@@ -1,5 +1,7 @@
 # Buttplug
 
+[![Build Status](https://travis-ci.org/metafetish/buttplug.svg?branch=master)](https://travis-ci.org/metafetish/libtrancevibe-rs) [![Build status](https://ci.appveyor.com/api/projects/status/g7vtlw95c39in22k?svg=true)](https://ci.appveyor.com/project/qdot/buttplug)
+
 Buttplug is a framework for hooking up hardware to interfaces, where
 hardware usually means sex toys, but could honestly be just about
 anything. It's basically a userland HID manager for things that may
