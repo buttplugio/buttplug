@@ -9,5 +9,6 @@ fn main() {
         .version(crate_version!())
         .author(crate_authors!())
         .get_matches();
+    println!("Should probably do something more interesting here.");
 }
 
