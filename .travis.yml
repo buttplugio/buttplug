@@ -22,6 +22,15 @@ addons:
   apt:
     packages:
       - build-essential
+      - libudev-dev
+
+before_install:
+  - wget https://github.com/libusb/libusb/archive/v1.0.20.tar.gz -O libusb-1.0.20.tar.gz
+  - tar -zxvf libusb-1.0.20.tar.gz
+  - cd libusb-1.0.20 && ./autogen.sh && ./configure --prefix=$HOME/local && make && make install
+  - PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig pkg-config --list-all
+  - PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig pkg-config --libs libusb-1.0
+  - PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig pkg-config --modversion libusb-1.0
 
 script:
   - PKG_CONFIG_PATH=$HOME/local/lib/pkgconfig LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH cargo build --verbose

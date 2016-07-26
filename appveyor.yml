@@ -12,6 +12,11 @@ install:
   - rustc -vV
   - cargo -vV
   - erase rust-install.exe
+  - ps: Start-FileDownload "http://downloads.sourceforge.net/project/libusb/libusb-1.0/libusb-1.0.20/libusb-1.0.20.7z?use_mirror=heanet" -FileName "libusb.7z"
+  - ps: 7z x -oc:\lib libusb.7z
+  - erase libusb.7z
+  - mkdir c:\.cargo
+  - copy util\cargo-config-win.toml c:\.cargo\config
 build_script:
   - cargo build
   - cargo package
