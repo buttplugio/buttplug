@@ -1,8 +1,15 @@
 [package]
 name = "buttplug"
 version = "0.1.0"
-authors = ["Kyle Machulis <kyle@nonpolynomial.com>"]
+authors = ["Kyle Machulis <kyle@machul.is>"]
+description = "Cross Platform Sex Toy Control Server"
+license = "BSD-3-Clause"
+homepage = "http://github.com/metafetish/buttplug"
+repository = "https://github.com/metafetish/buttplug.git"
+readme = "README.md"
+keywords = ["usb", "serial", "hardware"]
 
 [dependencies]
 libtrancevibe = "*"
 lovesense = "*"
+clap = {version = "2", features = ["yaml"]}
