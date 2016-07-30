@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate clap;
 use clap::{App};
+extern crate ws;
+use ws::listen;
 
 fn main() {
     // The YAML file is found relative to the current file, similar to how modules are found
@@ -9,6 +11,13 @@ fn main() {
         .version(crate_version!())
         .author(crate_authors!())
         .get_matches();
-    println!("Should probably do something more interesting here.");
-}
 
+    if let Err(error) = listen(matches.value_of("address").unwrap(), |out| {
+        move |msg| {
+            out.send(msg)
+        }
+    }) {
+        println!("Failed to create websocket server!");
+        println!("{:?}", error);
+    }
+}

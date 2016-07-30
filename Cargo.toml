@@ -13,3 +13,4 @@ keywords = ["usb", "serial", "hardware"]
 libtrancevibe = "*"
 lovesense = "*"
 clap = {version = "2", features = ["yaml"]}
+ws = "*"

@@ -2,22 +2,13 @@ name: Buttplug
 author: Kyle Machulis <kyle@machul.is>
 about: Sex Toy Control Server
 args:
-    - addr:
+    - address:
         short: a
         long: address
         value_name: ADDR
-        help: network address to listen on (defaults to localhost)
+        help: network address/port to listen on (defaults to localhost:12345)
         takes_value: true
         required: true
-        default: localhost
-    - port:
-        short: p
-        long: port
-        value_name: PORT
-        help: Network port to listen on (defaults to 15827)
-        takes_value: true
-        required: true
-        default: 15827
     - debug:
         short: d
         long: debug
