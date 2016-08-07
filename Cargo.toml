@@ -14,3 +14,5 @@ libtrancevibe = "*"
 lovesense = "*"
 clap = {version = "2", features = ["yaml"]}
 ws = "*"
+serde_json = "*"
+
