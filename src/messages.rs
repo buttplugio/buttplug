@@ -43,22 +43,9 @@ macro_rules! define_msgs {
         }
     };
 
-    (inner device_msg $name: ident) =>
-    {
-        define_msg_base!($name, device_id: u32);
-        impl $name {
-            pub fn new(device_id: u32) -> $name {
-                return $name {
-                    msg_name: stringify!($name).to_string(),
-                    device_id: device_id
-                }
-            }
-        }
-    };
-
     (inner device_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_msg_base!($name, device_id: u32, $($element: $ty),*);
+        define_msg_base!($name, device_id: u32 $(,$element: $ty),*);
         impl $name {
             pub fn new(device_id: u32, $($element: $ty),*) -> $name {
                 return $name {
