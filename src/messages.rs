@@ -1,25 +1,25 @@
 use std::vec::Vec;
-use std::option::Option;
 
 trait ButtplugMessage {
     fn name(&self) -> String;
 }
 
-macro_rules! define_msg {
+trait ButtplugDeviceMessage {
+    fn device_id(&self) -> u32;
+}
+
+pub struct DeviceInfo {
+    pub device_name: String,
+    pub device_id: u32
+}
+
+macro_rules! define_msg_base {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
         pub struct $a {
             pub msg_name: String,
             $(pub $element: $ty),*
-        }
-        impl $a {
-            pub fn new($($element: $ty),*) -> $a {
-                return $a {
-                    msg_name: stringify!($a).to_string(),
-                    $($element: $element),*
-                }
-            }
         }
         impl ButtplugMessage for $a {
             fn name(&self) -> String {
@@ -29,35 +29,86 @@ macro_rules! define_msg {
     }
 }
 
-pub struct DeviceInfo {
-    pub device_name: String,
-    pub device_id: u32
+macro_rules! define_msgs {
+    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
+    {
+        define_msg_base!($name, $($element: $ty),*);
+        impl $name {
+            pub fn new($($element: $ty),*) -> $name {
+                return $name {
+                    msg_name: stringify!($name).to_string(),
+                    $($element: $element),*
+                }
+            }
+        }
+    };
+
+    (inner device_msg $name: ident) =>
+    {
+        define_msg_base!($name, device_id: u32);
+        impl $name {
+            pub fn new(device_id: u32) -> $name {
+                return $name {
+                    msg_name: stringify!($name).to_string(),
+                    device_id: device_id
+                }
+            }
+        }
+    };
+
+    (inner device_msg $name: ident $($element: ident: $ty: ty),*) =>
+    {
+        define_msg_base!($name, device_id: u32, $($element: $ty),*);
+        impl $name {
+            pub fn new(device_id: u32, $($element: $ty),*) -> $name {
+                return $name {
+                    msg_name: stringify!($name).to_string(),
+                    device_id: device_id,
+                    $($element: $element),*
+                }
+            }
+        }
+    };
+
+    (
+        $(
+            $msg_type: ident $msg_name: ident ($($element: ident: $ty: ty),*)
+        );*
+    ) =>
+    {
+        $(define_msgs!(inner $msg_type $msg_name $($element: $ty),*);)*
+
+        pub enum Message {
+            $($msg_name($msg_name)),*
+        }
+    };
 }
 
-define_msg!(DeviceListMessage, devices: Vec<DeviceInfo>);
-define_msg!(ClaimDeviceMessage, device_id: u32);
-define_msg!(ReleaseDeviceMessage, device_id: u32);
-define_msg!(LovenseRawMessage, device_id: u32, command: String);
-define_msg!(SingleVibrateSpeedMessage, device_id: u32, speed: u8);
-define_msg!(ET312RawMessage, device_id: u32, command: Vec<u8>);
-
-pub enum Messages {
-    DeviceListMessage,
-    ClaimDeviceMessage,
-    ReleaseDeviceMessage,
-    LovenseRawMessage,
-    SingleVibrateSpeedMessage,
-    ET312RawMessage
-}
+define_msgs!(
+    base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
+    device_msg ClaimDeviceMessage ();
+    device_msg ReleaseDeviceMessage ();
+    device_msg LovenseRawMessage (speed:u32);
+    device_msg SingleVibrateSpeedMessage(speed:u32);
+    device_msg ET312RawMessage(msg: Vec<u8>)
+);
 
 #[cfg(test)]
 mod tests {
-    use super::{ClaimDeviceMessage, ButtplugMessage};
+    use super::{ClaimDeviceMessage, ReleaseDeviceMessage, ButtplugMessage, Message};
     #[test]
     fn test_message_generation() {
-        let msg = ClaimDeviceMessage::new(0);
-        println!("{}", msg.name());
+        let msg = ClaimDeviceMessage::new(1);
         assert!(msg.name() == "ClaimDeviceMessage");
-        assert!(msg.device_id == 0);
+        assert!(msg.device_id == 1);
+    }
+
+    #[test]
+    fn test_message_enum() {
+        let enum_msg = Message::ClaimDeviceMessage(ClaimDeviceMessage::new(1));
+        match enum_msg {
+            Message::ClaimDeviceMessage(msg) => assert!(true),
+            _ => assert!(false)
+        }
     }
 }
