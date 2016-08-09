@@ -15,4 +15,6 @@ lovesense = "*"
 clap = {version = "2", features = ["yaml"]}
 ws = "*"
 serde_json = "*"
-
+serde = "*"
+serde_macros = "*"
+clippy = "*"

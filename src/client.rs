@@ -11,7 +11,7 @@ pub trait ButtplugClientBase {
 
 impl ButtplugClient {
     pub fn new() -> ButtplugClient {
-        return ButtplugClient{};
+        ButtplugClient{}
     }
 }
 

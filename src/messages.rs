@@ -17,13 +17,14 @@ macro_rules! define_msg_base {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
+        #[derive(Serialize, Deserialize)]
         pub struct $a {
             pub msg_name: String,
             $(pub $element: $ty),*
         }
         impl ButtplugMessage for $a {
             fn name(&self) -> String {
-                return self.msg_name.clone();
+                self.msg_name.clone()
             }
         }
     }
@@ -35,7 +36,7 @@ macro_rules! define_msgs {
         define_msg_base!($name, $($element: $ty),*);
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
-                return $name {
+                $name {
                     msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
@@ -48,7 +49,7 @@ macro_rules! define_msgs {
         define_msg_base!($name, device_id: u32 $(,$element: $ty),*);
         impl $name {
             pub fn new(device_id: u32, $($element: $ty),*) -> $name {
-                return $name {
+                $name {
                     msg_name: stringify!($name).to_string(),
                     device_id: device_id,
                     $($element: $element),*
@@ -72,29 +73,30 @@ macro_rules! define_msgs {
 }
 
 define_msgs!(
-    base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
-    device_msg ClaimDeviceMessage ();
-    device_msg ReleaseDeviceMessage ();
-    device_msg LovenseRawMessage (speed:u32);
-    device_msg SingleVibrateSpeedMessage(speed:u32);
-    device_msg ET312RawMessage(msg: Vec<u8>)
+    //base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
+    base_msg RegisterClient ();
+    device_msg ClaimDevice ();
+    device_msg ReleaseDevice ();
+    device_msg LovenseRaw (speed:u32);
+    device_msg SingleVibrateSpeed(speed:u32);
+    device_msg ET312Raw(msg: Vec<u8>)
 );
 
 #[cfg(test)]
 mod tests {
-    use super::{ClaimDeviceMessage, ReleaseDeviceMessage, ButtplugMessage, Message};
+    use super::{ClaimDevice, ReleaseDevice, Message, ButtplugMessage};
     #[test]
     fn test_message_generation() {
-        let msg = ClaimDeviceMessage::new(1);
-        assert!(msg.name() == "ClaimDeviceMessage");
+        let msg = ClaimDevice::new(1);
+        assert!(msg.name() == "ClaimDevice");
         assert!(msg.device_id == 1);
     }
 
     #[test]
     fn test_message_enum() {
-        let enum_msg = Message::ClaimDeviceMessage(ClaimDeviceMessage::new(1));
+        let enum_msg = Message::ClaimDevice(ClaimDevice::new(1));
         match enum_msg {
-            Message::ClaimDeviceMessage(msg) => assert!(true),
+            Message::ClaimDevice(msg) => assert!(true),
             _ => assert!(false)
         }
     }
