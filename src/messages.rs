@@ -13,7 +13,23 @@ pub struct DeviceInfo {
     pub device_id: u32
 }
 
-macro_rules! define_msg_base {
+macro_rules! define_msg {
+    ( $a: ident,
+      $($element: ident: $ty: ty),*) =>
+    {
+        pub struct $a {
+            pub msg_name: String,
+            $(pub $element: $ty),*
+        }
+        impl ButtplugMessage for $a {
+            fn name(&self) -> String {
+                self.msg_name.clone()
+            }
+        }
+    }
+}
+
+macro_rules! define_serializable_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
@@ -31,9 +47,35 @@ macro_rules! define_msg_base {
 }
 
 macro_rules! define_msgs {
+    (inner internal_msg $name: ident $($element: ident: $ty: ty),*) =>
+    {
+        define_msg!($name, $($element: $ty),*);
+        impl $name {
+            pub fn new($($element: $ty),*) -> $name {
+                $name {
+                    msg_name: stringify!($name).to_string(),
+                    $($element: $element),*
+                }
+            }
+        }
+    };
+
     (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_msg_base!($name, $($element: $ty),*);
+        define_serializable_msg!($name, $($element: $ty),*);
+        impl $name {
+            pub fn new($($element: $ty),*) -> $name {
+                $name {
+                    msg_name: stringify!($name).to_string(),
+                    $($element: $element),*
+                }
+            }
+        }
+    };
+
+    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
+    {
+        define_serializable_msg!($name, $($element: $ty),*);
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
@@ -46,7 +88,7 @@ macro_rules! define_msgs {
 
     (inner device_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_msg_base!($name, device_id: u32 $(,$element: $ty),*);
+        define_serializable_msg!($name, device_id: u32 $(,$element: $ty),*);
         impl $name {
             pub fn new(device_id: u32, $($element: $ty),*) -> $name {
                 $name {
@@ -74,6 +116,10 @@ macro_rules! define_msgs {
 
 define_msgs!(
     //base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
+    internal_msg TestMessage (test_field: u32);
+    internal_msg TestShutdown ();
+    internal_msg Shutdown ();
+    internal_msg SetupPipe();
     base_msg RegisterClient ();
     device_msg ClaimDevice ();
     device_msg ReleaseDevice ();
