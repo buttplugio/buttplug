@@ -48,7 +48,7 @@ mod tests {
         let event_loop = EventLoop::new().ok().expect("Failed to create event loop");
         let server_tx = event_loop.channel();
         let child = thread::spawn(move|| {
-            buttplug_server::start_server(Config::new(None, None, None, None), Some(event_loop));
+            buttplug_server::start_server(Config::null_config(), Some(event_loop));
         });
         println!("Waiting on send");
         server_tx.send(Message::TestShutdown(TestShutdown::new()));

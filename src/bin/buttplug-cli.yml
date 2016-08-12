@@ -2,13 +2,30 @@ name: Buttplug
 author: Kyle Machulis <kyle@machul.is>
 about: Sex Toy Control Server
 args:
-    - address:
-        short: a
-        long: address
+    - webaddr:
+        short: w
+        long: webaddr
         value_name: ADDR
-        help: network address/port to listen on (defaults to localhost:12345)
+        help: network address/port to host web server on (defaults to localhost:12345)
         takes_value: true
-        required: true
+    - config:
+        short: c
+        long: config
+        value_name: FILE
+        help: configuration file location. If file does not exist, config information from command line is saved to it.
+        takes_value: true
+    - netaddr:
+        short: n
+        long: netaddr
+        value_name: ADDR
+        help: network address/port to listen on for raw TCP (defaults to localhost:12345)
+        takes_value: true
+    - wsaddr:
+        short: s
+        long: wsaddr
+        value_name: ADDR
+        help: network address/port to listen on for websockets
+        takes_value: true
     - debug:
         short: d
         long: debug
