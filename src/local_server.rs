@@ -7,7 +7,7 @@ pub struct LocalServer {
 
 pub fn start_server(core_tx: Sender<Message>, mut event_loop: EventLoop<LocalServer>) {
     info!("Event loop starting...");
-    event_loop.run(&mut LocalServer { core_tx: core_tx }).ok().expect("Failed to start event loop");
+    event_loop.run(&mut LocalServer { core_tx: core_tx }).expect("Failed to start event loop");
 }
 
 impl Handler for LocalServer {
@@ -17,7 +17,7 @@ impl Handler for LocalServer {
     fn notify(&mut self, _reactor: &mut EventLoop<LocalServer>, msg: Message) {
         match msg {
             Message::Shutdown(_) => {
-                self.core_tx.send(msg).ok().expect("Can't send?!");
+                self.core_tx.send(msg).expect("Can't send?!");
                 _reactor.shutdown();
             },
             _ => println!("Don't care!")
@@ -36,10 +36,10 @@ mod tests {
 
     #[test]
     fn test_local_server_shutdown() {
-        let event_loop = EventLoop::new().ok().expect("Failed to create event loop");
+        let event_loop = EventLoop::new().expect("Failed to create event loop");
         let server_tx = event_loop.channel();
         let child = thread::spawn(move|| {
-            buttplug_server::start_server(Config::null_config(), Some(event_loop));
+            buttplug_server::start_server(Config::default(), Some(event_loop));
         });
         println!("Waiting on send");
         server_tx.send(Message::Shutdown(Shutdown::new()));

@@ -22,7 +22,7 @@ pub fn start_server(config: Config,
     // Before doing anything, let us register a logger. The mio library has really good logging
     // at the _trace_ and _debug_ levels. Having a logger setup is invaluable when trying to
     // figure out why something is not working correctly.
-    env_logger::init().ok().expect("Failed to init logger");
+    env_logger::init().expect("Failed to init logger");
     buttplug_server::start_server(config, local_server_loop);
 }
 

@@ -10,9 +10,9 @@ use local_server::{LocalServer};
 
 pub fn start_server(config: Config,
                     local_server_loop: Option<EventLoop<LocalServer>>) {
-    let mut event_loop = EventLoop::new().ok().expect("Failed to create event loop");
+    let mut event_loop = EventLoop::new().expect("Failed to create event loop");
     let mut server = ButtplugServer::new(config, local_server_loop, event_loop.channel());
-    event_loop.run(&mut server).ok().expect("Failed to start event loop");
+    event_loop.run(&mut server).expect("Failed to start event loop");
 }
 
 pub struct ButtplugServer {
@@ -27,11 +27,11 @@ impl ButtplugServer {
                tx: Sender<Message>) -> ButtplugServer {
         let mut server_threads = vec![];
         let mut channels = vec![];
-        // if let Some(config.network_address) = network_address {
-        //     threads.push(thread::spawn(move|| {
-        //         network_server::start_server(network_address);
-        //     }));
-        // }
+        if let Some(_) = config.network_address {
+            // threads.push(thread::spawn(move|| {
+            //     network_server::start_server(network_address);
+            // }));
+        }
         if let Some(local_server_loop) = local_server_loop {
             channels.push(local_server_loop.channel());
             let server_tx = tx.clone();
@@ -60,7 +60,7 @@ impl ButtplugServer {
         // join(self)
         let ts = self.threads.drain(..);
         for t in ts {
-            t.join().ok().expect("Could not join thread!");
+            t.join().expect("Could not join thread!");
         }
     }
 }
