@@ -16,8 +16,10 @@ impl Handler for LocalServer {
     /// A message has been delivered
     fn notify(&mut self, _reactor: &mut EventLoop<LocalServer>, msg: Message) {
         match msg {
-            Message::TestShutdown(_) => self.core_tx.send(msg).ok().expect("Can't send?!"),
-            Message::Shutdown(_) => _reactor.shutdown(),
+            Message::Shutdown(_) => {
+                self.core_tx.send(msg).ok().expect("Can't send?!");
+                _reactor.shutdown();
+            },
             _ => println!("Don't care!")
         };
     }
@@ -30,28 +32,17 @@ mod tests {
     use super::{start_server};
     use std:: thread;
     use config::Config;
-    use messages::{Shutdown, Message, TestShutdown};
-    // #[test]
-    // fn test_local_server_shutdown() {
-    //     let event_loop = EventLoop::new().ok().expect("Failed to create event loop");
-    //     let server_tx = event_loop.channel();
-    //     let child = thread::spawn(move|| {
-    //         start_server(new_tx, event_loop);
-    //     });
-    //     println!("Waiting on send");
-    //     server_tx.send(Message::Shutdown(Shutdown::new()));
-    //     child.join();
-    // }
+    use messages::{Shutdown, Message};
 
     #[test]
-    fn test_buttplug_server_shutdown() {
+    fn test_local_server_shutdown() {
         let event_loop = EventLoop::new().ok().expect("Failed to create event loop");
         let server_tx = event_loop.channel();
         let child = thread::spawn(move|| {
             buttplug_server::start_server(Config::null_config(), Some(event_loop));
         });
         println!("Waiting on send");
-        server_tx.send(Message::TestShutdown(TestShutdown::new()));
+        server_tx.send(Message::Shutdown(Shutdown::new()));
         child.join();
     }
 }

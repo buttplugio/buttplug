@@ -46,6 +46,23 @@ impl ButtplugServer {
             channels: channels
         }
     }
+
+    fn shutdown(&mut self) {
+        for c in &self.channels {
+            // If we're shutting down, there's a chance the message came through
+            // the local server, which will have shut itself down first. Just
+            // ignore the error.
+            if let Err(_) = c.send(Message::Shutdown(Shutdown::new())) {
+                info!("Thread already shutdown!");
+            }
+        }
+        // Drain the vector here so we have ownership, since joining is
+        // join(self)
+        let ts = self.threads.drain(..);
+        for t in ts {
+            t.join().ok().expect("Could not join thread!");
+        }
+    }
 }
 
 impl Handler for ButtplugServer {
@@ -54,10 +71,8 @@ impl Handler for ButtplugServer {
     /// A message has been delivered
     fn notify(&mut self, _reactor: &mut EventLoop<ButtplugServer>, msg: Message) {
         match msg {
-            Message::TestShutdown(_) => {
-                self.channels.iter().cloned().map(|x| { x.send(Message::Shutdown(Shutdown::new())) });
-                // Join and remove all threads from the vector. We're done anyways.
-                self.threads.drain(..).map(|x| { x.join(); });
+            Message::Shutdown(_) => {
+                self.shutdown();
                 _reactor.shutdown();
             },
             _ => println!("Don't care!")

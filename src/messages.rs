@@ -116,10 +116,7 @@ macro_rules! define_msgs {
 
 define_msgs!(
     //base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
-    internal_msg TestMessage (test_field: u32);
-    internal_msg TestShutdown ();
     internal_msg Shutdown ();
-    internal_msg SetupPipe();
     base_msg RegisterClient ();
     device_msg ClaimDevice ();
     device_msg ReleaseDevice ();
