@@ -17,6 +17,7 @@ macro_rules! define_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
+        #[derive(Default)]
         pub struct $a {
             pub msg_name: String,
             $(pub $element: $ty),*
@@ -33,7 +34,7 @@ macro_rules! define_serializable_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
-        #[derive(Serialize, Deserialize)]
+        #[derive(Serialize, Deserialize, Default)]
         pub struct $a {
             pub msg_name: String,
             $(pub $element: $ty),*
@@ -118,6 +119,9 @@ define_msgs!(
     //base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
     internal_msg Shutdown ();
     base_msg RegisterClient ();
+    base_msg ServerInfo ();
+    base_msg Error(error_str: String);
+    base_msg Log(log_str: String);
     device_msg ClaimDevice ();
     device_msg ReleaseDevice ();
     device_msg LovenseRaw (speed:u32);

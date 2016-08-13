@@ -6,7 +6,8 @@ use config::{Config};
 // for start_server
 use local_server;
 use local_server::{LocalServer};
-//use websocket_server::{Websters};
+use websocket_server;
+use ws;
 
 pub fn start_server(config: Config,
                     local_server_loop: Option<EventLoop<LocalServer>>) {
@@ -18,7 +19,10 @@ pub fn start_server(config: Config,
 pub struct ButtplugServer {
     threads: Vec<thread::JoinHandle<()>>,
     channels: Vec<Sender<Message>>,
-    tx: Sender<Message>
+    websocket_sender: Option<ws::Sender>,
+    tx: Sender<Message>,
+    // TODO: field for Currently open devices
+    // TODO: field for Device lists?
 }
 
 impl ButtplugServer {
@@ -27,12 +31,21 @@ impl ButtplugServer {
                tx: Sender<Message>) -> ButtplugServer {
         let mut server_threads = vec![];
         let mut channels = vec![];
+        let mut sender = None;
         if let Some(_) = config.network_address {
+            info!("Starting network server");
             // threads.push(thread::spawn(move|| {
             //     network_server::start_server(network_address);
             // }));
         }
+        if let Some(wsaddr) = config.websocket_address {
+            info!("Starting websocket server");
+            let ws = websocket_server::start_server(wsaddr);
+            server_threads.push(ws.thread);
+            sender = Some(ws.sender);
+        }
         if let Some(local_server_loop) = local_server_loop {
+            info!("Starting local server");
             channels.push(local_server_loop.channel());
             let server_tx = tx.clone();
             server_threads.push(thread::spawn(move|| {
@@ -43,6 +56,7 @@ impl ButtplugServer {
         ButtplugServer {
             threads: server_threads,
             tx: tx,
+            websocket_sender: sender,
             channels: channels
         }
     }
@@ -55,6 +69,9 @@ impl ButtplugServer {
             if let Err(_) = c.send(Message::Shutdown(Shutdown::new())) {
                 info!("Thread already shutdown!");
             }
+        }
+        if let Some(ref ws) = self.websocket_sender {
+            ws.shutdown();
         }
         // Drain the vector here so we have ownership, since joining is
         // join(self)

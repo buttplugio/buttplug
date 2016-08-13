@@ -42,5 +42,5 @@ fn main() {
             .unwrap());
     }
 
-    start_server(Config::new(webaddr, netaddr, wsaddr), None);
+    start_server(Config::new(webaddr, wsaddr, netaddr), None);
 }

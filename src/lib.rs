@@ -12,6 +12,7 @@ extern crate env_logger;
 use config::{Config};
 
 mod local_server;
+mod websocket_server;
 pub mod buttplug_server;
 pub mod messages;
 pub mod config;
@@ -19,13 +20,6 @@ pub mod config;
 pub fn start_server(config: Config,
                     local_server_loop: Option<mio::EventLoop<local_server::LocalServer>>)
 {
-    // Before doing anything, let us register a logger. The mio library has really good logging
-    // at the _trace_ and _debug_ levels. Having a logger setup is invaluable when trying to
-    // figure out why something is not working correctly.
     env_logger::init().expect("Failed to init logger");
     buttplug_server::start_server(config, local_server_loop);
-}
-
-#[cfg(test)]
-mod tests {
 }
