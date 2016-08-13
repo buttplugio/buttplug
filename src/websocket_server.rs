@@ -2,9 +2,12 @@ use serde_json;
 use std::thread;
 use std::net::SocketAddr;
 use ws::{Sender, Handler, Handshake, Message, CloseCode, Builder, Result};
-use messages::{Log};
+use mio;
+use messages;
+use messages::{Log,Shutdown};
 
 struct WebsocketServer {
+    core_tx: mio::Sender<messages::Message>,
     out: Sender,
 }
 
@@ -15,14 +18,18 @@ pub struct WebsocketThread {
 
 impl Handler for WebsocketServer {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
-        println!("Opened!");
-        let s = Log::new("testing string!".to_string());
-        self.out.send(serde_json::to_string(&s).unwrap());
         Ok(())
     }
 
     fn on_message(&mut self, msg: Message) -> Result<()> {
-        println!("Got Message!");
+        let s = msg.into_text().unwrap();
+        //let m : messages::Message = serde_json::from_str(&s).unwrap();
+        let mut m : messages::Message;
+        match serde_json::from_str(&s) {
+            Ok(msg) => m = msg,
+            Err(e) => { warn!("{}", e); return Ok(()); }
+        }
+        self.core_tx.send(m);
         Ok(())
     }
 
@@ -31,9 +38,11 @@ impl Handler for WebsocketServer {
     }
 }
 
-pub fn start_server(addr : SocketAddr) -> WebsocketThread {
+pub fn start_server(core_tx: mio::Sender<messages::Message>, addr : SocketAddr) -> WebsocketThread {
     let socket = Builder::new().build(move |out: Sender| {
-        WebsocketServer { out: out }
+        WebsocketServer { out: out,
+                          core_tx: core_tx.clone()
+        }
     }).unwrap();
     WebsocketThread {
         sender: socket.broadcaster(),

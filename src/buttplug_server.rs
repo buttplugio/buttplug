@@ -40,7 +40,7 @@ impl ButtplugServer {
         }
         if let Some(wsaddr) = config.websocket_address {
             info!("Starting websocket server");
-            let ws = websocket_server::start_server(wsaddr);
+            let ws = websocket_server::start_server(tx.clone(), wsaddr);
             server_threads.push(ws.thread);
             sender = Some(ws.sender);
         }

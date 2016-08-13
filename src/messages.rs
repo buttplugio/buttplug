@@ -1,7 +1,6 @@
 use std::vec::Vec;
 
 trait ButtplugMessage {
-    fn name(&self) -> String;
 }
 
 trait ButtplugDeviceMessage {
@@ -17,15 +16,15 @@ macro_rules! define_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
-        #[derive(Default)]
+        #[derive(Serialize, Deserialize, Default)]
         pub struct $a {
-            pub msg_name: String,
+            //pub msg_name: String,
             $(pub $element: $ty),*
         }
         impl ButtplugMessage for $a {
-            fn name(&self) -> String {
-                self.msg_name.clone()
-            }
+            // fn name(&self) -> String {
+            //     self.msg_name.clone()
+            // }
         }
     }
 }
@@ -36,13 +35,13 @@ macro_rules! define_serializable_msg {
     {
         #[derive(Serialize, Deserialize, Default)]
         pub struct $a {
-            pub msg_name: String,
+            //pub msg_name: String,
             $(pub $element: $ty),*
         }
         impl ButtplugMessage for $a {
-            fn name(&self) -> String {
-                self.msg_name.clone()
-            }
+            // fn name(&self) -> String {
+            //     self.msg_name.clone()
+            // }
         }
     }
 }
@@ -54,7 +53,7 @@ macro_rules! define_msgs {
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    msg_name: stringify!($name).to_string(),
+                    //msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
             }
@@ -67,7 +66,7 @@ macro_rules! define_msgs {
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    msg_name: stringify!($name).to_string(),
+                    //msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
             }
@@ -80,7 +79,7 @@ macro_rules! define_msgs {
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    msg_name: stringify!($name).to_string(),
+                    //msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
             }
@@ -93,7 +92,7 @@ macro_rules! define_msgs {
         impl $name {
             pub fn new(device_id: u32, $($element: $ty),*) -> $name {
                 $name {
-                    msg_name: stringify!($name).to_string(),
+                    //msg_name: stringify!($name).to_string(),
                     device_id: device_id,
                     $($element: $element),*
                 }
@@ -109,6 +108,7 @@ macro_rules! define_msgs {
     {
         $(define_msgs!(inner $msg_type $msg_name $($element: $ty),*);)*
 
+        #[derive(Serialize, Deserialize)]
         pub enum Message {
             $($msg_name($msg_name)),*
         }
