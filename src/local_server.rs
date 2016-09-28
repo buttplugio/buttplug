@@ -28,7 +28,7 @@ impl Handler for LocalServer {
 
 #[cfg(test)]
 mod tests {
-    use mio::*;
+    use mio::deprecated::EventLoop;
     use buttplug_server;
     use super::{start_server};
     use std:: thread;

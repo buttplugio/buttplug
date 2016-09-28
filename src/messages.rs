@@ -135,7 +135,6 @@ mod tests {
     #[test]
     fn test_message_generation() {
         let msg = ClaimDevice::new(1);
-        assert!(msg.name() == "ClaimDevice");
         assert!(msg.device_id == 1);
     }
 
