@@ -1,4 +1,4 @@
-use mio::*;
+use mio::deprecated::{EventLoop, Handler, Sender};
 use messages::{Message};
 
 pub struct LocalServer {
@@ -17,7 +17,8 @@ impl Handler for LocalServer {
     fn notify(&mut self, _reactor: &mut EventLoop<LocalServer>, msg: Message) {
         match msg {
             Message::Shutdown(_) => {
-                self.core_tx.send(msg).expect("Can't send?!");
+                //self.core_tx.send(msg).expect("Can't send?!");
+                self.core_tx.send(msg);
                 _reactor.shutdown();
             },
             _ => println!("Don't care!")

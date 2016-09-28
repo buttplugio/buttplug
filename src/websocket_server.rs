@@ -7,7 +7,7 @@ use messages;
 use messages::{Log,Shutdown};
 
 struct WebsocketServer {
-    core_tx: mio::Sender<messages::Message>,
+    core_tx: mio::deprecated::Sender<messages::Message>,
     out: Sender,
 }
 
@@ -38,7 +38,8 @@ impl Handler for WebsocketServer {
     }
 }
 
-pub fn start_server(core_tx: mio::Sender<messages::Message>, addr : SocketAddr) -> WebsocketThread {
+pub fn start_server(core_tx: mio::deprecated::Sender<messages::Message>,
+                    addr : SocketAddr) -> WebsocketThread {
     let socket = Builder::new().build(move |out: Sender| {
         WebsocketServer { out: out,
                           core_tx: core_tx.clone()

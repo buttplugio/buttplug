@@ -1,4 +1,5 @@
-use mio::{EventLoop, Handler, Sender};
+use mio::deprecated::{EventLoop, Handler, Sender};
+use mio::channel;
 use std::thread;
 use std::vec::{Vec};
 use messages::{Message, Shutdown};

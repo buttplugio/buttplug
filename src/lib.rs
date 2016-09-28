@@ -18,7 +18,7 @@ pub mod messages;
 pub mod config;
 
 pub fn start_server(config: Config,
-                    local_server_loop: Option<mio::EventLoop<local_server::LocalServer>>)
+                    local_server_loop: Option<mio::deprecated::EventLoop<local_server::LocalServer>>)
 {
     env_logger::init().expect("Failed to init logger");
     buttplug_server::start_server(config, local_server_loop);
