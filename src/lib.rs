@@ -8,11 +8,13 @@ extern crate bytes;
 extern crate mio;
 #[macro_use] extern crate log;
 extern crate env_logger;
+extern crate libtrancevibe;
 
 use config::{Config};
 
 mod local_server;
 mod websocket_server;
+mod devices;
 pub mod buttplug_server;
 pub mod messages;
 pub mod config;

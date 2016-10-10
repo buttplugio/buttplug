@@ -2,12 +2,13 @@ use mio::deprecated::{EventLoop, Handler, Sender};
 use mio::channel;
 use std::thread;
 use std::vec::{Vec};
-use messages::{Message, Shutdown};
+use messages::{Message, Shutdown, ButtplugMessage};
 use config::{Config};
 // for start_server
 use local_server;
 use local_server::{LocalServer};
 use websocket_server;
+use devices::{DeviceManager};
 use ws;
 
 pub fn start_server(config: Config,
@@ -22,6 +23,7 @@ pub struct ButtplugServer {
     channels: Vec<Sender<Message>>,
     websocket_sender: Option<ws::Sender>,
     tx: Sender<Message>,
+    device_manager: DeviceManager,
     // TODO: field for Currently open devices
     // TODO: field for Device lists?
 }
@@ -58,7 +60,8 @@ impl ButtplugServer {
             threads: server_threads,
             tx: tx,
             websocket_sender: sender,
-            channels: channels
+            channels: channels,
+            device_manager: DeviceManager::new()
         }
     }
 
@@ -88,12 +91,20 @@ impl Handler for ButtplugServer {
     type Message = Message;
     /// A message has been delivered
     fn notify(&mut self, _reactor: &mut EventLoop<ButtplugServer>, msg: Message) {
+        // if let device_id = Some(msg.device_id()) {
+        //     // Device message, send to device manager to deal with it
+        //     self.device_manager.handle_message(msg);
+        //     return;
+        // }
         match msg {
             Message::Shutdown(_) => {
                 self.shutdown();
                 _reactor.shutdown();
             },
-            _ => println!("Don't care!")
+            // If it's not for us, maybe it's for the device manager.
+            msg => {
+                self.device_manager.handle_message(&msg);
+            }
         };
     }
 }

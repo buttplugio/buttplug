@@ -1,59 +1,41 @@
 use std::vec::Vec;
+use devices::DeviceInfo;
 
-trait ButtplugMessage {
-}
-
-trait ButtplugDeviceMessage {
-    fn device_id(&self) -> u32;
-}
-
-pub struct DeviceInfo {
-    pub device_name: String,
-    pub device_id: u32
+pub trait ButtplugMessage {
+    fn device_id(&self) -> Option<u32>;
 }
 
 macro_rules! define_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
-        #[derive(Serialize, Deserialize, Default)]
+        #[derive(Serialize, Deserialize)]
         pub struct $a {
-            //pub msg_name: String,
             $(pub $element: $ty),*
-        }
-        impl ButtplugMessage for $a {
-            // fn name(&self) -> String {
-            //     self.msg_name.clone()
-            // }
         }
     }
 }
 
-macro_rules! define_serializable_msg {
+macro_rules! define_non_device_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
-        #[derive(Serialize, Deserialize, Default)]
-        pub struct $a {
-            //pub msg_name: String,
-            $(pub $element: $ty),*
-        }
+        define_msg!($a, $($element: $ty),*);
         impl ButtplugMessage for $a {
-            // fn name(&self) -> String {
-            //     self.msg_name.clone()
-            // }
+            fn device_id(&self) -> Option<u32> {
+                None
+            }
         }
     }
 }
 
 macro_rules! define_msgs {
-    (inner internal_msg $name: ident $($element: ident: $ty: ty),*) =>
+    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_msg!($name, $($element: $ty),*);
+        define_non_device_msg!($name, $($element: $ty),*);
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    //msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
             }
@@ -62,24 +44,10 @@ macro_rules! define_msgs {
 
     (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_serializable_msg!($name, $($element: $ty),*);
+        define_non_device_msg!($name, $($element: $ty),*);
         impl $name {
             pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    //msg_name: stringify!($name).to_string(),
-                    $($element: $element),*
-                }
-            }
-        }
-    };
-
-    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
-    {
-        define_serializable_msg!($name, $($element: $ty),*);
-        impl $name {
-            pub fn new($($element: $ty),*) -> $name {
-                $name {
-                    //msg_name: stringify!($name).to_string(),
                     $($element: $element),*
                 }
             }
@@ -88,14 +56,18 @@ macro_rules! define_msgs {
 
     (inner device_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_serializable_msg!($name, device_id: u32 $(,$element: $ty),*);
+        define_msg!($name, device_id: u32 $(,$element: $ty),*);
         impl $name {
             pub fn new(device_id: u32, $($element: $ty),*) -> $name {
                 $name {
-                    //msg_name: stringify!($name).to_string(),
                     device_id: device_id,
                     $($element: $element),*
                 }
+            }
+        }
+        impl ButtplugMessage for $name {
+            fn device_id(&self) -> Option<u32> {
+                Some(self.device_id)
             }
         }
     };
@@ -116,8 +88,10 @@ macro_rules! define_msgs {
 }
 
 define_msgs!(
-    //base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
-    internal_msg Shutdown ();
+    // TODO: This should be an internal message, just need to figure out how to
+    // deal with serialization/deserialization
+    base_msg Shutdown ();
+    base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
     base_msg RegisterClient ();
     base_msg ServerInfo ();
     base_msg Error(error_str: String);
