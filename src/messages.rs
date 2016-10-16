@@ -1,15 +1,11 @@
 use std::vec::Vec;
 use devices::DeviceInfo;
 
-pub trait ButtplugMessage {
-    fn device_id(&self) -> Option<u32>;
-}
-
 macro_rules! define_msg {
     ( $a: ident,
       $($element: ident: $ty: ty),*) =>
     {
-        #[derive(Serialize, Deserialize)]
+        #[derive(Serialize, Deserialize, Clone)]
         pub struct $a {
             $(pub $element: $ty),*
         }
@@ -21,16 +17,11 @@ macro_rules! define_non_device_msg {
       $($element: ident: $ty: ty),*) =>
     {
         define_msg!($a, $($element: $ty),*);
-        impl ButtplugMessage for $a {
-            fn device_id(&self) -> Option<u32> {
-                None
-            }
-        }
     }
 }
 
 macro_rules! define_msgs {
-    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
+    (inner internal_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
         define_non_device_msg!($name, $($element: $ty),*);
         impl $name {
@@ -38,6 +29,10 @@ macro_rules! define_msgs {
                 $name {
                     $($element: $element),*
                 }
+            }
+
+            pub fn as_message($($element: $ty),*) -> Message {
+                return Message::Internal(InternalMessage::$name($name::new($($element),*)));
             }
         }
     };
@@ -50,24 +45,26 @@ macro_rules! define_msgs {
                 $name {
                     $($element: $element),*
                 }
+            }
+
+            pub fn as_message($($element: $ty),*) -> Message {
+                return Message::Buttplug(ButtplugMessage::$name($name::new($($element),*)));
             }
         }
     };
 
     (inner device_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
-        define_msg!($name, device_id: u32 $(,$element: $ty),*);
+        define_non_device_msg!($name, $($element: $ty),*);
         impl $name {
-            pub fn new(device_id: u32, $($element: $ty),*) -> $name {
+            pub fn new($($element: $ty),*) -> $name {
                 $name {
-                    device_id: device_id,
                     $($element: $element),*
                 }
             }
-        }
-        impl ButtplugMessage for $name {
-            fn device_id(&self) -> Option<u32> {
-                Some(self.device_id)
+
+            pub fn as_message(device_id: u32, $($element: $ty),*) -> Message {
+                return Message::Device(device_id, DeviceMessage::$name($name::new($($element),*)));
             }
         }
     };
@@ -80,17 +77,20 @@ macro_rules! define_msgs {
     {
         $(define_msgs!(inner $msg_type $msg_name $($element: $ty),*);)*
 
-        #[derive(Serialize, Deserialize)]
-        pub enum Message {
-            $($msg_name($msg_name)),*
-        }
+        // TODO We should be able to automate message enum creation via macros
+        // but I'm too rusty on macro syntax right noq.
+
+        // #[derive(Serialize, Deserialize)]
+        // pub enum Message {
+        //     $($msg_name($msg_name)),*
+        // }
     };
 }
 
 define_msgs!(
     // TODO: This should be an internal message, just need to figure out how to
     // deal with serialization/deserialization
-    base_msg Shutdown ();
+    internal_msg Shutdown ();
     base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
     base_msg RegisterClient ();
     base_msg ServerInfo ();
@@ -103,21 +103,51 @@ define_msgs!(
     device_msg ET312Raw(msg: Vec<u8>)
 );
 
+#[derive(Serialize, Deserialize, Clone)]
+pub enum InternalMessage {
+    Shutdown(Shutdown),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum ButtplugMessage {
+    DeviceListMessage(DeviceListMessage),
+    RegisterClient(RegisterClient),
+    ServerInfo(ServerInfo),
+    Error(Error),
+    Log(Log),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum DeviceMessage {
+    ClaimDevice(ClaimDevice),
+    ReleaseDevice(ReleaseDevice),
+    LovenseRaw(LovenseRaw),
+    SingleVibrateSpeed(SingleVibrateSpeed),
+    ET312Raw(ET312Raw)
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Message {
+    Internal(InternalMessage),
+    Buttplug(ButtplugMessage),
+    Device(u32, DeviceMessage)
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{ClaimDevice, ReleaseDevice, Message, ButtplugMessage};
+    use super::{ClaimDevice, ReleaseDevice, Message, ButtplugMessage, DeviceMessage};
     #[test]
     fn test_message_generation() {
-        let msg = ClaimDevice::new(1);
-        assert!(msg.device_id == 1);
-    }
-
-    #[test]
-    fn test_message_enum() {
-        let enum_msg = Message::ClaimDevice(ClaimDevice::new(1));
-        match enum_msg {
-            Message::ClaimDevice(msg) => assert!(true),
-            _ => assert!(false)
+        let msg = ClaimDevice::as_message(1);
+        if let Message::Device(device_id, x) = msg {
+            assert!(device_id == 1);
+            if let DeviceMessage::ClaimDevice(m) = x {
+                assert!(true);
+            } else {
+                assert!(false);
+            }
+        } else {
+            assert!(false);
         }
     }
 }

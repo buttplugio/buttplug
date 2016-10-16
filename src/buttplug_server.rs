@@ -2,7 +2,7 @@ use mio::deprecated::{EventLoop, Handler, Sender};
 use mio::channel;
 use std::thread;
 use std::vec::{Vec};
-use messages::{Message, Shutdown, ButtplugMessage};
+use messages::{Message, Shutdown, InternalMessage, ButtplugMessage};
 use config::{Config};
 // for start_server
 use local_server;
@@ -70,7 +70,9 @@ impl ButtplugServer {
             // If we're shutting down, there's a chance the message came through
             // the local server, which will have shut itself down first. Just
             // ignore the error.
-            if let Err(_) = c.send(Message::Shutdown(Shutdown::new())) {
+            let m = InternalMessage::Shutdown(Shutdown::new());
+            let g = Message::Internal(m);
+            if let Err(_) = c.send(g) {
                 info!("Thread already shutdown!");
             }
         }
@@ -97,13 +99,22 @@ impl Handler for ButtplugServer {
         //     return;
         // }
         match msg {
-            Message::Shutdown(_) => {
-                self.shutdown();
-                _reactor.shutdown();
+            Message::Internal(m) => {
+                match m {
+                    InternalMessage::Shutdown(_) => {
+                        self.shutdown();
+                        _reactor.shutdown();
+                    },
+                    // _ => {
+                    //     warn!("Don't know what to do with this internal message!");
+                    // }
+                }
             },
-            // If it's not for us, maybe it's for the device manager.
-            msg => {
+            Message::Device(_, _) => {
                 self.device_manager.handle_message(&msg);
+            },
+            _ => {
+                warn!("Don't know what to do with this message!");
             }
         };
     }

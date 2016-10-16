@@ -1,5 +1,5 @@
 use mio::deprecated::{EventLoop, Handler, Sender};
-use messages::{Message};
+use messages::{Message, InternalMessage, Shutdown};
 
 pub struct LocalServer {
     core_tx: Sender<Message>
@@ -16,12 +16,21 @@ impl Handler for LocalServer {
     /// A message has been delivered
     fn notify(&mut self, _reactor: &mut EventLoop<LocalServer>, msg: Message) {
         match msg {
-            Message::Shutdown(_) => {
-                //self.core_tx.send(msg).expect("Can't send?!");
-                self.core_tx.send(msg);
-                _reactor.shutdown();
+            Message::Internal(m) => {
+                match m {
+                    InternalMessage::Shutdown(_) => {
+                        //self.core_tx.send(msg).expect("Can't send?!");
+                        self.core_tx.send(Shutdown::as_message());
+                        _reactor.shutdown();
+                    }
+                }
             },
-            _ => println!("Don't care!")
+            // Message::Device(_, _) => {
+            //     self.device_manager.handle_message(&msg);
+            // },
+            _ => {
+                warn!("Don't know what to do with this message!");
+            }
         };
     }
 }
@@ -33,7 +42,7 @@ mod tests {
     use super::{start_server};
     use std:: thread;
     use config::Config;
-    use messages::{Shutdown, Message};
+    use messages::{Shutdown, Message, InternalMessage};
 
     #[test]
     fn test_local_server_shutdown() {
@@ -43,7 +52,7 @@ mod tests {
             buttplug_server::start_server(Config::default(), Some(event_loop));
         });
         println!("Waiting on send");
-        server_tx.send(Message::Shutdown(Shutdown::new()));
+        server_tx.send(Shutdown::as_message());
         child.join();
     }
 }
