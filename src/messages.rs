@@ -32,12 +32,12 @@ macro_rules! define_msgs {
             }
 
             pub fn as_message($($element: $ty),*) -> Message {
-                return Message::Internal(InternalMessage::$name($name::new($($element),*)));
+                return Message::Internal(Internal::$name($name::new($($element),*)));
             }
         }
     };
 
-    (inner base_msg $name: ident $($element: ident: $ty: ty),*) =>
+    (inner host_msg $name: ident $($element: ident: $ty: ty),*) =>
     {
         define_non_device_msg!($name, $($element: $ty),*);
         impl $name {
@@ -48,7 +48,23 @@ macro_rules! define_msgs {
             }
 
             pub fn as_message($($element: $ty),*) -> Message {
-                return Message::Buttplug(ButtplugMessage::$name($name::new($($element),*)));
+                return Message::Host(Host::$name($name::new($($element),*)));
+            }
+        }
+    };
+
+    (inner client_msg $name: ident $($element: ident: $ty: ty),*) =>
+    {
+        define_non_device_msg!($name, $($element: $ty),*);
+        impl $name {
+            pub fn new($($element: $ty),*) -> $name {
+                $name {
+                    $($element: $element),*
+                }
+            }
+
+            pub fn as_message($($element: $ty),*) -> Message {
+                return Message::Client(Client::$name($name::new($($element),*)));
             }
         }
     };
@@ -64,7 +80,7 @@ macro_rules! define_msgs {
             }
 
             pub fn as_message(device_id: u32, $($element: $ty),*) -> Message {
-                return Message::Device(device_id, DeviceMessage::$name($name::new($($element),*)));
+                return Message::Device(device_id, Device::$name($name::new($($element),*)));
             }
         }
     };
@@ -78,7 +94,7 @@ macro_rules! define_msgs {
         $(define_msgs!(inner $msg_type $msg_name $($element: $ty),*);)*
 
         // TODO We should be able to automate message enum creation via macros
-        // but I'm too rusty on macro syntax right noq.
+        // but I'm too rusty on macro syntax right now.
 
         // #[derive(Serialize, Deserialize)]
         // pub enum Message {
@@ -88,14 +104,17 @@ macro_rules! define_msgs {
 }
 
 define_msgs!(
-    // TODO: This should be an internal message, just need to figure out how to
-    // deal with serialization/deserialization
     internal_msg Shutdown ();
-    base_msg DeviceListMessage (devices: Vec<DeviceInfo>);
-    base_msg RegisterClient ();
-    base_msg ServerInfo ();
-    base_msg Error(error_str: String);
-    base_msg Log(log_str: String);
+    client_msg RequestDeviceList();
+    host_msg DeviceList(devices: Vec<DeviceInfo>);
+    client_msg RegisterClient(client_info: String);
+    host_msg ClientRegistered();
+    client_msg RequestServerInfo();
+    host_msg ServerInfo(version: String);
+    host_msg Error(error_str: String);
+    host_msg Log(log_str: String);
+    host_msg Ping();
+    client_msg Pong();
     device_msg ClaimDevice ();
     device_msg ReleaseDevice ();
     device_msg LovenseRaw (speed:u32);
@@ -104,21 +123,30 @@ define_msgs!(
 );
 
 #[derive(Serialize, Deserialize, Clone)]
-pub enum InternalMessage {
+pub enum Internal {
     Shutdown(Shutdown),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub enum ButtplugMessage {
-    DeviceListMessage(DeviceListMessage),
+pub enum Client {
+    RequestDeviceList(RequestDeviceList),
     RegisterClient(RegisterClient),
-    ServerInfo(ServerInfo),
-    Error(Error),
-    Log(Log),
+    RequestServerInfo(RequestServerInfo),
+    Pong(Pong)
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub enum DeviceMessage {
+pub enum Host {
+    DeviceList(DeviceList),
+    ClientRegistered(ClientRegistered),
+    ServerInfo(ServerInfo),
+    Error(Error),
+    Log(Log),
+    Ping(Ping)
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Device {
     ClaimDevice(ClaimDevice),
     ReleaseDevice(ReleaseDevice),
     LovenseRaw(LovenseRaw),
@@ -128,20 +156,26 @@ pub enum DeviceMessage {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Message {
-    Internal(InternalMessage),
-    Buttplug(ButtplugMessage),
-    Device(u32, DeviceMessage)
+    Internal(Internal),
+    Client(Client),
+    Host(Host),
+    Device(u32, Device)
+}
+
+pub struct IncomingMessage {
+    pub msg: Message,
+    pub callback: Box<Fn(Message) + Send>
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ClaimDevice, ReleaseDevice, Message, ButtplugMessage, DeviceMessage};
+    use super::{ClaimDevice, ReleaseDevice, Message, Device};
     #[test]
     fn test_message_generation() {
         let msg = ClaimDevice::as_message(1);
         if let Message::Device(device_id, x) = msg {
             assert!(device_id == 1);
-            if let DeviceMessage::ClaimDevice(m) = x {
+            if let Device::ClaimDevice(m) = x {
                 assert!(true);
             } else {
                 assert!(false);

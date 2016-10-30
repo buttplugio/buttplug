@@ -1,8 +1,11 @@
 use mio::deprecated::{EventLoop, Handler, Sender};
+use serde_json;
 use mio::channel;
 use std::thread;
+use std;
 use std::vec::{Vec};
-use messages::{Message, Shutdown, InternalMessage, ButtplugMessage};
+use messages;
+use messages::{Message, IncomingMessage, Shutdown, Internal, Host, Client, ServerInfo};
 use config::{Config};
 // for start_server
 use local_server;
@@ -12,17 +15,20 @@ use devices::{DeviceManager};
 use ws;
 
 pub fn start_server(config: Config,
-                    local_server_loop: Option<EventLoop<LocalServer>>) {
+                    local_server_loop: Option<EventLoop<LocalServer>>,
+                    local_server_test_tx: Option<std::sync::mpsc::Sender<Message>>) {
     let mut event_loop = EventLoop::new().expect("Failed to create event loop");
-    let mut server = ButtplugServer::new(config, local_server_loop, event_loop.channel());
+    let mut server = ButtplugServer::new(config,
+                                         local_server_loop,
+                                         local_server_test_tx,
+                                         event_loop.channel());
     event_loop.run(&mut server).expect("Failed to start event loop");
 }
 
 pub struct ButtplugServer {
     threads: Vec<thread::JoinHandle<()>>,
-    channels: Vec<Sender<Message>>,
     websocket_sender: Option<ws::Sender>,
-    tx: Sender<Message>,
+    tx: Sender<IncomingMessage>,
     device_manager: DeviceManager,
     // TODO: field for Currently open devices
     // TODO: field for Device lists?
@@ -31,9 +37,9 @@ pub struct ButtplugServer {
 impl ButtplugServer {
     pub fn new(config: Config,
                local_server_loop: Option<EventLoop<LocalServer>>,
-               tx: Sender<Message>) -> ButtplugServer {
+               local_server_test_tx: Option<std::sync::mpsc::Sender<Message>>,
+               tx: Sender<IncomingMessage>) -> ButtplugServer {
         let mut server_threads = vec![];
-        let mut channels = vec![];
         let mut sender = None;
         if let Some(_) = config.network_address {
             info!("Starting network server");
@@ -48,34 +54,26 @@ impl ButtplugServer {
             sender = Some(ws.sender);
         }
         if let Some(local_server_loop) = local_server_loop {
+            let unwrapped_local_server_test_tx = match local_server_test_tx {
+                Some(m) => m,
+                None => panic!("Require tx with local server loop!")
+            };
             info!("Starting local server");
-            channels.push(local_server_loop.channel());
             let server_tx = tx.clone();
             server_threads.push(thread::spawn(move|| {
-                local_server::start_server(server_tx, local_server_loop);
+                local_server::start_server(server_tx, unwrapped_local_server_test_tx, local_server_loop);
             }));
         }
-
+        println!("{}", serde_json::to_string(&ServerInfo::as_message("Testing".to_string())).unwrap());
         ButtplugServer {
             threads: server_threads,
             tx: tx,
             websocket_sender: sender,
-            channels: channels,
             device_manager: DeviceManager::new()
         }
     }
 
     fn shutdown(&mut self) {
-        for c in &self.channels {
-            // If we're shutting down, there's a chance the message came through
-            // the local server, which will have shut itself down first. Just
-            // ignore the error.
-            let m = InternalMessage::Shutdown(Shutdown::new());
-            let g = Message::Internal(m);
-            if let Err(_) = c.send(g) {
-                info!("Thread already shutdown!");
-            }
-        }
         if let Some(ref ws) = self.websocket_sender {
             ws.shutdown();
         }
@@ -90,31 +88,34 @@ impl ButtplugServer {
 
 impl Handler for ButtplugServer {
     type Timeout = usize;
-    type Message = Message;
+    type Message = IncomingMessage;
     /// A message has been delivered
-    fn notify(&mut self, _reactor: &mut EventLoop<ButtplugServer>, msg: Message) {
-        // if let device_id = Some(msg.device_id()) {
-        //     // Device message, send to device manager to deal with it
-        //     self.device_manager.handle_message(msg);
-        //     return;
-        // }
-        match msg {
+    fn notify(&mut self, _reactor: &mut EventLoop<ButtplugServer>, msg: IncomingMessage) {
+        match msg.msg {
             Message::Internal(m) => {
                 match m {
-                    InternalMessage::Shutdown(_) => {
+                    Internal::Shutdown(_) => {
                         self.shutdown();
                         _reactor.shutdown();
-                    },
-                    // _ => {
-                    //     warn!("Don't know what to do with this internal message!");
-                    // }
+                    }
+                }
+            },
+            Message::Client(m) => {
+                match m {
+                    Client::RequestServerInfo(_) => {
+                        let s = messages::ServerInfo::as_message("Buttplug v0.0.1".to_string());
+                        (msg.callback)(s);
+                    }
+                    _ => {
+                        warn!("Don't know what to do with this client message!");
+                    }
                 }
             },
             Message::Device(_, _) => {
                 self.device_manager.handle_message(&msg);
             },
             _ => {
-                warn!("Don't know what to do with this message!");
+                warn!("Don't know how to handle this host message!");
             }
         };
     }
