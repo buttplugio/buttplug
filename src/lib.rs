@@ -1,7 +1,6 @@
-#![feature(proc_macro, custom_attribute)]
+#![feature(proc_macro)]
 
 extern crate ws;
-extern crate lovesense;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
@@ -9,7 +8,11 @@ extern crate bytes;
 extern crate mio;
 #[macro_use] extern crate log;
 extern crate env_logger;
-extern crate libtrancevibe;
+
+// Device crates. Uncomment as devices actually start coming into the codebase.
+//
+//extern crate lovesense;
+//extern crate libtrancevibe;
 
 use config::{Config};
 

@@ -10,15 +10,17 @@ readme = "README.md"
 keywords = ["usb", "serial", "hardware"]
 
 [dependencies]
-libtrancevibe = "^0.1.0"
-lovesense = "^0.1.0"
 clap = {version = "2", features = ["yaml"]}
 ws = "^0.5.3"
 serde_json = "0.8"
 serde_derive = "0.8"
 serde = "0.8"
-# clippy = "^0.0.91"
 bytes = "^0.3.0"
 mio = "0.6"
 env_logger = "*"
 log = "*"
+# Device dependencies. Uncomment when devices actually start appearing in the
+# codebase. Wastes build/CI times otherwise.
+#
+# libtrancevibe = "^0.1.0"
+# lovesense = "^0.1.0"
