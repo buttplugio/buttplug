@@ -1,8 +1,9 @@
-#![feature(custom_derive, plugin)]
-#![plugin(serde_macros)]
+#![feature(proc_macro, custom_attribute)]
 
 extern crate ws;
 extern crate lovesense;
+#[macro_use]
+extern crate serde_derive;
 extern crate serde_json;
 extern crate bytes;
 extern crate mio;
