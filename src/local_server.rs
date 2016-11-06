@@ -1,6 +1,6 @@
 use std;
 use mio::deprecated::{EventLoop, Handler, Sender};
-use messages::{Message, Internal, Shutdown, IncomingMessage};
+use messages::{Message, Internal, IncomingMessage};
 
 pub struct LocalServer {
     core_tx: Sender<IncomingMessage>,

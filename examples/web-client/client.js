@@ -23,6 +23,21 @@ var ButtplugClient = {
     }
     var info_msg = { "Client" : { "RequestServerInfo" : {}}};
     this.socket.send(JSON.stringify(info_msg));
+  },
+  openDevice: function () {
+    if (this.socket === undefined) {
+      console.log("Must connect before getting server info!");
+    }
+    var info_msg = { "Device" : [1, { "ClaimDevice" : {}}]};
+    this.socket.send(JSON.stringify(info_msg));
+  },
+  setVibrateSpeed: function () {
+    if (this.socket === undefined) {
+      console.log("Must connect before getting server info!");
+    }
+    var speedValue = document.getElementById('speed').value;
+    var info_msg = { "Device" : [1, { "SingleVibrateSpeed" : { "speed": speedValue}}]};
+    this.socket.send(JSON.stringify(info_msg));
   }
 };
 
@@ -40,4 +55,16 @@ var init_client = function() {
   serverInfoBtn.addEventListener('click', function(event) {
     ButtplugClient.getServerInfo();
   });
+
+  var claimDeviceBtn = document.getElementById('claimdevice');
+  //add event listener
+  claimDeviceBtn.addEventListener('click', function(event) {
+    ButtplugClient.openDevice();
+  });
+
+  var speedRange = document.getElementById('speed');
+  speedRange.addEventListener('input', function(event) {
+    ButtplugClient.setVibrateSpeed();
+  });
 };
+

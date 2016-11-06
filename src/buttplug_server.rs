@@ -5,7 +5,7 @@ use std::thread;
 use std;
 use std::vec::{Vec};
 use messages;
-use messages::{Message, IncomingMessage, Shutdown, Internal, Host, Client, ServerInfo};
+use messages::{Message, IncomingMessage, Shutdown, Internal, Host, Client, ServerInfo, ClaimDevice};
 use config::{Config};
 // for start_server
 use local_server;
@@ -65,6 +65,7 @@ impl ButtplugServer {
             }));
         }
         println!("{}", serde_json::to_string(&ServerInfo::as_message("Testing".to_string())).unwrap());
+        println!("{}", serde_json::to_string(&ClaimDevice::as_message(1)).unwrap());
         ButtplugServer {
             threads: server_threads,
             tx: tx,
@@ -112,7 +113,8 @@ impl Handler for ButtplugServer {
                 }
             },
             Message::Device(_, _) => {
-                self.device_manager.handle_message(&msg);
+                info!("Got device message!");
+                self.device_manager.handle_message(msg);
             },
             _ => {
                 warn!("Don't know how to handle this host message!");

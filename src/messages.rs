@@ -1,5 +1,4 @@
 use std::vec::Vec;
-use devices::DeviceInfo;
 
 macro_rules! define_msg {
     ( $a: ident,
@@ -106,7 +105,7 @@ macro_rules! define_msgs {
 define_msgs!(
     internal_msg Shutdown ();
     client_msg RequestDeviceList();
-    host_msg DeviceList(devices: Vec<DeviceInfo>);
+    host_msg DeviceList(devices: Vec<(u32, String)>);
     client_msg RegisterClient(client_info: String);
     host_msg ClientRegistered();
     client_msg RequestServerInfo();
@@ -114,6 +113,8 @@ define_msgs!(
     host_msg Error(error_str: String);
     host_msg Log(log_str: String);
     host_msg Ping();
+    host_msg DeviceClaimed(id: u32, token: u32);
+    host_msg Ok();
     client_msg Pong();
     device_msg ClaimDevice ();
     device_msg ReleaseDevice ();
@@ -138,8 +139,10 @@ pub enum Client {
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Host {
     DeviceList(DeviceList),
+    DeviceClaimed(DeviceClaimed),
     ClientRegistered(ClientRegistered),
     ServerInfo(ServerInfo),
+    Ok(Ok),
     Error(Error),
     Log(Log),
     Ping(Ping)
