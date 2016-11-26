@@ -35,19 +35,19 @@ Planned support for
    - Have hardware and [python/c library](http://github.com/metafetish/librealtouch), need to port to Rust
 - [VStroker](http://vstroker.com)
    - Have hardware and [python library](http://github.com/metafetish/libvstroker), need to port to Rust
+- [Minna KGoal](http://www.minnalife.com/products/kgoal)
+   - Have hardware, [python library](http://github.com/metafetish/khole-py) and [javascript library](http://github.com/metafetish/khole-js), need to port to Rust
+- [WeVibe](http://wevibe.com)
+   - Have hardware and protocol, need to write library
+- [Kiiroo](http://www.kiiroo.com)
+   - Have hardware and protocol, need to write library
 - [Vibease](http://vibease.com)
    - Have hardware, need to reverse engineer
-- [WeVibe](http://wevibe.com)
-   - Waiting for [DEFCON Talk and code drop](https://www.defcon.org/html/defcon-24/dc-24-speakers.html#follower)
 - [ErosTek ET-232](http://www.erostek.com)
    - Need hardware, though may be added to [buttshock-rs](http://github.com/metafetish/buttshock-rs)
 - [Estim Systems 2b](http://e-stim.co.uk)
    - Need hardware, though may be added to [buttshock-rs](http://github.com/metafetish/buttshock-rs)
-- [Kiiroo](http://www.kiiroo.com)
-   - Need hardware
 - [Vibratissimo](http://www.vibratissimo.com)
-   - Need hardware
-- [Minna KGoal](http://www.minnalife.com/products/kgoal)
    - Need hardware
 
 ## License
