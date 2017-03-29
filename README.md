@@ -1,6 +1,6 @@
 # Buttplug
 
-[![Build Status](https://travis-ci.org/metafetish/buttplug.svg?branch=master)](https://travis-ci.org/metafetish/buttplug) [![Build status](https://ci.appveyor.com/api/projects/status/g7vtlw95c39in22k?svg=true)](https://ci.appveyor.com/project/qdot/buttplug)
+[![Build Status](https://travis-ci.org/metafetish/buttplug.svg?branch=master)](https://travis-ci.org/metafetish/buttplug) [![Build status](https://ci.appveyor.com/api/projects/status/g7vtlw95c39in22k?svg=true)](https://ci.appveyor.com/project/qdot/buttplug) [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 
 Buttplug is a framework for hooking up hardware to interfaces, where
 hardware usually means sex toys, but could honestly be just about
@@ -17,6 +17,14 @@ The core of buttplug works as a router. It is a Rust based application
 that connects to libraries that registers and communicates with
 different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
+
+## Support The Project
+
+If you find this project helpful, you
+can
+[support Metafetish projects via Patreon](http://patreon.com/qdot)!
+Every donation helps us afford more hardware to reverse, document, and
+write code for!
 
 ## Supported Hardware
 
