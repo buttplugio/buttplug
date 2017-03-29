@@ -39,6 +39,14 @@ Buttplug supports the following hardware
 
 Planned support for
 
+- [Fleshlight Launch](http://fleshlight.com/launch)
+   - Have hardawre and [documentation](http://github.com/metafetish/raunch-docs), need to write Rust library
+- [Vorze A10 Cyclone SA](http://vorzeinteractive.com)
+   - Have hardawre and [documentation](http://github.com/metafetish/cockblender-docs), need to write Rust library
+- [Kiiroo](http://www.kiiroo.com)
+   - Have hardware and [documentation](http://github.com/metafetish/miiyoo-docs), need to write Rust library
+- [Minna KGoal](http://www.minnalife.com/products/kgoal)
+   - Have hardware, [python](http://github.com/metafetish/khole-py) and [javascript](http://github.com/metafetish/khole-js) libraries, need to document and write Rust library
 - [RealTouch](http://realtouch.com)
    - Have hardware and [python/c library](http://github.com/metafetish/librealtouch), need to port to Rust
 - [VStroker](http://vstroker.com)
@@ -46,9 +54,7 @@ Planned support for
 - [Minna KGoal](http://www.minnalife.com/products/kgoal)
    - Have hardware, [python library](http://github.com/metafetish/khole-py) and [javascript library](http://github.com/metafetish/khole-js), need to port to Rust
 - [WeVibe](http://wevibe.com)
-   - Have hardware and protocol, need to write library
-- [Kiiroo](http://www.kiiroo.com)
-   - Have hardware and protocol, need to write library
+   - Have hardware, need to document protocol and write Rust library
 - [Vibease](http://vibease.com)
    - Have hardware, need to reverse engineer
 - [ErosTek ET-232](http://www.erostek.com)
