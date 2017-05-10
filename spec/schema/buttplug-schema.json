@@ -27,7 +27,7 @@
     },
     "IdMessage" : {
       "properties": {
-        "Id": {"$ref": "#/components/Id"},
+        "Id": {"$ref": "#/components/Id"}
       },
       "additionalProperties": false,
       "minProperties": 1,
@@ -39,7 +39,7 @@
     "SystemIdMessage" : {
       "description": "Message sent by the server that is not in direct reply to a message send from the client, and always uses system Id.",
       "properties": {
-        "Id": {"$ref": "#/components/SystemId"},
+        "Id": {"$ref": "#/components/SystemId"}
       },
       "additionalProperties": false,
       "minProperties": 1,
@@ -47,7 +47,7 @@
       "required": [
         "Id"
       ]
-    },
+    }
   },
   "messages": {
     "Ok": {
@@ -243,7 +243,7 @@
           "description": "Build version of server.",
           "type": "integer",
           "minimum": 0
-        },
+        }
       },
       "minProperties": 4,
       "maxProperties": 4,
@@ -292,8 +292,8 @@
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
           "description": "Command to send to Lovense device",
-          "type": "string",
-        },
+          "type": "string"
+        }
       },
       "minProperties": 3,
       "maxProperties": 3,
@@ -315,7 +315,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1
-        },
+        }
       },
       "minProperties": 3,
       "maxProperties": 3,
