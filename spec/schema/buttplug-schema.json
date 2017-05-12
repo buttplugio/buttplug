@@ -36,6 +36,14 @@
         "Id"
       ]
     },
+    "DeviceMessages" : {
+      "description": "A list of the messages a device will accept on this server implementation.",
+      "type": "array",
+      "items" : {
+        "type": "string",
+        "minItems": 1
+      }
+    },
     "SystemIdMessage" : {
       "description": "Message sent by the server that is not in direct reply to a message send from the client, and always uses system Id.",
       "properties": {
@@ -119,15 +127,17 @@
           "items": {
             "properties": {
               "DeviceName": { "$ref" : "#/components/DeviceName" },
-              "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" }
+              "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
+              "DeviceMessages": { "$ref" : "#/components/DeviceMessages" }
             },
-            "minProperties": 2,
-            "maxProperties": 2,
+            "minProperties": 3,
+            "maxProperties": 3,
+            "additionalProperties": false,
             "required": [
               "DeviceName",
-              "DeviceIndex"
-            ],
-            "additionalProperties": false
+              "DeviceIndex",
+              "DeviceMessages"
+            ]
           }
         }
       },
@@ -145,15 +155,17 @@
       "properties": {
         "Id": {"$ref": "#/components/SystemId"},
         "DeviceName": { "$ref" : "#/components/DeviceName" },
-        "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" }
+        "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
+        "DeviceMessages": { "$ref" : "#/components/DeviceMessages" }
       },
-      "minProperties": 3,
-      "maxProperties": 3,
+      "minProperties": 4,
+      "maxProperties": 4,
       "additionalProperties": false,
       "required": [
         "Id",
         "DeviceName",
-        "DeviceIndex"
+        "DeviceIndex",
+        "DeviceMessages"
       ]
     },
     "DeviceRemoved": {
