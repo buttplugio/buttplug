@@ -406,6 +406,8 @@
       "DeviceAdded": {"$ref": "#/messages/DeviceAdded"},
       "DeviceRemoved": {"$ref": "#/messages/DeviceRemoved"},
       "RequestDeviceList": {"$ref": "#/messages/RequestDeviceList"},
+      "StopDevice": {"$ref": "#/messages/StopDevice"},
+      "StopDevices": {"$ref": "#/messages/StopDevices"},
       "StartScanning": {"$ref": "#/messages/StartScanning"},
       "StopScanning": {"$ref": "#/messages/StopScanning"},
       "ScanningFinished": {"$ref": "#/messages/ScanningFinished"},
@@ -417,9 +419,7 @@
       "LovenseCmd": {"$ref": "#/messages/LovenseCmd"},
       "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"},
       "KiirooCmd": {"$ref": "#/messages/KiirooCmd"},
-      "RawCmd": {"$ref": "#/messages/RawCmd"},
-      "StopDevice": {"$ref": "#/messages/StopDevice"},
-      "StopDevices": {"$ref": "#/messages/StopDevices"}
+      "RawCmd": {"$ref": "#/messages/RawCmd"}
     },
     "additionalProperties": false,
     "minProperties": 1,
