@@ -352,6 +352,25 @@
         "Command"
       ]
     },
+    "StopDevice": {
+      "type": "object",
+      "description": "Stops the all actions currently being taken by a device.",
+      "properties": {
+        "Id": {"$ref": "#/components/SystemId"},
+        "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" }
+      },
+      "minProperties": 2,
+      "maxProperties": 2,
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
+    "StopDevices": {
+      "type": "object",
+      "description": "Stops all actions currently being taken by all connected devices.",
+      "anyOf" : [{ "$ref" : "#/components/IdMessage" }]
     }
   },
   "type": "array",
@@ -378,6 +397,8 @@
       "LovenseCmd": {"$ref": "#/messages/LovenseCmd"},
       "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"},
       "RawCmd": {"$ref": "#/messages/RawCmd"},
+      "StopDevice": {"$ref": "#/messages/StopDevice"},
+      "StopDevices": {"$ref": "#/messages/StopDevices"}
     },
     "additionalProperties": false,
     "minProperties": 1,
