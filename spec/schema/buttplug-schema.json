@@ -255,7 +255,7 @@
         "BuildVersion"
       ]
     },
-    "FleshlightLaunchRawFW12Cmd": {
+    "FleshlightLaunchFW12Cmd": {
       "type": "object",
       "description": "Sends speed and position command to the Fleshlight Launch Device denoted by the device index.",
       "properties": {
@@ -284,9 +284,9 @@
         "Position"
       ]
     },
-    "LovenseRawCmd": {
+    "LovenseCmd": {
       "type": "object",
-      "description": "Sends a raw string to a Lovense device",
+      "description": "Sends a command string to a Lovense device. Command string will be verified by sender.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
@@ -347,9 +347,9 @@
       "Log": {"$ref": "#/messages/Log"},
       "RequestServerInfo": {"$ref": "#/messages/RequestServerInfo"},
       "ServerInfo": {"$ref": "#/messages/ServerInfo"},
-      "FleshlightLaunchRawFW12Cmd": {"$ref": "#/messages/FleshlightLaunchRawFW12Cmd"},
-      "LovenseRawCmd": {"$ref": "#/messages/LovenseRawCmd"},
-      "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"}
+      "FleshlightLaunchFW12Cmd": {"$ref": "#/messages/FleshlightLaunchFW12Cmd"},
+      "LovenseCmd": {"$ref": "#/messages/LovenseCmd"},
+      "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"},
     },
     "additionalProperties": false,
     "minProperties": 1,
