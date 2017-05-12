@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-06/schema#",
   "title": "Buttplug Message Schema",
   "version": "0.0.1",
-  "description": "The JSON Protocol format for the Buttplug Protocol",
+  "description": "The JSON Protocol format for the Buttplug Protocol.",
   "components" : {
     "Id": {
       "description": "User-set id for the message. 0 denotes system message and is reserved.",
@@ -65,17 +65,17 @@
   "messages": {
     "Ok": {
       "type": "object",
-      "description": "Signifies successful processing of the message indicated by the id",
+      "description": "Signifies successful processing of the message indicated by the id.",
       "anyOf" : [{ "$ref" : "#/components/IdMessage" }]
     },
     "Ping": {
       "type": "object",
-      "description": "Connection keep-alive message",
+      "description": "Connection keep-alive message.",
       "anyOf" : [{ "$ref" : "#/components/IdMessage" }]
     },
     "Error": {
       "type": "object",
-      "description": "Signifies error processing of the message indicated by the id",
+      "description": "Signifies the server encountered an error while processing the message indicated by the id.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
         "ErrorMessage": {
@@ -110,11 +110,11 @@
     },
     "DeviceList": {
       "type": "object",
-      "description": "List of all available devices known to the system",
+      "description": "List of all available devices known to the system.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
         "Devices": {
-          "description": "Array of device ids and names",
+          "description": "Array of device ids and names.",
           "type": "array",
           "items": {
             "properties": {
@@ -304,7 +304,7 @@
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
-          "description": "Command to send to Lovense device",
+          "description": "Command to send to Lovense device.",
           "type": "string"
         }
       },
@@ -319,12 +319,12 @@
     },
     "SingleMotorVibrateCmd": {
       "type": "object",
-      "description": "Sends a vibrate command to a device that supports vibration",
+      "description": "Sends a vibrate command to a device that supports vibration.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Speed": {
-          "description": "Device vibration speed (floating point, 0 < x < 1), stepping will be device specific",
+          "description": "Device vibration speed (floating point, 0 < x < 1), stepping will be device specific.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
@@ -346,7 +346,7 @@
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
-          "description": "Command to send to Lovense device",
+          "description": "Command to send to Lovense device.",
           "type": "array",
           "items": {
             "type": "integer",
@@ -367,12 +367,12 @@
     },
     "KiirooCmd": {
       "type": "object",
-      "description": "Sends a raw byte string to a Kiiroo Onyx/Pearl device",
+      "description": "Sends a raw byte string to a Kiiroo Onyx/Pearl device.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
-          "description": "Command to send to Lovense device",
+          "description": "Command to send to Lovense device.",
           "type": "string"
         }
       },
@@ -409,7 +409,7 @@
   "type": "array",
   "items": {
     "title": "Messages",
-    "description": "One or more messages validated by the Buttplug Message schema list",
+    "description": "One or more messages validated by the Buttplug Message schema list.",
     "properties": {
       "Ok": {"$ref": "#/messages/Ok"},
       "Error": {"$ref": "#/messages/Error"},
