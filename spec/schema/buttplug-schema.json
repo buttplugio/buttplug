@@ -325,6 +325,33 @@
         "DeviceIndex",
         "Command"
       ]
+    },
+    "RawCmd": {
+      "type": "object",
+      "description": "Sends a raw byte array to a device. Should only be used for testing/development.",
+      "properties": {
+        "Id": {"$ref": "#/components/Id"},
+        "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
+        "Command": {
+          "description": "Command to send to Lovense device",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "minItems": 1
+          }
+        }
+      },
+      "minProperties": 3,
+      "maxProperties": 3,
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Command"
+      ]
+    },
     }
   },
   "type": "array",
@@ -350,6 +377,7 @@
       "FleshlightLaunchFW12Cmd": {"$ref": "#/messages/FleshlightLaunchFW12Cmd"},
       "LovenseCmd": {"$ref": "#/messages/LovenseCmd"},
       "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"},
+      "RawCmd": {"$ref": "#/messages/RawCmd"},
     },
     "additionalProperties": false,
     "minProperties": 1,
