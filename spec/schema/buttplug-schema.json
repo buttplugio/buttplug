@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "http://json-schema.org/draft-06/schema#",
   "title": "Buttplug Message Schema",
   "version": "0.0.1",
   "description": "The JSON Protocol format for the Buttplug Protocol",
