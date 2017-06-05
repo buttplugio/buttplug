@@ -1,0 +1,93 @@
+#+OPTIONS: toc:nil
+
+* Summary
+:PROPERTIES:
+:EXPORT_FILE_NAME: build/SUMMARY.md
+:END:
+
+- [[file:README.md][Introduction]]
+- [[file:architecture.md][Architecture]]
+  - [[file:architecture.md#protocol][Protocol]]
+  - [[file:architecture.md#libraries][Libraries]]
+  - [[file:architecture.md#servers][Servers]]
+- [[file:messages.md][Messages]]
+
+* Introduction
+:PROPERTIES:
+:EXPORT_FILE_NAME: build/README.md
+:END:
+** Introduction to Buttplug
+
+Buttplug is a quasi-standard set of technologies and protocols to
+allow developers to write software that controls an array of sex toys
+in a semi-future-proof way.
+
+*** The need for a Sex Toy Control standard
+
+*** The problem of generalizing haptics
+
+*** Why is it called Buttplug?
+
+* Architecture
+:PROPERTIES:
+:EXPORT_FILE_NAME: build/architecture.md
+:END:
+** Architecture
+*** Protocol
+
+The Buttplug protocol consists of a message based system between a
+client and a server. Note that the use of client and server here does
+not explicitly denote network connection, but is just a generic way to
+denote different communication endpoints. 
+
+The client will request information from the server about devices that
+are connected, and will send information to those devices. The server
+will handle device enumeration, connection management, and failure
+recoveries (for instance, stopping all connected devices on client
+disconnect).
+
+*** Stages
+
+Buttplug sessions exist in 3 stages. While these stages need not be
+discrete, due to the way Buttplug will likely be used, they will most
+likely end up being so. Applications may hide or combine some of the
+stages depending on requirements.
+
+**** Identification
+
+During the identification stage, a client will establish connection
+with the server, and send over its identifying information. The server
+may trigger some sort of UI event at this point to ask if the user
+will allow the client to connect and interact.
+
+**** Enumeration
+
+After the client/server connection is set up, device enumeration can
+begin. The client can ask the server to scan for devices on various
+busses or media (serial, usb, bluetooth, network, etc), and return a
+list of devices it can communicate with.
+
+**** Consummation
+
+Once devices are selected, we can assume the user will begin
+interactive with the devices. At this point, the client will mostly be
+sending and receiving device commands. It can usually (but not always)
+be assumed that continued enumeration may not be possible due to the
+context of situations that Buttplug software will be used in.
+** Implementations
+*** Libraries
+*** Servers
+*** Applications
+** Usage Examples
+*** As a Web Application
+*** As a Library Embedded in a Video Game
+* Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: build/messages.md
+:END:
+
+** Basic Message Structure
+** Messages
+*** Ok
+
+The Ok message is a message.
