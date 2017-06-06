@@ -7,6 +7,7 @@
 - [[file:README.md][Introduction]]
   - [[file:README.md#the-need-for-a-sex-toy-control-standard][The Need for a Sex Toy Control Standard]]
   - [[file:README.md#generalized-control][Generalized Control]]
+  - [[file:README.md#comparisons-to-existing-software][Comparisons to Existing Software]]
   - [[file:README.md#why-is-it-called-buttplug][Why is it called Buttplug?]]
 - [[file:architecture.md][Architecture]]
   - [[file:architecture.md#implementation-types][Implementations Types]]
@@ -111,9 +112,28 @@ most likely not tractable for a global solution, the goal of Buttplug
 is to make explorations of ideas like this accessible and easy to play
 with.
 
-*** Why is it called Buttplug?
+*** Comparisons to Existing Software
 
-Ok, breaking out of the tech documentation tone for a minute.
+It's somewhat difficult to point to a real world counterpart for the
+Buttplug Standard. While companies like [[http://twitter.com/frixionme][Frixion]] and [[http://feelme.com][FeelMe]] have
+created systems for controlling different sex toys, neither of those
+is open source, so it's hard to point at them as examples.
+
+The closest existing projects are those which reinterpret or
+generalize control schemes. Projects like:
+
+- [[http://andersmalmgren.github.io/FreePIE/][FreePIE]]
+- [[https://osculator.net/][OSCulator]]
+- [[https://github.com/vrpn/vrpn/wiki][VRPN]]
+- [[http://vjoystick.sourceforge.net/site/][vJoy]]
+
+All of these programs take input from various devices and translate
+them as some other kind of input, or aggregate them to make systems
+easier to use. The Buttplug Standard aims to define programs which do
+something similar. Applications referred to as "Buttplug Server"
+implementations will often look quite similar to these programs.
+
+*** Why is it called Buttplug?
 
 It probably seems silly to call a sex toy control standard "Buttplug". 
 
