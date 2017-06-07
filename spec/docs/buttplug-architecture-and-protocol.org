@@ -1,33 +1,41 @@
 #+OPTIONS: toc:nil
 * Summary
 :PROPERTIES:
-:EXPORT_FILE_NAME: build/SUMMARY.md
+:EXPORT_FILE_NAME: SUMMARY.md
 :END:
 
-- [[file:README.md][Introduction]]
+#+BEGIN_SRC emacs-lisp :exports results :results value org replace
+(org-build-gitbook-toc)
+#+END_SRC
+
+- [[file:README.md#the-buttplug-sex-toy-control-standard][The Buttplug Sex Toy Control Standard]]
   - [[file:README.md#the-need-for-a-sex-toy-control-standard][The Need for a Sex Toy Control Standard]]
   - [[file:README.md#generalized-control][Generalized Control]]
   - [[file:README.md#comparisons-to-existing-software][Comparisons to Existing Software]]
   - [[file:README.md#why-is-it-called-buttplug][Why is it called Buttplug?]]
-- [[file:architecture.md][Architecture]]
-  - [[file:architecture.md#implementation-types][Implementations Types]]
+- [[file:architecture.md#architecture][Architecture]]
+  - [[file:architecture.md#implementation-types][Implementation Types]]
     - [[file:architecture.md#libraries][Libraries]]
     - [[file:architecture.md#servers][Servers]]
-    - [[file:architecture.md#applications-clients][Applications (Clients)]]
+    - [[file:architecture.md#applications-aka-clients][Applications (aka Clients)]]
   - [[file:architecture.md#protocol][Protocol]]
   - [[file:architecture.md#stages][Stages]]
+    - [[file:architecture.md#identification][Identification]]
+    - [[file:architecture.md#enumeration][Enumeration]]
+    - [[file:architecture.md#consummation][Consummation]]
 - [[file:usages.md#usage-examples][Usage Examples]]
   - [[file:usages.md#library-embedded-in-a-video-game][Library Embedded in a Video Game]]
-  - [[file:usages.md#web-based-hardware-synced-movie-player][Web Based Hardware Synced Movie Player]] 
-----
-- [[file:messages.md][Messages]]
+  - [[file:usages.md#web-based-hardware-synced-movie-player][Web Based Hardware Synced Movie Player]]
+- [[file:messages.md#messages][Messages]]
   - [[file:messages.md#basic-message-structure][Basic Message Structure]]
+  - [[file:messages.md#messages][Messages]]
+    - [[file:messages.md#ok][Ok]]
 
 * Introduction
 :PROPERTIES:
-:EXPORT_FILE_NAME: build/README.md
+:EXPORT_FILE_NAME: README.md
 :END:
-** Introduction to Buttplug
+** The Buttplug Sex Toy Control Standard
 
 Buttplug is a quasi-standard set of technologies and protocols to
 allow developers to write software that controls an array of sex toys
@@ -168,7 +176,7 @@ expect this to come back to bite me in the ass at some point.
 
 * Architecture
 :PROPERTIES:
-:EXPORT_FILE_NAME: build/architecture.md
+:EXPORT_FILE_NAME: architecture.md
 :END:
 ** Architecture
 *** Implementation Types
@@ -262,7 +270,7 @@ in.
 
 * Usage Examples
 :PROPERTIES:
-:EXPORT_FILE_NAME: build/usages.md
+:EXPORT_FILE_NAME: usages.md
 :END:
 ** Usage Examples
 
@@ -375,11 +383,11 @@ Implementing a C# version of the Buttplug Library also gives us a
 platform into Unity integration.
 * Messages
 :PROPERTIES:
-:EXPORT_FILE_NAME: build/messages.md
+:EXPORT_FILE_NAME: messages.md
 :END:
-
-** Basic Message Structure
 ** Messages
-*** Ok
+*** Basic Message Structure
+*** Messages
+**** Ok
 
 The Ok message is a message.
