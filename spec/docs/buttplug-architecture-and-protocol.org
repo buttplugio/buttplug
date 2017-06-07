@@ -26,16 +26,50 @@
 - [[file:usages.md#usage-examples][Usage Examples]]
   - [[file:usages.md#library-embedded-in-a-video-game][Library Embedded in a Video Game]]
   - [[file:usages.md#web-based-hardware-synced-movie-player][Web Based Hardware Synced Movie Player]]
+----
 - [[file:messages.md#messages][Messages]]
   - [[file:messages.md#basic-message-structure][Basic Message Structure]]
-  - [[file:messages.md#messages][Messages]]
-    - [[file:messages.md#ok][Ok]]
+  - [[file:messages.md#message-flow][Message Flow]]
+  - [[file:messages.md#a-note-on-scaling][A Note On Scaling]]
+  - [[file:messages.md#json-message-serialization][JSON Message Serialization]]
+  - [[file:messages.md#adding-new-messages][Adding New Messages]]
+  - [[file:messages.md#message-description-template][Message Description Template]]
+- [[file:status.md#status-messages][Status Messages]]
+  - [[file:status.md#ok][Ok]]
+  - [[file:status.md#error][Error]]
+  - [[file:status.md#ping][Ping]]
+  - [[file:status.md#request-log][RequestLog]]
+  - [[file:status.md#log][Log]]
+- [[file:identification.md#identification-messages][Identification Messages]]
+  - [[file:identification.md#request-server-info][RequestServerInfo]]
+  - [[file:identification.md#server-info][ServerInfo]]
+- [[file:enumeration.md#enumeration-messages][Enumeration Messages]]
+  - [[file:enumeration.md#start-scanning][StartScanning]]
+  - [[file:enumeration.md#stop-scanning][StopScanning]]
+  - [[file:enumeration.md#scanning-finished][ScanningFinished]]
+  - [[file:enumeration.md#request-device-list][RequestDeviceList]]
+  - [[file:enumeration.md#device-list][DeviceList]]
+  - [[file:enumeration.md#device-added][DeviceAdded]]
+  - [[file:enumeration.md#device-removed][DeviceRemoved]]
+  - [[file:enumeration.md#stop-device][StopDevice]]
+  - [[file:enumeration.md#stop-all-devices][StopAllDevices]]
+- [[file:generic.md#generic-device-messages][Generic Device Messages]]
+  - [[file:generic.md#single-motor-vibrate-cmd][SingleMotorVibrateCmd]]
+  - [[file:generic.md#raw-cmd][RawCmd]]
+- [[file:specific.md#specific-device-messages][Specific Device Messages]]
+  - [[file:specific.md#kiiro-cmd][KiiroCmd]]
+  - [[file:specific.md#fleshlight-launch-f-w12cmd][FleshlightLaunchFW12Cmd]]
+  - [[file:specific.md#lovense-cmd][LovenseCmd]]
+- [[file:jsonschema.md#message-json-schema][Message JSON Schema]]
 
 * Introduction
 :PROPERTIES:
 :EXPORT_FILE_NAME: README.md
 :END:
 ** The Buttplug Sex Toy Control Standard
+
+*Version:* 0.0.1
+*Documentation Repo*: [[https://github.com/metafetish/buttplug][https://github.com/metafetish/buttplug]]
 
 Buttplug is a quasi-standard set of technologies and protocols to
 allow developers to write software that controls an array of sex toys
@@ -85,7 +119,7 @@ others, it may be impossible.
 Starting with the simple case, let's say a user has two sex toys,
 called Toy A and Toy B:
 
-- Each toy is made by a different manufacturer. 
+- Each toy is made by a different manufacturer.
 - One toy uses Bluetooth to talk to the computer, the other uses USB.
 - Both of these toys have vibration functionality.
 
@@ -143,7 +177,7 @@ implementations will often look quite similar to these programs.
 
 *** Why is it called Buttplug?
 
-It probably seems silly to call a sex toy control standard "Buttplug". 
+It probably seems silly to call a sex toy control standard "Buttplug".
 
 That's because it is.
 
@@ -167,12 +201,18 @@ I ended up with "Internet Buttplug" because everyone has a butt, and
 buttplug is a fun word to say. It's inclusive and it's humorous. I
 admit that it may confuse people when they're wondering why they're
 using something called Buttplug to control their fucking machine or
-robotic onahole or who knows what else. 
+robotic onahole or who knows what else.
 
 One of the hardest problems in Computer Science is naming things. I
 just stopped trying to name the thing and selected a name and here we
 are. Much like the other hard problems in Computer Science, I fully
 expect this to come back to bite me in the ass at some point.
+
+*Please Note:* Even though this project is called Buttplug, it does
+not mean you have to put something in your butt to develop with it or
+use applications that integrate it. We are not saying you shouldn't,
+as we condone butt stuff as performed in a safe and sane manner, but
+it's not a requirement, either.
 
 * Architecture
 :PROPERTIES:
@@ -182,7 +222,7 @@ expect this to come back to bite me in the ass at some point.
 *** Implementation Types
 
 The Buttplug Standard can be implemented in different ways. This
-section covers the terms used throughout this document. 
+section covers the terms used throughout this document.
 
 **** Libraries
 
@@ -328,7 +368,7 @@ for toy support will be Bluetooth LE toys, with all others considered
 nice to have.
 
 At this point, we have to take operating system and browser
-capabilities into account. 
+capabilities into account.
 
 Operating Systems that have BLE:
 
@@ -367,7 +407,7 @@ Going back to the web application itself, this now means the client
 side will need to connect to one of two different styles of servers.
 We can use User Agent Detection in the browser to let us know which OS
 we're on, and then either select the WebBluetooth path or native
-Windows Websocket path. 
+Windows Websocket path.
 
 To hit iOS, we now have the option of going via a Xamarin based C#
 app, or a Node.js/Cordova app. There will be some custom
@@ -386,8 +426,383 @@ platform into Unity integration.
 :EXPORT_FILE_NAME: messages.md
 :END:
 ** Messages
-*** Basic Message Structure
-*** Messages
-**** Ok
 
-The Ok message is a message.
+Messages are the core of communication for Buttplug.
+
+How messages are represented depends on the implementation in
+question. For instance, in a C# library implementation of Buttplug,
+messages are classes. In Rust, they're structs.
+
+In a server implementation, messages need to be serialized in some way
+to be sent between the client and server. In this case, they may exist
+in some sort of intermediate format, like JSON or OSC.
+
+*** Basic Message Structure
+
+Messages are made up of multiple different kinds of fields. As long as
+the fields can somehow be represented in JSON, we consider them valid.
+
+All messages will contain an "Id" field. This field as the range of 0
+to 4294967296. A value to 0 denotes a /System/ message, meaning a
+message that will only ever be sent from a server/library to a client.
+All messages coming from a client will have an Id from 1 to
+4294967296, as set by the client themselves. When the server replies
+to the message, it will return a message using the same Id as was
+sent. This allows developers to synchronize messages over remote
+systems like networks, or languages that lack async/await
+capabilities.
+
+Other than range, there is no restriction to what values the client
+can send as an Id. The Id does not need to be sequential, nor does it
+need to be unique. The client could just send 1 for every message,
+which would be valid in async/await library situations where the
+execution flow would handle matching message pairs without the need
+for the Id. In remote situations, like those over network connections,
+it is expected that the client will establish a sane usage of the Id
+field to orchestrate messaging.
+
+*** Message Flow
+
+There are two types of message flows.
+
+- Messages can be sent from the server/library to a client. Messages
+  like DeviceAdded, DeviceRemoved, and certain device specific input
+  messages can happen without the client making a request.
+- Messages sent from the client to the server will always receive a
+  reply. The message type the client will receive in reply is based on
+  the type of message sent. Some messages may receive a simple "Ok"
+  message in reply in order to denote successful receiving, while
+  others may receive something context specific. Messages reply types
+  are listed in the message descriptions section.
+
+*** A Note On Scaling
+
+The Buttplug Message System, as described here, was not designed to
+scale to large multiuser systems (like cam services). It was built
+with either a single user, peer-to-peer, or small group setting in
+mind.
+
+As the message flow section states, this system resembles a sort of
+half-assed-TCP mechanism. Using this system to drive large scale toy
+control streaming services may require changes to this system.
+
+Reducing and rearchitecting this system for scaling is an exercise
+left to the developer. Either to implement, or to contract the
+Buttplug designers to build it for them.
+
+*** JSON Message Serialization
+
+For reference implementations of the Buttplug standard, we use JSON
+for serialization. The format of the json mimics that of object output
+from Rust's [serde-json] crate. This is simply due to the first
+implementation of Buttplug with working serialization being in Rust.
+
+The format is as follows:
+
+#+BEGIN_SRC json
+  {
+    "MessageType" :
+    {
+      "MessageField1": "MessageValue1",
+      "MessageField2": "MessageValue2"
+    }
+  }
+#+END_SRC
+
+Message descriptions in this document will reflect this layout.
+
+Similarly, some message values will have certain bounds and
+limitations. These are described in this documentation, and are
+included in the JSON schema in this repo.
+
+*** Adding New Messages
+
+The message list as described here is not set in stone. New messages
+will be added as new devices are released, or as new generic messages
+are deemed necessary. The only rule is that once a message is added to
+this document, it should never be changed. This will allow parsing and
+schema checking to be as strict as possible. If edits to a message
+need to be made, a new message type will most likely be added.
+
+Requests for new messages can be submitted to [[https://github.com/metafetish/buttplug/issues][the Buttplug Standard
+Github Issue Tracker]].
+
+*Note:* As of this writing, we're not even to an alpha release yet, so
+all bets are off until we're at least a few release cycles into this.
+Good luck, godspeed, prepare to update your parser code often. Or
+maybe just use a reference implementation for now.
+
+*** Message Description Template
+
+*Description:*
+
+*Fields:*
+
+*Expected Response:*
+
+*Flow Diagram:*
+
+*Serialization Example:*
+
+* Status Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: status.md
+:END:
+** Status Messages
+*** Ok
+*Description:* Signifies that the previous message sent by the client
+was received and processed successfully by the server.
+
+*Fields:*
+
+- /Id/ (unsigned int): The Id of the client message that this reply is in response
+  to.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file ok_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StartScanning, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+#+RESULTS:
+[[file:ok_diagram.svg]]
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  {
+    "Ok": {
+      "Id": 1
+    }
+  }
+#+END_SRC
+
+*** Error
+*Description:* Signifies that the previous message sent by the client
+caused some sort of parsing or processing error on the server.
+
+*Fields:*
+
+- /Id/ (unsigned int): The Id of the client message that this reply is
+  in response to, assuming the Id could be parsed. Id will be 0 if
+  message could not be parsed (due to issues like invalid JSON).
+- /ErrorMessage/ (string): Message describing the error that happened
+  on the server.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file error_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "InvalidMessageName, Id=2" ];
+  Server -> Client [ label = "Error, Id=2" ];
+}
+#+END_SRC
+
+#+BEGIN_SRC mscgen :file error_malformed_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "InvalidMessageId, Id=Wat" ];
+  Server -> Client [ label = "Error, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+    {
+      "Error": {
+        "Id": 0,
+        "ErrorMessage": "Server received invalid JSON."
+      }
+    }
+#+END_SRC
+
+*** Ping
+*Description:* Ping acts a watchdog between the client and the server.
+The server will expect the client to send a ping message at a certain
+interval (interval will be sent to the client as part of the
+identification step). If the client fails to ping within the specified
+time, the server will disconnect and stop all currently connected
+devices.
+
+This will handle cases like the client crashing without a
+proper disconnect. This is not a guaranteed global failsafe, since it
+will not guard against problems like a client UI thread locking up
+while a client communication thread continues to work.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+- Ok message with matching Id on successful logging request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file ping_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "Ping, Id=5" ];
+  Server -> Client [ label = "Ok, Id=5" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  {
+    "Ping": {
+      "Id": 5
+    }
+  }
+#+END_SRC
+*** RequestLog
+*Description:* Requests that the server send all internal log messages
+to the client. Useful for debugging.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /LogLevel/ (string): The highest level of message to receive.
+  Sending "Off" turns off messages, while sending "Trace" denotes that
+  all log messages should be sent to the client. Valid LogLevel values:
+  - Off
+  - Fatal
+  - Error
+  - Warn
+  - Info
+  - Debug
+  - Trace
+
+*Expected Response:*
+
+- Ok message with matching Id on successful logging request. Assuming
+  the LogLevel was not "Off", Log type messages will be received after this.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file requestlog_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "RequestLog, Id=1, LogLevel=Trace" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "Log, Id=0, LogLevel=Warn" ];
+  Server -> Client [ label = "Log, Id=0, LogLevel=Trace" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  {
+    "RequestLog": {
+      "Id": 1,
+      "LogLevel": "Warn"
+    }
+  }
+#+END_SRC
+
+*** Log
+*Description:* Log message from the server. Only sent after the client
+has sent a RequestLog message with a level other than "Off".
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /LogLevel/ (string): The level of the log message.
+  - Off
+  - Fatal
+  - Error
+  - Warn
+  - Info
+  - Debug
+  - Trace
+- /LogMessage/ (string): Log message.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file log_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "RequestLog, Id=1, LogLevel=Trace" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "Log, Id=0, LogLevel=Warn" ];
+  Server -> Client [ label = "Log, Id=0, LogLevel=Trace" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  {
+    "RequestLog": {
+      "Id": 1,
+      "LogLevel": "Warn"
+    }
+  }
+#+END_SRC
+
+* Identification Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: identification.md
+:END:
+** Identification Messages
+*** RequestServerInfo
+*** ServerInfo
+* Enumeration Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: enumeration.md
+:END:
+** Enumeration Messages
+*** StartScanning
+*** StopScanning
+*** ScanningFinished
+*** RequestDeviceList
+*** DeviceList
+*** DeviceAdded
+*** DeviceRemoved
+*** StopDevice
+*** StopAllDevices
+* Generic Device Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: generic.md
+:END:
+** Generic Device Messages
+*** SingleMotorVibrateCmd
+*** RawCmd
+* Specific Device Messages
+:PROPERTIES:
+:EXPORT_FILE_NAME: specific.md
+:END:
+** Specific Device Messages
+*** KiiroCmd
+*** FleshlightLaunchFW12Cmd
+*** LovenseCmd
+* Message JSON Schema
+:PROPERTIES:
+:EXPORT_FILE_NAME: jsonschema.md
+:END:
+** Message JSON Schema
+#+BEGIN_SRC json
+
+#+END_SRC
