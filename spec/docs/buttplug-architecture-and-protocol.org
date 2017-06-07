@@ -4,7 +4,7 @@
 :EXPORT_FILE_NAME: SUMMARY.md
 :END:
 
-#+BEGIN_SRC emacs-lisp :exports results :results value org replace
+#+BEGIN_SRC emacs-lisp :exports results :results value raw replace
 (org-build-gitbook-toc)
 #+END_SRC
 
