@@ -493,20 +493,34 @@ Buttplug designers to build it for them.
 *** JSON Message Serialization
 
 For reference implementations of the Buttplug standard, we use JSON
-for serialization. The format of the json mimics that of object output
-from Rust's [serde-json] crate. This is simply due to the first
-implementation of Buttplug with working serialization being in Rust.
+for serialization. The format of the json object for each specific
+message mimics that of object output from Rust's [[https://github.com/serde-rs/json][serde-json]] crate.
+This is simply due to the first implementation of Buttplug with
+working serialization being in Rust.
+
+When sending messages over the line to a server/client, we wrap them
+in a JSON array, so that multiple messages can be sent and parsed
+simultaneously.
 
 The format is as follows:
 
 #+BEGIN_SRC json
-  {
-    "MessageType" :
+  [
     {
-      "MessageField1": "MessageValue1",
-      "MessageField2": "MessageValue2"
+      "MessageType" :
+      {
+        "MessageField1": "MessageValue1",
+        "MessageField2": "MessageValue2"
+      }
+    },
+    {
+      "MessageType2" :
+      {
+        "Message2Field1": "Message2Value1",
+        "Message2Field2": "Message2Value2"
+      }
     }
-  }
+  ]
 #+END_SRC
 
 Message descriptions in this document will reflect this layout.
@@ -578,11 +592,13 @@ msc {
 *Serialization Example:*
 
 #+BEGIN_SRC json
-  {
-    "Ok": {
-      "Id": 1
+  [
+    {
+      "Ok": {
+        "Id": 1
+      }
     }
-  }
+  ]
 #+END_SRC
 
 *** Error
@@ -622,12 +638,14 @@ msc {
 *Serialization Example:*
 
 #+BEGIN_SRC json
+  [
     {
       "Error": {
         "Id": 0,
         "ErrorMessage": "Server received invalid JSON."
       }
     }
+  ]
 #+END_SRC
 
 *** Ping
@@ -665,11 +683,13 @@ msc {
 *Serialization Example:*
 
 #+BEGIN_SRC json
-  {
-    "Ping": {
-      "Id": 5
+  [
+    {
+      "Ping": {
+        "Id": 5
+      }
     }
-  }
+  ]
 #+END_SRC
 *** RequestLog
 *Description:* Requests that the server send all internal log messages
@@ -710,12 +730,14 @@ msc {
 *Serialization Example:*
 
 #+BEGIN_SRC json
-  {
-    "RequestLog": {
-      "Id": 1,
-      "LogLevel": "Warn"
+  [
+    {
+      "RequestLog": {
+        "Id": 1,
+        "LogLevel": "Warn"
+      }
     }
-  }
+  ]
 #+END_SRC
 
 *** Log
@@ -754,12 +776,15 @@ msc {
 *Serialization Example:*
 
 #+BEGIN_SRC json
-  {
-    "RequestLog": {
-      "Id": 1,
-      "LogLevel": "Warn"
+  [
+    {
+      "Log": {
+        "Id": 0,
+        "LogLevel": "Trace",
+        "LogMessage": "This is a Log Message."
+      }
     }
-  }
+  ]
 #+END_SRC
 
 * Identification Messages
