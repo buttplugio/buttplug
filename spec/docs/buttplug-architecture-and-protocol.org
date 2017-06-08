@@ -87,7 +87,7 @@ having DIY control of it:
   sex toy from, including capabilities and programming interfaces to
   work with the connection medium (serial/usb/bluetooth/etc)
 - Experience using a programming language that allows the user access
-  to hardware via the operation system.
+  to hardware via the operating system.
 - Knowledge of the communications protocol the sex toy uses. This is
   rarely, if ever, publicly documented information.
 
@@ -1237,16 +1237,217 @@ msc {
       }
     ]
 #+END_SRC
-*** SingleMotorVibrateCmd
 *** RawCmd
+*Description:* Used to send a raw byte string to a device. Should only
+be used for development, and should not be exposed to untrusted clients.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device
+- /Command/ (Array of unsigned int): Command to send, array of ints
+  with a range of [0-255]. Minimum length is 1.
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file rawcmd_diagram.svg :filetype svg
+msc {
+  Client,Server, Hardware;
+  Client -> Server [ label = "RawCmd, Id=1" ];
+  Server -> Hardware [ label = "Byte Array from RawCmd"];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "RawCmd": {
+        "Id": 1,
+        "DeviceIndex": 0,
+        "Command": [0x00, 0x02, 0x04]
+      }
+    }
+  ]
+#+END_SRC
+*** SingleMotorVibrateCmd
+*Description:* Causes a toy that supports vibration to run at a
+certain speed. In order to abstract the dynamic range of different
+toys, the value sent is a float with a range of [0.0-1.0]
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device
+- /Speed/ (float): Vibration speed
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file singlemotorvibratecmd_diagram.svg :filetype svg
+msc {
+  Client,Server, Hardware;
+  Client -> Server [ label = "SingleMotorVibrateCmd, Id=1" ];
+  Server -> Hardware [ label = "Device Specific Vibration Command"];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+    [
+      {
+        "SingleMotorVibrateCmd": {
+          "Id": 1,
+          "DeviceIndex": 0,
+          "Speed": 0.5
+        }
+      }
+    ]
+#+END_SRC
 * Specific Device Messages
 :PROPERTIES:
 :EXPORT_FILE_NAME: specific.md
 :END:
 ** Specific Device Messages
-*** KiiroCmd
+*** KiirooCmd
+*Description:* Causes a toy that supports Kiiroo style commands to run
+whatever event may be related. More information on Kiiroo commands can
+be found in STPIHKAL.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device
+- /Command/ (unsigned int): Unsigned integer in range [0-4].
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file kiiroocmd_diagram.svg :filetype svg
+msc {
+  Client,Server, Hardware;
+  Client -> Server [ label = "KiirooCmd, Id=1" ];
+  Server -> Hardware [ label = "Device Specific Command"];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+    [
+      {
+        "KiirooCmd": {
+          "Id": 1,
+          "DeviceIndex": 0,
+          "Command": 4
+        }
+      }
+    ]
+#+END_SRC
 *** FleshlightLaunchFW12Cmd
+*Description:* Causes a toy that supports Fleshlight Launch (Firmware
+Version 1.2) style commands to run whatever event may be related. More
+information on Fleshlight Launch commands can be found in STPIHKAL.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device
+- /Position/ (unsigned int): Unsigned integer in range [0-99], denoting
+  position to move to.
+- /Speed/ (unsigned int): Unsigned integer in range [0-99], denoting
+  speed to requested position at.
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file fleshlightlaunchfw12cmd_diagram.svg :filetype svg
+msc {
+  Client,Server, Hardware;
+  Client -> Server [ label = "KiirooCmd, Id=1" ];
+  Server -> Hardware [ label = "Device Specific Command"];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "FleshlightLaunchFW12Cmd": {
+        "Id": 1,
+        "DeviceIndex": 0,
+        "Position": 95,
+        "Speed": 90
+      }
+    }
+  ]
+#+END_SRC
 *** LovenseCmd
+*Description:* Causes a toy that supports Lovense style commands to
+run whatever event may be related. More information on Fleshlight
+Launch commands can be found in STPIHKAL.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device
+- /Command/ (string): String command for Lovense toys. Must be a valid
+  Lovense command accessible on most of their toys. See STPIHKAL for
+  more info. Library implementations should check this for validity.
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file lovensecmd_diagram.svg :filetype svg
+msc {
+  Client,Server, Hardware;
+  Client -> Server [ label = "LovenseCmd, Id=1" ];
+  Server -> Hardware [ label = "Device Specific Command"];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "LovenseCmd": {
+        "Id": 1,
+        "DeviceIndex": 0,
+        "Command": "Vibrate:20;"
+      }
+    }
+  ]
+#+END_SRC
 * Message JSON Schema
 :PROPERTIES:
 :EXPORT_FILE_NAME: jsonschema.md
