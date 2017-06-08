@@ -33,7 +33,6 @@
   - [[file:messages.md#a-note-on-scaling][A Note On Scaling]]
   - [[file:messages.md#json-message-serialization][JSON Message Serialization]]
   - [[file:messages.md#adding-new-messages][Adding New Messages]]
-  - [[file:messages.md#message-description-template][Message Description Template]]
 - [[file:status.md#status-messages][Status Messages]]
   - [[file:status.md#ok][Ok]]
   - [[file:status.md#error][Error]]
@@ -54,14 +53,16 @@
 - [[file:generic.md#generic-device-messages][Generic Device Messages]]
   - [[file:generic.md#stop-device-cmd][StopDeviceCmd]]
   - [[file:generic.md#stop-all-devices][StopAllDevices]]
-  - [[file:generic.md#single-motor-vibrate-cmd][SingleMotorVibrateCmd]]
   - [[file:generic.md#raw-cmd][RawCmd]]
+  - [[file:generic.md#single-motor-vibrate-cmd][SingleMotorVibrateCmd]]
 - [[file:specific.md#specific-device-messages][Specific Device Messages]]
-  - [[file:specific.md#kiiro-cmd][KiiroCmd]]
+  - [[file:specific.md#kiiroo-cmd][KiirooCmd]]
   - [[file:specific.md#fleshlight-launch-f-w12cmd][FleshlightLaunchFW12Cmd]]
   - [[file:specific.md#lovense-cmd][LovenseCmd]]
 ----
 - [[file:jsonschema.md#message-json-schema][Message JSON Schema]]
+
+
 
 * Introduction
 :PROPERTIES:
@@ -69,8 +70,8 @@
 :END:
 ** The Buttplug Sex Toy Control Standard
 
-*Version:* 0.0.1
-*Documentation Repo*: [[https://github.com/metafetish/buttplug][https://github.com/metafetish/buttplug]]
+- *Version:* 0.0.1
+- *Documentation Repo*: [[https://github.com/metafetish/buttplug][https://github.com/metafetish/buttplug]]
 
 Buttplug is a quasi-standard set of technologies and protocols to
 allow developers to write software that controls an array of sex toys
@@ -547,18 +548,6 @@ Github Issue Tracker]].
 all bets are off until we're at least a few release cycles into this.
 Good luck, godspeed, prepare to update your parser code often. Or
 maybe just use a reference implementation for now.
-
-*** Message Description Template
-
-*Description:*
-
-*Fields:*
-
-*Expected Response:*
-
-*Flow Diagram:*
-
-*Serialization Example:*
 
 * Status Messages
 :PROPERTIES:
