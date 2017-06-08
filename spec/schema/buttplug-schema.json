@@ -348,7 +348,7 @@
       "required": [
         "Id",
         "DeviceIndex",
-        "Command"
+        "Speed"
       ]
     },
     "RawCmd": {
