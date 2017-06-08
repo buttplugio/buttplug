@@ -443,10 +443,10 @@ Messages are made up of multiple different kinds of fields. As long as
 the fields can somehow be represented in JSON, we consider them valid.
 
 All messages will contain an "Id" field. This field as the range of 0
-to 4294967296. A value to 0 denotes a /System/ message, meaning a
+to 4294967295. A value to 0 denotes a /System/ message, meaning a
 message that will only ever be sent from a server/library to a client.
 All messages coming from a client will have an Id from 1 to
-4294967296, as set by the client themselves. When the server replies
+4294967295, as set by the client themselves. When the server replies
 to the message, it will return a message using the same Id as was
 sent. This allows developers to synchronize messages over remote
 systems like networks, or languages that lack async/await
