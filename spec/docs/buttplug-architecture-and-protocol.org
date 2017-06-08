@@ -51,15 +51,16 @@
   - [[file:enumeration.md#device-list][DeviceList]]
   - [[file:enumeration.md#device-added][DeviceAdded]]
   - [[file:enumeration.md#device-removed][DeviceRemoved]]
-  - [[file:enumeration.md#stop-device][StopDevice]]
-  - [[file:enumeration.md#stop-all-devices][StopAllDevices]]
 - [[file:generic.md#generic-device-messages][Generic Device Messages]]
+  - [[file:generic.md#stop-device-cmd][StopDeviceCmd]]
+  - [[file:generic.md#stop-all-devices][StopAllDevices]]
   - [[file:generic.md#single-motor-vibrate-cmd][SingleMotorVibrateCmd]]
   - [[file:generic.md#raw-cmd][RawCmd]]
 - [[file:specific.md#specific-device-messages][Specific Device Messages]]
   - [[file:specific.md#kiiro-cmd][KiiroCmd]]
   - [[file:specific.md#fleshlight-launch-f-w12cmd][FleshlightLaunchFW12Cmd]]
   - [[file:specific.md#lovense-cmd][LovenseCmd]]
+----
 - [[file:jsonschema.md#message-json-schema][Message JSON Schema]]
 
 * Introduction
