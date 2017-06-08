@@ -805,12 +805,13 @@ and request info from the server.
 
 *Expected Response:*
 
-ServerInfo message on success, Error message on malformed message, null client name,
-or other error.
+- ServerInfo message on success
+- Error message on malformed message, null client name, or other
+  error.
 
 *Flow Diagram:*
 
-#+BEGIN_SRC mscgen :file log_diagram.svg :filetype svg
+#+BEGIN_SRC mscgen :file requestserverinfo_diagram.svg :filetype svg
 msc {
   Client,Server;
   Client -> Server [ label = "RequestServerInfo, Id=1" ];
@@ -851,7 +852,7 @@ None. Server-To-Client message only.
 
 *Flow Diagram:*
 
-#+BEGIN_SRC mscgen :file log_diagram.svg :filetype svg
+#+BEGIN_SRC mscgen :file serverinfo_diagram.svg :filetype svg
 msc {
   Client,Server;
   Client -> Server [ label = "RequestServerInfo, Id=1" ];
@@ -873,26 +874,368 @@ msc {
     }
   ]
 #+END_SRC
-
 * Enumeration Messages
 :PROPERTIES:
 :EXPORT_FILE_NAME: enumeration.md
 :END:
 ** Enumeration Messages
 *** StartScanning
+*Description:* Client request to have the server start scanning for
+devices on all busses that it knows about. Useful for protocols like
+Bluetooth, which require an explicit discovery phase.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file startscanning_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StartScanning, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "StartScanning": {
+        "Id": 1
+      }
+    }
+  ]
+#+END_SRC
 *** StopScanning
+*Description:* Client request to have the server stop scanning for
+devices. Useful for protocols like Bluetooth, which may not timeout
+otherwise.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file stopscanning_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StartScanning, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+  Client -> Server [ label = "StopScanning, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "ScanningFinished, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "StopScanning": {
+        "Id": 1
+      }
+    }
+  ]
+#+END_SRC
 *** ScanningFinished
+*Description:* Sent by the server once it has stopped scanning on all
+busses. Since systems may have timeouts that are not controlled by the
+server, this is a separate message from the StopScanning flow.
+ScanningFinished can happen without a StopScanning call.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+None. Server-to-Client only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file scanningfinished_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StartScanning, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+  Server -> Client [ label = "ScanningFinished, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "ScanningFinished": {
+        "Id": 0
+      }
+    }
+  ]
+#+END_SRC
 *** RequestDeviceList
+*Description:* Client request to have the server send over its known
+device list, without starting a full scan.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+- DeviceList message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file requestdevicelist_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "RequestDeviceList, Id=1" ];
+  Server -> Client [ label = "DeviceList, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "RequestDeviceList": {
+        "Id": 1
+      }
+    }
+  ]
+#+END_SRC
 *** DeviceList
+*Description:* Server reply to a client request for a device list.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /Devices/ (array): Array of device objects
+  - /DeviceName/ (string): Descriptive name of the device
+  - /DeviceIndex/ (unsigned integer): Index used to identify the
+    device when sending Device Messages.
+  - /DeviceMessages/ (array of strings): Type names of Device Messages
+    that the device will accept.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file devicelist_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "RequestDeviceList, Id=1" ];
+  Server -> Client [ label = "DeviceList, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "DeviceList": {
+        "Id": 1,
+        "Devices": [
+          {
+            "DeviceName": "TestDevice 1",
+            "DeviceIndex": 0,
+            "DeviceMessages": ["SingleMotorVibrateCmd", "RawCmd", "KiirooCmd", "StopDeviceCmd"]
+          },
+          {
+            "DeviceName": "TestDevice 2",
+            "DeviceIndex": 1,
+            "DeviceMessages": ["SingleMotorVibrateCmd", "LovenseCmd", "StopDeviceCmd"]
+          }
+        ]
+      }
+    }
+  ]
+#+END_SRC
 *** DeviceAdded
+*Description:* Sent by the server whenever a device is added to the
+system. Can happen at any time after identification, as it is assumed
+many server/library implementations will support devices with
+hotplugging capabilities that do not require specific
+scanning/discovery sessions.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceName/ (string): Descriptive name of the device
+- /DeviceIndex/ (unsigned integer): Index used to identify the
+  device when sending Device Messages.
+- /DeviceMessages/ (array of strings): Type names of Device Messages
+  that the device will accept.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file deviceadded_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Server -> Client [ label = "DeviceAdded, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "DeviceAdded": {
+        "Id": 0,
+        "DeviceName": "TestDevice 1",
+        "DeviceIndex": 0,
+        "DeviceMessages": ["SingleMotorVibrateCmd", "RawCmd", "KiirooCmd", "StopDeviceCmd"]
+      }
+    }
+  ]
+#+END_SRC
 *** DeviceRemoved
-*** StopDevice
-*** StopAllDevices
+*Description:* Sent by the server whenever a device is removed from
+the system. Can happen at any time after identification.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned integer): Index used to identify the
+  device when sending Device Messages.
+
+*Expected Response:*
+
+None. Server-to-Client message only.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file deviceremoved_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Server -> Client [ label = "DeviceRemoved, Id=0" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "DeviceRemoved": {
+        "Id": 0,
+        "DeviceIndex": 0
+      }
+    }
+  ]
+#+END_SRC
 * Generic Device Messages
 :PROPERTIES:
 :EXPORT_FILE_NAME: generic.md
 :END:
 ** Generic Device Messages
+*** StopDeviceCmd
+*Description:* Client request to have the server stop a device from
+whatever actions it may be taking. This message should be supported by
+all devices, and the server should know how to stop any device it
+supports.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /DeviceIndex/ (unsigned int): Index of device to stop.
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file stopdevice_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StopDeviceCmd, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+    [
+      {
+        "StopDeviceCmd": {
+          "Id": 1,
+          "DeviceIndex": 0
+        }
+      }
+    ]
+#+END_SRC
+*** StopAllDevices
+*Description:* Sent by the client to tell the server to stop all
+devices. Can be used for emergency situations, on client shutdown for
+cleanup, etc... While this is considered a Device Message, since it
+pertains to all currently connected devices, it does not specify a
+device index (and does not end with 'Cmd').
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+
+*Expected Response:*
+
+- Ok message with matching Id on successful request.
+- Error message on value or message error.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file stopalldevices_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "StopAllDevices, Id=1" ];
+  Server -> Client [ label = "Ok, Id=1" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+    [
+      {
+        "StopAllDevices": {
+          "Id": 1
+        }
+      }
+    ]
+#+END_SRC
 *** SingleMotorVibrateCmd
 *** RawCmd
 * Specific Device Messages
@@ -908,6 +1251,4 @@ msc {
 :EXPORT_FILE_NAME: jsonschema.md
 :END:
 ** Message JSON Schema
-#+BEGIN_SRC json
-
-#+END_SRC
+#+INCLUDE: ../schema/buttplug-schema.json src json
