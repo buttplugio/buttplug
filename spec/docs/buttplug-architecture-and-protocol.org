@@ -14,18 +14,11 @@
   - [[file:README.md#comparisons-to-existing-software][Comparisons to Existing Software]]
   - [[file:README.md#why-is-it-called-buttplug][Why is it called Buttplug?]]
 - [[file:architecture.md#architecture][Architecture]]
-  - [[file:architecture.md#implementation-types][Implementation Types]]
-    - [[file:architecture.md#libraries][Libraries]]
-    - [[file:architecture.md#servers][Servers]]
-    - [[file:architecture.md#applications-aka-clients][Applications (aka Clients)]]
   - [[file:architecture.md#protocol][Protocol]]
   - [[file:architecture.md#stages][Stages]]
     - [[file:architecture.md#identification][Identification]]
     - [[file:architecture.md#enumeration][Enumeration]]
     - [[file:architecture.md#consummation][Consummation]]
-- [[file:usages.md#usage-examples][Usage Examples]]
-  - [[file:usages.md#library-embedded-in-a-video-game][Library Embedded in a Video Game]]
-  - [[file:usages.md#web-based-hardware-synced-movie-player][Web Based Hardware Synced Movie Player]]
 ----
 - [[file:messages.md#messages][Messages]]
   - [[file:messages.md#basic-message-structure][Basic Message Structure]]
@@ -61,8 +54,6 @@
   - [[file:specific.md#lovense-cmd][LovenseCmd]]
 ----
 - [[file:jsonschema.md#message-json-schema][Message JSON Schema]]
-
-
 
 * Introduction
 :PROPERTIES:
@@ -1103,7 +1094,7 @@ msc {
       "RawCmd": {
         "Id": 1,
         "DeviceIndex": 0,
-        "Command": [0x00, 0x02, 0x04]
+        "Command": [0, 2, 4]
       }
     }
   ]
@@ -1239,8 +1230,8 @@ msc {
 #+END_SRC
 *** LovenseCmd
 *Description:* Causes a toy that supports Lovense style commands to
-run whatever event may be related. More information on Fleshlight
-Launch commands can be found in STPIHKAL.
+run whatever event may be related. More information on Lovense
+commands can be found in STPIHKAL.
 
 *Fields:*
 
