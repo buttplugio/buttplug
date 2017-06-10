@@ -30,28 +30,28 @@
   - [[file:status.md#ok][Ok]]
   - [[file:status.md#error][Error]]
   - [[file:status.md#ping][Ping]]
-  - [[file:status.md#request-log][RequestLog]]
+  - [[file:status.md#requestlog][RequestLog]]
   - [[file:status.md#log][Log]]
 - [[file:identification.md#identification-messages][Identification Messages]]
-  - [[file:identification.md#request-server-info][RequestServerInfo]]
-  - [[file:identification.md#server-info][ServerInfo]]
+  - [[file:identification.md#requestserverinfo][RequestServerInfo]]
+  - [[file:identification.md#serverinfo][ServerInfo]]
 - [[file:enumeration.md#enumeration-messages][Enumeration Messages]]
-  - [[file:enumeration.md#start-scanning][StartScanning]]
-  - [[file:enumeration.md#stop-scanning][StopScanning]]
-  - [[file:enumeration.md#scanning-finished][ScanningFinished]]
-  - [[file:enumeration.md#request-device-list][RequestDeviceList]]
-  - [[file:enumeration.md#device-list][DeviceList]]
-  - [[file:enumeration.md#device-added][DeviceAdded]]
-  - [[file:enumeration.md#device-removed][DeviceRemoved]]
+  - [[file:enumeration.md#startscanning][StartScanning]]
+  - [[file:enumeration.md#stopscanning][StopScanning]]
+  - [[file:enumeration.md#scanningfinished][ScanningFinished]]
+  - [[file:enumeration.md#requestdevicelist][RequestDeviceList]]
+  - [[file:enumeration.md#devicelist][DeviceList]]
+  - [[file:enumeration.md#deviceadded][DeviceAdded]]
+  - [[file:enumeration.md#deviceremoved][DeviceRemoved]]
 - [[file:generic.md#generic-device-messages][Generic Device Messages]]
-  - [[file:generic.md#stop-device-cmd][StopDeviceCmd]]
-  - [[file:generic.md#stop-all-devices][StopAllDevices]]
-  - [[file:generic.md#raw-cmd][RawCmd]]
-  - [[file:generic.md#single-motor-vibrate-cmd][SingleMotorVibrateCmd]]
+  - [[file:generic.md#stopdevicecmd][StopDeviceCmd]]
+  - [[file:generic.md#stopalldevices][StopAllDevices]]
+  - [[file:generic.md#rawcmd][RawCmd]]
+  - [[file:generic.md#singlemotorvibratecmd][SingleMotorVibrateCmd]]
 - [[file:specific.md#specific-device-messages][Specific Device Messages]]
-  - [[file:specific.md#kiiroo-cmd][KiirooCmd]]
-  - [[file:specific.md#fleshlight-launch-f-w12cmd][FleshlightLaunchFW12Cmd]]
-  - [[file:specific.md#lovense-cmd][LovenseCmd]]
+  - [[file:specific.md#kiiroocmd][KiirooCmd]]
+  - [[file:specific.md#fleshlightlaunchfw12cmd][FleshlightLaunchFW12Cmd]]
+  - [[file:specific.md#lovensecmd][LovenseCmd]]
 ----
 - [[file:jsonschema.md#message-json-schema][Message JSON Schema]]
 
@@ -700,7 +700,7 @@ msc {
 #+END_SRC
 * Enumeration Messages
 :PROPERTIES:
-:EXPORT_FILE_NAME: ./build/enumeration.md
+:EXPORT_FILE_NAME: enumeration.md
 :END:
 ** Enumeration Messages
 *** StartScanning
