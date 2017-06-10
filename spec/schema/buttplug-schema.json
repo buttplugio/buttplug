@@ -173,16 +173,6 @@
       "description": "Notifies client that a device of a certain type has been removed from the server.",
       "anyOf" : [{ "$ref" : "#/components/DeviceIndexMessage" }]
     },
-    "DeviceClaim": {
-      "type": "object",
-      "description": "Sent by client to claim ownership of a device, so that other clients cannot send commands to it.",
-      "anyOf" : [{ "$ref" : "#/components/DeviceIndexMessage" }]
-    },
-    "DeviceRelease": {
-      "type": "object",
-      "description": "Send by client to release ownership of a device.",
-      "anyOf" : [{ "$ref" : "#/components/DeviceIndexMessage" }]
-    },
     "RequestDeviceList": {
       "type": "object",
       "description": "Request for the server to send a list of devices to the client.",
@@ -429,8 +419,6 @@
       "Test": {"$ref": "#/messages/Test"},
       "DeviceList": {"$ref": "#/messages/DeviceList"},
       "DeviceAdded": {"$ref": "#/messages/DeviceAdded"},
-      "DeviceRemoved": {"$ref": "#/messages/DeviceRemoved"},
-      "DeviceClaim": { "$ref": "#/messages/DeviceClaim"},
       "DeviceRelease": { "$ref": "#/messages/DeviceRelease"},
       "RequestDeviceList": {"$ref": "#/messages/RequestDeviceList"},
       "StopDevice": {"$ref": "#/messages/StopDevice"},
