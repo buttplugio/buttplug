@@ -387,7 +387,7 @@
         "Command"
       ]
     },
-    "StopDevice": {
+    "StopDeviceCmd": {
       "type": "object",
       "description": "Stops the all actions currently being taken by a device.",
       "properties": {
@@ -402,7 +402,7 @@
         "DeviceIndex"
       ]
     },
-    "StopDevices": {
+    "StopAllDevices": {
       "type": "object",
       "description": "Stops all actions currently being taken by all connected devices.",
       "anyOf" : [{ "$ref" : "#/components/IdMessage" }]
@@ -421,8 +421,8 @@
       "DeviceAdded": {"$ref": "#/messages/DeviceAdded"},
       "DeviceRelease": { "$ref": "#/messages/DeviceRelease"},
       "RequestDeviceList": {"$ref": "#/messages/RequestDeviceList"},
-      "StopDevice": {"$ref": "#/messages/StopDevice"},
-      "StopDevices": {"$ref": "#/messages/StopDevices"},
+      "StopDeviceCmd": {"$ref": "#/messages/StopDeviceCmd"},
+      "StopAllDevices": {"$ref": "#/messages/StopAllDevices"},
       "StartScanning": {"$ref": "#/messages/StartScanning"},
       "StopScanning": {"$ref": "#/messages/StopScanning"},
       "ScanningFinished": {"$ref": "#/messages/ScanningFinished"},
