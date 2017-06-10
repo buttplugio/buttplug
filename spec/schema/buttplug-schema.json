@@ -225,8 +225,8 @@
           "type": "string"
         }
       },
-      "minProperties": 2,
-      "maxProperties": 2,
+      "minProperties": 3,
+      "maxProperties": 3,
       "additionalProperties": false,
       "required": [
         "Id",
@@ -236,14 +236,36 @@
     },
     "RequestServerInfo": {
       "type": "object",
-      "description": "Request server version.",
-      "anyOf" : [{ "$ref" : "#/components/IdMessage" }]
+      "description": "Request server version, and relay client name.",
+      "properties": {
+        "Id": {"$ref": "#/components/SystemId"},
+        "ClientName": {
+          "description": "Name of the client software.",
+          "type": "string"
+        }
+      },
+      "minProperties": 2,
+      "maxProperties": 2,
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "ClientName"
+      ]
     },
     "ServerInfo": {
       "type": "object",
       "description": "Server version information, in Major.Minor.Build format.",
       "properties": {
         "Id": {"$ref": "#/components/Id"},
+        "ServerName": {
+          "description": "Name of the server. Can be 0-length.",
+          "type": "string"
+        },
+        "MessageVersion": {
+          "description": "Message template version of the server software.",
+          "type": "integer",
+          "minimum": 0
+        },
         "MajorVersion": {
           "description": "Major version of server.",
           "type": "integer",
@@ -258,16 +280,24 @@
           "description": "Build version of server.",
           "type": "integer",
           "minimum": 0
+        },
+        "MaxPingTime": {
+          "description": "Maximum time (in milliseconds) the server will wait between ping messages from client before shutting down.",
+          "type": "integer",
+          "minimum": 1
         }
       },
-      "minProperties": 4,
-      "maxProperties": 4,
+      "minProperties": 7,
+      "maxProperties": 7,
       "additionalProperties": false,
       "required": [
         "Id",
         "MajorVersion",
         "MinorVersion",
-        "BuildVersion"
+        "BuildVersion",
+        "MessageVersion",
+        "MaxPingTime",
+        "ServerName"
       ]
     },
     "FleshlightLaunchFW12Cmd": {
@@ -419,7 +449,6 @@
       "Test": {"$ref": "#/messages/Test"},
       "DeviceList": {"$ref": "#/messages/DeviceList"},
       "DeviceAdded": {"$ref": "#/messages/DeviceAdded"},
-      "DeviceRelease": { "$ref": "#/messages/DeviceRelease"},
       "RequestDeviceList": {"$ref": "#/messages/RequestDeviceList"},
       "StopDeviceCmd": {"$ref": "#/messages/StopDeviceCmd"},
       "StopAllDevices": {"$ref": "#/messages/StopAllDevices"},
