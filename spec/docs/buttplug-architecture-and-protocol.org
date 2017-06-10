@@ -703,8 +703,10 @@ expectations.
 
 - /Id/ (unsigned int): Message Id
 - /ServerName/ (string): Name of the server. Can be null (0-length).
-- /MessageVersion/ (string): Semantic version for the message
-  template the server uses.
+- /MajorVersion/ (uint): Major version of the server software.
+- /MinorVersion/ (uint): Minor version of the server software.
+- /BuildVersion/ (uint): Build version of the server software.
+- /MessageVersion/ (uint): Message template version of the server software.
 - /MaxPingTime/ (unsigned int): Maximum internal for pings from the
   client, in milliseconds. If a client takes to longer than this time
   between sending Ping messages, the server is expected to disconnect.
@@ -731,7 +733,10 @@ msc {
       "ServerInfo": {
         "Id": 1,
         "ServerName": "Test Server",
-        "MessageVersion": "0.0.1",
+        "MessageVersion": "1",
+        "MajorVersion": "1",
+        "MinorVersion": "0",
+        "BuildVersion": "0",
         "MaxPingTime": 100
       }
     }
