@@ -30,6 +30,7 @@
   - [[file:status.md#ok][Ok]]
   - [[file:status.md#error][Error]]
   - [[file:status.md#ping][Ping]]
+  - [[file:status.md#test][Test]]
   - [[file:status.md#requestlog][RequestLog]]
   - [[file:status.md#log][Log]]
 - [[file:identification.md#identification-messages][Identification Messages]]
@@ -492,7 +493,7 @@ while a client communication thread continues to work.
 
 *Expected Response:*
 
-- Ok message with matching Id on successful logging request.
+- Ok message with matching Id on successful ping.
 - Error message on value or message error.
 
 *Flow Diagram:*
@@ -512,6 +513,44 @@ msc {
     {
       "Ping": {
         "Id": 5
+      }
+    }
+  ]
+#+END_SRC
+*** Test
+*Description:* The Test message is used for development and testing
+purposes. Sending a Test message with a string to the server will
+cause the server to return a Test message. If the string is "Error",
+the server will return an error message instead.
+
+*Fields:*
+
+- /Id/ (unsigned int): Message Id
+- /TestString/ (string): String to echo back from server.
+
+*Expected Response:*
+
+- Test message with matching Id and TestString on successful request.
+- Error message on value or message error, or TestString being 'Error'.
+
+*Flow Diagram:*
+
+#+BEGIN_SRC mscgen :file test_diagram.svg :filetype svg
+msc {
+  Client,Server;
+  Client -> Server [ label = "Test, TestString=Moo, Id=5" ];
+  Server -> Client [ label = "Test, TestString=Moo, Id=5" ];
+}
+#+END_SRC
+
+*Serialization Example:*
+
+#+BEGIN_SRC json
+  [
+    {
+      "Test": {
+        "Id": 5,
+        "TestString": "Moo"
       }
     }
   ]
