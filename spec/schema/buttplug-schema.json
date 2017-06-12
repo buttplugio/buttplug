@@ -238,7 +238,7 @@
       "type": "object",
       "description": "Request server version, and relay client name.",
       "properties": {
-        "Id": {"$ref": "#/components/SystemId"},
+        "Id": {"$ref": "#/components/Id"},
         "ClientName": {
           "description": "Name of the client software.",
           "type": "string"
