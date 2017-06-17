@@ -88,14 +88,20 @@
         "Id": {"$ref": "#/components/Id"},
         "ErrorMessage": {
           "type": "string"
+        },
+        "ErrorCode": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
         }
       },
       "additionalProperties": false,
-      "minProperties": 2,
-      "maxProperties": 2,
+      "minProperties": 3,
+      "maxProperties": 3,
       "required": [
         "Id",
-        "ErrorMessage"
+        "ErrorMessage",
+        "ErrorCode"
       ]
     },
     "Test": {
@@ -256,7 +262,7 @@
       "type": "object",
       "description": "Server version information, in Major.Minor.Build format.",
       "properties": {
-        "Id": {"$ref": "#/components/Id"},
+7        "Id": {"$ref": "#/components/Id"},
         "ServerName": {
           "description": "Name of the server. Can be 0-length.",
           "type": "string"

@@ -438,6 +438,13 @@ caused some sort of parsing or processing error on the server.
   message could not be parsed (due to issues like invalid JSON).
 - /ErrorMessage/ (string): Message describing the error that happened
   on the server.
+- /ErrorCode/ (int): Integer describing the error. Can be used in
+  programs to react accordingly.
+  - 0: ERROR_UNKNOWN - An unknown error occurred.
+  - 1: ERROR_INIT - Handshake did not succeed.
+  - 2: ERROR_PING - A ping was not sent in the expected time.
+  - 3: ERROR_MSG - A message parsing or permission error occurred.
+  - 4: ERROR_DEVICE - A command sent to a device returned an error.
 
 *Expected Response:*
 
@@ -468,7 +475,8 @@ msc {
     {
       "Error": {
         "Id": 0,
-        "ErrorMessage": "Server received invalid JSON."
+        "ErrorMessage": "Server received invalid JSON.",
+        "ErrorCode": 3
       }
     }
   ]
