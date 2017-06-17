@@ -262,7 +262,7 @@
       "type": "object",
       "description": "Server version information, in Major.Minor.Build format.",
       "properties": {
-7        "Id": {"$ref": "#/components/Id"},
+        "Id": {"$ref": "#/components/Id"},
         "ServerName": {
           "description": "Name of the server. Can be 0-length.",
           "type": "string"
