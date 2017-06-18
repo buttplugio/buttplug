@@ -1,5 +1,7 @@
 # Buttplug Protocol and Architecture Documentation
 
+[![Build Status](https://img.shields.io/travis/metafetish/buttplug.svg)](https://travis-ci.org/metafetish/lovesense-js)
+
 This repo houses architecture documentation and the central json
 schema for the Buttplug Sex Toy Control Server Protocol.
 

@@ -1,0 +1,25 @@
+{
+  "name": "buttplug-json-schema",
+  "version": "0.0.1",
+  "description": "Buttplug JSON Schema Repo",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "ajv compile -s schema/buttplug-schema.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metafetish/buttplug.git"
+  },
+  "author": "Kyle Machulis <kyle@machul.is>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/metafetish/buttplug/issues"
+  },
+  "homepage": "https://github.com/metafetish/buttplug#readme",
+  "devDependencies": {
+    "ajv-cli": "^2.1.0"
+  }
+}
