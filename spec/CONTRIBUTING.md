@@ -92,3 +92,74 @@ multiple repositories and/or technologies. We do our best to keep
 things up to date, but there may be times where we've missed updating
 documentation. If something seems wrong, or isn't working for you, ask
 us using one of the above methods.
+
+### Continuous Integration
+
+In as many cases as possible, we have added continuous integration
+services to run build checks on our software projects. These will
+normally be [Travis](http://travis-ci.org) for macOS and linux builds (or platform
+independent builds, like Node with no native requirements),
+and [Appveyor](http://appveyor.com) for Windows builds. CI Badges are usually added to
+the README.
+
+### Git/Github Workflow
+
+This section goes over our git workflow. We realize that git can be
+quite complicated and has a steep learning curve. We have done as much
+as we can to make sure Github makes this easy for contributors. If you
+are new to git, or if you do not understand some part of this section,
+please let us know when you make a pull request, and we'll help out.
+If you are not sure how to make a pull request on github,
+contact [admin@metafetish.com](mailto:admin@metafetish.com) and a project lead will help.
+
+As of this writing, Metafetish projects are maintained on
+the [Metafetish Organization on Github](http://github.com/metafetish). 'master' branches on
+Metafetish projects are kept as [Github protected branches](https://help.github.com/articles/about-protected-branches/), with
+the following settings.
+
+- All of the following rules apply to both users and administrators.
+- No direct pushes to 'master'. All changes must be via Pull Request
+  (PR).
+- No force pushes to 'master'. All rewrites must be done on feature
+  branches.
+- PRs must be off the end of the 'master' branch to merge to master.
+  Github will enforce this in PRs.
+- PRs must pass CI to merge. Due to the hardware focus of many
+  Metafetish projects, tests may be difficult to write in languages
+  without proper mocking utilities. Therefore, Code Coverage increase
+  is nice, but not required.
+- PRs should have a reviewer if possible, but this is not enforced.
+
+Metafetish organization projects maintain a 'rebase-only' workflow to
+master when possible, where all branches will be a fast-forward merge.
+Github PRs should manage this themselves, and will display an error if
+this is not possible. Project management will be happy to work with
+you to resolve the issue.
+
+In order to reduce workload of contributors, repo dependencies should
+be brought in by using the [git subtree method](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/) instead of git
+submodules. As this will require upkeep and documentation, please
+discuss possible repo inclusion with project leads before submitting
+pull requests with subtree merges.
+
+### Project Management
+
+For project management, we usually use either [Trello](http://trello.com)
+or [ZenHub](http://zenhub.io), depending on the level of integration needed with the
+source code repo itself. More information about this is usually
+included in the README for the specific project.
+
+### Documentation
+
+Non-code documentation for projects is usually done in one of two
+formats:
+
+- Markdown, for all README and contributor facing files.
+- org-mode, for large documentation sets and manuals.
+
+As there is currently only one project lead using org-mode (but they
+write most of the documentation), conversation from org-mode to
+markdown can happen on request. Similarly, markdown versions of
+org-mode documents may be checked in to documentation repos as needed.
+
+Large manuals are usually managed using the [gitbook](https://github.com/GitbookIO/gitbook) format.
