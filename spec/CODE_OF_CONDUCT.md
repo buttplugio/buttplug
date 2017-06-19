@@ -102,7 +102,7 @@ admin@metafetish.com.
 
 These are the policies for upholding our community's standards of
 conduct. If you feel that a thread needs moderation, please contact
-the [Rust moderation team](/team.html#Moderation).
+the [Metafetish moderation team](mailto:admin@metafetish.com).
 
 1. Remarks that violate the standard of conduct, including hateful,
    hurtful, oppressive, or exclusionary remarks, are not allowed.
