@@ -57,10 +57,14 @@ better.
 
 If you find a problem in a project, please do not hesitate to tell us.
 
-- If you have a github account, filing a github issue on the project.
-- Otherwise, make a post on the message board in the appropriate
-  category, or on the General category if a proper category does not
-  exist.
+- If you find a security bug, please email [admin@metafetish.com](mailto:admin@metafetish.com)
+  immediately, and we will work with you to resolve it and get the
+  information out to the community ASAP.
+- For all other bugs:
+  - If you have a github account, filing a github issue on the project.
+  - Otherwise, make a post on the message board in the appropriate
+    category, or on the General category if a proper category does not
+    exist.
 
 In the issue or post, you should let us know:
 
