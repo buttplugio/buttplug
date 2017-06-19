@@ -74,17 +74,25 @@ determined by other members of the project's leadership.
 
 While the project team seeks to welcome all contributors and
 participants, due to the sexual nature of projects related to the
-Metafetish organization, it is asked that all participants be of
-provable legal age.
+Metafetish organization, all contributors and participants should be
+of provable legal age.
 
-Work on projects related to the Metafetish organization may are times
-require sexual situations to be discussed in project forums, be they
-message boards, social media, chat systems, or other means not listed
-here. These discussions should pertain only to usage of the projects
-they involve, and should only include required details. If the
-discussion includes material that others may find objectionable for
-some reason, the discussions should be prepended with content
-warnings.
+Working on projects related to the Metafetish organization may at
+times require sexual situations to be discussed in project forums, be
+they message boards, social media, chat systems, or other means not
+listed here. These discussions should pertain only to usage of the
+projects they involve, and should only include required details to
+express some sort of issue or feature request. If the discussion
+includes material that others may find objectionable for some reason,
+the discussions should be prepended with content warnings.
+
+While usage stories about projects are appreciated, unless they
+express some issue with specific usage, we ask that they be kept to
+outside forums, where they would be appropriate. There are many
+sub-reddits, fetlife groups, and forum instances available for a
+multitude of interests where usage can be discussed. If a proper venue
+is not known, please contact project maintainers, as they may be able
+to point to one.
 
 If any contributor or project member feels that these considerations
 have not been met, they should contact the project maintainers at
