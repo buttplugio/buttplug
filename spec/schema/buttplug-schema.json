@@ -290,7 +290,7 @@
         "MaxPingTime": {
           "description": "Maximum time (in milliseconds) the server will wait between ping messages from client before shutting down.",
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         }
       },
       "minProperties": 7,
