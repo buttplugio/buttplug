@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-06/schema#",
   "title": "Buttplug Message Schema",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "The JSON Protocol format for the Buttplug Protocol.",
   "components" : {
     "Id": {
