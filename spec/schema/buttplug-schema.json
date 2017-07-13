@@ -384,7 +384,7 @@
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
-          "description": "Command to send to Lovense device.",
+          "description": "Raw byte string to send to device.",
           "type": "array",
           "items": {
             "type": "integer",
@@ -410,7 +410,7 @@
         "Id": {"$ref": "#/components/Id"},
         "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
         "Command": {
-          "description": "Command to send to Lovense device.",
+          "description": "Command to send to Kiiroo device.",
           "type": "string"
         }
       },
