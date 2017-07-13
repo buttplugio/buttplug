@@ -423,6 +423,33 @@
         "Command"
       ]
     },
+    "VorzeA10CycloneCmd": {
+      "type": "object",
+      "description": "Sends a raw byte string to a Kiiroo Onyx/Pearl device.",
+      "properties": {
+        "Id": {"$ref": "#/components/Id"},
+        "DeviceIndex":  { "$ref" : "#/components/DeviceIndex" },
+        "Speed": {
+          "description": "Rotation speed command for the Cyclone.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "Clockwise": {
+          "description": "True for clockwise rotation (in relation to device facing user), false for Counter-clockwise",
+          "type": "boolean"
+        }
+      },
+      "minProperties": 4,
+      "maxProperties": 4,
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Speed",
+        "Clockwise"
+      ]
+    },
     "StopDeviceCmd": {
       "type": "object",
       "description": "Stops the all actions currently being taken by a device.",
@@ -469,7 +496,8 @@
       "LovenseCmd": {"$ref": "#/messages/LovenseCmd"},
       "SingleMotorVibrateCmd": {"$ref": "#/messages/SingleMotorVibrateCmd"},
       "KiirooCmd": {"$ref": "#/messages/KiirooCmd"},
-      "RawCmd": {"$ref": "#/messages/RawCmd"}
+      "RawCmd": {"$ref": "#/messages/RawCmd"},
+      "VorzeA10CycloneCmd": {"$ref": "#/messages/VorzeA10CycloneCmd"}
     },
     "additionalProperties": false,
     "minProperties": 1,
