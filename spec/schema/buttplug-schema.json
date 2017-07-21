@@ -482,6 +482,7 @@
       "Test": {"$ref": "#/messages/Test"},
       "DeviceList": {"$ref": "#/messages/DeviceList"},
       "DeviceAdded": {"$ref": "#/messages/DeviceAdded"},
+      "DeviceRemoved": {"$ref": "#/messages/DeviceRemoved"},
       "RequestDeviceList": {"$ref": "#/messages/RequestDeviceList"},
       "StopDeviceCmd": {"$ref": "#/messages/StopDeviceCmd"},
       "StopAllDevices": {"$ref": "#/messages/StopAllDevices"},
