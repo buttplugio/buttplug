@@ -136,13 +136,13 @@ activities, fetishes, and interests.
 The information presented here comes from over a decade of my amateur
 research on the sex technology field, from the engineering and user
 interface perspective. While striving to provide as much help and
-information as possible, the author is an engineer, not a sexologist,
+information as possible, I am an engineer, not a sexologist,
 psychologist, sociologist, ethicist, or one of those other -ists that
 actually deals with people and people issues. When writing sex
 software, it's rather hard to avoid dealing with people, unless the
 software is never actually used. While the engineering portions will
 be as rigorous as possible, many of the observations about users and
-usage will be from personal experience.
+usage will be from my personal experience.
 
 Buttplug is a representation of my understanding of the needs of
 people, sex, and technology, translated into software.
