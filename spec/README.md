@@ -1,6 +1,6 @@
 # Buttplug Protocol and Architecture Documentation
 
-[![Build Status](https://img.shields.io/travis/metafetish/buttplug.svg)](https://travis-ci.org/metafetish/buttplug)
+[![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 
 This repo houses architecture documentation for the Buttplug Sex Toy
 Control Server Protocol.
