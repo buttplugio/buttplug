@@ -81,6 +81,82 @@ A quiet voice pops up from a few yards, or miles, over. Scale is difficult when 
 Fuck.
 
 ** Why Do I Need You To Tell Me Where My Butt Is
+The preceding story actually happened.
+
+Sure, it was in the context of the Second Life virtual world, and I
+was less god and more employee, but the events that transgressed were
+as stated. Someone really wanted to be a shirt, and I really couldn't
+tell them how to be so, despite having the ability to control the
+world, albeit in a manner limited by software development time,
+project specifications, and other obstacles both gods and engineers
+have to deal with, I'm sure.
+
+What does all of this have to do with a piece of software with an
+inappropriate name? There are a lot of people out there that want to
+be shirts, at least, in the terms of this horribly tortured metaphor.
+They've bought a sex toy, and the interface provided to them by the
+manufacturer doesn't work for them for some reason, or the content
+isn't to their liking.
+
+Why should the user be limited to the functions the toy and its
+manufacturers provide? The manufacturer may have their own reasons for
+this. It may provide them recurring revenue to control how the toy is
+used, or it may shield them from possible use in a brand-damaging
+(obscene/illegal) way. 
+
+However, the user may have similar reasons to need specific control or
+content options. Many commercial toys neglect any sort of LGBTQAUI
+content. Their interfaces are built in ways that may not consider
+accessibility.
+
+That's where Buttplug comes in. This software is provided as a way to
+fill the gap between what commercial support does and what the user
+wants. It is not aimed at replacing commercial interfaces, which may
+work fine for some users. For those that are willing to go to the
+trouble of using possibly obtuse software to get what they want,
+Buttplug is there.
+
+Of course, Buttplug is nothing without interface applications. All
+Buttplug does is talk to toys, and there has to be something to tell
+it what to say.
+
+This document is for those making those interface applications. The
+shirt makers, as it were.
+
+There are a many considerations, both non-technical and technical,
+that need to be held in mind when creating an application that will
+interact with a sex toy, that is assumed to be somehow attached to a
+person in the act of sexing. While it's impossible to outline all of
+the cases in a single document, the goal is to provide a framework by
+which decisions about specific application needs can be informed.
+
+The information presented here comes from over a decade of amateur
+research on the sex technology field, from the engineering and user
+interface perspective. While striving to provide as much help and
+information as possible, the author is an engineer, not a sexologist,
+psychologist, sociologist, ethicist, or one of those other -ists that
+actually deals with people and people issues. When writing sex
+software, it's rather hard to avoid dealing with people, unless the
+software is never actually used. While the engineering portions will
+be as rigorous as possible, many of the observations about users and
+usage will be from personal experience.
+
+In building this software, we have two choices:
+
+- Never release the software, watch someone else do it at some point
+  in a way we don't agree with, regret choice.
+- Try and release the software, try to believe what we're doing is
+  correct, and try to minimize harm in relation to good.
+
+We're too deep into this to go with the first option, so the second is
+all we've got.
+
+In short: We've tried not to fuck up in making Buttplug. We're want to
+help you not fuck up in using it. This document is what we think we
+know so far. We aren't perfect, and neither are you. Make no mistake,
+there will be fuck-ups, on both sides. When they happen, we'll add them
+to this document for all to learn from.
+
 ** C'est n'est pas une Buttplug
 * Buttplug Ethics
 ** Wait This Doesn't Sound Technical
