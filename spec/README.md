@@ -63,3 +63,11 @@ Protocol, here's a list of the ones we are aware of.
   Haptic Video player.
 - [LaunchControl](http://github.com/funjack/launchcontrol): Go Haptic
   Video Player and Launch Control Scripts.
+
+## Support The Project
+
+If you find this project helpful, you
+can
+[support Metafetish projects via Patreon](http://patreon.com/qdot)!
+Every donation helps us afford more hardware to reverse, document, and
+write code for!
