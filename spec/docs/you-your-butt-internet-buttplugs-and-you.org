@@ -149,10 +149,10 @@ people, sex, and technology, translated into software.
 * Buttplug Ethics
 ** Wait This Doesn't Sound Technical
 ** There is No Such Thing As Ethical Buttplugging Under Open Source
-** You Must Be This Tall To Code In This Library
+** You Must Be This Tall To Code With This Library
 * Ok So Here's How You Could Actually Use Buttplug
 ** Thermonuclear War
-** Maybe You Would You Like to Play a Nice Game of Chess?
+** How about a Nice Game of Chess?
 ** Thermonuclear War
 * Architecture
 :PROPERTIES:
