@@ -24,32 +24,35 @@ Protocol, here's a list of the ones we are aware of.
 
 - [buttplug-csharp](http://github.com/metafetish/buttplug-csharp):
   C#/.Net implementation of the Buttplug Server for Win7/10
-  - Status: Usable
-  - Maintainers: Core Buttplug Team
-- [buttplug-rs](http://github.com/metafetish/buttplug-rs): Rust
-  implementation of the Buttplug Server.
-  - Status: Under development, needs to be brought up to date with the new
-    JSON schema.
+  - Status: Stable
+  - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team
 - [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript
   implementation of the Buttplug Protocol (webclient and node.js), and
   Node.js implementation of the Buttplug Server.
   - Status: Under initial development.
   - Maintainers: Core Buttplug Team
+- [buttplug-rs](http://github.com/metafetish/buttplug-rs): Rust
+  implementation of the Buttplug Server.
+  - Status: Under development, needs to be brought up to date with the new
+    JSON schema.
+  - Maintainers: Core Buttplug Team
 
 ### Client Implementations
 
 - [buttplug-csharp](http://github.com/metafetish/buttplug-csharp):
   C#/.Net implementation of the Buttplug Client for Win7/10
-  - Status: Usable
+  - Status: Stable
+  - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team 
 - [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript
   implementation of the Buttplug Protocol Client
-  - Status: Usable
+  - Status: Stable
+  - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team 
 - [golibbuttplug](https://github.com/funjack/golibbuttplug): Go
   implementation of the Buttplug Protocol Client
-  - Status: Usable
+  - Status: Stable
   - Maintainers: Community Maintained
 
 ### Supporting Applications
