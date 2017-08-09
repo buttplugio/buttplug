@@ -84,12 +84,12 @@ Fuck.
 The preceding story actually happened.
 
 Sure, it was in the context of the Second Life virtual world, and the
-narrator was less god and more employee, but the events that
-transgressed happened basically as stated. Someone really wanted to be
-a shirt, and it couldn't happen. This was despite the employee having
-the ability to control the world, albeit in a manner limited by
-software development time, project specifications, and other obstacles
-both gods and engineers have to deal with.
+narrator was less god and more employee, but the events happened
+basically as stated. Someone really wanted to be a shirt, and it
+couldn't happen. This was despite the employee having the ability to
+control the world, albeit in a manner limited by software development
+time, project specifications, and other obstacles both gods and
+engineers have to deal with.
 
 There are a lot of people out there that want to be shirts, at least,
 in the terms of this horribly tortured metaphor. They've bought a sex
@@ -104,7 +104,7 @@ be something to tell Buttplug what to say.
 Interface applications are the link between users and Buttplug,
 establishing the functionality the user was missing. Application
 developers, those making the interfaces, are the shirt makers (and
-thus, the metaphor is dead). 
+thus, the metaphor is dead).
 
 There are a many considerations, both non-technical and technical,
 that need to be kept in mind when creating an application that will
@@ -116,36 +116,48 @@ impossible to outline all of the relevant situational use cases. The
 goal of this document is to provide a framework by which decisions
 about specific application needs can be informed.
 
-We, the core Buttplug development team, tried not to fuck up in making
-Buttplug. Building, releasing, and using software like this is a risk.
-We want to help you not fuck up in using it. 
-
-This document is what we think we know so far about sex toy control
-and interface design. We aren't perfect, neither are other developers,
-nor are users. In the end, we will all fuck up. When that happens,
-we'll add it to this document for all to learn from.
+There are risks in building, releasing, and using software with the
+kinds of contexts that are inherent in Buttplug. This document is what
+we've learned so far about sex toy control and interface design, and
+how to apply that when using or developing for Buttplug. We aren't
+perfect, neither are other developers, nor are users. In the end,
+things will sometimes go wrong. When that happens, we'll add it to
+this document for all to learn from.
 
 ** Why Do I Need You To Tell Me Where My Butt Is
 
-Hi. I'm Kyle Machulis, an engineer, founder of Metafetish, and lead
-architect of Buttplug. Since 2004, I've been research and blogging
-about sex tech, both commercial and DIY. I've followed online
-communities, talked to hundreds of people involved in many different
-activities, fetishes, and interests.
+Hi. I'm Kyle Machulis. I run metafetish.com, and am lead architect of
+Buttplug. Since 2004, I've been research and blogging about sex tech,
+both commercial and DIY. I've followed online communities, talked to
+hundreds of people involved in many different activities, fetishes,
+and interests, and built many experiments to try to figure out.
 
 The information presented here comes from over a decade of my amateur
 research on the sex technology field, from the engineering and user
-interface perspective. While striving to provide as much help and
+interface perspective. While I strive to provide as much help and
 information as possible, I am an engineer, not a sexologist,
 psychologist, sociologist, ethicist, or one of those other -ists that
-actually deals with people and people issues. When writing sex
-software, it's rather hard to avoid dealing with people, unless the
-software is never actually used. While the engineering portions will
-be as rigorous as possible, many of the observations about users and
-usage will be from my personal experience.
+deals directly with people and people issues. It is well known that
+tech engineers aren't (to put it lightly) real great at "people". With
+that in mind, I've tried to consult with many people that are those
+-ists while building this software and writing this document. This
+project was by no means done alone, nor could it have been done alone
+to a quality I would've been satisfied with. The names of those brave
+enough to be associated with this work are listed here:
 
-Buttplug is a representation of my understanding of the needs of
-people, sex, and technology, translated into software.
+- Should probably figure out who wants to be in this list.
+
+When writing sex software, it's rather hard to avoid dealing with
+people, unless the software is never actually used. While the
+engineering portions of this document will be as rigorous as possible,
+many of the observations about users and usage examples will be from
+my personal experience. These are by no means complete studies. All
+stories and examples presented are anecdotal at best, and complete
+fabrications at worst.
+
+Building this project has been a weird, great, weird journey. I hope
+Buttplug helps you with whatever your needs may be.
+
 * Buttplug Ethics
 ** Wait This Doesn't Sound Technical
 ** There is No Such Thing As Ethical Buttplugging Under Open Source
