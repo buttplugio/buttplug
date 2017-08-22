@@ -3,7 +3,6 @@
 :PROPERTIES:
 :EXPORT_FILE_NAME: SUMMARY.md
 :END:
-
 #+BEGIN_SRC emacs-lisp :exports results :results value raw replace
 (org-build-gitbook-toc)
 #+END_SRC
@@ -212,59 +211,270 @@ Buttplug helps you with whatever your wants and needs may be.
 ** Wait This Doesn't Sound Technical
 ** There is No Such Thing As Ethical Buttplugging Under Open Source
 ** You Must Be This Tall To Code With This Library
-* Ok So Here's How You Could Actually Use Buttplug
-** Thermonuclear War
-** How about a Nice Game of Chess?
-** Thermonuclear War
-* Architecture
+** Empathy for the User Having Sex With Your Software
+* Strategies Against Buttplug Architecture
 :PROPERTIES:
 :EXPORT_FILE_NAME: architecture.md
 :END:
-** Kyle Stop Trying To Be Stunt Rock And Just Write a Fucking Section Name
-** Implementation Types
+In this section, we'll cover what makes up Buttplug as an abstract
+architecture. Getting a hang of the definitions and contexts here is
+important, and will hopefully aid in understanding the amalgamation of
+flailing, crying, and screaming we call "project documentation".
 
-The Buttplug Standard can be implemented in different ways. This
-section covers the terms used throughout this document.
+All of the concepts here are abstract. While we do have "reference
+implementations" that are implemented by the Buttplug Core Team, we do
+not require any specific programming language or serialization type
+for implementing the protocol or client/server architecture of
+Buttplug. Go wild. Surprise us. Make a Haskell version of all this
+that really is one big IO Monad joke. Make an INTERCAL version because
+there's already power play built into the language. Make a C version
+because...
 
-** Libraries
+Ok you know what maybe don't make a C version. Do you really want to
+put C in your butt?
 
-Implementing the standard as a library for a certain programming
-language allows developers to either build servers on top of the
-library in that language, or to integrate the library into their
-applications that also use that language (or FFI/bindings to that
-language). For instance, the C# implementation of the Buttplug
-Standard can be used with a WebSocket implementation on top of it to
-be a server that other applications can talk to. It could also be
-compiled into a Unity game so that the communication exists only in
-the executable itself.
+** A Note for Grizzled Developers
+This section is written for those who may not be used to reading
+concise system architecture definitions in specifications or
+visualizing large systems via technical descriptions. All of the
+information in the Architecture portion of this document is also in
+the Buttplug Protocol Specification Introduction, in a more concise,
+somewhat less friendly form that may be more familiar.
 
-** Servers
+** The 3 Genders: Server, Client, Application
+There are 3 distinct conceptual parts to Buttplug. How all of these
+exist (as separate programs, all in the same program, or some other
+combination) are up to the needs of the developer and their specific
+application. However, when we talk about these parts in documentation
+and implementation, we keep them as separate ideas.
+*** Buttplug Servers
+A Buttplug Server is the piece that actually talks to hardware
+somehow. This is usually via an Operating System Specific library or
+API. It handles coordination of device connections/disconnections, and
+manages which clients can talk to hardware. A few examples of jobs the
+server has:
 
-As mentioned above, servers are a thin layer on top of a library that
-allow other applications to access hardware managed by the server. For
-instance, a Web Application may not have the capability to talk to
-hardware by itself, but can connect with a Buttplug Server
-implementation via HTTP, WebSockets, or other standardized protocols.
-Programs like Max/MSP and Pd could communicate with a Buttplug Server
-implementation via OSC.
+- The server is in charge of finding devices connected to the
+  computer, be they bluetooth, usb, serial, firewire, parallel, or
+  whatever other device communication type is supported by the server
+  implementation in question.
+- The server contains the knowledge of how to talk to a specific toy
+  in the way that it understands, which we'll explain more about in
+  "Buttplug Protocol" section.
+- If a client is controlling a device, then for some reason
+  disconnects, it is the server's job to stop the device until the
+  client has reconnected and sent new control commands.
 
-** Applications (aka Clients)
+The server may be in charge of other tasks too. At a bare minimum, a
+server should handle all non-device messages in the Buttplug Protocol
+spec.
 
-Applications, or clients, refer to programs that in some way interact
-with a server to perform some sort of job for the user. A few ideas
-for applications:
+*** Buttplug Clients
+Buttplug Clients are what developers use to talk to Buttplug Servers.
+Clients are responsible for messages staying synced between the
+developer's code and the servers. They may also expose devices and
+interfaces in a language specific way that the developer is used to
+working with.
+*** Applications
+Applications put some sort of specific UI/UX in front of a Buttplug
+Client. This could be:
 
-- A movie player that sends synchronization commands while playing an
-  encoded video.
-- A music player that syncs sex toys with the BPM of the current
-  track.
-- A video game that somehow involves sex toy interaction
+- A simple slider to control a toy from a web page
+- A 3D game
+- A word processor that makes the toy vibrate every time you hit a
+  key.
 
-All of these would need to talk to a Buttplug server to establish
-which devices to use, then communicate with those devices.
+The ideas here really are endless. All of these will use a Buttplug
+Client to talk to a Buttplug Server.
+*** Configuration Examples
+There are multiple configurations and possibilities available,
+depending on the programming language, operating system, and hardware
+platform the developers and users choose.
+
+Once again trying to limit specifics, here's a couple of examples of
+how these pieces might go together:
+
+- Someone builds a movie player application that is just one
+  executable, containing both a Buttplug Server and Client. This
+  allows them to use the Client API, which makes accessing the server
+  easy, while also meaning users only have one thing to install and
+  don't have to worry about connecting to outside programs.
+- Someone builds a web app to control sex toys. The web browser does
+  not support a way to access the sex toy hardware. The web app will
+  contain a Buttplug Client that talks over the network to a native
+  Buttplug Server, which has the ability to talk to the hardware.
+
+** Buttplug Protocol and Etiquette
+
+As a user of a Buttplug Client (which most developers using Buttplug
+will be), you will usually be sheltered from the sausage factory that
+is the Buttplug Message Protocol. If you'd like to see how the sausage
+is made in all of its raw glory, read on.
+
+If I may quote the author of the intro to this document
+
+#+BEGIN_QUOTE
+The only real function of Buttplug is make it easy for developers to
+get computers to talk to sex toys.
+#+END_QUOTE
+
+To understand how Buttplug simplifies this situation, let's take a
+look at how computer controlled sex toy communication normally
+happens.
+
+*** Computer To Toy Communication
+
+The computer needs to talk to the computer controlled sex toy,
+otherwise it wouldn't be computer controlled. To do this, is usually
+talks some sort of simple, "low-level" language that the toy
+manufacturer came up with. 
+
+For instance, if the computer wants to talk to a vibrator (we'll call
+this one Sex Toy A), the manufacturer may have made it so the computer
+has to say something like (> denotes messages computer sends to toy, <
+denotes messages toy sends to computer):
+
+#+BEGIN_QUOTE
+> Vibrate:50;
+< OK;
+> Vibrate:10;
+< OK;
+#+END_QUOTE
+
+Which means that the vibrator should run at 50% of its top speed, then
+later, at 10%. On each of those commands, the toy ends back a message
+to say "Yes that was a correctly formatted message and I am now doing
+the thing you said." 
+
+However, another manufacturer making another vibrator (calling this
+one Sex Toy B) may have commands that look like:
+
+#+BEGIN_QUOTE
+> 5,
+> 1,
+#+END_QUOTE
+
+These commands mean basically the same thing as what we sent to the
+first toy. Vibrate at 50%, vibrate at 10%. We don't get back anything
+from these commands, we just fire them off and hope they run.
+
+If the computer were to send the commands for Sex Toy B to the
+Sex Toy A, it would at get back errors saying the language was
+incorrect:
+
+#+BEGIN_QUOTE
+> Vibrate:50;
+< OK;
+> 5,
+< ERR;
+#+END_QUOTE
+
+What happens if we send Sex Toy A commands to Sex Toy B?
+
+#+BEGIN_QUOTE
+> 5,
+> Vibrate:10;
+#+END_QUOTE
+
+Sure, the toy doesn't vibrate, but now the computer doesn't know that.
+Only the user knows since they aren't getting vibrated, and they are
+probably very unhappy about that.
+
+This is life at the Computer-To-Toy communication level. It's not
+pretty, and it's not easy.
+*** Application to Computer Communication
+Moving up to the next level, there's 2 ways that Applications tell the
+computer to send information to hardware.
+
+- Via raw commands. This means just using the language talked about in
+  the last section to make the computer talk to the toy. This happens
+  a lot in applications that manufacturers make for their own
+  hardware.
+- Via an API (Application Programming Interface) of some kind. These
+  are basically "simplified languages," usually put out by a
+  manufacturer, to make it easy for developers to control the hardware
+  without having to know the low level language the computer uses to
+  talk to it. These APIs will usually only work for the toys the
+  manufacturer makes, and there may be different APIs for different
+  toys.
+
+*** Where the Buttplug Protocol Comes into Play
+Consider Buttplug to be sort of a Rosetta Stone for sex toys. As
+mentioned in the last section, it's an API. Instead of just talking to
+one kind of toy, it talks to as many toys as we've figured out the low
+level language for.
+
+Revisiting our example above, when an application wants to talk to a
+sex toy using Buttplug, it will send messages similar to this (encoded
+here in JSON for readability, but this information can be send in
+other formats too):
+
+#+BEGIN_QUOTE
+{
+  "SingleMotorVibrateCmd": {
+    "Id": 1,
+    "DeviceIndex": 1,
+    "Speed": 0.5,
+  }
+}
+
+...
+
+{
+  "SingleMotorVibrateCmd": {
+    "Id": 2,
+    "DeviceIndex": 1,
+    "Speed": 0.1,
+  }
+}
+#+END_QUOTE
+
+These two messages just say "Make the device at index 1 vibrate at
+50%, then 10%." In the Buttplug Server code, we know what kind of toy
+hardware we're talking to, so we can convert it to Sex Toy A or Sex
+Toy B without the application developer having to know anything about
+how A or B actually work. Not only that, when yet another computer
+controlled vibrator named Sex Toy C comes out 6 months after the
+developer writes the code to send the message above, their code may
+very well "just work" with the new toy without them having to make any
+changes.
+
+*** What the Buttplug Protocol Looks Like
+The Buttplug Protocol is made up of a number of different messages
+that fit into a few different classes. 
+
+- Messages sent between a Buttplug Client and Server to establish
+  communication and synchronize state (what toys are available,
+  etc...)
+- Messages sent by a Buttplug Client to control a specific brand/model
+  of toy.
+- Messages send by a Buttplug Client to control a class of toys (all
+  vibrating toys, all thrusting toys, etc...)
+
+Each message is strictly defined in the Buttplug Protocol
+Specification, and later we'll go over applications for all of them in
+the "Buttplug Message Guide" section of this document. For now, it's
+worth knowing that each message has 2 required fields:
+
+- Name, which lets the receiver know what it's supposed to do when it
+  gets that message.
+- Id, which allows the sender and receiver to let each other know
+  where in the conversation they are. If a sender sends a message with
+  an Id of 5 and needs information back in relation to that message,
+  it will wait for the receiver to send back a message that also has
+  an Id of 5.
+
+All fields outside of these are specific to message and will be
+covered in the specification or the Message Guide.
 
 
-* Usage Examples
+* Here's How You Could Actually Use Buttplug
+** Thermonuclear War
+** How about a Nice Game of Chess?
+** Thermonuclear War
+* Buttplug Message Guide
+* Old Stuff
+** Usage Examples
 :PROPERTIES:
 :EXPORT_FILE_NAME: usages.md
 :END:
@@ -377,3 +587,48 @@ application like the Buttplug Server would've required wrapping in
 something like nw.js, massively inflating distributable size.
 Implementing a C# version of the Buttplug Library also gives us a
 platform into Unity integration.
+** Architecture
+*** Implementation Types
+
+The Buttplug Standard can be implemented in different ways. This
+section covers the terms used throughout this document.
+
+*** Libraries
+
+Implementing the standard as a library for a certain programming
+language allows developers to either build servers on top of the
+library in that language, or to integrate the library into their
+applications that also use that language (or FFI/bindings to that
+language). For instance, the C# implementation of the Buttplug
+Standard can be used with a WebSocket implementation on top of it to
+be a server that other applications can talk to. It could also be
+compiled into a Unity game so that the communication exists only in
+the executable itself.
+
+*** Servers
+
+As mentioned above, servers are a thin layer on top of a library that
+allow other applications to access hardware managed by the server. For
+instance, a Web Application may not have the capability to talk to
+hardware by itself, but can connect with a Buttplug Server
+implementation via HTTP, WebSockets, or other standardized protocols.
+Programs like Max/MSP and Pd could communicate with a Buttplug Server
+implementation via OSC.
+
+*** Applications (aka Clients)
+
+
+Applications, or clients, refer to programs that in some way interact
+with a server to perform some sort of job for the user. A few ideas
+for applications:
+
+- A movie player that sends synchronization commands while playing an
+  encoded video.
+- A music player that syncs sex toys with the BPM of the current
+  track.
+- A video game that somehow involves sex toy interaction
+
+All of these would need to talk to a Buttplug server to establish
+which devices to use, then communicate with those devices.
+
+
