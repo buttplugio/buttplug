@@ -6,11 +6,46 @@
 #+BEGIN_SRC emacs-lisp :exports results :results value raw replace
 (org-build-gitbook-toc)
 #+END_SRC
-* Introduction
+
+- [[file:README.md#you-your-butt-internet-buttplugs-and-you][You, Your Butt, Internet Buttplugs, And You]]
+- [[file:introduction.md#foreword][Foreword]]
+  - [[file:introduction.md#wants-and-needs][Wants and Needs]]
+  - [[file:introduction.md#i-want-to-be-a-shirt][I Want To Be A Shirt]]
+  - [[file:introduction.md#cest-nest-pas-une-buttplug][C'est n'est pas une Buttplug]]
+  - [[file:introduction.md#why-do-i-need-you-to-tell-me-where-my-butt-is][Why Do I Need You To Tell Me Where My Butt Is]]
+- [[file:buttplug-ethics.md#buttplug-ethics][Buttplug Ethics]]
+  - [[file:buttplug-ethics.md#wait-this-doesnt-sound-technical][Wait This Doesn't Sound Technical]]
+  - [[file:buttplug-ethics.md#there-is-no-such-thing-as-ethical-buttplugging-under-open-source][There is No Such Thing As Ethical Buttplugging Under Open Source]]
+  - [[file:buttplug-ethics.md#you-must-be-this-tall-to-code-with-this-library][You Must Be This Tall To Code With This Library]]
+  - [[file:buttplug-ethics.md#empathy-for-the-user-having-sex-with-your-software][Empathy for the User Having Sex With Your Software]]
+- [[file:architecture.md#strategies-against-buttplug-architecture][Strategies Against Buttplug Architecture]]
+  - [[file:architecture.md#a-note-for-grizzled-developers][A Note for Grizzled Developers]]
+  - [[file:the3genders.md#the-3-genders-server-client-application][The 3 Genders: Server, Client, Application]]
+    - [[file:the3genders.md#buttplug-servers][Buttplug Servers]]
+    - [[file:the3genders.md#buttplug-clients][Buttplug Clients]]
+    - [[file:the3genders.md#applications][Applications]]
+  - [[file:the3genders.md#configuration-examples][Configuration Examples]]
+- [[file:buttplug-protocol-and-etiquette.md#buttplug-protocol-and-etiquette][Buttplug Protocol and Etiquette]]
+  - [[file:buttplug-protocol-and-etiquette.md#computer-to-toy-communication][Computer To Toy Communication]]
+  - [[file:buttplug-protocol-and-etiquette.md#application-to-computer-communication][Application to Computer Communication]]
+  - [[file:buttplug-protocol-and-etiquette.md#where-the-buttplug-protocol-comes-into-play][Where the Buttplug Protocol Comes into Play]]
+  - [[file:buttplug-protocol-and-etiquette.md#what-the-buttplug-protocol-looks-like][What the Buttplug Protocol Looks Like]]
+
+* README
 :PROPERTIES:
 :EXPORT_FILE_NAME: README.md
 :END:
-** Wants and Needs
+** You, Your Butt, Internet Buttplugs, And You
+An design guide for the Buttplug Sex Toy Control System
+
+By Kyle Machulis (qDot), Lead Architect
+
+* Foreword
+:PROPERTIES:
+:EXPORT_FILE_NAME: introduction.md
+:END:
+** Foreword
+*** Wants and Needs
 Before we jump into all of the descriptions and eccentricities and
 whatnot that make up Buttplug, let's start with a parable.
 
@@ -23,7 +58,7 @@ doesn't quite work for you?
 Here's a story from my days as a virtual world developer, about what
 this situation looks like from the designer's side.
 
-** I Want To Be A Shirt
+*** I Want To Be A Shirt
 "I want to be a shirt."
 
 "A what?"
@@ -127,7 +162,7 @@ difficult when you're looking down from above.
 
 Fuck.
 
-** C'est n'est pas une Buttplug
+*** C'est n'est pas une Buttplug
 The preceding story actually happened.
 
 Sure, it was in the context of the Second Life virtual world, and the
@@ -172,7 +207,7 @@ how to apply that when using or developing for Buttplug. It contains
 the lessons I've learned over the years, and will be the home for
 lessons learned in the future.
 
-** Why Do I Need You To Tell Me Where My Butt Is
+*** Why Do I Need You To Tell Me Where My Butt Is
 
 Hi. I'm Kyle Machulis, lead architect of Buttplug. Since 2004, I've
 been research and blogging about sex tech, both commercial and DIY, on
@@ -207,15 +242,33 @@ fabrications at worst.
 Building this project has been a weird, great, weird journey. I hope
 Buttplug helps you with whatever your wants and needs may be.
 
+
 * Buttplug Ethics
-** Wait This Doesn't Sound Technical
-** There is No Such Thing As Ethical Buttplugging Under Open Source
-** You Must Be This Tall To Code With This Library
-** Empathy for the User Having Sex With Your Software
+:PROPERTIES:
+:EXPORT_FILE_NAME: buttplug-ethics.md
+:END:
+** Buttplug Ethics
+
+#+BEGIN_QUOTE
+"... Society has put a lot of evils in our brains that we need to transcend before we make out." - [[https://youtu.be/ONi7QwYNQz4][Cex]]
+#+END_QUOTE
+
+Then we put some text here to see if our quote renders
+
+*** Wait This Doesn't Sound Technical
+
+*** There is No Such Thing As Ethical Buttplugging Under Open Source
+*** You Must Be This Tall To Code With This Library
+*** Empathy for the User Having Sex With Your Software
+* Things You Shouldn't Do With Buttplug
+:PROPERTIES:
+:EXPORT_FILE_NAME: things-you-shouldnt-do-with-buttplug.md
+:END:
 * Strategies Against Buttplug Architecture
 :PROPERTIES:
 :EXPORT_FILE_NAME: architecture.md
 :END:
+** Strategies Against Buttplug Architecture
 In this section, we'll cover what makes up Buttplug as an abstract
 architecture. Getting a hang of the definitions and contexts here is
 important, and will hopefully aid in understanding the amalgamation of
@@ -233,7 +286,7 @@ because...
 Ok you know what maybe don't make a C version. Do you really want to
 put C in your butt?
 
-** A Note for Grizzled Developers
+*** A Note for Grizzled Developers
 This section is written for those who may not be used to reading
 concise system architecture definitions in specifications or
 visualizing large systems via technical descriptions. All of the
@@ -241,13 +294,16 @@ information in the Architecture portion of this document is also in
 the Buttplug Protocol Specification Introduction, in a more concise,
 somewhat less friendly form that may be more familiar.
 
-** The 3 Genders: Server, Client, Application
+*** The 3 Genders: Server, Client, Application
+:PROPERTIES:
+:EXPORT_FILE_NAME: the3genders.md
+:END:
 There are 3 distinct conceptual parts to Buttplug. How all of these
 exist (as separate programs, all in the same program, or some other
 combination) are up to the needs of the developer and their specific
 application. However, when we talk about these parts in documentation
 and implementation, we keep them as separate ideas.
-*** Buttplug Servers
+**** Buttplug Servers
 A Buttplug Server is the piece that actually talks to hardware
 somehow. This is usually via an Operating System Specific library or
 API. It handles coordination of device connections/disconnections, and
@@ -269,13 +325,13 @@ The server may be in charge of other tasks too. At a bare minimum, a
 server should handle all non-device messages in the Buttplug Protocol
 spec.
 
-*** Buttplug Clients
+**** Buttplug Clients
 Buttplug Clients are what developers use to talk to Buttplug Servers.
 Clients are responsible for messages staying synced between the
 developer's code and the servers. They may also expose devices and
 interfaces in a language specific way that the developer is used to
 working with.
-*** Applications
+**** Applications
 Applications put some sort of specific UI/UX in front of a Buttplug
 Client. This could be:
 
@@ -304,14 +360,17 @@ how these pieces might go together:
   contain a Buttplug Client that talks over the network to a native
   Buttplug Server, which has the ability to talk to the hardware.
 
+* Buttplug Protocol and Etiquette
+:PROPERTIES:
+:EXPORT_FILE_NAME: buttplug-protocol-and-etiquette.md
+:END:
 ** Buttplug Protocol and Etiquette
-
 As a user of a Buttplug Client (which most developers using Buttplug
 will be), you will usually be sheltered from the sausage factory that
 is the Buttplug Message Protocol. If you'd like to see how the sausage
 is made in all of its raw glory, read on.
 
-If I may quote the author of the intro to this document
+You may remember this line from the foreword:
 
 #+BEGIN_QUOTE
 The only real function of Buttplug is make it easy for developers to
@@ -468,167 +527,4 @@ All fields outside of these are specific to message and will be
 covered in the specification or the Message Guide.
 
 
-* Here's How You Could Actually Use Buttplug
-** Thermonuclear War
-** How about a Nice Game of Chess?
-** Thermonuclear War
 * Buttplug Message Guide
-* Old Stuff
-** Usage Examples
-:PROPERTIES:
-:EXPORT_FILE_NAME: usages.md
-:END:
-*** Usage Examples
-
-To concretize this otherwise theoretical discussion, here are some
-in-depth examples of how Buttplug implementations could be architected
-in the wild.
-
-**** Library Embedded in a Video Game
-
-First off, a simple example using a single program with an embedded
-library.
-
-A developer would like to ship a game on Windows, using the Unity
-Engine, that has some sort of interaction with sex toys. Since we want
-concrete examples here, let's say it's a version of Tetris that
-increases vibrator speeds based on how many lines have been made by
-the player.
-
-Due to the nature of games, the developer would want it to have as
-little impact on performance as possible. They would also want the
-server to exist in the game executable, so that it can be shipped as a
-single package.
-
-In this case, the developer could use a Buttplug library
-implementation, possibly the C# reference library since this is Unity.
-Inside the game, device connection configuration could be part of the
-game settings menus, allow devices to be automatically reconnected on
-game startup. To communicate with the embedded server during gameplay,
-C# message objects could be sent to a thread for handling, so that IO
-timing doesn't lag the game loop.
-
-One of the important things lost by direct library integration is the
-ability to support new hardware. If a game is simple sending a generic
-"Vibrate" command, it is basically future-proofed for all toys that
-will support that command in the future, assuming it has a way to send
-that message to something that supports the new hardware. If a library
-is compiled into the game, there would be no way to add this hardware
-support though. There are multiple solutions to this issue, but those
-are outside the scope of this example.
-
-**** Web Based Hardware Synced Movie Player
-
-Now, a far more difficult scenario. This example tries to build a
-shotgun to hit as many platforms as possible with as little code as
-possible.
-
-The goal is to build a web based movie player, that will load movies
-with synchronization files, and play them back while controlling
-hardware. We will assume we are working with browsers that give us a
-minimum of HTML5 Video playback and WebSockets. We want our
-application to work on as many platforms as possible. The movie player
-should be capable of talking to as many devices as possible on as many
-platforms as possible, including desktop and mobile. The main focus
-for toy support will be Bluetooth LE toys, with all others considered
-nice to have.
-
-At this point, we have to take operating system and browser
-capabilities into account.
-
-Operating Systems that have BLE:
-
-- Windows 10 (Version 15063 and later)
-- macOS (10.6 or later)
-- Linux (with Bluez 5.22 or later)
-- Android (version 5 or later)
-- iOS (LE support versions unknown)
-- ChromeOS (LE support versions unknown)
-
-Web Browsers with WebBluetooth:
-
-- Chrome 56 on Mac, Linux, Android, ChromeOS
-
-This means that if we implement a Buttplug Server in Javascript using
-WebBluetooth to access BLE devices, we can target the Chrome web
-browser and support 2 major desktop platforms, 1 mobile platform, and
-whatever ChromeOS is. We can also ship this server implementation as
-part of the movie player application, meaning it will all work as a
-unit, similar to the game example above. Future-proofing could
-feasibly happen with CDN hosting of the library via semantic
-versioning adherence.
-
-Unfortunately, that leaves out Windows and iOS. To maximize ROI on
-custom support implementation, we're more likely to see more users via
-Windows than iOS, so we'll concentrate on Windows first.
-
-To talk to Bluetooth LE on Windows 10 requires access to UWP APIs, so
-following a "When In Rome" philosophy, we can implement a Buttplug
-Library in C#. On top of this we can build a server exposed via
-WebSockets, to let the browser application talk to the native server.
-A native implementation gives us the extra win of USB and Serial, at
-least, until WebUSB sex toys become a thing.
-
-Going back to the web application itself, this now means the client
-side will need to connect to one of two different styles of servers.
-We can use User Agent Detection in the browser to let us know which OS
-we're on, and then either select the WebBluetooth path or native
-Windows Websocket path.
-
-To hit iOS, we now have the option of going via a Xamarin based C#
-app, or a Node.js/Cordova app. There will be some custom
-implementation on either side, but most of the heavy lifting will have
-been done before this.
-
-An aside for those wondering why this wasn't all done in Node.js. At
-the time of this writing, node.js bindings to UWP APIs do exist, but
-were still iffy at best. Not only that, distributing a native
-application like the Buttplug Server would've required wrapping in
-something like nw.js, massively inflating distributable size.
-Implementing a C# version of the Buttplug Library also gives us a
-platform into Unity integration.
-** Architecture
-*** Implementation Types
-
-The Buttplug Standard can be implemented in different ways. This
-section covers the terms used throughout this document.
-
-*** Libraries
-
-Implementing the standard as a library for a certain programming
-language allows developers to either build servers on top of the
-library in that language, or to integrate the library into their
-applications that also use that language (or FFI/bindings to that
-language). For instance, the C# implementation of the Buttplug
-Standard can be used with a WebSocket implementation on top of it to
-be a server that other applications can talk to. It could also be
-compiled into a Unity game so that the communication exists only in
-the executable itself.
-
-*** Servers
-
-As mentioned above, servers are a thin layer on top of a library that
-allow other applications to access hardware managed by the server. For
-instance, a Web Application may not have the capability to talk to
-hardware by itself, but can connect with a Buttplug Server
-implementation via HTTP, WebSockets, or other standardized protocols.
-Programs like Max/MSP and Pd could communicate with a Buttplug Server
-implementation via OSC.
-
-*** Applications (aka Clients)
-
-
-Applications, or clients, refer to programs that in some way interact
-with a server to perform some sort of job for the user. A few ideas
-for applications:
-
-- A movie player that sends synchronization commands while playing an
-  encoded video.
-- A music player that syncs sex toys with the BPM of the current
-  track.
-- A video game that somehow involves sex toy interaction
-
-All of these would need to talk to a Buttplug server to establish
-which devices to use, then communicate with those devices.
-
-
