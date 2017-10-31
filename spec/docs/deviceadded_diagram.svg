@@ -1,0 +1,28 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+ width="600px" height="50px"
+ viewBox="0 0 600 50"
+ xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+ stroke-width="1" text-rendering="geometricPrecision">
+<polygon fill="white" points="133,7 165,7 165,16 133,16"/>
+<text x="150" y="16" textLength="31" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Client
+</text>
+<polygon fill="white" points="431,7 467,7 467,16 431,16"/>
+<text x="450" y="16" textLength="35" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Server
+</text>
+<line x1="150" y1="22" x2="150" y2="50" stroke="black"/>
+<line x1="450" y1="22" x2="450" y2="50" stroke="black"/>
+<line x1="450" y1="33" x2="150" y2="33" stroke="black"/>
+<line x1="150" y1="33" x2="160" y2="39" stroke="black"/>
+<polygon fill="white" points="247,23 351,23 351,32 247,32"/>
+<text x="248" y="32" textLength="102" font-family="Helvetica" font-size="12" fill="black">
+DeviceAdded, Id=0
+</text>
+<line x1="150" y1="44" x2="150" y2="50" stroke="black"/>
+<line x1="450" y1="44" x2="450" y2="50" stroke="black"/>
+</svg>

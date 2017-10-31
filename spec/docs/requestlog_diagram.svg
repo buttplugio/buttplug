@@ -1,0 +1,52 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+ width="600px" height="134px"
+ viewBox="0 0 600 134"
+ xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+ stroke-width="1" text-rendering="geometricPrecision">
+<polygon fill="white" points="133,7 165,7 165,16 133,16"/>
+<text x="150" y="16" textLength="31" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Client
+</text>
+<polygon fill="white" points="431,7 467,7 467,16 431,16"/>
+<text x="450" y="16" textLength="35" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Server
+</text>
+<line x1="150" y1="22" x2="150" y2="50" stroke="black"/>
+<line x1="450" y1="22" x2="450" y2="50" stroke="black"/>
+<line x1="150" y1="33" x2="450" y2="33" stroke="black"/>
+<line x1="450" y1="33" x2="440" y2="39" stroke="black"/>
+<polygon fill="white" points="204,23 394,23 394,32 204,32"/>
+<text x="205" y="32" textLength="188" font-family="Helvetica" font-size="12" fill="black">
+RequestLog, Id=1, LogLevel=Trace
+</text>
+<line x1="150" y1="50" x2="150" y2="78" stroke="black"/>
+<line x1="450" y1="50" x2="450" y2="78" stroke="black"/>
+<line x1="450" y1="61" x2="150" y2="61" stroke="black"/>
+<line x1="150" y1="61" x2="160" y2="67" stroke="black"/>
+<polygon fill="white" points="275,51 323,51 323,60 275,60"/>
+<text x="276" y="60" textLength="46" font-family="Helvetica" font-size="12" fill="black">
+Ok, Id=1
+</text>
+<line x1="150" y1="78" x2="150" y2="106" stroke="black"/>
+<line x1="450" y1="78" x2="450" y2="106" stroke="black"/>
+<line x1="450" y1="89" x2="150" y2="89" stroke="black"/>
+<line x1="150" y1="89" x2="160" y2="95" stroke="black"/>
+<polygon fill="white" points="228,79 371,79 371,88 228,88"/>
+<text x="229" y="88" textLength="141" font-family="Helvetica" font-size="12" fill="black">
+Log, Id=0, LogLevel=Warn
+</text>
+<line x1="150" y1="106" x2="150" y2="134" stroke="black"/>
+<line x1="450" y1="106" x2="450" y2="134" stroke="black"/>
+<line x1="450" y1="117" x2="150" y2="117" stroke="black"/>
+<line x1="150" y1="117" x2="160" y2="123" stroke="black"/>
+<polygon fill="white" points="227,107 372,107 372,116 227,116"/>
+<text x="228" y="116" textLength="143" font-family="Helvetica" font-size="12" fill="black">
+Log, Id=0, LogLevel=Trace
+</text>
+<line x1="150" y1="128" x2="150" y2="134" stroke="black"/>
+<line x1="450" y1="128" x2="450" y2="134" stroke="black"/>
+</svg>

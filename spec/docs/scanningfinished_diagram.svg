@@ -1,0 +1,60 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1"
+ width="600px" height="162px"
+ viewBox="0 0 600 162"
+ xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"
+ stroke-width="1" text-rendering="geometricPrecision">
+<polygon fill="white" points="133,7 165,7 165,16 133,16"/>
+<text x="150" y="16" textLength="31" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Client
+</text>
+<polygon fill="white" points="431,7 467,7 467,16 431,16"/>
+<text x="450" y="16" textLength="35" font-family="Helvetica" font-size="12" fill="black" text-anchor="middle">
+
+Server
+</text>
+<line x1="150" y1="22" x2="150" y2="50" stroke="black"/>
+<line x1="450" y1="22" x2="450" y2="50" stroke="black"/>
+<line x1="150" y1="33" x2="450" y2="33" stroke="black"/>
+<line x1="450" y1="33" x2="440" y2="39" stroke="black"/>
+<polygon fill="white" points="245,23 353,23 353,32 245,32"/>
+<text x="246" y="32" textLength="106" font-family="Helvetica" font-size="12" fill="black">
+StartScanning, Id=1
+</text>
+<line x1="150" y1="50" x2="150" y2="78" stroke="black"/>
+<line x1="450" y1="50" x2="450" y2="78" stroke="black"/>
+<line x1="450" y1="61" x2="150" y2="61" stroke="black"/>
+<line x1="150" y1="61" x2="160" y2="67" stroke="black"/>
+<polygon fill="white" points="275,51 323,51 323,60 275,60"/>
+<text x="276" y="60" textLength="46" font-family="Helvetica" font-size="12" fill="black">
+Ok, Id=1
+</text>
+<line x1="150" y1="78" x2="150" y2="106" stroke="black"/>
+<line x1="450" y1="78" x2="450" y2="106" stroke="black"/>
+<line x1="450" y1="89" x2="150" y2="89" stroke="black"/>
+<line x1="150" y1="89" x2="160" y2="95" stroke="black"/>
+<polygon fill="white" points="247,79 351,79 351,88 247,88"/>
+<text x="248" y="88" textLength="102" font-family="Helvetica" font-size="12" fill="black">
+DeviceAdded, Id=0
+</text>
+<line x1="150" y1="106" x2="150" y2="134" stroke="black"/>
+<line x1="450" y1="106" x2="450" y2="134" stroke="black"/>
+<line x1="450" y1="117" x2="150" y2="117" stroke="black"/>
+<line x1="150" y1="117" x2="160" y2="123" stroke="black"/>
+<polygon fill="white" points="247,107 351,107 351,116 247,116"/>
+<text x="248" y="116" textLength="102" font-family="Helvetica" font-size="12" fill="black">
+DeviceAdded, Id=0
+</text>
+<line x1="150" y1="134" x2="150" y2="162" stroke="black"/>
+<line x1="450" y1="134" x2="450" y2="162" stroke="black"/>
+<line x1="450" y1="145" x2="150" y2="145" stroke="black"/>
+<line x1="150" y1="145" x2="160" y2="151" stroke="black"/>
+<polygon fill="white" points="235,135 363,135 363,144 235,144"/>
+<text x="236" y="144" textLength="126" font-family="Helvetica" font-size="12" fill="black">
+ScanningFinished, Id=0
+</text>
+<line x1="150" y1="156" x2="150" y2="162" stroke="black"/>
+<line x1="450" y1="156" x2="450" y2="162" stroke="black"/>
+</svg>
