@@ -27,10 +27,10 @@ Protocol, here's a list of the ones we are aware of.
   - Status: Stable
   - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team
-- [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript
-  implementation of the Buttplug Protocol (webclient and node.js), and
-  Node.js implementation of the Buttplug Server.
-  - Status: Under initial development.
+- [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript/Typescript 
+  implementation of the Buttplug Server for Web (using WebBluetooth) and Node.js
+  - Status: Stable
+  - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team
 - [buttplug-rs](http://github.com/metafetish/buttplug-rs): Rust
   implementation of the Buttplug Server.
@@ -59,6 +59,8 @@ Protocol, here's a list of the ones we are aware of.
 
 - [SyncyDink](http://github.com/metafetish/syncydink):
   Javascript/Typescript Haptic Video player for the web.
+- [Playground](http://github.com/metafetish/buttplug-playground):
+  Javascript/Typescript device testing web application.
 - [ScriptPlayer](http://github.com/FredTungsten/ScriptPlayer): C#
   Haptic Video player.
 - [LaunchControl](http://github.com/funjack/launchcontrol): Go Haptic
