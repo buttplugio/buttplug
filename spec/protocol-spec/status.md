@@ -6,6 +6,8 @@
 **Description:** Signifies that the previous message sent by the
 client was received and processed successfully by the server.
 
+**Message Version:** 0
+
 **Fields:**
 
 -   *Id* (unsigned int): The Id of the client message that this reply is in response to.
@@ -36,6 +38,8 @@ None. Server-to-Client message only.
 **Description:** Signifies that the previous message sent by the
 client caused some sort of parsing or processing error on the server.
 
+**Message Version:** 0
+
 **Fields:**
 
 -   *Id* (unsigned int): The Id of the client message that this reply
@@ -45,13 +49,13 @@ client caused some sort of parsing or processing error on the server.
     happened on the server.
 -   *ErrorCode* (int): Integer describing the error. Can be used in
     programs to react accordingly.
-    -   0: ERROR<sub>UNKNOWN</sub> - An unknown error occurred.
-    -   1: ERROR<sub>INIT</sub> - Handshake did not succeed.
-    -   2: ERROR<sub>PING</sub> - A ping was not sent in the expected
+    -   0: ERROR_UNKNOWN - An unknown error occurred.
+    -   1: ERROR_INIT - Handshake did not succeed.
+    -   2: ERROR_PING - A ping was not sent in the expected
         time.
-    -   3: ERROR<sub>MSG</sub> - A message parsing or permission error
+    -   3: ERROR_MSG - A message parsing or permission error
         occurred.
-    -   4: ERROR<sub>DEVICE</sub> - A command sent to a device
+    -   4: ERROR_DEVICE - A command sent to a device
         returned an error.
 
 **Expected Response:**
@@ -93,6 +97,8 @@ disconnect. This is not a guaranteed global failsafe, since it will
 not guard against problems like a client UI thread locking up while a
 client communication thread continues to work.
 
+**Message Version:** 0
+
 **Fields:**
 
 -   *Id* (unsigned int): Message Id
@@ -125,6 +131,8 @@ client communication thread continues to work.
 purposes. Sending a Test message with a string to the server will
 cause the server to return a Test message. If the string is "Error",
 the server will return an error message instead.
+
+**Message Version:** 0
 
 **Fields:**
 
@@ -160,6 +168,8 @@ the server will return an error message instead.
 
 **Description:** Requests that the server send all internal log
 messages to the client. Useful for debugging.
+
+**Message Version:** 0
 
 **Fields:**
 
@@ -205,6 +215,8 @@ messages to the client. Useful for debugging.
 
 **Description:** Log message from the server. Only sent after the
 client has sent a RequestLog message with a level other than "Off".
+
+**Message Version:** 0
 
 **Fields:**
 
