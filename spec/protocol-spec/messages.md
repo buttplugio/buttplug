@@ -110,17 +110,26 @@ included in the JSON schema in this repo.
 
 ## Adding New Messages
 
-The message list as described here is not set in stone. New messages
-will be added as new devices are released, or as new generic messages
-are deemed necessary. The only rule is that once a message is added to
-this document, it should never be changed. This will allow parsing and
-schema checking to be as strict as possible. If edits to a message
-need to be made, a new message type will most likely be added.
+The message list as described here is not set in stone. New messages will be added as new devices are released, or as new generic messages are deemed necessary. The only rule is that once a message is added to this document, it should never be removed; however, newer versions of the message may suceed it. This will allow parsing andschema checking to be as strict as possible. If edits to a message need to be made, a new message type will most likely be added.
 
-Requests for new messages can be submitted to [the Buttplug Standard
-Github Issue Tracker](https://github.com/metafetish/buttplug/issues).
+Requests for new messages can be submitted to [the Buttplug Standard Github Issue Tracker](https://github.com/metafetish/buttplug/issues).
+
+
+## Message Versioning
+
+In order to cope with changes to the schema across servers and clients that may not both support the same schema versions, each message has a message version number. These are based on the schema version they were introduced in, represented as an unsigned integer:
+
+* 0.1.0 => 0
+* 0.2.0 => 1
+
+The message versions are not contained in the messages themselves, instead the client sends the overall schema message version as part of the RequestServerInfo message and the server includes its schema message version in the ServerInfo response. Note that the original version of RequestServerInfo does not have a parameter for this, so the 0.1.0 servers will reject clients capable of using the 0.2.0 schema. This is not seen as an issue, as the server is likely to be the first component in the Buttplug archtecture to be updated, and is the component most likely to be under the endd-user's control to update.
+
+In the case that the server supports a newer schema than the client, any messages that the server attempts to send will be checked against the message version and either downgraded to a previous version where possible, or simply dropped.
+
 
 **Note:** As of this writing, we're not even to an alpha release yet,
 so all bets are off until we're at least a few release cycles into
 this. Good luck, godspeed, prepare to update your parser code often.
 Or maybe just use a reference implementation for now.
+
+## Messa
