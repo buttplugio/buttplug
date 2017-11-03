@@ -1,6 +1,6 @@
 # The Buttplug Sex Toy Control Standard
 
-* **Version:** 0.2.0
+* **Version:** 0.1.0
 * **Documentation Repo**: [https://github.com/metafetish/buttplug](https://github.com/metafetish/buttplug)
 
 Buttplug is a quasi-standard set of technologies and protocols to allow developers to write software that controls an array of sex toys in a semi-future-proof way.
