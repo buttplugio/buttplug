@@ -18,6 +18,7 @@
   * [A Note On Scaling](messages.md#a-note-on-scaling)
   * [JSON Message Serialization](messages.md#json-message-serialization)
   * [Adding New Messages](messages.md#adding-new-messages)
+  * [Message Versioning](messages.md#message-versioning)
 * [Status Messages](status.md#status-messages)
   * [Ok](status.md#ok)
   * [Error](status.md#error)
