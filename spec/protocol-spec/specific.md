@@ -2,9 +2,7 @@
 
 ## KiirooCmd
 
-**Description:** Causes a toy that supports Kiiroo style commands to  
-run whatever event may be related. More information on Kiiroo commands  
-can be found in STPIHKAL.
+**Description:** Causes a toy that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
 
 **Message Version:** 0
 
@@ -39,10 +37,7 @@ can be found in STPIHKAL.
 
 ## FleshlightLaunchFW12Cmd
 
-**Description:** Causes a toy that supports Fleshlight Launch  
-\(Firmware Version 1.2\) style commands to run whatever event may be  
-related. More information on Fleshlight Launch commands can be found  
-in STPIHKAL.
+**Description:** Causes a toy that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
 
 **Message Version:** 0
 
@@ -50,10 +45,8 @@ in STPIHKAL.
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* _Position_ \(unsigned int\): Unsigned integer in range \[0-99\],
-    denoting position to move to.
-* _Speed_ \(unsigned int\): Unsigned integer in range \[0-99\], denoting
-    speed to requested position at.
+* _Position_ \(unsigned int\): Unsigned integer in range \[0-99\], denoting position to move to.
+* _Speed_ \(unsigned int\): Unsigned integer in range \[0-99\], denoting speed to requested position at.
 
 **Expected Response:**
 
@@ -81,9 +74,7 @@ in STPIHKAL.
 
 ## LovenseCmd
 
-**Description:** Causes a toy that supports Lovense style commands to  
-run whatever event may be related. More information on Lovense  
-commands can be found in STPIHKAL.
+**Description:** Causes a toy that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
 
 **Message Version:** 0
 
@@ -91,10 +82,7 @@ commands can be found in STPIHKAL.
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(string\): String command for Lovense toys. Must be a
-    valid Lovense command accessible on most of their toys. See
-    STPIHKAL for more info. Implementations should check this for
-    validity.
+* _Command_ \(string\): String command for Lovense toys. Must be a valid Lovense command accessible on most of their toys. See STPIHKAL for more info. Implementations should check this for validity.
 
 **Expected Response:**
 
@@ -129,8 +117,8 @@ commands can be found in STPIHKAL.
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* Speed \(unsigned int\): Unsigned integer in range \[0-100\], denoting speed to rotate at.
-* Clockwise \(boolean\): Rotation direction
+* _Speed_ \(unsigned int\): Unsigned integer in range \[0-100\], denoting speed to rotate at.
+* _Clockwise_ \(boolean\): Rotation direction
 
 **Expected Response:**
 
@@ -138,8 +126,6 @@ commands can be found in STPIHKAL.
 * Error message on value or message error.
 
 **Flow Diagram:**
-
-
 
 **Serialization Example:**
 

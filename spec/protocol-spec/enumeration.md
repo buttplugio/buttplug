@@ -2,9 +2,7 @@
 
 ## StartScanning
 
-**Description:** Client request to have the server start scanning for  
-devices on all busses that it knows about. Useful for protocols like  
-Bluetooth, which require an explicit discovery phase.
+**Description:** Client request to have the server start scanning for devices on all busses that it knows about. Useful for protocols like Bluetooth, which require an explicit discovery phase.
 
 **Message Version:** 0
 
@@ -35,9 +33,7 @@ Bluetooth, which require an explicit discovery phase.
 
 ## StopScanning
 
-**Description:** Client request to have the server stop scanning for  
-devices. Useful for protocols like Bluetooth, which may not timeout  
-otherwise.
+**Description:** Client request to have the server stop scanning for devices. Useful for protocols like Bluetooth, which may not timeout otherwise.
 
 **Message Version:** 0
 
@@ -68,10 +64,7 @@ otherwise.
 
 ## ScanningFinished
 
-**Description:** Sent by the server once it has stopped scanning on  
-all busses. Since systems may have timeouts that are not controlled by  
-the server, this is a separate message from the StopScanning flow.  
-ScanningFinished can happen without a StopScanning call.
+**Description:** Sent by the server once it has stopped scanning on all busses. Since systems may have timeouts that are not controlled by the server, this is a separate message from the StopScanning flow. ScanningFinished can happen without a StopScanning call.
 
 **Message Version:** 0
 
@@ -101,8 +94,7 @@ None. Server-to-Client only.
 
 ## RequestDeviceList
 
-**Description:** Client request to have the server send over its known  
-device list, without starting a full scan.
+**Description:** Client request to have the server send over its known device list, without starting a full scan.
 
 **Message Version:** 0
 
@@ -142,10 +134,8 @@ device list, without starting a full scan.
 * _Id_ \(unsigned int\): Message Id
 * _Devices_ \(array\): Array of device objects
   * _DeviceName_ \(string\): Descriptive name of the device
-  * _DeviceIndex_ \(unsigned integer\): Index used to identify the
-      device when sending Device Messages.
-  * _DeviceMessages_ \(array of strings\): Type names of Device
-      Messages that the device will accept.
+  * _DeviceIndex_ \(unsigned integer\): Index used to identify the device when sending Device Messages.
+  * _DeviceMessages_ \(array of strings\): Type names of Device Messages that the device will accept.
 
 **Expected Response:**
 
