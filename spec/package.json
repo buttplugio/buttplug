@@ -1,0 +1,24 @@
+{
+  "name": "buttplug-protocol-docs",
+  "version": "0.1.0",
+  "description": "Buttplug Protocol Specification",
+  "main": "index.js",
+  "scripts": {
+    "build": "gitbook build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/metafetish/buttplug.git"
+  },
+  "author": "Kyle Machulis <kyle@machul.is>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/metafetish/buttplug/issues"
+  },
+  "homepage": "https://github.com/metafetish/buttplug#readme",
+  "devDependencies": {
+    "gitbook": "^3.2.3",
+    "gitbook-cli": "^2.3.2",
+    "yarn": "^1.2.1"
+  }
+}
