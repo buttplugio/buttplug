@@ -4,6 +4,41 @@
 
 **Description:** Sent by the client to register itself with the server, and request info from the server.
 
+**Introduced In Version:** 0
+
+**Message Version:** 1
+
+**Fields:**
+
+* _Id_ \(unsigned int\): Message Id
+* _ClientName_ \(string\): Name of the client, for the server to use for UI if needed. Cannot be null.
+* _MessageVersion_ \(uint\): Message template version of the client software.
+
+**Expected Response:**
+
+* ServerInfo message on success
+* Error message on malformed message, null client name, or other error.
+
+**Flow Diagram:**
+
+![](blob:file:///ea7eba9e-a470-4494-89d3-20b8544da159)
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "RequestServerInfo": {
+      "Id": 1,
+      "ClientName": "Test Client",
+      "MessageVersion": 1,
+    }
+  }
+]
+```
+
+**Message Version:** 0
+
 **Fields:**
 
 * _Id_ \(unsigned int\): Message Id
@@ -16,7 +51,7 @@
 
 **Flow Diagram:**
 
-![img](requestserverinfo_diagram.svg)
+![](blob:file:///ea7eba9e-a470-4494-89d3-20b8544da159)
 
 **Serialization Example:**
 
@@ -34,6 +69,10 @@
 ## ServerInfo
 
 **Description:** Send by server to client, contains information about the server name \(optional\), template version, and ping time expectations.
+
+**Introduced In Version:** 0
+
+**Message Version:** 0
 
 **Fields:**
 

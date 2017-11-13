@@ -4,13 +4,15 @@
 
 **Description:** Causes a toy that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
 
+**Introduced In Version:** 0
+
 **Message Version:** 0
 
 **Fields:**
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(unsigned int\): Unsigned integer in range \[0-4\].
+* _Command_ \(string\): Parsed into an unsigned integer in range \[0-4\] for position/speed.
 
 **Expected Response:**
 
@@ -38,6 +40,8 @@
 ## FleshlightLaunchFW12Cmd
 
 **Description:** Causes a toy that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
+
+**Introduced In Version:** 0
 
 **Message Version:** 0
 
@@ -76,6 +80,8 @@
 
 **Description:** Causes a toy that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
 
+**Introduced In Version:** 0
+
 **Message Version:** 0
 
 **Fields:**
@@ -110,6 +116,8 @@
 ## VorzeA10CycloneCmd
 
 **Description:** Causes a toy that supports Vorze A10 Cyclone style commands to run whatever event may be related. More information on Vorze commands can be found in STPIHKAL.
+
+**Introduced In Version:** 0
 
 **Message Version:** 0
 

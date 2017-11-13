@@ -42,11 +42,19 @@
   * [StopAllDevices](generic.md#stopalldevices)
   * [RawCmd](generic.md#rawcmd)
   * [SingleMotorVibrateCmd](generic.md#singlemotorvibratecmd)
+  * [VibrateCmd](generic.md#vibratecmd)
+  * [LinearCmd](generic.md#linearcmd)
+  * [RotateCmd](generic.md#rotatecmd)
+  * [ConstrictCmd](generic.md#constrictcmd)
 * [Specific Device Messages](specific.md#specific-device-messages)
   * [KiirooCmd](specific.md#kiiroocmd)
   * [FleshlightLaunchFW12Cmd](specific.md#fleshlightlaunchfw12cmd)
   * [LovenseCmd](specific.md#lovensecmd)
   * [VorzeA10CycloneCmd](specific.md#vorzea10cyclonecmd)
+* [Generic Sensor Messages](input.md#generic-sensor-messages)  
+  * [StartAccelerometerCmd](input.md#startaccelerometercmd)
+  * [StopAccelerometerCmd](input.md#stopaccelerometercmd)
+  * [AccelerometerData](input.md#accelerometerdata)
 
 -—
 
