@@ -170,8 +170,7 @@ None. Server-to-Client message only.
           "DeviceIndex": 0,
           "DeviceMessages": {
             "SingleMotorVibrateCmd": {},
-            "RawCmd": {},
-            "KiirooCmd": {},
+            "VibrateCmd": { "VibratorCount": "2"},
             "StopDeviceCmd": {}
           }
         },
@@ -179,8 +178,8 @@ None. Server-to-Client message only.
           "DeviceName": "TestDevice 2",
           "DeviceIndex": 1,
           "DeviceMessages": {
-            "SingleMotorVibrateCmd": {},
-            "LovenseCmd": {},
+            "FleshlightLaunchFW12Cmd": {},
+            "LinearCmd": { "ActuatorCount": "1"},
             "StopDeviceCmd": {}
           }
         }
@@ -270,7 +269,11 @@ None. Server-to-Client message only.
       "Id": 0,
       "DeviceName": "TestDevice 1",
       "DeviceIndex": 0,
-      "DeviceMessages": ["SingleMotorVibrateCmd", "RawCmd", "KiirooCmd", "StopDeviceCmd"]
+      "DeviceMessages": {
+        "SingleMotorVibrateCmd": {},
+        "VibrateCmd": { "VibratorCount": "2"},
+        "StopDeviceCmd": {}
+      }
     }
   }
 ]

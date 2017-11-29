@@ -51,10 +51,6 @@
   * [FleshlightLaunchFW12Cmd](specific.md#fleshlightlaunchfw12cmd)
   * [LovenseCmd](specific.md#lovensecmd)
   * [VorzeA10CycloneCmd](specific.md#vorzea10cyclonecmd)
-* [Generic Sensor Messages](input.md#generic-sensor-messages)  
-  * [StartAccelerometerCmd](input.md#startaccelerometercmd)
-  * [StopAccelerometerCmd](input.md#stopaccelerometercmd)
-  * [AccelerometerData](input.md#accelerometerdata)
 
 -—
 
