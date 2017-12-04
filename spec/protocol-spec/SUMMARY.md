@@ -37,6 +37,7 @@
   * [DeviceList](enumeration.md#devicelist)
   * [DeviceAdded](enumeration.md#deviceadded)
   * [DeviceRemoved](enumeration.md#deviceremoved)
+  * [MessageAttributes](enumeration.md#messageattributes)
 * [Generic Device Messages](generic.md#generic-device-messages)
   * [StopDeviceCmd](generic.md#stopdevicecmd)
   * [StopAllDevices](generic.md#stopalldevices)

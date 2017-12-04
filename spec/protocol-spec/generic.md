@@ -202,7 +202,7 @@
 * _DeviceIndex_ \(unsigned int\): Index of device
 * _Vectors_ \(array\): Linear actuator speeds and positions
   * _Index_ \(unsigned int\): Index of linear actuator
-  * _Speed_ \(double\): Movement speed with a range of \[0.0-1.0\]
+  * _Time_ \(unsigned int\): Movement time in milliseconds
   * _Position_ \(double\): Target position with a range of \[0.0-1.0\]
 
 **Expected Response:**
@@ -237,8 +237,6 @@
   }
 ]
 ```
-
-
 
 ## RotateCmd
 
@@ -291,48 +289,3 @@
 ]
 ```
 
-## ConstrictCmd
-
-**Description:** Causes a toy that supports constriction to run specific constrictors at certain strengths. In order to abstract the dynamic range of different toys, the values are sent as a dictionary of constrictor indexes against floats with a range of \[0.0-1.0\]. ""Note:** Constriction may be either internal \(gripping\) or external \(expanding\).
-
-**Introduced In Version:** 1
-
-**Message Version:** 1
-
-**Fields:**
-
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Levels_ \(array\): Constriction levels
-  * _Index_ \(unsigned int\): Index of constrictor
-  * _Speed_ \(double\): Level of constriction with a range of \[0.0-1.0\]
-
-**Expected Response:**
-
-* Ok message with matching Id on successful request.
-* Error message on value or message error.
-
-**Flow Diagram:**
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "ConstrictCmd": {
-      "Id": 1,
-      "DeviceIndex": 0,
-      "Levels": [
-        {
-          "Index": 0,
-          "Level": 0.5
-        },
-        {
-          "Index": 1,
-          "Level": 1
-        }
-      ]
-    }
-  }
-]
-```

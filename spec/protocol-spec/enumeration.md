@@ -147,7 +147,8 @@ None. Server-to-Client only.
   * _DeviceIndex_ \(unsigned integer\): Index used to identify the device when sending Device Messages.
   * _DeviceMessages_ \(dictionary\): Accepted Device Messages 
     * Keys \(string\): Type names of Device Messages that the device will accept
-    * Values \(dictionary\): Attributes for the Device Messages. Both keys and values are strings.
+    * Values \([MessageAttributes](enumeration.md#messageattributes)
+\): Attributes for the Device Messages.
 
 **Expected Response:**
 
@@ -170,7 +171,7 @@ None. Server-to-Client message only.
           "DeviceIndex": 0,
           "DeviceMessages": {
             "SingleMotorVibrateCmd": {},
-            "VibrateCmd": { "VibratorCount": "2"},
+            "VibrateCmd": { "FeatureCount": 2 },
             "StopDeviceCmd": {}
           }
         },
@@ -179,7 +180,7 @@ None. Server-to-Client message only.
           "DeviceIndex": 1,
           "DeviceMessages": {
             "FleshlightLaunchFW12Cmd": {},
-            "LinearCmd": { "ActuatorCount": "1"},
+            "LinearCmd": { "FeatureCount": 1 },
             "StopDeviceCmd": {}
           }
         }
@@ -249,8 +250,9 @@ capabilities that do not require specific scanning/discovery sessions.
 * _DeviceIndex_ \(unsigned integer\): Index used to identify the device
   when sending Device Messages.
 * _DeviceMessages_ \(dictionary\): Accepted Device Messages 
-    * Keys \(string\): Type names of Device Messages that the device will accept
-    * Values \(dictionary\): Attributes for the Device Messages. Both keys and values are strings.
+  * Keys \(string\): Type names of Device Messages that the device will accept
+  * Values \([MessageAttributes](enumeration.md#messageattributes)
+\): Attributes for the Device Messages.
 
 **Expected Response:**
 
@@ -271,7 +273,7 @@ None. Server-to-Client message only.
       "DeviceIndex": 0,
       "DeviceMessages": {
         "SingleMotorVibrateCmd": {},
-        "VibrateCmd": { "VibratorCount": "2"},
+        "VibrateCmd": { "FeatureCount": 2 },
         "StopDeviceCmd": {}
       }
     }
@@ -348,6 +350,14 @@ None. Server-to-Client message only.
   }
 ]
 ```
+
+### MessageAttributes
+
+**Description:** An collection of message attributes \(this object is always the child of a Device Message type name within a DeviceList or DeviceAdded message\). Not all attributes are relevant for all Device Messages on all Devices; in these cases the attributes will not be included.
+
+**Attributes:**
+
+* _FeatureCount_ \(unsigned int\): Number of actuators/sensors/channels/etc that the Device Message may address. This is used by the generic device messages that accept an array of control parameters \(VibrateCmd, LinearCmd, RotateCmd, etc\).
 
 
 

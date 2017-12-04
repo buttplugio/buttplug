@@ -31,8 +31,7 @@ Reducing and rearchitecting this system for scaling is an exercise left to the d
 
 ## JSON Message Serialization
 
-For reference implementations of the Buttplug standard, we use JSON for serialization. The format of the json object for each specific message mimics that of object output from Rust's  
-[serde-json](https://github.com/serde-rs/json) crate. This is simply due to the first implementation of Buttplug with working serialization being in Rust.
+For reference implementations of the Buttplug standard, we use JSON for serialization. The format of the json object for each specific message mimics that of object output from Rust's [serde-json](https://github.com/serde-rs/json) crate. This is simply due to the first implementation of Buttplug with working serialization being in Rust.
 
 When sending messages over the line to a server/client, we wrap them in a JSON array, so that multiple messages can be sent and parsed simultaneously.
 
