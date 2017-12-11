@@ -353,11 +353,9 @@ None. Server-to-Client message only.
 
 ### MessageAttributes
 
-**Description:** An collection of message attributes \(this object is always the child of a Device Message type name within a DeviceList or DeviceAdded message\). Not all attributes are relevant for all Device Messages on all Devices; in these cases the attributes will not be included.
+**Description:** A collection of message attributes. This object is always the child of a Device Message type name within a [DeviceList](enumeration.md#devicelist) or [DeviceAdded](enumeration.md#deviceadded) message. Not all attributes are relevant for all Device Messages on all Devices; in these cases the attributes will not be included.
 
 **Attributes:**
 
-* _FeatureCount_ \(unsigned int\): Number of actuators/sensors/channels/etc that the Device Message may address. This is used by the generic device messages that accept an array of control parameters \(VibrateCmd, LinearCmd, RotateCmd, etc\).
-
-
+* _FeatureCount_ \(unsigned int\): Number of features the Device Message may address. This attribute is used to define the capabilities of generic device control messages. The meaning of "feature" is specific to the context of the message the attribute is attached to. For instance, the FeatureCount attribute of a VibrateCmd message will refer to the number of vibration motors that can be controlled on a device advertising the VibrateCmd message.
 

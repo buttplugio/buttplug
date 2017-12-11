@@ -46,7 +46,6 @@
   * [VibrateCmd](generic.md#vibratecmd)
   * [LinearCmd](generic.md#linearcmd)
   * [RotateCmd](generic.md#rotatecmd)
-  * [ConstrictCmd](generic.md#constrictcmd)
 * [Specific Device Messages](specific.md#specific-device-messages)
   * [KiirooCmd](specific.md#kiiroocmd)
   * [FleshlightLaunchFW12Cmd](specific.md#fleshlightlaunchfw12cmd)

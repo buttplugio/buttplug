@@ -107,6 +107,8 @@
 
 ## SingleMotorVibrateCmd
 
+**Deprecated:** This message has been superseded by [VibrateCmd](generic.md#vibratecmd)
+
 **Description:** Causes a toy that supports vibration to run all vibration motors at a certain speed. In order to abstract the dynamic range of different toys, the value sent is a float with a range of \[0.0-1.0\]
 
 **Introduced In Version:** 0
@@ -144,7 +146,9 @@
 
 ## VibrateCmd
 
-**Description:** Causes a toy that supports vibration to run specific vibration motors at a certain speeds. In order to abstract the dynamic range of different toys, the values are sent as a dictionary of vibration motor indexes against floats with a range of \[0.0-1.0\]
+**Description:** Causes a toy that supports vibration to run specific vibration motors at a certain speeds. Devices with multiple vibrator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded]enumeration.md#deviceadded) message will contain that information.
+
+Since devices may differ in terms of range of vibration strengths, the values are sent as a dictionary of vibration motor indexes against floats with a range of \[0.0-1.0\] wihich will be scaled appropriately for the device.
 
 **Introduced In Version:** 1
 
@@ -162,8 +166,6 @@
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
-
-**Flow Diagram:**
 
 **Serialization Example:**
 
@@ -190,7 +192,9 @@
 
 ## LinearCmd
 
-**Description:** Causes a toy that supports linear movement to reposition it's linear actuators at a certain speeds. In order to abstract the dynamic ranges (both speed and movement) of different toys, the values are sent as a dictionary of linear actuator indexes against objects encapsulating floats with a range of \[0.0-1.0\] for speed and position.
+**Description:** Causes a toy that supports linear movement to move to a position over a certain amount of time. Devices with multiple linear actuator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded]enumeration.md#deviceadded) message will contain that information.
+
+In order to abstract the dynamic ranges (both speed and movement) of different toys, the values are sent as a dictionary of linear actuator indexes against objects encapsulating floats with a range of \[0.0-1.0\] for speed and position.
 
 **Introduced In Version:** 1
 
@@ -209,8 +213,6 @@
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
-
-**Flow Diagram:**
 
 
 **Serialization Example:**
@@ -240,7 +242,9 @@
 
 ## RotateCmd
 
-**Description:** Causes a toy that supports rotation to run specific rotation motors at a certain speeds in specified directions. In order to abstract the dynamic range of different toys, the values are sent as a dictionary of rotation motor indexes against objects encapsulating the speed as a float with a range of \[0.0-1.0\] and the direction as a boolean (true being clockwise). **Note:** clockwise may be subjective.
+**Description:** Causes a toy that supports rotation to rotate at a certain speeds in specified directions. Devices with multiple rotating features may have multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded]enumeration.md#deviceadded) message will have this information.
+
+In order to abstract the dynamic range of different toys, the values are sent as a dictionary of rotation motor indexes against objects encapsulating the speed as a float with a range of \[0.0-1.0\] and the direction as a boolean (true being clockwise). **Note:** clockwise may be subjective.
 
 **Introduced In Version:** 1
 
@@ -253,16 +257,12 @@
 * _Speeds_ \(array\): Rotation speeds
   * _Index_ \(unsigned int\): Index of rotation motor
   * _Speed_ \(double\): Rotation speed with a range of \[0.0-1.0\]
-  * _Clockwise_ \(boolean\): Direction of rotation
+  * _Clockwise_ \(boolean\): Direction of rotation \(clockwise may be subjective\)
 
 **Expected Response:**
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
-
-**Flow Diagram:**
-
-![img](singlemotorvibratecmd_diagram.svg)
 
 **Serialization Example:**
 
