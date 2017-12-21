@@ -254,7 +254,7 @@ In order to abstract the dynamic range of different toys, the values are sent as
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* _Speeds_ \(array\): Rotation speeds
+* _Rotations_ \(array\): Rotation speeds
   * _Index_ \(unsigned int\): Index of rotation motor
   * _Speed_ \(double\): Rotation speed with a range of \[0.0-1.0\]
   * _Clockwise_ \(boolean\): Direction of rotation \(clockwise may be subjective\)
@@ -272,7 +272,7 @@ In order to abstract the dynamic range of different toys, the values are sent as
     "RotationCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "Speeds": [
+      "Rotations": [
         {
           "Index": 0,
           "Speed": 0.5,
