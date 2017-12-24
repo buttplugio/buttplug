@@ -206,14 +206,13 @@ In order to abstract the dynamic ranges (both speed and movement) of different t
 * _DeviceIndex_ \(unsigned int\): Index of device
 * _Vectors_ \(array\): Linear actuator speeds and positions
   * _Index_ \(unsigned int\): Index of linear actuator
-  * _Time_ \(unsigned int\): Movement time in milliseconds
+  * _Duration_ \(unsigned int\): Movement time in milliseconds
   * _Position_ \(double\): Target position with a range of \[0.0-1.0\]
 
 **Expected Response:**
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
-
 
 **Serialization Example:**
 
@@ -226,12 +225,12 @@ In order to abstract the dynamic ranges (both speed and movement) of different t
       "Vectors": [
         {
           "Index": 0,
-          "Speed": 0.5,
+          "Duration": 500,
           "Position": 0.3
         },
         {
           "Index": 1,
-          "Speed": 1,
+          "Duration": 1000,
           "Posiion": 0.8
         }
       ]
