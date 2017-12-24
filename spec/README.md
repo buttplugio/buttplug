@@ -2,20 +2,59 @@
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 
-This repo houses architecture documentation for the Buttplug Sex Toy
+## Table of Contents
+
+* [Introduction](#introduction)
+* [Building The Protocol Documents](#building-the-protocol-documents)
+* [Buttplug Repos and Supporting Applications](#buttplug-repos-and-supporting-applications)
+* [Support The Project](#support-the-project)
+* [License](#license)
+
+## Introduction
+
+This repo houses specifications documents for the Buttplug Sex Toy
 Control Server Protocol.
+
+HTML rendered version of the Protocol Spec is at [https://metafetish.github.io/buttplug](https://metafetish.github.io/buttplug).
 
 More information on Buttplug and the hardware it supports can be found
 at [https://buttplug.io](https://buttplug.io).
 
+## Building The Protocol Documents
+
+To build this document into HTML pages or pdfs, you'll need to use
+gitbook. We have a node package file available to install the version
+we use for development and build the book. Use the following commands
+to set it up.
+
+```
+npm install
+npm run build
+```
+
+This will build the HTML version of the book into the _book directory.
+
+We keep a built version of the HTML version in our gh-pages branch,
+and it is updated on every commit to master.
+
 ## Buttplug Repos and Supporting Applications
 
-### Supporting Repos
+### Protocol, Schema, and System Documentation
 
-- [buttplug-schema](http://github.com/metafetish/buttplug-schema):
+- [Buttplug Protocol Spec](http://github.com/metafetish/buttplug): Repo containing
+  the specification document for the Buttplug sex toy control
+  protocol.
+- [Buttplug Protocol JSON Schema](http://github.com/metafetish/buttplug-schema):
   JSON Schema for the Buttplug Protocol Standard. Usually subtree'd
   into server/client implementations.
-  - Maintainers: Core Buttplug Team
+- [Buttplug Developer Guide](http://github.com/metafetish/buttplug-developer-guide):
+  Manual for developing applications that use Buttplug, as well as
+  information on Buttplug Client and Server architecture.
+- [STPIHKAL](http://github.com/metafetish/stpihkal): "Sex Toy
+  Protocols I Have Known And Loved", a book containing low-level
+  proprietary protocol specifications for sex toys and sex hardware,
+  as well as movie synchronization formats and other miscellaneous
+  information.
 
 ### Server Implementations
 
@@ -65,6 +104,8 @@ Protocol, here's a list of the ones we are aware of.
   Haptic Video player.
 - [LaunchControl](http://github.com/funjack/launchcontrol): Go Haptic
   Video Player and Launch Control Scripts.
+- [buttplug-twine](https://github.com/metafetish/buttplug-twine):
+  Twine v2 macros for using buttplug-js with Twine stories.
 
 ## Support The Project
 
