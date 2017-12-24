@@ -62,14 +62,20 @@ Similarly, some message values will have certain bounds and limitations. These a
 
 ## Adding New Messages
 
-The message list as described here is not set in stone. New messages will be added as new devices are released, or as new generic messages are deemed necessary. The only rule is that once a message is added to this document, it should never be removed; however, newer versions of the message may suceed it. This will allow parsing andschema checking to be as strict as possible. If edits to a message need to be made, a new message type will most likely be added.
+The message list as described here is not set in stone. New messages will be added as new devices are released, or as new generic messages are deemed necessary. The only rule is that once a message is added to this document, it should never be removed; however, newer versions of the message may suceed it. This will allow parsing and schema checking to be as strict as possible. If edits to a message need to be made, a new message type will most likely be added.
 
 Requests for new messages can be submitted to [the Buttplug Standard Github Issue Tracker](https://github.com/metafetish/buttplug/issues).
 
 ## Message Versioning
 
-In order to cope with changes to the schema across servers and clients that may not both support the same schema versions, each message type defined in this document has a message version number. These are based on the schema version they were introduced in, represented as an unsigned integer. As of version 1, this document and the schema are synchronized by using the message version over any other form of release number. Version 0 was represented as release 0.1.0.
+Each protocol message type has a version number, to cope with protocol version differences between servers and clients. This version is based on the protocol version the message was introduced in, and is represented as an unsigned integer. 
 
-The message versions are not contained in the messages themselves, instead the client sends the overall schema message version as part of the RequestServerInfo message and the server includes its schema message version in the ServerInfo response. Note that the original version of RequestServerInfo does not have a parameter for this, so the servers that implement version 0 will reject clients capable of using the version 1 schema. This is not seen as an issue, as the server is likely to be the first component in the Buttplug archtecture to be updated, and is the component most likely to be under the end-user's control to update.
+To establish protocol versions between clients and servers, the client sends the overall protocol message version as part of the [RequestServerInfo](identification.md#requestserverinfo) message (as the MessageVersion field), and the server includes its protocol version in the [RequestServerInfo](identification.md#serverinfo) response (as the MessageVersion field). 
 
-In the case that the server supports a newer schema than the client, any messages that the server attempts to send will be checked against the message version and either downgraded to a previous version where possible, or simply dropped.
+If a server supports a newer protocol version than a client, any messages that the server attempts to send will be checked against the client protocol version, and either downgraded to a previous version where possible, or simply dropped. Server support for downgrading a message is optional, and it is not expected that all servers will support downgrading through all versions of the protocol. If a server implementation does not have downgrade capabilities, it should disconnect clients with lower schema versions.
+
+If a client supports a newer protocol version than a server, this is considered an invalid connection situation, and a disconnect should insue. This rule is based on the assumption that the user can most likely update the server version to something newer. The client may not be easily upgraded for many reasons, such as being a proprietary application or source code not being easily accessible, being to complex to work on and upgrade, etc...
+
+**Note:** Spec Version 0 was listed as Spec Version 0.1.0 initially.
+
+**Note**: Version 0 of the RequestServerInfo message does not have a parameter for protocol version. Servers that implement version 0 will reject clients capable of using the version 1 schema. This is not seen as an issue, as the server is likely to be the first component in the Buttplug archtecture to be updated, and is most likely to be under the end-user's control to update.
