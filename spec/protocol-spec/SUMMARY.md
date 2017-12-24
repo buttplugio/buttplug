@@ -1,5 +1,5 @@
-* [The Buttplug Sex Toy Control Standard](README.md#the-buttplug-sex-toy-control-standard)
-  * [The Need for a Sex Toy Control Standard](README.md#the-need-for-a-sex-toy-control-standard)
+* [The Buttplug Computer Controlled Sex Device Control Standard](README.md#the-buttplug-computer-controlled-sex-device-control-standard)
+  * [The Need for a Sex Device Control Standard](README.md#the-need-for-a-sex-device-control-standard)
   * [Generalized Control](README.md#generalized-control)
   * [Comparisons to Existing Software](README.md#comparisons-to-existing-software)
   * [Why is it called Buttplug?](README.md#why-is-it-called-buttplug)

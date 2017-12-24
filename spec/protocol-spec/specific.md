@@ -2,7 +2,7 @@
 
 ## KiirooCmd
 
-**Description:** Causes a toy that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
 
 **Introduced In Version:** 0
 
@@ -39,7 +39,7 @@
 
 ## FleshlightLaunchFW12Cmd
 
-**Description:** Causes a toy that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
 
 **Introduced In Version:** 0
 
@@ -78,7 +78,7 @@
 
 ## LovenseCmd
 
-**Description:** Causes a toy that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
 
 **Introduced In Version:** 0
 
@@ -88,7 +88,7 @@
 
 * _Id_ \(unsigned int\): Message Id
 * _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(string\): String command for Lovense toys. Must be a valid Lovense command accessible on most of their toys. See STPIHKAL for more info. Implementations should check this for validity.
+* _Command_ \(string\): String command for Lovense devices. Must be a valid Lovense command accessible on most of their devices. See STPIHKAL for more info. Implementations should check this for validity.
 
 **Expected Response:**
 
@@ -115,7 +115,7 @@
 
 ## VorzeA10CycloneCmd
 
-**Description:** Causes a toy that supports Vorze A10 Cyclone style commands to run whatever event may be related. More information on Vorze commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Vorze A10 Cyclone style commands to run whatever event may be related. More information on Vorze commands can be found in STPIHKAL.
 
 **Introduced In Version:** 0
 

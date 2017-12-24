@@ -25,7 +25,7 @@ There are two types of message flows.
 
 The Buttplug Message System, as described here, was not designed to scale to large multiuser systems \(like cam services\). It was built with either a single user, peer-to-peer, or small group setting in mind.
 
-As the message flow section states, this system resembles a sort of half-assed-TCP mechanism. Using this system to drive large scale toy control streaming services may require changes to this system.
+As the message flow section states, this system resembles a sort of half-assed-TCP mechanism. Using this system to drive large scale device control streaming services may require changes to this system.
 
 Reducing and rearchitecting this system for scaling is an exercise left to the developer. Either to implement, or to contract the Buttplug designers to build it for them.
 
