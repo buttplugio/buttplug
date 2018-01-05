@@ -37,7 +37,7 @@ This will build the HTML version of the book into the _book directory.
 We keep a built version of the HTML version in our gh-pages branch,
 and it is updated on every commit to master.
 
-## Buttplug Repos and Supporting Applications
+## Buttplug Documentation and Tutorials
 
 ### Protocol, Schema, and System Documentation
 
@@ -56,10 +56,15 @@ and it is updated on every commit to master.
   as well as movie synchronization formats and other miscellaneous
   information.
 
-### Server Implementations
+### Tutorials
 
-If you are looking for a server implementation of the Buttplug
-Protocol, here's a list of the ones we are aware of.
+- [how-to-buttplug Glitch.come
+  project](https://glitch.com/edit/#!/how-to-buttplug?path=README.md) -
+  Tutorial project for using buttplug-js for web applications.
+
+## Buttplug Implementation Repos and Supporting Applications
+
+### Server Implementations
 
 - [buttplug-csharp](http://github.com/metafetish/buttplug-csharp):
   C#/.Net implementation of the Buttplug Server for Win7/10
