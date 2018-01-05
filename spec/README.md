@@ -6,7 +6,8 @@
 
 * [Introduction](#introduction)
 * [Building The Protocol Documents](#building-the-protocol-documents)
-* [Buttplug Repos and Supporting Applications](#buttplug-repos-and-supporting-applications)
+* [Buttplug Documentation and Tutorials](#buttplug-documentation-and-tutorials)
+* [Buttplug Repos and Supporting Applications](#buttplug-implementation-repos-and-supporting-applications)
 * [Support The Project](#support-the-project)
 * [License](#license)
 
