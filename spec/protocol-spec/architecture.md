@@ -24,3 +24,12 @@ After the client/server connection is set up, device enumeration can begin. The 
 
 Once devices are found and selected, we can assume the user will begin interacting with connected devices. At this point, the client will mostly be sending and receiving device commands. It can usually \(but not always\) be assumed that continued enumeration may not be possible due to the context of situations that Buttplug software will be used in.
 
+### Example lifecycle
+
+```mermaid
+graph TD;
+  A-->B;
+  A-->C;
+  B-->D;
+  C-->D;
+```
