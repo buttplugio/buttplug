@@ -82,7 +82,7 @@
 * _MinorVersion_ \(uint\): Minor version of the server software.
 * _BuildVersion_ \(uint\): Build version of the server software.
 * _MessageVersion_ \(uint\): Message template version of the server software.
-* _MaxPingTime_ \(unsigned int\): Maximum internal for pings from the client, in milliseconds. If a client takes to longer than this time between sending Ping messages, the server is expected to disconnect.
+* _MaxPingTime_ \(uint\): Maximum internal for pings from the client, in milliseconds. If a client takes to longer than this time between sending Ping messages, the server is expected to disconnect.
 
 **Expected Response:**
 
@@ -100,10 +100,10 @@ None. Server-To-Client message only.
     "ServerInfo": {
       "Id": 1,
       "ServerName": "Test Server",
-      "MessageVersion": "1",
-      "MajorVersion": "1",
-      "MinorVersion": "0",
-      "BuildVersion": "0",
+      "MessageVersion": 1,
+      "MajorVersion": 1,
+      "MinorVersion": 0,
+      "BuildVersion": 0,
       "MaxPingTime": 100
     }
   }
