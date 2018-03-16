@@ -5,6 +5,7 @@
 ## Table of Contents
 
 * [Introduction](#introduction)
+* [Talk To Us!](#talk-to-us)
 * [Building The Protocol Documents](#building-the-protocol-documents)
 * [Buttplug Documentation and Tutorials](#buttplug-documentation-and-tutorials)
 * [Buttplug Repos and Supporting Applications](#buttplug-implementation-repos-and-supporting-applications)
@@ -13,13 +14,30 @@
 
 ## Introduction
 
-This repo houses specifications documents for the Buttplug Sex Toy
-Control Server Protocol.
+This repo houses specifications documents for the Buttplug Intimate
+Hardware Control Server Protocol (referred to hereafter as Buttplug).
 
-HTML rendered version of the Protocol Spec is at [https://metafetish.github.io/buttplug](https://metafetish.github.io/buttplug).
+Buttplug aims to simplify accessing and controlling different kinds of
+intimate hardware such as vibrators, strokers, and machines, as well
+as other devices like kegelcizers, electrostimulation systems, and
+whatever else seems like it could be intimate. The goal is to abstract
+line level (usb/bluetooth/serial/etc) protocol knowledge away from the
+developer, so they can concentrate on creating new and interesting
+interfaces, applications, games, and other software.
+
+HTML rendered version of the Protocol Spec is at
+[https://metafetish.github.io/buttplug](https://metafetish.github.io/buttplug).
 
 More information on Buttplug and the hardware it supports can be found
 at [https://buttplug.io](https://buttplug.io).
+
+## Talk To Us!
+
+If you're interested in Buttplug Development, check out our [discord server](https://discord.gg/t9g9RuD)!
+
+We've also got a Slack instance. You can request an invite by [DMing the Buttplug account on Twitter](https://twitter.com/buttplugio).
+
+Finally, there's a message board for development and support at [metafetish.club](https://metafetish.club).
 
 ## Building The Protocol Documents
 
