@@ -1,12 +1,12 @@
 # Buttplug Protocol and Architecture Documentation
 
-<img src="https://img.shields.io/badge/🏢-Enterprise Grade-999999.svg"/>
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Discourse Forum](https://img.shields.io/discourse/https/metafetish.club/topics.svg)](https://metafetish.club)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.gg/t9g9RuD)
 [![Telegram](https://img.shields.io/badge/telegram-168%20online-blue.svg?logo=telegram)](https://telegram.me/metafetish)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 
+<img src="https://img.shields.io/badge/🏢-Enterprise Grade-999999.svg"/>
 
 ## Table of Contents
 
