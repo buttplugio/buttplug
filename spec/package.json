@@ -19,6 +19,6 @@
   "devDependencies": {
     "gitbook": "^3.2.3",
     "gitbook-cli": "^2.3.2",
-    "yarn": "^1.2.1"
+    "yarn": "^1.5.1"
   }
 }
