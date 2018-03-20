@@ -1,35 +1,38 @@
-* [The Buttplug Computer Controlled Sex Device Control Standard](README.md#the-buttplug-computer-controlled-sex-device-control-standard)
+#Summary
+
+* [The Buttplug Computer Controlled Sex Device Control Standard](README.md)
   * [The Need for a Sex Device Control Standard](README.md#the-need-for-a-sex-device-control-standard)
   * [Generalized Control](README.md#generalized-control)
   * [Comparisons to Existing Software](README.md#comparisons-to-existing-software)
   * [Why is it called Buttplug?](README.md#why-is-it-called-buttplug)
-* [Architecture](architecture.md#architecture)
+* [Architecture](architecture.md)
   * [Protocol](architecture.md#protocol)
   * [Stages](architecture.md#stages)
     * [Identification](architecture.md#identification)
     * [Enumeration](architecture.md#enumeration)
     * [Consummation](architecture.md#consummation)
+  * [Example lifecycle](architecture.md#Example_lifecycle)
 
--—
+---
 
-* [Messages](messages.md#messages)
+* [Messages](messages.md)
   * [Basic Message Structure](messages.md#basic-message-structure)
   * [Message Flow](messages.md#message-flow)
   * [A Note On Scaling](messages.md#a-note-on-scaling)
   * [JSON Message Serialization](messages.md#json-message-serialization)
   * [Adding New Messages](messages.md#adding-new-messages)
   * [Message Versioning](messages.md#message-versioning)
-* [Status Messages](status.md#status-messages)
+* [Status Messages](status.md)
   * [Ok](status.md#ok)
   * [Error](status.md#error)
   * [Ping](status.md#ping)
   * [Test](status.md#test)
   * [RequestLog](status.md#requestlog)
   * [Log](status.md#log)
-* [Identification Messages](identification.md#identification-messages)
+* [Identification Messages](identification.md)
   * [RequestServerInfo](identification.md#requestserverinfo)
   * [ServerInfo](identification.md#serverinfo)
-* [Enumeration Messages](enumeration.md#enumeration-messages)
+* [Enumeration Messages](enumeration.md)
   * [StartScanning](enumeration.md#startscanning)
   * [StopScanning](enumeration.md#stopscanning)
   * [ScanningFinished](enumeration.md#scanningfinished)
@@ -38,7 +41,7 @@
   * [DeviceAdded](enumeration.md#deviceadded)
   * [DeviceRemoved](enumeration.md#deviceremoved)
   * [MessageAttributes](enumeration.md#messageattributes)
-* [Generic Device Messages](generic.md#generic-device-messages)
+* [Generic Device Messages](generic.md)
   * [StopDeviceCmd](generic.md#stopdevicecmd)
   * [StopAllDevices](generic.md#stopalldevices)
   * [RawCmd](generic.md#rawcmd)
@@ -46,15 +49,15 @@
   * [VibrateCmd](generic.md#vibratecmd)
   * [LinearCmd](generic.md#linearcmd)
   * [RotateCmd](generic.md#rotatecmd)
-* [Specific Device Messages](specific.md#specific-device-messages)
+* [Specific Device Messages](specific.md)
   * [KiirooCmd](specific.md#kiiroocmd)
   * [FleshlightLaunchFW12Cmd](specific.md#fleshlightlaunchfw12cmd)
   * [LovenseCmd](specific.md#lovensecmd)
   * [VorzeA10CycloneCmd](specific.md#vorzea10cyclonecmd)
 
--—
+---
 
-* [Message JSON Schema](jsonschema.md#message-json-schema)
+* [Message JSON Schema](jsonschema.md)
 
 
 

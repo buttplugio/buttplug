@@ -21,7 +21,11 @@
 
 **Flow Diagram:**
 
-![img](kiiroocmd_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>Server: KiirooCmd Id=1
+    Server->>Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -59,7 +63,11 @@
 
 **Flow Diagram:**
 
-![img](fleshlightlaunchfw12cmd_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>Server: FleshlightLaunchFW12Cmd Id=1
+    Server->>Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -97,7 +105,11 @@
 
 **Flow Diagram:**
 
-![img](lovensecmd_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>Server: LovenseCmd Id=1
+    Server->>Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -135,6 +147,12 @@
 
 **Flow Diagram:**
 
+```mermaid
+sequenceDiagram
+    Client->>Server: VorzeA10CycloneCmd Id=1
+    Server->>Client: Ok Id=1
+```
+
 **Serialization Example:**
 
 ```json
@@ -149,6 +167,3 @@
   }
 ]
 ```
-
-
-

@@ -21,7 +21,11 @@
 
 **Flow Diagram:**
 
-![](blob:file:///ea7eba9e-a470-4494-89d3-20b8544da159)
+```mermaid
+sequenceDiagram
+    Client->>Server: RequestServerInfo Id=0
+    Server->>Client: ServerInfo Id=0
+```
 
 **Serialization Example:**
 
@@ -51,7 +55,11 @@
 
 **Flow Diagram:**
 
-![](blob:file:///ea7eba9e-a470-4494-89d3-20b8544da159)
+```mermaid
+sequenceDiagram
+    Client->>Server: RequestServerInfo Id=0
+    Server->>Client: ServerInfo Id=0
+```
 
 **Serialization Example:**
 
@@ -90,7 +98,11 @@ None. Server-To-Client message only.
 
 **Flow Diagram:**
 
-![img](serverinfo_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>Server: RequestServerInfo Id=0
+    Server->>Client: ServerInfo Id=0
+```
 
 **Serialization Example:**
 

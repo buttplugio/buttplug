@@ -20,7 +20,11 @@
 
 **Flow Diagram:**
 
-![img](stopdevice_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StopDeviceCmd Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -54,7 +58,11 @@
 
 **Flow Diagram:**
 
-![img](stopalldevices_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StopAllDevices Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -89,7 +97,11 @@
 
 **Flow Diagram:**
 
-![img](rawcmd_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: RawCmd Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -128,7 +140,11 @@
 
 **Flow Diagram:**
 
-![img](singlemotorvibratecmd_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: SingleMotorVibrateCmd Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -164,6 +180,14 @@
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
+
+**Flow Diagram:**
+
+```mermaid
+sequenceDiagram
+    Client->>+Server: VibrateCmd Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -209,6 +233,14 @@
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
+
+**Flow Diagram:**
+
+```mermaid
+sequenceDiagram
+    Client->>+Server: LinearCmd Id=1
+    Server->>_Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -256,6 +288,14 @@
 
 * Ok message with matching Id on successful request.
 * Error message on value or message error.
+
+**Flow Diagram:**
+
+```mermaid
+sequenceDiagram
+    Client->>+Server: RotateCmd Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 

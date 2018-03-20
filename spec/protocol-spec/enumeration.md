@@ -19,7 +19,13 @@
 
 **Flow Diagram:**
 
-![img](startscanning_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StartScanning Id=1
+    Server->>-Client: Ok Id=1
+    Server->>Client: DeviceAdded Id=0
+    Server->>Client: DeviceAdded Id=0
+```
 
 **Serialization Example:**
 
@@ -52,7 +58,16 @@
 
 **Flow Diagram:**
 
-![img](stopscanning_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StartScanning Id=1
+    Server->>-Client: Ok Id=1
+    Server->>Client: DeviceAdded Id=0
+    Server->>Client: DeviceAdded Id=0
+    Client->>+Server: StopScanning Id=2
+    Server->>-Client: Ok Id=2
+    Server->>Client: ScanningFinished Id=0
+```
 
 **Serialization Example:**
 
@@ -84,7 +99,14 @@ None. Server-to-Client only.
 
 **Flow Diagram:**
 
-![img](scanningfinished_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StartScanning Id=1
+    Server->>-Client: Ok Id=1
+    Server->>Client: DeviceAdded Id=0
+    Server->>Client: DeviceAdded Id=0
+    Server->>Client: ScanningFinished Id=0
+```
 
 **Serialization Example:**
 
@@ -117,8 +139,11 @@ None. Server-to-Client only.
 
 **Flow Diagram:**
 
-![img](requestdevicelist_diagram.svg)
-
+```mermaid
+sequenceDiagram
+    Client->>+Server: RequestDeviceList Id=1
+    Server->>-Client: DeviceList Id=1
+```
 **Serialization Example:**
 
 ```json
@@ -156,8 +181,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](devicelist_diagram.svg)
-
+```mermaid
+sequenceDiagram
+    Client->>+Server: RequestDeviceList Id=1
+    Server->>-Client: DeviceList Id=1
+```
 **Serialization Example:**
 
 ```json
@@ -206,7 +234,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](devicelist_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: RequestDeviceList Id=1
+    Server->>-Client: DeviceList Id=1
+```
 
 **Serialization Example:**
 
@@ -260,7 +292,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](deviceadded_diagram.svg)
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Server->>Client: DeviceAdded Id=0
+```
 
 **Serialization Example:**
 
@@ -298,7 +335,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](deviceadded_diagram.svg)
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Server->>Client: DeviceAdded Id=0
+```
 
 **Serialization Example:**
 
@@ -336,8 +378,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](deviceremoved_diagram.svg)
-
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    Server->>Client: DeviceRemoved Id=0
+```
 **Serialization Example:**
 
 ```json

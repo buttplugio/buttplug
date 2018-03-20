@@ -26,10 +26,53 @@ Once devices are found and selected, we can assume the user will begin interacti
 
 ### Example lifecycle
 
+The following lifecycle covers the general message flow expected between a Buttplug client and a Buttplug server.
+
 ```mermaid
-graph TD;
-  A-->B;
-  A-->C;
-  B-->D;
-  C-->D;
+sequenceDiagram
+  Participant Client
+  Participant Server
+  
+  Note over Client,Server: Once a connection is established, perform the protocol handshake
+  Client->>+Server: RequestServerInfo Id=1
+  Server->>-Client: ServerInfo Id=1
+  
+  
+  Note over Client,Server: If the server has a non-zero PingTimeout, the client must ensure the server is sent the ping messages at before the timeout is reached. Sending a ping at an interval of half the timeout is a good generalisation.
+  loop Every ~half ping timeout
+    Client->>+Server: Ping ID=N++
+    Server->>-Client: Ok ID=N++
+  end
+  
+  Note over Client,Server: If we're connecting to a server that has already connected to devices (typically during reconnect) the client must call RequestDeviceList to get those devices.
+  Client->>+Server: RequestDeviceList Id=2
+  Server->>-Client: DeviceList Id=2
+  
+  Note over Client,Server: To discover new devices, the client must instrct the server to start scanning. 
+  Client->>+Server: StartScaning Id=3
+  Server->>-Client: Ok Id=3
+  
+  Note over Client,Server: Whilst the server is scanning, the server will notifiy the client of new devices.
+  Server->>Client: DeviceAdded Id=0
+  Server->>Client: DeviceAdded Id=0
+  
+  Note over Client,Server: Once the devices the client is intrested in have been discoved, the client can instruct the server to stop scaning. Once all device managers have stopped scanning, the server will notify the client.
+  Client->>+Server: StopScaning Id=4
+  Server->>-Client: Ok Id=4
+  Server->>Client: ScaningFinished Id=0
+  
+  Note over Client,Server: Devices may disconnect at any time. The server will notify the client when this happens.
+  Server->>Client: DeviceRemoved Id=0
+  
+  Note over Client,Server: The client may instruct devices to perform actions (these will vary gratly depending on the type of device).
+  Client->>+Server: VibrateCmd Id=5
+  Server->>-Client: Ok Id=5
+  
+  Note over Client,Server: The client may instruct the server to stop a device.
+  Client->>+Server: StopDeviceCmd Id=6
+  Server->>-Client: Ok Id=6
+  
+  Note over Client,Server: The client may also instruct the server to stop all devices. This is good form for a client that is shutting down.
+  Client->>+Server: StopAllDevices Id=7
+  Server->>-Client: Ok Id=7
 ```

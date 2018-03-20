@@ -18,7 +18,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](ok_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: StartScanning Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -58,9 +62,17 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](error_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: InvalidMessageName Id=2
+    Server->>-Client: Error Id=2
+```
 
-![img](error_malformed_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: InvalidMessageId Id=Wat
+    Server->>-Client: Error Id=0
+```
 
 **Serialization Example:**
 
@@ -97,7 +109,11 @@ This will handle cases like the client crashing without a proper disconnect. Thi
 
 **Flow Diagram:**
 
-![img](ping_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: Ping Id=5
+    Server->>-Client: Ok Id=5
+```
 
 **Serialization Example:**
 
@@ -131,7 +147,11 @@ This will handle cases like the client crashing without a proper disconnect. Thi
 
 **Flow Diagram:**
 
-![img](test_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: Test Id=5 TestString=Moo
+    Server->>-Client: Test Id=5 TestString=Moo
+```
 
 **Serialization Example:**
 
@@ -173,7 +193,11 @@ This will handle cases like the client crashing without a proper disconnect. Thi
 
 **Flow Diagram:**
 
-![img](requestlog_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: RequestLog Id=1
+    Server->>-Client: Ok Id=1
+```
 
 **Serialization Example:**
 
@@ -215,7 +239,13 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-![img](log_diagram.svg)
+```mermaid
+sequenceDiagram
+    Client->>+Server: RequestLog Id=1
+    Server->>-Client: Ok Id=1
+    Server->>Client: Log Id=0 LogLevel=Warn
+    Server->>Client: Log Id=0 LogLevel=Trace
+```
 
 **Serialization Example:**
 
@@ -230,6 +260,3 @@ None. Server-to-Client message only.
   }
 ]
 ```
-
-
-
