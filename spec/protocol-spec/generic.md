@@ -180,7 +180,7 @@
         },
         {
           "Index": 1,
-          "Speed": 1
+          "Speed": 1.0
         }
       ]
     }
@@ -227,7 +227,7 @@
         {
           "Index": 1,
           "Duration": 1000,
-          "Posiion": 0.8
+          "Position": 0.8
         }
       ]
     }
@@ -262,7 +262,7 @@
 ```json
 [
   {
-    "RotationCmd": {
+    "RotateCmd": {
       "Id": 1,
       "DeviceIndex": 0,
       "Rotations": [
@@ -273,7 +273,7 @@
         },
         {
           "Index": 1,
-          "Speed": 1,
+          "Speed": 1.0,
           "Clockwise": false
         }
       ]

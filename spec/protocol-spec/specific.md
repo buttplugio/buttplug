@@ -31,7 +31,7 @@
     "KiirooCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "Command": 4
+      "Command": "4"
     }
   }
 ]

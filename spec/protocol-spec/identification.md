@@ -31,7 +31,7 @@
     "RequestServerInfo": {
       "Id": 1,
       "ClientName": "Test Client",
-      "MessageVersion": 1,
+      "MessageVersion": 1
     }
   }
 ]
@@ -100,10 +100,10 @@ None. Server-To-Client message only.
     "ServerInfo": {
       "Id": 1,
       "ServerName": "Test Server",
-      "MessageVersion": 1,
       "MajorVersion": 1,
       "MinorVersion": 0,
       "BuildVersion": 0,
+      "MessageVersion": 1,
       "MaxPingTime": 100
     }
   }
