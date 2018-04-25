@@ -31,7 +31,7 @@ developer, so they can concentrate on creating new and interesting
 interfaces, applications, games, and other software.
 
 HTML rendered version of the Protocol Spec is at
-[https://metafetish.github.io/buttplug](https://metafetish.github.io/buttplug).
+[https://docs.buttplug.io/buttplug](https://docs.buttplug.io/buttplug).
 
 More information on Buttplug and the hardware it supports can be found
 at [https://buttplug.io](https://buttplug.io).
