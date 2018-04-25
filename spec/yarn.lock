@@ -1405,6 +1405,10 @@ gitbook-plugin-lunr@1.2.0:
     html-entities "1.2.0"
     lunr "0.5.12"
 
+gitbook-plugin-piwik@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/gitbook-plugin-piwik/-/gitbook-plugin-piwik-0.2.1.tgz#5e2b0c05d8257916f3476ce27d9820096d96b118"
+
 gitbook-plugin-search@*, gitbook-plugin-search@2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/gitbook-plugin-search/-/gitbook-plugin-search-2.2.1.tgz#6d25b5a776990fa98fdfdfa37de331f78e0f6b13"
