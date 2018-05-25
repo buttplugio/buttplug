@@ -33,46 +33,45 @@ sequenceDiagram
   Participant Client
   Participant Server
   
-  Note over Client,Server: Once a connection is established, perform the protocol handshake
+  Note over Client,Server: Once a connection is established, perform the protocol handshake, which exchanges information about identification, versions, ping times, etc...
   Client->>+Server: RequestServerInfo Id=1
   Server->>-Client: ServerInfo Id=1
   
-  
-  Note over Client,Server: If the server has a non-zero PingTimeout, the client must ensure the server is sent the ping messages at before the timeout is reached. Sending a ping at an interval of half the timeout is a good generalisation.
-  loop Every ~half ping timeout
+  Note over Client,Server: If the server has a non-zero PingTimeout, the client must send a ping message to the server before the specified timeout. A common strategy is to set the client Ping time to 1/2 the requested server ping time.
+  loop [PingTime/2]
     Client->>+Server: Ping ID=N++
     Server->>-Client: Ok ID=N++
   end
-  
-  Note over Client,Server: If we're connecting to a server that has already connected to devices (typically during reconnect) the client must call RequestDeviceList to get those devices.
+
+  Note over Client,Server: The client must call RequestDeviceList to get a list of already connected devices.
   Client->>+Server: RequestDeviceList Id=2
   Server->>-Client: DeviceList Id=2
   
-  Note over Client,Server: To discover new devices, the client must instrct the server to start scanning. 
-  Client->>+Server: StartScaning Id=3
+  Note over Client,Server: To discover new devices, the client instructs the server to start scanning.
+  Client->>+Server: StartScanning Id=3
   Server->>-Client: Ok Id=3
   
-  Note over Client,Server: Whilst the server is scanning, the server will notifiy the client of new devices.
+  Note over Client,Server: While the server is scanning, the server will notify the client of new devices.
   Server->>Client: DeviceAdded Id=0
   Server->>Client: DeviceAdded Id=0
   
-  Note over Client,Server: Once the devices the client is intrested in have been discoved, the client can instruct the server to stop scaning. Once all device managers have stopped scanning, the server will notify the client.
-  Client->>+Server: StopScaning Id=4
+  Note over Client,Server: Once devices have been discovered, the client instruct the server to stop scanning. Once all device managers have stopped scanning, the server will notify the client.
+  Client->>+Server: StopScanning Id=4
   Server->>-Client: Ok Id=4
-  Server->>Client: ScaningFinished Id=0
+  Server->>Client: ScanningFinished Id=0
   
   Note over Client,Server: Devices may disconnect at any time. The server will notify the client when this happens.
   Server->>Client: DeviceRemoved Id=0
   
-  Note over Client,Server: The client may instruct devices to perform actions (these will vary gratly depending on the type of device).
+  Note over Client,Server: The client may instruct devices to perform actions. Actions vary per device, and are relayed as part of DeviceAdded/DeviceList messages.
   Client->>+Server: VibrateCmd Id=5
   Server->>-Client: Ok Id=5
   
-  Note over Client,Server: The client may instruct the server to stop a device.
+  Note over Client,Server: The client may instruct the server to stop a device from whatever it may be doing.
   Client->>+Server: StopDeviceCmd Id=6
   Server->>-Client: Ok Id=6
   
-  Note over Client,Server: The client may also instruct the server to stop all devices. This is good form for a client that is shutting down.
+  Note over Client,Server: The client may instruct the server to stop all devices. This is considered good form for a client that is shutting down.
   Client->>+Server: StopAllDevices Id=7
   Server->>-Client: Ok Id=7
 ```
