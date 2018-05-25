@@ -54,10 +54,3 @@
   * [FleshlightLaunchFW12Cmd](specific.md#fleshlightlaunchfw12cmd)
   * [LovenseCmd](specific.md#lovensecmd)
   * [VorzeA10CycloneCmd](specific.md#vorzea10cyclonecmd)
-
----
-
-* [Message JSON Schema](jsonschema.md)
-
-
-
