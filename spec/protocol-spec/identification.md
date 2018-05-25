@@ -1,5 +1,8 @@
-# Identification Messages
+# Handshake Messages
 
+Messages used in the client/server handshake procedure.
+
+---
 ## RequestServerInfo
 
 **Description:** Sent by the client to register itself with the server, and request info from the server.
@@ -74,6 +77,7 @@ sequenceDiagram
 ]
 ```
 
+---
 ## ServerInfo
 
 **Description:** Send by server to client, contains information about the server name \(optional\), template version, and ping time expectations.

@@ -29,7 +29,7 @@
   * [Test](status.md#test)
   * [RequestLog](status.md#requestlog)
   * [Log](status.md#log)
-* [Identification Messages](identification.md)
+* [Handshake Messages](identification.md)
   * [RequestServerInfo](identification.md#requestserverinfo)
   * [ServerInfo](identification.md#serverinfo)
 * [Enumeration Messages](enumeration.md)

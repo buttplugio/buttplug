@@ -1,5 +1,8 @@
 # Specific Device Messages
 
+Messages for controlling specific device brands or models.
+
+---
 ## KiirooCmd
 
 **Description:** Causes a device that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
@@ -40,7 +43,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## FleshlightLaunchFW12Cmd
 
 **Description:** Causes a device that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
@@ -83,7 +86,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## LovenseCmd
 
 **Description:** Causes a device that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
@@ -124,7 +127,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## VorzeA10CycloneCmd
 
 **Description:** Causes a device that supports Vorze A10 Cyclone style commands to run whatever event may be related. More information on Vorze commands can be found in STPIHKAL.
