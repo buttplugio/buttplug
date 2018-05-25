@@ -1,5 +1,8 @@
 # Enumeration Messages
 
+Messages relating to finding and getting information about devices connected to the system.
+
+---
 ## StartScanning
 
 **Description:** Client request to have the server start scanning for devices on all busses that it knows about. Useful for protocols like Bluetooth, which require an explicit discovery phase.
@@ -38,7 +41,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## StopScanning
 
 **Description:** Client request to have the server stop scanning for devices. Useful for protocols like Bluetooth, which may not timeout otherwise.
@@ -80,7 +83,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## ScanningFinished
 
 **Description:** Sent by the server once it has stopped scanning on all busses. Since systems may have timeouts that are not controlled by the server, this is a separate message from the StopScanning flow. ScanningFinished can happen without a StopScanning call.
@@ -119,7 +122,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## RequestDeviceList
 
 **Description:** Client request to have the server send over its known device list, without starting a full scan.
@@ -144,6 +147,7 @@ sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
 ```
+
 **Serialization Example:**
 
 ```json
@@ -155,7 +159,7 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## DeviceList
 
 **Description:** Server reply to a client request for a device list.
@@ -172,8 +176,7 @@ sequenceDiagram
   * _DeviceIndex_ \(unsigned integer\): Index used to identify the device when sending Device Messages.
   * _DeviceMessages_ \(dictionary\): Accepted Device Messages 
     * Keys \(string\): Type names of Device Messages that the device will accept
-    * Values \([MessageAttributes](enumeration.md#messageattributes)
-\): Attributes for the Device Messages.
+    * Values \([Message Attributes](enumeration.md#message-attributes-for-devicelist-and-deviceadded)\): Attributes for the Device Messages.
 
 **Expected Response:**
 
@@ -186,6 +189,7 @@ sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
 ```
+
 **Serialization Example:**
 
 ```json
@@ -263,17 +267,14 @@ sequenceDiagram
   }
 ]
 ```
-
+---
 ## DeviceAdded
 
-**Description:** Sent by the server whenever a device is added to the  
-system. Can happen at any time after identification, as it is assumed  
-many server implementations will support devices with hotplugging  
-capabilities that do not require specific scanning/discovery sessions.
+**Description:** Sent by the server whenever a device is added to the system. Can happen at any time after identification, as it is assumed many server implementations will support devices with hotplugging capabilities that do not require specific scanning/discovery sessions.
 
 **Introduced In Version:** 0
 
-**Message Version:** 1
+### DeviceAdded Message Version 1
 
 **Fields:**
 
@@ -283,8 +284,7 @@ capabilities that do not require specific scanning/discovery sessions.
   when sending Device Messages.
 * _DeviceMessages_ \(dictionary\): Accepted Device Messages 
   * Keys \(string\): Type names of Device Messages that the device will accept
-  * Values \([MessageAttributes](enumeration.md#messageattributes)
-\): Attributes for the Device Messages.
+  * Values \([Message Attributes](enumeration.md#message-attributes-for-devicelist-and-deviceadded)\): Attributes for the Device Messages.
 
 **Expected Response:**
 
@@ -318,7 +318,7 @@ sequenceDiagram
 ]
 ```
 
-**Message Version:** 0
+### DeviceAdded Message Version 0
 
 **Fields:**
 
@@ -356,7 +356,16 @@ sequenceDiagram
   }
 ]
 ```
+---
+## Message Attributes for DeviceList and DeviceAdded
 
+**Description:** A collection of message attributes. This object is always the child of a Device Message type name within a [DeviceList](enumeration.md#devicelist) or [DeviceAdded](enumeration.md#deviceadded) message. Not all attributes are relevant for all Device Messages on all Devices; in these cases the attributes will not be included.
+
+**Attributes:**
+
+* _FeatureCount_ \(unsigned int\): Number of features the Device Message may address. This attribute is used to define the capabilities of generic device control messages. The meaning of "feature" is specific to the context of the message the attribute is attached to. For instance, the FeatureCount attribute of a VibrateCmd message will refer to the number of vibration motors that can be controlled on a device advertising the VibrateCmd message.
+
+---
 ## DeviceRemoved
 
 **Description:** Sent by the server whenever a device is removed from  
@@ -396,12 +405,3 @@ sequenceDiagram
   }
 ]
 ```
-
-### MessageAttributes
-
-**Description:** A collection of message attributes. This object is always the child of a Device Message type name within a [DeviceList](enumeration.md#devicelist) or [DeviceAdded](enumeration.md#deviceadded) message. Not all attributes are relevant for all Device Messages on all Devices; in these cases the attributes will not be included.
-
-**Attributes:**
-
-* _FeatureCount_ \(unsigned int\): Number of features the Device Message may address. This attribute is used to define the capabilities of generic device control messages. The meaning of "feature" is specific to the context of the message the attribute is attached to. For instance, the FeatureCount attribute of a VibrateCmd message will refer to the number of vibration motors that can be controlled on a device advertising the VibrateCmd message.
-

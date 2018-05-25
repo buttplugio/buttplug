@@ -62,15 +62,15 @@ Similarly, some message values will have certain bounds and limitations. These a
 
 ## Adding New Messages
 
-The message list as described here is not set in stone. New messages will be added as new devices are released, or as new generic messages are deemed necessary. The only rule is that once a message is added to this document, it should never be removed; however, newer versions of the message may suceed it. This will allow parsing and schema checking to be as strict as possible. If edits to a message need to be made, a new message type will most likely be added.
+The message list as described here is not set in stone. New messages will be added as new devices are released, or as new generic messages are deemed necessary. The only rule is that once a message is added to this document, it should never be removed; however, newer versions of the message may succeed it. This will allow parsing and schema checking to be as strict as possible. If edits to a message need to be made, a new message type will most likely be added.
 
 Requests for new messages can be submitted to [the Buttplug Standard Github Issue Tracker](https://github.com/metafetish/buttplug/issues).
 
 ## Message Versioning
 
-Each protocol message type has a version number, to cope with protocol version differences between servers and clients. This version is based on the protocol version the message was introduced in, and is represented as an unsigned integer. 
+To cope with protocol version differences between servers and clients, each protocol message type has a version number. The message version number is based on the protocol version the message was introduced in, and is represented as an unsigned integer. 
 
-To establish protocol versions between clients and servers, the client sends the overall protocol message version as part of the [RequestServerInfo](identification.md#requestserverinfo) message (as the MessageVersion field), and the server includes its protocol version in the [RequestServerInfo](identification.md#serverinfo) response (as the MessageVersion field). 
+To establish protocol versions between clients and servers, the client sends the protocol message version as part of the [RequestServerInfo](identification.md#requestserverinfo) message (as the MessageVersion field), and the server includes its protocol version in the [ServerInfo](identification.md#serverinfo) response (as the MessageVersion field). 
 
 If a server supports a newer protocol version than a client, any messages that the server attempts to send will be checked against the client protocol version, and either downgraded to a previous version where possible, or simply dropped. Server support for downgrading a message is optional, and it is not expected that all servers will support downgrading through all versions of the protocol. If a server implementation does not have downgrade capabilities, it should disconnect clients with lower schema versions.
 
