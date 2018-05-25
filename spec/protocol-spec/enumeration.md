@@ -166,7 +166,7 @@ sequenceDiagram
 
 **Introduced In Version:** 0
 
-**Message Version:** 1
+**Message Version:** 1 (See [Deprecated Messages](deprecated.md#devicelist-version-0) for older versions.)
 
 **Fields:**
 
@@ -222,51 +222,6 @@ sequenceDiagram
 ]
 ```
 
-**Message Version:** 0
-
-**Fields:**
-
-* _Id_ \(unsigned int\): Message Id
-* _Devices_ \(array\): Array of device objects
-  * _DeviceName_ \(string\): Descriptive name of the device
-  * _DeviceIndex_ \(unsigned integer\): Index used to identify the device when sending Device Messages.
-  * _DeviceMessages_ \(array of strings\): Type names of Device Messages that the device will accept.
-
-**Expected Response:**
-
-None. Server-to-Client message only.
-
-**Flow Diagram:**
-
-```mermaid
-sequenceDiagram
-    Client->>+Server: RequestDeviceList Id=1
-    Server->>-Client: DeviceList Id=1
-```
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "DeviceList": {
-      "Id": 1,
-      "Devices": [
-        {
-          "DeviceName": "TestDevice 1",
-          "DeviceIndex": 0,
-          "DeviceMessages": ["SingleMotorVibrateCmd", "RawCmd", "KiirooCmd", "StopDeviceCmd"]
-        },
-        {
-          "DeviceName": "TestDevice 2",
-          "DeviceIndex": 1,
-          "DeviceMessages": ["SingleMotorVibrateCmd", "LovenseCmd", "StopDeviceCmd"]
-        }
-      ]
-    }
-  }
-]
-```
 ---
 ## DeviceAdded
 
@@ -274,7 +229,7 @@ sequenceDiagram
 
 **Introduced In Version:** 0
 
-### DeviceAdded Message Version 1
+**Message Version**: 1 (See [Deprecated Messages](deprecated.md#deviceadded-version-0) for older versions.)
 
 **Fields:**
 
@@ -318,44 +273,6 @@ sequenceDiagram
 ]
 ```
 
-### DeviceAdded Message Version 0
-
-**Fields:**
-
-* _Id_ \(unsigned int\): Message Id
-* _DeviceName_ \(string\): Descriptive name of the device
-* _DeviceIndex_ \(unsigned integer\): Index used to identify the device
-  when sending Device Messages.
-* _DeviceMessages_ \(array of strings\): Type names of Device Messages
-  that the device will accept.
-
-**Expected Response:**
-
-None. Server-to-Client message only.
-
-**Flow Diagram:**
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    Server->>Client: DeviceAdded Id=0
-```
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "DeviceAdded": {
-      "Id": 0,
-      "DeviceName": "TestDevice 1",
-      "DeviceIndex": 0,
-      "DeviceMessages": ["SingleMotorVibrateCmd", "RawCmd", "KiirooCmd", "StopDeviceCmd"]
-    }
-  }
-]
-```
 ---
 ## Message Attributes for DeviceList and DeviceAdded
 

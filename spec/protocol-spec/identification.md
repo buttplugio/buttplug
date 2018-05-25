@@ -9,7 +9,7 @@ Messages used in the client/server handshake procedure.
 
 **Introduced In Version:** 0
 
-**Message Version:** 1
+**Message Version:** 1 (See [Deprecated Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
 
 **Fields:**
 
@@ -43,40 +43,6 @@ sequenceDiagram
   }
 ]
 ```
-
-**Message Version:** 0
-
-**Fields:**
-
-* _Id_ \(unsigned int\): Message Id
-* _ClientName_ \(string\): Name of the client, for the server to use for UI if needed. Cannot be null.
-
-**Expected Response:**
-
-* ServerInfo message on success
-* Error message on malformed message, null client name, or other error.
-
-**Flow Diagram:**
-
-```mermaid
-sequenceDiagram
-    Client->>Server: RequestServerInfo Id=0
-    Server->>Client: ServerInfo Id=0
-```
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "RequestServerInfo": {
-      "Id": 1,
-      "ClientName": "Test Client"
-    }
-  }
-]
-```
-
 ---
 ## ServerInfo
 

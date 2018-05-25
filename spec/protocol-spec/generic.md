@@ -120,49 +120,6 @@ sequenceDiagram
 ]
 ```
 ---
-## SingleMotorVibrateCmd
-
-**Deprecated:** This message has been superseded by [VibrateCmd](generic.md#vibratecmd)
-
-**Description:** Causes a device that supports vibration to run all vibration motors at a certain speed.
-
-**Introduced In Version:** 0
-
-**Message Version:** 0
-
-**Fields:**
-
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Speed_ \(double\): Vibration speed with a range of \[0.0-1.0\]
-
-**Expected Response:**
-
-* Ok message with matching Id on successful request.
-* Error message on value or message error.
-
-**Flow Diagram:**
-
-```mermaid
-sequenceDiagram
-    Client->>+Server: SingleMotorVibrateCmd Id=1
-    Server->>-Client: Ok Id=1
-```
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "SingleMotorVibrateCmd": {
-      "Id": 1,
-      "DeviceIndex": 0,
-      "Speed": 0.5
-    }
-  }
-]
-```
----
 ## VibrateCmd
 
 **Description:** Causes a device that supports vibration to run specific vibration motors at a certain speeds. Devices with multiple vibrator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will contain that information.
