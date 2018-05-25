@@ -1425,9 +1425,9 @@ gitbook-plugin-lunr@1.2.0:
     html-entities "1.2.0"
     lunr "0.5.12"
 
-gitbook-plugin-mermaid-gb3@^2.1.0:
+"gitbook-plugin-mermaid-gb3@git+https://github.com/galdo666/gitbook-plugin-mermaid-gb3.git#050021acf578d886e65cadb74505a7a43be3a031":
   version "2.1.0"
-  resolved "https://registry.yarnpkg.com/gitbook-plugin-mermaid-gb3/-/gitbook-plugin-mermaid-gb3-2.1.0.tgz#f2efc846021e527295d5fb723093e5db25f796a0"
+  resolved "git+https://github.com/galdo666/gitbook-plugin-mermaid-gb3.git#050021acf578d886e65cadb74505a7a43be3a031"
   dependencies:
     mermaid "^7.0.7"
 

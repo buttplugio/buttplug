@@ -20,7 +20,7 @@
     "gitbook": "^3.2.3",
     "gitbook-cli": "^2.3.2",
     "gitbook-plugin-piwik": "^0.2.1",
-    "gitbook-plugin-mermaid-gb3": "^2.1.0",
+    "gitbook-plugin-mermaid-gb3": "git+https://github.com/galdo666/gitbook-plugin-mermaid-gb3.git#050021acf578d886e65cadb74505a7a43be3a031",
     "yarn": "^1.7.0"
   }
 }
