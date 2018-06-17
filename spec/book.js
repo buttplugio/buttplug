@@ -17,9 +17,7 @@ if (process.env.CI) {
   module.exports["pluginsConfig"] = {
     "piwik": {
       "URL": "matomo.nonpolynomial.com/",
-      "siteId": 7,
-      "phpPath": "js/",
-      "jsPath": "js/"
+      "siteId": 7
     }
   };
 }
