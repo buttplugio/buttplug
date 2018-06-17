@@ -16,7 +16,7 @@ if (process.env.CI) {
   module.exports["plugins"].push("piwik");
   module.exports["pluginsConfig"] = {
     "piwik": {
-      "URL": "apps.nonpolynomial.com/p/",
+      "URL": "matomo.nonpolynomial.com/",
       "siteId": 7,
       "phpPath": "js/",
       "jsPath": "js/"
