@@ -31,14 +31,14 @@ developer, so they can concentrate on creating new and interesting
 interfaces, applications, games, and other software.
 
 HTML rendered version of the Protocol Spec is at
-[https://docs.buttplug.io/buttplug](https://docs.buttplug.io/buttplug).
+[https://buttplug-spec.docs.buttplug.io/](https://buttplug-spec.docs.buttplug.io/).
 
-More information on Buttplug and the hardware it supports can be found
-at [https://buttplug.io](https://buttplug.io).
+More information on the Buttplug project can be found at at
+[https://buttplug.io](https://buttplug.io).
 
 ## Talk To Us!
 
-If you're interested in Buttplug Development, check out our [discord server](https://discord.gg/t9g9RuD)!
+If you're interested in Buttplug Development, check out our [discord server](https://discord.buttplug.io)!
 
 We've also got a Slack instance. You can request an invite by [DMing the Buttplug account on Twitter](https://twitter.com/buttplugio).
 
@@ -65,16 +65,16 @@ and it is updated on every commit to master.
 
 ### Protocol, Schema, and System Documentation
 
-- [Buttplug Protocol Spec](http://github.com/metafetish/buttplug): Repo containing
+- [Buttplug Protocol Spec](http://github.com/buttplugio/buttplug): Repo containing
   the specification document for the Buttplug sex toy control
   protocol.
-- [Buttplug Protocol JSON Schema](http://github.com/metafetish/buttplug-schema):
+- [Buttplug Protocol JSON Schema](http://github.com/buttplugio/buttplug-schema):
   JSON Schema for the Buttplug Protocol Standard. Usually subtree'd
   into server/client implementations.
-- [Buttplug Developer Guide](http://github.com/metafetish/buttplug-developer-guide):
+- [Buttplug Developer Guide](http://github.com/buttplugio/buttplug-developer-guide):
   Manual for developing applications that use Buttplug, as well as
   information on Buttplug Client and Server architecture.
-- [STPIHKAL](http://github.com/metafetish/stpihkal): "Sex Toy
+- [STPIHKAL](http://github.com/buttplugio/stpihkal): "Sex Toy
   Protocols I Have Known And Loved", a book containing low-level
   proprietary protocol specifications for sex toys and sex hardware,
   as well as movie synchronization formats and other miscellaneous
@@ -90,17 +90,17 @@ and it is updated on every commit to master.
 
 ### Server Implementations
 
-- [buttplug-csharp](http://github.com/metafetish/buttplug-csharp):
+- [buttplug-csharp](http://github.com/buttplugio/buttplug-csharp):
   C#/.Net implementation of the Buttplug Server for Win7/10
   - Status: Stable
   - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team
-- [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript/Typescript 
+- [buttplug-js](http://github.com/buttplugio/buttplug-js): Javascript/Typescript 
   implementation of the Buttplug Server for Web (using WebBluetooth) and Node.js
   - Status: Stable
   - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team
-- [buttplug-rs](http://github.com/metafetish/buttplug-rs): Rust
+- [buttplug-rs](http://github.com/buttplugio/buttplug-rs): Rust
   implementation of the Buttplug Server.
   - Status: Under development, needs to be brought up to date with the new
     JSON schema.
@@ -133,22 +133,20 @@ and it is updated on every commit to master.
   Haptic Video player.
 - [LaunchControl](http://github.com/funjack/launchcontrol): Go Haptic
   Video Player and Launch Control Scripts.
-- [buttplug-twine](https://github.com/metafetish/buttplug-twine):
+- [buttplug-twine](https://github.com/buttplugio/buttplug-twine):
   Twine v2 macros for using buttplug-js with Twine stories.
 
 ## Support The Project
 
-If you find this project helpful, you
-can
-[support Metafetish projects via Patreon](http://patreon.com/qdot)!
-Every donation helps us afford more hardware to reverse, document, and
-write code for!
+If you find this project helpful, you can [support us via
+Patreon](http://patreon.com/qdot)! Every donation helps us afford more
+hardware to reverse, document, and write code for!
 
 ## License
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016, Metafetish
+    Copyright (c) 2016-2018, Nonpolynomial Labs, LLC
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
