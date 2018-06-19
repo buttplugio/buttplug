@@ -4,7 +4,6 @@ node_js:
 - 9
 install:
 - yarn
-- npm i -g travis-ci-cloudfront-invalidation
 script:
 - yarn build
 cache:
@@ -17,18 +16,3 @@ deploy:
   on:
     repo: metafetish/buttplug
     branch: master
-- provider: s3
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key: $AWS_SECRET_KEY
-  bucket: docs.buttplug.io
-  region: us-west-1
-  acl: public_read
-  local_dir: _book
-  skip_cleanup: true
-  upload-dir: buttplug
-  on:
-    repo: metafetish/buttplug
-    branch: master
-after_deploy:
-- travis-ci-cloudfront-invalidation -a $AWS_ACCESS_KEY -s $AWS_SECRET_KEY -c $AWS_CLOUDFRONT_DIST_ID -i '/buttplug/*' -b $TRAVIS_BRANCH -p $TRAVIS_PULL_REQUEST
-    
