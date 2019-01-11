@@ -13,6 +13,13 @@ module.exports = {
     ]
   },
   plugins: [
+    [
+      "protocol-spec/.vuepress/plugin-matomo",
+      {
+        'siteId': 7,
+        'trackerUrl': "https://matomo.nonpolynomial.com/"
+      }
+    ],
     "@vuepress/plugin-back-to-top"
   ]
 };
