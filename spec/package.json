@@ -19,7 +19,6 @@
   "homepage": "https://github.com/metafetish/buttplug#readme",
   "dependencies": {
     "mermaid": "^8.0.0",
-    "vue-matomo": "^3.7.0-1",
     "vuepress": "^0.14.8",
     "yarn": "^1.12.3"
   }
