@@ -11,5 +11,8 @@ module.exports = {
       "/specific.md",
       "/deprecated.md",
     ]
-  }
+  },
+  plugins: [
+    "@vuepress/plugin-back-to-top"
+  ]
 };
