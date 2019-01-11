@@ -24,11 +24,11 @@ Messages for controlling specific device brands or models.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: KiirooCmd Id=1
     Server->>Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -66,11 +66,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: FleshlightLaunchFW12Cmd Id=1
     Server->>Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -108,11 +108,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: LovenseCmd Id=1
     Server->>Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -150,11 +150,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: VorzeA10CycloneCmd Id=1
     Server->>Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 

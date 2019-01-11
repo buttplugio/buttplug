@@ -28,11 +28,11 @@ While some older versions of messages are not required to be implemented unless 
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: SingleMotorVibrateCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -73,11 +73,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -124,12 +124,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     participant Client
     participant Server
     Server->>Client: DeviceAdded Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -168,11 +168,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 

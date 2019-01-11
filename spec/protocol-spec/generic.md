@@ -23,11 +23,11 @@ Generic device messages pertain to classes of devices, versus specific devices. 
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: StopDeviceCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -61,11 +61,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: StopAllDevices Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -100,11 +100,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: RawCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -143,11 +143,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: VibrateCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -196,11 +196,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: LinearCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -251,11 +251,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: RotateCmd Id=1
     Server->>-Client: Ok Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 

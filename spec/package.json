@@ -1,10 +1,11 @@
 {
   "name": "buttplug-protocol-docs",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Buttplug Protocol Specification",
   "main": "index.js",
   "scripts": {
-    "build": "gitbook build"
+    "dev": "vuepress dev protocol-spec",
+    "build": "vuepress build protocol-spec"
   },
   "repository": {
     "type": "git",
@@ -16,11 +17,10 @@
     "url": "https://github.com/metafetish/buttplug/issues"
   },
   "homepage": "https://github.com/metafetish/buttplug#readme",
-  "devDependencies": {
-    "gitbook": "^3.2.3",
-    "gitbook-cli": "^2.3.2",
-    "gitbook-plugin-piwik": "git+https://github.com/qdot/gitbook-plugin-piwik",
-    "gitbook-plugin-mermaid-gb3": "git+https://github.com/galdo666/gitbook-plugin-mermaid-gb3.git#050021acf578d886e65cadb74505a7a43be3a031",
-    "yarn": "^1.7.0"
+  "dependencies": {
+    "mermaid": "^8.0.0",
+    "vue-matomo": "^3.7.0-1",
+    "vuepress": "^0.14.8",
+    "yarn": "^1.12.3"
   }
 }

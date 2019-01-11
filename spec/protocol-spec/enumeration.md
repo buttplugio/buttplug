@@ -22,13 +22,13 @@ Messages relating to finding and getting information about devices connected to 
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: StartScanning Id=1
     Server->>-Client: Ok Id=1
     Server->>Client: DeviceAdded Id=0
     Server->>Client: DeviceAdded Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -61,7 +61,7 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: StartScanning Id=1
     Server->>-Client: Ok Id=1
@@ -70,7 +70,7 @@ sequenceDiagram
     Client->>+Server: StopScanning Id=2
     Server->>-Client: Ok Id=2
     Server->>Client: ScanningFinished Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -102,14 +102,14 @@ None. Server-to-Client only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: StartScanning Id=1
     Server->>-Client: Ok Id=1
     Server->>Client: DeviceAdded Id=0
     Server->>Client: DeviceAdded Id=0
     Server->>Client: ScanningFinished Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -142,11 +142,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -184,11 +184,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -247,12 +247,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     participant Client
     participant Server
     Server->>Client: DeviceAdded Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -304,12 +304,13 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     participant Client
     participant Server
     Server->>Client: DeviceRemoved Id=0
-```
+</mermaid>
+
 **Serialization Example:**
 
 ```json

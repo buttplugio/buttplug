@@ -28,50 +28,50 @@ Once devices are found and selected, we can assume the user will begin interacti
 
 The following lifecycle covers the general message flow expected between a Buttplug client and a Buttplug server.
 
-```mermaid
+<mermaid>
 sequenceDiagram
   Participant Client
   Participant Server
-  
-  Note over Client,Server: Once a connection is established, perform the protocol handshake, which exchanges information about identification, versions, ping times, etc...
+&nbsp;
+  Note over Client,Server: Once a connection is established,<br/>perform the protocol handshake,<br/>which exchanges information<br/>about identification, versions,<br/>ping times, etc...
   Client->>+Server: RequestServerInfo Id=1
   Server->>-Client: ServerInfo Id=1
-  
-  Note over Client,Server: If the server has a non-zero PingTimeout, the client must send a ping message to the server before the specified timeout. A common strategy is to set the client Ping time to 1/2 the requested server ping time.
+&nbsp;
+  Note over Client,Server: If the server has a non-zero<br/>PingTimeout, the client must send<br/>a ping message to theserver<br/>before the specified timeout.<br/>A common strategy is to set<br/>the client Ping time to 1/2 the<br/>requested server ping time.
   loop [PingTime/2]
     Client->>+Server: Ping ID=N++
     Server->>-Client: Ok ID=N++
   end
-
-  Note over Client,Server: The client must call RequestDeviceList to get a list of already connected devices.
+&nbsp;
+  Note over Client,Server: The client calls RequestDeviceList<br/>to get a list of already connected<br/>devices.
   Client->>+Server: RequestDeviceList Id=2
   Server->>-Client: DeviceList Id=2
-  
-  Note over Client,Server: To discover new devices, the client instructs the server to start scanning.
+&nbsp;  
+  Note over Client,Server: To discover new devices, the client<br/>instructs the server to start<br/>scanning.
   Client->>+Server: StartScanning Id=3
   Server->>-Client: Ok Id=3
-  
-  Note over Client,Server: While the server is scanning, the server will notify the client of new devices.
+&nbsp;  
+  Note over Client,Server: While the server is scanning, the<br/>server will notify the client of new</br>devices.
   Server->>Client: DeviceAdded Id=0
   Server->>Client: DeviceAdded Id=0
-  
-  Note over Client,Server: Once devices have been discovered, the client instruct the server to stop scanning. Once all device managers have stopped scanning, the server will notify the client.
+&nbsp;  
+  Note over Client,Server: Once devices have been discovered,<br/> the client instruct the server to</br> stop scanning. Once all device<br/>managers have stopped scanning,<br/>the server will notify the client.
   Client->>+Server: StopScanning Id=4
   Server->>-Client: Ok Id=4
   Server->>Client: ScanningFinished Id=0
-  
-  Note over Client,Server: Devices may disconnect at any time. The server will notify the client when this happens.
+&nbsp;  
+  Note over Client,Server: Devices may disconnect at any time.<br/>The server will notify the client<br/>when this happens.
   Server->>Client: DeviceRemoved Id=0
-  
-  Note over Client,Server: The client may instruct devices to perform actions. Actions vary per device, and are relayed as part of DeviceAdded/DeviceList messages.
+&nbsp;  
+  Note over Client,Server: The client may instruct devices to<br/>perform actions. Actions vary per<br/>device. Device capabilities are<br/>relayed as part of DeviceAdded and<br/>DeviceList messages.
   Client->>+Server: VibrateCmd Id=5
   Server->>-Client: Ok Id=5
-  
-  Note over Client,Server: The client may instruct the server to stop a device from whatever it may be doing.
+&nbsp;  
+  Note over Client,Server: The client may instruct the server to<br/>stop a device from whatever it<br/>may be doing.
   Client->>+Server: StopDeviceCmd Id=6
   Server->>-Client: Ok Id=6
-  
-  Note over Client,Server: The client may instruct the server to stop all devices. This is considered good form for a client that is shutting down.
+&nbsp;  
+  Note over Client,Server: The client may instruct the server to<br/>stop all devices. This is considered<br/> good form for a client that is<br/>shutting down.
   Client->>+Server: StopAllDevices Id=7
   Server->>-Client: Ok Id=7
-```
+</mermaid>

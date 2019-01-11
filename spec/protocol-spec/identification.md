@@ -24,11 +24,11 @@ Messages used in the client/server handshake procedure.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
@@ -68,11 +68,11 @@ None. Server-To-Client message only.
 
 **Flow Diagram:**
 
-```mermaid
+<mermaid>
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-```
+</mermaid>
 
 **Serialization Example:**
 
