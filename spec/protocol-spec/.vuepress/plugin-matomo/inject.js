@@ -1,4 +1,4 @@
-/* global MATOMO_SITE_ID, MATOMO_TRACKER_URL, MATOMO_ENABLE_LINK_TRACKING */
+/* global MATOMO_SITE_ID, MATOMO_TRACKER_URL, MATOMO_ENABLE_LINK_TRACKING, _paq */
 
 export default ({ router }) => {
   // Google analytics integration
