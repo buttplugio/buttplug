@@ -7331,10 +7331,10 @@ vuepress-html-webpack-plugin@^3.2.0:
     toposort "^1.0.0"
     util.promisify "1.0.0"
 
-vuepress-plugin-matomo@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/vuepress-plugin-matomo/-/vuepress-plugin-matomo-1.0.0.tgz#0b4920f29a2433e6be9d423ed0ee3bf69ae6dcf8"
-  integrity sha512-YZQrD4jZKF533olD3IMrbyOUo3QzHLmqkHxjPshb2XAGMW52Ekm9tsiAq+zgqqcnn58h7P/OgsyvnuCi02vSrw==
+vuepress-plugin-matomo@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/vuepress-plugin-matomo/-/vuepress-plugin-matomo-1.0.1.tgz#5add6b22ab677fd032c29cbccf4a43ab6aa38176"
+  integrity sha512-5rc1eJiinaQD5ZkDTEvN3AjY3kD/OG/dyaGkILkXNRbtmxCWQUwvzeB3da5PXM5ZVGjasK9vIsIdxBjIDB5M6Q==
 
 vuepress@^1.0.0-alpha.31:
   version "1.0.0-alpha.31"
@@ -7585,10 +7585,10 @@ yargs-parser@^10.0.0:
   dependencies:
     camelcase "^4.1.0"
 
-yarn@^1.12.3:
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.12.3.tgz#fb4599bf1f8da01552bcc7e1571dfd4e53788203"
-  integrity sha512-8f5rWNDvkhAmCxmn8C0LsNWMxTYVk4VGKiq0sIB6HGZjaZTHsGIH87SUmVDUEd2Wk54bqKoUlbVWgQFCQhRkVw==
+yarn@^1.13.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.13.0.tgz#affa9c956739548024068532a902cf18c9cb523f"
+  integrity sha512-Unfw2eefv8imt4ZMPhvFVP44WCz38huDxkHs+Yqrx4wBTK75Tr0mh3V4rh+2Nw5iQq0rcM/VafotCZo9qTb5DA==
 
 ylru@^1.2.0:
   version "1.2.1"
