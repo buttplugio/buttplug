@@ -7331,6 +7331,11 @@ vuepress-html-webpack-plugin@^3.2.0:
     toposort "^1.0.0"
     util.promisify "1.0.0"
 
+vuepress-plugin-matomo@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/vuepress-plugin-matomo/-/vuepress-plugin-matomo-1.0.0.tgz#0b4920f29a2433e6be9d423ed0ee3bf69ae6dcf8"
+  integrity sha512-YZQrD4jZKF533olD3IMrbyOUo3QzHLmqkHxjPshb2XAGMW52Ekm9tsiAq+zgqqcnn58h7P/OgsyvnuCi02vSrw==
+
 vuepress@^1.0.0-alpha.31:
   version "1.0.0-alpha.31"
   resolved "https://registry.yarnpkg.com/vuepress/-/vuepress-1.0.0-alpha.31.tgz#3c5b6d64fe5eba1de66ba993ff009a8a6ad1595d"
