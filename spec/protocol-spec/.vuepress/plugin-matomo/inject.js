@@ -2,7 +2,7 @@
 
 export default ({ router }) => {
   // Google analytics integration
-  if (MATOMO_SITE_ID && MATOMO_TRACKER_URL) {
+  if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && MATOMO_SITE_ID && MATOMO_TRACKER_URL) {
     var _paq = _paq || [];
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
     _paq.push(['trackPageView']);
