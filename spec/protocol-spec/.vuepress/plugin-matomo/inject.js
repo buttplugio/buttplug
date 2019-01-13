@@ -3,7 +3,12 @@
 export default ({ router }) => {
   // Google analytics integration
   if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && MATOMO_SITE_ID && MATOMO_TRACKER_URL) {
-    var _paq = _paq || [];
+    // We're in SSR space here, meaning that we have to explictly attach _paq to
+    // the window in order to store it globally.
+    if (window._paq == undefined) {
+      window._paq = [];
+    }
+    let _paq = window._paq;
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
     _paq.push(['trackPageView']);
     if (MATOMO_ENABLE_LINK_TRACKING) {
@@ -17,7 +22,8 @@ export default ({ router }) => {
       g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
     })();
     router.afterEach(function (to) {
-      _paq.push(['trackPageView', to.fullPath]);
+      // Use window global here.
+      window._paq.push(['trackPageView', to.fullPath]);
     });
   }
 }
