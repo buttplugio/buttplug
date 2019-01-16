@@ -11,7 +11,8 @@ module.exports = {
       "/generic.md",
       "/specific.md",
       "/deprecated.md",
-    ]
+    ],
+    repo: 'buttplugio/buttplug',
   },
   plugins: [
     [
