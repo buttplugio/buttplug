@@ -25,7 +25,7 @@ module.exports = {
   ],
   evergreen: true,
   title: "Buttplug Protocol Specification",
-a  description: "Specification for the Buttplug Intimate Hardware Control Protocol",
+  description: "Specification for the Buttplug Intimate Hardware Control Protocol",
   head: [
     ['link', { rel: 'icon', href: '/buttplug.svg' }],
     ["meta", {property: "og:type", content:"website"}],
