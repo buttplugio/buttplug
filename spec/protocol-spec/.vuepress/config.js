@@ -7,6 +7,7 @@ module.exports = {
       "/architecture.md",
       "/messages.md",
       "/status.md",
+      "/identification.md",
       "/enumeration.md",
       "/generic.md",
       "/specific.md",
