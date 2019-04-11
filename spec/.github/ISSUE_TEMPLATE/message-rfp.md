@@ -11,6 +11,11 @@ assignees: ''
 
 **Name of Incoming Message, if any:**
 
+**Message Fields:**
+
+- Message Name
+  - Message Field: Type (number, string, array, object, etc), Description
+
 **Describe message usage scenario**
 A clear and concise description of how you see the message being used.
 
