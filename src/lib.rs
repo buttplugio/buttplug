@@ -1,4 +1,3 @@
-#![feature(proc_macro)]
 
 extern crate ws;
 #[macro_use]
@@ -27,6 +26,6 @@ pub fn start_server(config: Config,
                     local_server_loop: Option<mio::deprecated::EventLoop<local_server::LocalServer>>,
                     local_server_loop_tx: Option<std::sync::mpsc::Sender<messages::Message>>)
 {
-    env_logger::init().expect("Failed to init logger");
+    //env_logger::init().expect("Failed to init logger");
     buttplug_server::start_server(config, local_server_loop, local_server_loop_tx);
 }
