@@ -1,13 +1,13 @@
 [package]
 name = "buttplug"
-version = "0.1.0"
-authors = ["Kyle Machulis <kyle@machul.is>"]
+version = "0.0.1"
+authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Cross Platform Sex Toy Control Server"
 license = "BSD-3-Clause"
-homepage = "http://github.com/metafetish/buttplug"
-repository = "https://github.com/metafetish/buttplug.git"
+homepage = "http://buttplug.io"
+repository = "https://github.com/buttplugio/buttplug-rs.git"
 readme = "README.md"
-keywords = ["usb", "serial", "hardware"]
+keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 
 [dependencies]
 clap = {version = "2", features = ["yaml"]}

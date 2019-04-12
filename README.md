@@ -1,12 +1,13 @@
 # Buttplug
 
-[![Build Status](https://travis-ci.org/metafetish/buttplug.svg?branch=master)](https://travis-ci.org/metafetish/buttplug) [![Build status](https://ci.appveyor.com/api/projects/status/g7vtlw95c39in22k?svg=true)](https://ci.appveyor.com/project/qdot/buttplug)
+Rust implementation of the Buttplug Intimate Hardware Protocol,
+including implementations of the client and server.
 
 ## Read Me First!
 
 If you are new to Buttplug, you most likely want to start with the
 [Buttplug Website](https://buttplug.io) or the [Buttplug Core
-Repo](https://github.com/metafetish/buttplug).
+Repo](https://github.com/buttplugio/buttplug).
 
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
@@ -42,7 +43,7 @@ network ports, to claim and interact with the hardware.
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016, Metafetish
+    Copyright (c) 2016, Nonpolynomial Labs, LLC
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
