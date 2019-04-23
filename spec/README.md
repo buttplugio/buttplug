@@ -40,9 +40,7 @@ More information on the Buttplug project can be found at at
 
 If you're interested in Buttplug Development, check out our [discord server](https://discord.buttplug.io)!
 
-We've also got a Slack instance. You can request an invite by [DMing the Buttplug account on Twitter](https://twitter.com/buttplugio).
-
-Finally, there's a message board for development and support at [metafetish.club](https://metafetish.club).
+There's also a message board for development and support at [metafetish.club](https://metafetish.club).
 
 ## Building The Protocol Documents
 
