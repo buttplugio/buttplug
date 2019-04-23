@@ -15,7 +15,8 @@ been deprecated.
 ### SingleMotorVibrateCmd
 
 **Reason for Deprecation:** Superceded by
-[VibrateCmd](generic.md#vibratecmd). Should most likely still be
+[VibrateCmd](generic.md#vibratecmd), which provided granular control
+of an unlimited number of motors. Should most likely still be
 implemented in servers, in order to support older applications, but is
 not recommended for use in new client applications.
 
@@ -23,8 +24,6 @@ not recommended for use in new client applications.
 vibration motors at a certain speed.
 
 **Introduced In Spec Version:** 0
-
-**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -62,13 +61,13 @@ sequenceDiagram
 ---
 ## DeviceList Version 0
 
-**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration.md#devicelist).
+**Reason for Deprecation:** Superceded by [DeviceList Version
+1](enumeration.md#devicelist), which provides more information about
+feature limits of generic messages.
 
 **Description:** Server reply to a client request for a device list.
 
 **Introduced In Spec Version:** 0
-
-**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -116,9 +115,11 @@ sequenceDiagram
 ---
 ### DeviceAdded Version 0
 
-**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration.md#devicelist).
+**Reason for Deprecation:** Superceded by [DeviceList Version
+1](enumeration.md#devicelist), which provides more information about
+feature limits of generic messages.
 
-**Last Updated In Spec Version:** 0
+**Introduced In Spec Version:** 0
 
 **Fields:**
 
@@ -159,13 +160,12 @@ sequenceDiagram
 ---
 ### RequestServerInfo Version 0
 
-**Reason for Deprecation:** Superceded by [RequestServerInfo Version 1](identification.md#requestserverinfo).
+**Reason for Deprecation:** Superceded by [RequestServerInfo Version
+1](identification.md#requestserverinfo), adding message version check.
 
 **Description:** Sent by the client to register itself with the server, and request info from the server.
 
-**Introduced In Spec Version:** 0
-
-**Last Updated In Spec Version:** 0
+**Spec Version:** 0
 
 **Fields:**
 
