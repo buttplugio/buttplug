@@ -10,6 +10,7 @@ module.exports = {
       "/identification.md",
       "/enumeration.md",
       "/generic.md",
+      "/sensors.md",
       "/specific.md",
       "/deprecated.md",
     ],
