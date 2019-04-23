@@ -81,7 +81,7 @@ npm run dev
 
 ### Tutorials
 
-- [how-to-buttplug Glitch.come
+- [how-to-buttplug Glitch.com
   project](https://glitch.com/edit/#!/how-to-buttplug?path=README.md) -
   Tutorial project for using buttplug-js for web applications.
 
