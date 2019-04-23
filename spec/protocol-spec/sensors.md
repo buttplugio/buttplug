@@ -23,6 +23,8 @@ buttons, etc.
   matching Id on successful request.
 * Error message on value or message error.
 
+**Flow Diagram:**
+
 <mermaid>
 sequenceDiagram
     Client->>Server: BatteryLevelCmd Id=1
@@ -57,8 +59,9 @@ device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
 
 **Expected Response:**
 
-* BatteryLevelReading message with matching Id on successful request.
-* Error message on value or message error.
+* None. Server-to-Client message only.
+
+**Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
@@ -97,6 +100,8 @@ sequenceDiagram
   matching Id on successful request.
 * Error message on value or message error.
 
+**Flow Diagram:**
+
 <mermaid>
 sequenceDiagram
     Client->>Server: RSSILevelCmd Id=1
@@ -131,8 +136,9 @@ device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
 
 **Expected Response:**
 
-* RSSILevelReading message with matching Id on successful request.
-* Error message on value or message error.
+* None. Server-to-Client message only.
+
+**Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
