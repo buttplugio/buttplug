@@ -45,19 +45,20 @@ There's also a message board for development and support at [metafetish.club](ht
 ## Building The Protocol Documents
 
 To build this document into HTML pages or pdfs, you'll need to use
-gitbook. We have a node package file available to install the version
-we use for development and build the book. Use the following commands
-to set it up.
+[vuepress](https://vuepress.vuejs.org/). We have a node package file
+available to install the version we use for development and build the
+book. Use the following commands to set it up.
 
 ```
 npm install
 npm run build
 ```
 
-This will build the HTML version of the book into the _book directory.
+To see a local version of the protocol docs:
 
-We keep a built version of the HTML version in our gh-pages branch,
-and it is updated on every commit to master.
+```
+npm run dev
+```
 
 ## Buttplug Documentation and Tutorials
 
