@@ -57,15 +57,12 @@ expectations.
 
 **Introduced In Spec Version:** 0
 
-**Last Updated In Spec Version:** 0
+**Last Updated In Spec Version:** 2
 
 **Fields:**
 
 * _Id_ \(unsigned int\): Message Id
 * _ServerName_ \(string\): Name of the server. Can be null \(0-length\).
-* _MajorVersion_ \(uint\): Major version of the server software.
-* _MinorVersion_ \(uint\): Minor version of the server software.
-* _BuildVersion_ \(uint\): Build version of the server software.
 * _MessageVersion_ \(uint\): Message template version of the server software.
 * _MaxPingTime_ \(uint\): Maximum internal for pings from the client,
   in milliseconds. If a client takes to longer than this time between
@@ -91,9 +88,6 @@ sequenceDiagram
     "ServerInfo": {
       "Id": 1,
       "ServerName": "Test Server",
-      "MajorVersion": 1,
-      "MinorVersion": 0,
-      "BuildVersion": 0,
       "MessageVersion": 1,
       "MaxPingTime": 100
     }
