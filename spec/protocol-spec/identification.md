@@ -7,9 +7,9 @@ Messages used in the client/server handshake procedure.
 
 **Description:** Sent by the client to register itself with the server, and request info from the server.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 1 (See [Deprecated Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
+**Last Updated In Spec Version:** 1 (See [Deprecated Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
 
 **Fields:**
 
@@ -48,9 +48,9 @@ sequenceDiagram
 
 **Description:** Send by server to client, contains information about the server name \(optional\), template version, and ping time expectations.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 

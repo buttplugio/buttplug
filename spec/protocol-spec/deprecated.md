@@ -11,9 +11,9 @@ While some older versions of messages are not required to be implemented unless 
 
 **Description:** Causes a device that supports vibration to run all vibration motors at a certain speed.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -55,9 +55,9 @@ sequenceDiagram
 
 **Description:** Server reply to a client request for a device list.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -107,7 +107,7 @@ sequenceDiagram
 
 **Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration.md#devicelist).
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -152,9 +152,9 @@ sequenceDiagram
 
 **Description:** Sent by the client to register itself with the server, and request info from the server.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 

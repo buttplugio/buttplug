@@ -7,9 +7,9 @@ Messages relaying different statuses, including communication statuses, connecti
 
 **Description:** Signifies that the previous message sent by the client was received and processed successfully by the server.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -43,9 +43,9 @@ sequenceDiagram
 
 **Description:** Signifies that the previous message sent by the client caused some sort of parsing or processing error on the server.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -97,9 +97,9 @@ sequenceDiagram
 
 This will handle cases like the client crashing without a proper disconnect. This is not a guaranteed global failsafe, since it will not guard against problems like a client UI thread locking up while a client communication thread continues to work.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -134,9 +134,9 @@ sequenceDiagram
 
 **Description:** The Test message is used for development and testing purposes. Sending a Test message with a string to the server will cause the server to return a Test message. If the string is "Error", the server will return an error message instead.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -173,9 +173,9 @@ sequenceDiagram
 
 **Description:** Requests that the server send all internal log messages to the client. Useful for debugging.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -219,9 +219,9 @@ sequenceDiagram
 
 **Description:** Log message from the server. Only sent after the client has sent a RequestLog message with a level other than "Off".
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 

@@ -7,14 +7,14 @@ Generic device messages pertain to classes of devices, versus specific devices. 
 
 **Description:** Client request to have the server stop a device from whatever actions it may be taking. This message should be supported by all devices, and the server should know how to stop any device it supports.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device to stop.
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device to stop.
 
 **Expected Response:**
 
@@ -44,15 +44,15 @@ sequenceDiagram
 ---
 ## StopAllDevices
 
-**Description:** Sent by the client to tell the server to stop all devices. Can be used for emergency situations, on client shutdown for cleanup, etc… While this is considered a Device Message, since it pertains to all currently connected devices, it does not specify a device index \(and does not end with 'Cmd'\).
+**Description:** Sent by the client to tell the server to stop all devices. Can be used for emergency situations, on client shutdown for cleanup, etc… While this is considered a Device Message, since it pertains to all currently connected devices, it does not specify a device index (and does not end with 'Cmd').
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
+* _Id_ (unsigned int): Message Id
 
 **Expected Response:**
 
@@ -83,15 +83,15 @@ sequenceDiagram
 
 **Description:** Used to send a raw byte string to a device. Should only be used for development, and should not be exposed to untrusted clients.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(Array of bytes\): Command to send, array of ints with a range of \[0-255\]. Minimum length is 1.
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (Array of bytes): Command to send, array of ints with a range of [0-255]. Minimum length is 1.
 
 **Expected Response:**
 
@@ -124,17 +124,17 @@ sequenceDiagram
 
 **Description:** Causes a device that supports vibration to run specific vibration motors at a certain speeds. Devices with multiple vibrator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will contain that information.
 
-**Introduced In Version:** 1
+**Introduced In Spec Version:** 1
 
-**Message Version:** 1
+**Last Updated In Spec Version:** 1
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Speeds_ \(array\): Vibration speeds
-  * _Index_ \(unsigned int\): Index of vibration motor
-  * _Speed_ \(double\): Vibration speed with a range of \[0.0-1.0\]
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Speeds_ (array): Vibration speeds
+  * _Index_ (unsigned int): Index of vibration motor
+  * _Speed_ (double): Vibration speed with a range of [0.0-1.0]
 
 **Expected Response:**
 
@@ -176,18 +176,18 @@ sequenceDiagram
 
 **Description:** Causes a device that supports linear movement to move to a position over a certain amount of time. Devices with multiple linear actuator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will contain that information.
 
-**Introduced In Version:** 1
+**Introduced In Spec Version:** 1
 
-**Message Version:** 1
+**Last Updated In Spec Version:** 1
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Vectors_ \(array\): Linear actuator speeds and positions
-  * _Index_ \(unsigned int\): Index of linear actuator
-  * _Duration_ \(unsigned int\): Movement time in milliseconds
-  * _Position_ \(double\): Target position with a range of \[0.0-1.0\]
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Vectors_ (array): Linear actuator speeds and positions
+  * _Index_ (unsigned int): Index of linear actuator
+  * _Duration_ (unsigned int): Movement time in milliseconds
+  * _Position_ (double): Target position with a range of [0.0-1.0]
 
 **Expected Response:**
 
@@ -231,18 +231,18 @@ sequenceDiagram
 
 **Description:** Causes a device that supports rotation to rotate at a certain speeds in specified directions. Devices with multiple rotating features may have multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will have this information.
 
-**Introduced In Version:** 1
+**Introduced In Spec Version:** 1
 
-**Message Version:** 1
+**Last Updated In Spec Version:** 1
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Rotations_ \(array\): Rotation speeds
-  * _Index_ \(unsigned int\): Index of rotation motor
-  * _Speed_ \(double\): Rotation speed with a range of \[0.0-1.0\]
-  * _Clockwise_ \(boolean\): Direction of rotation \(clockwise may be subjective\)
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Rotations_ (array): Rotation speeds
+  * _Index_ (unsigned int): Index of rotation motor
+  * _Speed_ (double): Rotation speed with a range of [0.0-1.0]
+  * _Clockwise_ (boolean): Direction of rotation (clockwise may be subjective)
 
 **Expected Response:**
 

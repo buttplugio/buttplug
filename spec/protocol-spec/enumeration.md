@@ -7,9 +7,9 @@ Messages relating to finding and getting information about devices connected to 
 
 **Description:** Client request to have the server start scanning for devices on all busses that it knows about. Useful for protocols like Bluetooth, which require an explicit discovery phase.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -46,9 +46,9 @@ sequenceDiagram
 
 **Description:** Client request to have the server stop scanning for devices. Useful for protocols like Bluetooth, which may not timeout otherwise.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -88,9 +88,9 @@ sequenceDiagram
 
 **Description:** Sent by the server once it has stopped scanning on all busses. Since systems may have timeouts that are not controlled by the server, this is a separate message from the StopScanning flow. ScanningFinished can happen without a StopScanning call.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -127,9 +127,9 @@ sequenceDiagram
 
 **Description:** Client request to have the server send over its known device list, without starting a full scan.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
@@ -164,9 +164,9 @@ sequenceDiagram
 
 **Description:** Server reply to a client request for a device list.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 1 (See [Deprecated Messages](deprecated.md#devicelist-version-0) for older versions.)
+**Last Updated In Spec Version:** 1 (See [Deprecated Messages](deprecated.md#devicelist-version-0) for older versions.)
 
 **Fields:**
 
@@ -227,9 +227,9 @@ sequenceDiagram
 
 **Description:** Sent by the server whenever a device is added to the system. Can happen at any time after identification, as it is assumed many server implementations will support devices with hotplugging capabilities that do not require specific scanning/discovery sessions.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version**: 1 (See [Deprecated Messages](deprecated.md#deviceadded-version-0) for older versions.)
+**Last Updated In Spec Version**: 1 (See [Deprecated Messages](deprecated.md#deviceadded-version-0) for older versions.)
 
 **Fields:**
 
@@ -288,9 +288,9 @@ sequenceDiagram
 **Description:** Sent by the server whenever a device is removed from  
 the system. Can happen at any time after identification.
 
-**Introduced In Version:** 0
+**Introduced In Spec Version:** 0
 
-**Message Version:** 0
+**Last Updated In Spec Version:** 0
 
 **Fields:**
 
