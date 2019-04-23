@@ -1,5 +1,7 @@
 # Buttplug Protocol and Architecture Documentation
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/ca7221a2-36a6-4362-8459-07a4428c60b4/deploy-status)](https://app.netlify.com/sites/buttplug-spec/deploys)
+
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Discourse Forum](https://img.shields.io/discourse/https/metafetish.club/topics.svg)](https://metafetish.club)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.gg/t9g9RuD)
