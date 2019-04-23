@@ -7,8 +7,6 @@
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.gg/t9g9RuD)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 
-<img src="https://img.shields.io/badge/🏢-Enterprise Grade-999999.svg"/>
-
 ## Table of Contents
 
 * [Introduction](#introduction)
