@@ -1,15 +1,26 @@
 # Deprecated Messages
 
-The following messages are considered deprecated, either because they've been duplicated by new messages, or because their message version has changed and they represent an old version of a message.
+The following messages are considered deprecated, either because
+they've been duplicated by new messages, or because their message
+version has changed and they represent an old version of a message.
 
-While some older versions of messages are not required to be implemented unless a server wants to support version fallback, other messages, such as deprecated device commands, should most likely be implemented in all servers. Any reference servers provided by the Buttplug Core Team will support all messages, even those that have been deprecated.
+While some older versions of messages are not required to be
+implemented unless a server wants to support version fallback, other
+messages, such as deprecated device commands, should most likely be
+implemented in all servers. Any reference servers provided by the
+Buttplug Core Team will support all messages, even those that have
+been deprecated.
 
 ---
 ### SingleMotorVibrateCmd
 
-**Reason for Deprecation:** Superceded by [VibrateCmd](generic.md#vibratecmd). Should most likely still be implemented in servers, in order to support older applications, but is not recommended for use in new client applications.
+**Reason for Deprecation:** Superceded by
+[VibrateCmd](generic.md#vibratecmd). Should most likely still be
+implemented in servers, in order to support older applications, but is
+not recommended for use in new client applications.
 
-**Description:** Causes a device that supports vibration to run all vibration motors at a certain speed.
+**Description:** Causes a device that supports vibration to run all
+vibration motors at a certain speed.
 
 **Introduced In Spec Version:** 0
 
@@ -17,9 +28,9 @@ While some older versions of messages are not required to be implemented unless 
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Speed_ \(double\): Vibration speed with a range of \[0.0-1.0\]
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Speed_ (double): Vibration speed with a range of [0.0-1.0]
 
 **Expected Response:**
 
@@ -61,11 +72,11 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _Devices_ \(array\): Array of device objects
-  * _DeviceName_ \(string\): Descriptive name of the device
-  * _DeviceIndex_ \(unsigned integer\): Index used to identify the device when sending Device Messages.
-  * _DeviceMessages_ \(array of strings\): Type names of Device Messages that the device will accept.
+* _Id_ (unsigned int): Message Id
+* _Devices_ (array): Array of device objects
+  * _DeviceName_ (string): Descriptive name of the device
+  * _DeviceIndex_ (unsigned integer): Index used to identify the device when sending Device Messages.
+  * _DeviceMessages_ (array of strings): Type names of Device Messages that the device will accept.
 
 **Expected Response:**
 
@@ -111,11 +122,11 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceName_ \(string\): Descriptive name of the device
-* _DeviceIndex_ \(unsigned integer\): Index used to identify the device
+* _Id_ (unsigned int): Message Id
+* _DeviceName_ (string): Descriptive name of the device
+* _DeviceIndex_ (unsigned integer): Index used to identify the device
   when sending Device Messages.
-* _DeviceMessages_ \(array of strings\): Type names of Device Messages
+* _DeviceMessages_ (array of strings): Type names of Device Messages
   that the device will accept.
 
 **Expected Response:**
@@ -158,8 +169,8 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _ClientName_ \(string\): Name of the client, for the server to use for UI if needed. Cannot be null.
+* _Id_ (unsigned int): Message Id
+* _ClientName_ (string): Name of the client, for the server to use for UI if needed. Cannot be null.
 
 **Expected Response:**
 

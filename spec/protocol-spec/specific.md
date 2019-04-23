@@ -5,7 +5,9 @@ Messages for controlling specific device brands or models.
 ---
 ## KiirooCmd
 
-**Description:** Causes a device that supports Kiiroo style commands to run whatever event may be related. More information on Kiiroo commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Kiiroo style commands
+to run whatever event may be related. More information on Kiiroo
+commands can be found in STPIHKAL.
 
 **Introduced In Spec Version:** 0
 
@@ -13,9 +15,10 @@ Messages for controlling specific device brands or models.
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(string\): Parsed into an unsigned integer in range \[0-4\] for position/speed.
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (string): Parsed into an unsigned integer in range [0-4]
+  for position/speed.
 
 **Expected Response:**
 
@@ -46,7 +49,10 @@ sequenceDiagram
 ---
 ## FleshlightLaunchFW12Cmd
 
-**Description:** Causes a device that supports Fleshlight Launch \(Firmware Version 1.2\) style commands to run whatever event may be related. More information on Fleshlight Launch commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Fleshlight Launch
+(Firmware Version 1.2) style commands to run whatever event may be
+related. More information on Fleshlight Launch commands can be found
+in STPIHKAL.
 
 **Introduced In Spec Version:** 0
 
@@ -54,10 +60,12 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Position_ \(unsigned int\): Unsigned integer in range \[0-99\], denoting position to move to.
-* _Speed_ \(unsigned int\): Unsigned integer in range \[0-99\], denoting speed to requested position at.
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Position_ (unsigned int): Unsigned integer in range [0-99],
+  denoting position to move to.
+* _Speed_ (unsigned int): Unsigned integer in range [0-99], denoting
+  speed to requested position at.
 
 **Expected Response:**
 
@@ -89,7 +97,9 @@ sequenceDiagram
 ---
 ## LovenseCmd
 
-**Description:** Causes a device that supports Lovense style commands to run whatever event may be related. More information on Lovense commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Lovense style commands
+to run whatever event may be related. More information on Lovense
+commands can be found in STPIHKAL.
 
 **Introduced In Spec Version:** 0
 
@@ -97,9 +107,12 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Command_ \(string\): String command for Lovense devices. Must be a valid Lovense command accessible on most of their devices. See STPIHKAL for more info. Implementations should check this for validity.
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (string): String command for Lovense devices. Must be a
+  valid Lovense command accessible on most of their devices. See
+  STPIHKAL for more info. Implementations should check this for
+  validity.
 
 **Expected Response:**
 
@@ -130,7 +143,9 @@ sequenceDiagram
 ---
 ## VorzeA10CycloneCmd
 
-**Description:** Causes a device that supports Vorze A10 Cyclone style commands to run whatever event may be related. More information on Vorze commands can be found in STPIHKAL.
+**Description:** Causes a device that supports Vorze A10 Cyclone style
+commands to run whatever event may be related. More information on
+Vorze commands can be found in STPIHKAL.
 
 **Introduced In Spec Version:** 0
 
@@ -138,10 +153,11 @@ sequenceDiagram
 
 **Fields:**
 
-* _Id_ \(unsigned int\): Message Id
-* _DeviceIndex_ \(unsigned int\): Index of device
-* _Speed_ \(unsigned int\): Unsigned integer in range \[0-100\], denoting speed to rotate at.
-* _Clockwise_ \(boolean\): Rotation direction
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Speed_ (unsigned int): Unsigned integer in range [0-100], denoting
+  speed to rotate at.
+* _Clockwise_ (boolean): Rotation direction
 
 **Expected Response:**
 

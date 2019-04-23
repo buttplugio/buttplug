@@ -5,17 +5,22 @@ Messages used in the client/server handshake procedure.
 ---
 ## RequestServerInfo
 
-**Description:** Sent by the client to register itself with the server, and request info from the server.
+**Description:** Sent by the client to register itself with the
+server, and request info from the server.
 
 **Introduced In Spec Version:** 0
 
-**Last Updated In Spec Version:** 1 (See [Deprecated Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
+**Last Updated In Spec Version:** 1 (See [Deprecated
+Messages](deprecated.md#requestserverinfo-version-0) for older
+versions.)
 
 **Fields:**
 
 * _Id_ \(unsigned int\): Message Id
-* _ClientName_ \(string\): Name of the client, for the server to use for UI if needed. Cannot be null.
-* _MessageVersion_ \(uint\): Message template version of the client software.
+* _ClientName_ \(string\): Name of the client, for the server to use
+  for UI if needed. Cannot be null.
+* _MessageVersion_ \(uint\): Message template version of the client
+  software.
 
 **Expected Response:**
 
@@ -46,7 +51,9 @@ sequenceDiagram
 ---
 ## ServerInfo
 
-**Description:** Send by server to client, contains information about the server name \(optional\), template version, and ping time expectations.
+**Description:** Send by server to client, contains information about
+the server name \(optional\), template version, and ping time
+expectations.
 
 **Introduced In Spec Version:** 0
 
@@ -60,7 +67,9 @@ sequenceDiagram
 * _MinorVersion_ \(uint\): Minor version of the server software.
 * _BuildVersion_ \(uint\): Build version of the server software.
 * _MessageVersion_ \(uint\): Message template version of the server software.
-* _MaxPingTime_ \(uint\): Maximum internal for pings from the client, in milliseconds. If a client takes to longer than this time between sending Ping messages, the server is expected to disconnect.
+* _MaxPingTime_ \(uint\): Maximum internal for pings from the client,
+  in milliseconds. If a client takes to longer than this time between
+  sending Ping messages, the server is expected to disconnect.
 
 **Expected Response:**
 
@@ -91,6 +100,4 @@ sequenceDiagram
   }
 ]
 ```
-
-
 

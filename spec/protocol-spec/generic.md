@@ -1,11 +1,18 @@
 # Generic Device Messages
 
-Generic device messages pertain to classes of devices, versus specific devices. For instance, the generic VibrateCmd should be supported by all vibrating devices, and StopDeviceCmd should be supported by all devices in order to stop them from whatever their current action may be.
+Generic device messages pertain to classes of devices, versus specific
+devices. For instance, the generic VibrateCmd should be supported by
+all vibrating devices, and StopDeviceCmd should be supported by all
+devices in order to stop them from whatever their current action may
+be.
 
 ---
 ## StopDeviceCmd
 
-**Description:** Client request to have the server stop a device from whatever actions it may be taking. This message should be supported by all devices, and the server should know how to stop any device it supports.
+**Description:** Client request to have the server stop a device from
+whatever actions it may be taking. This message should be supported by
+all devices, and the server should know how to stop any device it
+supports.
 
 **Introduced In Spec Version:** 0
 
@@ -44,7 +51,11 @@ sequenceDiagram
 ---
 ## StopAllDevices
 
-**Description:** Sent by the client to tell the server to stop all devices. Can be used for emergency situations, on client shutdown for cleanup, etc… While this is considered a Device Message, since it pertains to all currently connected devices, it does not specify a device index (and does not end with 'Cmd').
+**Description:** Sent by the client to tell the server to stop all
+devices. Can be used for emergency situations, on client shutdown for
+cleanup, etc… While this is considered a Device Message, since it
+pertains to all currently connected devices, it does not specify a
+device index (and does not end with 'Cmd').
 
 **Introduced In Spec Version:** 0
 
@@ -81,7 +92,9 @@ sequenceDiagram
 ---
 ## RawCmd
 
-**Description:** Used to send a raw byte string to a device. Should only be used for development, and should not be exposed to untrusted clients.
+**Description:** Used to send a raw byte string to a device. Should
+only be used for development, and should not be exposed to untrusted
+clients.
 
 **Introduced In Spec Version:** 0
 
@@ -91,7 +104,8 @@ sequenceDiagram
 
 * _Id_ (unsigned int): Message Id
 * _DeviceIndex_ (unsigned int): Index of device
-* _Command_ (Array of bytes): Command to send, array of ints with a range of [0-255]. Minimum length is 1.
+* _Command_ (Array of bytes): Command to send, array of ints with a
+  range of [0-255]. Minimum length is 1.
 
 **Expected Response:**
 
@@ -122,7 +136,13 @@ sequenceDiagram
 ---
 ## VibrateCmd
 
-**Description:** Causes a device that supports vibration to run specific vibration motors at a certain speeds. Devices with multiple vibrator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will contain that information.
+**Description:** Causes a device that supports vibration to run
+specific vibration motors at a certain speeds. Devices with multiple
+vibrator features may take multiple values. The
+[FeatureCount](enumeration.md#messageattributes) attribute for the
+message in the
+[DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded)
+message will contain that information.
 
 **Introduced In Spec Version:** 1
 
@@ -174,7 +194,13 @@ sequenceDiagram
 ---
 ## LinearCmd
 
-**Description:** Causes a device that supports linear movement to move to a position over a certain amount of time. Devices with multiple linear actuator features may take multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will contain that information.
+**Description:** Causes a device that supports linear movement to move
+to a position over a certain amount of time. Devices with multiple
+linear actuator features may take multiple values. The
+[FeatureCount](enumeration.md#messageattributes) attribute for the
+message in the
+[DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded)
+message will contain that information.
 
 **Introduced In Spec Version:** 1
 
@@ -229,7 +255,13 @@ sequenceDiagram
 ---
 ## RotateCmd
 
-**Description:** Causes a device that supports rotation to rotate at a certain speeds in specified directions. Devices with multiple rotating features may have multiple values. The [FeatureCount](enumeration.md#messageattributes) attribute for the message in the [DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message will have this information.
+**Description:** Causes a device that supports rotation to rotate at a
+certain speeds in specified directions. Devices with multiple rotating
+features may have multiple values. The
+[FeatureCount](enumeration.md#messageattributes) attribute for the
+message in the
+[DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded)
+message will have this information.
 
 **Introduced In Spec Version:** 1
 
