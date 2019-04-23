@@ -98,11 +98,6 @@ and it is updated on every commit to master.
   - Status: Stable
   - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team
-- [buttplug-rs](http://github.com/buttplugio/buttplug-rs): Rust
-  implementation of the Buttplug Server.
-  - Status: Under development, needs to be brought up to date with the new
-    JSON schema.
-  - Maintainers: Core Buttplug Team
 
 ### Client Implementations
 
@@ -116,13 +111,26 @@ and it is updated on every commit to master.
   - Status: Stable
   - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team 
+- [buttplug-rs](https://github.com/buttplugio/buttplug-rs): Rust
+  - Status: In Development - Not Yet Usable
+  - Packages: [Available on Cargo](https://crates.io/crates/buttplug)
+  - Maintainers: Core Buttplug Team
+- [buttplug-py](https://github.com/buttplug/buttplug-py): Python
+  - Status: In Development - Not Yet Usable
+  - Packages: [Available on PyPi](https://pypi.org/project/buttplug/)
+  - Maintainers: Core Buttplug Team
 - [golibbuttplug](https://github.com/funjack/golibbuttplug): Go
   implementation of the Buttplug Protocol Client
   - Status: Stable
   - Maintainers: Community Maintained
 
+
 ### Supporting Applications
 
+- [Intiface](https://github.com/intiface/intiface-desktop):
+  Win/Mac/Linux Application for running Buttplug Servers on Desktop.
+  Allows users to connect via applications like Syncydink,
+  Scriptplayer, and more.
 - [SyncyDink](http://github.com/metafetish/syncydink):
   Javascript/Typescript Haptic Video player for the web.
 - [Playground](http://github.com/metafetish/buttplug-playground):
@@ -144,7 +152,7 @@ hardware to reverse, document, and write code for!
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016-2018, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2019, Nonpolynomial Labs, LLC
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
