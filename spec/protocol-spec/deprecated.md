@@ -12,7 +12,7 @@ Buttplug Core Team will support all messages, even those that have
 been deprecated.
 
 ---
-### SingleMotorVibrateCmd
+## SingleMotorVibrateCmd
 
 **Reason for Deprecation:** Superceded by
 [VibrateCmd](generic.md#vibratecmd), which provided granular control
@@ -113,7 +113,7 @@ sequenceDiagram
 ]
 ```
 ---
-### DeviceAdded Version 0
+## DeviceAdded Version 0
 
 **Reason for Deprecation:** Superceded by [DeviceList Version
 1](enumeration.md#devicelist), which provides more information about
@@ -158,7 +158,7 @@ sequenceDiagram
 ]
 ```
 ---
-### RequestServerInfo Version 0
+## RequestServerInfo Version 0
 
 **Reason for Deprecation:** Superceded by [RequestServerInfo Version
 1](identification.md#requestserverinfo), adding message version check.
