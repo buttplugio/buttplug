@@ -250,4 +250,55 @@ sequenceDiagram
   }
 ]
 ```
+---
+## RawCmd
 
+**Reason for Deprecation:** Message is ill-defined (doesn't specify
+where the data should go, assumes all devices have one endpoint which
+is very not true), was never actually implemented in any reference
+implemenation. Being superceded by RawDataCmd and RawDataReading. As
+the message was never in any protocol implementation, it can safely be
+ignored when implementing new servers, but should also not be used to
+name new messages (hence RawDataCmd and RawDataReading).
+
+**Description:** Used to send a raw byte string to a device. Should
+only be used for development, and should not be exposed to untrusted
+clients.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (Array of bytes): Command to send, array of ints with a
+  range of [0-255]. Minimum length is 1.
+
+**Expected Response:**
+
+* Ok message with matching Id on successful request.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>+Server: RawCmd Id=1
+    Server->>-Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "RawCmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Command": [0, 2, 4]
+    }
+  }
+]
+```

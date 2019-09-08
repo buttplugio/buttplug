@@ -90,50 +90,6 @@ sequenceDiagram
 ]
 ```
 ---
-## RawCmd
-
-**Description:** Used to send a raw byte string to a device. Should
-only be used for development, and should not be exposed to untrusted
-clients.
-
-**Introduced In Spec Version:** 0
-
-**Last Updated In Spec Version:** 0
-
-**Fields:**
-
-* _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned int): Index of device
-* _Command_ (Array of bytes): Command to send, array of ints with a
-  range of [0-255]. Minimum length is 1.
-
-**Expected Response:**
-
-* Ok message with matching Id on successful request.
-* Error message on value or message error.
-
-**Flow Diagram:**
-
-<mermaid>
-sequenceDiagram
-    Client->>+Server: RawCmd Id=1
-    Server->>-Client: Ok Id=1
-</mermaid>
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "RawCmd": {
-      "Id": 1,
-      "DeviceIndex": 0,
-      "Command": [0, 2, 4]
-    }
-  }
-]
-```
----
 ## VibrateCmd
 
 **Description:** Causes a device that supports vibration to run
