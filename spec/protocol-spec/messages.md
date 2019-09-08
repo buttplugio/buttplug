@@ -108,10 +108,10 @@ included in the JSON schema in this repo.
 The message list as described here is not set in stone. New messages
 will be added as new devices are released, or as new generic messages
 are deemed necessary. The only rule is that once a message is added to
-this document, it should never be removed; however, newer versions of
-the message may succeed it. This will allow parsing and schema
-checking to be as strict as possible. If edits to a message need to be
-made, a new message type will most likely be added.
+this document, it may be deprecated but should never be removed;
+however, newer versions of the message may succeed it. This will allow
+parsing and schema checking to be as strict as possible. If edits to a
+message need to be made, a new message type will most likely be added.
 
 Requests for new messages can be submitted to [the Buttplug Standard
 Github Issue Tracker](https://github.com/metafetish/buttplug/issues).
