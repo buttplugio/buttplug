@@ -8,14 +8,18 @@ homepage = "http://buttplug.io"
 repository = "https://github.com/buttplugio/buttplug-rs.git"
 readme = "README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
+edition = "2018"
 
 [dependencies]
-serde_json = "*"
-serde_derive = "*"
-serde = "*"
-bytes = "*"
-env_logger = "*"
-log = "*"
+serde_json = "1.0.40"
+serde_derive = "1.0.101"
+serde = "1.0.101"
+bytes = "0.4.12"
+env_logger = "0.7.0"
+log = "0.4.8"
+quote = "*"
+syn = "*"
+buttplug_derive = { path = "./buttplug_derive" }
 
 [lib]
 name = "buttplug"
@@ -23,3 +27,4 @@ path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
+proc-macro = true
