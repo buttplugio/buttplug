@@ -16,3 +16,10 @@ serde = "*"
 bytes = "*"
 env_logger = "*"
 log = "*"
+
+[lib]
+name = "buttplug"
+path = "src/lib.rs"
+test = true
+doctest = true
+doc = true
