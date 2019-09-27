@@ -1,5 +1,10 @@
 # Buttplug
 
+[![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
+[![Discourse Forum](https://img.shields.io/badge/discourse-forum-blue.svg)](https://metafetish.club)
+[![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
+[![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
+
 Rust implementation of the Buttplug Intimate Hardware Protocol,
 including implementations of the client and server.
 
@@ -40,6 +45,9 @@ network ports, to claim and interact with the hardware.
 **Warning:** Here lies monsters. Or at least, stupidity. Everything I
 am about to say may end up fabulously wrong, in which case, enjoy the
 comedy of errors that is this repo.
+
+This section is a discussion of the idea behind the new (Sept 2019)
+Rust implementation of Buttplug.
 
 Understanding the following discussion is probably only possible if
 you check out the [Buttplug Protocol
