@@ -43,7 +43,7 @@ network ports, to claim and interact with the hardware.
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016, Nonpolynomial Labs, LLC
+    Copyright (c) 2019, Nonpolynomial Labs, LLC
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
