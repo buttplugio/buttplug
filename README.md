@@ -12,13 +12,10 @@ Repo](https://github.com/buttplugio/buttplug).
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
-The Rust code in this repo is currently quite stale, though we're
-hoping to update it soon. Our
-[C#](https://github.com/metafetish/buttplug-csharp) and
+The Rust code in this repo is currently being rebuilt and rewritten.
+Our [C#](https://github.com/metafetish/buttplug-csharp) and
 [Typescript/JS/Node](https://github.com/metafetish/buttplug-js)
-implementations are the most complete for the moment. Rust got hung up
-on lack of windows bluetooth capabilities, but that may be resolved
-soon.
+implementations are the most complete for the moment.
 
 ## Introduction
 
