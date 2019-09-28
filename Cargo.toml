@@ -17,9 +17,11 @@ serde = "1.0.101"
 bytes = "0.4.12"
 env_logger = "0.7.0"
 log = "0.4.8"
-quote = "*"
-syn = "*"
+quote = "1.0.2"
+syn = "1.0.5"
 buttplug_derive = { path = "./buttplug_derive" }
+async-std = "0.99.8"
+futures-channel = "0.2.1"
 
 [lib]
 name = "buttplug"
