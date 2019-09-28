@@ -13,10 +13,18 @@ pub struct Ok {
     pub id: u32,
 }
 
-#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub enum ErrorCode {
+    ErrorUnknown = 0,
+    ErrorInit,
+    ErrorPing,
+    ErrorMessage,
+    ErrorDevice
+}
+
+#[derive(ButtplugMessage, ButtplugSystemMessage)]
 pub struct Error {
     pub id: u32,
-    pub error_code: u32,
+    pub error_code: ErrorCode,
     pub error_message: String,
 }
 
