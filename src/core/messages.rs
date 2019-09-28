@@ -1,82 +1,105 @@
 use std::vec;
 use std::collections::HashMap;
 
-trait ButtplugMessage {
+pub trait ButtplugMessage {
     fn id(&self) -> u32;
 }
 
+pub trait ButtplugSystemMessage {
+}
+
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct Ok {
+    pub id: u32,
+}
+
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct Error {
+    pub id: u32,
+    pub error_code: u32,
+    pub error_message: String,
+}
+
+pub struct MessageAttributes {
+    pub feature_count: u32,
+}
+
+pub struct DeviceMessageInfo {
+    pub device_index: u32,
+    pub device_name: String,
+    pub device_messages: Vec<String>,
+}
+
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct DeviceList {
+    pub id: u32,
+    pub devices: Vec<DeviceMessageInfo>
+}
+
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct DeviceAdded {
+    pub id: u32,
+    pub device_index: u32,
+    pub device_name: String,
+    pub device_messages: HashMap<String, MessageAttributes>
+}
+
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct DeviceRemoved {
+    pub id: u32,
+    pub device_index: u32,
+}
+
 #[derive(Default, ButtplugMessage)]
-struct Ok {
-    id: u32,
+pub struct StartScanning {
+    pub id: u32,
 }
 
-#[derive(ButtplugMessage)]
-struct Error {
-    id: u32,
-    error_code: u32,
-    error_message: str,
+#[derive(Default, ButtplugMessage)]
+pub struct StopScanning {
+    pub id: u32,
 }
 
-struct MessageAttributes {
-    feature_count: u32,
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct ScanningFinished {
+    pub id: u32,
 }
 
-struct DeviceMessageInfo {
-    device_index: u32,
-    device_name: String,
-    device_messages: Vec<String>,
+#[derive(Default, ButtplugMessage)]
+pub struct RequestDeviceList {
+    pub id: u32,
 }
 
-#[derive(ButtplugMessage)]
-struct DeviceList {
-    id: u32,
-    devices: Vec<DeviceMessageInfo>
+#[derive(Default, ButtplugMessage)]
+pub struct RequestServerInfo {
+    pub id: u32,
+    pub client_name: String,
+    pub message_version: u32,
 }
 
-#[derive(ButtplugMessage)]
-struct DeviceAdded {
-    id: u32,
-    device_index: u32,
-    device_name: String,
-    device_messages: HashMap<String, MessageAttributes>
+#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+pub struct ServerInfo {
+    pub id: u32,
+    pub major_version: u32,
+    pub minor_version: u32,
+    pub build_version: u32,
+    pub message_version: u32,
+    pub max_ping_time: u32,
+    pub server_name: String
 }
 
-#[derive(ButtplugMessage)]
-struct StartScanning {
-    id: u32,
-}
-
-#[derive(ButtplugMessage)]
-struct StopScanning {
-    id: u32,
-}
-
-#[derive(ButtplugMessage)]
-struct ScanningFinished {
-    id: u32,
-}
-
-#[derive(ButtplugMessage)]
-struct RequestDeviceList {
-    id: u32,
-}
-
-#[derive(ButtplugMessage)]
-struct RequestServerInfo {
-    id: u32,
-    client_name: String,
-    message_version: u32,
-}
-
-#[derive(ButtplugMessage)]
-struct ServerInfo {
-    id: u32,
-    major_version: u32,
-    minor_version: u32,
-    build_version: u32,
-    message_version: u32,
-    max_ping_time: u32,
-    server_name: String
+pub enum ButtplugMessageUnion {
+    Ok(Ok),
+    Error(Error),
+    DeviceList(DeviceList),
+    DeviceAdded(DeviceAdded),
+    DeviceRemoved(DeviceRemoved),
+    StartScanning(StartScanning),
+    StopScanning(StopScanning),
+    ScanningFinished(ScanningFinished),
+    RequestDeviceList(RequestDeviceList),
+    RequestServerInfo(RequestServerInfo),
+    ServerInfo(ServerInfo),
 }
 
 #[cfg(test)]

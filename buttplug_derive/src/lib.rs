@@ -27,10 +27,21 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
     gen.into()
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+#[proc_macro_derive(ButtplugSystemMessage)]
+pub fn buttplug_system_message_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_system_message_macro(&ast)
+}
+
+fn impl_buttplug_system_message_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ButtplugSystemMessage for #name {
+        }
+    };
+    gen.into()
 }
