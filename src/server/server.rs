@@ -3,7 +3,7 @@ use crate::core::errors::*;
 use crate::core::messages::ButtplugMessageUnion;
 use crate::core::messages::ButtplugMessage;
 
-struct ButtplugServer {
+pub struct ButtplugServer {
     server_name: String,
     server_spec_version: u32,
     client_spec_version: Option<u32>,
