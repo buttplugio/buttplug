@@ -1,8 +1,12 @@
 use std::error::Error;
 use std::fmt;
+use crate::core::messages::RequestServerInfo;
+use crate::core::messages::ButtplugMessage;
+use crate::core::messages::ButtplugMessageUnion;
 use super::connector::ButtplugClientConnector;
 use super::connector::ButtplugClientConnectorError;
 use crate::core::errors::ButtplugError;
+use crate::core::errors::ButtplugInitError;
 
 #[derive(Debug)]
 pub enum ButtplugClientError {
@@ -32,28 +36,52 @@ impl Error for ButtplugClientError {
     }
 }
 
-
 pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
-    connector: Option<Box<dyn ButtplugClientConnector>>
+    pub max_ping_time: u32,
+    connector: Option<Box<dyn ButtplugClientConnector>>,
 }
 
 impl ButtplugClient {
     pub fn new(name: &str) -> ButtplugClient {
         ButtplugClient {
             client_name: name.to_string(),
+            max_ping_time: 0,
             server_name: None,
             connector: None
         }
     }
 
     pub fn connect<T: ButtplugClientConnector + 'static>(&mut self, mut connector: T) -> Result<(), ButtplugClientError> {
+        if self.connector.is_some() {
+            return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
+        }
         match connector.connect() {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
             None => self.connector = Option::Some(Box::new(connector)),
         }
-        Result::Ok(())
+        self.init()
+    }
+
+    fn init(&mut self) -> Result<(), ButtplugClientError> {
+        if self.connector.is_none() {
+            return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected".to_string() }));
+        }
+        let connector = self.connector.as_ref().unwrap();
+        connector.send(&RequestServerInfo::new(&self.client_name, 1).as_union())
+            .map_err(|x| x)
+            .and_then(|x| {
+                // TODO Error message case may need to be implemented here when
+                // we aren't only using embedded connectors.
+                if let ButtplugMessageUnion::ServerInfo(server_info) = x {
+                    self.server_name = Option::Some(server_info.server_name);
+                    self.max_ping_time = server_info.max_ping_time;
+                    Ok(())
+                } else {
+                    Err(ButtplugClientError::ButtplugError(ButtplugError::ButtplugInitError(ButtplugInitError { message: "Did not receive expected ServerInfo or Error messages.".to_string() })))
+                }
+            })
     }
 
     pub fn connected(&self) -> bool {
@@ -75,24 +103,37 @@ mod test {
     use super::ButtplugClient;
     use crate::client::connector::ButtplugEmbeddedClientConnector;
 
-    #[test]
-    fn test_embedded_connector_connect() {
+    fn connect_test_client() -> ButtplugClient {
         let mut client = ButtplugClient::new("Test Client");
-        client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0));
+        assert!(client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0)).is_ok());
         assert!(client.connected());
+        client
     }
 
     #[test]
-    fn test_embedded_connector_disconnect() {
-        let mut client = ButtplugClient::new("Test Client");
-        client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0));
+    fn test_connect_status() {
+        connect_test_client();
+    }
+
+    #[test]
+    fn test_disconnect_status() {
+        let mut client = connect_test_client();
         assert!(client.disconnect().is_ok());
         assert!(!client.connected());
     }
 
     #[test]
-    fn test_embedded_connector_disconnect_with_no_connect() {
+    fn test_disconnect_with_no_connect() {
         let mut client = ButtplugClient::new("Test Client");
         assert!(client.disconnect().is_err());
     }
+
+    #[test]
+    fn test_connect_init() {
+        let client = connect_test_client();
+        assert_eq!(client.server_name.unwrap(), "Test Server");
+    }
+
+    // Failure on server version error is unit tested in server.
+
 }
