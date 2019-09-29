@@ -44,8 +44,10 @@ impl Error {
             error_message: error_message.to_string()
         }
     }
+}
 
-    pub fn from_error(error: ButtplugError) -> Error {
+impl From<ButtplugError> for Error {
+    fn from(error: ButtplugError) -> Self {
         let code = match error {
             ButtplugError::ButtplugDeviceError(_) => ErrorCode::ErrorDevice,
             ButtplugError::ButtplugMessageError(_) => ErrorCode::ErrorMessage,
