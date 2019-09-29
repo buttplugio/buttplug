@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use super::errors::*;
 
 pub trait ButtplugMessage {
     fn id(&self) -> u32;
@@ -21,11 +22,40 @@ pub enum ErrorCode {
     ErrorDevice
 }
 
-#[derive(Debug, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Debug, ButtplugMessage)]
 pub struct Error {
-    pub id: u32,
+    id: u32,
     pub error_code: ErrorCode,
     pub error_message: String,
+}
+
+impl Error {
+    pub fn new(error_code: ErrorCode, error_message: &str) -> Error {
+        Error {
+            id: 0,
+            error_code: error_code,
+            error_message: error_message.to_string()
+        }
+    }
+
+    pub fn from_error(error: ButtplugError) -> Error {
+        let code = match error {
+            ButtplugError::ButtplugDeviceError(_) => ErrorCode::ErrorDevice,
+            ButtplugError::ButtplugMessageError(_) => ErrorCode::ErrorMessage,
+            ButtplugError::ButtplugPingError(_) => ErrorCode::ErrorPing,
+            ButtplugError::ButtplugInitError(_) => ErrorCode::ErrorInit,
+            ButtplugError::ButtplugUnknownError(_) => ErrorCode::ErrorUnknown,
+        };
+        // Gross but was having problems with naming collisions on the error trait
+        let msg = match error {
+            ButtplugError::ButtplugDeviceError(_s) => _s.message,
+            ButtplugError::ButtplugMessageError(_s) => _s.message,
+            ButtplugError::ButtplugPingError(_s) => _s.message,
+            ButtplugError::ButtplugInitError(_s) => _s.message,
+            ButtplugError::ButtplugUnknownError(_s) => _s.message,
+        };
+        Error::new(code, &msg)
+    }
 }
 
 pub struct MessageAttributes {
