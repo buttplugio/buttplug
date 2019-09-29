@@ -2,15 +2,22 @@ use std::collections::HashMap;
 use super::errors::*;
 
 pub trait ButtplugMessage {
-    fn id(&self) -> u32;
+    fn get_id(&self) -> u32;
+    fn set_id(&mut self, id: u32);
+    fn as_union(self) -> ButtplugMessageUnion;
 }
 
-pub trait ButtplugSystemMessage {
-}
-
-#[derive(Debug, PartialEq, Default, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Debug, PartialEq, Default, ButtplugMessage)]
 pub struct Ok {
-    pub id: u32,
+    id: u32,
+}
+
+impl Ok {
+    pub fn new() -> Ok {
+        Ok {
+            id: 0
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -68,62 +75,86 @@ pub struct DeviceMessageInfo {
     pub device_messages: Vec<String>,
 }
 
-#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Default, ButtplugMessage)]
 pub struct DeviceList {
-    pub id: u32,
+    id: u32,
     pub devices: Vec<DeviceMessageInfo>
 }
 
-#[derive(Default, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Default, ButtplugMessage)]
 pub struct DeviceAdded {
-    pub id: u32,
+    id: u32,
     pub device_index: u32,
     pub device_name: String,
     pub device_messages: HashMap<String, MessageAttributes>
 }
 
-#[derive(Debug, Default, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Debug, Default, ButtplugMessage)]
 pub struct DeviceRemoved {
-    pub id: u32,
+    id: u32,
     pub device_index: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage)]
 pub struct StartScanning {
-    pub id: u32,
+    id: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage)]
 pub struct StopScanning {
-    pub id: u32,
+    id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, ButtplugSystemMessage)]
+#[derive(Debug, Default, ButtplugMessage)]
 pub struct ScanningFinished {
-    pub id: u32,
+    id: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage)]
 pub struct RequestDeviceList {
-    pub id: u32,
+    id: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage)]
 pub struct RequestServerInfo {
-    pub id: u32,
+    id: u32,
     pub client_name: String,
     pub message_version: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, ButtplugSystemMessage)]
+impl RequestServerInfo {
+    pub fn new(client_name: &str, message_version: u32) -> RequestServerInfo {
+        RequestServerInfo {
+            id: 0,
+            client_name: client_name.to_string(),
+            message_version: message_version
+        }
+    }
+}
+
+#[derive(Debug, Default, ButtplugMessage, PartialEq)]
 pub struct ServerInfo {
-    pub id: u32,
+    id: u32,
     pub major_version: u32,
     pub minor_version: u32,
     pub build_version: u32,
     pub message_version: u32,
     pub max_ping_time: u32,
     pub server_name: String
+}
+
+impl ServerInfo {
+    pub fn new(server_name: &str, message_version: u32, max_ping_time: u32) -> ServerInfo {
+        ServerInfo {
+            id: 0,
+            major_version: 0,
+            minor_version: 0,
+            build_version: 0,
+            message_version: message_version,
+            max_ping_time: max_ping_time,
+            server_name: server_name.to_string(),
+        }
+    }
 }
 
 pub enum ButtplugMessageUnion {

@@ -19,8 +19,16 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl ButtplugMessage for #name {
-            fn id(&self) -> u32 {
+            fn get_id(&self) -> u32 {
                 self.id
+            }
+
+            fn set_id(&mut self, id: u32) {
+                self.id = id;
+            }
+
+            fn as_union(self) -> ButtplugMessageUnion {
+                ButtplugMessageUnion::#name(self)
             }
         }
     };
