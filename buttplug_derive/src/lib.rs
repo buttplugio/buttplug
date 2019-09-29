@@ -20,7 +20,7 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
     let gen = quote! {
         impl ButtplugMessage for #name {
             fn id(&self) -> u32 {
-                return self.id;
+                self.id
             }
         }
     };
