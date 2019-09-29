@@ -34,29 +34,65 @@ impl Error for ButtplugClientError {
 
 
 pub struct ButtplugClient {
-    pub name: String,
+    pub client_name: String,
+    pub server_name: Option<String>,
     connector: Option<Box<dyn ButtplugClientConnector>>
 }
 
 impl ButtplugClient {
     pub fn new(name: &str) -> ButtplugClient {
         ButtplugClient {
-            name: name.to_string(),
+            client_name: name.to_string(),
+            server_name: None,
             connector: None
         }
     }
 
-    pub fn connect<T: ButtplugClientConnector + 'static>(&mut self, connector: T) where {
-        self.connector = Option::Some(Box::new(connector));
+    pub fn connect<T: ButtplugClientConnector + 'static>(&mut self, mut connector: T) -> Result<(), ButtplugClientError> {
+        match connector.connect() {
+            Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
+            None => self.connector = Option::Some(Box::new(connector)),
+        }
+        Result::Ok(())
     }
 
     pub fn connected(&self) -> bool {
         return self.connector.is_some();
     }
+
+    pub fn disconnect(&mut self) -> Result<(), ButtplugClientError> {
+        if self.connector.is_none() {
+            return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected".to_string() }));
+        }
+        let mut connector = self.connector.take().unwrap();
+        connector.disconnect();
+        Result::Ok(())
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::ButtplugClient;
+    use crate::client::connector::ButtplugEmbeddedClientConnector;
 
+    #[test]
+    fn test_embedded_connector_connect() {
+        let mut client = ButtplugClient::new("Test Client");
+        client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0));
+        assert!(client.connected());
+    }
+
+    #[test]
+    fn test_embedded_connector_disconnect() {
+        let mut client = ButtplugClient::new("Test Client");
+        client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0));
+        assert!(client.disconnect().is_ok());
+        assert!(!client.connected());
+    }
+
+    #[test]
+    fn test_embedded_connector_disconnect_with_no_connect() {
+        let mut client = ButtplugClient::new("Test Client");
+        assert!(client.disconnect().is_err());
+    }
 }

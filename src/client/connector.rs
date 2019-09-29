@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::fmt;
 use super::client::ButtplugClientError;
-use crate::core::errors::ButtplugError;
 use crate::core::messages::ButtplugMessageUnion;
 use crate::server::server::ButtplugServer;
 
@@ -27,9 +26,9 @@ impl Error for ButtplugClientConnectorError {
 }
 
 pub trait ButtplugClientConnector {
-    fn Connect(&mut self) -> Option<ButtplugClientConnectorError>;
-    fn Disconnect(&self);
-    fn Send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
+    fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
+    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
+    fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
 }
 
 pub struct ButtplugEmbeddedClientConnector {
@@ -49,15 +48,17 @@ impl ButtplugEmbeddedClientConnector {
 }
 
 impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
-    fn Connect(&mut self) -> Option<ButtplugClientConnectorError> {
+    fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
         self.server = Option::Some(ButtplugServer::new(&self.server_name, self.max_ping_time));
         None
     }
 
-    fn Disconnect(&self) {
+    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+        self.server = None;
+        None
     }
 
-    fn Send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+    fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         match self.server {
             Some (ref mut _s) => return _s.send_message(msg).map_err(|x| ButtplugClientError::ButtplugError(x)),
             None => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected to server.".to_string() }))
