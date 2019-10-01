@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use super::errors::*;
 
-pub trait ButtplugMessage {
+pub trait ButtplugMessage: Send + Sync + Clone {
     fn get_id(&self) -> u32;
     fn set_id(&mut self, id: u32);
     fn as_union(self) -> ButtplugMessageUnion;
 }
 
-#[derive(Debug, PartialEq, Default, ButtplugMessage)]
+#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone)]
 pub struct Ok {
     id: u32,
 }
@@ -20,7 +20,7 @@ impl Ok {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ErrorCode {
     ErrorUnknown = 0,
     ErrorInit,
@@ -29,7 +29,7 @@ pub enum ErrorCode {
     ErrorDevice
 }
 
-#[derive(Debug, ButtplugMessage)]
+#[derive(Debug, ButtplugMessage, Clone)]
 pub struct Error {
     id: u32,
     pub error_code: ErrorCode,
@@ -67,23 +67,25 @@ impl From<ButtplugError> for Error {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct MessageAttributes {
     pub feature_count: u32,
 }
 
+#[derive(Clone, Debug)]
 pub struct DeviceMessageInfo {
     pub device_index: u32,
     pub device_name: String,
     pub device_messages: Vec<String>,
 }
 
-#[derive(Default, ButtplugMessage)]
+#[derive(Default, ButtplugMessage, Clone, Debug)]
 pub struct DeviceList {
     id: u32,
     pub devices: Vec<DeviceMessageInfo>
 }
 
-#[derive(Default, ButtplugMessage)]
+#[derive(Default, ButtplugMessage, Clone, Debug)]
 pub struct DeviceAdded {
     id: u32,
     pub device_index: u32,
@@ -91,33 +93,33 @@ pub struct DeviceAdded {
     pub device_messages: HashMap<String, MessageAttributes>
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct DeviceRemoved {
     id: u32,
     pub device_index: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct StartScanning {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct StopScanning {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct ScanningFinished {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct RequestDeviceList {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage)]
+#[derive(Debug, Default, ButtplugMessage, Clone)]
 pub struct RequestServerInfo {
     id: u32,
     pub client_name: String,
@@ -134,7 +136,7 @@ impl RequestServerInfo {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
 pub struct ServerInfo {
     id: u32,
     pub major_version: u32,
@@ -159,6 +161,7 @@ impl ServerInfo {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
     Error(Error),
@@ -173,10 +176,40 @@ pub enum ButtplugMessageUnion {
     ServerInfo(ServerInfo),
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+impl ButtplugMessage for ButtplugMessageUnion {
+    fn get_id(&self) -> u32 {
+        match self {
+            ButtplugMessageUnion::Ok (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::Error (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceList (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceAdded (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceRemoved (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::StartScanning (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::StopScanning (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::ScanningFinished (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::RequestDeviceList (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::RequestServerInfo (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::ServerInfo (ref _msg) => return _msg.id,
+        }
+    }
+
+    fn set_id(&mut self, id: u32) {
+        match self {
+            ButtplugMessageUnion::Ok (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Error (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceList (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceAdded (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceRemoved (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::StartScanning (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::StopScanning (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::ScanningFinished (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::RequestDeviceList (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::RequestServerInfo (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::ServerInfo (ref mut _msg) => _msg.set_id(id),
+        }
+    }
+
+    fn as_union(self) -> ButtplugMessageUnion {
+        panic!("as_union shouldn't be called on union.");
     }
 }
