@@ -21,7 +21,8 @@ quote = "1.0.2"
 syn = "1.0.5"
 buttplug_derive = { path = "./buttplug_derive" }
 async-std = "0.99.8"
-futures-channel = "0.2.1"
+futures-channel-preview = "=0.3.0-alpha.18"
+futures-preview = "=0.3.0-alpha.18"
 
 [lib]
 name = "buttplug"
