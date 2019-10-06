@@ -22,10 +22,23 @@ impl ButtplugServer {
         }
     }
 
-    pub async fn send_message(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+    pub async fn send_message(&mut self, msg: &ButtplugMessageUnion)
+                              -> Result<ButtplugMessageUnion, ButtplugError> {
         match msg {
             ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
-            _ => return Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new())),
+            ButtplugMessageUnion::StartScanning(_) => {
+                self
+                    .start_scanning()
+                    .await
+                    .map_or_else(|| Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))), |x| Result::Err(x))
+            },
+            ButtplugMessageUnion::StopScanning(_) => {
+                self
+                    .stop_scanning()
+                    .await
+                    .map_or_else(|| Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))), |x| Result::Err(x))
+            },
+            _ => return Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
         }
     }
 
@@ -43,6 +56,14 @@ impl ButtplugServer {
         self.client_name = Option::Some(msg.client_name.clone());
         self.client_spec_version = Option::Some(msg.message_version);
         Result::Ok(messages::ServerInfo::new(&self.server_name, self.server_spec_version, self.max_ping_time).as_union())
+    }
+
+    async fn start_scanning(&self) -> Option<ButtplugError> {
+        None
+    }
+
+    async fn stop_scanning(&self) -> Option<ButtplugError> {
+        None
     }
 }
 

@@ -16,9 +16,9 @@ pub struct Ok {
 }
 
 impl Ok {
-    pub fn new() -> Ok {
+    pub fn new(id: u32) -> Ok {
         Ok {
-            id: 0
+            id: id
         }
     }
 }
@@ -248,7 +248,7 @@ mod test {
 
     #[test]
     fn test_ok_serialize() {
-        let ok = ButtplugMessageUnion::Ok(Ok::new());
+        let ok = ButtplugMessageUnion::Ok(Ok::new(0));
         let js = serde_json::to_string(&ok).unwrap();
         assert_eq!(OK_STR, js);
     }
@@ -256,7 +256,7 @@ mod test {
     #[test]
     fn test_ok_deserialize() {
         let union: ButtplugMessageUnion = serde_json::from_str(&OK_STR).unwrap();
-        assert_eq!(ButtplugMessageUnion::Ok(Ok::new()), union);
+        assert_eq!(ButtplugMessageUnion::Ok(Ok::new(0)), union);
     }
 
     #[test]

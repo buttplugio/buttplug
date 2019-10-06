@@ -55,7 +55,7 @@ impl ButtplugClient {
         }
     }
 
-    pub async fn connect<T: ButtplugClientConnector + 'static>(&mut self, mut connector: T) -> Result<(), ButtplugClientError> {
+    pub async fn connect(&mut self, mut connector: impl ButtplugClientConnector + 'static) -> Result<(), ButtplugClientError> {
         if self.connector.is_some() {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
         }
@@ -123,10 +123,10 @@ impl ButtplugClient {
         }
     }
 
+    // TODO This should return Option<ButtplugClientError> but there's a known size issue.
     async fn send_message_expect_ok(&mut self, msg: &ButtplugMessageUnion) -> Result<(), ButtplugClientError> {
         self.send_message(msg)
             .await
-            .map_err(|x| x)
             .and_then(|x: ButtplugMessageUnion| {
                 match x {
                     ButtplugMessageUnion::Ok(_) => Ok(()),
@@ -175,7 +175,16 @@ mod test {
     fn test_connect_init() {
         task::block_on(async {
             let client = connect_test_client().await;
-            assert_eq!(client.server_name.unwrap(), "Test Server");
+            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+        });
+    }
+
+    #[test]
+    fn test_start_scanning() {
+        task::block_on(async {
+            let mut client = connect_test_client().await;
+            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+            assert!(client.start_scanning().await.is_ok());
         });
     }
 
