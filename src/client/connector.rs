@@ -35,16 +35,12 @@ pub trait ButtplugClientConnector {
 
 pub struct ButtplugEmbeddedClientConnector {
     server: ButtplugServer,
-    server_name: String,
-    max_ping_time: u32
 }
 
 impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
         ButtplugEmbeddedClientConnector {
             server: ButtplugServer::new(&name, max_ping_time),
-            server_name: name.to_string(),
-            max_ping_time: max_ping_time
         }
     }
 }
@@ -69,3 +65,4 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
 
 // The embedded connector is used heavily in the client unit tests, so we can
 // assume code coverage there and omit specific tests here.
+
