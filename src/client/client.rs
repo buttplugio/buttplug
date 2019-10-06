@@ -53,18 +53,18 @@ impl ButtplugClient {
         }
     }
 
-    pub fn connect<T: ButtplugClientConnector + 'static>(&mut self, mut connector: T) -> Result<(), ButtplugClientError> {
+    pub async fn connect<T: ButtplugClientConnector + 'static>(&mut self, mut connector: T) -> Result<(), ButtplugClientError> {
         if self.connector.is_some() {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
         }
-        match connector.connect() {
+        match connector.connect().await {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
             None => self.connector = Option::Some(Box::new(connector)),
         }
-        self.init()
+        self.init().await
     }
 
-    fn init(&mut self) -> Result<(), ButtplugClientError> {
+    async fn init(&mut self) -> Result<(), ButtplugClientError> {
         if self.connector.is_none() {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected".to_string() }));
         }
@@ -102,24 +102,29 @@ impl ButtplugClient {
 mod test {
     use super::ButtplugClient;
     use crate::client::connector::ButtplugEmbeddedClientConnector;
+    use async_std::task;
 
-    fn connect_test_client() -> ButtplugClient {
+    async fn connect_test_client() -> ButtplugClient {
         let mut client = ButtplugClient::new("Test Client");
-        assert!(client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0)).is_ok());
+        assert!(client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0)).await.is_ok());
         assert!(client.connected());
         client
     }
 
     #[test]
     fn test_connect_status() {
-        connect_test_client();
+        task::block_on(async {
+            connect_test_client().await;
+        });
     }
 
     #[test]
     fn test_disconnect_status() {
-        let mut client = connect_test_client();
-        assert!(client.disconnect().is_ok());
-        assert!(!client.connected());
+        task::block_on(async {
+            let mut client = connect_test_client().await;
+            assert!(client.disconnect().is_ok());
+            assert!(!client.connected());
+        });
     }
 
     #[test]
@@ -130,10 +135,11 @@ mod test {
 
     #[test]
     fn test_connect_init() {
-        let client = connect_test_client();
-        assert_eq!(client.server_name.unwrap(), "Test Server");
+        task::block_on(async {
+            let client = connect_test_client().await;
+            assert_eq!(client.server_name.unwrap(), "Test Server");
+        });
     }
 
     // Failure on server version error is unit tested in server.
-
 }
