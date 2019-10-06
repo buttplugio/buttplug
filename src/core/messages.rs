@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use super::errors::*;
+use serde::{Serialize, Deserialize};
+use serde_repr::{Serialize_repr, Deserialize_repr};
 
 pub trait ButtplugMessage: Send + Sync + Clone {
     fn get_id(&self) -> u32;
@@ -7,8 +9,9 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     fn as_union(self) -> ButtplugMessageUnion;
 }
 
-#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone)]
+#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone, Serialize, Deserialize)]
 pub struct Ok {
+    #[serde(rename = "Id")]
     id: u32,
 }
 
@@ -20,7 +23,8 @@ impl Ok {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize_repr, Deserialize_repr, PartialEq)]
+#[repr(u8)]
 pub enum ErrorCode {
     ErrorUnknown = 0,
     ErrorInit,
@@ -29,10 +33,13 @@ pub enum ErrorCode {
     ErrorDevice
 }
 
-#[derive(Debug, ButtplugMessage, Clone)]
+#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Error {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "ErrorCode")]
     pub error_code: ErrorCode,
+    #[serde(rename = "ErrorMessage")]
     pub error_message: String,
 }
 
@@ -67,25 +74,25 @@ impl From<ButtplugError> for Error {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MessageAttributes {
     pub feature_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceMessageInfo {
     pub device_index: u32,
     pub device_name: String,
     pub device_messages: Vec<String>,
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug)]
+#[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceList {
     id: u32,
     pub devices: Vec<DeviceMessageInfo>
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug)]
+#[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceAdded {
     id: u32,
     pub device_index: u32,
@@ -93,36 +100,47 @@ pub struct DeviceAdded {
     pub device_messages: HashMap<String, MessageAttributes>
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DeviceRemoved {
     id: u32,
     pub device_index: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StartScanning {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+impl StartScanning {
+    pub fn new() -> StartScanning {
+        StartScanning {
+            id: 0
+        }
+    }
+}
+
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StopScanning {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ScanningFinished {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RequestDeviceList {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone)]
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RequestServerInfo {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "ClientName")]
     pub client_name: String,
+    #[serde(rename = "MessageVersion")]
     pub message_version: u32,
 }
 
@@ -136,14 +154,21 @@ impl RequestServerInfo {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ServerInfo {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "MajorVersion")]
     pub major_version: u32,
+    #[serde(rename = "MinorVersion")]
     pub minor_version: u32,
+    #[serde(rename = "BuildVersion")]
     pub build_version: u32,
+    #[serde(rename = "MessageVersion")]
     pub message_version: u32,
+    #[serde(rename = "MaxPingTime")]
     pub max_ping_time: u32,
+    #[serde(rename = "ServerName")]
     pub server_name: String
 }
 
@@ -161,7 +186,7 @@ impl ServerInfo {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
     Error(Error),
@@ -212,4 +237,39 @@ impl ButtplugMessage for ButtplugMessageUnion {
     fn as_union(self) -> ButtplugMessageUnion {
         panic!("as_union shouldn't be called on union.");
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Ok, Error, RequestServerInfo, ButtplugMessageUnion, ErrorCode};
+
+    const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
+    const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
+
+    #[test]
+    fn test_ok_serialize() {
+        let ok = ButtplugMessageUnion::Ok(Ok::new());
+        let js = serde_json::to_string(&ok).unwrap();
+        assert_eq!(OK_STR, js);
+    }
+
+    #[test]
+    fn test_ok_deserialize() {
+        let union: ButtplugMessageUnion = serde_json::from_str(&OK_STR).unwrap();
+        assert_eq!(ButtplugMessageUnion::Ok(Ok::new()), union);
+    }
+
+    #[test]
+    fn test_error_serialize() {
+        let error = ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error"));
+        let js = serde_json::to_string(&error).unwrap();
+        assert_eq!(ERROR_STR, js);
+    }
+
+    #[test]
+    fn test_error_deserialize() {
+        let union: ButtplugMessageUnion = serde_json::from_str(&ERROR_STR).unwrap();
+        assert_eq!(ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error")), union);
+    }
+
 }
