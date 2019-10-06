@@ -1,12 +1,14 @@
 use std::error::Error;
 use std::fmt;
-use crate::core::messages::RequestServerInfo;
-use crate::core::messages::ButtplugMessage;
-use crate::core::messages::ButtplugMessageUnion;
-use super::connector::ButtplugClientConnector;
-use super::connector::ButtplugClientConnectorError;
-use crate::core::errors::ButtplugError;
-use crate::core::errors::ButtplugInitError;
+use crate::core::messages::{RequestServerInfo,
+                            ButtplugMessage,
+                            ButtplugMessageUnion,
+                            StartScanning};
+use super::connector::{ButtplugClientConnector,
+                       ButtplugClientConnectorError};
+use crate::core::errors::{ButtplugError,
+                          ButtplugMessageError,
+                          ButtplugInitError};
 
 #[derive(Debug)]
 pub enum ButtplugClientError {
@@ -59,17 +61,24 @@ impl ButtplugClient {
         }
         match connector.connect().await {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
-            None => self.connector = Option::Some(Box::new(connector)),
+            None => {
+                self.connector = Option::Some(Box::new(connector));
+                match self.init().await {
+                    Ok(_) => {
+                        Ok(())
+                    }
+                    Err(x) => {
+                        self.connector = None;
+                        Err(x)
+                    }
+                }
+            }
         }
-        self.init().await
     }
 
     async fn init(&mut self) -> Result<(), ButtplugClientError> {
-        if self.connector.is_none() {
-            return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected".to_string() }));
-        }
-        let connector = self.connector.as_ref().unwrap();
-        connector.send(&RequestServerInfo::new(&self.client_name, 1).as_union())
+        self.send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
+            .await
             .map_err(|x| x)
             .and_then(|x| {
                 // TODO Error message case may need to be implemented here when
@@ -95,6 +104,35 @@ impl ButtplugClient {
         let mut connector = self.connector.take().unwrap();
         connector.disconnect();
         Result::Ok(())
+    }
+
+    pub async fn start_scanning(&mut self) -> Result<(), ButtplugClientError> {
+        self
+            .send_message_expect_ok(&ButtplugMessageUnion::StartScanning(StartScanning::new()))
+            .await
+    }
+
+    async fn send_message(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        if let Some(ref mut connector) = self.connector {
+            connector
+                .send(msg)
+                .await
+                .map_err(|x| x)
+        } else {
+            Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not Connected.".to_string() }))
+        }
+    }
+
+    async fn send_message_expect_ok(&mut self, msg: &ButtplugMessageUnion) -> Result<(), ButtplugClientError> {
+        self.send_message(msg)
+            .await
+            .map_err(|x| x)
+            .and_then(|x: ButtplugMessageUnion| {
+                match x {
+                    ButtplugMessageUnion::Ok(_) => Ok(()),
+                    _ => Err(ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError { message: "Got non-Ok message back".to_string() })))
+                }
+            })
     }
 }
 

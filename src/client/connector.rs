@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::cell::RefCell;
 use std::fmt;
 use async_trait::async_trait;
 use super::client::ButtplugClientError;
@@ -31,11 +30,11 @@ impl Error for ButtplugClientConnectorError {
 pub trait ButtplugClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
-    fn send(&self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
+    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
 }
 
 pub struct ButtplugEmbeddedClientConnector {
-    server: Option<RefCell<ButtplugServer>>,
+    server: ButtplugServer,
     server_name: String,
     max_ping_time: u32
 }
@@ -43,7 +42,7 @@ pub struct ButtplugEmbeddedClientConnector {
 impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
         ButtplugEmbeddedClientConnector {
-            server: None,
+            server: ButtplugServer::new(&name, max_ping_time),
             server_name: name.to_string(),
             max_ping_time: max_ping_time
         }
@@ -53,20 +52,18 @@ impl ButtplugEmbeddedClientConnector {
 #[async_trait]
 impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
-        self.server = Option::Some(RefCell::new(ButtplugServer::new(&self.server_name, self.max_ping_time)));
         None
     }
 
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
-        self.server = None;
         None
     }
 
-    fn send(&self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        match self.server {
-            Some (ref _s) => return _s.borrow_mut().send_message(msg).map_err(|x| ButtplugClientError::ButtplugError(x)),
-            None => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client not connected to server.".to_string() }))
-        }
+    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        self.server
+            .send_message(msg)
+            .await
+            .map_err(|x| ButtplugClientError::ButtplugError(x))
     }
 }
 
