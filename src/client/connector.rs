@@ -5,7 +5,7 @@ use super::client::ButtplugClientError;
 use crate::core::messages::ButtplugMessageUnion;
 use crate::server::server::ButtplugServer;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
     pub message: String,
 }

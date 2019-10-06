@@ -1,7 +1,7 @@
 use std::fmt;
 use std::error::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugInitError {
     pub message: String,
 }
@@ -22,7 +22,7 @@ impl Error for ButtplugInitError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugMessageError {
     pub message: String,
 }
@@ -43,7 +43,7 @@ impl Error for ButtplugMessageError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugPingError {
     pub message: String,
 }
@@ -64,7 +64,7 @@ impl Error for ButtplugPingError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugDeviceError {
     pub message: String,
 }
@@ -85,7 +85,7 @@ impl Error for ButtplugDeviceError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ButtplugUnknownError {
     pub message: String,
 }
@@ -106,7 +106,7 @@ impl Error for ButtplugUnknownError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ButtplugError {
     ButtplugInitError(ButtplugInitError),
     ButtplugMessageError(ButtplugMessageError),

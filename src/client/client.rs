@@ -10,7 +10,7 @@ use crate::core::errors::{ButtplugError,
                           ButtplugMessageError,
                           ButtplugInitError};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ButtplugClientError {
     ButtplugClientConnectorError(ButtplugClientConnectorError),
     ButtplugError(ButtplugError),
