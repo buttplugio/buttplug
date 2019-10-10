@@ -19,9 +19,9 @@ log = "0.4.8"
 quote = "1.0.2"
 syn = "1.0.5"
 buttplug_derive = { path = "./buttplug_derive" }
-async-std = "0.99.8"
-futures-channel-preview = "=0.3.0-alpha.18"
-futures-preview = "=0.3.0-alpha.18"
+async-std = "0.99.9"
+futures-channel-preview = "=0.3.0-alpha.19"
+futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
 async-trait = "0.1.13"
 serde_repr = "0.1.5"
 ws = "0.9.0"
