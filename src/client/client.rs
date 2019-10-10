@@ -59,9 +59,11 @@ impl ButtplugClient {
         if self.connector.is_some() {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
         }
+        println!("Connecting");
         match connector.connect().await {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
             None => {
+                println!("Init in connect");
                 self.connector = Option::Some(Box::new(connector));
                 match self.init().await {
                     Ok(_) => {
@@ -77,6 +79,7 @@ impl ButtplugClient {
     }
 
     async fn init(&mut self) -> Result<(), ButtplugClientError> {
+        println!("Initing");
         self.send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
             .await
             .map_err(|x| x)

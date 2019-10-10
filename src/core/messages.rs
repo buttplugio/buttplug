@@ -147,7 +147,7 @@ pub struct RequestServerInfo {
 impl RequestServerInfo {
     pub fn new(client_name: &str, message_version: u32) -> RequestServerInfo {
         RequestServerInfo {
-            id: 0,
+            id: 1,
             client_name: client_name.to_string(),
             message_version: message_version
         }
