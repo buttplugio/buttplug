@@ -1,5 +1,7 @@
 use std::error::Error;
 use std::fmt;
+use async_std::task;
+use pharos::{Pharos, Observable, Events, ObserveConfig, Channel};
 use crate::core::messages::{RequestServerInfo,
                             ButtplugMessage,
                             ButtplugMessageUnion,
@@ -9,6 +11,17 @@ use super::connector::{ButtplugClientConnector,
 use crate::core::errors::{ButtplugError,
                           ButtplugMessageError,
                           ButtplugInitError};
+use futures::{FutureExt, StreamExt, SinkExt};
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ButtplugClientEvent {
+    ScanningFinished,
+    DeviceAdded,
+    DeviceRemoved,
+    Log,
+    PingTimeout,
+    ServerDisconnect,
+}
 
 #[derive(Debug, Clone)]
 pub enum ButtplugClientError {
@@ -42,8 +55,12 @@ pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
     pub max_ping_time: u32,
+    pub observers: Pharos<ButtplugClientEvent>,
     connector: Option<Box<dyn ButtplugClientConnector>>,
 }
+
+unsafe impl Sync for ButtplugClient {}
+unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
     pub fn new(name: &str) -> ButtplugClient {
@@ -51,7 +68,8 @@ impl ButtplugClient {
             client_name: name.to_string(),
             max_ping_time: 0,
             server_name: None,
-            connector: None
+            connector: None,
+            observers: Pharos::default()
         }
     }
 
@@ -59,7 +77,15 @@ impl ButtplugClient {
         if self.connector.is_some() {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
         }
-        println!("Connecting");
+
+        let mut recv = connector.get_event_receiver();
+
+        // task::spawn(async {
+        //     while let msg = recv.next().await {
+        //         self.on_message_received(&msg.unwrap());
+        //     }
+        // });
+
         match connector.connect().await {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
             None => {
@@ -137,6 +163,29 @@ impl ButtplugClient {
                 }
             })
     }
+
+    pub async fn on_message_received(&mut self, msg: &ButtplugMessageUnion) {
+        match msg {
+            ButtplugMessageUnion::ScanningFinished(_) => {},
+            ButtplugMessageUnion::DeviceAdded(_) => {},
+            ButtplugMessageUnion::DeviceRemoved(_) => {},
+            //ButtplugMessageUnion::Log(_) => {}
+            _ => panic!("Unhandled incoming message!")
+        }
+    }
+
+    pub fn get_default_observer(&mut self) -> Result< Events<ButtplugClientEvent>, pharos::Error > {
+        Ok(self.observe(Channel::Unbounded.into()).expect( "observe" ))
+    }
+}
+
+impl Observable<ButtplugClientEvent> for ButtplugClient {
+   type Error = pharos::Error;
+
+   fn observe(&mut self, options: ObserveConfig<ButtplugClientEvent>) -> Result< Events<ButtplugClientEvent>, Self::Error >
+   {
+       self.observers.observe(options)
+   }
 }
 
 #[cfg(test)]
@@ -184,6 +233,15 @@ mod test {
 
     #[test]
     fn test_start_scanning() {
+        task::block_on(async {
+            let mut client = connect_test_client().await;
+            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+            assert!(client.start_scanning().await.is_ok());
+        });
+    }
+
+    #[test]
+    fn test_scanning_finished() {
         task::block_on(async {
             let mut client = connect_test_client().await;
             assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");

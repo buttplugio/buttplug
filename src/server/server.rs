@@ -2,6 +2,7 @@ use crate::core::messages;
 use crate::core::errors::*;
 use crate::core::messages::ButtplugMessageUnion;
 use crate::core::messages::ButtplugMessage;
+use futures_channel::mpsc;
 
 pub struct ButtplugServer {
     server_name: String,
@@ -9,16 +10,18 @@ pub struct ButtplugServer {
     client_spec_version: Option<u32>,
     client_name: Option<String>,
     max_ping_time: u32,
+    event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>,
 }
 
 impl ButtplugServer {
-    pub fn new(name: &str, max_ping_time: u32) -> ButtplugServer {
+    pub fn new(name: &str, max_ping_time: u32, event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>) -> ButtplugServer {
         ButtplugServer {
             server_name: name.to_string(),
             server_spec_version: 1,
             client_name: None,
             client_spec_version: None,
             max_ping_time: max_ping_time,
+            event_sender
         }
     }
 
@@ -73,7 +76,8 @@ mod test {
     use async_std::task;
 
     async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
-        let mut server = ButtplugServer::new("Test Server", 0);
+        let (send, recv) = mpsc::unbounded();
+        let mut server = ButtplugServer::new("Test Server", 0, send);
         assert_eq!(server.server_name, "Test Server");
         match server.send_message(&msg_union).await.unwrap() {
             ButtplugMessageUnion::ServerInfo (_s) => assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0)),
@@ -103,7 +107,8 @@ mod test {
 
     #[test]
     fn test_server_version_gt() {
-        let mut server = ButtplugServer::new("Test Server", 0);
+        let (send, recv) = mpsc::unbounded();
+        let mut server = ButtplugServer::new("Test Server", 0, send);
         let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
         let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
         task::block_on(async {

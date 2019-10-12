@@ -6,7 +6,7 @@ use futures::future::Future;
 use futures::{FutureExt, StreamExt, SinkExt};
 use futures_channel::mpsc;
 use super::client::ButtplugClientError;
-use crate::core::messages::ButtplugMessageUnion;
+use crate::core::messages::{ButtplugMessageUnion, Ok};
 use crate::server::server::ButtplugServer;
 use super::messagesorter::{ClientConnectorMessageSorter, ClientConnectorMessageFuture};
 
@@ -44,6 +44,7 @@ pub trait ButtplugClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
     async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
+    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion>;
 }
 
 pub trait ButtplugRemoteClientConnectorSender: Sync + Send {
@@ -72,16 +73,18 @@ pub struct ButtplugRemoteClientConnectorHelper {
     // sorter (which lives in a future wherever the scheduler put it) when we
     // expect them.
     future_recv: Option<mpsc::UnboundedReceiver<ClientConnectorMessageFuture>>,
+    event_send:mpsc::UnboundedSender<ButtplugMessageUnion>
 }
 
 unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
 unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
 impl ButtplugRemoteClientConnectorHelper {
-    pub fn new() -> ButtplugRemoteClientConnectorHelper {
+    pub fn new(event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>) -> ButtplugRemoteClientConnectorHelper {
         let (internal_send, internal_recv) = mpsc::unbounded();
         let (remote_send, remote_recv) = mpsc::unbounded();
         ButtplugRemoteClientConnectorHelper {
+            event_send: event_sender,
             remote_send,
             remote_recv: Some(remote_recv),
             internal_send,
@@ -113,6 +116,7 @@ impl ButtplugRemoteClientConnectorHelper {
         // in our connector task.
         let (mut future_send, future_recv) = mpsc::unbounded::<ClientConnectorMessageFuture>();
         self.future_recv = Some(future_recv);
+        let mut event_send = self.event_send.clone();
 
         // Remove the receivers we need to move into the task.
         let mut remote_recv = self.remote_recv.take().unwrap();
@@ -159,7 +163,8 @@ impl ButtplugRemoteClientConnectorHelper {
                                 let array: Vec<ButtplugMessageUnion> = serde_json::from_str(&_t.clone()).unwrap();
                                 for smsg in array {
                                     if !sorter.resolve_message(&smsg) {
-                                        // TODO Fill this in with notifications.
+                                        // Send notification through event channel
+                                        event_send.send(smsg).await;
                                     }
                                 }
                             }
@@ -185,13 +190,23 @@ impl ButtplugRemoteClientConnectorHelper {
 
 pub struct ButtplugEmbeddedClientConnector {
     server: ButtplugServer,
+    sender: mpsc::UnboundedSender<ButtplugMessageUnion>,
+    recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
 }
 
 impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
+        let (send, recv) = mpsc::unbounded();
         ButtplugEmbeddedClientConnector {
-            server: ButtplugServer::new(&name, max_ping_time),
+            server: ButtplugServer::new(&name, max_ping_time, send.clone()),
+            sender: send,
+            recv: Some(recv),
         }
+    }
+
+    async fn emit_event(&mut self, msg: &ButtplugMessageUnion) ->
+        Result<ButtplugMessageUnion, ButtplugClientError> {
+            Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
     }
 }
 
@@ -210,6 +225,11 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
             .send_message(msg)
             .await
             .map_err(|x| ButtplugClientError::ButtplugError(x))
+    }
+
+    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
+        // This will panic if we've already taken the receiver.
+        self.recv.take().unwrap()
     }
 }
 

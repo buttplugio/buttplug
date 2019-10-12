@@ -19,7 +19,6 @@ use super::connector::{ButtplugClientConnector,
                        ButtplugRemoteClientConnectorHelper,
                        ButtplugRemoteClientConnectorMessage,
                        ButtplugRemoteClientConnectorSender};
-use super::messagesorter::{ClientConnectorMessageFuture};
 use super::client::ButtplugClientError;
 use std::thread;
 use async_std::task;
@@ -60,13 +59,16 @@ pub struct ButtplugWebsocketClientConnector
 {
     helper: ButtplugRemoteClientConnectorHelper,
     ws_thread: Option<thread::JoinHandle<()>>,
+    recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
 }
 
 impl ButtplugWebsocketClientConnector {
     pub fn new() -> ButtplugWebsocketClientConnector {
+        let (send, recv) = mpsc::unbounded();
         ButtplugWebsocketClientConnector {
-            helper: ButtplugRemoteClientConnectorHelper::new(),
+            helper: ButtplugRemoteClientConnectorHelper::new(send.clone()),
             ws_thread: None,
+            recv: Some(recv),
         }
     }
 }
@@ -127,6 +129,10 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         self.helper.send(msg).await
     }
+    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
+        // This will panic if we've already taken the receiver.
+        self.recv.take().unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -136,20 +142,22 @@ mod test {
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
 
-    #[test]
-    fn test_websocket() {
-        task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::new().connect().await.is_none());
-        })
-    }
+    // Only run these tests when we know there's an external server up to reply
 
-    #[test]
-    fn test_client_websocket() {
-        task::block_on(async {
-            println!("connecting");
-            let mut client = ButtplugClient::new("test client");
-            client.connect(ButtplugWebsocketClientConnector::new()).await;
-            println!("connected");
-        })
-    }
+    // #[test]
+    // fn test_websocket() {
+    //     task::block_on(async {
+    //         assert!(ButtplugWebsocketClientConnector::new().connect().await.is_none());
+    //     })
+    // }
+
+    // #[test]
+    // fn test_client_websocket() {
+    //     task::block_on(async {
+    //         println!("connecting");
+    //         let mut client = ButtplugClient::new("test client");
+    //         client.connect(ButtplugWebsocketClientConnector::new()).await;
+    //         println!("connected");
+    //     })
+    // }
 }
