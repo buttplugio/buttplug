@@ -14,15 +14,15 @@
 // - Continue on our way with the two channels, happy to know we don't have to
 //   wait for networking libraries to get on our futures 0.3 level.
 
-use super::connector::{ButtplugClientConnector,
-                       ButtplugClientConnectorError,
-                       ButtplugRemoteClientConnectorHelper,
-                       ButtplugRemoteClientConnectorMessage,
-                       ButtplugRemoteClientConnectorSender};
-use super::client::ButtplugClientError;
+use buttplug::client::connector::{ButtplugClientConnector,
+                                  ButtplugClientConnectorError,
+                                  ButtplugRemoteClientConnectorHelper,
+                                  ButtplugRemoteClientConnectorMessage,
+                                  ButtplugRemoteClientConnectorSender};
+use buttplug::client::client::ButtplugClientError;
+use buttplug::core::messages::{ButtplugMessageUnion, ButtplugMessage};
 use std::thread;
 use async_std::task;
-use crate::core::messages::ButtplugMessageUnion;
 use futures_channel::mpsc;
 use async_trait::async_trait;
 use ws::{Handler, Handshake, Message, CloseCode};
@@ -90,7 +90,7 @@ impl ButtplugWebsocketWrappedSender {
 
 impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
     fn send(&self, msg: ButtplugMessageUnion) {
-        let m = "[".to_owned() + &serde_json::to_string(&msg).unwrap() + "]";
+        let m = msg.as_protocol_json();
         self.sender.send(m);
     }
 
@@ -137,8 +137,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 
 #[cfg(test)]
 mod test {
-    use crate::client::client::ButtplugClient;
-    use super::ButtplugClientConnector;
+    use buttplug::client::client::{ButtplugClient};
+    use buttplug::client::connector::{ButtplugClientConnector};
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
 

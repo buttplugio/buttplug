@@ -3,4 +3,5 @@
 members = [
     "buttplug",
     "buttplug_derive",
+    "buttplug_ws_connector",
 ]

@@ -3,10 +3,13 @@ use super::errors::*;
 use serde::{Serialize, Deserialize};
 use serde_repr::{Serialize_repr, Deserialize_repr};
 
-pub trait ButtplugMessage: Send + Sync + Clone {
+pub trait ButtplugMessage: Send + Sync + Clone + Serialize + Deserialize<'static> {
     fn get_id(&self) -> u32;
     fn set_id(&mut self, id: u32);
     fn as_union(self) -> ButtplugMessageUnion;
+    fn as_protocol_json(&self) -> String {
+        "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
+    }
 }
 
 #[derive(Debug, PartialEq, Default, ButtplugMessage, Clone, Serialize, Deserialize)]
