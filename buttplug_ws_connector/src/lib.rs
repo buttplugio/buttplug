@@ -19,7 +19,7 @@ use buttplug::client::connector::{ButtplugClientConnector,
                                   ButtplugRemoteClientConnectorHelper,
                                   ButtplugRemoteClientConnectorMessage,
                                   ButtplugRemoteClientConnectorSender};
-use buttplug::client::client::ButtplugClientError;
+use buttplug::client::ButtplugClientError;
 use buttplug::core::messages::{ButtplugMessageUnion, ButtplugMessage};
 use std::thread;
 use async_std::task;
@@ -137,7 +137,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 
 #[cfg(test)]
 mod test {
-    use buttplug::client::client::{ButtplugClient};
+    use buttplug::client::ButtplugClient;
     use buttplug::client::connector::{ButtplugClientConnector};
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;

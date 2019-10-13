@@ -5,7 +5,7 @@ use futures::select;
 use futures::future::Future;
 use futures::{FutureExt, StreamExt, SinkExt};
 use futures_channel::mpsc;
-use super::client::ButtplugClientError;
+use super::ButtplugClientError;
 use crate::core::messages::{ButtplugMessageUnion, Ok};
 use crate::server::server::ButtplugServer;
 use super::messagesorter::{ClientConnectorMessageSorter, ClientConnectorMessageFuture};
