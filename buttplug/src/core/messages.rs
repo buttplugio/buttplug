@@ -189,6 +189,40 @@ impl ServerInfo {
     }
 }
 
+#[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
+pub struct VibrateSubcommand {
+    #[serde(rename = "Index")]
+    pub index: u32,
+    #[serde(rename = "Speed")]
+    pub speed: f64,
+}
+
+impl VibrateSubcommand {
+    pub fn new(index: u32, speed: f64) -> VibrateSubcommand {
+        VibrateSubcommand {
+            index,
+            speed
+        }
+    }
+}
+
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct VibrateCmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "Speeds")]
+    pub speeds: Vec<VibrateSubcommand>,
+}
+
+impl VibrateCmd {
+    pub fn new(speeds: Vec<VibrateSubcommand>) -> VibrateCmd {
+        VibrateCmd {
+            id: 1,
+            speeds
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
@@ -202,6 +236,7 @@ pub enum ButtplugMessageUnion {
     RequestDeviceList(RequestDeviceList),
     RequestServerInfo(RequestServerInfo),
     ServerInfo(ServerInfo),
+    VibrateCmd(VibrateCmd),
 }
 
 impl ButtplugMessage for ButtplugMessageUnion {
@@ -218,6 +253,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestDeviceList (ref _msg) => return _msg.id,
             ButtplugMessageUnion::RequestServerInfo (ref _msg) => return _msg.id,
             ButtplugMessageUnion::ServerInfo (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::VibrateCmd (ref _msg) => return _msg.id,
         }
     }
 
@@ -234,6 +270,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestDeviceList (ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::RequestServerInfo (ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::ServerInfo (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::VibrateCmd (ref mut _msg) => _msg.set_id(id),
         }
     }
 
