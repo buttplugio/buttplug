@@ -1,5 +1,6 @@
 use std::fmt;
 use std::error::Error;
+use super::messages::{self, ErrorCode};
 
 #[derive(Debug, Clone)]
 pub struct ButtplugInitError {
@@ -140,5 +141,17 @@ impl Error for ButtplugError {
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
+    }
+}
+
+impl From<messages::Error> for ButtplugError {
+    fn from(error: messages::Error) -> Self {
+        match error.error_code {
+            ErrorCode::ErrorDevice => ButtplugError::ButtplugDeviceError(ButtplugDeviceError { message: error.error_message }),
+            ErrorCode::ErrorMessage => ButtplugError::ButtplugMessageError(ButtplugMessageError { message: error.error_message }),
+            ErrorCode::ErrorInit => ButtplugError::ButtplugInitError(ButtplugInitError { message: error.error_message }),
+            ErrorCode::ErrorUnknown => ButtplugError::ButtplugUnknownError(ButtplugUnknownError { message: error.error_message }),
+            ErrorCode::ErrorPing => ButtplugError::ButtplugPingError(ButtplugPingError { message: error.error_message }),
+        }
     }
 }
