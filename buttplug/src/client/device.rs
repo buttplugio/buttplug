@@ -4,6 +4,8 @@ use crate::core::{
                MessageAttributes,
                ButtplugMessageUnion,
                VibrateCmd,
+               DeviceAdded,
+               DeviceMessageInfo,
                VibrateSubcommand},
     errors::{ButtplugError, ButtplugMessageError},
 };
@@ -12,7 +14,7 @@ use std::collections::HashMap;
 use futures_channel::mpsc;
 
 // Send over both a message, and a channel to receive back our processing future on.
-struct ButtplugClientDeviceMessage<'a> {
+pub struct ButtplugClientDeviceMessage<'a> {
     msg: ButtplugMessageUnion,
     future_sender: mpsc::Sender<BoxFuture<'a, ButtplugMessageUnion>>
 }
@@ -29,7 +31,7 @@ impl<'a> ButtplugClientDeviceMessage<'a> {
 }
 
 #[derive(Clone)]
-struct ButtplugClientDevice<'a> {
+pub struct ButtplugClientDevice<'a> {
     pub name: String,
     index: u32,
     allowed_messages: HashMap<String, MessageAttributes>,
@@ -86,4 +88,18 @@ impl<'a> ButtplugClientDevice<'a> {
     // pub async fn send_rotation_cmd(&self) -> Option<ButtplugError> {
     //     None
     // }
+}
+
+impl<'a> From<(&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)> for ButtplugClientDevice<'a> {
+    fn from(msg_sender_tuple: (&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)) -> Self {
+        let msg = msg_sender_tuple.0.clone();
+        ButtplugClientDevice::new(&*msg.device_name, msg.device_index, msg.device_messages, msg_sender_tuple.1)
+    }
+}
+
+impl<'a> From<(&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)> for ButtplugClientDevice<'a> {
+    fn from(msg_sender_tuple: (&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)) -> Self {
+        let msg = msg_sender_tuple.0.clone();
+        ButtplugClientDevice::new(&*msg.device_name, msg.device_index, msg.device_messages, msg_sender_tuple.1)
+    }
 }

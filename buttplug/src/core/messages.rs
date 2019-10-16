@@ -86,7 +86,7 @@ pub struct MessageAttributes {
 pub struct DeviceMessageInfo {
     pub device_index: u32,
     pub device_name: String,
-    pub device_messages: Vec<String>,
+    pub device_messages: HashMap<String, MessageAttributes>,
 }
 
 #[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]

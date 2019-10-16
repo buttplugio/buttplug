@@ -14,6 +14,8 @@ use connector::{ButtplugClientConnector,
 use crate::core::errors::{ButtplugError,
                           ButtplugMessageError,
                           ButtplugInitError};
+use device::{ButtplugClientDevice, ButtplugClientDeviceMessage};
+use futures_channel::mpsc;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ButtplugClientEvent {
@@ -53,25 +55,29 @@ impl Error for ButtplugClientError {
     }
 }
 
-pub struct ButtplugClient {
+pub struct ButtplugClient<'a> {
     pub client_name: String,
     pub server_name: Option<String>,
     pub max_ping_time: u32,
     pub observers: Pharos<ButtplugClientEvent>,
+    devices: Vec<ButtplugClientDevice<'a>>,
+    device_receivers: Vec<mpsc::UnboundedReceiver<ButtplugClientDeviceMessage<'a>>>,
     connector: Option<Box<dyn ButtplugClientConnector>>,
 }
 
-unsafe impl Sync for ButtplugClient {}
-unsafe impl Send for ButtplugClient {}
+unsafe impl<'a> Sync for ButtplugClient<'a> {}
+unsafe impl<'a> Send for ButtplugClient<'a> {}
 
-impl ButtplugClient {
-    pub fn new(name: &str) -> ButtplugClient {
+impl<'a> ButtplugClient<'a> {
+    pub fn new(name: &str) -> ButtplugClient<'a> {
         ButtplugClient {
             client_name: name.to_string(),
             max_ping_time: 0,
             server_name: None,
             connector: None,
-            observers: Pharos::default()
+            observers: Pharos::default(),
+            devices: vec!(),
+            device_receivers: vec!(),
         }
     }
 
@@ -163,7 +169,24 @@ impl ButtplugClient {
     pub async fn on_message_received(&mut self, msg: &ButtplugMessageUnion) {
         match msg {
             ButtplugMessageUnion::ScanningFinished(_) => {},
-            ButtplugMessageUnion::DeviceAdded(_) => {},
+            ButtplugMessageUnion::DeviceList(_msg) => {
+                for info in _msg.devices.iter() {
+                    let (send, recv) = mpsc::unbounded::<ButtplugClientDeviceMessage>();
+                    self.device_receivers.push(recv);
+                    self.devices.push(ButtplugClientDevice::from((&info.clone(), send)));
+                    // TODO Fire DeviceAdded here, once we figure out how events work
+
+                    // TODO Actually put the receiver into a loop somewhere. Maybe the connector?
+                }
+            },
+            ButtplugMessageUnion::DeviceAdded(_msg) => {
+                let (send, recv) = mpsc::unbounded::<ButtplugClientDeviceMessage>();
+                self.device_receivers.push(recv);
+                self.devices.push(ButtplugClientDevice::from((_msg, send)));
+                // TODO Fire DeviceAdded here, once we figure out how events work
+
+                // TODO Actually put the receiver into a loop somewhere. Maybe the connector?
+            },
             ButtplugMessageUnion::DeviceRemoved(_) => {},
             //ButtplugMessageUnion::Log(_) => {}
             _ => panic!("Unhandled incoming message!")
@@ -175,7 +198,7 @@ impl ButtplugClient {
     }
 }
 
-impl Observable<ButtplugClientEvent> for ButtplugClient {
+impl<'a> Observable<ButtplugClientEvent> for ButtplugClient<'a> {
    type Error = pharos::Error;
 
    fn observe(&mut self, options: ObserveConfig<ButtplugClientEvent>) -> Result< Events<ButtplugClientEvent>, Self::Error >
@@ -190,7 +213,7 @@ mod test {
     use crate::client::connector::ButtplugEmbeddedClientConnector;
     use async_std::task;
 
-    async fn connect_test_client() -> ButtplugClient {
+    async fn connect_test_client() -> ButtplugClient<'static> {
         let mut client = ButtplugClient::new("Test Client");
         assert!(client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0)).await.is_ok());
         assert!(client.connected());
