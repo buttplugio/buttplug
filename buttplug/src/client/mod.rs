@@ -1,4 +1,5 @@
 pub mod connector;
+pub mod device;
 mod messagesorter;
 
 use std::error::Error;
