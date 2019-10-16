@@ -7,7 +7,7 @@
 //     }
 //     Console.ReadKey(true);
 // }
-
+/*
 private static async Task RunExample()
 {
     // Time to see what devices are available! In this example, we'll see how servers can
@@ -175,6 +175,6 @@ private static async Task RunExample()
     // Now we can connect and see what devices we have, so next we'll learn about sending
     // them commands!
 }
-
+*/
 fn main() {
 }
