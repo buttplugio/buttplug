@@ -158,6 +158,10 @@ mod test {
     //         let mut client = ButtplugClient::new("test client");
     //         client.connect(ButtplugWebsocketClientConnector::new()).await;
     //         println!("connected");
+    //         client.start_scanning().await;
+    //         println!("scanning!");
+    //         client.wait_for_event().await;
+    //         println!("Got event!");
     //     })
     // }
 }

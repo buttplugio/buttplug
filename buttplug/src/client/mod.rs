@@ -64,6 +64,7 @@ pub struct ButtplugClient {
     devices: Vec<ButtplugClientDevice>,
     device_receivers: Vec<mpsc::UnboundedReceiver<ButtplugClientDeviceMessage>>,
     connector: Option<Box<dyn ButtplugClientConnector>>,
+    event_receiver: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
 }
 
 unsafe impl Sync for ButtplugClient {}
@@ -79,6 +80,7 @@ impl ButtplugClient {
             observers: Pharos::default(),
             devices: vec!(),
             device_receivers: vec!(),
+            event_receiver: None,
         }
     }
 
@@ -87,7 +89,9 @@ impl ButtplugClient {
             return Result::Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError { message: "Client already connected".to_string() }));
         }
 
-        let mut recv = connector.get_event_receiver();
+        // Set our event receiver before we connect, in case we get random
+        // errors or something.
+        self.event_receiver = Some(connector.get_event_receiver());
 
         match connector.connect().await {
             Some (_s) => return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
@@ -100,10 +104,25 @@ impl ButtplugClient {
                     }
                     Err(x) => {
                         self.connector = None;
+                        self.event_receiver = None;
                         Err(x)
                     }
                 }
             }
+        }
+    }
+
+    pub async fn wait_for_event(&mut self) -> Option<ButtplugClientConnectorError> {
+        if let Some(ref mut recv) = self.event_receiver {
+            match recv.next().await {
+                Some(ref msg) => {
+                    self.on_message_received(msg).await;
+                    None
+                },
+                None => Some(ButtplugClientConnectorError::new("What the hell"))
+            }
+        } else {
+            Some(ButtplugClientConnectorError::new("Client not connected"))
         }
     }
 
@@ -174,18 +193,21 @@ impl ButtplugClient {
                 for info in _msg.devices.iter() {
                     let (send, recv) = mpsc::unbounded::<ButtplugClientDeviceMessage>();
                     self.device_receivers.push(recv);
-                    self.devices.push(ButtplugClientDevice::from((&info.clone(), send)));
+                    let device = ButtplugClientDevice::from((&info.clone(), send));
+                    self.devices.push(device.clone());
                     // TODO Fire DeviceAdded here, once we figure out how events work
-
+                    self.observers.send(ButtplugClientEvent::DeviceAdded(device)).await.expect("Events should be able to send");
                     // TODO Actually put the receiver into a loop somewhere. Maybe the connector?
                 }
             },
             ButtplugMessageUnion::DeviceAdded(_msg) => {
+                println!("Got a device added message!");
                 let (send, recv) = mpsc::unbounded::<ButtplugClientDeviceMessage>();
                 self.device_receivers.push(recv);
-                self.devices.push(ButtplugClientDevice::from((_msg, send)));
+                let device = ButtplugClientDevice::from((_msg, send));
+                self.devices.push(device.clone());
                 // TODO Fire DeviceAdded here, once we figure out how events work
-
+                self.observers.send(ButtplugClientEvent::DeviceAdded(device)).await.expect("Events should be able to send");
                 // TODO Actually put the receiver into a loop somewhere. Maybe the connector?
             },
             ButtplugMessageUnion::DeviceRemoved(_) => {},
