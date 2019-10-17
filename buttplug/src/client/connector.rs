@@ -211,6 +211,7 @@ impl ButtplugRemoteClientConnectorHelper {
                                 let array: Vec<ButtplugMessageUnion> = serde_json::from_str(&_t.clone()).unwrap();
                                 for smsg in array {
                                     if !sorter.resolve_message(&smsg) {
+                                        println!("Sending event!");
                                         // Send notification through event channel
                                         event_send.send(smsg).await;
                                     }
@@ -222,10 +223,12 @@ impl ButtplugRemoteClientConnectorHelper {
                         }
                     },
                     StreamValue::Outgoing(ref mut buttplug_msg) => {
+                        // Create future sets our message ID, so make sure this
+                        // happens before we send out the message.
+                        let f = sorter.create_future(buttplug_msg);
                         if let Some(ref mut remote_sender) = remote_send {
                             remote_sender.send(buttplug_msg.clone());
                         }
-                        let f = sorter.create_future(buttplug_msg);
                         if future_send.send(f).await.is_err() {
                             println!("SEND ERR");
                         }
