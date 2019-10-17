@@ -79,27 +79,37 @@ impl From<ButtplugError> for Error {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MessageAttributes {
-    pub feature_count: u32,
+    #[serde(rename = "FeatureCount")]
+    pub feature_count: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceMessageInfo {
+    #[serde(rename = "DeviceIndex")]
     pub device_index: u32,
+    #[serde(rename = "DeviceName")]
     pub device_name: String,
+    #[serde(rename = "DeviceMessages")]
     pub device_messages: HashMap<String, MessageAttributes>,
 }
 
 #[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceList {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "Devices")]
     pub devices: Vec<DeviceMessageInfo>
 }
 
 #[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceAdded {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "DeviceIndex")]
     pub device_index: u32,
+    #[serde(rename = "DeviceName")]
     pub device_name: String,
+    #[serde(rename = "DeviceMessages")]
     pub device_messages: HashMap<String, MessageAttributes>
 }
 
@@ -111,29 +121,33 @@ pub struct DeviceRemoved {
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StartScanning {
+    #[serde(rename = "Id")]
     id: u32,
 }
 
 impl StartScanning {
     pub fn new() -> StartScanning {
         StartScanning {
-            id: 0
+            id: 1
         }
     }
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StopScanning {
+    #[serde(rename = "Id")]
     id: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ScanningFinished {
+    #[serde(rename = "Id")]
     id: u32,
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RequestDeviceList {
+    #[serde(rename = "Id")]
     id: u32,
 }
 
