@@ -15,13 +15,14 @@ use crate::core::errors::{ButtplugError,
                           ButtplugMessageError,
                           ButtplugInitError};
 use device::{ButtplugClientDevice, ButtplugClientDeviceMessage};
+use futures::{StreamExt, SinkExt};
 use futures_channel::mpsc;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone)]
 pub enum ButtplugClientEvent {
     ScanningFinished,
-    DeviceAdded,
-    DeviceRemoved,
+    DeviceAdded(ButtplugClientDevice),
+    DeviceRemoved(ButtplugClientDevice),
     Log,
     PingTimeout,
     ServerDisconnect,
@@ -55,21 +56,21 @@ impl Error for ButtplugClientError {
     }
 }
 
-pub struct ButtplugClient<'a> {
+pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
     pub max_ping_time: u32,
     pub observers: Pharos<ButtplugClientEvent>,
-    devices: Vec<ButtplugClientDevice<'a>>,
-    device_receivers: Vec<mpsc::UnboundedReceiver<ButtplugClientDeviceMessage<'a>>>,
+    devices: Vec<ButtplugClientDevice>,
+    device_receivers: Vec<mpsc::UnboundedReceiver<ButtplugClientDeviceMessage>>,
     connector: Option<Box<dyn ButtplugClientConnector>>,
 }
 
-unsafe impl<'a> Sync for ButtplugClient<'a> {}
-unsafe impl<'a> Send for ButtplugClient<'a> {}
+unsafe impl Sync for ButtplugClient {}
+unsafe impl Send for ButtplugClient {}
 
-impl<'a> ButtplugClient<'a> {
-    pub fn new(name: &str) -> ButtplugClient<'a> {
+impl ButtplugClient {
+    pub fn new(name: &str) -> ButtplugClient {
         ButtplugClient {
             client_name: name.to_string(),
             max_ping_time: 0,
@@ -198,7 +199,7 @@ impl<'a> ButtplugClient<'a> {
     }
 }
 
-impl<'a> Observable<ButtplugClientEvent> for ButtplugClient<'a> {
+impl Observable<ButtplugClientEvent> for ButtplugClient {
     type Error = pharos::Error;
 
     fn observe(&mut self, options: ObserveConfig<ButtplugClientEvent>) -> Result< Events<ButtplugClientEvent>, Self::Error >
@@ -213,7 +214,7 @@ mod test {
     use crate::client::connector::ButtplugEmbeddedClientConnector;
     use async_std::task;
 
-    async fn connect_test_client() -> ButtplugClient<'static> {
+    async fn connect_test_client() -> ButtplugClient {
         let mut client = ButtplugClient::new("Test Client");
         assert!(client.connect(ButtplugEmbeddedClientConnector::new("Test Server", 0)).await.is_ok());
         assert!(client.connected());

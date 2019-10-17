@@ -14,15 +14,15 @@ use std::collections::HashMap;
 use futures_channel::mpsc;
 
 // Send over both a message, and a channel to receive back our processing future on.
-pub struct ButtplugClientDeviceMessage<'a> {
+pub struct ButtplugClientDeviceMessage {
     msg: ButtplugMessageUnion,
-    future_sender: mpsc::Sender<BoxFuture<'a, ButtplugMessageUnion>>
+    future_sender: mpsc::Sender<BoxFuture<'static, ButtplugMessageUnion>>
 }
 
-impl<'a> ButtplugClientDeviceMessage<'a> {
+impl ButtplugClientDeviceMessage {
     pub fn new(msg: ButtplugMessageUnion,
-               future_sender: mpsc::Sender<BoxFuture<'a, ButtplugMessageUnion>>)
-               -> ButtplugClientDeviceMessage<'a> {
+               future_sender: mpsc::Sender<BoxFuture<'static, ButtplugMessageUnion>>)
+               -> ButtplugClientDeviceMessage {
         ButtplugClientDeviceMessage {
             msg,
             future_sender
@@ -31,19 +31,19 @@ impl<'a> ButtplugClientDeviceMessage<'a> {
 }
 
 #[derive(Clone)]
-pub struct ButtplugClientDevice<'a> {
+pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
     allowed_messages: HashMap<String, MessageAttributes>,
-    client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>,
+    client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
 }
 
-impl<'a> ButtplugClientDevice<'a> {
+impl ButtplugClientDevice {
     pub fn new(name: &str,
                index: u32,
                allowed_messages: HashMap<String, MessageAttributes>,
-               client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)
-               -> ButtplugClientDevice<'a> {
+               client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage>)
+               -> ButtplugClientDevice {
         ButtplugClientDevice {
             name: name.to_owned(),
             index,
@@ -90,15 +90,15 @@ impl<'a> ButtplugClientDevice<'a> {
     // }
 }
 
-impl<'a> From<(&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)> for ButtplugClientDevice<'a> {
-    fn from(msg_sender_tuple: (&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)) -> Self {
+impl From<(&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage>)> for ButtplugClientDevice {
+    fn from(msg_sender_tuple: (&DeviceAdded, mpsc::UnboundedSender<ButtplugClientDeviceMessage>)) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(&*msg.device_name, msg.device_index, msg.device_messages, msg_sender_tuple.1)
     }
 }
 
-impl<'a> From<(&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)> for ButtplugClientDevice<'a> {
-    fn from(msg_sender_tuple: (&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage<'a>>)) -> Self {
+impl From<(&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage>)> for ButtplugClientDevice {
+    fn from(msg_sender_tuple: (&DeviceMessageInfo, mpsc::UnboundedSender<ButtplugClientDeviceMessage>)) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(&*msg.device_name, msg.device_index, msg.device_messages, msg_sender_tuple.1)
     }
