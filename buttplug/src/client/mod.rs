@@ -10,7 +10,7 @@ use crate::core::messages::{RequestServerInfo,
                             ButtplugMessageUnion,
                             StartScanning};
 use connector::{ButtplugClientConnector,
-                       ButtplugClientConnectorError};
+                ButtplugClientConnectorError};
 use crate::core::errors::{ButtplugError,
                           ButtplugMessageError,
                           ButtplugInitError};
@@ -199,12 +199,12 @@ impl<'a> ButtplugClient<'a> {
 }
 
 impl<'a> Observable<ButtplugClientEvent> for ButtplugClient<'a> {
-   type Error = pharos::Error;
+    type Error = pharos::Error;
 
-   fn observe(&mut self, options: ObserveConfig<ButtplugClientEvent>) -> Result< Events<ButtplugClientEvent>, Self::Error >
-   {
-       self.observers.observe(options)
-   }
+    fn observe(&mut self, options: ObserveConfig<ButtplugClientEvent>) -> Result< Events<ButtplugClientEvent>, Self::Error >
+    {
+        self.observers.observe(options)
+    }
 }
 
 #[cfg(test)]

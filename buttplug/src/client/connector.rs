@@ -1,13 +1,13 @@
 use std::error::Error;
 use std::fmt;
 use async_trait::async_trait;
-use futures::select;
-use futures::future::Future;
-use futures::{FutureExt, StreamExt, SinkExt};
 use futures_channel::mpsc;
 use super::ButtplugClientError;
 use crate::core::messages::{ButtplugMessageUnion, Ok};
 use crate::server::server::ButtplugServer;
+use futures::select;
+use futures::future::Future;
+use futures::{FutureExt, StreamExt, SinkExt};
 use super::messagesorter::{ClientConnectorMessageSorter, ClientConnectorMessageFuture};
 
 #[derive(Debug, Clone)]
@@ -46,6 +46,54 @@ pub trait ButtplugClientConnector {
     async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion>;
 }
+
+pub struct ButtplugEmbeddedClientConnector {
+    server: ButtplugServer,
+    sender: mpsc::UnboundedSender<ButtplugMessageUnion>,
+    recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
+}
+
+impl ButtplugEmbeddedClientConnector {
+    pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
+        let (send, recv) = mpsc::unbounded();
+        ButtplugEmbeddedClientConnector {
+            server: ButtplugServer::new(&name, max_ping_time, send.clone()),
+            sender: send,
+            recv: Some(recv),
+        }
+    }
+
+    async fn emit_event(&mut self, msg: &ButtplugMessageUnion) ->
+        Result<ButtplugMessageUnion, ButtplugClientError> {
+            Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
+        }
+}
+
+#[async_trait]
+impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
+    async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
+        None
+    }
+
+    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+        None
+    }
+
+    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        self.server
+            .send_message(msg)
+            .await
+            .map_err(|x| ButtplugClientError::ButtplugError(x))
+    }
+
+    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
+        // This will panic if we've already taken the receiver.
+        self.recv.take().unwrap()
+    }
+}
+
+// The embedded connector is used heavily in the client unit tests, so we can
+// assume code coverage there and omit specific tests here.
 
 pub trait ButtplugRemoteClientConnectorSender: Sync + Send {
     fn send(&self, msg: ButtplugMessageUnion);
@@ -187,52 +235,4 @@ impl ButtplugRemoteClientConnectorHelper {
         }
     }
 }
-
-pub struct ButtplugEmbeddedClientConnector {
-    server: ButtplugServer,
-    sender: mpsc::UnboundedSender<ButtplugMessageUnion>,
-    recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
-}
-
-impl ButtplugEmbeddedClientConnector {
-    pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
-        let (send, recv) = mpsc::unbounded();
-        ButtplugEmbeddedClientConnector {
-            server: ButtplugServer::new(&name, max_ping_time, send.clone()),
-            sender: send,
-            recv: Some(recv),
-        }
-    }
-
-    async fn emit_event(&mut self, msg: &ButtplugMessageUnion) ->
-        Result<ButtplugMessageUnion, ButtplugClientError> {
-            Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
-    }
-}
-
-#[async_trait]
-impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
-    async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
-        None
-    }
-
-    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
-        None
-    }
-
-    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        self.server
-            .send_message(msg)
-            .await
-            .map_err(|x| ButtplugClientError::ButtplugError(x))
-    }
-
-    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
-        // This will panic if we've already taken the receiver.
-        self.recv.take().unwrap()
-    }
-}
-
-// The embedded connector is used heavily in the client unit tests, so we can
-// assume code coverage there and omit specific tests here.
 
