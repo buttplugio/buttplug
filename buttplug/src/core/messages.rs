@@ -224,14 +224,17 @@ impl VibrateSubcommand {
 pub struct VibrateCmd {
     #[serde(rename = "Id")]
     pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
     #[serde(rename = "Speeds")]
     pub speeds: Vec<VibrateSubcommand>,
 }
 
 impl VibrateCmd {
-    pub fn new(speeds: Vec<VibrateSubcommand>) -> VibrateCmd {
+    pub fn new(device_index: u32, speeds: Vec<VibrateSubcommand>) -> VibrateCmd {
         VibrateCmd {
             id: 1,
+            device_index,
             speeds
         }
     }

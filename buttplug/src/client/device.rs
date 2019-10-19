@@ -78,7 +78,7 @@ impl ButtplugClientDevice {
     }
 
     pub async fn send_vibrate_cmd(&mut self, speed: f64) -> Option<ButtplugError> {
-        self.send_message_expect_ok(ButtplugMessageUnion::VibrateCmd(VibrateCmd::new(vec!(VibrateSubcommand::new(0, speed))))).await
+        self.send_message_expect_ok(ButtplugMessageUnion::VibrateCmd(VibrateCmd::new(self.index, vec!(VibrateSubcommand::new(0, speed))))).await
     }
 
     // pub async fn send_linear_cmd(&self) -> Option<ButtplugError> {
