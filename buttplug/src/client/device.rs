@@ -15,13 +15,13 @@ use futures_channel::mpsc;
 
 // Send over both a message, and a channel to receive back our processing future on.
 pub struct ButtplugClientDeviceMessage {
-    msg: ButtplugMessageUnion,
-    future_sender: mpsc::Sender<BoxFuture<'static, ButtplugMessageUnion>>
+    pub msg: ButtplugMessageUnion,
+    pub future_sender: mpsc::Sender<ButtplugMessageUnion>
 }
 
 impl ButtplugClientDeviceMessage {
     pub fn new(msg: ButtplugMessageUnion,
-               future_sender: mpsc::Sender<BoxFuture<'static, ButtplugMessageUnion>>)
+               future_sender: mpsc::Sender<ButtplugMessageUnion>)
                -> ButtplugClientDeviceMessage {
         ButtplugClientDeviceMessage {
             msg,
@@ -60,9 +60,9 @@ impl ButtplugClientDevice {
         self.client_sender.send(out_msg).await;
         let maybe_fut = recv.next().await;
         if let Some(fut) = maybe_fut {
-            fut.await
+            fut
         } else {
-            let mut err_msg = ButtplugMessageUnion::Error(messages::Error::new(messages::ErrorCode::ErrorUnknown, "Unknown rrror receiving return from device message."));
+            let mut err_msg = ButtplugMessageUnion::Error(messages::Error::new(messages::ErrorCode::ErrorUnknown, "Unknown error receiving return from device message."));
             err_msg.set_id(id);
             err_msg
         }
