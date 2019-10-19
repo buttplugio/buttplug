@@ -145,37 +145,49 @@ mod test {
 
     // Only run these tests when we know there's an external server up to reply
 
-    // #[test]
-    // fn test_websocket() {
-    //     task::block_on(async {
-    //         assert!(ButtplugWebsocketClientConnector::new().connect().await.is_none());
-    //     })
-    // }
+    #[test]
+    #[ignore]
+    fn test_websocket() {
+        task::block_on(async {
+            assert!(ButtplugWebsocketClientConnector::new().connect().await.is_none());
+        })
+    }
 
-    // #[test]
-    // fn test_client_websocket() {
-    //     task::block_on(async {
-    //         println!("connecting");
-    //         let mut client = ButtplugClient::new("test client");
-    //         client.connect(ButtplugWebsocketClientConnector::new()).await;
-    //         println!("connected");
-    //         let mut observer = client.get_default_observer().unwrap();
-    //         client.start_scanning().await;
-    //         println!("scanning!");
-    //         task::spawn(async move {
-    //             loop {
-    //                 client.wait_for_event().await;
-    //             }
-    //         });
-    //         match observer.next().await.unwrap() {
-    //             ButtplugClientEvent::DeviceAdded(ref mut _device) => {
-    //                 println!("Got device! {}", _device.name);
-    //                 let mut d = _device.clone();
-    //                 d.send_vibrate_cmd(1.0).await;
-    //                 println!("Should be vibrating!");
-    //             },
-    //             _ => println!("Got something else!")
-    //         }
-    //     })
-    // }
+    #[test]
+    #[ignore]
+    fn test_client_websocket() {
+        task::block_on(async {
+            println!("connecting");
+            let mut client = ButtplugClient::new("test client");
+            let mut observer = client.get_default_observer().unwrap();
+            client.connect(ButtplugWebsocketClientConnector::new()).await;
+            println!("connected");
+            client.start_scanning().await;
+            println!("scanning!");
+            let event_loop = task::spawn(async move {
+                println!("Launching client task!");
+                loop {
+                    client.wait_for_event().await;
+                }
+            });
+            let app = task::spawn(async move {
+                println!("starting observer loop!");
+                loop {
+                    println!("Waiting for observer!");
+                    match observer.next().await.unwrap() {
+                        ButtplugClientEvent::DeviceAdded(ref mut _device) => {
+                            println!("Got device! {}", _device.name);
+                            let mut d = _device.clone();
+                            if d.allowed_messages.contains_key("VibrateCmd") {
+                                d.send_vibrate_cmd(1.0).await;
+                                println!("Should be vibrating!");
+                            }
+                        },
+                        _ => println!("Got something else!")
+                    }
+                }
+            });
+            futures::join!(app, event_loop);
+        })
+    }
 }
