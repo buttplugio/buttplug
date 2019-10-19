@@ -6,11 +6,19 @@ trigger:
 
 stages:
  - template: azure/nightly-stages.yml@templates
-   
+   parameters:
+     # Turn off feature checking since this is a workspace
+     check_all_features: false
+     check_no_features: false
+ - template: azure/cargo-clippy.yml@templates
+   parameters:
+     rust: nightly
+     allow_fail: true
+
 resources:
   repositories:
     - repository: templates
       type: github
-      name: crate-ci/azure-pipelines
-      ref: refs/heads/v0.2
+      name: qdot/azure-pipelines
+      ref: refs/heads/master
       endpoint: qdot
