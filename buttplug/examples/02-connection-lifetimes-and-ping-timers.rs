@@ -1,7 +1,4 @@
-use buttplug::{
-    client::ButtplugClient
-};
-
+use buttplug::client::ButtplugClient;
 
 // Dummy client class that ignores ping timing, just used here for show.
 /*
@@ -30,8 +27,7 @@ private static async Task WaitForKey()
 }
 */
 
-async fn lifetimes_and_ping_example()
-{
+async fn lifetimes_and_ping_example() {
     // Let's go back to our embedded connector now, to discuss what the lifetime of a
     // connection looks like.
     //
@@ -78,5 +74,4 @@ async fn lifetimes_and_ping_example()
     // At this point we should already be disconnected, so we'll just show ourselves out.
 }
 
-fn main() {
-}
+fn main() {}

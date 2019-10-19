@@ -1,9 +1,4 @@
-use buttplug::{
-    client::{
-        ButtplugClient,
-        connector::ButtplugEmbeddedClientConnector,
-    },
-};
+use buttplug::client::{connector::ButtplugEmbeddedClientConnector, ButtplugClient};
 
 // TODO These comments are pulled from the C# examples, so they need updating.
 
@@ -56,7 +51,5 @@ async fn embedded_connector_example() {
 
 fn main() {
     // Setup a client, and wait until everything is done before exiting.
-    futures::executor::block_on(async {
-        embedded_connector_example().await
-    });
+    futures::executor::block_on(async { embedded_connector_example().await });
 }

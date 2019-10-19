@@ -1,9 +1,9 @@
-use crate::core::messages::{ButtplugMessageUnion, ButtplugMessage};
-use std::collections::{HashMap};
-use std::sync::{Arc, Mutex};
+use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use core::pin::Pin;
+use futures::prelude::Future;
 use futures::task::{Context, Poll, Waker};
-use futures::prelude::{Future};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 // Method copypasta'd from https://rust-lang.github.io/async-book/02_executor/03_wakeups.html
 
@@ -23,7 +23,7 @@ pub struct ClientConnectorMessageFuture {
 impl ClientConnectorMessageFuture {
     fn new(state: &ClientConnectorMessageStateShared) -> ClientConnectorMessageFuture {
         ClientConnectorMessageFuture {
-            waker_state: state.clone()
+            waker_state: state.clone(),
         }
     }
 }
@@ -57,7 +57,10 @@ impl ClientConnectorMessageSorter {
         }
     }
 
-    pub fn create_future(&mut self, msg: &mut ButtplugMessageUnion) -> ClientConnectorMessageFuture {
+    pub fn create_future(
+        &mut self,
+        msg: &mut ButtplugMessageUnion,
+    ) -> ClientConnectorMessageFuture {
         msg.set_id(self.current_id);
         let state = Arc::new(Mutex::new(ClientConnectorMessageState::default()));
         self.future_map.insert(self.current_id, state.clone());
@@ -78,13 +81,13 @@ impl ClientConnectorMessageSorter {
                     Some(_w) => {
                         let wake = waker_state.waker.take();
                         wake.unwrap().wake();
-                    },
+                    }
                     None => {
                         println!("No waker!");
                     }
                 }
                 true
-            },
+            }
             None => {
                 println!("Not found");
                 false

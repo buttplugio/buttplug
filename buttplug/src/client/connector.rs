@@ -1,14 +1,14 @@
-use std::error::Error;
-use std::fmt;
-use async_trait::async_trait;
-use futures_channel::mpsc;
+use super::messagesorter::{ClientConnectorMessageFuture, ClientConnectorMessageSorter};
 use super::ButtplugClientError;
 use crate::core::messages::{ButtplugMessageUnion, Ok};
 use crate::server::server::ButtplugServer;
-use futures::select;
+use async_trait::async_trait;
 use futures::future::Future;
-use futures::{FutureExt, StreamExt, SinkExt};
-use super::messagesorter::{ClientConnectorMessageSorter, ClientConnectorMessageFuture};
+use futures::select;
+use futures::{FutureExt, SinkExt, StreamExt};
+use futures_channel::mpsc;
+use std::error::Error;
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
@@ -18,7 +18,7 @@ pub struct ButtplugClientConnectorError {
 impl ButtplugClientConnectorError {
     pub fn new(msg: &str) -> ButtplugClientConnectorError {
         ButtplugClientConnectorError {
-            message: msg.to_owned()
+            message: msg.to_owned(),
         }
     }
 }
@@ -45,7 +45,10 @@ impl Error for ButtplugClientConnectorError {
 pub trait ButtplugClientConnector: Send {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
-    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
+    async fn send(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError>;
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion>;
 }
 
@@ -65,10 +68,12 @@ impl ButtplugEmbeddedClientConnector {
         }
     }
 
-    async fn emit_event(&mut self, msg: &ButtplugMessageUnion) ->
-        Result<ButtplugMessageUnion, ButtplugClientError> {
-            Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
-        }
+    async fn emit_event(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
+    }
 }
 
 #[async_trait]
@@ -81,7 +86,10 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
         None
     }
 
-    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+    async fn send(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         self.server
             .send_message(msg)
             .await
@@ -107,7 +115,7 @@ pub enum ButtplugRemoteClientConnectorMessage {
     Connected(),
     Text(String),
     Error(String),
-    Close(String)
+    Close(String),
 }
 
 pub struct ButtplugRemoteClientConnectorHelper {
@@ -123,14 +131,16 @@ pub struct ButtplugRemoteClientConnectorHelper {
     // sorter (which lives in a future wherever the scheduler put it) when we
     // expect them.
     future_recv: Option<mpsc::UnboundedReceiver<ClientConnectorMessageFuture>>,
-    event_send:mpsc::UnboundedSender<ButtplugMessageUnion>
+    event_send: mpsc::UnboundedSender<ButtplugMessageUnion>,
 }
 
 unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
 unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
 impl ButtplugRemoteClientConnectorHelper {
-    pub fn new(event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>) -> ButtplugRemoteClientConnectorHelper {
+    pub fn new(
+        event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>,
+    ) -> ButtplugRemoteClientConnectorHelper {
         let (internal_send, internal_recv) = mpsc::unbounded();
         let (remote_send, remote_recv) = mpsc::unbounded();
         ButtplugRemoteClientConnectorHelper {
@@ -151,13 +161,18 @@ impl ButtplugRemoteClientConnectorHelper {
         self.remote_send.clone()
     }
 
-    pub async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+    pub async fn send(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         if let Some(ref mut fr) = self.future_recv {
             self.internal_send.send(msg.clone()).await;
             let fut = fr.next().await;
             Ok(fut.unwrap().await)
         } else {
-            Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError::new("Do not have receiver yet")))
+            Err(ButtplugClientError::ButtplugClientConnectorError(
+                ButtplugClientConnectorError::new("Do not have receiver yet"),
+            ))
         }
     }
 
@@ -180,7 +195,7 @@ impl ButtplugRemoteClientConnectorHelper {
             enum StreamValue {
                 NoValue,
                 Incoming(ButtplugRemoteClientConnectorMessage),
-                Outgoing(ButtplugMessageUnion)
+                Outgoing(ButtplugMessageUnion),
             }
 
             loop {
@@ -208,9 +223,10 @@ impl ButtplugRemoteClientConnectorHelper {
                         match remote_msg {
                             ButtplugRemoteClientConnectorMessage::Sender(_s) => {
                                 remote_send = Some(_s);
-                            },
+                            }
                             ButtplugRemoteClientConnectorMessage::Text(_t) => {
-                                let array: Vec<ButtplugMessageUnion> = serde_json::from_str(&_t.clone()).unwrap();
+                                let array: Vec<ButtplugMessageUnion> =
+                                    serde_json::from_str(&_t.clone()).unwrap();
                                 for smsg in array {
                                     if !sorter.resolve_message(&smsg) {
                                         println!("Sending event!");
@@ -223,7 +239,7 @@ impl ButtplugRemoteClientConnectorHelper {
                                 panic!("UNHANDLED BRANCH");
                             }
                         }
-                    },
+                    }
                     StreamValue::Outgoing(ref mut buttplug_msg) => {
                         // Create future sets our message ID, so make sure this
                         // happens before we send out the message.
@@ -240,4 +256,3 @@ impl ButtplugRemoteClientConnectorHelper {
         }
     }
 }
-

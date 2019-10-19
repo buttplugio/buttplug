@@ -176,5 +176,4 @@ private static async Task RunExample()
     // them commands!
 }
 */
-fn main() {
-}
+fn main() {}

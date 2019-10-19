@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use super::errors::*;
-use serde::{Serialize, Deserialize};
-use serde_repr::{Serialize_repr, Deserialize_repr};
+use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
+use std::collections::HashMap;
 
 pub trait ButtplugMessage: Send + Sync + Clone + Serialize + Deserialize<'static> {
     fn get_id(&self) -> u32;
@@ -20,9 +20,7 @@ pub struct Ok {
 
 impl Ok {
     pub fn new(id: u32) -> Ok {
-        Ok {
-            id: id
-        }
+        Ok { id: id }
     }
 }
 
@@ -33,7 +31,7 @@ pub enum ErrorCode {
     ErrorInit,
     ErrorPing,
     ErrorMessage,
-    ErrorDevice
+    ErrorDevice,
 }
 
 #[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
@@ -51,7 +49,7 @@ impl Error {
         Error {
             id: 0,
             error_code: error_code,
-            error_message: error_message.to_string()
+            error_message: error_message.to_string(),
         }
     }
 }
@@ -98,7 +96,7 @@ pub struct DeviceList {
     #[serde(rename = "Id")]
     id: u32,
     #[serde(rename = "Devices")]
-    pub devices: Vec<DeviceMessageInfo>
+    pub devices: Vec<DeviceMessageInfo>,
 }
 
 #[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -110,7 +108,7 @@ pub struct DeviceAdded {
     #[serde(rename = "DeviceName")]
     pub device_name: String,
     #[serde(rename = "DeviceMessages")]
-    pub device_messages: HashMap<String, MessageAttributes>
+    pub device_messages: HashMap<String, MessageAttributes>,
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
@@ -127,9 +125,7 @@ pub struct StartScanning {
 
 impl StartScanning {
     pub fn new() -> StartScanning {
-        StartScanning {
-            id: 1
-        }
+        StartScanning { id: 1 }
     }
 }
 
@@ -166,7 +162,7 @@ impl RequestServerInfo {
         RequestServerInfo {
             id: 1,
             client_name: client_name.to_string(),
-            message_version: message_version
+            message_version: message_version,
         }
     }
 }
@@ -186,7 +182,7 @@ pub struct ServerInfo {
     #[serde(rename = "MaxPingTime")]
     pub max_ping_time: u32,
     #[serde(rename = "ServerName")]
-    pub server_name: String
+    pub server_name: String,
 }
 
 impl ServerInfo {
@@ -213,10 +209,7 @@ pub struct VibrateSubcommand {
 
 impl VibrateSubcommand {
     pub fn new(index: u32, speed: f64) -> VibrateSubcommand {
-        VibrateSubcommand {
-            index,
-            speed
-        }
+        VibrateSubcommand { index, speed }
     }
 }
 
@@ -235,7 +228,7 @@ impl VibrateCmd {
         VibrateCmd {
             id: 1,
             device_index,
-            speeds
+            speeds,
         }
     }
 }
@@ -259,35 +252,35 @@ pub enum ButtplugMessageUnion {
 impl ButtplugMessage for ButtplugMessageUnion {
     fn get_id(&self) -> u32 {
         match self {
-            ButtplugMessageUnion::Ok (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::Error (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceList (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceAdded (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceRemoved (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::StartScanning (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::StopScanning (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::ScanningFinished (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::RequestDeviceList (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::RequestServerInfo (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::ServerInfo (ref _msg) => return _msg.id,
-            ButtplugMessageUnion::VibrateCmd (ref _msg) => return _msg.id,
+            ButtplugMessageUnion::Ok(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::Error(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceList(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceAdded(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::DeviceRemoved(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::StartScanning(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::StopScanning(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::ScanningFinished(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::RequestDeviceList(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::RequestServerInfo(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::ServerInfo(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::VibrateCmd(ref _msg) => return _msg.id,
         }
     }
 
     fn set_id(&mut self, id: u32) {
         match self {
-            ButtplugMessageUnion::Ok (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::Error (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::DeviceList (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::DeviceAdded (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::DeviceRemoved (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::StartScanning (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::StopScanning (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::ScanningFinished (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::RequestDeviceList (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::RequestServerInfo (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::ServerInfo (ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::VibrateCmd (ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Ok(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Error(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceList(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceAdded(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::DeviceRemoved(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::StartScanning(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::StopScanning(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::ScanningFinished(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::RequestDeviceList(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::RequestServerInfo(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::ServerInfo(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::VibrateCmd(ref mut _msg) => _msg.set_id(id),
         }
     }
 
@@ -298,10 +291,11 @@ impl ButtplugMessage for ButtplugMessageUnion {
 
 #[cfg(test)]
 mod test {
-    use super::{Ok, Error, RequestServerInfo, ButtplugMessageUnion, ErrorCode};
+    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok, RequestServerInfo};
 
     const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
-    const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
+    const ERROR_STR: &str =
+        "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
     #[test]
     fn test_ok_serialize() {
@@ -326,7 +320,9 @@ mod test {
     #[test]
     fn test_error_deserialize() {
         let union: ButtplugMessageUnion = serde_json::from_str(&ERROR_STR).unwrap();
-        assert_eq!(ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error")), union);
+        assert_eq!(
+            ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error")),
+            union
+        );
     }
-
 }

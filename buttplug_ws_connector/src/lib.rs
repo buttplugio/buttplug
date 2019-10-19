@@ -14,18 +14,17 @@
 // - Continue on our way with the two channels, happy to know we don't have to
 //   wait for networking libraries to get on our futures 0.3 level.
 
-use buttplug::client::connector::{ButtplugClientConnector,
-                                  ButtplugClientConnectorError,
-                                  ButtplugRemoteClientConnectorHelper,
-                                  ButtplugRemoteClientConnectorMessage,
-                                  ButtplugRemoteClientConnectorSender};
-use buttplug::client::ButtplugClientError;
-use buttplug::core::messages::{ButtplugMessageUnion, ButtplugMessage};
-use std::thread;
 use async_std::task;
-use futures_channel::mpsc;
 use async_trait::async_trait;
-use ws::{Handler, Handshake, Message, CloseCode};
+use buttplug::client::connector::{
+    ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
+    ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
+};
+use buttplug::client::ButtplugClientError;
+use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
+use futures_channel::mpsc;
+use std::thread;
+use ws::{CloseCode, Handler, Handshake, Message};
 
 // TODO Should probably let users pass in their own addresses
 const CONNECTION: &'static str = "ws://127.0.0.1:12345";
@@ -42,7 +41,8 @@ impl Handler for InternalClient {
 
     fn on_message(&mut self, msg: Message) -> ws::Result<()> {
         println!("Got message: {}", msg);
-        self.buttplug_out.unbounded_send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string()));
+        self.buttplug_out
+            .unbounded_send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string()));
         ws::Result::Ok(())
     }
 
@@ -55,8 +55,7 @@ impl Handler for InternalClient {
     }
 }
 
-pub struct ButtplugWebsocketClientConnector
-{
+pub struct ButtplugWebsocketClientConnector {
     helper: ButtplugRemoteClientConnectorHelper,
     ws_thread: Option<thread::JoinHandle<()>>,
     recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
@@ -74,7 +73,7 @@ impl ButtplugWebsocketClientConnector {
 }
 
 pub struct ButtplugWebsocketWrappedSender {
-    sender: ws::Sender
+    sender: ws::Sender,
 }
 
 unsafe impl Send for ButtplugWebsocketWrappedSender {}
@@ -82,9 +81,7 @@ unsafe impl Sync for ButtplugWebsocketWrappedSender {}
 
 impl ButtplugWebsocketWrappedSender {
     pub fn new(send: ws::Sender) -> ButtplugWebsocketWrappedSender {
-        ButtplugWebsocketWrappedSender {
-            sender: send
-        }
+        ButtplugWebsocketWrappedSender { sender: send }
     }
 }
 
@@ -106,11 +103,13 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         self.ws_thread = Some(thread::spawn(|| {
             ws::connect(CONNECTION, move |out| {
                 // Get our websocket sender back to the main thread
-                send.unbounded_send(ButtplugRemoteClientConnectorMessage::Sender(
-                    Box::new(ButtplugWebsocketWrappedSender::new(out.clone())))).unwrap();
+                send.unbounded_send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
+                    ButtplugWebsocketWrappedSender::new(out.clone()),
+                )))
+                .unwrap();
                 // Go ahead and create our internal client
                 InternalClient {
-                    buttplug_out: send.clone()
+                    buttplug_out: send.clone(),
                 }
             });
         }));
@@ -126,7 +125,10 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         None
     }
 
-    async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+    async fn send(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         self.helper.send(msg).await
     }
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
@@ -137,11 +139,11 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 
 #[cfg(test)]
 mod test {
-    use buttplug::client::{ButtplugClient, ButtplugClientEvent};
-    use buttplug::client::connector::{ButtplugClientConnector};
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
-    use futures::{StreamExt};
+    use buttplug::client::connector::ButtplugClientConnector;
+    use buttplug::client::{ButtplugClient, ButtplugClientEvent};
+    use futures::StreamExt;
 
     // Only run these tests when we know there's an external server up to reply
 
@@ -149,7 +151,10 @@ mod test {
     #[ignore]
     fn test_websocket() {
         task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::new().connect().await.is_none());
+            assert!(ButtplugWebsocketClientConnector::new()
+                .connect()
+                .await
+                .is_none());
         })
     }
 
@@ -160,7 +165,9 @@ mod test {
             println!("connecting");
             let mut client = ButtplugClient::new("test client");
             let mut observer = client.get_default_observer().unwrap();
-            client.connect(ButtplugWebsocketClientConnector::new()).await;
+            client
+                .connect(ButtplugWebsocketClientConnector::new())
+                .await;
             println!("connected");
             client.start_scanning().await;
             println!("scanning!");
@@ -182,8 +189,8 @@ mod test {
                                 d.send_vibrate_cmd(1.0).await;
                                 println!("Should be vibrating!");
                             }
-                        },
-                        _ => println!("Got something else!")
+                        }
+                        _ => println!("Got something else!"),
                     }
                 }
             });

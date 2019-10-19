@@ -6,6 +6,4 @@ trait DeviceSubtypeManager {
     fn is_scanning() -> bool;
 }
 
-struct DeviceManager {
-    
-}
+struct DeviceManager {}
