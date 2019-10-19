@@ -10,10 +10,10 @@ stages:
      # Turn off feature checking since this is a workspace
      check_all_features: false
      check_no_features: false
- # - template: azure/cargo-clippy.yml@templates
- #   parameters:
- #     rust: nightly
- #     allow_fail: true
+ - template: azure/cargo-clippy.yml@templates
+   parameters:
+     rust: "nightly"
+     allow_fail: true
 
 resources:
   repositories:
