@@ -5,15 +5,16 @@ trigger:
     include: ['*']
 
 jobs:
- - job: Linux
+  - job: Linux
     pool:
       vmImage: 'ubuntu-16.04'
-   - template: azure/nightly-stages.yml@templates
-     parameters:
-       # Turn off feature checking since this is a workspace
-       check_all_features: false
-       check_no_features: false
- - job: Windows
+    steps:
+      - template: azure/nightly-stages.yml@templates
+        parameters:
+          # Turn off feature checking since this is a workspace
+          check_all_features: false
+          check_no_features: false
+  - job: Windows
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -22,14 +23,15 @@ jobs:
           # Turn off feature checking since this is a workspace
           check_all_features: false
           check_no_features: false
- - job: MacOS
+  - job: MacOS
     pool:
       vmImage: 'macos-10.13'
-   - template: azure/nightly-stages.yml@templates
-     parameters:
-       # Turn off feature checking since this is a workspace
-       check_all_features: false
-       check_no_features: false
+    steps:
+      - template: azure/nightly-stages.yml@templates
+        parameters:
+          # Turn off feature checking since this is a workspace
+          check_all_features: false
+          check_no_features: false
 
 resources:
   repositories:
