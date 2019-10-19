@@ -39,8 +39,10 @@ impl Error for ButtplugClientConnectorError {
     }
 }
 
+// Not real sure if this is sync, since there may be state that could get weird
+// in connectors implementing this trait, but Send should be ok.
 #[async_trait]
-pub trait ButtplugClientConnector {
+pub trait ButtplugClientConnector: Send {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
     async fn send(&mut self, msg: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError>;
