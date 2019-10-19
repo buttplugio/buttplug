@@ -1,6 +1,6 @@
 use super::messagesorter::{ClientConnectorMessageFuture, ClientConnectorMessageSorter};
 use super::ButtplugClientError;
-use crate::core::messages::{ButtplugMessageUnion};
+use crate::core::messages::ButtplugMessageUnion;
 use crate::server::server::ButtplugServer;
 use async_trait::async_trait;
 use futures::future::Future;
