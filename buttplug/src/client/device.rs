@@ -5,7 +5,7 @@ use crate::core::{
         MessageAttributes, VibrateCmd, VibrateSubcommand,
     },
 };
-use futures::{future::BoxFuture, Future, SinkExt, StreamExt};
+use futures::{SinkExt, StreamExt};
 use futures_channel::mpsc;
 use std::collections::HashMap;
 

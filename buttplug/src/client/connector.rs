@@ -1,6 +1,6 @@
 use super::messagesorter::{ClientConnectorMessageFuture, ClientConnectorMessageSorter};
 use super::ButtplugClientError;
-use crate::core::messages::{ButtplugMessageUnion, Ok};
+use crate::core::messages::{ButtplugMessageUnion};
 use crate::server::server::ButtplugServer;
 use async_trait::async_trait;
 use futures::future::Future;
@@ -66,13 +66,6 @@ impl ButtplugEmbeddedClientConnector {
             sender: send,
             recv: Some(recv),
         }
-    }
-
-    async fn emit_event(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        Ok(ButtplugMessageUnion::Ok(Ok::new(1)))
     }
 }
 
