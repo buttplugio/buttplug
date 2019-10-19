@@ -137,10 +137,11 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 
 #[cfg(test)]
 mod test {
-    use buttplug::client::ButtplugClient;
+    use buttplug::client::{ButtplugClient, ButtplugClientEvent};
     use buttplug::client::connector::{ButtplugClientConnector};
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
+    use futures::{StreamExt};
 
     // Only run these tests when we know there's an external server up to reply
 
@@ -158,10 +159,23 @@ mod test {
     //         let mut client = ButtplugClient::new("test client");
     //         client.connect(ButtplugWebsocketClientConnector::new()).await;
     //         println!("connected");
+    //         let mut observer = client.get_default_observer().unwrap();
     //         client.start_scanning().await;
     //         println!("scanning!");
-    //         client.wait_for_event().await;
-    //         println!("Got event!");
+    //         task::spawn(async move {
+    //             loop {
+    //                 client.wait_for_event().await;
+    //             }
+    //         });
+    //         match observer.next().await.unwrap() {
+    //             ButtplugClientEvent::DeviceAdded(ref mut _device) => {
+    //                 println!("Got device! {}", _device.name);
+    //                 let mut d = _device.clone();
+    //                 d.send_vibrate_cmd(1.0).await;
+    //                 println!("Should be vibrating!");
+    //             },
+    //             _ => println!("Got something else!")
+    //         }
     //     })
     // }
 }
