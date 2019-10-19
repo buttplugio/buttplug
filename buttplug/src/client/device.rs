@@ -34,7 +34,7 @@ impl ButtplugClientDeviceMessage {
 pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
-    allowed_messages: HashMap<String, MessageAttributes>,
+    pub allowed_messages: HashMap<String, MessageAttributes>,
     client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
 }
 
