@@ -20,7 +20,7 @@ use buttplug::client::connector::{
     ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
-use buttplug::client::ButtplugClientError;
+use buttplug::client::{ButtplugClientMessageStateShared};
 use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use futures_channel::mpsc;
 use std::thread;
@@ -115,6 +115,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         }));
 
         let read_future = self.helper.get_recv_future();
+
+        // TODO This should be part of the ButtplugClientInternalLoop
         task::spawn(async {
             read_future.await;
         });
@@ -128,9 +130,12 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn send(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        self.helper.send(msg).await
+        state: &ButtplugClientMessageStateShared,
+    ) {
+        // Should this happen earlier?
+        self.helper.send(msg, state).await;
     }
+
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
         // This will panic if we've already taken the receiver.
         self.recv.take().unwrap()

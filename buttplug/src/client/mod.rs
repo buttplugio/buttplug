@@ -8,11 +8,72 @@ use crate::core::messages::{
 };
 use connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use device::{ButtplugClientDevice, ButtplugClientDeviceMessage};
-use futures::{select, FutureExt, SinkExt, StreamExt};
+use core::pin::Pin;
+use futures::{select, FutureExt, SinkExt, StreamExt, Future, task::{Waker, Poll, Context}};
 use futures_channel::mpsc;
 use pharos::{Channel, Events, Observable, ObserveConfig, Pharos};
 use std::error::Error;
+use std::sync::{Arc, Mutex};
 use std::fmt;
+
+#[derive(Default, Debug, Clone)]
+pub struct ButtplugClientMessageState {
+    reply_msg: Option<ButtplugMessageUnion>,
+    waker: Option<Waker>,
+}
+
+impl ButtplugClientMessageState {
+    pub fn set_reply_msg(&mut self, msg: &ButtplugMessageUnion) {
+        self.reply_msg = Some(msg.clone());
+        let waker = self.waker.take();
+        if !waker.is_none() {
+            waker.unwrap().wake();
+        }
+    }
+}
+
+pub type ButtplugClientMessageStateShared = Arc<Mutex<ButtplugClientMessageState>>;
+
+#[derive(Default, Debug)]
+pub struct ButtplugClientMessageFuture {
+    // This needs to be an Arc<Mutex<T>> in order to make it mutable under
+    // pinning when dealing with being a future. There is a chance we could do
+    // this as a unchecked_mut borrow from pin, which would be way faster, but
+    // that's dicey and hasn't been proven as needed for speed yet.
+    waker_state: ButtplugClientMessageStateShared,
+}
+
+impl ButtplugClientMessageFuture {
+    pub fn new(state: &ButtplugClientMessageStateShared) -> ButtplugClientMessageFuture {
+        ButtplugClientMessageFuture {
+            waker_state: state.clone(),
+        }
+    }
+
+    pub fn get_state_ref(&self) -> &ButtplugClientMessageStateShared {
+        &self.waker_state
+    }
+
+    // TODO Should we implement drop on this, so it'll yell if its dropping and
+    // the waker didn't fire? otherwise it seems like we could have quiet
+    // deadlocks.
+}
+
+impl Future for ButtplugClientMessageFuture {
+    type Output = ButtplugMessageUnion;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+        let mut waker_state = self.waker_state.lock().unwrap();
+        if waker_state.reply_msg.is_some() {
+            let msg = waker_state.reply_msg.take().unwrap();
+            Poll::Ready(msg)
+        } else {
+            println!("Got waker!");
+            waker_state.waker = Some(cx.waker().clone());
+            Poll::Pending
+        }
+    }
+}
 
 #[derive(Clone)]
 pub enum ButtplugClientEvent {
@@ -52,6 +113,75 @@ impl Error for ButtplugClientError {
     }
 }
 
+pub struct ButtplugClientInternalLoop {
+    connector: Option<Box<dyn ButtplugClientConnector>>,
+    device_receiver: mpsc::UnboundedReceiver<ButtplugClientDeviceMessage>,
+    event_receiver: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
+}
+
+unsafe impl Send for ButtplugClientInternalLoop {}
+/*
+impl ButtplugClientInternalLoop {
+    pub fn new() -> Self {
+    }
+
+    pub async fn send_message(
+        &mut self,
+        msg: &ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        if let Some(ref mut connector) = self.connector {
+            connector.send(msg).await.map_err(|x| x)
+        } else {
+            Err(ButtplugClientError::ButtplugClientConnectorError(
+                ButtplugClientConnectorError {
+                    message: "Client not Connected.".to_string(),
+                },
+            ))
+        }
+    }
+
+    pub async fn wait_for_event(&mut self) -> Option<ButtplugClientConnectorError> {
+        let mut event_future;
+        if let Some(ref mut recv) = self.event_receiver {
+            event_future = recv.next().fuse();
+            let mut device_future = self.device_receiver.next();
+            let mut device_future_send = None;
+            let stream_ret = select! {
+                a = event_future => a,
+                b = device_future => {
+                    if let Some(client_msg) = b {
+                        println!("Got device message!");
+                        device_future_send = Some(client_msg.future_sender.clone());
+                        Some(client_msg.msg.clone())
+                    } else {
+                        println!("Didn't get device message!");
+                        //Some(ButtplugMessageUnion::Error(messages::Error::new(messages::ErrorCode::ErrorUnknown, "Fucking whatever")))
+                        None
+                    }
+                },
+            };
+            match stream_ret {
+                Some(ref msg) => {
+                    if device_future_send.is_some() {
+                        println!("Sending device message!");
+                        let devmsg = self.send_message(msg).await;
+                        println!("Returning device message!");
+                        device_future_send.unwrap().send(devmsg.unwrap()).await;
+                    } else {
+                        println!("Got event!");
+                        self.on_message_received(msg).await;
+                    }
+                    println!("Exiting wait for event func!");
+                    None
+                }
+                None => Some(ButtplugClientConnectorError::new("What the hell")),
+            }
+        } else {
+            Some(ButtplugClientConnectorError::new("Client not connected"))
+        }
+    }
+}
+*/
 pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
@@ -207,7 +337,9 @@ impl ButtplugClient {
         msg: &ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         if let Some(ref mut connector) = self.connector {
-            connector.send(msg).await.map_err(|x| x)
+            let fut = ButtplugClientMessageFuture::default();
+            connector.send(msg, fut.get_state_ref()).await;
+            Ok(fut.await)
         } else {
             Err(ButtplugClientError::ButtplugClientConnectorError(
                 ButtplugClientConnectorError {

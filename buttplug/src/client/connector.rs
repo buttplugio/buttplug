@@ -1,5 +1,5 @@
-use super::messagesorter::{ClientConnectorMessageFuture, ClientConnectorMessageSorter};
-use super::ButtplugClientError;
+use super::messagesorter::ClientConnectorMessageSorter;
+use super::{ButtplugClientError, ButtplugClientMessageFuture, ButtplugClientMessageStateShared};
 use crate::core::messages::ButtplugMessageUnion;
 use crate::server::server::ButtplugServer;
 use async_trait::async_trait;
@@ -48,7 +48,8 @@ pub trait ButtplugClientConnector: Send {
     async fn send(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError>;
+        state: &ButtplugClientMessageStateShared,
+    );
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion>;
 }
 
@@ -82,11 +83,13 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     async fn send(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        self.server
+        state: &ButtplugClientMessageStateShared,
+    ) {
+        let ret_msg = self.server
             .send_message(msg)
-            .await
-            .map_err(|x| ButtplugClientError::ButtplugError(x))
+            .await;
+        let mut waker_state = state.lock().unwrap();
+        waker_state.set_reply_msg(&(ret_msg.unwrap()));
     }
 
     fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
@@ -114,16 +117,12 @@ pub enum ButtplugRemoteClientConnectorMessage {
 pub struct ButtplugRemoteClientConnectorHelper {
     // Channel send/recv pair for applications wanting to send out through the
     // remote connection. Receiver will be send to task on creation.
-    internal_send: mpsc::UnboundedSender<ButtplugMessageUnion>,
-    internal_recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
+    internal_send: mpsc::UnboundedSender<(ButtplugMessageUnion, ButtplugClientMessageStateShared)>,
+    internal_recv: Option<mpsc::UnboundedReceiver<(ButtplugMessageUnion, ButtplugClientMessageStateShared)>>,
     // Channel send/recv pair for remote connection sending information to the
     // application. Receiver will be send to task on creation.
     remote_send: mpsc::UnboundedSender<ButtplugRemoteClientConnectorMessage>,
     remote_recv: Option<mpsc::UnboundedReceiver<ButtplugRemoteClientConnectorMessage>>,
-    // Channel receiver for getting futures back on the main thread from the
-    // sorter (which lives in a future wherever the scheduler put it) when we
-    // expect them.
-    future_recv: Option<mpsc::UnboundedReceiver<ClientConnectorMessageFuture>>,
     event_send: mpsc::UnboundedSender<ButtplugMessageUnion>,
 }
 
@@ -142,12 +141,7 @@ impl ButtplugRemoteClientConnectorHelper {
             remote_recv: Some(remote_recv),
             internal_send,
             internal_recv: Some(internal_recv),
-            future_recv: None,
         }
-    }
-
-    pub fn get_internal_send(&self) -> mpsc::UnboundedSender<ButtplugMessageUnion> {
-        self.internal_send.clone()
     }
 
     pub fn get_remote_send(&self) -> mpsc::UnboundedSender<ButtplugRemoteClientConnectorMessage> {
@@ -157,23 +151,13 @@ impl ButtplugRemoteClientConnectorHelper {
     pub async fn send(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
-        if let Some(ref mut fr) = self.future_recv {
-            self.internal_send.send(msg.clone()).await;
-            let fut = fr.next().await;
-            Ok(fut.unwrap().await)
-        } else {
-            Err(ButtplugClientError::ButtplugClientConnectorError(
-                ButtplugClientConnectorError::new("Do not have receiver yet"),
-            ))
-        }
+        state: &ButtplugClientMessageStateShared) {
+        self.internal_send.send((msg.clone(), state.clone())).await;
     }
 
     pub fn get_recv_future(&mut self) -> impl Future {
         // Set up a way to get futures in and out of the sorter, which will live
         // in our connector task.
-        let (mut future_send, future_recv) = mpsc::unbounded::<ClientConnectorMessageFuture>();
-        self.future_recv = Some(future_recv);
         let mut event_send = self.event_send.clone();
 
         // Remove the receivers we need to move into the task.
@@ -188,7 +172,7 @@ impl ButtplugRemoteClientConnectorHelper {
             enum StreamValue {
                 NoValue,
                 Incoming(ButtplugRemoteClientConnectorMessage),
-                Outgoing(ButtplugMessageUnion),
+                Outgoing((ButtplugMessageUnion, ButtplugClientMessageStateShared)),
             }
 
             loop {
@@ -233,15 +217,12 @@ impl ButtplugRemoteClientConnectorHelper {
                             }
                         }
                     }
-                    StreamValue::Outgoing(ref mut buttplug_msg) => {
+                    StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
                         // Create future sets our message ID, so make sure this
                         // happens before we send out the message.
-                        let f = sorter.create_future(buttplug_msg);
+                        let f = sorter.register_future(&mut buttplug_fut_msg.0, &buttplug_fut_msg.1);
                         if let Some(ref mut remote_sender) = remote_send {
-                            remote_sender.send(buttplug_msg.clone());
-                        }
-                        if future_send.send(f).await.is_err() {
-                            println!("SEND ERR");
+                            remote_sender.send(buttplug_fut_msg.0.clone());
                         }
                     }
                 }
