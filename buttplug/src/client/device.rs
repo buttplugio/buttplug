@@ -1,12 +1,12 @@
 use crate::core::{
     errors::{ButtplugError, ButtplugMessageError},
     messages::{
-        self, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo,
+        ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo,
         MessageAttributes, VibrateCmd, VibrateSubcommand,
     },
 };
 use super::internal::{ButtplugInternalClientMessage, ButtplugClientMessageFuture};
-use futures::{SinkExt, StreamExt};
+use futures::SinkExt;
 use futures_channel::mpsc;
 use std::collections::HashMap;
 

@@ -1,7 +1,4 @@
-use crate::core::messages::{
-    self, ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning,
-};
-use super::{ButtplugClientError};
+use crate::core::messages::{self, ButtplugMessageUnion};
 use super::connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use core::pin::Pin;
 use futures::{select, FutureExt, SinkExt, StreamExt, Future, task::{Waker, Poll, Context}, future::Fuse};
@@ -124,6 +121,7 @@ impl ButtplugClientInternalLoop {
         match stream_ret {
             StreamReturn::ConnectorMessage(_msg) => {
                 for ref mut sender in self.event_sender.iter() {
+                    println!("Sending message to clients!");
                     sender.send(_msg.clone()).await;
                 }
                 None
@@ -139,6 +137,7 @@ impl ButtplugClientInternalLoop {
                                 println!("Connected!");
                                 let mut waker_state = state.lock().unwrap();
                                 waker_state.set_reply_msg(&ButtplugMessageUnion::Ok(messages::Ok::new(1)));
+                                self.connector_receiver = Some(connector.get_event_receiver());
                                 self.connector = Option::Some(connector);
                                 None
                             }

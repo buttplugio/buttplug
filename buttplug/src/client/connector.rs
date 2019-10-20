@@ -182,12 +182,14 @@ impl ButtplugRemoteClientConnectorHelper {
                 // get anything.
                 let mut stream_return: StreamValue = select! {
                     a = incoming_stream => {
+                        println!("Got connector message!");
                         match a {
                             Some(msg) => StreamValue::Incoming(msg),
                             None => StreamValue::NoValue,
                         }
                     },
                     b = outgoing_stream => {
+                        println!("Got client message!");
                         match b {
                             Some(msg) => StreamValue::Outgoing(msg),
                             None => StreamValue::NoValue,
@@ -223,6 +225,8 @@ impl ButtplugRemoteClientConnectorHelper {
                         let f = sorter.register_future(&mut buttplug_fut_msg.0, &buttplug_fut_msg.1);
                         if let Some(ref mut remote_sender) = remote_send {
                             remote_sender.send(buttplug_fut_msg.0.clone());
+                        } else {
+                            panic!("Can't send message yet!");
                         }
                     }
                 }

@@ -20,8 +20,8 @@ use buttplug::client::connector::{
     ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
-use buttplug::client::internal::{ButtplugClientMessageStateShared};
-use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
+use buttplug::client::internal::{ButtplugClientMessageStateShared, ButtplugClientMessageFuture};
+use buttplug::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
 use futures_channel::mpsc;
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
@@ -30,12 +30,16 @@ use ws::{CloseCode, Handler, Handshake, Message};
 const CONNECTION: &'static str = "ws://127.0.0.1:12345";
 
 struct InternalClient {
+    connector_waker: ButtplugClientMessageStateShared,
     buttplug_out: mpsc::UnboundedSender<ButtplugRemoteClientConnectorMessage>,
 }
 
 impl Handler for InternalClient {
     fn on_open(&mut self, _: Handshake) -> ws::Result<()> {
         println!("Opened websocket");
+        // TODO Use another future type when it's not midnight and you're less
+        // tired.
+        self.connector_waker.lock().unwrap().set_reply_msg(&ButtplugMessageUnion::Ok(messages::Ok::new(1)));
         Ok(())
     }
 
@@ -101,6 +105,8 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
 impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
         let send = self.helper.get_remote_send().clone();
+        let fut = ButtplugClientMessageFuture::default();
+        let mut waker = fut.get_state_ref().clone();
         self.ws_thread = Some(thread::spawn(|| {
             ws::connect(CONNECTION, move |out| {
                 // Get our websocket sender back to the main thread
@@ -111,6 +117,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 // Go ahead and create our internal client
                 InternalClient {
                     buttplug_out: send.clone(),
+                    connector_waker: waker.clone(),
                 }
             });
         }));
@@ -121,6 +128,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         task::spawn(async {
             read_future.await;
         });
+
+        fut.await;
         None
     }
 
@@ -164,6 +173,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_client_websocket() {
         task::block_on(async {
             println!("connecting");
@@ -179,6 +189,8 @@ mod test {
                 println!("starting observer loop!");
                 loop {
                     println!("Waiting for observer!");
+                    client.wait_for_event().await;
+                    println!("observer returned!");
                     match observer.next().await.unwrap() {
                         ButtplugClientEvent::DeviceAdded(ref mut _device) => {
                             println!("Got device! {}", _device.name);
