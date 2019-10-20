@@ -1,5 +1,5 @@
 use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion};
-use super::ButtplugClientMessageStateShared;
+use super::internal::ButtplugClientMessageStateShared;
 use std::collections::HashMap;
 
 pub struct ClientConnectorMessageSorter {

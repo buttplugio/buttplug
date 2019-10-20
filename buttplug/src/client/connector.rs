@@ -1,5 +1,5 @@
 use super::messagesorter::ClientConnectorMessageSorter;
-use super::{ButtplugClientError, ButtplugClientMessageFuture, ButtplugClientMessageStateShared};
+use super::internal::{ButtplugClientMessageStateShared};
 use crate::core::messages::ButtplugMessageUnion;
 use crate::server::server::ButtplugServer;
 use async_trait::async_trait;

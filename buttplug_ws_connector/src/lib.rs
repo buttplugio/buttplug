@@ -20,7 +20,7 @@ use buttplug::client::connector::{
     ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
-use buttplug::client::{ButtplugClientMessageStateShared};
+use buttplug::client::internal::{ButtplugClientMessageStateShared};
 use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use futures_channel::mpsc;
 use std::thread;
@@ -88,6 +88,7 @@ impl ButtplugWebsocketWrappedSender {
 impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
     fn send(&self, msg: ButtplugMessageUnion) {
         let m = msg.as_protocol_json();
+        println!("Sending message: {}", m);
         self.sender.send(m);
     }
 
@@ -106,7 +107,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 send.unbounded_send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
                     ButtplugWebsocketWrappedSender::new(out.clone()),
                 )))
-                .unwrap();
+                    .unwrap();
                 // Go ahead and create our internal client
                 InternalClient {
                     buttplug_out: send.clone(),
@@ -132,7 +133,6 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         msg: &ButtplugMessageUnion,
         state: &ButtplugClientMessageStateShared,
     ) {
-        // Should this happen earlier?
         self.helper.send(msg, state).await;
     }
 
@@ -148,7 +148,7 @@ mod test {
     use async_std::task;
     use buttplug::client::connector::ButtplugClientConnector;
     use buttplug::client::{ButtplugClient, ButtplugClientEvent};
-    use futures::StreamExt;
+    use futures::stream::StreamExt;
 
     // Only run these tests when we know there's an external server up to reply
 
@@ -157,32 +157,25 @@ mod test {
     fn test_websocket() {
         task::block_on(async {
             assert!(ButtplugWebsocketClientConnector::new()
-                .connect()
-                .await
-                .is_none());
+                    .connect()
+                    .await
+                    .is_none());
         })
     }
 
     #[test]
-    #[ignore]
     fn test_client_websocket() {
         task::block_on(async {
             println!("connecting");
-            let mut client = ButtplugClient::new("test client");
-            let mut observer = client.get_default_observer().unwrap();
-            client
-                .connect(ButtplugWebsocketClientConnector::new())
-                .await;
-            println!("connected");
-            client.start_scanning().await;
-            println!("scanning!");
-            let event_loop = task::spawn(async move {
-                println!("Launching client task!");
-                loop {
-                    client.wait_for_event().await;
-                }
-            });
+            let (mut client, lp) = ButtplugClient::new("test client");
             let app = task::spawn(async move {
+                let mut observer = client.get_default_observer().unwrap();
+                client
+                    .connect(ButtplugWebsocketClientConnector::new())
+                    .await;
+                println!("connected");
+                client.start_scanning().await;
+                println!("scanning!");
                 println!("starting observer loop!");
                 loop {
                     println!("Waiting for observer!");
@@ -199,7 +192,7 @@ mod test {
                     }
                 }
             });
-            futures::join!(app, event_loop);
+            futures::join!(lp, app);
         })
     }
 }

@@ -5,31 +5,17 @@ use crate::core::{
         MessageAttributes, VibrateCmd, VibrateSubcommand,
     },
 };
+use super::internal::{ButtplugInternalClientMessage, ButtplugClientMessageFuture};
 use futures::{SinkExt, StreamExt};
 use futures_channel::mpsc;
 use std::collections::HashMap;
-
-// Send over both a message, and a channel to receive back our processing future on.
-pub struct ButtplugClientDeviceMessage {
-    pub msg: ButtplugMessageUnion,
-    pub future_sender: mpsc::Sender<ButtplugMessageUnion>,
-}
-
-impl ButtplugClientDeviceMessage {
-    pub fn new(
-        msg: ButtplugMessageUnion,
-        future_sender: mpsc::Sender<ButtplugMessageUnion>,
-    ) -> ButtplugClientDeviceMessage {
-        ButtplugClientDeviceMessage { msg, future_sender }
-    }
-}
 
 #[derive(Clone)]
 pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
     pub allowed_messages: HashMap<String, MessageAttributes>,
-    client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+    client_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
 }
 
 impl ButtplugClientDevice {
@@ -37,7 +23,7 @@ impl ButtplugClientDevice {
         name: &str,
         index: u32,
         allowed_messages: HashMap<String, MessageAttributes>,
-        client_sender: mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+        client_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
     ) -> ButtplugClientDevice {
         ButtplugClientDevice {
             name: name.to_owned(),
@@ -48,22 +34,11 @@ impl ButtplugClientDevice {
     }
 
     async fn send_message(&mut self, msg: ButtplugMessageUnion) -> ButtplugMessageUnion {
-        // We'll only ever use this channel for 1 message. Kinda sucks but eh.
-        let (send, mut recv) = mpsc::channel(1);
         let id = msg.get_id();
-        let out_msg = ButtplugClientDeviceMessage::new(msg, send);
-        self.client_sender.send(out_msg).await;
-        let maybe_fut = recv.next().await;
-        if let Some(fut) = maybe_fut {
-            fut
-        } else {
-            let mut err_msg = ButtplugMessageUnion::Error(messages::Error::new(
-                messages::ErrorCode::ErrorUnknown,
-                "Unknown error receiving return from device message.",
-            ));
-            err_msg.set_id(id);
-            err_msg
-        }
+        let fut = ButtplugClientMessageFuture::default();
+        self.client_sender.send(
+            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_ref().clone()))).await;
+        fut.await
     }
 
     async fn send_message_expect_ok(&mut self, msg: ButtplugMessageUnion) -> Option<ButtplugError> {
@@ -97,13 +72,13 @@ impl ButtplugClientDevice {
 impl
     From<(
         &DeviceAdded,
-        mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+        mpsc::UnboundedSender<ButtplugInternalClientMessage>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceAdded,
-            mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+            mpsc::UnboundedSender<ButtplugInternalClientMessage>,
         ),
     ) -> Self {
         let msg = msg_sender_tuple.0.clone();
@@ -119,13 +94,13 @@ impl
 impl
     From<(
         &DeviceMessageInfo,
-        mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+        mpsc::UnboundedSender<ButtplugInternalClientMessage>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceMessageInfo,
-            mpsc::UnboundedSender<ButtplugClientDeviceMessage>,
+            mpsc::UnboundedSender<ButtplugInternalClientMessage>,
         ),
     ) -> Self {
         let msg = msg_sender_tuple.0.clone();
