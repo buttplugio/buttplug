@@ -69,14 +69,11 @@ impl ClientConnectorMessageSorter {
         fut
     }
 
-    pub fn resolve_message(&mut self, msg: &ButtplugMessageUnion) -> bool {
+    pub fn maybe_resolve_message(&mut self, msg: &ButtplugMessageUnion) -> bool {
         match self.future_map.remove(&(msg.get_id())) {
             Some(_state) => {
-                println!("found");
                 let mut waker_state = _state.lock().unwrap();
-                println!("making reply");
                 waker_state.reply_msg = Some(msg.clone());
-                println!("waking");
                 match &waker_state.waker {
                     Some(_w) => {
                         let wake = waker_state.waker.take();

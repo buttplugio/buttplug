@@ -221,7 +221,7 @@ impl ButtplugRemoteClientConnectorHelper {
                                 let array: Vec<ButtplugMessageUnion> =
                                     serde_json::from_str(&_t.clone()).unwrap();
                                 for smsg in array {
-                                    if !sorter.resolve_message(&smsg) {
+                                    if !sorter.maybe_resolve_message(&smsg) {
                                         println!("Sending event!");
                                         // Send notification through event channel
                                         event_send.send(smsg).await;
