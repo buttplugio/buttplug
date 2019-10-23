@@ -179,28 +179,27 @@ mod test {
             println!("connecting");
             let (mut client, lp) = ButtplugClient::new("test client");
             let app = task::spawn(async move {
-                let mut observer = client.get_default_observer().unwrap();
                 client
                     .connect(ButtplugWebsocketClientConnector::new())
                     .await;
                 println!("connected");
                 client.start_scanning().await;
                 println!("scanning!");
-                println!("starting observer loop!");
+                println!("starting event loop!");
                 loop {
-                    println!("Waiting for observer!");
-                    client.wait_for_event().await;
-                    println!("observer returned!");
-                    match observer.next().await.unwrap() {
-                        ButtplugClientEvent::DeviceAdded(ref mut _device) => {
-                            println!("Got device! {}", _device.name);
-                            let mut d = _device.clone();
-                            if d.allowed_messages.contains_key("VibrateCmd") {
-                                d.send_vibrate_cmd(1.0).await;
-                                println!("Should be vibrating!");
+                    println!("Waiting for event!");
+                    for mut event in client.wait_for_event().await {
+                        match event {
+                            ButtplugClientEvent::DeviceAdded(ref mut _device) => {
+                                println!("Got device! {}", _device.name);
+                                let mut d = _device.clone();
+                                if d.allowed_messages.contains_key("VibrateCmd") {
+                                    d.send_vibrate_cmd(1.0).await;
+                                    println!("Should be vibrating!");
+                                }
                             }
+                            _ => println!("Got something else!"),
                         }
-                        _ => println!("Got something else!"),
                     }
                 }
             });

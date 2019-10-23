@@ -14,7 +14,6 @@ use futures_channel::mpsc;
 use internal::{
     ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
 };
-use pharos::{Channel, Events, Observable, ObserveConfig, Pharos};
 use std::error::Error;
 use std::fmt;
 
@@ -59,7 +58,6 @@ impl Error for ButtplugClientError {
 pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
-    pub observers: Pharos<ButtplugClientEvent>,
     devices: Vec<ButtplugClientDevice>,
     message_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
     event_receiver: mpsc::UnboundedReceiver<ButtplugMessageUnion>,
@@ -82,7 +80,6 @@ impl ButtplugClient {
             ButtplugClient {
                 client_name: name.to_string(),
                 server_name: None,
-                observers: Pharos::default(),
                 devices: vec![],
                 event_receiver,
                 message_sender: internal_loop.get_client_sender(),
@@ -204,7 +201,8 @@ impl ButtplugClient {
         }
     }
 
-    pub async fn wait_for_event(&mut self) {
+    pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
+        let mut events = vec!();
         match self.event_receiver.next().await.unwrap() {
             ButtplugMessageUnion::ScanningFinished(_) => {}
             ButtplugMessageUnion::DeviceList(_msg) => {
@@ -212,10 +210,7 @@ impl ButtplugClient {
                     let device =
                         ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
                     self.devices.push(device.clone());
-                    self.observers
-                        .send(ButtplugClientEvent::DeviceAdded(device))
-                        .await
-                        .expect("Events should be able to send");
+                    events.push(ButtplugClientEvent::DeviceAdded(device));
                 }
             }
             ButtplugMessageUnion::DeviceAdded(_msg) => {
@@ -223,31 +218,14 @@ impl ButtplugClient {
                 let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
                 self.devices.push(device.clone());
                 println!("Sending to observers!");
-                self.observers
-                    .send(ButtplugClientEvent::DeviceAdded(device))
-                    .await
-                    .expect("Events should be able to send");
+                events.push(ButtplugClientEvent::DeviceAdded(device));
                 println!("Observers sent!");
             }
             ButtplugMessageUnion::DeviceRemoved(_) => {}
             //ButtplugMessageUnion::Log(_) => {}
             _ => panic!("Unhandled incoming message!"),
         }
-    }
-
-    pub fn get_default_observer(&mut self) -> Result<Events<ButtplugClientEvent>, pharos::Error> {
-        Ok(self.observe(Channel::Unbounded.into()).expect("observe"))
-    }
-}
-
-impl Observable<ButtplugClientEvent> for ButtplugClient {
-    type Error = pharos::Error;
-
-    fn observe(
-        &mut self,
-        options: ObserveConfig<ButtplugClientEvent>,
-    ) -> Result<Events<ButtplugClientEvent>, Self::Error> {
-        self.observers.observe(options)
+        events
     }
 }
 
