@@ -6,8 +6,8 @@ edition = "2018"
 
 [dependencies]
 buttplug = { path = "../buttplug" }
-ws = "0.9.0"
 futures-channel-preview = "=0.3.0-alpha.19"
 futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
-async-std = "0.99.9"
-async-trait = "0.1.13"
+ws = "0.9.1"
+async-std = "0.99.10"
+async-trait = "0.1.16"
