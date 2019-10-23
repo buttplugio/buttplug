@@ -156,20 +156,6 @@ impl ButtplugClientInternalLoop {
                     _ => panic!("Message not handled!")
                 }
             },
-            // Some(ref msg) => {
-            //     if device_future_send.is_some() {
-            //         println!("Sending device message!");
-            //         let devmsg = self.send_message(msg).await;
-            //         println!("Returning device message!");
-            //         device_future_send.unwrap().send(devmsg.unwrap()).await;
-            //     } else {
-            //         println!("Got event!");
-            //         self.on_message_received(msg).await;
-            //     }
-            //     println!("Exiting wait for event func!");
-            //     None
-            // }
-            // None => Some(ButtplugClientConnectorError::new("What the hell")),
         }
     }
 }
