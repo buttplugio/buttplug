@@ -9,5 +9,5 @@ buttplug = { path = "../buttplug" }
 futures-channel-preview = "=0.3.0-alpha.19"
 futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
 ws = "0.9.1"
-async-std = "0.99.10"
-async-trait = "0.1.16"
+async-std = {version="0.99.11", features=["unstable"]}
+async-trait = "0.1.17"
