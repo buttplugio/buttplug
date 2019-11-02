@@ -11,19 +11,14 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
 [dependencies]
-serde_json = "1.0.41"
 serde = { version = "1.0.102", features = ["derive"] }
-bytes = "0.4.12"
+serde_json = "1.0.41"
+serde_repr = "0.1.5"
 log = "0.4.8"
-quote = "1.0.2"
-syn = "1.0.7"
 buttplug_derive = { path = "../buttplug_derive" }
-futures-channel-preview = "=0.3.0-alpha.19"
 futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
 async-std = {version="0.99.11", features=["unstable"]}
 async-trait = "0.1.17"
-serde_repr = "0.1.5"
-futures-util = "0.2.1"
 
 [dev-dependencies]
 env_logger = "0.7.1"
