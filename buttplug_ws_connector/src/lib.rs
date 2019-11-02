@@ -165,7 +165,6 @@ mod test {
     use async_std::task;
     use buttplug::client::connector::ButtplugClientConnector;
     use buttplug::client::{ButtplugClient, ButtplugClientEvent};
-    use futures::stream::StreamExt;
     use env_logger;
 
     // Only run these tests when we know there's an external server up to reply
@@ -182,11 +181,13 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_client_websocket() {
         env_logger::init();
         task::block_on(async {
             info!("connecting");
-            let (mut client, lp) = ButtplugClient::new("test client");
+            let mut client = ButtplugClient::new("test client");
+            let lp = client.get_loop();
             let app = task::spawn(async move {
                 client
                     .connect(ButtplugWebsocketClientConnector::new())

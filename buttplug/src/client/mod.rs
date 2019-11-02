@@ -105,6 +105,11 @@ impl Error for ButtplugClientError {
 /// - Emitting events received from the Server
 /// - Holding state related to the server (i.e. what devices are currently
 ///   connected, etc...)
+///
+/// When a client is first created, it will be able to create an internal loop
+/// as a Future, and return it via the [ButtplugClient::get_loop] call. This
+/// loop needs to be awaited before awaiting other client calls (like
+/// [ButtplugClient::connect]), otherwise the system will panic.
 #[derive(Clone)]
 pub struct ButtplugClient {
     /// The client name. Depending on the connection type and server being used,
@@ -116,37 +121,47 @@ pub struct ButtplugClient {
     // A vector of devices currently connected to the server, as represented by
     // [ButtplugClientDevice] types.
     devices: Vec<ButtplugClientDevice>,
-    message_sender: Sender<ButtplugInternalClientMessage>,
+    // Sender to relay messages to the internal client loop
+    message_sender: Option<Sender<ButtplugInternalClientMessage>>,
     // Receives event notifications from the ButtplugInternalClientLoop
     event_receiver: Receiver<ButtplugMessageUnion>,
     // True if the connector is currently connected, and handshake was
     // successful.
     connected: bool,
+    // Holds the InternalLoop object until it is retreived by the application to
+    // run.
+    event_sender: Option<Sender<ButtplugMessageUnion>>,
 }
 
 unsafe impl Sync for ButtplugClient {}
 unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
-    pub fn new(name: &str) -> (ButtplugClient, impl Future) {
+    /// Creates a new ButtplugClient.
+    pub fn new(name: &str) -> ButtplugClient {
         let (event_sender, event_receiver) = channel(256);
-        let mut internal_loop = ButtplugClientInternalLoop::new(event_sender);
-        (
-            ButtplugClient {
-                client_name: name.to_string(),
-                server_name: None,
-                devices: vec![],
-                event_receiver,
-                message_sender: internal_loop.get_client_sender(),
-                connected: false,
-            },
-            async move {
-                loop {
-                    // TODO Loop this in wait_for_event, not outside of it.
-                    internal_loop.wait_for_event().await;
-                }
-            },
-        )
+        ButtplugClient {
+            client_name: name.to_string(),
+            server_name: None,
+            devices: vec![],
+            event_receiver,
+            message_sender: None,
+            connected: false,
+            event_sender: Some(event_sender)
+        }
+    }
+
+    /// Returns a future representing the internal loop for the client, which
+    /// will need to be run alongside a future where client logic is performed.
+    pub fn get_loop(&mut self) -> impl Future {
+        let mut internal_loop = ButtplugClientInternalLoop::new(self.event_sender.take().unwrap());
+        self.message_sender = Some(internal_loop.get_client_sender());
+        async move {
+            loop {
+                // TODO Loop this in wait_for_event, not outside of it.
+                internal_loop.wait_for_event().await;
+            }
+        }
     }
 
     pub async fn connect(
@@ -154,12 +169,16 @@ impl ButtplugClient {
         connector: impl ButtplugClientConnector + 'static,
     ) -> Option<ButtplugClientError> {
         let fut = ButtplugClientMessageFuture::default();
-        self.message_sender
-            .send(ButtplugInternalClientMessage::Connect(
-                Box::new(connector),
-                fut.get_state_ref().clone(),
-            ))
-            .await;
+        if let Some(sender) = &self.message_sender {
+            sender
+                .send(ButtplugInternalClientMessage::Connect(
+                    Box::new(connector),
+                    fut.get_state_ref().clone(),
+                ))
+                .await;
+        } else {
+            panic!("Cannot connect without internal loop running!");
+        }
         info!("Waiting on connect");
         let msg = fut.await;
         info!("connected in client");
@@ -225,13 +244,17 @@ impl ButtplugClient {
     ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         if self.connected {
             let fut = ButtplugClientMessageFuture::default();
-            self.message_sender
-                .send(ButtplugInternalClientMessage::Message((
-                    msg.clone(),
-                    fut.get_state_ref().clone(),
-                )))
-                .await;
-            Ok(fut.await)
+            if let Some(sender) = &self.message_sender {
+                sender
+                    .send(ButtplugInternalClientMessage::Message((
+                        msg.clone(),
+                        fut.get_state_ref().clone(),
+                    )))
+                    .await;
+                Ok(fut.await)
+            } else {
+                panic!("Cannot connect without internal loop running!");
+            }
         } else {
             Err(ButtplugClientError::ButtplugClientConnectorError(
                 ButtplugClientConnectorError {
@@ -241,15 +264,14 @@ impl ButtplugClient {
         }
     }
 
-    // TODO This should return Option<ButtplugClientError> but there's a known size issue.
     async fn send_message_expect_ok(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Result<(), ButtplugClientError> {
+    ) -> Option<ButtplugClientError> {
         let msg = self.send_message(msg).await;
         match msg.unwrap() {
-            ButtplugMessageUnion::Ok(_) => Ok(()),
-            _ => Err(ButtplugClientError::ButtplugError(
+            ButtplugMessageUnion::Ok(_) => None,
+            _ => Some(ButtplugClientError::ButtplugError(
                 ButtplugError::ButtplugMessageError(ButtplugMessageError {
                     message: "Got non-Ok message back".to_string(),
                 }),
@@ -258,20 +280,29 @@ impl ButtplugClient {
     }
 
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
+        if self.message_sender.is_none() {
+            panic!("Cannot wait for events before internal loop is running!");
+        }
         let mut events = vec!();
         match self.event_receiver.next().await.unwrap() {
             ButtplugMessageUnion::ScanningFinished(_) => {}
             ButtplugMessageUnion::DeviceList(_msg) => {
                 for info in _msg.devices.iter() {
+                    // Calling unwrap here is fine, because we can't even get
+                    // events if the internal loop isn't already running.
                     let device =
-                        ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
+                        ButtplugClientDevice::from((&info.clone(),
+                                                    self.message_sender.as_ref().unwrap().clone()));
                     self.devices.push(device.clone());
                     events.push(ButtplugClientEvent::DeviceAdded(device));
                 }
             }
             ButtplugMessageUnion::DeviceAdded(_msg) => {
                 info!("Got a device added message!");
-                let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
+                // Calling unwrap here is fine, because we can't even get
+                // events if the internal loop isn't already running.
+                let device = ButtplugClientDevice::from((&_msg,
+                                                         self.message_sender.as_ref().unwrap().clone()));
                 self.devices.push(device.clone());
                 info!("Sending to observers!");
                 events.push(ButtplugClientEvent::DeviceAdded(device));
@@ -293,7 +324,8 @@ mod test {
     use env_logger;
 
     async fn connect_test_client() -> ButtplugClient {
-        let (mut client, fut_loop) = ButtplugClient::new("Test Client");
+        let mut client = ButtplugClient::new("Test Client");
+        let fut_loop = client.get_loop();
         task::spawn(async move {
             fut_loop.await;
         });
