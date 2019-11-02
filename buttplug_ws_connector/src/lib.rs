@@ -14,7 +14,6 @@
 // - Continue on our way with the two channels, happy to know we don't have to
 //   wait for networking libraries to get on our futures 0.3 level.
 
-use async_std::task;
 use async_trait::async_trait;
 use buttplug::client::connector::{
     ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
@@ -22,7 +21,7 @@ use buttplug::client::connector::{
 };
 use buttplug::client::internal::{ButtplugClientMessageStateShared, ButtplugClientMessageFuture};
 use buttplug::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
-use futures_channel::mpsc;
+use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
 
@@ -31,7 +30,7 @@ const CONNECTION: &'static str = "ws://127.0.0.1:12345";
 
 struct InternalClient {
     connector_waker: ButtplugClientMessageStateShared,
-    buttplug_out: mpsc::UnboundedSender<ButtplugRemoteClientConnectorMessage>,
+    buttplug_out: Sender<ButtplugRemoteClientConnectorMessage>,
 }
 
 impl Handler for InternalClient {
@@ -45,8 +44,10 @@ impl Handler for InternalClient {
 
     fn on_message(&mut self, msg: Message) -> ws::Result<()> {
         println!("Got message: {}", msg);
-        self.buttplug_out
-            .unbounded_send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string()));
+        let out = self.buttplug_out.clone();
+        task::spawn(async move {
+            out.send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string())).await;
+        });
         ws::Result::Ok(())
     }
 
@@ -62,12 +63,12 @@ impl Handler for InternalClient {
 pub struct ButtplugWebsocketClientConnector {
     helper: ButtplugRemoteClientConnectorHelper,
     ws_thread: Option<thread::JoinHandle<()>>,
-    recv: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
+    recv: Option<Receiver<ButtplugMessageUnion>>,
 }
 
 impl ButtplugWebsocketClientConnector {
     pub fn new() -> ButtplugWebsocketClientConnector {
-        let (send, recv) = mpsc::unbounded();
+        let (send, recv) = channel(256);
         ButtplugWebsocketClientConnector {
             helper: ButtplugRemoteClientConnectorHelper::new(send.clone()),
             ws_thread: None,
@@ -109,11 +110,13 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         let mut waker = fut.get_state_ref().clone();
         self.ws_thread = Some(thread::spawn(|| {
             ws::connect(CONNECTION, move |out| {
+                let bp_out = send.clone();
                 // Get our websocket sender back to the main thread
-                send.unbounded_send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
-                    ButtplugWebsocketWrappedSender::new(out.clone()),
-                )))
-                    .unwrap();
+                task::spawn(async move {
+                    bp_out.send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
+                        ButtplugWebsocketWrappedSender::new(out.clone()),
+                    ))).await;
+                });
                 // Go ahead and create our internal client
                 InternalClient {
                     buttplug_out: send.clone(),
@@ -145,7 +148,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         self.helper.send(msg, state).await;
     }
 
-    fn get_event_receiver(&mut self) -> mpsc::UnboundedReceiver<ButtplugMessageUnion> {
+    fn get_event_receiver(&mut self) ->
+        Receiver<ButtplugMessageUnion> {
         // This will panic if we've already taken the receiver.
         self.recv.take().unwrap()
     }
@@ -173,7 +177,6 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_client_websocket() {
         task::block_on(async {
             println!("connecting");

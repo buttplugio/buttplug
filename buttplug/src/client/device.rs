@@ -7,7 +7,7 @@ use crate::core::{
 };
 use super::internal::{ButtplugInternalClientMessage, ButtplugClientMessageFuture};
 use futures::SinkExt;
-use futures_channel::mpsc;
+use async_std::sync::Sender;
 use std::collections::HashMap;
 
 #[derive(Clone)]
@@ -15,7 +15,7 @@ pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
     pub allowed_messages: HashMap<String, MessageAttributes>,
-    client_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+    client_sender: Sender<ButtplugInternalClientMessage>,
 }
 
 impl ButtplugClientDevice {
@@ -23,7 +23,7 @@ impl ButtplugClientDevice {
         name: &str,
         index: u32,
         allowed_messages: HashMap<String, MessageAttributes>,
-        client_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+        client_sender: Sender<ButtplugInternalClientMessage>,
     ) -> ButtplugClientDevice {
         ButtplugClientDevice {
             name: name.to_owned(),
@@ -72,13 +72,13 @@ impl ButtplugClientDevice {
 impl
     From<(
         &DeviceAdded,
-        mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+        Sender<ButtplugInternalClientMessage>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceAdded,
-            mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+            Sender<ButtplugInternalClientMessage>,
         ),
     ) -> Self {
         let msg = msg_sender_tuple.0.clone();
@@ -94,13 +94,13 @@ impl
 impl
     From<(
         &DeviceMessageInfo,
-        mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+        Sender<ButtplugInternalClientMessage>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceMessageInfo,
-            mpsc::UnboundedSender<ButtplugInternalClientMessage>,
+            Sender<ButtplugInternalClientMessage>,
         ),
     ) -> Self {
         let msg = msg_sender_tuple.0.clone();

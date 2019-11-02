@@ -1,8 +1,8 @@
 use crate::core::messages::{self, ButtplugMessageUnion};
 use super::connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use core::pin::Pin;
-use futures::{select, FutureExt, SinkExt, StreamExt, Future, task::{Waker, Poll, Context}, future::Fuse};
-use futures_channel::mpsc;
+use futures::{FutureExt, SinkExt, StreamExt, Future, task::{Waker, Poll, Context}, future::Fuse};
+use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
 use std::sync::{Arc, Mutex};
 
 #[derive(Default, Debug, Clone)]
@@ -67,10 +67,10 @@ impl Future for ButtplugClientMessageFuture {
 pub struct ButtplugClientInternalLoop {
     connected_devices: Vec<u32>,
     connector: Option<Box<dyn ButtplugClientConnector>>,
-    connector_receiver: Option<mpsc::UnboundedReceiver<ButtplugMessageUnion>>,
-    client_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
-    client_receiver: mpsc::UnboundedReceiver<ButtplugInternalClientMessage>,
-    event_sender: Vec<mpsc::UnboundedSender<ButtplugMessageUnion>>,
+    connector_receiver: Option<Receiver<ButtplugMessageUnion>>,
+    client_sender: Sender<ButtplugInternalClientMessage>,
+    client_receiver: Receiver<ButtplugInternalClientMessage>,
+    event_sender: Vec<Sender<ButtplugMessageUnion>>,
 }
 
 unsafe impl Send for ButtplugClientInternalLoop {}
@@ -79,7 +79,7 @@ pub enum ButtplugInternalClientMessage {
     Connect(Box<dyn ButtplugClientConnector>, ButtplugClientMessageStateShared),
     Disconnect,
     Message((ButtplugMessageUnion, ButtplugClientMessageStateShared)),
-    NewClient(mpsc::UnboundedSender<ButtplugMessageUnion>)
+    NewClient(Sender<ButtplugMessageUnion>)
 }
 
 pub enum ButtplugInternalDeviceMessage {
@@ -87,8 +87,8 @@ pub enum ButtplugInternalDeviceMessage {
 }
 
 impl ButtplugClientInternalLoop {
-    pub fn new(event_sender: mpsc::UnboundedSender<ButtplugMessageUnion>) -> Self {
-        let (cs, cr) = mpsc::unbounded();
+    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
+        let (cs, cr) = channel(256);
         ButtplugClientInternalLoop {
             connector: None,
             connected_devices: vec!(),
@@ -99,25 +99,38 @@ impl ButtplugClientInternalLoop {
         }
     }
 
-    pub fn get_client_sender(&self) -> mpsc::UnboundedSender<ButtplugInternalClientMessage> {
+    pub fn get_client_sender(&self) -> Sender<ButtplugInternalClientMessage> {
         self.client_sender.clone()
     }
 
     pub async fn wait_for_event(&mut self) -> Option<ButtplugClientConnectorError> {
-        let mut event_future = Fuse::terminated();
 
+        let mut r = None;
         if let Some(ref mut recv) = self.connector_receiver {
-            event_future = recv.next().fuse();
+            //event_future = recv.clone().next().fuse();
+            r = Some(recv.clone());
+        }
+        let mut event_recv = None;
+        if let Some(ref mut re) = r {
+            event_recv = Some(re.clone());
         }
         enum StreamReturn {
             ConnectorMessage(ButtplugMessageUnion),
             ClientMessage(ButtplugInternalClientMessage),
         }
-        let mut client_future = self.client_receiver.next();
-        let stream_ret = select! {
-            a = event_future => StreamReturn::ConnectorMessage(a.unwrap()),
-            b = client_future => StreamReturn::ClientMessage(b.unwrap()),
-        };
+        let mut client_receiver = self.client_receiver.clone();
+        let client = task::spawn(async move {
+            StreamReturn::ClientMessage(client_receiver.next().await.unwrap())
+        });
+        let mut stream_ret;
+        if let Some(mut er) = event_recv {
+            let event = task::spawn(async move {
+                StreamReturn::ConnectorMessage(er.next().await.unwrap())
+            });
+            stream_ret = select!(event, client).await;
+        } else {
+            stream_ret = client.await;
+        }
         match stream_ret {
             StreamReturn::ConnectorMessage(_msg) => {
                 for ref mut sender in self.event_sender.iter() {
@@ -150,6 +163,7 @@ impl ButtplugClientInternalLoop {
                         None
                     },
                     ButtplugInternalClientMessage::NewClient(_sender) => {
+                        println!("Adding new client!");
                         self.event_sender.push(_sender);
                         None
                     },

@@ -10,7 +10,7 @@ use crate::core::messages::{
 use connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use device::ButtplugClientDevice;
 use futures::{Future, SinkExt, StreamExt};
-use futures_channel::mpsc;
+use async_std::{sync::{channel, Sender, Receiver}};
 use internal::{
     ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
 };
@@ -59,8 +59,8 @@ pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
     devices: Vec<ButtplugClientDevice>,
-    message_sender: mpsc::UnboundedSender<ButtplugInternalClientMessage>,
-    event_receiver: mpsc::UnboundedReceiver<ButtplugMessageUnion>,
+    message_sender: Sender<ButtplugInternalClientMessage>,
+    event_receiver: Receiver<ButtplugMessageUnion>,
     connected: bool,
 }
 
@@ -74,7 +74,7 @@ unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
     pub fn new(name: &str) -> (ButtplugClient, impl Future) {
-        let (event_sender, event_receiver) = mpsc::unbounded();
+        let (event_sender, event_receiver) = channel(256);
         let mut internal_loop = ButtplugClientInternalLoop::new(event_sender);
         (
             ButtplugClient {
@@ -241,9 +241,9 @@ mod test {
             fut_loop.await;
         });
         assert!(client
-            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-            .await
-            .is_ok());
+                .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+                .await
+                .is_ok());
         assert!(client.connected());
         client
     }
