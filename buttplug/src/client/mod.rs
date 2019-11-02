@@ -10,17 +10,21 @@ pub mod device;
 pub mod internal;
 mod messagesorter;
 
-use crate::core::errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError};
-use crate::core::messages::{
-    ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning,
-};
 use connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use device::ButtplugClientDevice;
-use futures::{Future, StreamExt};
-use async_std::{sync::{channel, Sender, Receiver}};
 use internal::{
     ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
 };
+
+use crate::core::{
+    errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+    messages::{
+        ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning,
+    }
+};
+
+use futures::{Future, StreamExt};
+use async_std::{sync::{channel, Sender, Receiver}};
 use std::error::Error;
 use std::fmt;
 
