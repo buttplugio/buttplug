@@ -2,18 +2,23 @@ use super::messages::{self, ErrorCode};
 use std::error::Error;
 use std::fmt;
 
+/// Handshake errors occur while a client is connecting to a server. This
+/// usually involves protocol handshake errors. For connector errors (i.e. when
+/// a remote network connection cannot be established), see
+/// [crate::client::connector::ButtplugClientConnectorError].
 #[derive(Debug, Clone)]
-pub struct ButtplugInitError {
+pub struct ButtplugHandshakeError {
+    /// Message for the handshake error.
     pub message: String,
 }
 
-impl fmt::Display for ButtplugInitError {
+impl fmt::Display for ButtplugHandshakeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Init Error: {}", self.message)
     }
 }
 
-impl Error for ButtplugInitError {
+impl Error for ButtplugHandshakeError {
     fn description(&self) -> &str {
         self.message.as_str()
     }
@@ -23,6 +28,8 @@ impl Error for ButtplugInitError {
     }
 }
 
+/// Message errors occur when a message is somehow malformed on creation, or
+/// received unexpectedly by a client or server.
 #[derive(Debug, Clone)]
 pub struct ButtplugMessageError {
     pub message: String,
@@ -44,6 +51,9 @@ impl Error for ButtplugMessageError {
     }
 }
 
+/// Ping errors occur when a server requires a ping response (set up during
+/// connection handshake), and the client does not return a response in the
+/// alloted timeframe. This also signifies a server disconnect.
 #[derive(Debug, Clone)]
 pub struct ButtplugPingError {
     pub message: String,
@@ -65,6 +75,9 @@ impl Error for ButtplugPingError {
     }
 }
 
+/// Device errors occur during device interactions, including sending
+/// unsupported message commands, addressing the wrong number of device
+/// attributes, etc...
 #[derive(Debug, Clone)]
 pub struct ButtplugDeviceError {
     pub message: String,
@@ -86,6 +99,8 @@ impl Error for ButtplugDeviceError {
     }
 }
 
+/// Unknown errors occur in exceptional circumstances where no other error type
+/// will suffice. These are rare and usually fatal (disconnecting) errors.
 #[derive(Debug, Clone)]
 pub struct ButtplugUnknownError {
     pub message: String,
@@ -107,9 +122,10 @@ impl Error for ButtplugUnknownError {
     }
 }
 
+/// Aggregation enum for protocol error types.
 #[derive(Debug, Clone)]
 pub enum ButtplugError {
-    ButtplugInitError(ButtplugInitError),
+    ButtplugHandshakeError(ButtplugHandshakeError),
     ButtplugMessageError(ButtplugMessageError),
     ButtplugPingError(ButtplugPingError),
     ButtplugDeviceError(ButtplugDeviceError),
@@ -122,7 +138,7 @@ impl fmt::Display for ButtplugError {
             ButtplugError::ButtplugDeviceError(ref e) => e.fmt(f),
             ButtplugError::ButtplugMessageError(ref e) => e.fmt(f),
             ButtplugError::ButtplugPingError(ref e) => e.fmt(f),
-            ButtplugError::ButtplugInitError(ref e) => e.fmt(f),
+            ButtplugError::ButtplugHandshakeError(ref e) => e.fmt(f),
             ButtplugError::ButtplugUnknownError(ref e) => e.fmt(f),
         }
     }
@@ -134,7 +150,7 @@ impl Error for ButtplugError {
             ButtplugError::ButtplugDeviceError(ref e) => e.description(),
             ButtplugError::ButtplugMessageError(ref e) => e.description(),
             ButtplugError::ButtplugPingError(ref e) => e.description(),
-            ButtplugError::ButtplugInitError(ref e) => e.description(),
+            ButtplugError::ButtplugHandshakeError(ref e) => e.description(),
             ButtplugError::ButtplugUnknownError(ref e) => e.description(),
         }
     }
@@ -145,6 +161,7 @@ impl Error for ButtplugError {
 }
 
 impl From<messages::Error> for ButtplugError {
+    /// Turns a Buttplug Protocol Error Message into a error type.
     fn from(error: messages::Error) -> Self {
         match error.error_code {
             ErrorCode::ErrorDevice => ButtplugError::ButtplugDeviceError(ButtplugDeviceError {
@@ -153,7 +170,7 @@ impl From<messages::Error> for ButtplugError {
             ErrorCode::ErrorMessage => ButtplugError::ButtplugMessageError(ButtplugMessageError {
                 message: error.error_message,
             }),
-            ErrorCode::ErrorInit => ButtplugError::ButtplugInitError(ButtplugInitError {
+            ErrorCode::ErrorHandshake => ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
                 message: error.error_message,
             }),
             ErrorCode::ErrorUnknown => ButtplugError::ButtplugUnknownError(ButtplugUnknownError {

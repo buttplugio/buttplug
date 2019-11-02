@@ -28,7 +28,7 @@ impl Ok {
 #[repr(u8)]
 pub enum ErrorCode {
     ErrorUnknown = 0,
-    ErrorInit,
+    ErrorHandshake,
     ErrorPing,
     ErrorMessage,
     ErrorDevice,
@@ -60,7 +60,7 @@ impl From<ButtplugError> for Error {
             ButtplugError::ButtplugDeviceError(_) => ErrorCode::ErrorDevice,
             ButtplugError::ButtplugMessageError(_) => ErrorCode::ErrorMessage,
             ButtplugError::ButtplugPingError(_) => ErrorCode::ErrorPing,
-            ButtplugError::ButtplugInitError(_) => ErrorCode::ErrorInit,
+            ButtplugError::ButtplugHandshakeError(_) => ErrorCode::ErrorHandshake,
             ButtplugError::ButtplugUnknownError(_) => ErrorCode::ErrorUnknown,
         };
         // Gross but was having problems with naming collisions on the error trait
@@ -68,7 +68,7 @@ impl From<ButtplugError> for Error {
             ButtplugError::ButtplugDeviceError(_s) => _s.message,
             ButtplugError::ButtplugMessageError(_s) => _s.message,
             ButtplugError::ButtplugPingError(_s) => _s.message,
-            ButtplugError::ButtplugInitError(_s) => _s.message,
+            ButtplugError::ButtplugHandshakeError(_s) => _s.message,
             ButtplugError::ButtplugUnknownError(_s) => _s.message,
         };
         Error::new(code, &msg)
@@ -312,7 +312,8 @@ mod test {
 
     #[test]
     fn test_error_serialize() {
-        let error = ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error"));
+        let error =
+            ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error"));
         let js = serde_json::to_string(&error).unwrap();
         assert_eq!(ERROR_STR, js);
     }
@@ -321,7 +322,7 @@ mod test {
     fn test_error_deserialize() {
         let union: ButtplugMessageUnion = serde_json::from_str(&ERROR_STR).unwrap();
         assert_eq!(
-            ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorInit, "Test Error")),
+            ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error")),
             union
         );
     }
