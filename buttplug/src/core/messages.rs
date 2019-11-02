@@ -3,27 +3,40 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::HashMap;
 
+/// Base trait for all Buttplug Protocol Message Structs. Handles management of
+/// message ids, as well as implementing conveinence functions for converting
+/// between message structs and [ButtplugMessageUnion] enums, serialization, etc...
 pub trait ButtplugMessage: Send + Sync + Clone + Serialize + Deserialize<'static> {
+    /// Returns the id number of the message
     fn get_id(&self) -> u32;
+    /// Sets the id number of the message
     fn set_id(&mut self, id: u32);
+    /// Returns the message as a [ButtplugMessageUnion] enum.
     fn as_union(self) -> ButtplugMessageUnion;
+    /// Returns the message as a string in Buttplug JSON Protocol format.
     fn as_protocol_json(&self) -> String {
         "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
     }
 }
 
+/// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
+/// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#ok).
 #[derive(Debug, PartialEq, Default, ButtplugMessage, Clone, Serialize, Deserialize)]
 pub struct Ok {
+    /// Message Id, used for matching message pairs in remote connection instances.
     #[serde(rename = "Id")]
     id: u32,
 }
 
 impl Ok {
+    /// Creates a new Ok message with the given Id.
     pub fn new(id: u32) -> Ok {
         Ok { id: id }
     }
 }
 
+/// Error codes pertaining to error classes that can be represented in the
+/// Buttplug [Error] message.
 #[derive(Debug, Clone, Serialize_repr, Deserialize_repr, PartialEq)]
 #[repr(u8)]
 pub enum ErrorCode {
@@ -34,17 +47,23 @@ pub enum ErrorCode {
     ErrorDevice,
 }
 
+/// Represents the Buttplug Protocol Error message, as documented in the [Buttplug
+/// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#error).
 #[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Error {
+    /// Message Id, used for matching message pairs in remote connection instances.
     #[serde(rename = "Id")]
     id: u32,
+    /// Specifies the class of the error.
     #[serde(rename = "ErrorCode")]
     pub error_code: ErrorCode,
+    /// Description of the error.
     #[serde(rename = "ErrorMessage")]
     pub error_message: String,
 }
 
 impl Error {
+    /// Creates a new error object.
     pub fn new(error_code: ErrorCode, error_message: &str) -> Error {
         Error {
             id: 0,
@@ -55,6 +74,8 @@ impl Error {
 }
 
 impl From<ButtplugError> for Error {
+    /// Converts a [super::errors::ButtplugError] object into a Buttplug Protocol
+    /// [Error] message.
     fn from(error: ButtplugError) -> Self {
         let code = match error {
             ButtplugError::ButtplugDeviceError(_) => ErrorCode::ErrorDevice,

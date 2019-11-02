@@ -161,7 +161,7 @@ impl Error for ButtplugError {
 }
 
 impl From<messages::Error> for ButtplugError {
-    /// Turns a Buttplug Protocol Error Message into a error type.
+    /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
     fn from(error: messages::Error) -> Self {
         match error.error_code {
             ErrorCode::ErrorDevice => ButtplugError::ButtplugDeviceError(ButtplugDeviceError {
