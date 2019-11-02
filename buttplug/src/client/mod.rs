@@ -28,19 +28,46 @@ use async_std::{sync::{channel, Sender, Receiver}};
 use std::error::Error;
 use std::fmt;
 
+/// Enum representing different events that can be emitted by a client.
+///
+/// These events are created by the server and sent to the client, and represent
+/// unrequested actions that the client will need to respond to, or that
+/// applications using the client may be interested in.
 #[derive(Clone)]
 pub enum ButtplugClientEvent {
+    /// Emitted when a scanning session (started via a StartScanning call on
+    /// [ButtplugClient]) has finished.
     ScanningFinished,
+    /// Emitted when a device has been added to the server. Includes a
+    /// [ButtplugClientDevice] object representing the device.
     DeviceAdded(ButtplugClientDevice),
+    /// Emitted when a device has been removed from the server. Includes a
+    /// [ButtplugClientDevice] object representing the device.
     DeviceRemoved(ButtplugClientDevice),
+    /// Emitted when log messages are sent from the server.
+    // TODO This needs an actual type sent along with it.
     Log,
+    /// Emitted when a client has not pinged the server in a sufficient amount
+    /// of time.
     PingTimeout,
+    /// Emitted when a client connector detects that the server has
+    /// disconnected.
     ServerDisconnect,
 }
 
+/// Represents all of the different types of errors a ButtplugClient can return.
+///
+/// Clients can return two types of errors:
+///
+/// - [ButtplugClientConnectorError], which means there was a problem with the
+/// connection between the client and the server, like a network connection
+/// issue.
+/// - [ButtplugError], which is an error specific to the Buttplug Protocol.
 #[derive(Debug, Clone)]
 pub enum ButtplugClientError {
+    /// Connector error
     ButtplugClientConnectorError(ButtplugClientConnectorError),
+    /// Protocol error
     ButtplugError(ButtplugError),
 }
 
@@ -66,13 +93,34 @@ impl Error for ButtplugClientError {
     }
 }
 
+/// Struct used by applications to communicate with a Buttplug Server.
+///
+/// Buttplug Clients provide an API layer on top of the Buttplug Protocol that
+/// handles boring things like message creation and pairing, protocol ordering,
+/// etc... This allows developers to concentrate on controlling hardware with
+/// the API.
+///
+/// Clients serve a few different purposes:
+/// - Managing connections to servers, thru [ButtplugClientConnector]s
+/// - Emitting events received from the Server
+/// - Holding state related to the server (i.e. what devices are currently
+///   connected, etc...)
 #[derive(Clone)]
 pub struct ButtplugClient {
+    /// The client name. Depending on the connection type and server being used,
+    /// this name is sometimes shown on the server logs or GUI.
     pub client_name: String,
+    /// The server name. Once connected, this contains the name of the server,
+    /// so we can know what we're connected to.
     pub server_name: Option<String>,
+    // A vector of devices currently connected to the server, as represented by
+    // [ButtplugClientDevice] types.
     devices: Vec<ButtplugClientDevice>,
     message_sender: Sender<ButtplugInternalClientMessage>,
+    // Receives event notifications from the ButtplugInternalClientLoop
     event_receiver: Receiver<ButtplugMessageUnion>,
+    // True if the connector is currently connected, and handshake was
+    // successful.
     connected: bool,
 }
 
