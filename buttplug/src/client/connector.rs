@@ -5,7 +5,7 @@ use crate::server::server::ButtplugServer;
 use async_trait::async_trait;
 use futures::future::Future;
 use futures::select;
-use futures::{FutureExt, SinkExt, StreamExt};
+use futures::{FutureExt, StreamExt};
 use async_std::{sync::{channel, Sender, Receiver}};
 use std::error::Error;
 use std::fmt;

@@ -6,7 +6,6 @@ use crate::core::{
     },
 };
 use super::internal::{ButtplugInternalClientMessage, ButtplugClientMessageFuture};
-use futures::SinkExt;
 use async_std::sync::Sender;
 use std::collections::HashMap;
 

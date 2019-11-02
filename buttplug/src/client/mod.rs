@@ -3,13 +3,13 @@ pub mod device;
 pub mod internal;
 mod messagesorter;
 
-use crate::core::errors::{ButtplugError, ButtplugInitError, ButtplugMessageError};
+use crate::core::errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError};
 use crate::core::messages::{
     ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning,
 };
 use connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use device::ButtplugClientDevice;
-use futures::{Future, SinkExt, StreamExt};
+use futures::{Future, StreamExt};
 use async_std::{sync::{channel, Sender, Receiver}};
 use internal::{
     ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
@@ -55,6 +55,7 @@ impl Error for ButtplugClientError {
     }
 }
 
+#[derive(Clone)]
 pub struct ButtplugClient {
     pub client_name: String,
     pub server_name: Option<String>,
@@ -63,11 +64,6 @@ pub struct ButtplugClient {
     event_receiver: Receiver<ButtplugMessageUnion>,
     connected: bool,
 }
-
-// impl Clone for ButtplugClient {
-//     fn clone(&mut self) -> Self {
-//     }
-// }
 
 unsafe impl Sync for ButtplugClient {}
 unsafe impl Send for ButtplugClient {}
@@ -87,7 +83,7 @@ impl ButtplugClient {
             },
             async move {
                 loop {
-                    // TODO Loop this internally
+                    // TODO Loop this in wait_for_event, not outside of it.
                     internal_loop.wait_for_event().await;
                 }
             },
@@ -96,7 +92,7 @@ impl ButtplugClient {
 
     pub async fn connect(
         &mut self,
-        mut connector: impl ButtplugClientConnector + 'static,
+        connector: impl ButtplugClientConnector + 'static,
     ) -> Result<(), ButtplugClientError> {
         let fut = ButtplugClientMessageFuture::default();
         self.message_sender
@@ -130,7 +126,7 @@ impl ButtplugClient {
                     Ok(())
                 } else {
                     Err(ButtplugClientError::ButtplugError(
-                        ButtplugError::ButtplugInitError(ButtplugInitError {
+                        ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
                             message: "Did not receive expected ServerInfo or Error messages."
                                 .to_string(),
                         }),

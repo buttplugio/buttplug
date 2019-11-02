@@ -2,7 +2,7 @@ use crate::core::errors::*;
 use crate::core::messages;
 use crate::core::messages::ButtplugMessage;
 use crate::core::messages::ButtplugMessageUnion;
-use async_std::sync::{channel, Sender, Receiver};
+use async_std::sync::Sender;
 
 pub struct ButtplugServer {
     server_name: String,
@@ -52,7 +52,7 @@ impl ButtplugServer {
         msg: &messages::RequestServerInfo,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         if self.server_spec_version < msg.message_version {
-            return Result::Err(ButtplugError::ButtplugInitError(ButtplugInitError {
+            return Result::Err(ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
                 message: format!(
                     "Server version ({}) must be equal to or greater than client version ({}).",
                     self.server_spec_version, msg.message_version

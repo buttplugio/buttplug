@@ -1,7 +1,7 @@
 use crate::core::messages::{self, ButtplugMessageUnion};
 use super::connector::{ButtplugClientConnector, ButtplugClientConnectorError};
 use core::pin::Pin;
-use futures::{FutureExt, SinkExt, StreamExt, Future, task::{Waker, Poll, Context}, future::Fuse};
+use futures::{StreamExt, Future, task::{Waker, Poll, Context}};
 use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
 use std::sync::{Arc, Mutex};
 
