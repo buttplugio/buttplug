@@ -1,8 +1,7 @@
 #[macro_use]
 extern crate buttplug_derive;
-extern crate async_trait;
-extern crate serde;
-extern crate serde_json;
+#[macro_use]
+extern crate log;
 
 pub mod client;
 pub mod core;

@@ -57,7 +57,7 @@ impl Future for ButtplugClientMessageFuture {
             let msg = waker_state.reply_msg.take().unwrap();
             Poll::Ready(msg)
         } else {
-            println!("Got waker!");
+            info!("Got waker!");
             waker_state.waker = Some(cx.waker().clone());
             Poll::Pending
         }
@@ -105,6 +105,7 @@ impl ButtplugClientInternalLoop {
 
     pub async fn wait_for_event(&mut self) -> Option<ButtplugClientConnectorError> {
 
+        info!("RUNNING INTERNAL LOOP");
         let mut r = None;
         if let Some(ref mut recv) = self.connector_receiver {
             //event_future = recv.clone().next().fuse();
@@ -124,17 +125,19 @@ impl ButtplugClientInternalLoop {
         });
         let mut stream_ret;
         if let Some(mut er) = event_recv {
+            info!("Waiting on event and client!");
             let event = task::spawn(async move {
                 StreamReturn::ConnectorMessage(er.next().await.unwrap())
             });
             stream_ret = select!(event, client).await;
         } else {
+            info!("Waiting on client!");
             stream_ret = client.await;
         }
         match stream_ret {
             StreamReturn::ConnectorMessage(_msg) => {
                 for ref mut sender in self.event_sender.iter() {
-                    println!("Sending message to clients!");
+                    info!("Sending message to clients!");
                     sender.send(_msg.clone()).await;
                 }
                 None
@@ -147,7 +150,7 @@ impl ButtplugClientInternalLoop {
                                 None //return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
                             },
                             None => {
-                                println!("Connected!");
+                                info!("Connected!");
                                 let mut waker_state = state.lock().unwrap();
                                 waker_state.set_reply_msg(&ButtplugMessageUnion::Ok(messages::Ok::new(1)));
                                 self.connector_receiver = Some(connector.get_event_receiver());
@@ -163,7 +166,7 @@ impl ButtplugClientInternalLoop {
                         None
                     },
                     ButtplugInternalClientMessage::NewClient(_sender) => {
-                        println!("Adding new client!");
+                        info!("Adding new client!");
                         self.event_sender.push(_sender);
                         None
                     },

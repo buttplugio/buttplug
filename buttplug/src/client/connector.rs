@@ -182,14 +182,14 @@ impl ButtplugRemoteClientConnectorHelper {
                 // get anything.
                 let mut stream_return: StreamValue = select! {
                     a = incoming_stream => {
-                        println!("Got connector message!");
+                        info!("Got connector message!");
                         match a {
                             Some(msg) => StreamValue::Incoming(msg),
                             None => StreamValue::NoValue,
                         }
                     },
                     b = outgoing_stream => {
-                        println!("Got client message!");
+                        info!("Got client message!");
                         match b {
                             Some(msg) => StreamValue::Outgoing(msg),
                             None => StreamValue::NoValue,
@@ -208,7 +208,7 @@ impl ButtplugRemoteClientConnectorHelper {
                                     serde_json::from_str(&_t.clone()).unwrap();
                                 for smsg in array {
                                     if !sorter.maybe_resolve_message(&smsg) {
-                                        println!("Sending event!");
+                                        info!("Sending event!");
                                         // Send notification through event channel
                                         event_send.send(smsg).await;
                                     }

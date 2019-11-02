@@ -33,7 +33,7 @@ impl ClientConnectorMessageSorter {
                 true
             }
             None => {
-                println!("Not found, may be event.");
+                info!("Not found, may be event.");
                 false
             }
         }

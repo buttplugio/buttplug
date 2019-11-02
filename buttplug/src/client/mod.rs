@@ -87,6 +87,7 @@ impl ButtplugClient {
             },
             async move {
                 loop {
+                    // TODO Loop this internally
                     internal_loop.wait_for_event().await;
                 }
             },
@@ -104,23 +105,23 @@ impl ButtplugClient {
                 fut.get_state_ref().clone(),
             ))
             .await;
-        println!("Waiting on connect");
+        info!("Waiting on connect");
         let msg = fut.await;
-        println!("connected in client");
+        info!("connected in client");
         self.connected = true;
-        println!("calling init");
+        info!("calling init");
         self.init().await.unwrap();
         Ok(())
     }
 
     async fn init(&mut self) -> Result<(), ButtplugClientError> {
-        println!("Initing");
+        info!("Initing");
         let res = self
             .send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
             .await;
         match res {
             Ok(msg) => {
-                println!("got message back");
+                info!("got message back");
                 // TODO Error message case may need to be implemented here when
                 // we aren't only using embedded connectors.
                 if let ButtplugMessageUnion::ServerInfo(server_info) = msg {
@@ -214,12 +215,12 @@ impl ButtplugClient {
                 }
             }
             ButtplugMessageUnion::DeviceAdded(_msg) => {
-                println!("Got a device added message!");
+                info!("Got a device added message!");
                 let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
                 self.devices.push(device.clone());
-                println!("Sending to observers!");
+                info!("Sending to observers!");
                 events.push(ButtplugClientEvent::DeviceAdded(device));
-                println!("Observers sent!");
+                info!("Observers sent!");
             }
             ButtplugMessageUnion::DeviceRemoved(_) => {}
             //ButtplugMessageUnion::Log(_) => {}
@@ -234,6 +235,7 @@ mod test {
     use super::ButtplugClient;
     use crate::client::connector::ButtplugEmbeddedClientConnector;
     use async_std::task;
+    use env_logger;
 
     async fn connect_test_client() -> ButtplugClient {
         let (mut client, fut_loop) = ButtplugClient::new("Test Client");
