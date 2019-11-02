@@ -152,7 +152,7 @@ impl ButtplugClient {
     pub async fn connect(
         &mut self,
         connector: impl ButtplugClientConnector + 'static,
-    ) -> Result<(), ButtplugClientError> {
+    ) -> Option<ButtplugClientError> {
         let fut = ButtplugClientMessageFuture::default();
         self.message_sender
             .send(ButtplugInternalClientMessage::Connect(
@@ -166,10 +166,10 @@ impl ButtplugClient {
         self.connected = true;
         info!("calling init");
         self.init().await.unwrap();
-        Ok(())
+        None
     }
 
-    async fn init(&mut self) -> Result<(), ButtplugClientError> {
+    async fn init(&mut self) -> Option<ButtplugClientError> {
         info!("Initing");
         let res = self
             .send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
@@ -182,9 +182,9 @@ impl ButtplugClient {
                 if let ButtplugMessageUnion::ServerInfo(server_info) = msg {
                     self.server_name = Option::Some(server_info.server_name);
                     // TODO Handle ping time in the internal event loop
-                    Ok(())
+                    None
                 } else {
-                    Err(ButtplugClientError::ButtplugError(
+                    Some(ButtplugClientError::ButtplugError(
                         ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
                             message: "Did not receive expected ServerInfo or Error messages."
                                 .to_string(),
@@ -192,7 +192,7 @@ impl ButtplugClient {
                     ))
                 }
             }
-            Err(_) => Ok(()),
+            Err(_) => None,
         }
     }
 
@@ -200,7 +200,7 @@ impl ButtplugClient {
         return self.connected;
     }
 
-    pub fn disconnect(&mut self) -> Result<(), ButtplugClientError> {
+    pub fn disconnect(&mut self) -> Option<ButtplugClientError> {
         // if self.connector.is_none() {
         //     return Result::Err(ButtplugClientError::ButtplugClientConnectorError(
         //         ButtplugClientConnectorError {
@@ -211,10 +211,10 @@ impl ButtplugClient {
         // let mut connector = self.connector.take().unwrap();
         // connector.disconnect();
         self.connected = false;
-        Result::Ok(())
+        None
     }
 
-    pub async fn start_scanning(&mut self) -> Result<(), ButtplugClientError> {
+    pub async fn start_scanning(&mut self) -> Option<ButtplugClientError> {
         self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(StartScanning::new()))
             .await
     }
