@@ -407,6 +407,7 @@ mod test {
     use env_logger;
 
     async fn connect_test_client() -> ButtplugClient {
+        let _ = env_logger::builder().is_test(true).try_init();
         let mut client = ButtplugClient::new("Test Client");
         let fut_loop = client.get_loop();
         task::spawn(async move {
