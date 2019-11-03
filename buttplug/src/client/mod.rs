@@ -12,10 +12,14 @@ pub mod device;
 pub mod internal;
 mod messagesorter;
 
-use connector::{ButtplugClientConnector, ButtplugClientConnectorError};
+use connector::{ButtplugClientConnector,
+                ButtplugClientConnectorError,
+                ButtplugClientConnectionFuture};
 use device::ButtplugClientDevice;
 use internal::{
-    ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
+    ButtplugClientInternalLoop,
+    ButtplugClientMessageFuture,
+    ButtplugInternalClientMessage,
 };
 
 use crate::core::{
@@ -224,15 +228,17 @@ impl ButtplugClient {
         // Send the connector to the internal loop for management. Once we throw
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
-        let fut = ButtplugClientMessageFuture::default();
+        let fut = ButtplugClientConnectionFuture::default();
         let msg = ButtplugInternalClientMessage::Connect(
             Box::new(connector),
             fut.get_state_clone(),
         );
-        let err = self.send_internal_message(msg).await;
+        self.send_internal_message(msg).await;
 
         debug!("Waiting on internal loop to connect");
-        fut.await;
+        if let Some(err) = fut.await {
+            return Some(ButtplugClientError::ButtplugClientConnectorError(err));
+        }
 
         info!("Client connected to server, running handshake.");
         // Set connected to true, since running the handshake requires the

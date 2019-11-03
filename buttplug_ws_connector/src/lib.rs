@@ -24,9 +24,10 @@ use async_trait::async_trait;
 use buttplug::client::connector::{
     ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
+    ButtplugClientConnectionStateShared, ButtplugClientConnectionFuture
 };
-use buttplug::client::internal::{ButtplugClientMessageStateShared, ButtplugClientMessageFuture};
-use buttplug::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
+use buttplug::client::internal::ButtplugClientMessageStateShared;
+use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use async_std::{sync::{channel, Sender, Receiver}, task};
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
@@ -35,7 +36,7 @@ use ws::{CloseCode, Handler, Handshake, Message};
 const CONNECTION: &'static str = "ws://127.0.0.1:12345";
 
 struct InternalClient {
-    connector_waker: ButtplugClientMessageStateShared,
+    connector_waker: ButtplugClientConnectionStateShared,
     buttplug_out: Sender<ButtplugRemoteClientConnectorMessage>,
 }
 
@@ -44,7 +45,7 @@ impl Handler for InternalClient {
         info!("Opened websocket");
         // TODO Use another future type when it's not midnight and you're less
         // tired.
-        self.connector_waker.lock().unwrap().set_reply_msg(&ButtplugMessageUnion::Ok(messages::Ok::new(1)));
+        self.connector_waker.lock().unwrap().set_reply_msg(&None);
         Ok(())
     }
 
@@ -63,6 +64,7 @@ impl Handler for InternalClient {
 
     fn on_error(&mut self, err: ws::Error) {
         info!("The server encountered an error: {:?}", err);
+        self.connector_waker.lock().unwrap().set_reply_msg(&Some(ButtplugClientConnectorError::new(&(format!("{}", err)))));
     }
 }
 
@@ -118,7 +120,7 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
 impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
         let send = self.helper.get_remote_send().clone();
-        let fut = ButtplugClientMessageFuture::default();
+        let fut = ButtplugClientConnectionFuture::default();
         let waker = fut.get_state_clone();
         self.ws_thread = Some(thread::spawn(|| {
             let ret = ws::connect(CONNECTION, move |out| {
@@ -148,8 +150,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
             read_future.await;
         });
 
-        fut.await;
-        None
+        fut.await
     }
 
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
@@ -201,9 +202,10 @@ mod test {
             info!("connecting");
             ButtplugClient::run("test client", |mut client| {
                 async move {
-                    client
-                        .connect(ButtplugWebsocketClientConnector::new())
-                        .await;
+                    assert!(client
+                            .connect(ButtplugWebsocketClientConnector::new())
+                            .await
+                            .is_none());
                     info!("connected");
                     client.start_scanning().await;
                     info!("scanning!");
