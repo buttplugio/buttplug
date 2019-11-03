@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Implementation of internal Buttplug Client event loop.
+
 use crate::core::messages::{self, ButtplugMessageUnion};
 use super::connector::{ButtplugClientConnector};
 use core::pin::Pin;

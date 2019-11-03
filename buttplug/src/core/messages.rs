@@ -5,6 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Structs representing low level [Buttplug
+//! Protocol](https://buttplug-spec.docs.buttplug.io) messages
+
 use super::errors::*;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};

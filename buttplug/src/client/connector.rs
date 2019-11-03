@@ -5,10 +5,12 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Handling of communication with Buttplug Server.
+
 use super::messagesorter::ClientConnectorMessageSorter;
 use super::internal::{ButtplugClientMessageStateShared};
 use crate::core::messages::ButtplugMessageUnion;
-use crate::server::server::ButtplugServer;
+use crate::server::ButtplugServer;
 use async_trait::async_trait;
 use futures::future::Future;
 use futures::select;

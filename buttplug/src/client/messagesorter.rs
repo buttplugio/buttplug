@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Handling of remote message pairing and future resolution.
+
 use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use super::internal::ButtplugClientMessageStateShared;
 use std::collections::HashMap;

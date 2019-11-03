@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Representation and management of devices connected to the server.
+
 use crate::core::{
     errors::{ButtplugError, ButtplugMessageError},
     messages::{

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! # Buttplug Client Module
+//! Communications API for accessing Buttplug Servers
 
 pub mod connector;
 pub mod device;

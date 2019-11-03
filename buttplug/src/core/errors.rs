@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Buttplug Error Structs/Enums, representing protocol errors.
+
 use super::messages::{self, ErrorCode};
 use std::error::Error;
 use std::fmt;
