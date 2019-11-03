@@ -7,17 +7,13 @@
 
 //! Handling of communication with Buttplug Server.
 
-use super::messagesorter::ClientConnectorMessageSorter;
-use super::internal::{ButtplugClientMessageStateShared};
-use crate::core::messages::ButtplugMessageUnion;
-use crate::server::ButtplugServer;
+use super::{internal::ButtplugClientMessageStateShared,
+            messagesorter::ClientConnectorMessageSorter};
+use crate::{core::messages::ButtplugMessageUnion, server::ButtplugServer};
 use async_trait::async_trait;
-use futures::future::Future;
-use futures::select;
-use futures::{FutureExt, StreamExt};
+use futures::{FutureExt, StreamExt, select, future::Future};
 use async_std::{sync::{channel, Sender, Receiver}};
-use std::error::Error;
-use std::fmt;
+use std::{fmt, error::Error};
 
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
