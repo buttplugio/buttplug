@@ -124,13 +124,10 @@ pub struct ButtplugClient {
     // Sender to relay messages to the internal client loop
     message_sender: Option<Sender<ButtplugInternalClientMessage>>,
     // Receives event notifications from the ButtplugInternalClientLoop
-    event_receiver: Receiver<ButtplugMessageUnion>,
+    event_receiver: Option<Receiver<ButtplugMessageUnion>>,
     // True if the connector is currently connected, and handshake was
     // successful.
     connected: bool,
-    // Holds the InternalLoop object until it is retreived by the application to
-    // run.
-    event_sender: Option<Sender<ButtplugMessageUnion>>,
 }
 
 unsafe impl Sync for ButtplugClient {}
@@ -138,16 +135,18 @@ unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
     /// Creates a new ButtplugClient.
+    ///
+    /// # Parameters
+    ///
+    /// - `name`: Name to be given to the client (see [ButtplugClient::client_name]).
     pub fn new(name: &str) -> ButtplugClient {
-        let (event_sender, event_receiver) = channel(256);
         ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
             devices: vec![],
-            event_receiver,
+            event_receiver: None,
             message_sender: None,
             connected: false,
-            event_sender: Some(event_sender)
         }
     }
 
@@ -156,8 +155,11 @@ impl ButtplugClient {
     /// The internal loop will need to be run alongside a future where client
     /// logic is performed.
     pub fn get_loop(&mut self) -> impl Future {
-        let mut internal_loop = ButtplugClientInternalLoop::new(self.event_sender.take().unwrap());
-        self.message_sender = Some(internal_loop.get_client_sender());
+        let (event_sender, event_receiver) = channel(256);
+        let (message_sender, message_receiver) = channel(256);
+        let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
+        self.event_receiver = Some(event_receiver);
+        self.message_sender = Some(message_sender);
         async move {
             loop {
                 // TODO Loop this in wait_for_event, not outside of it.
@@ -166,14 +168,30 @@ impl ButtplugClient {
         }
     }
 
-    /// Connects and runs handshake flow with [ButtplugServer], either local or
-    /// remote.
+    /// Connects and runs handshake flow with
+    /// [crate::server::server::ButtplugServer], either local or remote.
     ///
     /// Tries to connect to a server via the given [ButtplugClientConnector]
     /// struct. If connection is successful, also runs the handshake flow and
     /// retrieves a list of currently connected devices. These devices will be
     /// emitted as [ButtplugClientEvent::DeviceAdded] events next time
     /// [ButtplugClient::wait_for_event] is run.
+    ///
+    /// # Parameters
+    ///
+    /// - `connector`: A connector of some type that will handle the connection
+    /// to the server. The core library ships with an "embedded" connector
+    /// ([connector::ButtplugEmbeddedClientConnector]) that will run a server
+    /// in-process with the client, or there are add-on libraries like
+    /// buttplug-ws-connector that will handle other communication methods like
+    /// websockets, TCP/UDP, etc...
+    ///
+    /// # Returns
+    ///
+    /// An `Option` which is:
+    ///
+    /// - None if connection succeeded
+    /// - Some containing a [ButtplugClientError] on connection failure.
     pub async fn connect(
         &mut self,
         connector: impl ButtplugClientConnector + 'static,
@@ -345,36 +363,41 @@ impl ButtplugClient {
         if self.message_sender.is_none() {
             panic!("Cannot wait for events before internal loop is running!");
         }
+        debug!("Client waiting for event.");
         let mut events = vec!();
-        match self.event_receiver.next().await.unwrap() {
-            ButtplugMessageUnion::ScanningFinished(_) => {}
-            ButtplugMessageUnion::DeviceList(_msg) => {
-                for info in _msg.devices.iter() {
+        if let Some(ref mut receiver) = self.event_receiver {
+            match receiver.next().await.unwrap() {
+                ButtplugMessageUnion::ScanningFinished(_) => {}
+                ButtplugMessageUnion::DeviceList(_msg) => {
+                    for info in _msg.devices.iter() {
+                        // Calling unwrap here is fine, because we can't even get
+                        // events if the internal loop isn't already running.
+                        let device =
+                            ButtplugClientDevice::from((&info.clone(),
+                                                        self.message_sender.as_ref().unwrap().clone()));
+                        self.devices.push(device.clone());
+                        events.push(ButtplugClientEvent::DeviceAdded(device));
+                    }
+                }
+                ButtplugMessageUnion::DeviceAdded(_msg) => {
+                    info!("Got a device added message!");
                     // Calling unwrap here is fine, because we can't even get
                     // events if the internal loop isn't already running.
-                    let device =
-                        ButtplugClientDevice::from((&info.clone(),
-                                                    self.message_sender.as_ref().unwrap().clone()));
+                    let device = ButtplugClientDevice::from((&_msg,
+                                                             self.message_sender.as_ref().unwrap().clone()));
                     self.devices.push(device.clone());
+                    info!("Sending to observers!");
                     events.push(ButtplugClientEvent::DeviceAdded(device));
+                    info!("Observers sent!");
                 }
+                ButtplugMessageUnion::DeviceRemoved(_) => {}
+                //ButtplugMessageUnion::Log(_) => {}
+                _ => panic!("Unhandled incoming message!"),
             }
-            ButtplugMessageUnion::DeviceAdded(_msg) => {
-                info!("Got a device added message!");
-                // Calling unwrap here is fine, because we can't even get
-                // events if the internal loop isn't already running.
-                let device = ButtplugClientDevice::from((&_msg,
-                                                         self.message_sender.as_ref().unwrap().clone()));
-                self.devices.push(device.clone());
-                info!("Sending to observers!");
-                events.push(ButtplugClientEvent::DeviceAdded(device));
-                info!("Observers sent!");
-            }
-            ButtplugMessageUnion::DeviceRemoved(_) => {}
-            //ButtplugMessageUnion::Log(_) => {}
-            _ => panic!("Unhandled incoming message!"),
+            events
+        } else {
+            vec!()
         }
-        events
     }
 }
 

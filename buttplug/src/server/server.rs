@@ -4,6 +4,8 @@ use crate::core::messages::ButtplugMessage;
 use crate::core::messages::ButtplugMessageUnion;
 use async_std::sync::Sender;
 
+
+/// Represents a ButtplugServer.
 pub struct ButtplugServer {
     server_name: String,
     server_spec_version: u32,

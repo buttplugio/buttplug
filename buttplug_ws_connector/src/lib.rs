@@ -96,7 +96,7 @@ impl ButtplugWebsocketWrappedSender {
 impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
     fn send(&self, msg: ButtplugMessageUnion) {
         let m = msg.as_protocol_json();
-        info!("Sending message: {}", m);
+        debug!("Sending message: {}", m);
         self.sender.send(m);
     }
 
