@@ -23,8 +23,8 @@ use crate::core::{
     }
 };
 
-use futures::{Future, StreamExt};
-use async_std::{sync::{channel, Sender, Receiver}};
+use futures::{Future, StreamExt, future::BoxFuture};
+use async_std::{sync::{channel, Sender, Receiver}, task, future::join};
 use std::error::Error;
 use std::fmt;
 
@@ -139,7 +139,7 @@ impl ButtplugClient {
     /// # Parameters
     ///
     /// - `name`: Name to be given to the client (see [ButtplugClient::client_name]).
-    pub fn new(name: &str) -> ButtplugClient {
+    fn new(name: &str) -> ButtplugClient {
         ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
@@ -148,6 +148,29 @@ impl ButtplugClient {
             message_sender: None,
             connected: false,
         }
+    }
+
+    pub async fn run<F, T>(name: &str, func: F)
+    where F: FnOnce(ButtplugClient) -> T,
+          T: Future
+    {
+        debug!("Run called!");
+        let (event_sender, event_receiver) = channel(256);
+        let (message_sender, message_receiver) = channel(256);
+        let client = ButtplugClient {
+            client_name: name.to_string(),
+            server_name: None,
+            devices: vec![],
+            event_receiver: Some(event_receiver),
+            message_sender: Some(message_sender),
+            connected: false,
+        };
+        let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
+        let internal_loop_future = internal_loop.event_loop();
+        let app_future = func(client);
+        task::block_on(async move {
+            join!(app_future, internal_loop_future).await;
+        });
     }
 
     /// Returns a future representing the internal loop for the client.
@@ -466,6 +489,27 @@ mod test {
             let mut client = connect_test_client().await;
             assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
             assert!(client.start_scanning().await.is_none());
+        });
+    }
+
+    #[test]
+    fn test_run() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        task::block_on(async {
+            debug!("Running test?");
+            ButtplugClient::run("Test Client", |mut client| {
+                async move {
+                    debug!("Actually Running test?");
+                    assert!(client
+                            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+                            .await
+                            .is_none());
+                    assert!(client.connected());
+                    //let mut client = connect_test_client().await;
+                    assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+                    assert!(client.start_scanning().await.is_none());
+                }
+            }).await;
         });
     }
 
