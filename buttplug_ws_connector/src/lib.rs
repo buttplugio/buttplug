@@ -15,20 +15,23 @@
 //   wait for networking libraries to get on our futures 0.3 level.
 
 // Required to get tests compiling?!
-#![type_length_limit="1518428"]
+#![type_length_limit = "1518428"]
 
 #[macro_use]
 extern crate log;
 
+use async_std::{
+    sync::{channel, Receiver, Sender},
+    task,
+};
 use async_trait::async_trait;
 use buttplug::client::connector::{
-    ButtplugClientConnector, ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
+    ButtplugClientConnectionFuture, ButtplugClientConnectionStateShared, ButtplugClientConnector,
+    ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
-    ButtplugClientConnectionStateShared, ButtplugClientConnectionFuture
 };
 use buttplug::client::internal::ButtplugClientMessageStateShared;
 use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
-use async_std::{sync::{channel, Sender, Receiver}, task};
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
 
@@ -53,7 +56,8 @@ impl Handler for InternalClient {
         info!("Got message: {}", msg);
         let out = self.buttplug_out.clone();
         task::spawn(async move {
-            out.send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string())).await;
+            out.send(ButtplugRemoteClientConnectorMessage::Text(msg.to_string()))
+                .await;
         });
         ws::Result::Ok(())
     }
@@ -64,7 +68,9 @@ impl Handler for InternalClient {
 
     fn on_error(&mut self, err: ws::Error) {
         info!("The server encountered an error: {:?}", err);
-        self.connector_waker.lock().unwrap().set_reply_msg(&Some(ButtplugClientConnectorError::new(&(format!("{}", err)))));
+        self.connector_waker.lock().unwrap().set_reply_msg(&Some(
+            ButtplugClientConnectorError::new(&(format!("{}", err))),
+        ));
     }
 }
 
@@ -104,7 +110,7 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
         debug!("Sending message: {}", m);
         match self.sender.send(m) {
             Ok(_) => return,
-            Err(err) => error!("{}", err)
+            Err(err) => error!("{}", err),
         }
     }
 
@@ -127,9 +133,11 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 let bp_out = send.clone();
                 // Get our websocket sender back to the main thread
                 task::spawn(async move {
-                    bp_out.send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
-                        ButtplugWebsocketWrappedSender::new(out.clone()),
-                    ))).await;
+                    bp_out
+                        .send(ButtplugRemoteClientConnectorMessage::Sender(Box::new(
+                            ButtplugWebsocketWrappedSender::new(out.clone()),
+                        )))
+                        .await;
                 });
                 // Go ahead and create our internal client
                 InternalClient {
@@ -157,29 +165,24 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         None
     }
 
-    async fn send(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-        state: &ButtplugClientMessageStateShared,
-    ) {
+    async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
         self.helper.send(msg, state).await;
     }
 
-    fn get_event_receiver(&mut self) ->
-        Receiver<ButtplugMessageUnion> {
-            // This will panic if we've already taken the receiver.
-            self.recv.take().unwrap()
-        }
+    fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
+        // This will panic if we've already taken the receiver.
+        self.recv.take().unwrap()
+    }
 }
 
 #[cfg(test)]
 mod test {
-    use log::{info};
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
     use buttplug::client::connector::ButtplugClientConnector;
     use buttplug::client::{ButtplugClient, ButtplugClientEvent};
     use env_logger;
+    use log::info;
 
     // Only run these tests when we know there's an external server up to reply
 
@@ -189,9 +192,9 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             assert!(ButtplugWebsocketClientConnector::new()
-                    .connect()
-                    .await
-                    .is_none());
+                .connect()
+                .await
+                .is_none());
         })
     }
 
@@ -204,9 +207,9 @@ mod test {
             ButtplugClient::run("test client", |mut client| {
                 async move {
                     assert!(client
-                            .connect(ButtplugWebsocketClientConnector::new())
-                            .await
-                            .is_none());
+                        .connect(ButtplugWebsocketClientConnector::new())
+                        .await
+                        .is_none());
                     info!("connected");
                     client.start_scanning().await;
                     info!("scanning!");
@@ -228,7 +231,8 @@ mod test {
                         }
                     }
                 }
-            }).await;
+            })
+            .await;
         })
     }
 }

@@ -7,20 +7,25 @@
 
 //! Handling of communication with Buttplug Server.
 
-use super::{internal::{ButtplugClientMessageStateShared,
-                       ButtplugClientFutureState,
-                       ButtplugClientFutureStateShared,
-                       ButtplugClientFuture},
-            messagesorter::ClientConnectorMessageSorter};
+use super::{
+    internal::{
+        ButtplugClientFuture, ButtplugClientFutureState, ButtplugClientFutureStateShared,
+        ButtplugClientMessageStateShared,
+    },
+    messagesorter::ClientConnectorMessageSorter,
+};
 use crate::{core::messages::ButtplugMessageUnion, server::ButtplugServer};
+use async_std::sync::{channel, Receiver, Sender};
 use async_trait::async_trait;
-use futures::{FutureExt, StreamExt, select, future::Future};
-use async_std::{sync::{channel, Sender, Receiver}};
-use std::{fmt, error::Error};
+use futures::{future::Future, select, FutureExt, StreamExt};
+use std::{error::Error, fmt};
 
-pub type ButtplugClientConnectionState = ButtplugClientFutureState<Option<ButtplugClientConnectorError>>;
-pub type ButtplugClientConnectionStateShared = ButtplugClientFutureStateShared<Option<ButtplugClientConnectorError>>;
-pub type ButtplugClientConnectionFuture = ButtplugClientFuture<Option<ButtplugClientConnectorError>>;
+pub type ButtplugClientConnectionState =
+    ButtplugClientFutureState<Option<ButtplugClientConnectorError>>;
+pub type ButtplugClientConnectionStateShared =
+    ButtplugClientFutureStateShared<Option<ButtplugClientConnectorError>>;
+pub type ButtplugClientConnectionFuture =
+    ButtplugClientFuture<Option<ButtplugClientConnectorError>>;
 
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
@@ -57,11 +62,7 @@ impl Error for ButtplugClientConnectorError {
 pub trait ButtplugClientConnector: Send {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
-    async fn send(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-        state: &ButtplugClientMessageStateShared,
-    );
+    async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared);
     fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion>;
 }
 
@@ -90,14 +91,8 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
         None
     }
 
-    async fn send(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-        state: &ButtplugClientMessageStateShared,
-    ) {
-        let ret_msg = self.server
-            .send_message(msg)
-            .await;
+    async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
+        let ret_msg = self.server.send_message(msg).await;
         let mut waker_state = state.lock().unwrap();
         waker_state.set_reply_msg(&(ret_msg.unwrap()));
     }
@@ -140,9 +135,7 @@ unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
 unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
 impl ButtplugRemoteClientConnectorHelper {
-    pub fn new(
-        event_sender: Sender<ButtplugMessageUnion>,
-    ) -> ButtplugRemoteClientConnectorHelper {
+    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> ButtplugRemoteClientConnectorHelper {
         let (internal_send, internal_recv) = channel(256);
         let (remote_send, remote_recv) = channel(256);
         ButtplugRemoteClientConnectorHelper {
@@ -161,7 +154,8 @@ impl ButtplugRemoteClientConnectorHelper {
     pub async fn send(
         &mut self,
         msg: &ButtplugMessageUnion,
-        state: &ButtplugClientMessageStateShared) {
+        state: &ButtplugClientMessageStateShared,
+    ) {
         self.internal_send.send((msg.clone(), state.clone())).await;
     }
 

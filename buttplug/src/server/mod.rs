@@ -64,12 +64,14 @@ impl ButtplugServer {
         msg: &messages::RequestServerInfo,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         if self.server_spec_version < msg.message_version {
-            return Result::Err(ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
-                message: format!(
-                    "Server version ({}) must be equal to or greater than client version ({}).",
-                    self.server_spec_version, msg.message_version
-                ),
-            }));
+            return Result::Err(ButtplugError::ButtplugHandshakeError(
+                ButtplugHandshakeError {
+                    message: format!(
+                        "Server version ({}) must be equal to or greater than client version ({}).",
+                        self.server_spec_version, msg.message_version
+                    ),
+                },
+            ));
         }
         self.client_name = Option::Some(msg.client_name.clone());
         self.client_spec_version = Option::Some(msg.message_version);
@@ -95,7 +97,11 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
+    use async_std::{
+        future::select,
+        sync::{channel, Receiver, Sender},
+        task,
+    };
 
     // async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
     //     let (send, recv) = channel(256);

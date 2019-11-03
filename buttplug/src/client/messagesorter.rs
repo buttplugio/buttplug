@@ -7,8 +7,8 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use super::internal::ButtplugClientMessageStateShared;
+use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use std::collections::HashMap;
 
 pub struct ClientConnectorMessageSorter {

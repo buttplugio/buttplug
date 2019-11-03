@@ -179,9 +179,11 @@ impl From<messages::Error> for ButtplugError {
             ErrorCode::ErrorMessage => ButtplugError::ButtplugMessageError(ButtplugMessageError {
                 message: error.error_message,
             }),
-            ErrorCode::ErrorHandshake => ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
-                message: error.error_message,
-            }),
+            ErrorCode::ErrorHandshake => {
+                ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
+                    message: error.error_message,
+                })
+            }
             ErrorCode::ErrorUnknown => ButtplugError::ButtplugUnknownError(ButtplugUnknownError {
                 message: error.error_message,
             }),

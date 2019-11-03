@@ -7,14 +7,14 @@
 
 //! Representation and management of devices connected to the server.
 
+use super::internal::{ButtplugClientMessageFuture, ButtplugInternalClientMessage};
 use crate::core::{
     errors::{ButtplugError, ButtplugMessageError},
     messages::{
-        ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo,
-        MessageAttributes, VibrateCmd, VibrateSubcommand,
+        ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, MessageAttributes, VibrateCmd,
+        VibrateSubcommand,
     },
 };
-use super::internal::{ButtplugInternalClientMessage, ButtplugClientMessageFuture};
 use async_std::sync::Sender;
 use std::collections::HashMap;
 
@@ -43,8 +43,12 @@ impl ButtplugClientDevice {
 
     async fn send_message(&mut self, msg: ButtplugMessageUnion) -> ButtplugMessageUnion {
         let fut = ButtplugClientMessageFuture::default();
-        self.client_sender.send(
-            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()))).await;
+        self.client_sender
+            .send(ButtplugInternalClientMessage::Message((
+                msg.clone(),
+                fut.get_state_clone(),
+            )))
+            .await;
         fut.await
     }
 
@@ -76,18 +80,8 @@ impl ButtplugClientDevice {
     // }
 }
 
-impl
-    From<(
-        &DeviceAdded,
-        Sender<ButtplugInternalClientMessage>,
-    )> for ButtplugClientDevice
-{
-    fn from(
-        msg_sender_tuple: (
-            &DeviceAdded,
-            Sender<ButtplugInternalClientMessage>,
-        ),
-    ) -> Self {
+impl From<(&DeviceAdded, Sender<ButtplugInternalClientMessage>)> for ButtplugClientDevice {
+    fn from(msg_sender_tuple: (&DeviceAdded, Sender<ButtplugInternalClientMessage>)) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(
             &*msg.device_name,
@@ -98,18 +92,8 @@ impl
     }
 }
 
-impl
-    From<(
-        &DeviceMessageInfo,
-        Sender<ButtplugInternalClientMessage>,
-    )> for ButtplugClientDevice
-{
-    fn from(
-        msg_sender_tuple: (
-            &DeviceMessageInfo,
-            Sender<ButtplugInternalClientMessage>,
-        ),
-    ) -> Self {
+impl From<(&DeviceMessageInfo, Sender<ButtplugInternalClientMessage>)> for ButtplugClientDevice {
+    fn from(msg_sender_tuple: (&DeviceMessageInfo, Sender<ButtplugInternalClientMessage>)) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(
             &*msg.device_name,

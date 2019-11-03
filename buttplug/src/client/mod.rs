@@ -12,25 +12,24 @@ pub mod device;
 pub mod internal;
 mod messagesorter;
 
-use connector::{ButtplugClientConnector,
-                ButtplugClientConnectorError,
-                ButtplugClientConnectionFuture};
+use connector::{
+    ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
+};
 use device::ButtplugClientDevice;
 use internal::{
-    ButtplugClientInternalLoop,
-    ButtplugClientMessageFuture,
-    ButtplugInternalClientMessage,
+    ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
 };
 
 use crate::core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
-    messages::{
-        ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning,
-    }
+    messages::{ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning},
 };
 
+use async_std::{
+    future::join,
+    sync::{channel, Receiver, Sender},
+};
 use futures::{Future, StreamExt};
-use async_std::{sync::{channel, Sender, Receiver}, future::join};
 use std::error::Error;
 use std::fmt;
 
@@ -173,8 +172,9 @@ impl ButtplugClient {
     /// });
     /// ```
     pub fn run<F, T>(name: &str, func: F) -> impl Future
-    where F: FnOnce(ButtplugClient) -> T,
-          T: Future
+    where
+        F: FnOnce(ButtplugClient) -> T,
+        T: Future,
     {
         debug!("Run called!");
         let (event_sender, event_receiver) = channel(256);
@@ -229,10 +229,8 @@ impl ButtplugClient {
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
         let fut = ButtplugClientConnectionFuture::default();
-        let msg = ButtplugInternalClientMessage::Connect(
-            Box::new(connector),
-            fut.get_state_clone(),
-        );
+        let msg =
+            ButtplugInternalClientMessage::Connect(Box::new(connector), fut.get_state_clone());
         self.send_internal_message(msg).await;
 
         debug!("Waiting on internal loop to connect");
@@ -308,10 +306,7 @@ impl ButtplugClient {
 
     // Send message to the internal event loop. Mostly for handling boilerplate
     // around possible send errors.
-    async fn send_internal_message(
-        &mut self,
-        msg: ButtplugInternalClientMessage
-    ) {
+    async fn send_internal_message(&mut self, msg: ButtplugInternalClientMessage) {
         // If we're running the event loop, we should have a message_sender.
         // Being connected to the server doesn't matter here yet because we use
         // this function in order to connect also.
@@ -335,10 +330,8 @@ impl ButtplugClient {
         }
         // Create a future to pair with the message being resolved.
         let fut = ButtplugClientMessageFuture::default();
-        let internal_msg = ButtplugInternalClientMessage::Message((
-            msg.clone(),
-            fut.get_state_clone(),
-        ));
+        let internal_msg =
+            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()));
         // Make sure we can send the message. If we send without a problem, then
         // wait on the future we paired with the message to return.
         //
@@ -375,7 +368,7 @@ impl ButtplugClient {
     /// Rust so this requires us to be slightly more explicit.
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
         debug!("Client waiting for event.");
-        let mut events = vec!();
+        let mut events = vec![];
         match self.event_receiver.next().await.unwrap() {
             ButtplugMessageUnion::ScanningFinished(_) => {}
             ButtplugMessageUnion::DeviceList(_msg) => {
@@ -383,8 +376,7 @@ impl ButtplugClient {
                     // Calling unwrap here is fine, because we can't even get
                     // events if the internal loop isn't already running.
                     let device =
-                        ButtplugClientDevice::from((&info.clone(),
-                                                    self.message_sender.clone()));
+                        ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
                     self.devices.push(device.clone());
                     events.push(ButtplugClientEvent::DeviceAdded(device));
                 }
@@ -393,8 +385,7 @@ impl ButtplugClient {
                 info!("Got a device added message!");
                 // Calling unwrap here is fine, because we can't even get
                 // events if the internal loop isn't already running.
-                let device = ButtplugClientDevice::from((&_msg,
-                                                         self.message_sender.clone()));
+                let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
                 self.devices.push(device.clone());
                 info!("Sending to observers!");
                 events.push(ButtplugClientEvent::DeviceAdded(device));
@@ -418,9 +409,9 @@ mod test {
     async fn connect_test_client(client: &mut ButtplugClient) {
         let _ = env_logger::builder().is_test(true).try_init();
         assert!(client
-                .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-                .await
-                .is_none());
+            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+            .await
+            .is_none());
         assert!(client.connected());
     }
 
@@ -431,7 +422,8 @@ mod test {
                 async move {
                     connect_test_client(&mut client).await;
                 }
-            }).await;
+            })
+            .await;
         });
     }
 
@@ -444,7 +436,8 @@ mod test {
                     assert!(client.disconnect().is_none());
                     assert!(!client.connected());
                 }
-            }).await;
+            })
+            .await;
         });
     }
 
@@ -462,7 +455,8 @@ mod test {
                     connect_test_client(&mut client).await;
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
-            }).await;
+            })
+            .await;
         });
     }
 
@@ -474,7 +468,8 @@ mod test {
                     connect_test_client(&mut client).await;
                     assert!(client.start_scanning().await.is_none());
                 }
-            }).await;
+            })
+            .await;
         });
     }
 
