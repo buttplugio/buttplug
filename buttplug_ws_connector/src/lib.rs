@@ -196,6 +196,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_client_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
