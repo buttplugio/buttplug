@@ -23,8 +23,8 @@ use crate::core::{
     }
 };
 
-use futures::{Future, StreamExt, future::BoxFuture};
-use async_std::{sync::{channel, Sender, Receiver}, task, future::join};
+use futures::{Future, StreamExt};
+use async_std::{sync::{channel, Sender, Receiver}, future::join};
 use std::error::Error;
 use std::fmt;
 
@@ -122,9 +122,9 @@ pub struct ButtplugClient {
     // [ButtplugClientDevice] types.
     devices: Vec<ButtplugClientDevice>,
     // Sender to relay messages to the internal client loop
-    message_sender: Option<Sender<ButtplugInternalClientMessage>>,
+    message_sender: Sender<ButtplugInternalClientMessage>,
     // Receives event notifications from the ButtplugInternalClientLoop
-    event_receiver: Option<Receiver<ButtplugMessageUnion>>,
+    event_receiver: Receiver<ButtplugMessageUnion>,
     // True if the connector is currently connected, and handshake was
     // successful.
     connected: bool,
@@ -134,23 +134,39 @@ unsafe impl Sync for ButtplugClient {}
 unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
-    /// Creates a new ButtplugClient.
+    /// Runs the client event loop.
+    ///
+    /// Given a client name and a function that takes the client and returns an
+    /// future (since we can't have async closures yet), this function
+    ///
+    /// - creates a ButtplugClient instance
+    /// - passes it to the `func` argument to create the application [Future]
+    /// - returns a [Future] with a [join] for the client event loop future and
+    /// the client application future.
     ///
     /// # Parameters
     ///
-    /// - `name`: Name to be given to the client (see [ButtplugClient::client_name]).
-    fn new(name: &str) -> ButtplugClient {
-        ButtplugClient {
-            client_name: name.to_string(),
-            server_name: None,
-            devices: vec![],
-            event_receiver: None,
-            message_sender: None,
-            connected: false,
-        }
-    }
-
-    pub async fn run<F, T>(name: &str, func: F)
+    /// - `name`: Name of the client, see [ButtplugClient::client_name]
+    /// - `func`: Function that takes the client instance, and returns a future
+    /// for what the application will be doing with the client instance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use buttplug::client::{ButtplugClient, connector::ButtplugEmbeddedClientConnector};
+    ///
+    /// futures::executor::block_on(async {
+    ///     ButtplugClient::run("Test Client", |mut client| {
+    ///         async move {
+    ///             client
+    ///                 .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+    ///                 .await;
+    ///             println!("Are we connected? {}", client.connected());
+    ///         }
+    ///     }).await;
+    /// });
+    /// ```
+    pub fn run<F, T>(name: &str, func: F) -> impl Future
     where F: FnOnce(ButtplugClient) -> T,
           T: Future
     {
@@ -161,31 +177,15 @@ impl ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
             devices: vec![],
-            event_receiver: Some(event_receiver),
-            message_sender: Some(message_sender),
+            event_receiver,
+            message_sender,
             connected: false,
         };
-        let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
-        let internal_loop_future = internal_loop.event_loop();
         let app_future = func(client);
-        task::block_on(async move {
-            join!(app_future, internal_loop_future).await;
-        });
-    }
-
-    /// Returns a future representing the internal loop for the client.
-    ///
-    /// The internal loop will need to be run alongside a future where client
-    /// logic is performed.
-    pub fn get_loop(&mut self) -> impl Future {
-        let (event_sender, event_receiver) = channel(256);
-        let (message_sender, message_receiver) = channel(256);
-        let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
-        self.event_receiver = Some(event_receiver);
-        self.message_sender = Some(message_sender);
         async move {
-            // TODO Loop this in wait_for_event, not outside of it.
-            internal_loop.event_loop().await;
+            let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
+            let internal_loop_future = internal_loop.event_loop();
+            join!(app_future, internal_loop_future).await;
         }
     }
 
@@ -228,10 +228,6 @@ impl ButtplugClient {
             fut.get_state_clone(),
         );
         let err = self.send_internal_message(msg).await;
-        // If we get back an error, we couldn't connect, so exit early.
-        if err.is_some() {
-            return err;
-        }
 
         debug!("Waiting on internal loop to connect");
         fut.await;
@@ -307,20 +303,11 @@ impl ButtplugClient {
     async fn send_internal_message(
         &mut self,
         msg: ButtplugInternalClientMessage
-    ) -> Option<ButtplugClientError> {
+    ) {
         // If we're running the event loop, we should have a message_sender.
         // Being connected to the server doesn't matter here yet because we use
         // this function in order to connect also.
-        if let Some(sender) = &self.message_sender {
-            sender.send(msg).await;
-            None
-        } else {
-            Some(ButtplugClientError::ButtplugClientConnectorError(
-                ButtplugClientConnectorError {
-                    message: "Client event loop not running.".to_string(),
-                },
-            ))
-        }
+        self.message_sender.send(msg).await;
     }
 
     // Sends a ButtplugMessage from client to server. Expects to receive a
@@ -349,10 +336,8 @@ impl ButtplugClient {
         //
         // TODO How we'd get here without the internal loop running is a good
         // question, so we may be able to simplify this and assume we can unwrap.
-        match self.send_internal_message(internal_msg).await {
-            Some(err) => Err(err),
-            None => Ok(fut.await)
-        }
+        self.send_internal_message(internal_msg).await;
+        Ok(fut.await)
     }
 
     // Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
@@ -381,44 +366,37 @@ impl ButtplugClient {
     /// basically what event handlers in C# and JS would deal with, but we're in
     /// Rust so this requires us to be slightly more explicit.
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
-        if self.message_sender.is_none() {
-            panic!("Cannot wait for events before internal loop is running!");
-        }
         debug!("Client waiting for event.");
         let mut events = vec!();
-        if let Some(ref mut receiver) = self.event_receiver {
-            match receiver.next().await.unwrap() {
-                ButtplugMessageUnion::ScanningFinished(_) => {}
-                ButtplugMessageUnion::DeviceList(_msg) => {
-                    for info in _msg.devices.iter() {
-                        // Calling unwrap here is fine, because we can't even get
-                        // events if the internal loop isn't already running.
-                        let device =
-                            ButtplugClientDevice::from((&info.clone(),
-                                                        self.message_sender.as_ref().unwrap().clone()));
-                        self.devices.push(device.clone());
-                        events.push(ButtplugClientEvent::DeviceAdded(device));
-                    }
-                }
-                ButtplugMessageUnion::DeviceAdded(_msg) => {
-                    info!("Got a device added message!");
+        match self.event_receiver.next().await.unwrap() {
+            ButtplugMessageUnion::ScanningFinished(_) => {}
+            ButtplugMessageUnion::DeviceList(_msg) => {
+                for info in _msg.devices.iter() {
                     // Calling unwrap here is fine, because we can't even get
                     // events if the internal loop isn't already running.
-                    let device = ButtplugClientDevice::from((&_msg,
-                                                             self.message_sender.as_ref().unwrap().clone()));
+                    let device =
+                        ButtplugClientDevice::from((&info.clone(),
+                                                    self.message_sender.clone()));
                     self.devices.push(device.clone());
-                    info!("Sending to observers!");
                     events.push(ButtplugClientEvent::DeviceAdded(device));
-                    info!("Observers sent!");
                 }
-                ButtplugMessageUnion::DeviceRemoved(_) => {}
-                //ButtplugMessageUnion::Log(_) => {}
-                _ => panic!("Unhandled incoming message!"),
             }
-            events
-        } else {
-            vec!()
+            ButtplugMessageUnion::DeviceAdded(_msg) => {
+                info!("Got a device added message!");
+                // Calling unwrap here is fine, because we can't even get
+                // events if the internal loop isn't already running.
+                let device = ButtplugClientDevice::from((&_msg,
+                                                         self.message_sender.clone()));
+                self.devices.push(device.clone());
+                info!("Sending to observers!");
+                events.push(ButtplugClientEvent::DeviceAdded(device));
+                info!("Observers sent!");
+            }
+            ButtplugMessageUnion::DeviceRemoved(_) => {}
+            //ButtplugMessageUnion::Log(_) => {}
+            _ => panic!("Unhandled incoming message!"),
         }
+        events
     }
 }
 
@@ -429,34 +407,36 @@ mod test {
     use async_std::task;
     use env_logger;
 
-    async fn connect_test_client() -> ButtplugClient {
+    async fn connect_test_client(client: &mut ButtplugClient) {
         let _ = env_logger::builder().is_test(true).try_init();
-        let mut client = ButtplugClient::new("Test Client");
-        let fut_loop = client.get_loop();
-        task::spawn(async move {
-            fut_loop.await;
-        });
         assert!(client
                 .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
                 .await
                 .is_none());
         assert!(client.connected());
-        client
     }
 
     #[test]
     fn test_connect_status() {
         task::block_on(async {
-            connect_test_client().await;
+            ButtplugClient::run("Test Client", |mut client| {
+                async move {
+                    connect_test_client(&mut client).await;
+                }
+            }).await;
         });
     }
 
     #[test]
     fn test_disconnect_status() {
         task::block_on(async {
-            let mut client = connect_test_client().await;
-            assert!(client.disconnect().is_none());
-            assert!(!client.connected());
+            ButtplugClient::run("Test Client", |mut client| {
+                async move {
+                    connect_test_client(&mut client).await;
+                    assert!(client.disconnect().is_none());
+                    assert!(!client.connected());
+                }
+            }).await;
         });
     }
 
@@ -469,49 +449,35 @@ mod test {
     #[test]
     fn test_connect_init() {
         task::block_on(async {
-            let client = connect_test_client().await;
-            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+            ButtplugClient::run("Test Client", |mut client| {
+                async move {
+                    connect_test_client(&mut client).await;
+                    assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+                }
+            }).await;
         });
     }
 
     #[test]
     fn test_start_scanning() {
         task::block_on(async {
-            let mut client = connect_test_client().await;
-            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-            assert!(client.start_scanning().await.is_none());
-        });
-    }
-
-    #[test]
-    fn test_scanning_finished() {
-        task::block_on(async {
-            let mut client = connect_test_client().await;
-            assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-            assert!(client.start_scanning().await.is_none());
-        });
-    }
-
-    #[test]
-    fn test_run() {
-        let _ = env_logger::builder().is_test(true).try_init();
-        task::block_on(async {
-            debug!("Running test?");
             ButtplugClient::run("Test Client", |mut client| {
                 async move {
-                    debug!("Actually Running test?");
-                    assert!(client
-                            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-                            .await
-                            .is_none());
-                    assert!(client.connected());
-                    //let mut client = connect_test_client().await;
-                    assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+                    connect_test_client(&mut client).await;
                     assert!(client.start_scanning().await.is_none());
                 }
             }).await;
         });
     }
+
+    // #[test]
+    // fn test_scanning_finished() {
+    //     task::block_on(async {
+    //         let mut client = connect_test_client().await;
+    //         assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
+    //         assert!(client.start_scanning().await.is_none());
+    //     });
+    // }
 
     // Failure on server version error is unit tested in server.
 }

@@ -24,7 +24,7 @@ use buttplug::client::connector::{
 };
 use buttplug::client::internal::{ButtplugClientMessageStateShared, ButtplugClientMessageFuture};
 use buttplug::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
-use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
+use async_std::{sync::{channel, Sender, Receiver}, task};
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
 
@@ -153,9 +153,9 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 
     fn get_event_receiver(&mut self) ->
         Receiver<ButtplugMessageUnion> {
-        // This will panic if we've already taken the receiver.
-        self.recv.take().unwrap()
-    }
+            // This will panic if we've already taken the receiver.
+            self.recv.take().unwrap()
+        }
 }
 
 #[cfg(test)]
@@ -181,39 +181,37 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_client_websocket() {
         env_logger::init();
         task::block_on(async {
             info!("connecting");
-            let mut client = ButtplugClient::new("test client");
-            let lp = client.get_loop();
-            let app = task::spawn(async move {
-                client
-                    .connect(ButtplugWebsocketClientConnector::new())
-                    .await;
-                info!("connected");
-                client.start_scanning().await;
-                info!("scanning!");
-                info!("starting event loop!");
-                loop {
-                    info!("Waiting for event!");
-                    for mut event in client.wait_for_event().await {
-                        match event {
-                            ButtplugClientEvent::DeviceAdded(ref mut _device) => {
-                                info!("Got device! {}", _device.name);
-                                let mut d = _device.clone();
-                                if d.allowed_messages.contains_key("VibrateCmd") {
-                                    d.send_vibrate_cmd(1.0).await;
-                                    info!("Should be vibrating!");
+            ButtplugClient::run("test client", |mut client| {
+                async move {
+                    client
+                        .connect(ButtplugWebsocketClientConnector::new())
+                        .await;
+                    info!("connected");
+                    client.start_scanning().await;
+                    info!("scanning!");
+                    info!("starting event loop!");
+                    loop {
+                        info!("Waiting for event!");
+                        for mut event in client.wait_for_event().await {
+                            match event {
+                                ButtplugClientEvent::DeviceAdded(ref mut _device) => {
+                                    info!("Got device! {}", _device.name);
+                                    let mut d = _device.clone();
+                                    if d.allowed_messages.contains_key("VibrateCmd") {
+                                        d.send_vibrate_cmd(1.0).await;
+                                        info!("Should be vibrating!");
+                                    }
                                 }
+                                _ => info!("Got something else!"),
                             }
-                            _ => info!("Got something else!"),
                         }
                     }
                 }
-            });
-            futures::join!(lp, app);
+            }).await;
         })
     }
 }
