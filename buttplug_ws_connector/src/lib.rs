@@ -110,7 +110,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
         let send = self.helper.get_remote_send().clone();
         let fut = ButtplugClientMessageFuture::default();
-        let mut waker = fut.get_state_ref().clone();
+        let waker = fut.get_state_clone();
         self.ws_thread = Some(thread::spawn(|| {
             ws::connect(CONNECTION, move |out| {
                 let bp_out = send.clone();

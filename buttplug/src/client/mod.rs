@@ -186,7 +186,7 @@ impl ButtplugClient {
         let fut = ButtplugClientMessageFuture::default();
         let msg = ButtplugInternalClientMessage::Connect(
             Box::new(connector),
-            fut.get_state_ref().clone(),
+            fut.get_state_clone(),
         );
         let err = self.send_internal_message(msg).await;
         // If we get back an error, we couldn't connect, so exit early.
@@ -303,7 +303,7 @@ impl ButtplugClient {
         let fut = ButtplugClientMessageFuture::default();
         let internal_msg = ButtplugInternalClientMessage::Message((
             msg.clone(),
-            fut.get_state_ref().clone(),
+            fut.get_state_clone(),
         ));
         // Make sure we can send the message. If we send without a problem, then
         // wait on the future we paired with the message to return.

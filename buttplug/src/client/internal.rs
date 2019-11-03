@@ -46,8 +46,10 @@ impl ButtplugClientMessageFuture {
         }
     }
 
-    pub fn get_state_ref(&self) -> &ButtplugClientMessageStateShared {
-        &self.waker_state
+    /// Returns a clone of the state, used for moving the state across contexts
+    /// (tasks/threads/etc...).
+    pub fn get_state_clone(&self) -> ButtplugClientMessageStateShared {
+        self.waker_state.clone()
     }
 
     // TODO Should we implement drop on this, so it'll yell if its dropping and

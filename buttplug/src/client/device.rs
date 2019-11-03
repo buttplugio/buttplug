@@ -43,7 +43,7 @@ impl ButtplugClientDevice {
         let id = msg.get_id();
         let fut = ButtplugClientMessageFuture::default();
         self.client_sender.send(
-            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_ref().clone()))).await;
+            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()))).await;
         fut.await
     }
 
