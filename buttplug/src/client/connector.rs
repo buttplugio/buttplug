@@ -75,7 +75,7 @@ impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
         let (send, recv) = channel(256);
         ButtplugEmbeddedClientConnector {
-            server: ButtplugServer::new(&name, max_ping_time, send.clone()),
+            server: ButtplugServer::new(&name, max_ping_time, send),
             recv: Some(recv),
         }
     }

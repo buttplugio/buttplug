@@ -41,7 +41,7 @@ pub struct Ok {
 impl Ok {
     /// Creates a new Ok message with the given Id.
     pub fn new(id: u32) -> Ok {
-        Ok { id: id }
+        Ok { id }
     }
 }
 
@@ -77,7 +77,7 @@ impl Error {
     pub fn new(error_code: ErrorCode, error_message: &str) -> Error {
         Error {
             id: 0,
-            error_code: error_code,
+            error_code,
             error_message: error_message.to_string(),
         }
     }
@@ -193,7 +193,7 @@ impl RequestServerInfo {
         RequestServerInfo {
             id: 1,
             client_name: client_name.to_string(),
-            message_version: message_version,
+            message_version,
         }
     }
 }
@@ -223,8 +223,8 @@ impl ServerInfo {
             major_version: 0,
             minor_version: 0,
             build_version: 0,
-            message_version: message_version,
-            max_ping_time: max_ping_time,
+            message_version,
+            max_ping_time,
             server_name: server_name.to_string(),
         }
     }
@@ -283,18 +283,18 @@ pub enum ButtplugMessageUnion {
 impl ButtplugMessage for ButtplugMessageUnion {
     fn get_id(&self) -> u32 {
         match self {
-            ButtplugMessageUnion::Ok(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::Error(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceList(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceAdded(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::DeviceRemoved(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::StartScanning(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::StopScanning(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::ScanningFinished(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::RequestDeviceList(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::RequestServerInfo(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::ServerInfo(ref _msg) => return _msg.id,
-            ButtplugMessageUnion::VibrateCmd(ref _msg) => return _msg.id,
+            ButtplugMessageUnion::Ok(ref _msg) => _msg.id,
+            ButtplugMessageUnion::Error(ref _msg) => _msg.id,
+            ButtplugMessageUnion::DeviceList(ref _msg) => _msg.id,
+            ButtplugMessageUnion::DeviceAdded(ref _msg) => _msg.id,
+            ButtplugMessageUnion::DeviceRemoved(ref _msg) => _msg.id,
+            ButtplugMessageUnion::StartScanning(ref _msg) => _msg.id,
+            ButtplugMessageUnion::StopScanning(ref _msg) => _msg.id,
+            ButtplugMessageUnion::ScanningFinished(ref _msg) => _msg.id,
+            ButtplugMessageUnion::RequestDeviceList(ref _msg) => _msg.id,
+            ButtplugMessageUnion::RequestServerInfo(ref _msg) => _msg.id,
+            ButtplugMessageUnion::ServerInfo(ref _msg) => _msg.id,
+            ButtplugMessageUnion::VibrateCmd(ref _msg) => _msg.id,
         }
     }
 
@@ -322,7 +322,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
 
 #[cfg(test)]
 mod test {
-    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok, RequestServerInfo};
+    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok};
 
     const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
     const ERROR_STR: &str =

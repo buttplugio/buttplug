@@ -280,7 +280,7 @@ impl ButtplugClient {
 
     /// Returns true if client is currently connected to server.
     pub fn connected(&self) -> bool {
-        return self.connected;
+        self.connected
     }
 
     /// Disconnects from server, if connected.

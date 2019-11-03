@@ -10,7 +10,7 @@
 use super::connector::{
     ButtplugClientConnectionStateShared, ButtplugClientConnector, ButtplugClientConnectorError,
 };
-use crate::core::messages::{self, ButtplugMessageUnion};
+use crate::core::messages::ButtplugMessageUnion;
 use async_std::{
     future::{select, Future},
     sync::{Receiver, Sender},
@@ -63,8 +63,8 @@ impl<T> ButtplugClientFutureState<T> {
         let waker = self.waker.take();
         // TODO This should never happen? If it does we'll just lock because we
         // don't have a future to finish?
-        if !waker.is_none() {
-            waker.unwrap().wake();
+        if let Some(wake) = waker {
+            wake.wake();
         }
     }
 }
@@ -237,7 +237,7 @@ impl ButtplugClientInternalLoop {
                             waker_state.set_reply_msg(&None);
                             let recv = connector.get_event_receiver();
                             self.connector = Option::Some(connector);
-                            return Some(recv);
+                            Some(recv)
                         }
                     }
                 }

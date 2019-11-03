@@ -36,7 +36,7 @@ use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
 
 // TODO Should probably let users pass in their own addresses
-const CONNECTION: &'static str = "ws://127.0.0.1:12345";
+const CONNECTION: &str = "ws://127.0.0.1:12345";
 
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
@@ -80,11 +80,11 @@ pub struct ButtplugWebsocketClientConnector {
     recv: Option<Receiver<ButtplugMessageUnion>>,
 }
 
-impl ButtplugWebsocketClientConnector {
-    pub fn new() -> ButtplugWebsocketClientConnector {
+impl Default for ButtplugWebsocketClientConnector {
+    fn default() -> Self {
         let (send, recv) = channel(256);
         ButtplugWebsocketClientConnector {
-            helper: ButtplugRemoteClientConnectorHelper::new(send.clone()),
+            helper: ButtplugRemoteClientConnectorHelper::new(send),
             ws_thread: None,
             recv: Some(recv),
         }
@@ -109,14 +109,14 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
         let m = msg.as_protocol_json();
         debug!("Sending message: {}", m);
         match self.sender.send(m) {
-            Ok(_) => return,
+            Ok(_) => {},
             Err(err) => error!("{}", err),
         }
     }
 
     fn close(&self) {
         match self.sender.close(CloseCode::Normal) {
-            Ok(_) => return,
+            Ok(_) => {},
             Err(err) => error!("{}", err),
         }
     }
@@ -125,7 +125,7 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
 #[async_trait]
 impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
-        let send = self.helper.get_remote_send().clone();
+        let send = self.helper.get_remote_send();
         let fut = ButtplugClientConnectionFuture::default();
         let waker = fut.get_state_clone();
         self.ws_thread = Some(thread::spawn(|| {
@@ -146,7 +146,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 }
             });
             match ret {
-                Ok(_) => return,
+                Ok(_) => {},
                 Err(err) => error!("{}", err),
             }
         }));
@@ -191,7 +191,7 @@ mod test {
     fn test_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::new()
+            assert!(ButtplugWebsocketClientConnector::default()
                 .connect()
                 .await
                 .is_none());
@@ -207,7 +207,7 @@ mod test {
             ButtplugClient::run("test client", |mut client| {
                 async move {
                     assert!(client
-                        .connect(ButtplugWebsocketClientConnector::new())
+                        .connect(ButtplugWebsocketClientConnector::default())
                         .await
                         .is_none());
                     info!("connected");

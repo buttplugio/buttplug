@@ -29,14 +29,14 @@ impl ButtplugServer {
     pub fn new(
         name: &str,
         max_ping_time: u32,
-        event_sender: Sender<ButtplugMessageUnion>,
+        _event_sender: Sender<ButtplugMessageUnion>,
     ) -> ButtplugServer {
         ButtplugServer {
             server_name: name.to_string(),
             server_spec_version: 1,
             client_name: None,
             client_spec_version: None,
-            max_ping_time: max_ping_time,
+            max_ping_time,
             // event_sender,
         }
     }
@@ -49,13 +49,13 @@ impl ButtplugServer {
             ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
             ButtplugMessageUnion::StartScanning(_) => self.start_scanning().await.map_or_else(
                 || Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
-                |x| Result::Err(x),
+                Result::Err,
             ),
             ButtplugMessageUnion::StopScanning(_) => self.stop_scanning().await.map_or_else(
                 || Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
-                |x| Result::Err(x),
+                Result::Err,
             ),
-            _ => return Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
+            _ => Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
         }
     }
 
@@ -96,12 +96,12 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use async_std::{
-        future::select,
-        sync::{channel, Receiver, Sender},
-        task,
-    };
+    // use super::*;
+    // use async_std::{
+    //     future::select,
+    //     sync::{channel, Receiver, Sender},
+    //     task,
+    // };
 
     // async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
     //     let (send, recv) = channel(256);
