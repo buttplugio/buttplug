@@ -109,14 +109,14 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
         let m = msg.as_protocol_json();
         debug!("Sending message: {}", m);
         match self.sender.send(m) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(err) => error!("{}", err),
         }
     }
 
     fn close(&self) {
         match self.sender.close(CloseCode::Normal) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(err) => error!("{}", err),
         }
     }
@@ -146,7 +146,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 }
             });
             match ret {
-                Ok(_) => {},
+                Ok(_) => {}
                 Err(err) => error!("{}", err),
             }
         }));
