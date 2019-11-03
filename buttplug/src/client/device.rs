@@ -10,7 +10,7 @@
 use crate::core::{
     errors::{ButtplugError, ButtplugMessageError},
     messages::{
-        ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo,
+        ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo,
         MessageAttributes, VibrateCmd, VibrateSubcommand,
     },
 };
@@ -42,7 +42,6 @@ impl ButtplugClientDevice {
     }
 
     async fn send_message(&mut self, msg: ButtplugMessageUnion) -> ButtplugMessageUnion {
-        let id = msg.get_id();
         let fut = ButtplugClientMessageFuture::default();
         self.client_sender.send(
             ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()))).await;

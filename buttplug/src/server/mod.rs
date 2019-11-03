@@ -22,7 +22,7 @@ pub struct ButtplugServer {
     client_spec_version: Option<u32>,
     client_name: Option<String>,
     max_ping_time: u32,
-    event_sender: Sender<ButtplugMessageUnion>,
+    // event_sender: Sender<ButtplugMessageUnion>,
 }
 
 impl ButtplugServer {
@@ -37,7 +37,7 @@ impl ButtplugServer {
             client_name: None,
             client_spec_version: None,
             max_ping_time: max_ping_time,
-            event_sender,
+            // event_sender,
         }
     }
 

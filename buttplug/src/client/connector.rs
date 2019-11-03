@@ -60,7 +60,6 @@ pub trait ButtplugClientConnector: Send {
 
 pub struct ButtplugEmbeddedClientConnector {
     server: ButtplugServer,
-    sender: Sender<ButtplugMessageUnion>,
     recv: Option<Receiver<ButtplugMessageUnion>>,
 }
 
@@ -69,7 +68,6 @@ impl ButtplugEmbeddedClientConnector {
         let (send, recv) = channel(256);
         ButtplugEmbeddedClientConnector {
             server: ButtplugServer::new(&name, max_ping_time, send.clone()),
-            sender: send,
             recv: Some(recv),
         }
     }
@@ -163,7 +161,7 @@ impl ButtplugRemoteClientConnectorHelper {
     pub fn get_recv_future(&mut self) -> impl Future {
         // Set up a way to get futures in and out of the sorter, which will live
         // in our connector task.
-        let mut event_send = self.event_send.clone();
+        let event_send = self.event_send.clone();
 
         // Remove the receivers we need to move into the task.
         let mut remote_recv = self.remote_recv.take().unwrap();
@@ -227,7 +225,7 @@ impl ButtplugRemoteClientConnectorHelper {
                     StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
                         // Create future sets our message ID, so make sure this
                         // happens before we send out the message.
-                        let f = sorter.register_future(&mut buttplug_fut_msg.0, &buttplug_fut_msg.1);
+                        sorter.register_future(&mut buttplug_fut_msg.0, &buttplug_fut_msg.1);
                         if let Some(ref mut remote_sender) = remote_send {
                             remote_sender.send(buttplug_fut_msg.0.clone());
                         } else {

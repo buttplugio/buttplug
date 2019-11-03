@@ -57,8 +57,8 @@ impl Handler for InternalClient {
         ws::Result::Ok(())
     }
 
-    fn on_close(&mut self, code: CloseCode, reason: &str) {
-        info!("Closed!");
+    fn on_close(&mut self, _code: CloseCode, _reason: &str) {
+        info!("Websocket closed : {}", _reason);
     }
 
     fn on_error(&mut self, err: ws::Error) {
@@ -100,11 +100,17 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
     fn send(&self, msg: ButtplugMessageUnion) {
         let m = msg.as_protocol_json();
         debug!("Sending message: {}", m);
-        self.sender.send(m);
+        match self.sender.send(m) {
+            Ok(_) => return,
+            Err(err) => error!("{}", err)
+        }
     }
 
     fn close(&self) {
-        self.sender.close(CloseCode::Normal);
+        match self.sender.close(CloseCode::Normal) {
+            Ok(_) => return,
+            Err(err) => error!("{}", err),
+        }
     }
 }
 
@@ -115,7 +121,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         let fut = ButtplugClientMessageFuture::default();
         let waker = fut.get_state_clone();
         self.ws_thread = Some(thread::spawn(|| {
-            ws::connect(CONNECTION, move |out| {
+            let ret = ws::connect(CONNECTION, move |out| {
                 let bp_out = send.clone();
                 // Get our websocket sender back to the main thread
                 task::spawn(async move {
@@ -129,6 +135,10 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                     connector_waker: waker.clone(),
                 }
             });
+            match ret {
+                Ok(_) => return,
+                Err(err) => error!("{}", err),
+            }
         }));
 
         let read_future = self.helper.get_recv_future();
@@ -175,6 +185,7 @@ mod test {
     #[test]
     #[ignore]
     fn test_websocket() {
+        let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             assert!(ButtplugWebsocketClientConnector::new()
                     .connect()
@@ -185,7 +196,7 @@ mod test {
 
     #[test]
     fn test_client_websocket() {
-        env_logger::init();
+        let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             info!("connecting");
             ButtplugClient::run("test client", |mut client| {

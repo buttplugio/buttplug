@@ -130,8 +130,6 @@ impl Future for ButtplugClientMessageFuture {
 /// [ButtplugClientInternalLoop]s can run in parallel. This allows applications
 /// to possibly create connections to multiple [ButtplugServer] instances.
 pub struct ButtplugClientInternalLoop {
-    /// List of currently connected device ids
-    connected_devices: Vec<u32>,
     /// Connector struct, which handles communication with the server
     connector: Option<Box<dyn ButtplugClientConnector>>,
     /// Receiver for data from clients
@@ -187,7 +185,6 @@ impl ButtplugClientInternalLoop {
                client_receiver: Receiver<ButtplugInternalClientMessage>) -> Self {
         ButtplugClientInternalLoop {
             connector: None,
-            connected_devices: vec!(),
             client_receiver,
             event_sender,
         }
@@ -201,7 +198,7 @@ impl ButtplugClientInternalLoop {
             },
             Some(msg) => {
                 match msg {
-                    ButtplugInternalClientMessage::Connect(mut connector, mut state) => {
+                    ButtplugInternalClientMessage::Connect(mut connector, state) => {
                         match connector.connect().await {
                             Some(_s) => {
                                 //return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
