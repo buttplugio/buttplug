@@ -161,10 +161,8 @@ impl ButtplugClient {
         self.event_receiver = Some(event_receiver);
         self.message_sender = Some(message_sender);
         async move {
-            loop {
-                // TODO Loop this in wait_for_event, not outside of it.
-                internal_loop.wait_for_event().await;
-            }
+            // TODO Loop this in wait_for_event, not outside of it.
+            internal_loop.event_loop().await;
         }
     }
 

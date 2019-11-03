@@ -6,10 +6,13 @@
 // for full license information.
 
 use crate::core::messages::{self, ButtplugMessageUnion};
-use super::connector::{ButtplugClientConnector, ButtplugClientConnectorError};
+use super::connector::{ButtplugClientConnector};
 use core::pin::Pin;
-use futures::{StreamExt, Future, task::{Waker, Poll, Context}};
-use async_std::{sync::{channel, Sender, Receiver}, future::{select}, task};
+use futures::StreamExt;
+use futures_util::future::FutureExt;
+use async_std::{sync::{Sender, Receiver},
+                future::{select, Future},
+                task::{Waker, Context, Poll}};
 use std::sync::{Arc, Mutex};
 
 /// Struct used for waiting on replies from the server.
@@ -129,116 +132,179 @@ pub struct ButtplugClientInternalLoop {
     connected_devices: Vec<u32>,
     /// Connector struct, which handles communication with the server
     connector: Option<Box<dyn ButtplugClientConnector>>,
-    /// Receiver for data from the connector
-    connector_receiver: Option<Receiver<ButtplugMessageUnion>>,
     /// Receiver for data from clients
     client_receiver: Receiver<ButtplugInternalClientMessage>,
     /// Sender for communicating events to [ButtplugClient]s
+    ///
+    // When the event_sender is dropped, all clients will only receive None
+    // during wait_for_event calls, so we can assume disconnection at that
+    // point.
     event_sender: Sender<ButtplugMessageUnion>,
 }
 
+/// Make ButtplugClientInternalLoop sendable across threads.
+///
+/// Since this loop will usually be run in a future somewhere, and we don't know
+/// where, this needs to be send.
 unsafe impl Send for ButtplugClientInternalLoop {}
+unsafe impl Sync for ButtplugClientInternalLoop {}
 
+/// Enum used for communication between the client and the internal loop.
 pub enum ButtplugInternalClientMessage {
+    /// Client request to connect, via the included connector instance.
+    ///
+    /// Once connection is finished, use the bundled future to resolve.
     Connect(Box<dyn ButtplugClientConnector>, ButtplugClientMessageStateShared),
+    /// Client request to disconnect, via already sent connector instance.
     Disconnect,
+    /// Client request to send a message via the connector.
+    ///
+    /// Bundled future should have reply set and waker called when this is
+    /// finished.
     Message((ButtplugMessageUnion, ButtplugClientMessageStateShared)),
 }
 
-pub enum ButtplugInternalDeviceMessage {
-    Message,
+enum StreamReturn {
+    ConnectorMessage(ButtplugMessageUnion),
+    ClientMessage(ButtplugInternalClientMessage),
+    Disconnect,
 }
 
 impl ButtplugClientInternalLoop {
+    /// Returns a new ButtplugClientInternalLoop instance.
+    ///
+    /// This should really only ever be constructed by a [ButtplugClient], and
+    /// there should only be one per new [ButtplugClient].
+    ///
+    /// # Parameters
+    ///
+    /// - `event_sender`: Used when sending server updates to clients.
+    /// - `client_receiver`: Used when receiving commands from clients to
+    /// send to server.
     pub fn new(event_sender: Sender<ButtplugMessageUnion>,
                client_receiver: Receiver<ButtplugInternalClientMessage>) -> Self {
         ButtplugClientInternalLoop {
             connector: None,
             connected_devices: vec!(),
-            connector_receiver: None,
             client_receiver,
             event_sender,
         }
     }
 
-    pub async fn wait_for_event(&mut self) -> Option<ButtplugClientConnectorError> {
-        info!("Starting client event loop.");
-        let mut r = None;
-        if let Some(ref mut recv) = self.connector_receiver {
-            //event_future = recv.clone().next().fuse();
-            r = Some(recv.clone());
-        }
-        let mut event_recv = None;
-        if let Some(ref mut re) = r {
-            event_recv = Some(re.clone());
-        }
-        enum StreamReturn {
-            ConnectorMessage(ButtplugMessageUnion),
-            ClientMessage(ButtplugInternalClientMessage),
-            Disconnect,
-        }
-        let mut client_receiver = self.client_receiver.clone();
-        let client = task::spawn(async move {
-            let val = client_receiver.next().await;
-            if val.is_none() {
-                StreamReturn::Disconnect
-            } else {
-                StreamReturn::ClientMessage(val.unwrap())
-            }
-        });
-        let mut stream_ret;
-        if let Some(mut er) = event_recv {
-            info!("Waiting on event and client!");
-            let event = task::spawn(async move {
-                let val = er.next().await;
-                if val.is_none() {
-                    StreamReturn::Disconnect
-                } else {
-                    StreamReturn::ConnectorMessage(val.unwrap())
-                }
-            });
-            stream_ret = select!(event, client).await;
-        } else {
-            info!("Waiting on client!");
-            stream_ret = client.await;
-        }
-        match stream_ret {
-            StreamReturn::ConnectorMessage(_msg) => {
-                info!("Sending message to clients!");
-                self.event_sender.send(_msg.clone()).await;
+    async fn wait_for_connector(&mut self) -> Option<Receiver<ButtplugMessageUnion>> {
+        match self.client_receiver.next().await {
+            None => {
+                debug!("Client disconnected.");
                 None
             },
-            StreamReturn::ClientMessage(_msg) => {
-                match _msg {
+            Some(msg) => {
+                match msg {
                     ButtplugInternalClientMessage::Connect(mut connector, mut state) => {
                         match connector.connect().await {
                             Some(_s) => {
-                                None //return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
+                                //return Result::Err(ButtplugClientError::ButtplugClientConnectorError(_s)),
+                                None
                             },
                             None => {
                                 info!("Connected!");
                                 let mut waker_state = state.lock().unwrap();
                                 waker_state.set_reply_msg(&ButtplugMessageUnion::Ok(messages::Ok::new(1)));
-                                self.connector_receiver = Some(connector.get_event_receiver());
+                                let recv = connector.get_event_receiver();
                                 self.connector = Option::Some(connector);
-                                None
+                                return Some(recv);
                             }
                         }
                     },
-                    ButtplugInternalClientMessage::Message(_msg_fut) => {
-                        if let Some(ref mut connector) = self.connector {
-                            connector.send(&_msg_fut.0, &_msg_fut.1).await;
-                        }
+                    _ => {
+                        error!("Received non-connector message before connector message.");
                         None
-                    },
-                    _ => panic!("Message not handled!")
+                    }
                 }
-            },
-            StreamReturn::Disconnect => {
-                info!("Disconnected!");
-                None
             }
         }
     }
-}
 
+    /// The internal event loop for [ButtplugClient] connection and
+    /// communication
+    ///
+    /// The event_loop does a few different things during its lifetime.
+    ///
+    /// - The first thing it will do is wait for a Connect message from a
+    /// client. This message contains a [ButtplugClientConnector] that will be
+    /// used to connect and communicate with a [ButtplugServer].
+    ///
+    /// - After a connection is established, it will listen for events from the
+    /// connector, or messages from the client, until either server/client
+    /// disconnects.
+    ///
+    /// - Finally, on disconnect, it will tear down, and cannot be used again.
+    /// All clients and devices associated with the loop will be invalidated,
+    /// and a new [ButtplugClient] (and corresponding
+    /// [ButtplugClientInternalLoop]) must be created.
+    pub async fn event_loop(&mut self) {
+        info!("Starting client event loop.");
+        // Wait for the connect message, then only continue on successful
+        // connection.
+        let mut connector_receiver;
+        match self.wait_for_connector().await {
+            None => return,
+            Some(recv) => connector_receiver = recv,
+        }
+        // Once connected, wait for messages from either the client or the
+        // connector, and send them the direction they're supposed to go.
+        loop {
+            let client_future = self.client_receiver
+                .next()
+                .map(|x| {
+                    match x {
+                        None => {
+                            debug!("Client disconnected.");
+                            StreamReturn::Disconnect
+                        },
+                        Some(msg) => StreamReturn::ClientMessage(msg)
+                    }
+                });
+            let event_future = connector_receiver
+                .next()
+                .map(|x| {
+                    match x {
+                        None => {
+                            debug!("Connector disconnected.");
+                            StreamReturn::Disconnect
+                        },
+                        Some(msg) => StreamReturn::ConnectorMessage(msg)
+                    }
+                });
+            let stream_ret = select!(event_future, client_future).await;
+            match stream_ret {
+                StreamReturn::ConnectorMessage(_msg) => {
+                    info!("Sending message to clients.");
+                    self.event_sender.send(_msg.clone()).await;
+                },
+                StreamReturn::ClientMessage(_msg) => {
+                    debug!("Parsing a client message.");
+                    match _msg {
+                        ButtplugInternalClientMessage::Message(_msg_fut) => {
+                            debug!("Sending message through connector.");
+                            if let Some(ref mut connector) = self.connector {
+                                connector.send(&_msg_fut.0, &_msg_fut.1).await;
+                            }
+                        },
+                        ButtplugInternalClientMessage::Disconnect => {
+                            info!("Client requested disconnect");
+                            break;
+                        },
+                        // TODO Do something other than panic if someone does
+                        // something like trying to connect twice..
+                        _ => panic!("Message not handled!")
+                    }
+                },
+                StreamReturn::Disconnect => {
+                    info!("Disconnected!");
+                    break;
+                }
+            }
+        }
+        info!("Exiting client event loop");
+    }
+}
