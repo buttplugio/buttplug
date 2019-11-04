@@ -284,16 +284,14 @@ impl ButtplugClient {
     }
 
     /// Disconnects from server, if connected.
-    pub fn disconnect(&mut self) -> Option<ButtplugClientError> {
-        // if self.connector.is_none() {
-        //     return Result::Err(ButtplugClientError::ButtplugClientConnectorError(
-        //         ButtplugClientConnectorError {
-        //             message: "Client not connected".to_string(),
-        //         },
-        //     ));
-        // }
-        // let mut connector = self.connector.take().unwrap();
-        // connector.disconnect();
+    pub async fn disconnect(&mut self) -> Option<ButtplugClientError> {
+        // Send the connector to the internal loop for management. Once we throw
+        // the connector over, the internal loop will handle connecting and any
+        // further communications with the server, if connection is successful.
+        let fut = ButtplugClientConnectionFuture::default();
+        let msg =
+            ButtplugInternalClientMessage::Disconnect(fut.get_state_clone());
+        self.send_internal_message(msg).await;
         self.connected = false;
         None
     }
@@ -332,11 +330,8 @@ impl ButtplugClient {
         let fut = ButtplugClientMessageFuture::default();
         let internal_msg =
             ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()));
-        // Make sure we can send the message. If we send without a problem, then
-        // wait on the future we paired with the message to return.
-        //
-        // TODO How we'd get here without the internal loop running is a good
-        // question, so we may be able to simplify this and assume we can unwrap.
+
+        // Send message to internal loop and wait for return.
         self.send_internal_message(internal_msg).await;
         Ok(fut.await)
     }
@@ -369,31 +364,40 @@ impl ButtplugClient {
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
         debug!("Client waiting for event.");
         let mut events = vec![];
-        match self.event_receiver.next().await.unwrap() {
-            ButtplugMessageUnion::ScanningFinished(_) => {}
-            ButtplugMessageUnion::DeviceList(_msg) => {
-                for info in _msg.devices.iter() {
-                    // Calling unwrap here is fine, because we can't even get
-                    // events if the internal loop isn't already running.
-                    let device =
-                        ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
-                    self.devices.push(device.clone());
-                    events.push(ButtplugClientEvent::DeviceAdded(device));
+        match self.event_receiver.next().await {
+            Some(msg) => {
+                match msg {
+                    ButtplugMessageUnion::ScanningFinished(_) => {}
+                    ButtplugMessageUnion::DeviceList(_msg) => {
+                        for info in _msg.devices.iter() {
+                            // Calling unwrap here is fine, because we can't even get
+                            // events if the internal loop isn't already running.
+                            let device =
+                                ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
+                            self.devices.push(device.clone());
+                            events.push(ButtplugClientEvent::DeviceAdded(device));
+                        }
+                    }
+                    ButtplugMessageUnion::DeviceAdded(_msg) => {
+                        info!("Got a device added message!");
+                        // Calling unwrap here is fine, because we can't even get
+                        // events if the internal loop isn't already running.
+                        let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
+                        self.devices.push(device.clone());
+                        info!("Sending to observers!");
+                        events.push(ButtplugClientEvent::DeviceAdded(device));
+                        info!("Observers sent!");
+                    }
+                    ButtplugMessageUnion::DeviceRemoved(_) => {}
+                    //ButtplugMessageUnion::Log(_) => {}
+                    _ => panic!("Unhandled incoming message!"),
                 }
+            },
+            None => {
+                // If we got None, this means the internal loop stopped and our
+                // sender was dropped. We should consider this a disconnect.
+                events.push(ButtplugClientEvent::ServerDisconnect)
             }
-            ButtplugMessageUnion::DeviceAdded(_msg) => {
-                info!("Got a device added message!");
-                // Calling unwrap here is fine, because we can't even get
-                // events if the internal loop isn't already running.
-                let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
-                self.devices.push(device.clone());
-                info!("Sending to observers!");
-                events.push(ButtplugClientEvent::DeviceAdded(device));
-                info!("Observers sent!");
-            }
-            ButtplugMessageUnion::DeviceRemoved(_) => {}
-            //ButtplugMessageUnion::Log(_) => {}
-            _ => panic!("Unhandled incoming message!"),
         }
         events
     }
@@ -438,12 +442,12 @@ mod test {
             Some(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
+        async fn send(&mut self, _msg: &ButtplugMessageUnion, _state: &ButtplugClientMessageStateShared) {
         }
 
         fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
             // This will panic if we've already taken the receiver.
-            let (send, recv) = channel(256);
+            let (_send, recv) = channel(256);
             recv
         }
     }
@@ -482,7 +486,7 @@ mod test {
             ButtplugClient::run("Test Client", |mut client| {
                 async move {
                     connect_test_client(&mut client).await;
-                    assert!(client.disconnect().is_none());
+                    assert!(client.disconnect().await.is_none());
                     assert!(!client.connected());
                 }
             })
