@@ -5,7 +5,7 @@ authors = ["Kyle Machulis <kyle@nonpolynomial.com>"]
 edition = "2018"
 
 [dependencies]
-buttplug = { path = "../buttplug" }
+buttplug = "0.0.2-beta.1" # { path = "../buttplug" }
 futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
 ws = "0.9.1"
 async-std = {version="0.99.11", features=["unstable"]}
