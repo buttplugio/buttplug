@@ -97,10 +97,7 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use async_std::{
-        sync::channel,
-        task,
-    };
+    use async_std::{sync::channel, task};
 
     async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
         let (send, _) = channel(256);

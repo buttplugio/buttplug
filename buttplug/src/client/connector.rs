@@ -76,7 +76,7 @@ impl ButtplugEmbeddedClientConnector {
         let (send, recv) = channel(256);
         Self {
             recv: Some(recv),
-            server: ButtplugServer::new(&name, max_ping_time, send)
+            server: ButtplugServer::new(&name, max_ping_time, send),
         }
     }
 }
