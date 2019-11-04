@@ -33,8 +33,8 @@ pub struct ButtplugClientConnectorError {
 }
 
 impl ButtplugClientConnectorError {
-    pub fn new(msg: &str) -> ButtplugClientConnectorError {
-        ButtplugClientConnectorError {
+    pub fn new(msg: &str) -> Self {
+        Self {
             message: msg.to_owned(),
         }
     }
@@ -72,11 +72,11 @@ pub struct ButtplugEmbeddedClientConnector {
 }
 
 impl ButtplugEmbeddedClientConnector {
-    pub fn new(name: &str, max_ping_time: u32) -> ButtplugEmbeddedClientConnector {
+    pub fn new(name: &str, max_ping_time: u32) -> Self {
         let (send, recv) = channel(256);
-        ButtplugEmbeddedClientConnector {
-            server: ButtplugServer::new(&name, max_ping_time, send),
+        Self {
             recv: Some(recv),
+            server: ButtplugServer::new(&name, max_ping_time, send)
         }
     }
 }
@@ -135,10 +135,10 @@ unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
 unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
 impl ButtplugRemoteClientConnectorHelper {
-    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> ButtplugRemoteClientConnectorHelper {
+    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
         let (internal_send, internal_recv) = channel(256);
         let (remote_send, remote_recv) = channel(256);
-        ButtplugRemoteClientConnectorHelper {
+        Self {
             event_send: event_sender,
             remote_send,
             remote_recv: Some(remote_recv),

@@ -32,8 +32,8 @@ impl ButtplugClientDevice {
         index: u32,
         allowed_messages: HashMap<String, MessageAttributes>,
         client_sender: Sender<ButtplugInternalClientMessage>,
-    ) -> ButtplugClientDevice {
-        ButtplugClientDevice {
+    ) -> Self {
+        Self {
             name: name.to_owned(),
             index,
             allowed_messages,

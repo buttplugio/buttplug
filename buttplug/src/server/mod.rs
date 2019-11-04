@@ -30,8 +30,8 @@ impl ButtplugServer {
         name: &str,
         max_ping_time: u32,
         _event_sender: Sender<ButtplugMessageUnion>,
-    ) -> ButtplugServer {
-        ButtplugServer {
+    ) -> Self {
+        Self {
             server_name: name.to_string(),
             server_spec_version: 1,
             client_name: None,

@@ -206,7 +206,7 @@ impl ButtplugClientInternalLoop {
         event_sender: Sender<ButtplugMessageUnion>,
         client_receiver: Receiver<ButtplugInternalClientMessage>,
     ) -> Self {
-        ButtplugClientInternalLoop {
+        Self {
             connector: None,
             client_receiver,
             event_sender,

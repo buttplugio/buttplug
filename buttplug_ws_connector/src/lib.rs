@@ -99,8 +99,8 @@ unsafe impl Send for ButtplugWebsocketWrappedSender {}
 unsafe impl Sync for ButtplugWebsocketWrappedSender {}
 
 impl ButtplugWebsocketWrappedSender {
-    pub fn new(send: ws::Sender) -> ButtplugWebsocketWrappedSender {
-        ButtplugWebsocketWrappedSender { sender: send }
+    pub fn new(send: ws::Sender) -> Self {
+        Self { sender: send }
     }
 }
 

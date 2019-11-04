@@ -17,8 +17,8 @@ pub struct ClientConnectorMessageSorter {
 }
 
 impl ClientConnectorMessageSorter {
-    pub fn new() -> ClientConnectorMessageSorter {
-        ClientConnectorMessageSorter {
+    pub fn new() -> Self {
+        Self {
             future_map: HashMap::new(),
             current_id: 1,
         }

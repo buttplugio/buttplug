@@ -40,8 +40,8 @@ pub struct Ok {
 
 impl Ok {
     /// Creates a new Ok message with the given Id.
-    pub fn new(id: u32) -> Ok {
-        Ok { id }
+    pub fn new(id: u32) -> Self {
+        Self { id }
     }
 }
 
@@ -74,8 +74,8 @@ pub struct Error {
 
 impl Error {
     /// Creates a new error object.
-    pub fn new(error_code: ErrorCode, error_message: &str) -> Error {
-        Error {
+    pub fn new(error_code: ErrorCode, error_message: &str) -> Self {
+        Self {
             id: 0,
             error_code,
             error_message: error_message.to_string(),
@@ -155,8 +155,8 @@ pub struct StartScanning {
 }
 
 impl StartScanning {
-    pub fn new() -> StartScanning {
-        StartScanning { id: 1 }
+    pub fn new() -> Self {
+        Self { id: 1 }
     }
 }
 
@@ -189,8 +189,8 @@ pub struct RequestServerInfo {
 }
 
 impl RequestServerInfo {
-    pub fn new(client_name: &str, message_version: u32) -> RequestServerInfo {
-        RequestServerInfo {
+    pub fn new(client_name: &str, message_version: u32) -> Self {
+        Self {
             id: 1,
             client_name: client_name.to_string(),
             message_version,
@@ -217,8 +217,8 @@ pub struct ServerInfo {
 }
 
 impl ServerInfo {
-    pub fn new(server_name: &str, message_version: u32, max_ping_time: u32) -> ServerInfo {
-        ServerInfo {
+    pub fn new(server_name: &str, message_version: u32, max_ping_time: u32) -> Self {
+        Self {
             id: 0,
             major_version: 0,
             minor_version: 0,
@@ -239,8 +239,8 @@ pub struct VibrateSubcommand {
 }
 
 impl VibrateSubcommand {
-    pub fn new(index: u32, speed: f64) -> VibrateSubcommand {
-        VibrateSubcommand { index, speed }
+    pub fn new(index: u32, speed: f64) -> Self {
+        Self { index, speed }
     }
 }
 
@@ -255,8 +255,8 @@ pub struct VibrateCmd {
 }
 
 impl VibrateCmd {
-    pub fn new(device_index: u32, speeds: Vec<VibrateSubcommand>) -> VibrateCmd {
-        VibrateCmd {
+    pub fn new(device_index: u32, speeds: Vec<VibrateSubcommand>) -> Self {
+        Self {
             id: 1,
             device_index,
             speeds,
