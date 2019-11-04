@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_ws_connector"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Websocket connection handling for the Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -10,7 +10,7 @@ keywords = ["teledildonics", "websockets"]
 edition = "2018"
 
 [dependencies]
-buttplug = "0.0.2-beta.1" # { path = "../buttplug" }
+buttplug = { path = "../buttplug" }
 futures-preview = {version="0.3.0-alpha.19", features = ["async-await"]}
 ws = "0.9.1"
 async-std = {version="0.99.11", features=["unstable"]}
