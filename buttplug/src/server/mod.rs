@@ -96,56 +96,55 @@ impl ButtplugServer {
 
 #[cfg(test)]
 mod test {
-    // use super::*;
-    // use async_std::{
-    //     future::select,
-    //     sync::{channel, Receiver, Sender},
-    //     task,
-    // };
+    use super::*;
+    use async_std::{
+        sync::channel,
+        task,
+    };
 
-    // async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
-    //     let (send, recv) = channel(256);
-    //     let mut server = ButtplugServer::new("Test Server", 0, send);
-    //     assert_eq!(server.server_name, "Test Server");
-    //     match server.send_message(&msg_union).await.unwrap() {
-    //         ButtplugMessageUnion::ServerInfo(_s) => {
-    //             assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0))
-    //         }
-    //         _ => assert!(false, "Should've received ok"),
-    //     }
-    //     server
-    // }
+    async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
+        let (send, _) = channel(256);
+        let mut server = ButtplugServer::new("Test Server", 0, send);
+        assert_eq!(server.server_name, "Test Server");
+        match server.send_message(&msg_union).await.unwrap() {
+            ButtplugMessageUnion::ServerInfo(_s) => {
+                assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0))
+            }
+            _ => assert!(false, "Should've received ok"),
+        }
+        server
+    }
 
-    // #[test]
-    // fn test_server_handshake() {
-    //     let msg = messages::RequestServerInfo::new("Test Client", 1);
-    //     let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
-    //     task::block_on(async {
-    //         let server = test_server_setup(&msg_union).await;
-    //         assert_eq!(server.client_name.unwrap(), "Test Client");
-    //     });
-    // }
+    #[test]
+    fn test_server_handshake() {
+        let msg = messages::RequestServerInfo::new("Test Client", 1);
+        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        task::block_on(async {
+            let server = test_server_setup(&msg_union).await;
+            assert_eq!(server.client_name.unwrap(), "Test Client");
+        });
+    }
 
-    // #[test]
-    // fn test_server_version_lt() {
-    //     let msg = messages::RequestServerInfo::new("Test Client", 0);
-    //     let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
-    //     task::block_on(async {
-    //         test_server_setup(&msg_union).await;
-    //     });
-    // }
+    #[test]
+    fn test_server_version_lt() {
+        let msg = messages::RequestServerInfo::new("Test Client", 0);
+        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        task::block_on(async {
+            test_server_setup(&msg_union).await;
+        });
+    }
 
-    // #[test]
-    // fn test_server_version_gt() {
-    //     let (send, recv) = channel(256);
-    //     let mut server = ButtplugServer::new("Test Server", 0, send);
-    //     let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
-    //     let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
-    //     task::block_on(async {
-    //         assert!(
-    //             server.send_message(&msg_union).await.is_err(),
-    //             "Client having higher version than server should fail"
-    //         );
-    //     });
-    // }
+    #[test]
+    fn test_server_version_gt() {
+        let (send, _) = channel(256);
+        let mut server = ButtplugServer::new("Test Server", 0, send);
+        let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
+        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        task::block_on(async {
+            assert!(
+                server.send_message(&msg_union).await.is_err(),
+                "Client having higher version than server should fail"
+            );
+        });
+    }
 }

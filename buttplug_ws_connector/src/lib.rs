@@ -15,7 +15,7 @@
 //   wait for networking libraries to get on our futures 0.3 level.
 
 // Required to get tests compiling?!
-#![type_length_limit = "1518428"]
+#![type_length_limit = "2000000"]
 
 #[macro_use]
 extern crate log;
