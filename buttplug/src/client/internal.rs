@@ -59,12 +59,15 @@ impl<T> ButtplugClientFutureState<T> {
     where
         T: Clone,
     {
+        if self.reply_msg.is_some() {
+            // TODO Can we stop multiple calls to set_reply_msg at compile time?
+            panic!("set_reply_msg called multiple times on the same future.");
+        }
+
         self.reply_msg = Some(msg.clone());
-        let waker = self.waker.take();
-        // TODO This should never happen? If it does we'll just lock because we
-        // don't have a future to finish?
-        if let Some(wake) = waker {
-            wake.wake();
+
+        if self.waker.is_some() {
+            self.waker.take().unwrap().wake();
         }
     }
 }
@@ -148,8 +151,6 @@ pub type ButtplugClientMessageFuture = ButtplugClientFuture<ButtplugMessageUnion
 /// [ButtplugClientInternalLoop]s can run in parallel. This allows applications
 /// to possibly create connections to multiple [ButtplugServer] instances.
 pub struct ButtplugClientInternalLoop {
-    /// Connector struct, which handles communication with the server
-    connector: Option<Box<dyn ButtplugClientConnector>>,
     /// Receiver for data from clients
     client_receiver: Receiver<ButtplugInternalClientMessage>,
     /// Sender for communicating events to [ButtplugClient]s
@@ -177,7 +178,7 @@ pub enum ButtplugInternalClientMessage {
         ButtplugClientConnectionStateShared,
     ),
     /// Client request to disconnect, via already sent connector instance.
-    Disconnect,
+    Disconnect(ButtplugClientConnectionStateShared),
     /// Client request to send a message via the connector.
     ///
     /// Bundled future should have reply set and waker called when this is
@@ -207,13 +208,12 @@ impl ButtplugClientInternalLoop {
         client_receiver: Receiver<ButtplugInternalClientMessage>,
     ) -> Self {
         Self {
-            connector: None,
             client_receiver,
             event_sender,
         }
     }
 
-    async fn wait_for_connector(&mut self) -> Option<Receiver<ButtplugMessageUnion>> {
+    async fn wait_for_connector(&mut self) -> Option<Box<dyn ButtplugClientConnector>> {
         match self.client_receiver.next().await {
             None => {
                 debug!("Client disconnected.");
@@ -235,9 +235,7 @@ impl ButtplugClientInternalLoop {
                             info!("Connected!");
                             let mut waker_state = state.lock().unwrap();
                             waker_state.set_reply_msg(&None);
-                            let recv = connector.get_event_receiver();
-                            self.connector = Option::Some(connector);
-                            Some(recv)
+                            Some(connector)
                         }
                     }
                 }
@@ -271,9 +269,13 @@ impl ButtplugClientInternalLoop {
         // Wait for the connect message, then only continue on successful
         // connection.
         let mut connector_receiver;
+        let mut connector;
         match self.wait_for_connector().await {
             None => return,
-            Some(recv) => connector_receiver = recv,
+            Some(con) => {
+                connector = con;
+                connector_receiver = connector.get_event_receiver();
+            }
         }
         // Once connected, wait for messages from either the client or the
         // connector, and send them the direction they're supposed to go.
@@ -303,12 +305,13 @@ impl ButtplugClientInternalLoop {
                     match _msg {
                         ButtplugInternalClientMessage::Message(_msg_fut) => {
                             debug!("Sending message through connector.");
-                            if let Some(ref mut connector) = self.connector {
-                                connector.send(&_msg_fut.0, &_msg_fut.1).await;
-                            }
+                            connector.send(&_msg_fut.0, &_msg_fut.1).await;
                         }
-                        ButtplugInternalClientMessage::Disconnect => {
+                        ButtplugInternalClientMessage::Disconnect(state) => {
                             info!("Client requested disconnect");
+                            connector.disconnect();
+                            let mut waker_state = state.lock().unwrap();
+                            waker_state.set_reply_msg(&None);
                             break;
                         }
                         // TODO Do something other than panic if someone does
