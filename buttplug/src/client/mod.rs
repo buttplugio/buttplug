@@ -402,17 +402,66 @@ impl ButtplugClient {
 #[cfg(test)]
 mod test {
     use super::ButtplugClient;
-    use crate::client::connector::ButtplugEmbeddedClientConnector;
-    use async_std::task;
+    use crate::{
+        client::{
+            connector::{ButtplugEmbeddedClientConnector,
+                        ButtplugClientConnector,
+                        ButtplugClientConnectorError},
+            internal::ButtplugClientMessageStateShared,
+        },
+        core::messages::ButtplugMessageUnion,
+    };
+    use async_trait::async_trait;
+    use async_std::{task, sync::{channel, Receiver}};
     use env_logger;
 
     async fn connect_test_client(client: &mut ButtplugClient) {
         let _ = env_logger::builder().is_test(true).try_init();
         assert!(client
-            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-            .await
-            .is_none());
+                .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+                .await
+                .is_none());
         assert!(client.connected());
+    }
+
+    #[derive(Default)]
+    struct ButtplugFailingClientConnector {
+    }
+
+    #[async_trait]
+    impl ButtplugClientConnector for ButtplugFailingClientConnector {
+        async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
+            Some(ButtplugClientConnectorError::new("Always fails"))
+        }
+
+        fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+            Some(ButtplugClientConnectorError::new("Always fails"))
+        }
+
+        async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
+        }
+
+        fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
+            // This will panic if we've already taken the receiver.
+            let (send, recv) = channel(256);
+            recv
+        }
+    }
+
+
+    #[test]
+    fn test_failing_connection() {
+        task::block_on(async {
+            ButtplugClient::run("Test Client", |mut client| {
+                async move {
+                    assert!(client
+                            .connect(ButtplugFailingClientConnector::default())
+                            .await
+                            .is_some());
+                    assert!(!client.connected());
+                }
+            }).await;
+        });
     }
 
     #[test]
@@ -423,7 +472,7 @@ mod test {
                     connect_test_client(&mut client).await;
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -437,7 +486,7 @@ mod test {
                     assert!(!client.connected());
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -456,7 +505,7 @@ mod test {
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -469,7 +518,7 @@ mod test {
                     assert!(client.start_scanning().await.is_none());
                 }
             })
-            .await;
+                .await;
         });
     }
 
