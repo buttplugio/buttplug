@@ -12,13 +12,12 @@ use super::connector::{
 };
 use crate::core::messages::ButtplugMessageUnion;
 use async_std::{
-    future::{select, Future},
+    prelude::{FutureExt, StreamExt},
+    future::{self, Future},
     sync::{Receiver, Sender},
     task::{Context, Poll, Waker},
 };
 use core::pin::Pin;
-use futures::StreamExt;
-use futures_util::future::FutureExt;
 use std::sync::{Arc, Mutex};
 
 /// Struct used for waiting on replies from the server.
@@ -280,21 +279,28 @@ impl ButtplugClientInternalLoop {
         // Once connected, wait for messages from either the client or the
         // connector, and send them the direction they're supposed to go.
         loop {
-            let client_future = self.client_receiver.next().map(|x| match x {
-                None => {
-                    debug!("Client disconnected.");
-                    StreamReturn::Disconnect
+            let client_future = async {
+                match self.client_receiver.next().await {
+                    None => {
+                        debug!("Client disconnected.");
+                        StreamReturn::Disconnect
+                    }
+                    Some(msg) => StreamReturn::ClientMessage(msg),
                 }
-                Some(msg) => StreamReturn::ClientMessage(msg),
-            });
-            let event_future = connector_receiver.next().map(|x| match x {
-                None => {
-                    debug!("Connector disconnected.");
-                    StreamReturn::Disconnect
+            };
+            let event_future = async {
+                match connector_receiver.next().await {
+                    None => {
+                        debug!("Connector disconnected.");
+                        StreamReturn::Disconnect
+                    }
+                    Some(msg) => StreamReturn::ConnectorMessage(msg),
                 }
-                Some(msg) => StreamReturn::ConnectorMessage(msg),
-            });
-            let stream_ret = select!(event_future, client_future).await;
+            };
+            let stream_ret = future::pending()
+                .race(event_future)
+                .race(client_future)
+                .await;
             match stream_ret {
                 StreamReturn::ConnectorMessage(_msg) => {
                     info!("Sending message to clients.");

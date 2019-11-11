@@ -26,7 +26,7 @@ use crate::core::{
 };
 
 use async_std::{
-    future::join,
+    prelude::FutureExt,
     sync::{channel, Receiver, Sender},
 };
 use futures::{Future, StreamExt};
@@ -174,7 +174,7 @@ impl ButtplugClient {
     pub fn run<F, T>(name: &str, func: F) -> impl Future
     where
         F: FnOnce(ButtplugClient) -> T,
-        T: Future,
+        T: Future<Output = ()>,
     {
         debug!("Run called!");
         let (event_sender, event_receiver) = channel(256);
@@ -191,7 +191,7 @@ impl ButtplugClient {
         async move {
             let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
             let internal_loop_future = internal_loop.event_loop();
-            join!(app_future, internal_loop_future).await;
+            app_future.join(internal_loop_future).await;
         }
     }
 

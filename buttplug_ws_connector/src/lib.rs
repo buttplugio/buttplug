@@ -162,6 +162,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     }
 
     fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+        //self.helper.close().await;
         None
     }
 
