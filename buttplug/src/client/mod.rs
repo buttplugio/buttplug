@@ -17,7 +17,7 @@ use connector::{
 };
 use device::ButtplugClientDevice;
 use internal::{
-    ButtplugClientInternalLoop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
+    client_event_loop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
 };
 
 use crate::core::{
@@ -189,8 +189,7 @@ impl ButtplugClient {
         };
         let app_future = func(client);
         async move {
-            let mut internal_loop = ButtplugClientInternalLoop::new();
-            let internal_loop_future = internal_loop.event_loop(event_sender, message_receiver);
+            let internal_loop_future = client_event_loop(event_sender, message_receiver);
             app_future.join(internal_loop_future).await;
         }
     }
