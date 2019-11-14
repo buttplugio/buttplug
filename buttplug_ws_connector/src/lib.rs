@@ -46,8 +46,6 @@ struct InternalClient {
 impl Handler for InternalClient {
     fn on_open(&mut self, _: Handshake) -> ws::Result<()> {
         info!("Opened websocket");
-        // TODO Use another future type when it's not midnight and you're less
-        // tired.
         self.connector_waker.lock().unwrap().set_reply_msg(&None);
         Ok(())
     }
@@ -64,6 +62,12 @@ impl Handler for InternalClient {
 
     fn on_close(&mut self, _code: CloseCode, _reason: &str) {
         info!("Websocket closed : {}", _reason);
+        let out = self.buttplug_out.clone();
+        let r = _reason.clone().to_owned();
+        task::spawn(async move {
+            out.send(ButtplugRemoteClientConnectorMessage::Close(r))
+                .await;
+        });
     }
 
     fn on_error(&mut self, err: ws::Error) {
@@ -161,8 +165,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         fut.await
     }
 
-    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
-        //self.helper.close().await;
+    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+        self.helper.close().await;
         None
     }
 
@@ -184,6 +188,8 @@ mod test {
     use buttplug::client::{ButtplugClient, ButtplugClientEvent};
     use env_logger;
     use log::info;
+    use futures_timer::Delay;
+    use std::time::Duration;
 
     // Only run these tests when we know there's an external server up to reply
 
@@ -215,7 +221,7 @@ mod test {
                     client.start_scanning().await;
                     info!("scanning!");
                     info!("starting event loop!");
-                    loop {
+                    while client.connected() {
                         info!("Waiting for event!");
                         for mut event in client.wait_for_event().await {
                             match event {
@@ -225,8 +231,16 @@ mod test {
                                     if d.allowed_messages.contains_key("VibrateCmd") {
                                         d.send_vibrate_cmd(1.0).await;
                                         info!("Should be vibrating!");
+                                        Delay::new(Duration::from_secs(1)).await;
+                                        client.disconnect().await;
+                                        Delay::new(Duration::from_secs(1)).await;
+                                        break;
                                     }
-                                }
+                                },
+                                ButtplugClientEvent::ServerDisconnect => {
+                                    assert!(false, "Server disconnected!");
+                                    break;
+                                },
                                 _ => info!("Got something else!"),
                             }
                         }

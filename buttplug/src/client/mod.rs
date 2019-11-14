@@ -189,8 +189,8 @@ impl ButtplugClient {
         };
         let app_future = func(client);
         async move {
-            let mut internal_loop = ButtplugClientInternalLoop::new(event_sender, message_receiver);
-            let internal_loop_future = internal_loop.event_loop();
+            let mut internal_loop = ButtplugClientInternalLoop::new();
+            let internal_loop_future = internal_loop.event_loop(event_sender, message_receiver);
             app_future.join(internal_loop_future).await;
         }
     }
@@ -438,7 +438,7 @@ mod test {
             Some(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+        async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
             Some(ButtplugClientConnectorError::new("Always fails"))
         }
 

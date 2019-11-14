@@ -61,7 +61,7 @@ impl Error for ButtplugClientConnectorError {
 #[async_trait]
 pub trait ButtplugClientConnector: Send {
     async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
-    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
+    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
     async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared);
     fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion>;
 }
@@ -87,7 +87,7 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
         None
     }
 
-    fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
         None
     }
 
@@ -116,6 +116,7 @@ pub enum ButtplugRemoteClientConnectorMessage {
     Connected(),
     Text(String),
     Error(String),
+    ClientClose(String),
     Close(String),
 }
 
@@ -125,10 +126,10 @@ pub struct ButtplugRemoteClientConnectorHelper {
     internal_send: Sender<(ButtplugMessageUnion, ButtplugClientMessageStateShared)>,
     internal_recv: Option<Receiver<(ButtplugMessageUnion, ButtplugClientMessageStateShared)>>,
     // Channel send/recv pair for remote connection sending information to the
-    // application. Receiver will be send to task on creation.
+    // application. Receiver will be sent to task on creation.
     remote_send: Sender<ButtplugRemoteClientConnectorMessage>,
     remote_recv: Option<Receiver<ButtplugRemoteClientConnectorMessage>>,
-    event_send: Sender<ButtplugMessageUnion>,
+    event_send: Option<Sender<ButtplugMessageUnion>>,
 }
 
 unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
@@ -139,7 +140,7 @@ impl ButtplugRemoteClientConnectorHelper {
         let (internal_send, internal_recv) = channel(256);
         let (remote_send, remote_recv) = channel(256);
         Self {
-            event_send: event_sender,
+            event_send: Some(event_sender),
             remote_send,
             remote_recv: Some(remote_recv),
             internal_send,
@@ -159,10 +160,16 @@ impl ButtplugRemoteClientConnectorHelper {
         self.internal_send.send((msg.clone(), state.clone())).await;
     }
 
+    pub async fn close(&self) {
+        // Emulate a close from the connector side, which will cause us to
+        // close.
+        self.remote_send.send(ButtplugRemoteClientConnectorMessage::Close("Client requested close.".to_owned())).await;
+    }
+
     pub fn get_recv_future(&mut self) -> impl Future {
         // Set up a way to get futures in and out of the sorter, which will live
         // in our connector task.
-        let event_send = self.event_send.clone();
+        let event_send = self.event_send.take().unwrap();
 
         // Remove the receivers we need to move into the task.
         let mut remote_recv = self.remote_recv.take().unwrap();
@@ -204,12 +211,12 @@ impl ButtplugRemoteClientConnectorHelper {
                     StreamValue::NoValue => break,
                     StreamValue::Incoming(remote_msg) => {
                         match remote_msg {
-                            ButtplugRemoteClientConnectorMessage::Sender(_s) => {
-                                remote_send = Some(_s);
+                            ButtplugRemoteClientConnectorMessage::Sender(s) => {
+                                remote_send = Some(s);
                             }
-                            ButtplugRemoteClientConnectorMessage::Text(_t) => {
+                            ButtplugRemoteClientConnectorMessage::Text(t) => {
                                 let array: Vec<ButtplugMessageUnion> =
-                                    serde_json::from_str(&_t.clone()).unwrap();
+                                    serde_json::from_str(&t.clone()).unwrap();
                                 for smsg in array {
                                     if !sorter.maybe_resolve_message(&smsg) {
                                         info!("Sending event!");
@@ -217,7 +224,19 @@ impl ButtplugRemoteClientConnectorHelper {
                                         event_send.send(smsg).await;
                                     }
                                 }
-                            }
+                            },
+                            ButtplugRemoteClientConnectorMessage::ClientClose(s) => {
+                                info!("Client closing connection {}", s);
+                                if let Some(ref mut remote_sender) = remote_send {
+                                    remote_sender.close();
+                                } else {
+                                    panic!("Can't send message yet!");
+                                }
+                            },
+                            ButtplugRemoteClientConnectorMessage::Close(s) => {
+                                info!("Connector closing connection {}", s);
+                                break;
+                            },
                             _ => {
                                 panic!("UNHANDLED BRANCH");
                             }

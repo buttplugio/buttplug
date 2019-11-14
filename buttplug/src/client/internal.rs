@@ -150,14 +150,6 @@ pub type ButtplugClientMessageFuture = ButtplugClientFuture<ButtplugMessageUnion
 /// [ButtplugClientInternalLoop]s can run in parallel. This allows applications
 /// to possibly create connections to multiple [ButtplugServer] instances.
 pub struct ButtplugClientInternalLoop {
-    /// Receiver for data from clients
-    client_receiver: Receiver<ButtplugInternalClientMessage>,
-    /// Sender for communicating events to [ButtplugClient]s
-    ///
-    // When the event_sender is dropped, all clients will only receive None
-    // during wait_for_event calls, so we can assume disconnection at that
-    // point.
-    event_sender: Sender<ButtplugMessageUnion>,
 }
 
 /// Make ButtplugClientInternalLoop sendable across threads.
@@ -196,24 +188,14 @@ impl ButtplugClientInternalLoop {
     ///
     /// This should really only ever be constructed by a [ButtplugClient], and
     /// there should only be one per new [ButtplugClient].
-    ///
-    /// # Parameters
-    ///
-    /// - `event_sender`: Used when sending server updates to clients.
-    /// - `client_receiver`: Used when receiving commands from clients to
-    /// send to server.
-    pub fn new(
-        event_sender: Sender<ButtplugMessageUnion>,
-        client_receiver: Receiver<ButtplugInternalClientMessage>,
-    ) -> Self {
-        Self {
-            client_receiver,
-            event_sender,
-        }
+    pub fn new() -> Self {
+        Self {}
     }
 
-    async fn wait_for_connector(&mut self) -> Option<Box<dyn ButtplugClientConnector>> {
-        match self.client_receiver.next().await {
+    async fn wait_for_connector(&mut self,
+                                client_receiver: &mut Receiver<ButtplugInternalClientMessage>)
+                                -> Option<Box<dyn ButtplugClientConnector>> {
+        match client_receiver.next().await {
             None => {
                 debug!("Client disconnected.");
                 None
@@ -263,13 +245,21 @@ impl ButtplugClientInternalLoop {
     /// All clients and devices associated with the loop will be invalidated,
     /// and a new [ButtplugClient] (and corresponding
     /// [ButtplugClientInternalLoop]) must be created.
-    pub async fn event_loop(&mut self) {
+    ///
+    /// # Parameters
+    ///
+    /// - `event_sender`: Used when sending server updates to clients.
+    /// - `client_receiver`: Used when receiving commands from clients to
+    /// send to server.
+    pub async fn event_loop(&mut self,
+                            event_sender: Sender<ButtplugMessageUnion>,
+                            mut client_receiver: Receiver<ButtplugInternalClientMessage>) {
         info!("Starting client event loop.");
         // Wait for the connect message, then only continue on successful
         // connection.
         let mut connector_receiver;
         let mut connector;
-        match self.wait_for_connector().await {
+        match self.wait_for_connector(&mut client_receiver).await {
             None => return,
             Some(con) => {
                 connector = con;
@@ -280,7 +270,7 @@ impl ButtplugClientInternalLoop {
         // connector, and send them the direction they're supposed to go.
         loop {
             let client_future = async {
-                match self.client_receiver.next().await {
+                match client_receiver.next().await {
                     None => {
                         debug!("Client disconnected.");
                         StreamReturn::Disconnect
@@ -304,7 +294,7 @@ impl ButtplugClientInternalLoop {
             match stream_ret {
                 StreamReturn::ConnectorMessage(_msg) => {
                     info!("Sending message to clients.");
-                    self.event_sender.send(_msg.clone()).await;
+                    event_sender.send(_msg.clone()).await;
                 }
                 StreamReturn::ClientMessage(_msg) => {
                     debug!("Parsing a client message.");
