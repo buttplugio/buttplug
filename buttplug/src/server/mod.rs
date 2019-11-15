@@ -10,9 +10,7 @@
 pub mod device_manager;
 
 use crate::core::errors::*;
-use crate::core::messages;
-use crate::core::messages::ButtplugMessage;
-use crate::core::messages::ButtplugMessageUnion;
+use crate::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
 use async_std::sync::Sender;
 
 /// Represents a ButtplugServer.
@@ -55,6 +53,11 @@ impl ButtplugServer {
                 || Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
                 Result::Err,
             ),
+            ButtplugMessageUnion::RequestDeviceList(_) => {
+                let mut list = messages::DeviceList::default();
+                list.set_id(msg.get_id());
+                Result::Ok(list.as_union())
+            }
             _ => Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
         }
     }
