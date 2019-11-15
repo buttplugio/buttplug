@@ -23,7 +23,7 @@ use internal::{
 use crate::core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
     messages::{ButtplugMessage, ButtplugMessageUnion, RequestServerInfo,
-               StartScanning, RequestDeviceList},
+               StartScanning, RequestDeviceList, LogLevel},
 };
 
 use async_std::{
@@ -51,8 +51,7 @@ pub enum ButtplugClientEvent {
     /// [ButtplugClientDevice] object representing the device.
     DeviceRemoved(ButtplugClientDevice),
     /// Emitted when log messages are sent from the server.
-    // TODO This needs an actual type sent along with it.
-    Log,
+    Log(LogLevel, String),
     /// Emitted when a client has not pinged the server in a sufficient amount
     /// of time.
     PingTimeout,
@@ -416,16 +415,18 @@ impl ButtplugClient {
             Some(msg) => {
                 match msg {
                     ButtplugMessageUnion::ScanningFinished(_) => {}
-                    ButtplugMessageUnion::DeviceAdded(_msg) => {
+                    ButtplugMessageUnion::DeviceAdded(msg) => {
                         info!("Got a device added message!");
-                        let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
+                        let device = ButtplugClientDevice::from((&msg, self.message_sender.clone()));
                         self.devices.push(device.clone());
                         info!("Sending to observers!");
                         events.push(ButtplugClientEvent::DeviceAdded(device));
                         info!("Observers sent!");
                     }
                     ButtplugMessageUnion::DeviceRemoved(_) => {}
-                    //ButtplugMessageUnion::Log(_) => {}
+                    ButtplugMessageUnion::Log(msg) => {
+                        events.push(ButtplugClientEvent::Log(msg.log_level, msg.log_message));
+                    }
                     _ => panic!("Unhandled incoming message!"),
                 }
             },

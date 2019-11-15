@@ -230,6 +230,37 @@ impl ServerInfo {
     }
 }
 
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum LogLevel {
+    Off = 0,
+    Fatal,
+    Error,
+    Warn,
+    Info,
+    Debug,
+    Trace,
+}
+
+#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Log {
+    #[serde(rename = "Id")]
+    id: u32,
+    #[serde(rename = "LogLevel")]
+    pub log_level: LogLevel,
+    #[serde(rename = "LogMessage")]
+    pub log_message: String,
+}
+
+impl Log {
+    pub fn new(log_level: LogLevel, log_message: String) -> Self {
+        Self {
+            id: 0,
+            log_level,
+            log_message,
+        }
+    }
+}
+
 #[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
 pub struct VibrateSubcommand {
     #[serde(rename = "Index")]
@@ -278,6 +309,7 @@ pub enum ButtplugMessageUnion {
     RequestServerInfo(RequestServerInfo),
     ServerInfo(ServerInfo),
     VibrateCmd(VibrateCmd),
+    Log(Log),
 }
 
 impl ButtplugMessage for ButtplugMessageUnion {
@@ -295,6 +327,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestServerInfo(ref _msg) => _msg.id,
             ButtplugMessageUnion::ServerInfo(ref _msg) => _msg.id,
             ButtplugMessageUnion::VibrateCmd(ref _msg) => _msg.id,
+            ButtplugMessageUnion::Log(ref _msg) => _msg.id,
         }
     }
 
@@ -312,6 +345,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestServerInfo(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::ServerInfo(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::VibrateCmd(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Log(ref mut _msg) => _msg.set_id(id),
         }
     }
 
