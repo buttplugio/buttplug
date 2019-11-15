@@ -22,7 +22,8 @@ use internal::{
 
 use crate::core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
-    messages::{ButtplugMessage, ButtplugMessageUnion, RequestServerInfo, StartScanning},
+    messages::{ButtplugMessage, ButtplugMessageUnion, RequestServerInfo,
+               StartScanning, RequestDeviceList},
 };
 
 use async_std::{
@@ -133,6 +134,13 @@ pub struct ButtplugClient {
     // True if the connector is currently connected, and handshake was
     // successful.
     connected: bool,
+    // Stupid state storage variable to know if we've sent DeviceAdded events
+    // yet during the first call to wait_for_events. I hate this, but in C# and
+    // JS we always fired the event handlers on after connect (so that all new
+    // device additions did similar things, even if the devices were already
+    // connected to the server and added on connect) and we should do similar
+    // here. But I hate this.
+    has_sent_devices: bool,
 }
 
 unsafe impl Sync for ButtplugClient {}
@@ -186,6 +194,7 @@ impl ButtplugClient {
             event_receiver,
             message_sender,
             connected: false,
+            has_sent_devices: false,
         };
         let app_future = func(client);
         async move {
@@ -260,7 +269,9 @@ impl ButtplugClient {
                     info!("Connected to {}", server_info.server_name);
                     self.server_name = Option::Some(server_info.server_name);
                     // TODO Handle ping time in the internal event loop
-                    None
+
+                    // Get currently connected devices.
+                    self.update_device_list().await
                 } else {
                     // TODO Should disconnect here.
                     Some(ButtplugClientError::ButtplugError(
@@ -273,6 +284,30 @@ impl ButtplugClient {
             }
             // TODO Error message case may need to be implemented here when
             // we aren't only using embedded connectors.
+            Err(_) => None,
+        }
+    }
+
+    async fn update_device_list(&mut self) -> Option<ButtplugClientError> {
+        let res = self
+            .send_message(&RequestDeviceList::default().as_union())
+            .await;
+        match res {
+            Ok(msg) => {
+                match msg {
+                    ButtplugMessageUnion::DeviceList(_msg) => {
+                        for info in _msg.devices.iter() {
+                            let device =
+                                ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
+                            debug!("DeviceList: Adding {}", &device.name);
+                            self.devices.push(device.clone());
+                            //events.push(ButtplugClientEvent::DeviceAdded(device));
+                        }
+                        None
+                    }
+                    _ => panic!("Should get back device list!")
+                }
+            }
             Err(_) => None,
         }
     }
@@ -363,24 +398,26 @@ impl ButtplugClient {
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
         debug!("Client waiting for event.");
         let mut events = vec![];
+        // During connection, we call RequestDeviceList and then add all devices
+        // returned to our client. However, in C# and JS, we would usually call
+        // event handlers at that point. We don't really have event handlers in
+        // Rust, so instead we emulate this behavior by returning DeviceAdded
+        // events on the first call to wait_for_event.
+        if !self.has_sent_devices {
+            self.has_sent_devices = true;
+            if self.devices.len() > 0 {
+                for device in &self.devices {
+                    events.push(ButtplugClientEvent::DeviceAdded(device.clone()));
+                }
+                return events;
+            }
+        }
         match self.event_receiver.next().await {
             Some(msg) => {
                 match msg {
                     ButtplugMessageUnion::ScanningFinished(_) => {}
-                    ButtplugMessageUnion::DeviceList(_msg) => {
-                        for info in _msg.devices.iter() {
-                            // Calling unwrap here is fine, because we can't even get
-                            // events if the internal loop isn't already running.
-                            let device =
-                                ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
-                            self.devices.push(device.clone());
-                            events.push(ButtplugClientEvent::DeviceAdded(device));
-                        }
-                    }
                     ButtplugMessageUnion::DeviceAdded(_msg) => {
                         info!("Got a device added message!");
-                        // Calling unwrap here is fine, because we can't even get
-                        // events if the internal loop isn't already running.
                         let device = ButtplugClientDevice::from((&_msg, self.message_sender.clone()));
                         self.devices.push(device.clone());
                         info!("Sending to observers!");
