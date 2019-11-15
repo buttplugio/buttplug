@@ -404,7 +404,7 @@ impl ButtplugClient {
         // events on the first call to wait_for_event.
         if !self.has_sent_devices {
             self.has_sent_devices = true;
-            if self.devices.len() > 0 {
+            if !self.devices.is_empty() {
                 for device in &self.devices {
                     events.push(ButtplugClientEvent::DeviceAdded(device.clone()));
                 }

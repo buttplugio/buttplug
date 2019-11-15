@@ -63,7 +63,8 @@ impl Handler for InternalClient {
     fn on_close(&mut self, _code: CloseCode, _reason: &str) {
         info!("Websocket closed : {}", _reason);
         let out = self.buttplug_out.clone();
-        let r = _reason.clone().to_owned();
+        // One rather horrible way to get a copy of the reason to pass along.
+        let r = (&(*_reason).to_owned()).clone();
         task::spawn(async move {
             out.send(ButtplugRemoteClientConnectorMessage::Close(r))
                 .await;

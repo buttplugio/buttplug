@@ -15,9 +15,12 @@ use super::{
     messagesorter::ClientConnectorMessageSorter,
 };
 use crate::{core::messages::ButtplugMessageUnion, server::ButtplugServer};
-use async_std::sync::{channel, Receiver, Sender};
+use async_std::{
+    prelude::{FutureExt, StreamExt},
+    sync::{channel, Receiver, Sender},
+};
 use async_trait::async_trait;
-use futures::{future::Future, select, FutureExt, StreamExt};
+use futures::{future::Future};
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionState =
@@ -187,26 +190,19 @@ impl ButtplugRemoteClientConnectorHelper {
             }
 
             loop {
-                let mut incoming_stream = remote_recv.next().fuse();
-                let mut outgoing_stream = internal_recv.next().fuse();
                 // We use two Options instead of an enum because we may never
                 // get anything.
-                let mut stream_return: StreamValue = select! {
-                    a = incoming_stream => {
-                        info!("Got connector message!");
-                        match a {
-                            Some(msg) => StreamValue::Incoming(msg),
-                            None => StreamValue::NoValue,
-                        }
-                    },
-                    b = outgoing_stream => {
-                        info!("Got client message!");
-                        match b {
-                            Some(msg) => StreamValue::Outgoing(msg),
-                            None => StreamValue::NoValue,
-                        }
-                    },
-                };
+                let mut stream_return: StreamValue = async {
+                    match remote_recv.next().await {
+                        Some(msg) => StreamValue::Incoming(msg),
+                        None => StreamValue::NoValue,
+                    }
+                }.race(async {
+                    match internal_recv.next().await {
+                        Some(msg) => StreamValue::Outgoing(msg),
+                        None => StreamValue::NoValue,
+                    }
+                }).await;
                 match stream_return {
                     StreamValue::NoValue => break,
                     StreamValue::Incoming(remote_msg) => {
