@@ -32,14 +32,14 @@ use buttplug::client::connector::{
 };
 use buttplug::client::internal::ButtplugClientMessageStateShared;
 use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
-use std::thread;
-use ws::{CloseCode, Handler, Handshake, Message};
 use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
-use ws::util::TcpStream;
+use std::thread;
 use url;
+use ws::util::TcpStream;
+use ws::{CloseCode, Handler, Handshake, Message};
 
 // TODO Should probably let users pass in their own addresses
-const CONNECTION: &str = "wss://localhost:12345";
+const CONNECTION: &str = "ws://localhost:12345";
 
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
@@ -233,7 +233,7 @@ mod test {
     }
 
     #[test]
-    //#[ignore]
+    #[ignore]
     fn test_client_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
