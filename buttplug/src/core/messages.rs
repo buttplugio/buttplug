@@ -144,7 +144,9 @@ pub struct DeviceAdded {
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DeviceRemoved {
+    #[serde(rename = "Id")]
     id: u32,
+    #[serde(rename = "DeviceIndex")]
     pub device_index: u32,
 }
 

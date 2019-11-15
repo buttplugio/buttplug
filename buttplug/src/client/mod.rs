@@ -31,8 +31,11 @@ use async_std::{
     sync::{channel, Receiver, Sender},
 };
 use futures::{Future, StreamExt};
-use std::error::Error;
-use std::fmt;
+use std::{
+    fmt,
+    error::Error,
+    collections::HashMap,
+};
 
 /// Enum representing different events that can be emitted by a client.
 ///
@@ -125,7 +128,7 @@ pub struct ButtplugClient {
     pub server_name: Option<String>,
     // A vector of devices currently connected to the server, as represented by
     // [ButtplugClientDevice] types.
-    devices: Vec<ButtplugClientDevice>,
+    devices: HashMap<u32, ButtplugClientDevice>,
     // Sender to relay messages to the internal client loop
     message_sender: Sender<ButtplugInternalClientMessage>,
     // Receives event notifications from the ButtplugInternalClientLoop
@@ -189,7 +192,7 @@ impl ButtplugClient {
         let client = ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
-            devices: vec![],
+            devices: HashMap::new(),
             event_receiver,
             message_sender,
             connected: false,
@@ -299,8 +302,7 @@ impl ButtplugClient {
                             let device =
                                 ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
                             debug!("DeviceList: Adding {}", &device.name);
-                            self.devices.push(device.clone());
-                            //events.push(ButtplugClientEvent::DeviceAdded(device));
+                            self.devices.insert(info.device_index, device.clone());
                         }
                         None
                     }
@@ -405,7 +407,7 @@ impl ButtplugClient {
         if !self.has_sent_devices {
             self.has_sent_devices = true;
             if !self.devices.is_empty() {
-                for device in &self.devices {
+                for device in self.devices.values() {
                     events.push(ButtplugClientEvent::DeviceAdded(device.clone()));
                 }
                 return events;
@@ -418,12 +420,19 @@ impl ButtplugClient {
                     ButtplugMessageUnion::DeviceAdded(msg) => {
                         info!("Got a device added message!");
                         let device = ButtplugClientDevice::from((&msg, self.message_sender.clone()));
-                        self.devices.push(device.clone());
+                        self.devices.insert(msg.device_index, device.clone());
                         info!("Sending to observers!");
                         events.push(ButtplugClientEvent::DeviceAdded(device));
                         info!("Observers sent!");
                     }
-                    ButtplugMessageUnion::DeviceRemoved(_) => {}
+                    ButtplugMessageUnion::DeviceRemoved(msg) => {
+                        if let Some(dev) = self.devices.remove(&msg.device_index) {
+                            info!("Removing {}", dev.name);
+                            events.push(ButtplugClientEvent::DeviceRemoved(dev));
+                        } else {
+                            error!("Tried removing non-existant device index {}", msg.device_index);
+                        }
+                    }
                     ButtplugMessageUnion::Log(msg) => {
                         events.push(ButtplugClientEvent::Log(msg.log_level, msg.log_message));
                     }
