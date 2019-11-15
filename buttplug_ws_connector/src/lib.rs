@@ -232,6 +232,7 @@ mod test {
                                         d.send_vibrate_cmd(1.0).await;
                                         info!("Should be vibrating!");
                                         Delay::new(Duration::from_secs(1)).await;
+                                        d.send_vibrate_cmd(0.0).await;
                                         client.disconnect().await;
                                         Delay::new(Duration::from_secs(1)).await;
                                         break;
