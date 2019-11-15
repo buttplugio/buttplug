@@ -34,9 +34,12 @@ use buttplug::client::internal::ButtplugClientMessageStateShared;
 use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
 use std::thread;
 use ws::{CloseCode, Handler, Handshake, Message};
+use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
+use ws::util::TcpStream;
+use url;
 
 // TODO Should probably let users pass in their own addresses
-const CONNECTION: &str = "ws://127.0.0.1:12345";
+const CONNECTION: &str = "wss://localhost:12345";
 
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
@@ -76,6 +79,29 @@ impl Handler for InternalClient {
         self.connector_waker.lock().unwrap().set_reply_msg(&Some(
             ButtplugClientConnectorError::new(&(format!("{}", err))),
         ));
+    }
+
+    fn upgrade_ssl_client(
+        &mut self,
+        sock: TcpStream,
+        _: &url::Url,
+    ) -> ws::Result<SslStream<TcpStream>> {
+        let mut builder = SslConnector::builder(SslMethod::tls()).map_err(|e| {
+            ws::Error::new(
+                ws::ErrorKind::Internal,
+                format!("Failed to upgrade client to SSL: {}", e),
+            )
+        })?;
+        builder.set_verify(SslVerifyMode::empty());
+
+        let connector = builder.build();
+        connector
+            .configure()
+            .unwrap()
+            .use_server_name_indication(false)
+            .verify_hostname(false)
+            .connect("", sock)
+            .map_err(From::from)
     }
 }
 
@@ -207,7 +233,7 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    //#[ignore]
     fn test_client_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
