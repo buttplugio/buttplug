@@ -16,14 +16,14 @@ use connector::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
 };
 use device::ButtplugClientDevice;
-use internal::{
-    client_event_loop, ButtplugClientMessageFuture, ButtplugInternalClientMessage,
-};
+use internal::{client_event_loop, ButtplugClientMessageFuture, ButtplugInternalClientMessage};
 
 use crate::core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
-    messages::{ButtplugMessage, ButtplugMessageUnion, RequestServerInfo,
-               StartScanning, RequestDeviceList, LogLevel},
+    messages::{
+        ButtplugMessage, ButtplugMessageUnion, LogLevel, RequestDeviceList, RequestServerInfo,
+        StartScanning,
+    },
 };
 
 use async_std::{
@@ -31,11 +31,7 @@ use async_std::{
     sync::{channel, Receiver, Sender},
 };
 use futures::{Future, StreamExt};
-use std::{
-    fmt,
-    error::Error,
-    collections::HashMap,
-};
+use std::{collections::HashMap, error::Error, fmt};
 
 /// Enum representing different events that can be emitted by a client.
 ///
@@ -295,20 +291,20 @@ impl ButtplugClient {
             .send_message(&RequestDeviceList::default().as_union())
             .await;
         match res {
-            Ok(msg) => {
-                match msg {
-                    ButtplugMessageUnion::DeviceList(_msg) => {
-                        for info in _msg.devices.iter() {
-                            let device =
-                                ButtplugClientDevice::from((&info.clone(), self.message_sender.clone()));
-                            debug!("DeviceList: Adding {}", &device.name);
-                            self.devices.insert(info.device_index, device.clone());
-                        }
-                        None
+            Ok(msg) => match msg {
+                ButtplugMessageUnion::DeviceList(_msg) => {
+                    for info in _msg.devices.iter() {
+                        let device = ButtplugClientDevice::from((
+                            &info.clone(),
+                            self.message_sender.clone(),
+                        ));
+                        debug!("DeviceList: Adding {}", &device.name);
+                        self.devices.insert(info.device_index, device.clone());
                     }
-                    _ => panic!("Should get back device list!")
+                    None
                 }
-            }
+                _ => panic!("Should get back device list!"),
+            },
             Err(_) => None,
         }
     }
@@ -324,8 +320,7 @@ impl ButtplugClient {
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
         let fut = ButtplugClientConnectionFuture::default();
-        let msg =
-            ButtplugInternalClientMessage::Disconnect(fut.get_state_clone());
+        let msg = ButtplugInternalClientMessage::Disconnect(fut.get_state_clone());
         self.send_internal_message(msg).await;
         self.connected = false;
         None
@@ -414,30 +409,31 @@ impl ButtplugClient {
             }
         }
         match self.event_receiver.next().await {
-            Some(msg) => {
-                match msg {
-                    ButtplugMessageUnion::ScanningFinished(_) => {}
-                    ButtplugMessageUnion::DeviceAdded(msg) => {
-                        info!("Got a device added message!");
-                        let device = ButtplugClientDevice::from((&msg, self.message_sender.clone()));
-                        self.devices.insert(msg.device_index, device.clone());
-                        info!("Sending to observers!");
-                        events.push(ButtplugClientEvent::DeviceAdded(device));
-                        info!("Observers sent!");
-                    }
-                    ButtplugMessageUnion::DeviceRemoved(msg) => {
-                        if let Some(dev) = self.devices.remove(&msg.device_index) {
-                            info!("Removing {}", dev.name);
-                            events.push(ButtplugClientEvent::DeviceRemoved(dev));
-                        } else {
-                            error!("Tried removing non-existant device index {}", msg.device_index);
-                        }
-                    }
-                    ButtplugMessageUnion::Log(msg) => {
-                        events.push(ButtplugClientEvent::Log(msg.log_level, msg.log_message));
-                    }
-                    _ => panic!("Unhandled incoming message!"),
+            Some(msg) => match msg {
+                ButtplugMessageUnion::ScanningFinished(_) => {}
+                ButtplugMessageUnion::DeviceAdded(msg) => {
+                    info!("Got a device added message!");
+                    let device = ButtplugClientDevice::from((&msg, self.message_sender.clone()));
+                    self.devices.insert(msg.device_index, device.clone());
+                    info!("Sending to observers!");
+                    events.push(ButtplugClientEvent::DeviceAdded(device));
+                    info!("Observers sent!");
                 }
+                ButtplugMessageUnion::DeviceRemoved(msg) => {
+                    if let Some(dev) = self.devices.remove(&msg.device_index) {
+                        info!("Removing {}", dev.name);
+                        events.push(ButtplugClientEvent::DeviceRemoved(dev));
+                    } else {
+                        error!(
+                            "Tried removing non-existant device index {}",
+                            msg.device_index
+                        );
+                    }
+                }
+                ButtplugMessageUnion::Log(msg) => {
+                    events.push(ButtplugClientEvent::Log(msg.log_level, msg.log_message));
+                }
+                _ => panic!("Unhandled incoming message!"),
             },
             None => {
                 // If we got None, this means the internal loop stopped and our
@@ -454,29 +450,32 @@ mod test {
     use super::ButtplugClient;
     use crate::{
         client::{
-            connector::{ButtplugEmbeddedClientConnector,
-                        ButtplugClientConnector,
-                        ButtplugClientConnectorError},
+            connector::{
+                ButtplugClientConnector, ButtplugClientConnectorError,
+                ButtplugEmbeddedClientConnector,
+            },
             internal::ButtplugClientMessageStateShared,
         },
         core::messages::ButtplugMessageUnion,
     };
+    use async_std::{
+        sync::{channel, Receiver},
+        task,
+    };
     use async_trait::async_trait;
-    use async_std::{task, sync::{channel, Receiver}};
     use env_logger;
 
     async fn connect_test_client(client: &mut ButtplugClient) {
         let _ = env_logger::builder().is_test(true).try_init();
         assert!(client
-                .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-                .await
-                .is_none());
+            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
+            .await
+            .is_none());
         assert!(client.connected());
     }
 
     #[derive(Default)]
-    struct ButtplugFailingClientConnector {
-    }
+    struct ButtplugFailingClientConnector {}
 
     #[async_trait]
     impl ButtplugClientConnector for ButtplugFailingClientConnector {
@@ -488,7 +487,11 @@ mod test {
             Some(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn send(&mut self, _msg: &ButtplugMessageUnion, _state: &ButtplugClientMessageStateShared) {
+        async fn send(
+            &mut self,
+            _msg: &ButtplugMessageUnion,
+            _state: &ButtplugClientMessageStateShared,
+        ) {
         }
 
         fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
@@ -498,19 +501,19 @@ mod test {
         }
     }
 
-
     #[test]
     fn test_failing_connection() {
         task::block_on(async {
             ButtplugClient::run("Test Client", |mut client| {
                 async move {
                     assert!(client
-                            .connect(ButtplugFailingClientConnector::default())
-                            .await
-                            .is_some());
+                        .connect(ButtplugFailingClientConnector::default())
+                        .await
+                        .is_some());
                     assert!(!client.connected());
                 }
-            }).await;
+            })
+            .await;
         });
     }
 
@@ -522,7 +525,7 @@ mod test {
                     connect_test_client(&mut client).await;
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -536,7 +539,7 @@ mod test {
                     assert!(!client.connected());
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -555,7 +558,7 @@ mod test {
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -568,7 +571,7 @@ mod test {
                     assert!(client.start_scanning().await.is_none());
                 }
             })
-                .await;
+            .await;
         });
     }
 

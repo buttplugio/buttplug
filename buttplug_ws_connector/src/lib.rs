@@ -188,8 +188,8 @@ mod test {
     use buttplug::client::connector::ButtplugClientConnector;
     use buttplug::client::{ButtplugClient, ButtplugClientEvent};
     use env_logger;
-    use log::info;
     use futures_timer::Delay;
+    use log::info;
     use std::time::Duration;
 
     // Only run these tests when we know there's an external server up to reply
@@ -238,11 +238,11 @@ mod test {
                                         Delay::new(Duration::from_secs(1)).await;
                                         break;
                                     }
-                                },
+                                }
                                 ButtplugClientEvent::ServerDisconnect => {
                                     assert!(false, "Server disconnected!");
                                     break;
-                                },
+                                }
                                 _ => info!("Got something else!"),
                             }
                         }

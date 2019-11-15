@@ -12,8 +12,8 @@ use super::connector::{
 };
 use crate::core::messages::ButtplugMessageUnion;
 use async_std::{
-    prelude::{FutureExt, StreamExt},
     future::{self, Future},
+    prelude::{FutureExt, StreamExt},
     sync::{Receiver, Sender},
     task::{Context, Poll, Waker},
 };
@@ -162,8 +162,9 @@ enum StreamReturn {
     Disconnect,
 }
 
-async fn wait_for_connector(client_receiver: &mut Receiver<ButtplugInternalClientMessage>)
-                            -> Option<Box<dyn ButtplugClientConnector>> {
+async fn wait_for_connector(
+    client_receiver: &mut Receiver<ButtplugInternalClientMessage>,
+) -> Option<Box<dyn ButtplugClientConnector>> {
     match client_receiver.next().await {
         None => {
             debug!("Client disconnected.");
@@ -229,8 +230,10 @@ async fn wait_for_connector(client_receiver: &mut Receiver<ButtplugInternalClien
 /// - `event_sender`: Used when sending server updates to clients.
 /// - `client_receiver`: Used when receiving commands from clients to
 /// send to server.
-pub async fn client_event_loop(event_sender: Sender<ButtplugMessageUnion>,
-                               mut client_receiver: Receiver<ButtplugInternalClientMessage>) {
+pub async fn client_event_loop(
+    event_sender: Sender<ButtplugMessageUnion>,
+    mut client_receiver: Receiver<ButtplugInternalClientMessage>,
+) {
     info!("Starting client event loop.");
     // Wait for the connect message, then only continue on successful
     // connection.
@@ -300,4 +303,3 @@ pub async fn client_event_loop(event_sender: Sender<ButtplugMessageUnion>,
     }
     info!("Exiting client event loop");
 }
-

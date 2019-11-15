@@ -20,7 +20,7 @@ use async_std::{
     sync::{channel, Receiver, Sender},
 };
 use async_trait::async_trait;
-use futures::{future::Future};
+use futures::future::Future;
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionState =
@@ -166,7 +166,11 @@ impl ButtplugRemoteClientConnectorHelper {
     pub async fn close(&self) {
         // Emulate a close from the connector side, which will cause us to
         // close.
-        self.remote_send.send(ButtplugRemoteClientConnectorMessage::Close("Client requested close.".to_owned())).await;
+        self.remote_send
+            .send(ButtplugRemoteClientConnectorMessage::Close(
+                "Client requested close.".to_owned(),
+            ))
+            .await;
     }
 
     pub fn get_recv_future(&mut self) -> impl Future {
@@ -197,12 +201,14 @@ impl ButtplugRemoteClientConnectorHelper {
                         Some(msg) => StreamValue::Incoming(msg),
                         None => StreamValue::NoValue,
                     }
-                }.race(async {
+                }
+                .race(async {
                     match internal_recv.next().await {
                         Some(msg) => StreamValue::Outgoing(msg),
                         None => StreamValue::NoValue,
                     }
-                }).await;
+                })
+                .await;
                 match stream_return {
                     StreamValue::NoValue => break,
                     StreamValue::Incoming(remote_msg) => {
@@ -220,7 +226,7 @@ impl ButtplugRemoteClientConnectorHelper {
                                         event_send.send(smsg).await;
                                     }
                                 }
-                            },
+                            }
                             ButtplugRemoteClientConnectorMessage::ClientClose(s) => {
                                 info!("Client closing connection {}", s);
                                 if let Some(ref mut remote_sender) = remote_send {
@@ -228,11 +234,11 @@ impl ButtplugRemoteClientConnectorHelper {
                                 } else {
                                     panic!("Can't send message yet!");
                                 }
-                            },
+                            }
                             ButtplugRemoteClientConnectorMessage::Close(s) => {
                                 info!("Connector closing connection {}", s);
                                 break;
-                            },
+                            }
                             _ => {
                                 panic!("UNHANDLED BRANCH");
                             }
