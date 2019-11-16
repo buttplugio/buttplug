@@ -106,6 +106,20 @@ impl From<ButtplugError> for Error {
     }
 }
 
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Ping {
+    /// Message Id, used for matching message pairs in remote connection instances.
+    #[serde(rename = "Id")]
+    id: u32,
+}
+
+impl Ping {
+    /// Creates a new Ping message with the given Id.
+    pub fn new(id: u32) -> Self {
+        Self { id }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MessageAttributes {
     #[serde(rename = "FeatureCount")]
@@ -301,6 +315,7 @@ impl VibrateCmd {
 pub enum ButtplugMessageUnion {
     Ok(Ok),
     Error(Error),
+    Ping(Ping),
     DeviceList(DeviceList),
     DeviceAdded(DeviceAdded),
     DeviceRemoved(DeviceRemoved),
@@ -319,6 +334,8 @@ impl ButtplugMessage for ButtplugMessageUnion {
         match self {
             ButtplugMessageUnion::Ok(ref _msg) => _msg.id,
             ButtplugMessageUnion::Error(ref _msg) => _msg.id,
+            ButtplugMessageUnion::Log(ref _msg) => _msg.id,
+            ButtplugMessageUnion::Ping(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceList(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceAdded(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceRemoved(ref _msg) => _msg.id,
@@ -329,7 +346,6 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestServerInfo(ref _msg) => _msg.id,
             ButtplugMessageUnion::ServerInfo(ref _msg) => _msg.id,
             ButtplugMessageUnion::VibrateCmd(ref _msg) => _msg.id,
-            ButtplugMessageUnion::Log(ref _msg) => _msg.id,
         }
     }
 
@@ -337,6 +353,8 @@ impl ButtplugMessage for ButtplugMessageUnion {
         match self {
             ButtplugMessageUnion::Ok(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Error(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Log(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Ping(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceList(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceAdded(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceRemoved(ref mut _msg) => _msg.set_id(id),
@@ -347,7 +365,6 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestServerInfo(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::ServerInfo(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::VibrateCmd(ref mut _msg) => _msg.set_id(id),
-            ButtplugMessageUnion::Log(ref mut _msg) => _msg.set_id(id),
         }
     }
 
