@@ -371,6 +371,42 @@ impl VibrateCmd {
     }
 }
 
+#[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
+pub struct VectorSubcommand {
+    #[serde(rename = "Index")]
+    pub index: u32,
+    #[serde(rename = "Duration")]
+    pub duration: u32,
+    #[serde(rename = "Position")]
+    pub position: f64,
+}
+
+impl VectorSubcommand {
+    pub fn new(index: u32, duration: u32, position: f64) -> Self {
+        Self { index, duration, position }
+    }
+}
+
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct LinearCmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
+    #[serde(rename = "Vectors")]
+    pub vectors: Vec<VectorSubcommand>,
+}
+
+impl LinearCmd {
+    pub fn new(device_index: u32, vectors: Vec<VectorSubcommand>) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            vectors,
+        }
+    }
+}
+
 
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -391,6 +427,7 @@ pub enum ButtplugMessageUnion {
     ScanningFinished(ScanningFinished),
     RequestDeviceList(RequestDeviceList),
     VibrateCmd(VibrateCmd),
+    LinearCmd(LinearCmd),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -414,6 +451,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::ScanningFinished(ref msg) => msg.id,
             ButtplugMessageUnion::RequestDeviceList(ref msg) => msg.id,
             ButtplugMessageUnion::VibrateCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::LinearCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -437,6 +475,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::ScanningFinished(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::RequestDeviceList(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::VibrateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::LinearCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
