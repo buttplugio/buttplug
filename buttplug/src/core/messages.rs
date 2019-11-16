@@ -443,7 +443,28 @@ impl RotateCmd {
     }
 }
 
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct FleshlightLaunchFW12Cmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
+    #[serde(rename = "Position")]
+    pub position: u8,
+    #[serde(rename = "Speed")]
+    pub speed: u8,
+}
 
+impl FleshlightLaunchFW12Cmd {
+    pub fn new(device_index: u32, position: u8, speed: u8) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            position,
+            speed,
+        }
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
@@ -465,6 +486,7 @@ pub enum ButtplugMessageUnion {
     VibrateCmd(VibrateCmd),
     LinearCmd(LinearCmd),
     RotateCmd(RotateCmd),
+    FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -490,6 +512,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::VibrateCmd(ref msg) => msg.id,
             ButtplugMessageUnion::LinearCmd(ref msg) => msg.id,
             ButtplugMessageUnion::RotateCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -515,6 +538,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::VibrateCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::LinearCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::RotateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
