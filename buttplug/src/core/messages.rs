@@ -331,6 +331,12 @@ impl StopDeviceCmd {
     }
 }
 
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct StopAllDevices {
+    #[serde(rename = "Id")]
+    pub id: u32,
+}
+
 #[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
 pub struct VibrateSubcommand {
     #[serde(rename = "Index")]
@@ -365,6 +371,8 @@ impl VibrateCmd {
     }
 }
 
+
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
@@ -384,6 +392,7 @@ pub enum ButtplugMessageUnion {
     RequestDeviceList(RequestDeviceList),
     VibrateCmd(VibrateCmd),
     StopDeviceCmd(StopDeviceCmd),
+    StopAllDevices(StopAllDevices),
 }
 
 impl ButtplugMessage for ButtplugMessageUnion {
@@ -406,6 +415,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestDeviceList(ref msg) => msg.id,
             ButtplugMessageUnion::VibrateCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
     }
 
@@ -428,6 +438,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RequestDeviceList(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::VibrateCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
     }
 
