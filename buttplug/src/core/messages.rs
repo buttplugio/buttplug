@@ -120,6 +120,26 @@ impl Ping {
     }
 }
 
+#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Test {
+    /// Message Id, used for matching message pairs in remote connection instances.
+    #[serde(rename = "Id")]
+    id: u32,
+    /// Test string, which will be echo'd back to client when sent to server.
+    #[serde(rename = "TestString")]
+    test_string: String,
+}
+
+impl Test {
+    /// Creates a new Ping message with the given Id.
+    pub fn new(test: &str) -> Self {
+        Self {
+            id:1,
+            test_string: test.to_owned()
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MessageAttributes {
     #[serde(rename = "FeatureCount")]
@@ -316,6 +336,7 @@ pub enum ButtplugMessageUnion {
     Ok(Ok),
     Error(Error),
     Ping(Ping),
+    Test(Test),
     DeviceList(DeviceList),
     DeviceAdded(DeviceAdded),
     DeviceRemoved(DeviceRemoved),
@@ -336,6 +357,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::Error(ref _msg) => _msg.id,
             ButtplugMessageUnion::Log(ref _msg) => _msg.id,
             ButtplugMessageUnion::Ping(ref _msg) => _msg.id,
+            ButtplugMessageUnion::Test(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceList(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceAdded(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceRemoved(ref _msg) => _msg.id,
@@ -355,6 +377,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::Error(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Log(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Ping(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::Test(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceList(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceAdded(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceRemoved(ref mut _msg) => _msg.set_id(id),
