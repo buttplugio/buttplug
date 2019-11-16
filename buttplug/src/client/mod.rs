@@ -19,7 +19,7 @@ use device::ButtplugClientDevice;
 use internal::{client_event_loop, ButtplugClientMessageFuture, ButtplugInternalClientMessage};
 
 use crate::core::{
-    errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+    errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError, ButtplugDeviceError},
     messages::{
         ButtplugMessage, ButtplugMessageUnion, LogLevel, RequestDeviceList, RequestServerInfo,
         StartScanning,
@@ -96,6 +96,22 @@ impl Error for ButtplugClientError {
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
+    }
+}
+
+impl From<ButtplugMessageError> for ButtplugClientError {
+    fn from(error: ButtplugMessageError) -> Self {
+        ButtplugClientError::ButtplugError(
+            ButtplugError::ButtplugMessageError(error),
+        )
+    }
+}
+
+impl From<ButtplugDeviceError> for ButtplugClientError {
+    fn from(error: ButtplugDeviceError) -> Self {
+        ButtplugClientError::ButtplugError(
+            ButtplugError::ButtplugDeviceError(error),
+        )
     }
 }
 
@@ -375,11 +391,10 @@ impl ButtplugClient {
         let msg = self.send_message(msg).await;
         match msg.unwrap() {
             ButtplugMessageUnion::Ok(_) => Ok(()),
-            _ => Err(ButtplugClientError::ButtplugError(
-                ButtplugError::ButtplugMessageError(ButtplugMessageError {
-                    message: "Got non-Ok message back".to_string(),
-                }),
-            )),
+            _ => Err(ButtplugClientError::from(
+                ButtplugMessageError::new("Got non-Ok message back"))),
+        }
+    }
         }
     }
 

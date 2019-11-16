@@ -23,6 +23,14 @@ pub struct ButtplugHandshakeError {
     pub message: String,
 }
 
+impl ButtplugHandshakeError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_owned()
+        }
+    }
+}
+
 impl fmt::Display for ButtplugHandshakeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Init Error: {}", self.message)
@@ -44,6 +52,14 @@ impl Error for ButtplugHandshakeError {
 #[derive(Debug, Clone)]
 pub struct ButtplugMessageError {
     pub message: String,
+}
+
+impl ButtplugMessageError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_owned()
+        }
+    }
 }
 
 impl fmt::Display for ButtplugMessageError {
@@ -70,6 +86,14 @@ pub struct ButtplugPingError {
     pub message: String,
 }
 
+impl ButtplugPingError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_owned()
+        }
+    }
+}
+
 impl fmt::Display for ButtplugPingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Ping Error: {}", self.message)
@@ -94,6 +118,14 @@ pub struct ButtplugDeviceError {
     pub message: String,
 }
 
+impl ButtplugDeviceError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_owned()
+        }
+    }
+}
+
 impl fmt::Display for ButtplugDeviceError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Device Error: {}", self.message)
@@ -115,6 +147,14 @@ impl Error for ButtplugDeviceError {
 #[derive(Debug, Clone)]
 pub struct ButtplugUnknownError {
     pub message: String,
+}
+
+impl ButtplugUnknownError {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_owned()
+        }
+    }
 }
 
 impl fmt::Display for ButtplugUnknownError {
