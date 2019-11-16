@@ -507,6 +507,24 @@ impl KiirooCmd {
     }
 }
 
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone, Serialize, Deserialize)]
+pub struct VorzeA10CycloneCmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
+    #[serde(rename = "Speed")]
+    pub speed: u32,
+    #[serde(rename = "Clockwise")]
+    pub clockwise: bool,
+}
+
+impl VorzeA10CycloneCmd {
+    pub fn new(device_index: u32, speed: u32, clockwise: bool) -> Self {
+        Self { id: 1, device_index, speed, clockwise }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
@@ -530,6 +548,7 @@ pub enum ButtplugMessageUnion {
     FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
     LovenseCmd(LovenseCmd),
     KiirooCmd(KiirooCmd),
+    VorzeA10CycloneCmd(VorzeA10CycloneCmd),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -558,6 +577,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref msg) => msg.id,
             ButtplugMessageUnion::LovenseCmd(ref msg) => msg.id,
             ButtplugMessageUnion::KiirooCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::VorzeA10CycloneCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -586,6 +606,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::LovenseCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::KiirooCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::VorzeA10CycloneCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
