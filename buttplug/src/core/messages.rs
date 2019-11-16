@@ -486,6 +486,27 @@ impl LovenseCmd {
     }
 }
 
+// Dear god this needs to be deprecated
+#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct KiirooCmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
+    #[serde(rename = "Command")]
+    pub command: String,
+}
+
+impl KiirooCmd {
+    pub fn new(device_index: u32, command: &str) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            command: command.to_owned(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
@@ -508,6 +529,7 @@ pub enum ButtplugMessageUnion {
     RotateCmd(RotateCmd),
     FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
     LovenseCmd(LovenseCmd),
+    KiirooCmd(KiirooCmd),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -535,6 +557,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RotateCmd(ref msg) => msg.id,
             ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref msg) => msg.id,
             ButtplugMessageUnion::LovenseCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::KiirooCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -562,6 +585,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::RotateCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::FleshlightLaunchFW12Cmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::LovenseCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::KiirooCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
