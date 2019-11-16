@@ -525,6 +525,22 @@ impl VorzeA10CycloneCmd {
     }
 }
 
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone, Serialize, Deserialize)]
+pub struct SingleMotorVibrateCmd {
+    #[serde(rename = "Id")]
+    pub id: u32,
+    #[serde(rename = "DeviceIndex")]
+    pub device_index: u32,
+    #[serde(rename = "Speed")]
+    pub speed: f64,
+}
+
+impl SingleMotorVibrateCmd {
+    pub fn new(device_index: u32, speed: f64) -> Self {
+        Self { id: 1, device_index, speed }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
@@ -549,6 +565,7 @@ pub enum ButtplugMessageUnion {
     LovenseCmd(LovenseCmd),
     KiirooCmd(KiirooCmd),
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+    SingleMotorVibrateCmd(SingleMotorVibrateCmd),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -578,6 +595,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::LovenseCmd(ref msg) => msg.id,
             ButtplugMessageUnion::KiirooCmd(ref msg) => msg.id,
             ButtplugMessageUnion::VorzeA10CycloneCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::SingleMotorVibrateCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -607,6 +625,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::LovenseCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::KiirooCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::VorzeA10CycloneCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::SingleMotorVibrateCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
