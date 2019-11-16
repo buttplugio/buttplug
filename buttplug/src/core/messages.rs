@@ -278,6 +278,23 @@ pub enum LogLevel {
 }
 
 #[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+pub struct RequestLog {
+    #[serde(rename = "Id")]
+    id: u32,
+    #[serde(rename = "LogLevel")]
+    pub log_level: LogLevel,
+}
+
+impl RequestLog {
+    pub fn new(log_level: LogLevel) -> Self {
+        Self {
+            id: 1,
+            log_level,
+        }
+    }
+}
+
+#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Log {
     #[serde(rename = "Id")]
     id: u32,
@@ -337,6 +354,8 @@ pub enum ButtplugMessageUnion {
     Error(Error),
     Ping(Ping),
     Test(Test),
+    RequestLog(RequestLog),
+    Log(Log),
     DeviceList(DeviceList),
     DeviceAdded(DeviceAdded),
     DeviceRemoved(DeviceRemoved),
@@ -347,7 +366,6 @@ pub enum ButtplugMessageUnion {
     RequestServerInfo(RequestServerInfo),
     ServerInfo(ServerInfo),
     VibrateCmd(VibrateCmd),
-    Log(Log),
 }
 
 impl ButtplugMessage for ButtplugMessageUnion {
@@ -356,6 +374,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::Ok(ref _msg) => _msg.id,
             ButtplugMessageUnion::Error(ref _msg) => _msg.id,
             ButtplugMessageUnion::Log(ref _msg) => _msg.id,
+            ButtplugMessageUnion::RequestLog(ref _msg) => _msg.id,
             ButtplugMessageUnion::Ping(ref _msg) => _msg.id,
             ButtplugMessageUnion::Test(ref _msg) => _msg.id,
             ButtplugMessageUnion::DeviceList(ref _msg) => _msg.id,
@@ -376,6 +395,7 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::Ok(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Error(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Log(ref mut _msg) => _msg.set_id(id),
+            ButtplugMessageUnion::RequestLog(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Ping(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::Test(ref mut _msg) => _msg.set_id(id),
             ButtplugMessageUnion::DeviceList(ref mut _msg) => _msg.set_id(id),
