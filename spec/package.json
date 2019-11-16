@@ -18,10 +18,10 @@
   },
   "homepage": "https://github.com/metafetish/buttplug#readme",
   "dependencies": {
-    "@vuepress/plugin-back-to-top": "^1.0.1",
-    "mermaid": "^8.0.0",
-    "vuepress": "^1.0.1",
+    "@vuepress/plugin-back-to-top": "^1.2.0",
+    "mermaid": "^8.4.2",
+    "vuepress": "^1.2.0",
     "vuepress-plugin-matomo": "^1.0.2",
-    "yarn": "^1.16.0"
+    "yarn": "^1.19.1"
   }
 }
