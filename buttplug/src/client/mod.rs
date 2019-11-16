@@ -33,6 +33,8 @@ use async_std::{
 use futures::{Future, StreamExt};
 use std::{collections::HashMap, error::Error, fmt};
 
+type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
+
 /// Enum representing different events that can be emitted by a client.
 ///
 /// These events are created by the server and sent to the client, and represent
@@ -228,7 +230,7 @@ impl ButtplugClient {
     pub async fn connect(
         &mut self,
         connector: impl ButtplugClientConnector + 'static,
-    ) -> Option<ButtplugClientError> {
+    ) -> ButtplugClientResult {
         debug!("Running client connection.");
 
         // Send the connector to the internal loop for management. Once we throw
@@ -241,7 +243,7 @@ impl ButtplugClient {
 
         debug!("Waiting on internal loop to connect");
         if let Some(err) = fut.await {
-            return Some(ButtplugClientError::ButtplugClientConnectorError(err));
+            return Err(ButtplugClientError::ButtplugClientConnectorError(err));
         }
 
         info!("Client connected to server, running handshake.");
@@ -255,12 +257,11 @@ impl ButtplugClient {
     //
     // Sends over RequestServerInfo, gets back ServerInfo, sets up ping timer if
     // needed.
-    async fn handshake(&mut self) -> Option<ButtplugClientError> {
+    async fn handshake(&mut self) -> ButtplugClientResult {
         info!("Running handshake with server.");
-        let res = self
+        match self
             .send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
-            .await;
-        match res {
+            .await {
             Ok(msg) => {
                 debug!("Got ServerInfo return.");
                 if let ButtplugMessageUnion::ServerInfo(server_info) = msg {
@@ -272,7 +273,7 @@ impl ButtplugClient {
                     self.update_device_list().await
                 } else {
                     // TODO Should disconnect here.
-                    Some(ButtplugClientError::ButtplugError(
+                    Err(ButtplugClientError::ButtplugError(
                         ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
                             message: "Did not receive expected ServerInfo or Error messages."
                                 .to_string(),
@@ -282,15 +283,14 @@ impl ButtplugClient {
             }
             // TODO Error message case may need to be implemented here when
             // we aren't only using embedded connectors.
-            Err(_) => None,
+            Err(e) => Err(e),
         }
     }
 
-    async fn update_device_list(&mut self) -> Option<ButtplugClientError> {
-        let res = self
+    async fn update_device_list(&mut self) -> ButtplugClientResult {
+        match self
             .send_message(&RequestDeviceList::default().as_union())
-            .await;
-        match res {
+            .await {
             Ok(msg) => match msg {
                 ButtplugMessageUnion::DeviceList(_msg) => {
                     for info in _msg.devices.iter() {
@@ -301,11 +301,11 @@ impl ButtplugClient {
                         debug!("DeviceList: Adding {}", &device.name);
                         self.devices.insert(info.device_index, device.clone());
                     }
-                    None
+                    Ok(())
                 }
                 _ => panic!("Should get back device list!"),
             },
-            Err(_) => None,
+            Err(e) => Err(e),
         }
     }
 
@@ -315,7 +315,7 @@ impl ButtplugClient {
     }
 
     /// Disconnects from server, if connected.
-    pub async fn disconnect(&mut self) -> Option<ButtplugClientError> {
+    pub async fn disconnect(&mut self) -> ButtplugClientResult {
         // Send the connector to the internal loop for management. Once we throw
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
@@ -323,11 +323,11 @@ impl ButtplugClient {
         let msg = ButtplugInternalClientMessage::Disconnect(fut.get_state_clone());
         self.send_internal_message(msg).await;
         self.connected = false;
-        None
+        Ok(())
     }
 
     /// Tells server to start scanning for devices.
-    pub async fn start_scanning(&mut self) -> Option<ButtplugClientError> {
+    pub async fn start_scanning(&mut self) -> ButtplugClientResult {
         self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(StartScanning::new()))
             .await
     }
@@ -371,11 +371,11 @@ impl ButtplugClient {
     async fn send_message_expect_ok(
         &mut self,
         msg: &ButtplugMessageUnion,
-    ) -> Option<ButtplugClientError> {
+    ) -> ButtplugClientResult {
         let msg = self.send_message(msg).await;
         match msg.unwrap() {
-            ButtplugMessageUnion::Ok(_) => None,
-            _ => Some(ButtplugClientError::ButtplugError(
+            ButtplugMessageUnion::Ok(_) => Ok(()),
+            _ => Err(ButtplugClientError::ButtplugError(
                 ButtplugError::ButtplugMessageError(ButtplugMessageError {
                     message: "Got non-Ok message back".to_string(),
                 }),
@@ -470,7 +470,7 @@ mod test {
         assert!(client
             .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
             .await
-            .is_none());
+            .is_ok());
         assert!(client.connected());
     }
 
@@ -509,7 +509,7 @@ mod test {
                     assert!(client
                         .connect(ButtplugFailingClientConnector::default())
                         .await
-                        .is_some());
+                        .is_err());
                     assert!(!client.connected());
                 }
             })
@@ -535,7 +535,7 @@ mod test {
             ButtplugClient::run("Test Client", |mut client| {
                 async move {
                     connect_test_client(&mut client).await;
-                    assert!(client.disconnect().await.is_none());
+                    assert!(client.disconnect().await.is_ok());
                     assert!(!client.connected());
                 }
             })
@@ -568,7 +568,7 @@ mod test {
             ButtplugClient::run("Test Client", |mut client| {
                 async move {
                     connect_test_client(&mut client).await;
-                    assert!(client.start_scanning().await.is_none());
+                    assert!(client.start_scanning().await.is_ok());
                 }
             })
             .await;
