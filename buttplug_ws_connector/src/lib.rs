@@ -243,9 +243,9 @@ mod test {
                     assert!(client
                         .connect(ButtplugWebsocketClientConnector::default())
                         .await
-                        .is_none());
+                        .is_ok());
                     info!("connected");
-                    client.start_scanning().await;
+                    assert!(client.start_scanning().await.is_ok());
                     info!("scanning!");
                     info!("starting event loop!");
                     while client.connected() {
@@ -256,11 +256,11 @@ mod test {
                                     info!("Got device! {}", _device.name);
                                     let mut d = _device.clone();
                                     if d.allowed_messages.contains_key("VibrateCmd") {
-                                        d.send_vibrate_cmd(1.0).await;
+                                        assert!(d.send_vibrate_cmd(1.0).await.is_some());
                                         info!("Should be vibrating!");
                                         Delay::new(Duration::from_secs(1)).await;
-                                        d.send_vibrate_cmd(0.0).await;
-                                        client.disconnect().await;
+                                        assert!(d.send_vibrate_cmd(0.0).await.is_some());
+                                        assert!(client.disconnect().await.is_ok());
                                         Delay::new(Duration::from_secs(1)).await;
                                         break;
                                     }

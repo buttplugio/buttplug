@@ -395,8 +395,6 @@ impl ButtplugClient {
                 ButtplugMessageError::new("Got non-Ok message back"))),
         }
     }
-        }
-    }
 
     /// Produces a future that will wait for a set of events from the
     /// internal loop. Returns once any number of events is received.
