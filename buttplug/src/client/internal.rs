@@ -54,16 +54,14 @@ impl<T> ButtplugClientFutureState<T> {
     ///
     /// - `msg`: Message to set as reply, which will be returned by the
     /// corresponding future.
-    pub fn set_reply_msg(&mut self, msg: &T)
-    where
-        T: Clone,
+    pub fn set_reply(&mut self, reply: T)
     {
         if self.reply_msg.is_some() {
             // TODO Can we stop multiple calls to set_reply_msg at compile time?
             panic!("set_reply_msg called multiple times on the same future.");
         }
 
-        self.reply_msg = Some(msg.clone());
+        self.reply_msg = Some(reply);
 
         if self.waker.is_some() {
             self.waker.take().unwrap().wake();

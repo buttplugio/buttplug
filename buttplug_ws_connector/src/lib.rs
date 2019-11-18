@@ -49,7 +49,7 @@ struct InternalClient {
 impl Handler for InternalClient {
     fn on_open(&mut self, _: Handshake) -> ws::Result<()> {
         info!("Opened websocket");
-        self.connector_waker.lock().unwrap().set_reply_msg(&None);
+        self.connector_waker.lock().unwrap().set_reply(None);
         Ok(())
     }
 
@@ -76,7 +76,7 @@ impl Handler for InternalClient {
 
     fn on_error(&mut self, err: ws::Error) {
         info!("The server encountered an error: {:?}", err);
-        self.connector_waker.lock().unwrap().set_reply_msg(&Some(
+        self.connector_waker.lock().unwrap().set_reply(Some(
             ButtplugClientConnectorError::new(&(format!("{}", err))),
         ));
     }

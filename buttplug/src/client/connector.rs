@@ -97,7 +97,7 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
         let ret_msg = self.server.send_message(msg).await;
         let mut waker_state = state.lock().unwrap();
-        waker_state.set_reply_msg(&(ret_msg.unwrap()));
+        waker_state.set_reply(ret_msg.unwrap());
     }
 
     fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {

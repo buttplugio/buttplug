@@ -132,7 +132,6 @@ impl From<ButtplugDeviceError> for ButtplugClientError {
 /// as a Future, and return it via the [ButtplugClient::get_loop] call. This
 /// loop needs to be awaited before awaiting other client calls (like
 /// [ButtplugClient::connect]), otherwise the system will panic.
-#[derive(Clone)]
 pub struct ButtplugClient {
     /// The client name. Depending on the connection type and server being used,
     /// this name is sometimes shown on the server logs or GUI.

@@ -38,7 +38,7 @@ impl ClientConnectorMessageSorter {
         match self.future_map.remove(&(msg.get_id())) {
             Some(_state) => {
                 let mut waker_state = _state.lock().unwrap();
-                waker_state.set_reply_msg(msg);
+                waker_state.set_reply(msg.clone());
                 true
             }
             None => {
