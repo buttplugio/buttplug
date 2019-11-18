@@ -134,8 +134,8 @@ impl Test {
     /// Creates a new Ping message with the given Id.
     pub fn new(test: &str) -> Self {
         Self {
-            id:1,
-            test_string: test.to_owned()
+            id: 1,
+            test_string: test.to_owned(),
         }
     }
 }
@@ -226,9 +226,7 @@ pub struct RequestDeviceList {
 
 impl RequestDeviceList {
     pub fn new() -> Self {
-        Self {
-            id: 1
-        }
+        Self { id: 1 }
     }
 }
 
@@ -305,10 +303,7 @@ pub struct RequestLog {
 
 impl RequestLog {
     pub fn new(log_level: LogLevel) -> Self {
-        Self {
-            id: 1,
-            log_level,
-        }
+        Self { id: 1, log_level }
     }
 }
 
@@ -401,7 +396,11 @@ pub struct VectorSubcommand {
 
 impl VectorSubcommand {
     pub fn new(index: u32, duration: u32, position: f64) -> Self {
-        Self { index, duration, position }
+        Self {
+            index,
+            duration,
+            position,
+        }
     }
 }
 
@@ -437,7 +436,11 @@ pub struct RotationSubcommand {
 
 impl RotationSubcommand {
     pub fn new(index: u32, speed: f64, clockwise: bool) -> Self {
-        Self { index, speed, clockwise }
+        Self {
+            index,
+            speed,
+            clockwise,
+        }
     }
 }
 
@@ -539,7 +542,12 @@ pub struct VorzeA10CycloneCmd {
 
 impl VorzeA10CycloneCmd {
     pub fn new(device_index: u32, speed: u32, clockwise: bool) -> Self {
-        Self { id: 1, device_index, speed, clockwise }
+        Self {
+            id: 1,
+            device_index,
+            speed,
+            clockwise,
+        }
     }
 }
 
@@ -555,7 +563,11 @@ pub struct SingleMotorVibrateCmd {
 
 impl SingleMotorVibrateCmd {
     pub fn new(device_index: u32, speed: f64) -> Self {
-        Self { id: 1, device_index, speed }
+        Self {
+            id: 1,
+            device_index,
+            speed,
+        }
     }
 }
 

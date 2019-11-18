@@ -12,24 +12,23 @@ use super::{
         ButtplugClientConnectionStateShared, ButtplugClientConnector, ButtplugClientConnectorError,
     },
     device::ButtplugClientDevice,
-    ButtplugClientError,
-    ButtplugClientEvent,
+    ButtplugClientError, ButtplugClientEvent,
 };
 use crate::core::{
-    messages::{ButtplugMessageUnion, DeviceMessageInfo, DeviceList},
     errors::ButtplugError,
     errors::ButtplugMessageError,
+    messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo},
 };
 use async_std::{
     future::Future,
     prelude::{FutureExt, StreamExt},
-    sync::{Receiver, Sender, channel},
+    sync::{channel, Receiver, Sender},
     task::{Context, Poll, Waker},
 };
 use core::pin::Pin;
 use std::{
-    sync::{Arc, Mutex},
     collections::HashMap,
+    sync::{Arc, Mutex},
 };
 
 /// Struct used for waiting on replies from the server.
@@ -66,8 +65,7 @@ impl<T> ButtplugClientFutureState<T> {
     ///
     /// - `msg`: Message to set as reply, which will be returned by the
     /// corresponding future.
-    pub fn set_reply(&mut self, reply: T)
-    {
+    pub fn set_reply(&mut self, reply: T) {
         if self.reply_msg.is_some() {
             // TODO Can we stop multiple calls to set_reply_msg at compile time?
             panic!("set_reply_msg called multiple times on the same future.");
@@ -207,7 +205,9 @@ impl ButtplugClientEventLoop {
         match client_receiver.next().await {
             None => {
                 debug!("Client disconnected.");
-                Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError::new("Client was dropped during connect.")))
+                Err(ButtplugClientError::ButtplugClientConnectorError(
+                    ButtplugClientConnectorError::new("Client was dropped during connect."),
+                ))
             }
             Some(msg) => match msg {
                 ButtplugClientMessage::Connect(mut connector, state) => {
@@ -215,11 +215,16 @@ impl ButtplugClientEventLoop {
                         Err(err) => {
                             error!("Cannot connect to server: {}", err.message);
                             let mut waker_state = state.lock().unwrap();
-                            let reply = Err(ButtplugClientConnectorError::new(
-                                &format!("Cannot connect to server: {}", err.message),
-                            ));
+                            let reply = Err(ButtplugClientConnectorError::new(&format!(
+                                "Cannot connect to server: {}",
+                                err.message
+                            )));
                             waker_state.set_reply(reply);
-                            Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError::new("Client couldn't connect to server.")))
+                            Err(ButtplugClientError::ButtplugClientConnectorError(
+                                ButtplugClientConnectorError::new(
+                                    "Client couldn't connect to server.",
+                                ),
+                            ))
                         }
                         Ok(_) => {
                             info!("Connected!");
@@ -241,7 +246,11 @@ impl ButtplugClientEventLoop {
                 }
                 _ => {
                     error!("Received non-connector message before connector message.");
-                    Err(ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Client couldn't connect to server."))))
+                    Err(ButtplugClientError::ButtplugError(
+                        ButtplugError::ButtplugMessageError(ButtplugMessageError::new(
+                            "Client couldn't connect to server.",
+                        )),
+                    ))
                 }
             },
         }
@@ -250,7 +259,8 @@ impl ButtplugClientEventLoop {
     fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
         let (event_sender, event_receiver) = channel(256);
         if !self.device_event_senders.contains_key(&info.device_index) {
-            self.device_event_senders.insert(info.device_index, vec!(event_sender));
+            self.device_event_senders
+                .insert(info.device_index, vec![event_sender]);
         } else {
             if let Some(v) = self.device_event_senders.get_mut(&info.device_index) {
                 v.push(event_sender);
@@ -266,21 +276,27 @@ impl ButtplugClientEventLoop {
                 let info = DeviceMessageInfo::from(dev);
                 let device = self.create_client_device(&info);
                 self.devices.insert(dev.device_index, info);
-                self.event_sender.send(ButtplugClientEvent::DeviceAdded(device)).await;
-            },
+                self.event_sender
+                    .send(ButtplugClientEvent::DeviceAdded(device))
+                    .await;
+            }
             ButtplugMessageUnion::DeviceList(dev) => {
                 for d in &dev.devices {
                     let device = self.create_client_device(&d);
                     self.devices.insert(d.device_index, d.clone());
-                    self.event_sender.send(ButtplugClientEvent::DeviceAdded(device)).await;
+                    self.event_sender
+                        .send(ButtplugClientEvent::DeviceAdded(device))
+                        .await;
                 }
             }
             ButtplugMessageUnion::DeviceRemoved(dev) => {
                 let info = self.devices.remove(&dev.device_index);
                 self.device_event_senders.remove(&dev.device_index);
-                self.event_sender.send(ButtplugClientEvent::DeviceRemoved(info.unwrap())).await;
+                self.event_sender
+                    .send(ButtplugClientEvent::DeviceRemoved(info.unwrap()))
+                    .await;
             }
-            _ => panic!("Got connector message type we don't know how to handle!")
+            _ => panic!("Got connector message type we don't know how to handle!"),
         }
     }
 
@@ -300,7 +316,7 @@ impl ButtplugClientEventLoop {
             }
             ButtplugClientMessage::RequestDeviceList(fut) => {
                 info!("Building device list!");
-                let mut r = vec!();
+                let mut r = vec![];
                 // TODO There's probably a better way to do this.
                 let devices = self.devices.clone();
                 for d in devices.values() {
@@ -318,7 +334,9 @@ impl ButtplugClientEventLoop {
                 for d in &device_list.devices {
                     let device = self.create_client_device(&d);
                     self.devices.insert(d.device_index, d.clone());
-                    self.event_sender.send(ButtplugClientEvent::DeviceAdded(device)).await;
+                    self.event_sender
+                        .send(ButtplugClientEvent::DeviceAdded(device))
+                        .await;
                 }
                 true
             }
@@ -386,7 +404,6 @@ impl ButtplugClientEventLoop {
         }
     }
 }
-
 
 /// The internal event loop for [ButtplugClient] connection and
 /// communication

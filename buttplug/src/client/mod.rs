@@ -16,13 +16,15 @@ use connector::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
 };
 use device::ButtplugClientDevice;
-use internal::{client_event_loop, ButtplugClientMessageFuture, ButtplugClientMessage, ButtplugClientFuture};
+use internal::{
+    client_event_loop, ButtplugClientFuture, ButtplugClientMessage, ButtplugClientMessageFuture,
+};
 
 use crate::core::{
-    errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError, ButtplugDeviceError},
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
     messages::{
-        ButtplugMessage, ButtplugMessageUnion, RequestDeviceList, RequestServerInfo,
-        StartScanning, LogLevel, DeviceMessageInfo
+        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
+        RequestServerInfo, StartScanning,
     },
 };
 
@@ -75,25 +77,19 @@ impl Error for ButtplugClientError {
 
 impl From<ButtplugClientConnectorError> for ButtplugClientError {
     fn from(error: ButtplugClientConnectorError) -> Self {
-        ButtplugClientError::ButtplugClientConnectorError(
-            error
-        )
+        ButtplugClientError::ButtplugClientConnectorError(error)
     }
 }
 
 impl From<ButtplugMessageError> for ButtplugClientError {
     fn from(error: ButtplugMessageError) -> Self {
-        ButtplugClientError::ButtplugError(
-            ButtplugError::ButtplugMessageError(error),
-        )
+        ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(error))
     }
 }
 
 impl From<ButtplugDeviceError> for ButtplugClientError {
     fn from(error: ButtplugDeviceError) -> Self {
-        ButtplugClientError::ButtplugError(
-            ButtplugError::ButtplugDeviceError(error),
-        )
+        ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(error))
     }
 }
 
@@ -247,8 +243,7 @@ impl ButtplugClient {
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
         let fut = ButtplugClientConnectionFuture::default();
-        let msg =
-            ButtplugClientMessage::Connect(Box::new(connector), fut.get_state_clone());
+        let msg = ButtplugClientMessage::Connect(Box::new(connector), fut.get_state_clone());
         self.send_internal_message(msg).await;
 
         debug!("Waiting on internal loop to connect");
@@ -269,7 +264,8 @@ impl ButtplugClient {
         info!("Running handshake with server.");
         match self
             .send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
-            .await {
+            .await
+        {
             Ok(msg) => {
                 debug!("Got ServerInfo return.");
                 if let ButtplugMessageUnion::ServerInfo(server_info) = msg {
@@ -280,9 +276,14 @@ impl ButtplugClient {
                     // Get currently connected devices. The event loop will
                     // handle sending the message and getting the return, and
                     // will send the client updates as events.
-                    let msg = self.send_message(&ButtplugMessageUnion::RequestDeviceList(RequestDeviceList::new())).await?;
+                    let msg = self
+                        .send_message(&ButtplugMessageUnion::RequestDeviceList(
+                            RequestDeviceList::new(),
+                        ))
+                        .await?;
                     if let ButtplugMessageUnion::DeviceList(m) = msg {
-                        self.send_internal_message(ButtplugClientMessage::HandleDeviceList(m)).await;
+                        self.send_internal_message(ButtplugClientMessage::HandleDeviceList(m))
+                            .await;
                     }
                     Ok(())
                 } else {
@@ -350,8 +351,7 @@ impl ButtplugClient {
         }
         // Create a future to pair with the message being resolved.
         let fut = ButtplugClientMessageFuture::default();
-        let internal_msg =
-            ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
+        let internal_msg = ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
 
         // Send message to internal loop and wait for return.
         self.send_internal_message(internal_msg).await;
@@ -360,15 +360,13 @@ impl ButtplugClient {
 
     // Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
     // type ButtplugMessage back from the server.
-    async fn send_message_expect_ok(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-    ) -> ButtplugClientResult {
+    async fn send_message_expect_ok(&mut self, msg: &ButtplugMessageUnion) -> ButtplugClientResult {
         let msg = self.send_message(msg).await;
         match msg.unwrap() {
             ButtplugMessageUnion::Ok(_) => Ok(()),
-            _ => Err(ButtplugClientError::from(
-                ButtplugMessageError::new("Got non-Ok message back"))),
+            _ => Err(ButtplugClientError::from(ButtplugMessageError::new(
+                "Got non-Ok message back",
+            ))),
         }
     }
 
@@ -397,8 +395,7 @@ impl ButtplugClient {
     pub async fn devices(&mut self) -> Vec<ButtplugClientDevice> {
         info!("Request devices from inner loop!");
         let fut = ButtplugClientFuture::<Vec<ButtplugClientDevice>>::default();
-        let msg =
-            ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
+        let msg = ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
         info!("Sending device request to inner loop!");
         self.send_internal_message(msg).await;
         info!("Waiting for device list return!");

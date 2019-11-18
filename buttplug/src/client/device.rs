@@ -8,11 +8,10 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-    internal::{ButtplugClientMessageFuturePair,
-               ButtplugClientMessageFuture,
-               ButtplugClientDeviceMessage},
-    ButtplugClientResult,
-    ButtplugClientError,
+    internal::{
+        ButtplugClientDeviceMessage, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair,
+    },
+    ButtplugClientError, ButtplugClientResult,
 };
 use crate::core::{
     errors::{ButtplugError, ButtplugMessageError},
@@ -21,7 +20,7 @@ use crate::core::{
         VibrateSubcommand,
     },
 };
-use async_std::sync::{Sender, Receiver};
+use async_std::sync::{Receiver, Sender};
 use std::collections::HashMap;
 
 pub struct ButtplugClientDevice {
@@ -56,10 +55,7 @@ impl ButtplugClientDevice {
     async fn send_message(&mut self, msg: ButtplugMessageUnion) -> ButtplugMessageUnion {
         let fut = ButtplugClientMessageFuture::default();
         self.message_sender
-            .send((
-                msg.clone(),
-                fut.get_state_clone(),
-            ))
+            .send((msg.clone(), fut.get_state_clone()))
             .await;
         fut.await
     }
@@ -67,10 +63,14 @@ impl ButtplugClientDevice {
     async fn send_message_expect_ok(&mut self, msg: ButtplugMessageUnion) -> ButtplugClientResult {
         match self.send_message(msg).await {
             ButtplugMessageUnion::Ok(_) => Ok(()),
-            ButtplugMessageUnion::Error(_err) => Err(ButtplugClientError::ButtplugError(ButtplugError::from(_err))),
-            _ => Err(ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError {
-                message: "Got unexpected message type.".to_owned(),
-            })))
+            ButtplugMessageUnion::Error(_err) => Err(ButtplugClientError::ButtplugError(
+                ButtplugError::from(_err),
+            )),
+            _ => Err(ButtplugClientError::ButtplugError(
+                ButtplugError::ButtplugMessageError(ButtplugMessageError {
+                    message: "Got unexpected message type.".to_owned(),
+                }),
+            )),
         }
     }
 
@@ -91,13 +91,20 @@ impl ButtplugClientDevice {
     // }
 }
 
-impl From<(&DeviceAdded,
-           Sender<ButtplugClientMessageFuturePair>,
-           Receiver<ButtplugClientDeviceMessage>)> for ButtplugClientDevice {
-    fn from(msg_sender_tuple: (&DeviceAdded,
-                               Sender<ButtplugClientMessageFuturePair>,
-                               Receiver<ButtplugClientDeviceMessage>))
-            -> Self {
+impl
+    From<(
+        &DeviceAdded,
+        Sender<ButtplugClientMessageFuturePair>,
+        Receiver<ButtplugClientDeviceMessage>,
+    )> for ButtplugClientDevice
+{
+    fn from(
+        msg_sender_tuple: (
+            &DeviceAdded,
+            Sender<ButtplugClientMessageFuturePair>,
+            Receiver<ButtplugClientDeviceMessage>,
+        ),
+    ) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(
             &*msg.device_name,
@@ -109,13 +116,20 @@ impl From<(&DeviceAdded,
     }
 }
 
-impl From<(&DeviceMessageInfo,
-           Sender<ButtplugClientMessageFuturePair>,
-           Receiver<ButtplugClientDeviceMessage>)> for ButtplugClientDevice {
-    fn from(msg_sender_tuple: (&DeviceMessageInfo,
-                               Sender<ButtplugClientMessageFuturePair>,
-                               Receiver<ButtplugClientDeviceMessage>))
-            -> Self {
+impl
+    From<(
+        &DeviceMessageInfo,
+        Sender<ButtplugClientMessageFuturePair>,
+        Receiver<ButtplugClientDeviceMessage>,
+    )> for ButtplugClientDevice
+{
+    fn from(
+        msg_sender_tuple: (
+            &DeviceMessageInfo,
+            Sender<ButtplugClientMessageFuturePair>,
+            Receiver<ButtplugClientDeviceMessage>,
+        ),
+    ) -> Self {
         let msg = msg_sender_tuple.0.clone();
         ButtplugClientDevice::new(
             &*msg.device_name,

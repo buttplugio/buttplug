@@ -26,7 +26,7 @@ pub struct ButtplugHandshakeError {
 impl ButtplugHandshakeError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_owned()
+            message: message.to_owned(),
         }
     }
 }
@@ -57,7 +57,7 @@ pub struct ButtplugMessageError {
 impl ButtplugMessageError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_owned()
+            message: message.to_owned(),
         }
     }
 }
@@ -89,7 +89,7 @@ pub struct ButtplugPingError {
 impl ButtplugPingError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_owned()
+            message: message.to_owned(),
         }
     }
 }
@@ -121,7 +121,7 @@ pub struct ButtplugDeviceError {
 impl ButtplugDeviceError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_owned()
+            message: message.to_owned(),
         }
     }
 }
@@ -152,7 +152,7 @@ pub struct ButtplugUnknownError {
 impl ButtplugUnknownError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_owned()
+            message: message.to_owned(),
         }
     }
 }

@@ -48,11 +48,11 @@ impl ButtplugServer {
             ButtplugMessageUnion::StartScanning(_) => {
                 self.start_scanning().await?;
                 Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
-            },
-            ButtplugMessageUnion::StopScanning(_) =>  {
+            }
+            ButtplugMessageUnion::StopScanning(_) => {
                 self.stop_scanning().await?;
                 Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
-            },
+            }
             ButtplugMessageUnion::RequestDeviceList(_) => {
                 let mut list = messages::DeviceList::default();
                 list.set_id(msg.get_id());

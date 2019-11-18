@@ -76,9 +76,12 @@ impl Handler for InternalClient {
 
     fn on_error(&mut self, err: ws::Error) {
         info!("The server encountered an error: {:?}", err);
-        self.connector_waker.lock().unwrap().set_reply(Err(
-            ButtplugClientConnectorError::new(&(format!("{}", err))),
-        ));
+        self.connector_waker
+            .lock()
+            .unwrap()
+            .set_reply(Err(ButtplugClientConnectorError::new(
+                &(format!("{}", err)),
+            )));
     }
 
     fn upgrade_ssl_client(
@@ -228,7 +231,7 @@ mod test {
             assert!(ButtplugWebsocketClientConnector::default()
                 .connect()
                 .await
-                .is_none());
+                .is_ok());
         })
     }
 
@@ -282,7 +285,6 @@ mod test {
                         assert!(client.disconnect().await.is_ok());
                         Delay::new(Duration::from_secs(1)).await;
                     }
-
                 }
             })
             .await;
