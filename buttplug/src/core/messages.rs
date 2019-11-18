@@ -106,17 +106,17 @@ impl From<ButtplugError> for Error {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Ping {
     /// Message Id, used for matching message pairs in remote connection instances.
     #[serde(rename = "Id")]
     id: u32,
 }
 
-impl Ping {
+impl Default for Ping {
     /// Creates a new Ping message with the given Id.
-    pub fn new(id: u32) -> Self {
-        Self { id }
+    fn default() -> Self {
+        Self { id: 1 }
     }
 }
 
@@ -194,22 +194,28 @@ pub struct DeviceRemoved {
     pub device_index: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StartScanning {
     #[serde(rename = "Id")]
     id: u32,
 }
 
-impl StartScanning {
-    pub fn new() -> Self {
+impl Default for StartScanning {
+    fn default() -> Self {
         Self { id: 1 }
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StopScanning {
     #[serde(rename = "Id")]
     id: u32,
+}
+
+impl Default for StopScanning {
+    fn default() -> Self {
+        Self { id: 1 }
+    }
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
@@ -224,8 +230,8 @@ pub struct RequestDeviceList {
     id: u32,
 }
 
-impl RequestDeviceList {
-    pub fn new() -> Self {
+impl Default for RequestDeviceList {
+    fn default() -> Self {
         Self { id: 1 }
     }
 }
