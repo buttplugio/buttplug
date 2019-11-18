@@ -29,6 +29,7 @@ pub struct ButtplugClientDevice {
     index: u32,
     pub allowed_messages: HashMap<String, MessageAttributes>,
     message_sender: Sender<ButtplugClientMessageFuturePair>,
+    // TODO Use this for disconnects
     event_receiver: Receiver<ButtplugClientDeviceMessage>,
 }
 
@@ -81,11 +82,11 @@ impl ButtplugClientDevice {
         .await
     }
 
-    // pub async fn send_linear_cmd(&self) -> Option<ButtplugError> {
+    // pub async fn send_linear_cmd(&self) -> ButtplugClientResult {
     //     None
     // }
 
-    // pub async fn send_rotation_cmd(&self) -> Option<ButtplugError> {
+    // pub async fn send_rotation_cmd(&self) -> ButtplugClientResult {
     //     None
     // }
 }

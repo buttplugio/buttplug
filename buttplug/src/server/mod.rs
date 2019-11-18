@@ -45,14 +45,14 @@ impl ButtplugServer {
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         match msg {
             ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
-            ButtplugMessageUnion::StartScanning(_) => self.start_scanning().await.map_or_else(
-                || Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
-                Result::Err,
-            ),
-            ButtplugMessageUnion::StopScanning(_) => self.stop_scanning().await.map_or_else(
-                || Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
-                Result::Err,
-            ),
+            ButtplugMessageUnion::StartScanning(_) => {
+                self.start_scanning().await?;
+                Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+            },
+            ButtplugMessageUnion::StopScanning(_) =>  {
+                self.stop_scanning().await?;
+                Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+            },
             ButtplugMessageUnion::RequestDeviceList(_) => {
                 let mut list = messages::DeviceList::default();
                 list.set_id(msg.get_id());
@@ -88,12 +88,12 @@ impl ButtplugServer {
         )
     }
 
-    async fn start_scanning(&self) -> Option<ButtplugError> {
-        None
+    async fn start_scanning(&self) -> Result<(), ButtplugError> {
+        Ok(())
     }
 
-    async fn stop_scanning(&self) -> Option<ButtplugError> {
-        None
+    async fn stop_scanning(&self) -> Result<(), ButtplugError> {
+        Ok(())
     }
 }
 

@@ -49,7 +49,7 @@ struct InternalClient {
 impl Handler for InternalClient {
     fn on_open(&mut self, _: Handshake) -> ws::Result<()> {
         info!("Opened websocket");
-        self.connector_waker.lock().unwrap().set_reply(None);
+        self.connector_waker.lock().unwrap().set_reply(Ok(()));
         Ok(())
     }
 
@@ -76,7 +76,7 @@ impl Handler for InternalClient {
 
     fn on_error(&mut self, err: ws::Error) {
         info!("The server encountered an error: {:?}", err);
-        self.connector_waker.lock().unwrap().set_reply(Some(
+        self.connector_waker.lock().unwrap().set_reply(Err(
             ButtplugClientConnectorError::new(&(format!("{}", err))),
         ));
     }
@@ -155,7 +155,7 @@ impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
 
 #[async_trait]
 impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
-    async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
+    async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
         let send = self.helper.get_remote_send();
         let fut = ButtplugClientConnectionFuture::default();
         let waker = fut.get_state_clone();
@@ -192,9 +192,9 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         fut.await
     }
 
-    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
+    async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
         self.helper.close().await;
-        None
+        Ok(())
     }
 
     async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {

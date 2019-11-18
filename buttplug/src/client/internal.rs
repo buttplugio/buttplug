@@ -212,19 +212,19 @@ impl ButtplugClientEventLoop {
             Some(msg) => match msg {
                 ButtplugClientMessage::Connect(mut connector, state) => {
                     match connector.connect().await {
-                        Some(_s) => {
-                            error!("Cannot connect to server.");
+                        Err(err) => {
+                            error!("Cannot connect to server: {}", err.message);
                             let mut waker_state = state.lock().unwrap();
-                            let reply = Some(ButtplugClientConnectorError::new(
-                                "Cannot connect to server.",
+                            let reply = Err(ButtplugClientConnectorError::new(
+                                &format!("Cannot connect to server: {}", err.message),
                             ));
                             waker_state.set_reply(reply);
                             Err(ButtplugClientError::ButtplugClientConnectorError(ButtplugClientConnectorError::new("Client couldn't connect to server.")))
                         }
-                        None => {
+                        Ok(_) => {
                             info!("Connected!");
                             let mut waker_state = state.lock().unwrap();
-                            waker_state.set_reply(None);
+                            waker_state.set_reply(Ok(()));
                             let (device_message_sender, device_message_receiver) = channel(256);
                             Ok(ButtplugClientEventLoop {
                                 devices: HashMap::new(),
@@ -294,9 +294,8 @@ impl ButtplugClientEventLoop {
             }
             ButtplugClientMessage::Disconnect(state) => {
                 info!("Client requested disconnect");
-                self.connector.disconnect();
                 let mut waker_state = state.lock().unwrap();
-                waker_state.set_reply(None);
+                waker_state.set_reply(self.connector.disconnect().await);
                 false
             }
             ButtplugClientMessage::RequestDeviceList(fut) => {

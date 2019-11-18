@@ -31,7 +31,7 @@ use async_std::{
     sync::{channel, Receiver, Sender},
 };
 use futures::{Future, StreamExt};
-use std::{collections::HashMap, error::Error, fmt};
+use std::{error::Error, fmt};
 
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
@@ -70,6 +70,14 @@ impl Error for ButtplugClientError {
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
+    }
+}
+
+impl From<ButtplugClientConnectorError> for ButtplugClientError {
+    fn from(error: ButtplugClientConnectorError) -> Self {
+        ButtplugClientError::ButtplugClientConnectorError(
+            error
+        )
     }
 }
 
@@ -244,9 +252,7 @@ impl ButtplugClient {
         self.send_internal_message(msg).await;
 
         debug!("Waiting on internal loop to connect");
-        if let Some(err) = fut.await {
-            return Err(ButtplugClientError::ButtplugClientConnectorError(err));
-        }
+        fut.await?;
 
         info!("Client connected to server, running handshake.");
         // Set connected to true, since running the handshake requires the
@@ -434,12 +440,12 @@ mod test {
 
     #[async_trait]
     impl ButtplugClientConnector for ButtplugFailingClientConnector {
-        async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
-            Some(ButtplugClientConnectorError::new("Always fails"))
+        async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+            Err(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
-            Some(ButtplugClientConnectorError::new("Always fails"))
+        async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+            Err(ButtplugClientConnectorError::new("Always fails"))
         }
 
         async fn send(

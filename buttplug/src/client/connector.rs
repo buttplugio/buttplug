@@ -24,11 +24,11 @@ use futures::future::Future;
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionState =
-    ButtplugClientFutureState<Option<ButtplugClientConnectorError>>;
+    ButtplugClientFutureState<Result<(), ButtplugClientConnectorError>>;
 pub type ButtplugClientConnectionStateShared =
-    ButtplugClientFutureStateShared<Option<ButtplugClientConnectorError>>;
+    ButtplugClientFutureStateShared<Result<(), ButtplugClientConnectorError>>;
 pub type ButtplugClientConnectionFuture =
-    ButtplugClientFuture<Option<ButtplugClientConnectorError>>;
+    ButtplugClientFuture<Result<(), ButtplugClientConnectorError>>;
 
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
@@ -63,8 +63,8 @@ impl Error for ButtplugClientConnectorError {
 // in connectors implementing this trait, but Send should be ok.
 #[async_trait]
 pub trait ButtplugClientConnector: Send {
-    async fn connect(&mut self) -> Option<ButtplugClientConnectorError>;
-    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError>;
+    async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError>;
+    async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError>;
     async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared);
     fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion>;
 }
@@ -86,12 +86,12 @@ impl ButtplugEmbeddedClientConnector {
 
 #[async_trait]
 impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
-    async fn connect(&mut self) -> Option<ButtplugClientConnectorError> {
-        None
+    async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+        Ok(())
     }
 
-    async fn disconnect(&mut self) -> Option<ButtplugClientConnectorError> {
-        None
+    async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+        Ok(())
     }
 
     async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugClientMessageStateShared) {
