@@ -258,14 +258,10 @@ impl ButtplugClientEventLoop {
 
     fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
         let (event_sender, event_receiver) = channel(256);
-        if !self.device_event_senders.contains_key(&info.device_index) {
-            self.device_event_senders
-                .insert(info.device_index, vec![event_sender]);
-        } else {
-            if let Some(v) = self.device_event_senders.get_mut(&info.device_index) {
-                v.push(event_sender);
-            }
-        }
+        self.device_event_senders
+            .entry(info.device_index)
+            .or_insert_with(|| vec![])
+            .push(event_sender);
         ButtplugClientDevice::from((info, self.device_message_sender.clone(), event_receiver))
     }
 

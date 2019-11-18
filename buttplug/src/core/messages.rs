@@ -159,7 +159,7 @@ pub struct DeviceMessageInfo {
 impl From<&DeviceAdded> for DeviceMessageInfo {
     fn from(device_added: &DeviceAdded) -> Self {
         Self {
-            device_index: device_added.device_index.clone(),
+            device_index: device_added.device_index,
             device_name: device_added.device_name.clone(),
             device_messages: device_added.device_messages.clone(),
         }

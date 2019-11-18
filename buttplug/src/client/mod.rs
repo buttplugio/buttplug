@@ -321,8 +321,10 @@ impl ButtplugClient {
 
     /// Tells server to start scanning for devices.
     pub async fn start_scanning(&mut self) -> ButtplugClientResult {
-        self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(StartScanning::default()))
-            .await
+        self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(
+            StartScanning::default(),
+        ))
+        .await
     }
 
     // Send message to the internal event loop. Mostly for handling boilerplate
