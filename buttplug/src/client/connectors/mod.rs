@@ -17,7 +17,6 @@ use crate::{
         ButtplugClientMessageStateShared,
     },
     core::messages::ButtplugMessageUnion,
-    server::ButtplugServer,
 };
 use async_std::{
     prelude::{FutureExt, StreamExt},
@@ -26,6 +25,8 @@ use async_std::{
 use async_trait::async_trait;
 use futures::future::Future;
 use std::{error::Error, fmt};
+#[cfg(feature = "server")]
+use crate::server::ButtplugServer;
 
 pub type ButtplugClientConnectionState =
     ButtplugClientFutureState<Result<(), ButtplugClientConnectorError>>;
@@ -73,11 +74,13 @@ pub trait ButtplugClientConnector: Send {
     fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion>;
 }
 
+#[cfg(feature = "server")]
 pub struct ButtplugEmbeddedClientConnector {
     server: ButtplugServer,
     recv: Option<Receiver<ButtplugMessageUnion>>,
 }
 
+#[cfg(feature = "server")]
 impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u32) -> Self {
         let (send, recv) = channel(256);
@@ -88,6 +91,7 @@ impl ButtplugEmbeddedClientConnector {
     }
 }
 
+#[cfg(feature = "server")]
 #[async_trait]
 impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {

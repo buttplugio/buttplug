@@ -11,7 +11,9 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
 [features]
-default=[]
+default=["client", "server"]
+client=[]
+server=[]
 client-ws=["ws", "url"]
 client-ws-ssl=["ws", "url", "ws/ssl", "openssl"]
 

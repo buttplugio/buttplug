@@ -173,8 +173,10 @@ impl ButtplugClient {
     /// # Examples
     ///
     /// ```
+    /// #[cfg(feature = "server")]
     /// use buttplug::client::{ButtplugClient, connectors::ButtplugEmbeddedClientConnector};
     ///
+    /// #[cfg(feature = "server")]
     /// futures::executor::block_on(async {
     ///     ButtplugClient::run("Test Client", |mut client| {
     ///         async move {
@@ -402,7 +404,7 @@ impl ButtplugClient {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "server"))]
 mod test {
     use super::ButtplugClient;
     use crate::{
