@@ -16,13 +16,13 @@ use connector::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
 };
 use device::ButtplugClientDevice;
-use internal::{client_event_loop, ButtplugClientMessageFuture, ButtplugInternalClientMessage};
+use internal::{client_event_loop, ButtplugClientMessageFuture, ButtplugClientMessage, ButtplugClientFuture};
 
 use crate::core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError, ButtplugDeviceError},
     messages::{
-        ButtplugMessage, ButtplugMessageUnion, LogLevel, RequestDeviceList, RequestServerInfo,
-        StartScanning,
+        ButtplugMessage, ButtplugMessageUnion, RequestDeviceList, RequestServerInfo,
+        StartScanning, LogLevel, DeviceMessageInfo
     },
 };
 
@@ -34,32 +34,6 @@ use futures::{Future, StreamExt};
 use std::{collections::HashMap, error::Error, fmt};
 
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
-
-/// Enum representing different events that can be emitted by a client.
-///
-/// These events are created by the server and sent to the client, and represent
-/// unrequested actions that the client will need to respond to, or that
-/// applications using the client may be interested in.
-#[derive(Clone)]
-pub enum ButtplugClientEvent {
-    /// Emitted when a scanning session (started via a StartScanning call on
-    /// [ButtplugClient]) has finished.
-    ScanningFinished,
-    /// Emitted when a device has been added to the server. Includes a
-    /// [ButtplugClientDevice] object representing the device.
-    DeviceAdded(ButtplugClientDevice),
-    /// Emitted when a device has been removed from the server. Includes a
-    /// [ButtplugClientDevice] object representing the device.
-    DeviceRemoved(ButtplugClientDevice),
-    /// Emitted when log messages are sent from the server.
-    Log(LogLevel, String),
-    /// Emitted when a client has not pinged the server in a sufficient amount
-    /// of time.
-    PingTimeout,
-    /// Emitted when a client connector detects that the server has
-    /// disconnected.
-    ServerDisconnect,
-}
 
 /// Represents all of the different types of errors a ButtplugClient can return.
 ///
@@ -115,6 +89,31 @@ impl From<ButtplugDeviceError> for ButtplugClientError {
     }
 }
 
+/// Enum representing different events that can be emitted by a client.
+///
+/// These events are created by the server and sent to the client, and represent
+/// unrequested actions that the client will need to respond to, or that
+/// applications using the client may be interested in.
+pub enum ButtplugClientEvent {
+    /// Emitted when a scanning session (started via a StartScanning call on
+    /// [ButtplugClient]) has finished.
+    ScanningFinished,
+    /// Emitted when a device has been added to the server. Includes a
+    /// [ButtplugClientDevice] object representing the device.
+    DeviceAdded(ButtplugClientDevice),
+    /// Emitted when a device has been removed from the server. Includes a
+    /// [ButtplugClientDevice] object representing the device.
+    DeviceRemoved(DeviceMessageInfo),
+    /// Emitted when log messages are sent from the server.
+    Log(LogLevel, String),
+    /// Emitted when a client has not pinged the server in a sufficient amount
+    /// of time.
+    PingTimeout,
+    /// Emitted when a client connector detects that the server has
+    /// disconnected.
+    ServerDisconnect,
+}
+
 /// Struct used by applications to communicate with a Buttplug Server.
 ///
 /// Buttplug Clients provide an API layer on top of the Buttplug Protocol that
@@ -139,23 +138,13 @@ pub struct ButtplugClient {
     /// The server name. Once connected, this contains the name of the server,
     /// so we can know what we're connected to.
     pub server_name: Option<String>,
-    // A vector of devices currently connected to the server, as represented by
-    // [ButtplugClientDevice] types.
-    devices: HashMap<u32, ButtplugClientDevice>,
     // Sender to relay messages to the internal client loop
-    message_sender: Sender<ButtplugInternalClientMessage>,
-    // Receives event notifications from the ButtplugInternalClientLoop
-    event_receiver: Receiver<ButtplugMessageUnion>,
+    message_sender: Sender<ButtplugClientMessage>,
+    // Receives event notifications from the ButtplugClientLoop
+    event_receiver: Receiver<ButtplugClientEvent>,
     // True if the connector is currently connected, and handshake was
     // successful.
     connected: bool,
-    // Stupid state storage variable to know if we've sent DeviceAdded events
-    // yet during the first call to wait_for_events. I hate this, but in C# and
-    // JS we always fired the event handlers on after connect (so that all new
-    // device additions did similar things, even if the devices were already
-    // connected to the server and added on connect) and we should do similar
-    // here. But I hate this.
-    has_sent_devices: bool,
 }
 
 unsafe impl Sync for ButtplugClient {}
@@ -205,11 +194,9 @@ impl ButtplugClient {
         let client = ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
-            devices: HashMap::new(),
             event_receiver,
             message_sender,
             connected: false,
-            has_sent_devices: false,
         };
         let app_future = func(client);
         async move {
@@ -253,7 +240,7 @@ impl ButtplugClient {
         // further communications with the server, if connection is successful.
         let fut = ButtplugClientConnectionFuture::default();
         let msg =
-            ButtplugInternalClientMessage::Connect(Box::new(connector), fut.get_state_clone());
+            ButtplugClientMessage::Connect(Box::new(connector), fut.get_state_clone());
         self.send_internal_message(msg).await;
 
         debug!("Waiting on internal loop to connect");
@@ -284,8 +271,14 @@ impl ButtplugClient {
                     self.server_name = Option::Some(server_info.server_name);
                     // TODO Handle ping time in the internal event loop
 
-                    // Get currently connected devices.
-                    self.update_device_list().await
+                    // Get currently connected devices. The event loop will
+                    // handle sending the message and getting the return, and
+                    // will send the client updates as events.
+                    let msg = self.send_message(&ButtplugMessageUnion::RequestDeviceList(RequestDeviceList::new())).await?;
+                    if let ButtplugMessageUnion::DeviceList(m) = msg {
+                        self.send_internal_message(ButtplugClientMessage::HandleDeviceList(m)).await;
+                    }
+                    Ok(())
                 } else {
                     // TODO Should disconnect here.
                     Err(ButtplugClientError::ButtplugError(
@@ -302,28 +295,6 @@ impl ButtplugClient {
         }
     }
 
-    async fn update_device_list(&mut self) -> ButtplugClientResult {
-        match self
-            .send_message(&RequestDeviceList::default().as_union())
-            .await {
-            Ok(msg) => match msg {
-                ButtplugMessageUnion::DeviceList(_msg) => {
-                    for info in _msg.devices.iter() {
-                        let device = ButtplugClientDevice::from((
-                            &info.clone(),
-                            self.message_sender.clone(),
-                        ));
-                        debug!("DeviceList: Adding {}", &device.name);
-                        self.devices.insert(info.device_index, device.clone());
-                    }
-                    Ok(())
-                }
-                _ => panic!("Should get back device list!"),
-            },
-            Err(e) => Err(e),
-        }
-    }
-
     /// Returns true if client is currently connected to server.
     pub fn connected(&self) -> bool {
         self.connected
@@ -335,7 +306,7 @@ impl ButtplugClient {
         // the connector over, the internal loop will handle connecting and any
         // further communications with the server, if connection is successful.
         let fut = ButtplugClientConnectionFuture::default();
-        let msg = ButtplugInternalClientMessage::Disconnect(fut.get_state_clone());
+        let msg = ButtplugClientMessage::Disconnect(fut.get_state_clone());
         self.send_internal_message(msg).await;
         self.connected = false;
         Ok(())
@@ -349,7 +320,7 @@ impl ButtplugClient {
 
     // Send message to the internal event loop. Mostly for handling boilerplate
     // around possible send errors.
-    async fn send_internal_message(&mut self, msg: ButtplugInternalClientMessage) {
+    async fn send_internal_message(&mut self, msg: ButtplugClientMessage) {
         // If we're running the event loop, we should have a message_sender.
         // Being connected to the server doesn't matter here yet because we use
         // this function in order to connect also.
@@ -374,7 +345,7 @@ impl ButtplugClient {
         // Create a future to pair with the message being resolved.
         let fut = ButtplugClientMessageFuture::default();
         let internal_msg =
-            ButtplugInternalClientMessage::Message((msg.clone(), fut.get_state_clone()));
+            ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
 
         // Send message to internal loop and wait for return.
         self.send_internal_message(internal_msg).await;
@@ -406,54 +377,26 @@ impl ButtplugClient {
     pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
         debug!("Client waiting for event.");
         let mut events = vec![];
-        // During connection, we call RequestDeviceList and then add all devices
-        // returned to our client. However, in C# and JS, we would usually call
-        // event handlers at that point. We don't really have event handlers in
-        // Rust, so instead we emulate this behavior by returning DeviceAdded
-        // events on the first call to wait_for_event.
-        if !self.has_sent_devices {
-            self.has_sent_devices = true;
-            if !self.devices.is_empty() {
-                for device in self.devices.values() {
-                    events.push(ButtplugClientEvent::DeviceAdded(device.clone()));
-                }
-                return events;
-            }
-        }
         match self.event_receiver.next().await {
-            Some(msg) => match msg {
-                ButtplugMessageUnion::ScanningFinished(_) => {}
-                ButtplugMessageUnion::DeviceAdded(msg) => {
-                    info!("Got a device added message!");
-                    let device = ButtplugClientDevice::from((&msg, self.message_sender.clone()));
-                    self.devices.insert(msg.device_index, device.clone());
-                    info!("Sending to observers!");
-                    events.push(ButtplugClientEvent::DeviceAdded(device));
-                    info!("Observers sent!");
-                }
-                ButtplugMessageUnion::DeviceRemoved(msg) => {
-                    if let Some(dev) = self.devices.remove(&msg.device_index) {
-                        info!("Removing {}", dev.name);
-                        events.push(ButtplugClientEvent::DeviceRemoved(dev));
-                    } else {
-                        error!(
-                            "Tried removing non-existant device index {}",
-                            msg.device_index
-                        );
-                    }
-                }
-                ButtplugMessageUnion::Log(msg) => {
-                    events.push(ButtplugClientEvent::Log(msg.log_level, msg.log_message));
-                }
-                _ => panic!("Unhandled incoming message!"),
-            },
+            Some(msg) => events.push(msg),
             None => {
                 // If we got None, this means the internal loop stopped and our
                 // sender was dropped. We should consider this a disconnect.
                 events.push(ButtplugClientEvent::ServerDisconnect)
             }
-        }
+        };
         events
+    }
+
+    pub async fn devices(&mut self) -> Vec<ButtplugClientDevice> {
+        info!("Request devices from inner loop!");
+        let fut = ButtplugClientFuture::<Vec<ButtplugClientDevice>>::default();
+        let msg =
+            ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
+        info!("Sending device request to inner loop!");
+        self.send_internal_message(msg).await;
+        info!("Waiting for device list return!");
+        fut.await
     }
 }
 
