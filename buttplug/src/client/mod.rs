@@ -380,18 +380,16 @@ impl ButtplugClient {
     /// as devices connections/disconnections, log messages, etc... This is
     /// basically what event handlers in C# and JS would deal with, but we're in
     /// Rust so this requires us to be slightly more explicit.
-    pub async fn wait_for_event(&mut self) -> Vec<ButtplugClientEvent> {
+    pub async fn wait_for_event(&mut self) -> ButtplugClientEvent {
         debug!("Client waiting for event.");
-        let mut events = vec![];
         match self.event_receiver.next().await {
-            Some(msg) => events.push(msg),
+            Some(msg) => msg,
             None => {
                 // If we got None, this means the internal loop stopped and our
                 // sender was dropped. We should consider this a disconnect.
-                events.push(ButtplugClientEvent::ServerDisconnect)
+                ButtplugClientEvent::ServerDisconnect
             }
-        };
-        events
+        }
     }
 
     pub async fn devices(&mut self) -> Vec<ButtplugClientDevice> {

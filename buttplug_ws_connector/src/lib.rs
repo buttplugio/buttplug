@@ -253,26 +253,24 @@ mod test {
                     info!("starting event loop!");
                     while client.connected() {
                         info!("Waiting for event!");
-                        for mut event in client.wait_for_event().await {
-                            match event {
-                                ButtplugClientEvent::DeviceAdded(ref mut d) => {
-                                    info!("Got device! {}", d.name);
-                                    if d.allowed_messages.contains_key("VibrateCmd") {
-                                        assert!(d.send_vibrate_cmd(1.0).await.is_ok());
-                                        info!("Should be vibrating!");
-                                        Delay::new(Duration::from_secs(1)).await;
-                                        assert!(d.send_vibrate_cmd(0.0).await.is_ok());
-                                        // assert!(client.disconnect().await.is_ok());
-                                        Delay::new(Duration::from_secs(1)).await;
-                                        break;
-                                    }
-                                }
-                                ButtplugClientEvent::ServerDisconnect => {
-                                    assert!(false, "Server disconnected!");
+                        match client.wait_for_event().await {
+                            ButtplugClientEvent::DeviceAdded(ref mut d) => {
+                                info!("Got device! {}", d.name);
+                                if d.allowed_messages.contains_key("VibrateCmd") {
+                                    assert!(d.send_vibrate_cmd(1.0).await.is_ok());
+                                    info!("Should be vibrating!");
+                                    Delay::new(Duration::from_secs(1)).await;
+                                    assert!(d.send_vibrate_cmd(0.0).await.is_ok());
+                                    // assert!(client.disconnect().await.is_ok());
+                                    Delay::new(Duration::from_secs(1)).await;
                                     break;
                                 }
-                                _ => info!("Got something else!"),
                             }
+                            ButtplugClientEvent::ServerDisconnect => {
+                                assert!(false, "Server disconnected!");
+                                break;
+                            }
+                            _ => info!("Got something else!"),
                         }
                     }
                     info!("Trying to get device again!");
