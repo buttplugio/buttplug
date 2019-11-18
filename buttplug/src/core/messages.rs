@@ -156,6 +156,16 @@ pub struct DeviceMessageInfo {
     pub device_messages: HashMap<String, MessageAttributes>,
 }
 
+impl From<&DeviceAdded> for DeviceMessageInfo {
+    fn from(device_added: &DeviceAdded) -> Self {
+        Self {
+            device_index: device_added.device_index.clone(),
+            device_name: device_added.device_name.clone(),
+            device_messages: device_added.device_messages.clone(),
+        }
+    }
+}
+
 #[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DeviceList {
     #[serde(rename = "Id")]
@@ -208,10 +218,18 @@ pub struct ScanningFinished {
     id: u32,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RequestDeviceList {
     #[serde(rename = "Id")]
     id: u32,
+}
+
+impl RequestDeviceList {
+    pub fn new() -> Self {
+        Self {
+            id: 1
+        }
+    }
 }
 
 #[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
