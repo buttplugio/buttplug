@@ -15,23 +15,22 @@
 //   wait for networking libraries to get on our futures 0.3 level.
 
 // Required to get tests compiling?!
-#![type_length_limit = "2000000"]
-
-#[macro_use]
-extern crate log;
+// #![type_length_limit = "2000000"]
 
 use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
 use async_trait::async_trait;
-use buttplug::client::connector::{
+use super::{
     ButtplugClientConnectionFuture, ButtplugClientConnectionStateShared, ButtplugClientConnector,
     ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
-use buttplug::client::internal::ButtplugClientMessageStateShared;
-use buttplug::core::messages::{ButtplugMessage, ButtplugMessageUnion};
+use crate::{
+    client::internal::ButtplugClientMessageStateShared,
+    core::messages::{ButtplugMessage, ButtplugMessageUnion},
+};
 use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 use std::thread;
 use url;
@@ -214,8 +213,10 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 mod test {
     use super::ButtplugWebsocketClientConnector;
     use async_std::task;
-    use buttplug::client::connector::ButtplugClientConnector;
-    use buttplug::client::{ButtplugClient, ButtplugClientEvent};
+    use crate::client::{ButtplugClient,
+                        ButtplugClientEvent,
+                        connectors::ButtplugClientConnector,
+    };
     use env_logger;
     use futures_timer::Delay;
     use log::info;

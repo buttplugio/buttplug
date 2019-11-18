@@ -6,15 +6,18 @@
 // for full license information.
 
 //! Handling of communication with Buttplug Server.
+pub mod messagesorter;
+pub mod websocket;
 
-use super::{
-    internal::{
+use messagesorter::ClientConnectorMessageSorter;
+use crate::{
+    client::internal::{
         ButtplugClientFuture, ButtplugClientFutureState, ButtplugClientFutureStateShared,
         ButtplugClientMessageStateShared,
     },
-    messagesorter::ClientConnectorMessageSorter,
+    core::messages::ButtplugMessageUnion,
+    server::ButtplugServer,
 };
-use crate::{core::messages::ButtplugMessageUnion, server::ButtplugServer};
 use async_std::{
     prelude::{FutureExt, StreamExt},
     sync::{channel, Receiver, Sender},

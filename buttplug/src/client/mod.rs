@@ -7,12 +7,11 @@
 
 //! Communications API for accessing Buttplug Servers
 
-pub mod connector;
 pub mod device;
 pub mod internal;
-mod messagesorter;
+pub mod connectors;
 
-use connector::{
+use connectors::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
 };
 use device::ButtplugClientDevice;
@@ -174,7 +173,7 @@ impl ButtplugClient {
     /// # Examples
     ///
     /// ```
-    /// use buttplug::client::{ButtplugClient, connector::ButtplugEmbeddedClientConnector};
+    /// use buttplug::client::{ButtplugClient, connectors::ButtplugEmbeddedClientConnector};
     ///
     /// futures::executor::block_on(async {
     ///     ButtplugClient::run("Test Client", |mut client| {
@@ -408,7 +407,7 @@ mod test {
     use super::ButtplugClient;
     use crate::{
         client::{
-            connector::{
+            connectors::{
                 ButtplugClientConnector, ButtplugClientConnectorError,
                 ButtplugEmbeddedClientConnector,
             },

@@ -8,7 +8,7 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-    connector::{
+    connectors::{
         ButtplugClientConnectionStateShared, ButtplugClientConnector, ButtplugClientConnectorError,
     },
     device::ButtplugClientDevice,
