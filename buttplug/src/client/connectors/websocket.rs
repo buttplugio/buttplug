@@ -31,11 +31,12 @@ use crate::{
     client::internal::ButtplugClientMessageStateShared,
     core::messages::{ButtplugMessage, ButtplugMessageUnion},
 };
-use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 use std::thread;
 use url;
 use ws::util::TcpStream;
 use ws::{CloseCode, Handler, Handshake, Message};
+#[cfg(feature = "client-ws-ssl")]
+use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 
 // TODO Should probably let users pass in their own addresses
 const CONNECTION: &str = "ws://localhost:12345";
@@ -83,6 +84,7 @@ impl Handler for InternalClient {
             )));
     }
 
+    #[cfg(feature = "client-ws-ssl")]
     fn upgrade_ssl_client(
         &mut self,
         sock: TcpStream,

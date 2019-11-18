@@ -7,6 +7,7 @@
 
 //! Handling of communication with Buttplug Server.
 pub mod messagesorter;
+#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
 use messagesorter::ClientConnectorMessageSorter;

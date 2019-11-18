@@ -10,6 +10,11 @@ readme = "../README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
+[features]
+default=[]
+client-ws=["ws", "url"]
+client-ws-ssl=["ws", "url", "ws/ssl", "openssl"]
+
 [dependencies]
 serde = { version = "1.0.102", features = ["derive"] }
 serde_json = "1.0.41"
@@ -20,9 +25,9 @@ futures = "0.3.1"
 futures-util = "0.3.1"
 async-std = { version = "1.0.1", features = ["unstable"] }
 async-trait = "0.1.17"
-ws = { version = "0.9.1", features = ["ssl"] }
-openssl = "0.10.25"
-url = "2.1.0"
+ws = { version = "0.9.1", features = ["ssl"], optional = true }
+openssl = { version = "0.10.25", optional = true }
+url = { version = "2.1.0", optional = true }
 
 [dev-dependencies]
 env_logger = "0.7.1"
