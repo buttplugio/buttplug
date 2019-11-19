@@ -9,14 +9,17 @@
 //! Protocol](https://buttplug-spec.docs.buttplug.io) messages
 
 use super::errors::*;
-use serde::{Deserialize, Serialize};
-use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::HashMap;
+#[cfg(feature = "serialize_json")]
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "serialize_json")]
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and [ButtplugMessageUnion] enums, serialization, etc...
-pub trait ButtplugMessage: Send + Sync + Clone + Serialize + Deserialize<'static> {
+pub trait ButtplugMessage: Send + Sync + Clone {
     /// Returns the id number of the message
     fn get_id(&self) -> u32;
     /// Sets the id number of the message
@@ -24,17 +27,20 @@ pub trait ButtplugMessage: Send + Sync + Clone + Serialize + Deserialize<'static
     /// Returns the message as a [ButtplugMessageUnion] enum.
     fn as_union(self) -> ButtplugMessageUnion;
     /// Returns the message as a string in Buttplug JSON Protocol format.
-    fn as_protocol_json(&self) -> String {
+    #[cfg(feature = "serialize_json")]
+    fn as_protocol_json(self) -> String
+    where Self: ButtplugMessage + Serialize + Deserialize<'static> {
         "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
     }
 }
 
 /// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Ok {
     /// Message Id, used for matching message pairs in remote connection instances.
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
@@ -47,7 +53,8 @@ impl Ok {
 
 /// Error codes pertaining to error classes that can be represented in the
 /// Buttplug [Error] message.
-#[derive(Debug, Clone, Serialize_repr, Deserialize_repr, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize_repr, Deserialize_repr))]
 #[repr(u8)]
 pub enum ErrorCode {
     ErrorUnknown = 0,
@@ -59,16 +66,17 @@ pub enum ErrorCode {
 
 /// Represents the Buttplug Protocol Error message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#error).
-#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Error {
     /// Message Id, used for matching message pairs in remote connection instances.
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
     /// Specifies the class of the error.
-    #[serde(rename = "ErrorCode")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ErrorCode"))]
     pub error_code: ErrorCode,
     /// Description of the error.
-    #[serde(rename = "ErrorMessage")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ErrorMessage"))]
     pub error_message: String,
 }
 
@@ -106,10 +114,11 @@ impl From<ButtplugError> for Error {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Ping {
     /// Message Id, used for matching message pairs in remote connection instances.
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
@@ -120,13 +129,14 @@ impl Default for Ping {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Test {
     /// Message Id, used for matching message pairs in remote connection instances.
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
     /// Test string, which will be echo'd back to client when sent to server.
-    #[serde(rename = "TestString")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "TestString"))]
     test_string: String,
 }
 
@@ -140,19 +150,21 @@ impl Test {
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct MessageAttributes {
-    #[serde(rename = "FeatureCount")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "FeatureCount"))]
     pub feature_count: Option<u32>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "DeviceName")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
     pub device_name: String,
-    #[serde(rename = "DeviceMessages")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
     pub device_messages: HashMap<String, MessageAttributes>,
 }
 
@@ -166,37 +178,41 @@ impl From<&DeviceAdded> for DeviceMessageInfo {
     }
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceList {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "Devices")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Devices"))]
     pub devices: Vec<DeviceMessageInfo>,
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceAdded {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "DeviceName")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
     pub device_name: String,
-    #[serde(rename = "DeviceMessages")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
     pub device_messages: HashMap<String, MessageAttributes>,
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceRemoved {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
 }
 
-#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StartScanning {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
@@ -206,9 +222,10 @@ impl Default for StartScanning {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopScanning {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
@@ -218,15 +235,17 @@ impl Default for StopScanning {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct ScanningFinished {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
-#[derive(Debug, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestDeviceList {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
 }
 
@@ -236,13 +255,14 @@ impl Default for RequestDeviceList {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "ClientName")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ClientName"))]
     pub client_name: String,
-    #[serde(rename = "MessageVersion")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
     pub message_version: u32,
 }
 
@@ -256,21 +276,22 @@ impl RequestServerInfo {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "MajorVersion")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MajorVersion"))]
     pub major_version: u32,
-    #[serde(rename = "MinorVersion")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MinorVersion"))]
     pub minor_version: u32,
-    #[serde(rename = "BuildVersion")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "BuildVersion"))]
     pub build_version: u32,
-    #[serde(rename = "MessageVersion")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
     pub message_version: u32,
-    #[serde(rename = "MaxPingTime")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MaxPingTime"))]
     pub max_ping_time: u32,
-    #[serde(rename = "ServerName")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ServerName"))]
     pub server_name: String,
 }
 
@@ -288,7 +309,8 @@ impl ServerInfo {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum LogLevel {
     Off = 0,
     Fatal,
@@ -299,11 +321,12 @@ pub enum LogLevel {
     Trace,
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestLog {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "LogLevel")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "LogLevel"))]
     pub log_level: LogLevel,
 }
 
@@ -313,13 +336,14 @@ impl RequestLog {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Log {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     id: u32,
-    #[serde(rename = "LogLevel")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "LogLevel"))]
     pub log_level: LogLevel,
-    #[serde(rename = "LogMessage")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "LogMessage"))]
     pub log_message: String,
 }
 
@@ -333,11 +357,12 @@ impl Log {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopDeviceCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
 }
 
@@ -350,17 +375,19 @@ impl StopDeviceCmd {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopAllDevices {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
 }
 
-#[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VibrateSubcommand {
-    #[serde(rename = "Index")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Index"))]
     pub index: u32,
-    #[serde(rename = "Speed")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
     pub speed: f64,
 }
 
@@ -370,13 +397,14 @@ impl VibrateSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VibrateCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Speeds")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speeds"))]
     pub speeds: Vec<VibrateSubcommand>,
 }
 
@@ -390,13 +418,14 @@ impl VibrateCmd {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VectorSubcommand {
-    #[serde(rename = "Index")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Index"))]
     pub index: u32,
-    #[serde(rename = "Duration")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Duration"))]
     pub duration: u32,
-    #[serde(rename = "Position")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Position"))]
     pub position: f64,
 }
 
@@ -410,13 +439,14 @@ impl VectorSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Vectors")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Vectors"))]
     pub vectors: Vec<VectorSubcommand>,
 }
 
@@ -430,13 +460,14 @@ impl LinearCmd {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RotationSubcommand {
-    #[serde(rename = "Index")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Index"))]
     pub index: u32,
-    #[serde(rename = "Speed")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
     pub speed: f64,
-    #[serde(rename = "Clockwise")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Clockwise"))]
     pub clockwise: bool,
 }
 
@@ -450,13 +481,14 @@ impl RotationSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RotateCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Rotations")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Rotations"))]
     pub rotations: Vec<RotationSubcommand>,
 }
 
@@ -470,15 +502,16 @@ impl RotateCmd {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Position")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Position"))]
     pub position: u8,
-    #[serde(rename = "Speed")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
     pub speed: u8,
 }
 
@@ -493,13 +526,14 @@ impl FleshlightLaunchFW12Cmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Command")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Command"))]
     pub command: String,
 }
 
@@ -514,13 +548,14 @@ impl LovenseCmd {
 }
 
 // Dear god this needs to be deprecated
-#[derive(Debug, ButtplugMessage, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Command")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Command"))]
     pub command: String,
 }
 
@@ -534,15 +569,16 @@ impl KiirooCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Speed")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
     pub speed: u32,
-    #[serde(rename = "Clockwise")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Clockwise"))]
     pub clockwise: bool,
 }
 
@@ -557,13 +593,14 @@ impl VorzeA10CycloneCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
-    #[serde(rename = "Id")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub id: u32,
-    #[serde(rename = "DeviceIndex")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
     pub device_index: u32,
-    #[serde(rename = "Speed")]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
     pub speed: f64,
 }
 
@@ -577,7 +614,8 @@ impl SingleMotorVibrateCmd {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnion {
     Ok(Ok),
     Error(Error),

@@ -10,7 +10,6 @@ pub mod messagesorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
-use messagesorter::ClientConnectorMessageSorter;
 use crate::{
     client::internal::{
         ButtplugClientFuture, ButtplugClientFutureState, ButtplugClientFutureStateShared,
@@ -18,15 +17,20 @@ use crate::{
     },
     core::messages::ButtplugMessageUnion,
 };
-use async_std::{
-    prelude::{FutureExt, StreamExt},
-    sync::{channel, Receiver, Sender},
-};
+use async_std::sync::{channel, Receiver};
 use async_trait::async_trait;
-use futures::future::Future;
 use std::{error::Error, fmt};
+#[cfg(feature = "serialize_json")]
+use async_std::{
+    prelude::{StreamExt, FutureExt},
+    sync::{Sender},
+};
 #[cfg(feature = "server")]
 use crate::server::ButtplugServer;
+#[cfg(feature = "serialize_json")]
+use messagesorter::ClientConnectorMessageSorter;
+#[cfg(feature = "serialize_json")]
+use futures::future::Future;
 
 pub type ButtplugClientConnectionState =
     ButtplugClientFutureState<Result<(), ButtplugClientConnectorError>>;
@@ -131,6 +135,7 @@ pub enum ButtplugRemoteClientConnectorMessage {
     Close(String),
 }
 
+#[cfg(feature = "serialize_json")]
 pub struct ButtplugRemoteClientConnectorHelper {
     // Channel send/recv pair for applications wanting to send out through the
     // remote connection. Receiver will be send to task on creation.
@@ -143,9 +148,12 @@ pub struct ButtplugRemoteClientConnectorHelper {
     event_send: Option<Sender<ButtplugMessageUnion>>,
 }
 
+#[cfg(feature = "serialize_json")]
 unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
+#[cfg(feature = "serialize_json")]
 unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
+#[cfg(feature = "serialize_json")]
 impl ButtplugRemoteClientConnectorHelper {
     pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
         let (internal_send, internal_recv) = channel(256);

@@ -14,19 +14,20 @@ edition = "2018"
 default=["client", "server"]
 client=[]
 server=[]
-client-ws=["ws", "url"]
-client-ws-ssl=["ws", "url", "ws/ssl", "openssl"]
+serialize_json=["serde", "serde_json", "serde_repr"]
+client-ws=["client", "serialize_json", "ws", "url"]
+client-ws-ssl=["client", "serialize_json", "ws", "url", "ws/ssl", "openssl"]
 
 [dependencies]
-serde = { version = "1.0.102", features = ["derive"] }
-serde_json = "1.0.41"
-serde_repr = "0.1.5"
 log = "0.4.8"
 buttplug_derive = { path = "../buttplug_derive" }
 futures = "0.3.1"
 futures-util = "0.3.1"
 async-std = { version = "1.0.1", features = ["unstable"] }
 async-trait = "0.1.17"
+serde = { version = "1.0.102", features = ["derive"], optional = true }
+serde_json = { version = "1.0.41", optional = true }
+serde_repr = { version = "0.1.5", optional = true }
 ws = { version = "0.9.1", features = ["ssl"], optional = true }
 openssl = { version = "0.10.25", optional = true }
 url = { version = "2.1.0", optional = true }
