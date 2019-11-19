@@ -229,9 +229,9 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             assert!(ButtplugWebsocketClientConnector::default()
-                .connect()
-                .await
-                .is_ok());
+                    .connect()
+                    .await
+                    .is_ok());
         })
     }
 
@@ -241,12 +241,8 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             info!("connecting");
-            ButtplugClient::run("test client", |mut client| {
+            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::default(), |mut client| {
                 async move {
-                    assert!(client
-                        .connect(ButtplugWebsocketClientConnector::default())
-                        .await
-                        .is_ok());
                     info!("connected");
                     assert!(client.start_scanning().await.is_ok());
                     info!("scanning!");
@@ -285,7 +281,7 @@ mod test {
                     }
                 }
             })
-            .await;
+                    .await.is_ok());
         })
     }
 }

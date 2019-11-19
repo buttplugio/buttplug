@@ -12,11 +12,9 @@ use super::{
         ButtplugClientConnectionStateShared, ButtplugClientConnector, ButtplugClientConnectorError,
     },
     device::ButtplugClientDevice,
-    ButtplugClientError, ButtplugClientEvent,
+    ButtplugClientResult, ButtplugClientEvent,
 };
 use crate::core::{
-    errors::ButtplugError,
-    errors::ButtplugMessageError,
     messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo},
 };
 use async_std::{
@@ -200,13 +198,11 @@ impl ButtplugClientEventLoop {
     pub async fn wait_for_connector(
         event_sender: Sender<ButtplugClientEvent>,
         mut client_receiver: Receiver<ButtplugClientMessage>,
-    ) -> Result<Self, ButtplugClientError> {
+    ) -> Result<Self, ButtplugClientConnectorError> {
         match client_receiver.next().await {
             None => {
                 debug!("Client disconnected.");
-                Err(ButtplugClientError::ButtplugClientConnectorError(
-                    ButtplugClientConnectorError::new("Client was dropped during connect."),
-                ))
+                Err(ButtplugClientConnectorError::new("Client was dropped during connect."))
             }
             Some(msg) => match msg {
                 ButtplugClientMessage::Connect(mut connector, state) => {
@@ -219,11 +215,7 @@ impl ButtplugClientEventLoop {
                                 err.message
                             )));
                             waker_state.set_reply(reply);
-                            Err(ButtplugClientError::ButtplugClientConnectorError(
-                                ButtplugClientConnectorError::new(
-                                    "Client couldn't connect to server.",
-                                ),
-                            ))
+                            Err(ButtplugClientConnectorError::new("Client couldn't connect to server."))
                         }
                         Ok(_) => {
                             info!("Connected!");
@@ -245,11 +237,7 @@ impl ButtplugClientEventLoop {
                 }
                 _ => {
                     error!("Received non-connector message before connector message.");
-                    Err(ButtplugClientError::ButtplugError(
-                        ButtplugError::ButtplugMessageError(ButtplugMessageError::new(
-                            "Client couldn't connect to server.",
-                        )),
-                    ))
+                    Err(ButtplugClientConnectorError::new("Event Loop did not receive Connect message first."))
                 }
             },
         }
@@ -435,16 +423,12 @@ impl ButtplugClientEventLoop {
 pub async fn client_event_loop(
     event_sender: Sender<ButtplugClientEvent>,
     client_receiver: Receiver<ButtplugClientMessage>,
-) {
+) -> ButtplugClientResult {
     info!("Starting client event loop.");
-    let mut event_loop;
-    match ButtplugClientEventLoop::wait_for_connector(event_sender, client_receiver).await {
-        Ok(el) => event_loop = el,
-        Err(err) => {
-            error!("{}", err);
-            return;
-        }
-    }
-    event_loop.run().await;
+    ButtplugClientEventLoop::wait_for_connector(event_sender, client_receiver)
+        .await?
+        .run()
+        .await;
     info!("Exiting client event loop");
+    Ok(())
 }

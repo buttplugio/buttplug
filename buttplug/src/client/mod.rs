@@ -181,17 +181,16 @@ impl ButtplugClient {
     ///
     /// #[cfg(feature = "server")]
     /// futures::executor::block_on(async {
-    ///     ButtplugClient::run("Test Client", |mut client| {
+    ///     ButtplugClient::run("Test Client", ButtplugEmbeddedClientConnector::new("Test Server", 0), |mut client| {
     ///         async move {
-    ///             client
-    ///                 .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-    ///                 .await;
     ///             println!("Are we connected? {}", client.connected());
     ///         }
     ///     }).await;
     /// });
     /// ```
-    pub fn run<F, T>(name: &str, func: F) -> impl Future
+    pub fn run<F, T>(name: &str,
+                     connector: impl ButtplugClientConnector + 'static,
+                     func: F) -> impl Future<Output = ButtplugClientResult>
     where
         F: FnOnce(ButtplugClient) -> T,
         T: Future<Output = ()>,
@@ -199,18 +198,22 @@ impl ButtplugClient {
         debug!("Run called!");
         let (event_sender, event_receiver) = channel(256);
         let (message_sender, message_receiver) = channel(256);
-        let client = ButtplugClient {
+        let mut client = ButtplugClient {
             client_name: name.to_string(),
             server_name: None,
             event_receiver,
             message_sender,
-            connected: false,
+            connected: true,
             events: vec!(),
         };
-        let app_future = func(client);
+        let app_future = async move {
+            client.connect(connector).await?;
+            func(client);
+            Ok(())
+        };
         async move {
             let internal_loop_future = client_event_loop(event_sender, message_receiver);
-            app_future.join(internal_loop_future).await;
+            app_future.race(internal_loop_future).await
         }
     }
 
@@ -238,15 +241,11 @@ impl ButtplugClient {
     ///
     /// - None if connection succeeded
     /// - Some containing a [ButtplugClientError] on connection failure.
-    pub async fn connect(
+    pub(self) async fn connect(
         &mut self,
         connector: impl ButtplugClientConnector + 'static,
     ) -> ButtplugClientResult {
         debug!("Running client connection.");
-
-        // Set connected to true, since running the handshake requires the
-        // ability to send messages.
-        self.connected = true;
 
         // Send the connector to the internal loop for management. Once we throw
         // the connector over, the internal loop will handle connecting and any
@@ -257,7 +256,6 @@ impl ButtplugClient {
 
         debug!("Waiting on internal loop to connect");
         if let Err(e) = fut.await {
-            self.connected = false;
             return Err(ButtplugClientError::from(e));
         }
 
@@ -453,19 +451,22 @@ mod test {
         core::messages::ButtplugMessageUnion,
     };
     use async_std::{
+        future::Future,
         sync::{channel, Receiver},
         task,
     };
     use async_trait::async_trait;
     use env_logger;
 
-    async fn connect_test_client(client: &mut ButtplugClient) {
+    async fn connect_test_client<F, T>(func: F)
+    where
+        F: FnOnce(ButtplugClient) -> T,
+        T: Future<Output = ()>,
+    {
         let _ = env_logger::builder().is_test(true).try_init();
-        assert!(client
-            .connect(ButtplugEmbeddedClientConnector::new("Test Server", 0))
-            .await
-            .is_ok());
-        assert!(client.connected());
+        assert!(ButtplugClient::run("Test Client",
+                                    ButtplugEmbeddedClientConnector::new("Test Server", 0),
+                                    func).await.is_ok());
     }
 
     #[derive(Default)]
@@ -497,38 +498,21 @@ mod test {
 
     #[test]
     fn test_failing_connection() {
+        let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
-                async move {
-                    assert!(client
-                        .connect(ButtplugFailingConnector::default())
-                        .await
-                        .is_err());
-                    assert!(!client.connected());
-                }
-            })
-            .await;
-        });
-    }
-
-    #[test]
-    fn test_connect_status() {
-        task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
-                async move {
-                    connect_test_client(&mut client).await;
-                }
-            })
-            .await;
+            assert!(ButtplugClient::run("Test Client",
+                                        ButtplugFailingConnector::default(),
+                                        |_| {
+                                            async {}
+                                        }).await.is_err());
         });
     }
 
     #[test]
     fn test_disconnect_status() {
         task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
+            connect_test_client(|mut client| {
                 async move {
-                    connect_test_client(&mut client).await;
                     assert!(client.disconnect().await.is_ok());
                     assert!(!client.connected());
                 }
@@ -540,7 +524,7 @@ mod test {
     #[test]
     fn test_disconnect_with_no_connect() {
         task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
+            connect_test_client(|mut client| {
                 async move {
                     assert!(client.disconnect().await.is_err());
                 }
@@ -552,9 +536,8 @@ mod test {
     #[test]
     fn test_connect_init() {
         task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
+            connect_test_client(|client| {
                 async move {
-                    connect_test_client(&mut client).await;
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
             })
@@ -565,9 +548,8 @@ mod test {
     #[test]
     fn test_start_scanning() {
         task::block_on(async {
-            ButtplugClient::run("Test Client", |mut client| {
+            connect_test_client(|mut client| {
                 async move {
-                    connect_test_client(&mut client).await;
                     assert!(client.start_scanning().await.is_ok());
                 }
             })
