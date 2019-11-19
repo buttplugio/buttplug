@@ -719,20 +719,20 @@ mod test {
     const ERROR_STR: &str =
         "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
-    #[test]
+    #[cfg_attr(feature = "serialize_json", test)]
     fn test_ok_serialize() {
         let ok = ButtplugMessageUnion::Ok(Ok::new(0));
         let js = serde_json::to_string(&ok).unwrap();
         assert_eq!(OK_STR, js);
     }
 
-    #[test]
+    #[cfg_attr(feature = "serialize_json", test)]
     fn test_ok_deserialize() {
         let union: ButtplugMessageUnion = serde_json::from_str(&OK_STR).unwrap();
         assert_eq!(ButtplugMessageUnion::Ok(Ok::new(0)), union);
     }
 
-    #[test]
+    #[cfg_attr(feature = "serialize_json", test)]
     fn test_error_serialize() {
         let error =
             ButtplugMessageUnion::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error"));
@@ -740,7 +740,7 @@ mod test {
         assert_eq!(ERROR_STR, js);
     }
 
-    #[test]
+    #[cfg_attr(feature = "serialize_json", test)]
     fn test_error_deserialize() {
         let union: ButtplugMessageUnion = serde_json::from_str(&ERROR_STR).unwrap();
         assert_eq!(
