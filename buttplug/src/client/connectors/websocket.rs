@@ -41,6 +41,7 @@ use ws::{CloseCode, Handler, Handshake, Message};
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
     buttplug_out: Sender<ButtplugRemoteClientConnectorMessage>,
+    bypass_cert_verify: bool
 }
 
 impl Handler for InternalClient {
@@ -93,7 +94,10 @@ impl Handler for InternalClient {
                 format!("Failed to upgrade client to SSL: {}", e),
             )
         })?;
-        builder.set_verify(SslVerifyMode::empty());
+
+        if self.bypass_cert_verify {
+            builder.set_verify(SslVerifyMode::empty());
+        }
 
         let connector = builder.build();
         connector
@@ -111,17 +115,18 @@ pub struct ButtplugWebsocketClientConnector {
     ws_thread: Option<thread::JoinHandle<()>>,
     recv: Option<Receiver<ButtplugMessageUnion>>,
     address: String,
+    bypass_cert_verify: bool,
 }
 
 impl ButtplugWebsocketClientConnector {
-    #[allow(dead_code)]
-    fn new(address: &str) -> Self {
+    pub fn new(address: &str, bypass_cert_verify: bool) -> Self {
         let (send, recv) = channel(256);
         ButtplugWebsocketClientConnector {
             helper: ButtplugRemoteClientConnectorHelper::new(send),
             ws_thread: None,
             recv: Some(recv),
             address: address.to_owned(),
+            bypass_cert_verify
         }
     }
 }
@@ -164,7 +169,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         let fut = ButtplugClientConnectionFuture::default();
         let waker = fut.get_state_clone();
         let addr = self.address.clone();
-        self.ws_thread = Some(thread::spawn(|| {
+        let verify = self.bypass_cert_verify;
+        self.ws_thread = Some(thread::spawn(move || {
             let ret = ws::connect(addr, move |out| {
                 let bp_out = send.clone();
                 // Get our websocket sender back to the main thread
@@ -179,6 +185,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
                 InternalClient {
                     buttplug_out: send.clone(),
                     connector_waker: waker.clone(),
+                    bypass_cert_verify: verify,
                 }
             });
             match ret {
@@ -229,7 +236,7 @@ mod test {
     fn test_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::new("ws://localhost:12345")
+            assert!(ButtplugWebsocketClientConnector::new("ws://localhost:12345", false)
                     .connect()
                     .await
                     .is_ok());
@@ -242,7 +249,7 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             info!("connecting");
-            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::new("ws://localhost:12345"), |mut client| {
+            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::new("ws://localhost:12345", false), |mut client| {
                 async move {
                     info!("connected");
                     assert!(client.start_scanning().await.is_ok());
