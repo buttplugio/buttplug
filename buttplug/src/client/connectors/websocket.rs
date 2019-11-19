@@ -253,7 +253,7 @@ mod test {
                     info!("starting event loop!");
                     while client.connected() {
                         info!("Waiting for event!");
-                        match client.wait_for_event().await {
+                        match client.wait_for_event().await.unwrap() {
                             ButtplugClientEvent::DeviceAdded(ref mut d) => {
                                 info!("Got device! {}", d.name);
                                 if d.allowed_messages.contains_key("VibrateCmd") {
@@ -274,7 +274,7 @@ mod test {
                         }
                     }
                     info!("Trying to get device again!");
-                    let mut d = client.devices().await;
+                    let mut d = client.devices().await.unwrap();
                     if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
                         assert!(d[0].send_vibrate_cmd(1.0).await.is_ok());
                         info!("Should be vibrating!");

@@ -172,10 +172,9 @@ pub enum ButtplugClientMessage {
     Message(ButtplugClientMessageFuturePair),
 }
 
-pub enum ButtplugClientDeviceMessage {
-    DeviceDisconnected,
-    ClientDisconnected,
-    ServerDisconnected,
+pub enum ButtplugClientDeviceEvent {
+    DeviceDisconnect,
+    ClientDisconnect,
     Message(ButtplugMessageUnion),
 }
 
@@ -190,7 +189,7 @@ struct ButtplugClientEventLoop {
     devices: HashMap<u32, DeviceMessageInfo>,
     device_message_sender: Sender<ButtplugClientMessageFuturePair>,
     device_message_receiver: Receiver<ButtplugClientMessageFuturePair>,
-    device_event_senders: HashMap<u32, Vec<Sender<ButtplugClientDeviceMessage>>>,
+    device_event_senders: HashMap<u32, Vec<Sender<ButtplugClientDeviceEvent>>>,
     event_sender: Sender<ButtplugClientEvent>,
     client_receiver: Receiver<ButtplugClientMessage>,
     connector: Box<dyn ButtplugClientConnector>,

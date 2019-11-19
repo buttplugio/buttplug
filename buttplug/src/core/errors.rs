@@ -211,6 +211,30 @@ impl Error for ButtplugError {
     }
 }
 
+impl From<ButtplugDeviceError> for ButtplugError {
+    fn from(error: ButtplugDeviceError) -> Self {
+        ButtplugError::ButtplugDeviceError(error)
+    }
+}
+
+impl From<ButtplugMessageError> for ButtplugError {
+    fn from(error: ButtplugMessageError) -> Self {
+        ButtplugError::ButtplugMessageError(error)
+    }
+}
+
+impl From<ButtplugPingError> for ButtplugError {
+    fn from(error: ButtplugPingError) -> Self {
+        ButtplugError::ButtplugPingError(error)
+    }
+}
+
+impl From<ButtplugHandshakeError> for ButtplugError {
+    fn from(error: ButtplugHandshakeError) -> Self {
+        ButtplugError::ButtplugHandshakeError(error)
+    }
+}
+
 impl From<messages::Error> for ButtplugError {
     /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
     fn from(error: messages::Error) -> Self {
