@@ -8,14 +8,14 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
+    connectors::ButtplugClientConnectorError,
     internal::{
         ButtplugClientDeviceEvent, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair,
     },
-    connectors::ButtplugClientConnectorError,
     ButtplugClientError, ButtplugClientResult,
 };
 use crate::core::{
-    errors::{ButtplugError, ButtplugMessageError, ButtplugDeviceError},
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
         ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, MessageAttributes, VibrateCmd,
         VibrateSubcommand,
@@ -23,7 +23,7 @@ use crate::core::{
 };
 use async_std::{
     prelude::StreamExt,
-    sync::{Receiver, Sender}
+    sync::{Receiver, Sender},
 };
 use std::collections::HashMap;
 
@@ -57,11 +57,14 @@ impl ButtplugClientDevice {
             event_receiver,
             device_connected: true,
             client_connected: true,
-            events: vec!(),
+            events: vec![],
         }
     }
 
-    async fn send_message(&mut self, msg: ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+    async fn send_message(
+        &mut self,
+        msg: ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         // Since we're using async_std channels, if we send a message and the
         // event loop has shut down, we may never know (and therefore possibly
         // block infinitely) if we don't check the status of an event loop
@@ -92,11 +95,13 @@ impl ButtplugClientDevice {
     async fn check_for_events(&mut self) -> ButtplugClientResult {
         if !self.client_connected {
             return Err(ButtplugClientError::from(
-                ButtplugClientConnectorError::new("Client not connected.")));
+                ButtplugClientConnectorError::new("Client not connected."),
+            ));
         }
         if !self.device_connected {
-            return Err(ButtplugClientError::from(
-                ButtplugDeviceError::new("Device not connected.")));
+            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                "Device not connected.",
+            )));
         }
         while !self.event_receiver.is_empty() {
             match self.event_receiver.next().await {
@@ -112,9 +117,11 @@ impl ButtplugClientDevice {
                     self.device_connected = false;
                     // If we got None, this means the internal loop stopped and our
                     // sender was dropped. We should consider this a disconnect.
-                    self.events.push(ButtplugClientDeviceEvent::ClientDisconnect);
+                    self.events
+                        .push(ButtplugClientDeviceEvent::ClientDisconnect);
                     return Err(ButtplugClientError::from(
-                        ButtplugClientConnectorError::new("Client not connected.")));
+                        ButtplugClientConnectorError::new("Client not connected."),
+                    ));
                 }
             }
         }
@@ -129,15 +136,19 @@ impl ButtplugClientDevice {
     /// as devices connections/disconnections, log messages, etc... This is
     /// basically what event handlers in C# and JS would deal with, but we're in
     /// Rust so this requires us to be slightly more explicit.
-    pub async fn wait_for_event(&mut self) -> Result<ButtplugClientDeviceEvent, ButtplugClientError> {
+    pub async fn wait_for_event(
+        &mut self,
+    ) -> Result<ButtplugClientDeviceEvent, ButtplugClientError> {
         debug!("Device waiting for event.");
         if !self.client_connected {
             return Err(ButtplugClientError::from(
-                ButtplugClientConnectorError::new("Client not connected.")));
+                ButtplugClientConnectorError::new("Client not connected."),
+            ));
         }
         if !self.device_connected {
-            return Err(ButtplugClientError::from(
-                ButtplugDeviceError::new("Device not connected.")));
+            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                "Device not connected.",
+            )));
         }
         Ok({
             if !self.events.is_empty() {

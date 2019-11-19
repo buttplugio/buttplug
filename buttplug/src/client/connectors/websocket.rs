@@ -41,7 +41,7 @@ use ws::{CloseCode, Handler, Handshake, Message};
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
     buttplug_out: Sender<ButtplugRemoteClientConnectorMessage>,
-    bypass_cert_verify: bool
+    bypass_cert_verify: bool,
 }
 
 impl Handler for InternalClient {
@@ -83,11 +83,7 @@ impl Handler for InternalClient {
     }
 
     #[cfg(feature = "client-ws-ssl")]
-    fn upgrade_ssl_client(
-        &mut self,
-        sock: TcpStream,
-        _: &Url,
-    ) -> ws::Result<SslStream<TcpStream>> {
+    fn upgrade_ssl_client(&mut self, sock: TcpStream, _: &Url) -> ws::Result<SslStream<TcpStream>> {
         let mut builder = SslConnector::builder(SslMethod::tls()).map_err(|e| {
             ws::Error::new(
                 ws::ErrorKind::Internal,
@@ -126,7 +122,7 @@ impl ButtplugWebsocketClientConnector {
             ws_thread: None,
             recv: Some(recv),
             address: address.to_owned(),
-            bypass_cert_verify
+            bypass_cert_verify,
         }
     }
 }
@@ -236,10 +232,12 @@ mod test {
     fn test_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::new("ws://localhost:12345", false)
+            assert!(
+                ButtplugWebsocketClientConnector::new("ws://localhost:12345", false)
                     .connect()
                     .await
-                    .is_ok());
+                    .is_ok()
+            );
         })
     }
 
@@ -249,47 +247,52 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             info!("connecting");
-            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::new("ws://localhost:12345", false), |mut client| {
-                async move {
-                    info!("connected");
-                    assert!(client.start_scanning().await.is_ok());
-                    info!("scanning!");
-                    info!("starting event loop!");
-                    while client.connected() {
-                        info!("Waiting for event!");
-                        match client.wait_for_event().await.unwrap() {
-                            ButtplugClientEvent::DeviceAdded(ref mut d) => {
-                                info!("Got device! {}", d.name);
-                                if d.allowed_messages.contains_key("VibrateCmd") {
-                                    assert!(d.send_vibrate_cmd(1.0).await.is_ok());
-                                    info!("Should be vibrating!");
-                                    Delay::new(Duration::from_secs(1)).await;
-                                    assert!(d.send_vibrate_cmd(0.0).await.is_ok());
-                                    // assert!(client.disconnect().await.is_ok());
-                                    Delay::new(Duration::from_secs(1)).await;
+            assert!(ButtplugClient::run(
+                "test client",
+                ButtplugWebsocketClientConnector::new("ws://localhost:12345", false),
+                |mut client| {
+                    async move {
+                        info!("connected");
+                        assert!(client.start_scanning().await.is_ok());
+                        info!("scanning!");
+                        info!("starting event loop!");
+                        while client.connected() {
+                            info!("Waiting for event!");
+                            match client.wait_for_event().await.unwrap() {
+                                ButtplugClientEvent::DeviceAdded(ref mut d) => {
+                                    info!("Got device! {}", d.name);
+                                    if d.allowed_messages.contains_key("VibrateCmd") {
+                                        assert!(d.send_vibrate_cmd(1.0).await.is_ok());
+                                        info!("Should be vibrating!");
+                                        Delay::new(Duration::from_secs(1)).await;
+                                        assert!(d.send_vibrate_cmd(0.0).await.is_ok());
+                                        // assert!(client.disconnect().await.is_ok());
+                                        Delay::new(Duration::from_secs(1)).await;
+                                        break;
+                                    }
+                                }
+                                ButtplugClientEvent::ServerDisconnect => {
+                                    assert!(false, "Server disconnected!");
                                     break;
                                 }
+                                _ => info!("Got something else!"),
                             }
-                            ButtplugClientEvent::ServerDisconnect => {
-                                assert!(false, "Server disconnected!");
-                                break;
-                            }
-                            _ => info!("Got something else!"),
+                        }
+                        info!("Trying to get device again!");
+                        let mut d = client.devices().await.unwrap();
+                        if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
+                            assert!(d[0].send_vibrate_cmd(1.0).await.is_ok());
+                            info!("Should be vibrating!");
+                            Delay::new(Duration::from_secs(1)).await;
+                            assert!(d[0].send_vibrate_cmd(0.0).await.is_ok());
+                            assert!(client.disconnect().await.is_ok());
+                            Delay::new(Duration::from_secs(1)).await;
                         }
                     }
-                    info!("Trying to get device again!");
-                    let mut d = client.devices().await.unwrap();
-                    if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
-                        assert!(d[0].send_vibrate_cmd(1.0).await.is_ok());
-                        info!("Should be vibrating!");
-                        Delay::new(Duration::from_secs(1)).await;
-                        assert!(d[0].send_vibrate_cmd(0.0).await.is_ok());
-                        assert!(client.disconnect().await.is_ok());
-                        Delay::new(Duration::from_secs(1)).await;
-                    }
                 }
-            })
-                    .await.is_ok());
+            )
+            .await
+            .is_ok());
         })
     }
 }

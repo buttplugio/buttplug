@@ -12,11 +12,9 @@ use super::{
         ButtplugClientConnectionStateShared, ButtplugClientConnector, ButtplugClientConnectorError,
     },
     device::ButtplugClientDevice,
-    ButtplugClientResult, ButtplugClientEvent,
+    ButtplugClientEvent, ButtplugClientResult,
 };
-use crate::core::{
-    messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo},
-};
+use crate::core::messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo};
 use async_std::{
     future::Future,
     prelude::{FutureExt, StreamExt},
@@ -202,7 +200,9 @@ impl ButtplugClientEventLoop {
         match client_receiver.next().await {
             None => {
                 debug!("Client disconnected.");
-                Err(ButtplugClientConnectorError::new("Client was dropped during connect."))
+                Err(ButtplugClientConnectorError::new(
+                    "Client was dropped during connect.",
+                ))
             }
             Some(msg) => match msg {
                 ButtplugClientMessage::Connect(mut connector, state) => {
@@ -215,7 +215,9 @@ impl ButtplugClientEventLoop {
                                 err.message
                             )));
                             waker_state.set_reply(reply);
-                            Err(ButtplugClientConnectorError::new("Client couldn't connect to server."))
+                            Err(ButtplugClientConnectorError::new(
+                                "Client couldn't connect to server.",
+                            ))
                         }
                         Ok(_) => {
                             info!("Connected!");
@@ -237,7 +239,9 @@ impl ButtplugClientEventLoop {
                 }
                 _ => {
                     error!("Received non-connector message before connector message.");
-                    Err(ButtplugClientConnectorError::new("Event Loop did not receive Connect message first."))
+                    Err(ButtplugClientConnectorError::new(
+                        "Event Loop did not receive Connect message first.",
+                    ))
                 }
             },
         }

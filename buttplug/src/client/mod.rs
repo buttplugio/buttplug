@@ -188,9 +188,11 @@ impl ButtplugClient {
     ///     }).await;
     /// });
     /// ```
-    pub fn run<F, T>(name: &str,
-                     connector: impl ButtplugClientConnector + 'static,
-                     func: F) -> impl Future<Output = ButtplugClientResult>
+    pub fn run<F, T>(
+        name: &str,
+        connector: impl ButtplugClientConnector + 'static,
+        func: F,
+    ) -> impl Future<Output = ButtplugClientResult>
     where
         F: FnOnce(ButtplugClient) -> T,
         T: Future<Output = ()>,
@@ -204,7 +206,7 @@ impl ButtplugClient {
             event_receiver,
             message_sender,
             connected: true,
-            events: vec!(),
+            events: vec![],
         };
         let app_future = async move {
             client.connect(connector).await?;
@@ -336,7 +338,10 @@ impl ButtplugClient {
 
     // Send message to the internal event loop. Mostly for handling boilerplate
     // around possible send errors.
-    async fn send_internal_message(&mut self, msg: ButtplugClientMessage) -> Result<(), ButtplugClientConnectorError> {
+    async fn send_internal_message(
+        &mut self,
+        msg: ButtplugClientMessage,
+    ) -> Result<(), ButtplugClientConnectorError> {
         // Since we're using async_std channels, if we send a message and the
         // event loop has shut down, we may never know (and therefore possibly
         // block infinitely) if we don't check the status of an event loop
@@ -404,7 +409,9 @@ impl ButtplugClient {
     /// as devices connections/disconnections, log messages, etc... This is
     /// basically what event handlers in C# and JS would deal with, but we're in
     /// Rust so this requires us to be slightly more explicit.
-    pub async fn wait_for_event(&mut self) -> Result<ButtplugClientEvent, ButtplugClientConnectorError> {
+    pub async fn wait_for_event(
+        &mut self,
+    ) -> Result<ButtplugClientEvent, ButtplugClientConnectorError> {
         debug!("Client waiting for event.");
         if !self.connected {
             return Err(ButtplugClientConnectorError::new("Client not connected."));
@@ -426,7 +433,9 @@ impl ButtplugClient {
         })
     }
 
-    pub async fn devices(&mut self) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {
+    pub async fn devices(
+        &mut self,
+    ) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {
         info!("Request devices from inner loop!");
         let fut = ButtplugClientFuture::<Vec<ButtplugClientDevice>>::default();
         let msg = ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
@@ -464,9 +473,13 @@ mod test {
         T: Future<Output = ()>,
     {
         let _ = env_logger::builder().is_test(true).try_init();
-        assert!(ButtplugClient::run("Test Client",
-                                    ButtplugEmbeddedClientConnector::new("Test Server", 0),
-                                    func).await.is_ok());
+        assert!(ButtplugClient::run(
+            "Test Client",
+            ButtplugEmbeddedClientConnector::new("Test Server", 0),
+            func
+        )
+        .await
+        .is_ok());
     }
 
     #[derive(Default)]
@@ -500,11 +513,13 @@ mod test {
     fn test_failing_connection() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            assert!(ButtplugClient::run("Test Client",
-                                        ButtplugFailingConnector::default(),
-                                        |_| {
-                                            async {}
-                                        }).await.is_err());
+            assert!(ButtplugClient::run(
+                "Test Client",
+                ButtplugFailingConnector::default(),
+                |_| { async {} }
+            )
+            .await
+            .is_err());
         });
     }
 
