@@ -9,7 +9,7 @@
 
 use crate::{
     client::internal::ButtplugClientMessageStateShared,
-    core::messages::{ButtplugMessage, ButtplugMessageUnion}
+    core::messages::{ButtplugMessage, ButtplugMessageUnion},
 };
 use std::collections::HashMap;
 
@@ -19,13 +19,6 @@ pub struct ClientConnectorMessageSorter {
 }
 
 impl ClientConnectorMessageSorter {
-    pub fn new() -> Self {
-        Self {
-            future_map: HashMap::new(),
-            current_id: 1,
-        }
-    }
-
     pub fn register_future(
         &mut self,
         msg: &mut ButtplugMessageUnion,
@@ -47,6 +40,15 @@ impl ClientConnectorMessageSorter {
                 info!("Not found, may be event.");
                 false
             }
+        }
+    }
+}
+
+impl Default for ClientConnectorMessageSorter {
+    fn default() -> Self {
+        Self {
+            future_map: HashMap::new(),
+            current_id: 1,
         }
     }
 }

@@ -9,12 +9,11 @@
 //! Protocol](https://buttplug-spec.docs.buttplug.io) messages
 
 use super::errors::*;
-use std::collections::HashMap;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-
+use std::collections::HashMap;
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -29,7 +28,9 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     /// Returns the message as a string in Buttplug JSON Protocol format.
     #[cfg(feature = "serialize_json")]
     fn as_protocol_json(self) -> String
-    where Self: ButtplugMessage + Serialize + Deserialize<'static> {
+    where
+        Self: ButtplugMessage + Serialize + Deserialize<'static>,
+    {
         "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
     }
 }

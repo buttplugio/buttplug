@@ -98,8 +98,8 @@ extern crate buttplug_derive;
 #[macro_use]
 extern crate log;
 
-pub mod core;
-#[cfg(feature="client")]
+#[cfg(feature = "client")]
 pub mod client;
-#[cfg(feature="server")]
+pub mod core;
+#[cfg(feature = "server")]
 pub mod server;

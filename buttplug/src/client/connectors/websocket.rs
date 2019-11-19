@@ -17,11 +17,6 @@
 // Required to get tests compiling?!
 // #![type_length_limit = "2000000"]
 
-use async_std::{
-    sync::{channel, Receiver, Sender},
-    task,
-};
-use async_trait::async_trait;
 use super::{
     ButtplugClientConnectionFuture, ButtplugClientConnectionStateShared, ButtplugClientConnector,
     ButtplugClientConnectorError, ButtplugRemoteClientConnectorHelper,
@@ -31,12 +26,17 @@ use crate::{
     client::internal::ButtplugClientMessageStateShared,
     core::messages::{ButtplugMessage, ButtplugMessageUnion},
 };
+use async_std::{
+    sync::{channel, Receiver, Sender},
+    task,
+};
+use async_trait::async_trait;
+#[cfg(feature = "client-ws-ssl")]
+use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 use std::thread;
 use url;
 use ws::util::TcpStream;
 use ws::{CloseCode, Handler, Handshake, Message};
-#[cfg(feature = "client-ws-ssl")]
-use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 
 // TODO Should probably let users pass in their own addresses
 const CONNECTION: &str = "ws://localhost:12345";
@@ -214,11 +214,8 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 #[cfg(test)]
 mod test {
     use super::ButtplugWebsocketClientConnector;
+    use crate::client::{connectors::ButtplugClientConnector, ButtplugClient, ButtplugClientEvent};
     use async_std::task;
-    use crate::client::{ButtplugClient,
-                        ButtplugClientEvent,
-                        connectors::ButtplugClientConnector,
-    };
     use env_logger;
     use futures_timer::Delay;
     use log::info;

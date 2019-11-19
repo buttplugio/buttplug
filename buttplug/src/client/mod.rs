@@ -7,9 +7,9 @@
 
 //! Communications API for accessing Buttplug Servers
 
+pub mod connectors;
 pub mod device;
 pub mod internal;
-pub mod connectors;
 
 use connectors::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
