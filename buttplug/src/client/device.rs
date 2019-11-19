@@ -42,7 +42,7 @@ unsafe impl Send for ButtplugClientDevice {}
 unsafe impl Sync for ButtplugClientDevice {}
 
 impl ButtplugClientDevice {
-    pub fn new(
+    pub(crate) fn new(
         name: &str,
         index: u32,
         allowed_messages: HashMap<String, MessageAttributes>,
