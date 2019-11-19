@@ -34,12 +34,9 @@ use async_trait::async_trait;
 #[cfg(feature = "client-ws-ssl")]
 use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 use std::thread;
-use url;
+use url::Url;
 use ws::util::TcpStream;
 use ws::{CloseCode, Handler, Handshake, Message};
-
-// TODO Should probably let users pass in their own addresses
-const CONNECTION: &str = "ws://localhost:12345";
 
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
@@ -88,7 +85,7 @@ impl Handler for InternalClient {
     fn upgrade_ssl_client(
         &mut self,
         sock: TcpStream,
-        _: &url::Url,
+        _: &Url,
     ) -> ws::Result<SslStream<TcpStream>> {
         let mut builder = SslConnector::builder(SslMethod::tls()).map_err(|e| {
             ws::Error::new(
@@ -113,15 +110,18 @@ pub struct ButtplugWebsocketClientConnector {
     helper: ButtplugRemoteClientConnectorHelper,
     ws_thread: Option<thread::JoinHandle<()>>,
     recv: Option<Receiver<ButtplugMessageUnion>>,
+    address: String,
 }
 
-impl Default for ButtplugWebsocketClientConnector {
-    fn default() -> Self {
+impl ButtplugWebsocketClientConnector {
+    #[allow(dead_code)]
+    fn new(address: &str) -> Self {
         let (send, recv) = channel(256);
         ButtplugWebsocketClientConnector {
             helper: ButtplugRemoteClientConnectorHelper::new(send),
             ws_thread: None,
             recv: Some(recv),
+            address: address.to_owned(),
         }
     }
 }
@@ -163,8 +163,9 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         let send = self.helper.get_remote_send();
         let fut = ButtplugClientConnectionFuture::default();
         let waker = fut.get_state_clone();
+        let addr = self.address.clone();
         self.ws_thread = Some(thread::spawn(|| {
-            let ret = ws::connect(CONNECTION, move |out| {
+            let ret = ws::connect(addr, move |out| {
                 let bp_out = send.clone();
                 // Get our websocket sender back to the main thread
                 task::spawn(async move {
@@ -228,7 +229,7 @@ mod test {
     fn test_websocket() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
-            assert!(ButtplugWebsocketClientConnector::default()
+            assert!(ButtplugWebsocketClientConnector::new("ws://localhost:12345")
                     .connect()
                     .await
                     .is_ok());
@@ -241,7 +242,7 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
             info!("connecting");
-            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::default(), |mut client| {
+            assert!(ButtplugClient::run("test client", ButtplugWebsocketClientConnector::new("ws://localhost:12345"), |mut client| {
                 async move {
                     info!("connected");
                     assert!(client.start_scanning().await.is_ok());
