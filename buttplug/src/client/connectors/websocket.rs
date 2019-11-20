@@ -218,7 +218,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 #[cfg(test)]
 mod test {
     use super::ButtplugWebsocketClientConnector;
-    use crate::client::{connectors::ButtplugClientConnector, ButtplugClient, ButtplugClientEvent};
+    use crate::client::{connectors::ButtplugClientConnector, ButtplugClient, ButtplugClientEvent, device::VibrateCommand};
     use async_std::task;
     use env_logger;
     use futures_timer::Delay;
@@ -262,10 +262,10 @@ mod test {
                                 ButtplugClientEvent::DeviceAdded(ref mut d) => {
                                     info!("Got device! {}", d.name);
                                     if d.allowed_messages.contains_key("VibrateCmd") {
-                                        assert!(d.send_vibrate_cmd(1.0).await.is_ok());
+                                        assert!(d.vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
                                         info!("Should be vibrating!");
                                         Delay::new(Duration::from_secs(1)).await;
-                                        assert!(d.send_vibrate_cmd(0.0).await.is_ok());
+                                        assert!(d.stop().await.is_ok());
                                         // assert!(client.disconnect().await.is_ok());
                                         Delay::new(Duration::from_secs(1)).await;
                                         break;
@@ -281,10 +281,10 @@ mod test {
                         info!("Trying to get device again!");
                         let mut d = client.devices().await.unwrap();
                         if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
-                            assert!(d[0].send_vibrate_cmd(1.0).await.is_ok());
+                            assert!(d[0].vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
                             info!("Should be vibrating!");
                             Delay::new(Duration::from_secs(1)).await;
-                            assert!(d[0].send_vibrate_cmd(0.0).await.is_ok());
+                            assert!(d[0].stop().await.is_ok());
                             assert!(client.disconnect().await.is_ok());
                             Delay::new(Duration::from_secs(1)).await;
                         }
