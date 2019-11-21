@@ -46,6 +46,15 @@
 //! controlling devices after successful connection. There are also connectors
 //! included for connecting to servers via Websockets.
 //!
+//! ## Examples
+//!
+//! Code examples are available in the [github
+//! repo](https://github.com/buttplugio/buttplug-rs/tree/master/buttplug/examples).
+//!
+//! The [Buttplug Developer
+//! Guide](https://buttplug-developer-guide.docs.buttplug.io) may also be
+//! useful, though it does not currently have Rust examples.
+//!
 //! ## Attributes
 //!
 //! The following attributes are available
