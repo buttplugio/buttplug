@@ -210,7 +210,7 @@ impl ButtplugClient {
         };
         let app_future = async move {
             client.connect(connector).await?;
-            func(client);
+            func(client).await;
             Ok(())
         };
         async move {
