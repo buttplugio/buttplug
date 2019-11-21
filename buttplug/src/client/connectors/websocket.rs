@@ -31,13 +31,16 @@ use async_trait::async_trait;
 #[cfg(feature = "client-ws-ssl")]
 use openssl::ssl::{SslConnector, SslMethod, SslStream, SslVerifyMode};
 use std::thread;
+#[cfg(feature = "client-ws-ssl")]
 use url::Url;
+#[cfg(feature = "client-ws-ssl")]
 use ws::util::TcpStream;
 use ws::{CloseCode, Handler, Handshake, Message};
 
 struct InternalClient {
     connector_waker: ButtplugClientConnectionStateShared,
     buttplug_out: Sender<ButtplugRemoteClientConnectorMessage>,
+    #[allow(dead_code)]
     bypass_cert_verify: bool,
 }
 
