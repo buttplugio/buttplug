@@ -11,6 +11,7 @@ stages:
      check_all_features: false
      check_no_features: false
      cross: true
+     minrust: false
 
 resources:
   repositories:
