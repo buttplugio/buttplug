@@ -5,7 +5,7 @@ trigger:
     include: ['*']
 
 stages:
- - template: azure/nightly-stages.yml@templates
+ - template: azure/stages.yml@templates
    parameters:
      # Turn off feature checking since this is a workspace
      check_all_features: false
