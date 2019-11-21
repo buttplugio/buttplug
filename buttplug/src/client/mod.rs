@@ -130,10 +130,9 @@ pub enum ButtplugClientEvent {
 /// - Holding state related to the server (i.e. what devices are currently
 ///   connected, etc...)
 ///
-/// When a client is first created, it will be able to create an internal loop
-/// as a Future, and return it via the [ButtplugClient::get_loop] call. This
-/// loop needs to be awaited before awaiting other client calls (like
-/// [ButtplugClient::connect]), otherwise the system will panic.
+/// Clients are created by the [ButtplugClient::run()] method, which also
+/// handles spinning up the event loop and connecting the client to the server.
+/// Closures passed to the run() method can access and use the Client object.
 pub struct ButtplugClient {
     /// The client name. Depending on the connection type and server being used,
     /// this name is sometimes shown on the server logs or GUI.
@@ -159,19 +158,28 @@ unsafe impl Send for ButtplugClient {}
 impl ButtplugClient {
     /// Runs the client event loop.
     ///
-    /// Given a client name and a function that takes the client and returns an
-    /// future (since we can't have async closures yet), this function
+    /// Given a client name, a connector, and a function that takes the client
+    /// and returns an future (since we can't have async closures yet), this
+    /// function
     ///
-    /// - creates a ButtplugClient instance
+    /// - creates a ButtplugClient instance, and connects it to the server via the
+    /// connector instance that was passed in.
     /// - passes it to the `func` argument to create the application [Future]
-    /// - returns a [Future] with a [join] for the client event loop future and
+    /// - returns a [Future] that joins the client event loop future and
     /// the client application future.
     ///
     /// # Parameters
     ///
     /// - `name`: Name of the client, see [ButtplugClient::client_name]
+    /// - `connector`: Connector instance for handling connection and communication
+    /// with the Buttplug Server
     /// - `func`: Function that takes the client instance, and returns a future
     /// for what the application will be doing with the client instance.
+    ///
+    /// # Returns
+    ///
+    /// Ok(()) if connection is successful and closure executes correctly,
+    /// Err(ButtplugClientError) if connection with the server fails.
     ///
     /// # Examples
     ///
@@ -222,10 +230,11 @@ impl ButtplugClient {
     /// Connects and runs handshake flow with
     /// [crate::server::server::ButtplugServer], either local or remote.
     ///
-    /// Tries to connect to a server via the given [ButtplugClientConnector]
-    /// struct. If connection is successful, also runs the handshake flow and
-    /// retrieves a list of currently connected devices. These devices will be
-    /// emitted as [ButtplugClientEvent::DeviceAdded] events next time
+    /// Called by run() while spinning up the event loop. Tries to connect to a
+    /// server via the given [ButtplugClientConnector] struct. If connection is
+    /// successful, also runs the handshake flow and retrieves a list of
+    /// currently connected devices. These devices will be emitted as
+    /// [ButtplugClientEvent::DeviceAdded] events next time
     /// [ButtplugClient::wait_for_event] is run.
     ///
     /// # Parameters
@@ -311,12 +320,21 @@ impl ButtplugClient {
         }
     }
 
-    /// Returns true if client is currently connected to server.
+    /// Status of the client connection.
+    ///
+    /// # Returns
+    /// Returns true if client is currently connected to server, false otherwise.
     pub fn connected(&self) -> bool {
         self.connected
     }
 
     /// Disconnects from server, if connected.
+    ///
+    /// # Returns
+    ///
+    /// Ok(()) if disconnection is successful, Err(ButtplugClientError) if
+    /// disconnection fails. It can be assumed that even on failure, the client
+    /// will be disconnected.
     pub async fn disconnect(&mut self) -> ButtplugClientResult {
         // Send the connector to the internal loop for management. Once we throw
         // the connector over, the internal loop will handle connecting and any
@@ -329,6 +347,12 @@ impl ButtplugClient {
     }
 
     /// Tells server to start scanning for devices.
+    ///
+    /// # Returns
+    ///
+    /// Ok(()) if request is successful, Err([ButtplugClientError]) if request
+    /// fails due to issues with DeviceManagers on the server, disconnection,
+    /// etc.
     pub async fn start_scanning(&mut self) -> ButtplugClientResult {
         self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(
             StartScanning::default(),
@@ -402,13 +426,20 @@ impl ButtplugClient {
     }
 
     /// Produces a future that will wait for a set of events from the
-    /// internal loop. Returns once any number of events is received.
+    /// internal loop. Returns every time an event is received.
     ///
     /// This should be called whenever the client isn't doing anything
     /// otherwise, so we can respond to unexpected updates from the server, such
     /// as devices connections/disconnections, log messages, etc... This is
     /// basically what event handlers in C# and JS would deal with, but we're in
     /// Rust so this requires us to be slightly more explicit.
+    ///
+    /// # Returns
+    ///
+    /// Ok([ButtplugClientEvent]) if event is received successfully,
+    /// Err([ButtplugClientConnectorError]) if waiting fails due to server/client
+    /// disconnection.
+
     pub async fn wait_for_event(
         &mut self,
     ) -> Result<ButtplugClientEvent, ButtplugClientConnectorError> {
@@ -433,6 +464,13 @@ impl ButtplugClient {
         })
     }
 
+    /// Retreives a list of devices. This requires communication with the Event
+    /// Loop, which is why it is an asynchronous function.
+    ///
+    /// # Returns
+    ///
+    /// Ok(Vec<[ButtplugClientDevice]>) if successful,
+    /// Err([ButtplugClientConnectorError]) if the server has disconnected.
     pub async fn devices(
         &mut self,
     ) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {

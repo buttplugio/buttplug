@@ -75,11 +75,11 @@ impl<T> ButtplugClientFutureState<T> {
     }
 }
 
-/// Shared [ButtplugClientConnectionStatus] type.
+/// Shared [ButtplugClientFutureState] type.
 ///
-/// [ButtplugClientConnectionStatus] is made to be shared across futures, and we'll
+/// [ButtplugClientFutureState] is made to be shared across futures, and we'll
 /// never know if those futures are single or multithreaded. Only needs to
-/// unlock for calls to [ButtplugClientConnectionStatus::set_reply_msg].
+/// unlock for calls to [ButtplugClientFutureState::set_reply].
 pub type ButtplugClientFutureStateShared<T> = Arc<Mutex<ButtplugClientFutureState<T>>>;
 
 /// [Future] implementation for [ButtplugMessageUnion] types send to the server.
@@ -124,7 +124,7 @@ impl<T> Future for ButtplugClientFuture<T> {
     type Output = T;
 
     /// Returns when the [ButtplugMessageUnion] reply has been set in the
-    /// [ButtplugClientConnectionStatusShared].
+    /// [ButtplugClientFutureStateShared].
     fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         let mut waker_state = self.waker_state.lock().unwrap();
         if waker_state.reply_msg.is_some() {
@@ -392,23 +392,18 @@ impl ButtplugClientEventLoop {
     }
 }
 
-/// The internal event loop for [ButtplugClient] connection and
+/// The internal event loop for [super::ButtplugClient] connection and
 /// communication
 ///
-/// Created whenever a new [ButtplugClient] is created, the internal loop
+/// Created whenever a new [super::ButtplugClient] is created, the internal loop
 /// handles connection and communication with the server, and creation of events
-/// received from the server. As [ButtplugClient] is clonable, multiple
-/// ButtplugClient instances can exist that all communicate with the same
-/// [client_event_loop] created future.
-///
-/// Also, if multiple [ButtplugClient] instances are created via new(), multiple
-/// [client_event_loop] futures can run in parallel. This allows applications
+/// received from the server.
 ///
 /// The event_loop does a few different things during its lifetime.
 ///
 /// - The first thing it will do is wait for a Connect message from a
 /// client. This message contains a [ButtplugClientConnector] that will be
-/// used to connect and communicate with a [ButtplugServer].
+/// used to connect and communicate with a [crate::server::ButtplugServer].
 ///
 /// - After a connection is established, it will listen for events from the
 /// connector, or messages from the client, until either server/client
@@ -416,8 +411,7 @@ impl ButtplugClientEventLoop {
 ///
 /// - Finally, on disconnect, it will tear down, and cannot be used again.
 /// All clients and devices associated with the loop will be invalidated,
-/// and a new [ButtplugClient] (and corresponding
-/// [ButtplugClientInternalLoop]) must be created.
+/// and a new [super::ButtplugClient] must be created.
 ///
 /// # Parameters
 ///
