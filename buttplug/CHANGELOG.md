@@ -1,3 +1,14 @@
+# v0.0.2 - 2019/11/21
+
+## Features
+
+- Overhauled API, now have an event loop that the client is created in
+  and lives in.
+- Finished full implementation of Client.
+- Added features for partial library builds.
+- Integrated websocket connector into library.
+- More documentation.
+
 # v0.0.2-beta.1 - 2019/11/03
 
 ## Features
