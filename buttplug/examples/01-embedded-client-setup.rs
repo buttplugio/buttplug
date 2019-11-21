@@ -73,7 +73,9 @@ async fn embedded_connector_example() {
             client.disconnect().await.unwrap();
         }
     };
-    ButtplugClient::run("Example Client", connector, app_closure).await.unwrap();
+    ButtplugClient::run("Example Client", connector, app_closure)
+        .await
+        .unwrap();
 
     // That's it for the basics of setting up, connecting, and disconnecting a client.
 }

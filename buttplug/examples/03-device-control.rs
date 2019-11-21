@@ -8,11 +8,14 @@
 // Let's make something move! In this example, we'll see how to tell what a
 // device can do, then send it a command (assuming it vibrates)!
 
-#![type_length_limit="5500000"]
+#![type_length_limit = "5500000"]
 
-use std::time::Duration;
 use async_std::task;
-use buttplug::client::{connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent, device::VibrateCommand};
+use buttplug::client::{
+    connectors::websocket::ButtplugWebsocketClientConnector, device::VibrateCommand,
+    ButtplugClient, ButtplugClientEvent,
+};
+use std::time::Duration;
 
 async fn device_control_example() {
     // We're pretty familiar with connectors by now.
@@ -47,7 +50,7 @@ async fn device_control_example() {
                             // something about it.
                             println!("Got some other kind of event we don't care about");
                         }
-                    }
+                    },
                     // Once again, if we disconnected before calling
                     // wait_for_error, we'll get an error back.
                     Err(err) => {
@@ -115,15 +118,14 @@ async fn device_control_example() {
                 } else {
                     println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
                 }
-
             }
             // And now we're done!
             println!("Exiting example");
         }
     };
-    ButtplugClient::run("Example Client",
-                        connector,
-                        app_closure).await.unwrap();
+    ButtplugClient::run("Example Client", connector, app_closure)
+        .await
+        .unwrap();
 }
 
 fn main() {

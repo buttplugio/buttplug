@@ -218,7 +218,10 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
 #[cfg(test)]
 mod test {
     use super::ButtplugWebsocketClientConnector;
-    use crate::client::{connectors::ButtplugClientConnector, ButtplugClient, ButtplugClientEvent, device::VibrateCommand};
+    use crate::client::{
+        connectors::ButtplugClientConnector, device::VibrateCommand, ButtplugClient,
+        ButtplugClientEvent,
+    };
     use async_std::task;
     use env_logger;
     use futures_timer::Delay;
@@ -262,7 +265,10 @@ mod test {
                                 ButtplugClientEvent::DeviceAdded(ref mut d) => {
                                     info!("Got device! {}", d.name);
                                     if d.allowed_messages.contains_key("VibrateCmd") {
-                                        assert!(d.vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
+                                        assert!(d
+                                            .vibrate(VibrateCommand::Speed(1.0))
+                                            .await
+                                            .is_ok());
                                         info!("Should be vibrating!");
                                         Delay::new(Duration::from_secs(1)).await;
                                         assert!(d.stop().await.is_ok());

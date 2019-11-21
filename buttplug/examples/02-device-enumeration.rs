@@ -10,7 +10,9 @@
 // servers which devices are available.
 
 use async_std::task;
-use buttplug::client::{connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent};
+use buttplug::client::{
+    connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent,
+};
 
 async fn device_enumeration_example() {
     // Since as of this writing we don't actually have devices in Rust yet,
@@ -111,7 +113,7 @@ async fn device_enumeration_example() {
                             // something about it.
                             println!("Got some other kind of event we don't care about");
                         }
-                    }
+                    },
                     // Once again, if we disconnected before calling
                     // wait_for_error, we'll get an error back.
                     Err(err) => {
@@ -142,9 +144,9 @@ async fn device_enumeration_example() {
             println!("Exiting example");
         }
     };
-    ButtplugClient::run("Example Client",
-                        connector,
-                        app_closure).await.unwrap();
+    ButtplugClient::run("Example Client", connector, app_closure)
+        .await
+        .unwrap();
 }
 
 fn main() {
