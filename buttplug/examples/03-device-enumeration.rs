@@ -1,179 +1,154 @@
-// private static async Task WaitForKey()
-// {
-//     Console.WriteLine("Press any key to continue.");
-//     while (!Console.KeyAvailable)
-//     {
-//         await Task.Delay(1);
-//     }
-//     Console.ReadKey(true);
-// }
-/*
-private static async Task RunExample()
-{
-    // Time to see what devices are available! In this example, we'll see how servers can
-    // access certain types of devices, and how clients can ask servers which devices are available.
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
 
-    // Since we're going to need to manage our server and client, this example will use an embedded connector.
+// Time to see what devices are available! In this example, we'll see how
+// servers can access certain types of devices, and how clients can ask
+// servers which devices are available.
 
-    // var connector = new ButtplugEmbeddedConnector("Example Server");
+use async_std::task;
+use buttplug::client::{connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent};
 
-    // ButtplugClient creation is the same as always.
+async fn device_enumeration_example() {
+    // Since as of this writing we don't actually have devices in Rust yet,
+    // we'll have to use a websocket connector. You'll want to have Intiface
+    // Desktop running with insecure sockets when you try this example for now.
+    //
+    // (If you're reading this and we have devices in Rust, please file a bug to
+    // tell me to update this)
+    //
+    // Websocket connectors take a address, and whether they should ignore cert
+    // verification or not. Since we're not using SSL for this example, that
+    // doesn't really matter for now.
+    let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", true);
 
-    // var client = new ButtplugClient("Example Client", connector);
+    // Since we don't have a server implementation yet, I'll be skipping the
+    // explanation of how Device Subtype Managers work for this.
 
-    // We're to the new stuff. When we create a ButtplugEmbeddedConnector, it in turn creates
-    // a Buttplug Server to hold (unless we pass it one to use, which we won't be doing until
-    // later examples). If you're just interested in creating Buttplug Client applications
-    // that will access things like the Windows Buttplug Server, you won't have to set up the
-    // server like this, but this is good knowledge to have anyways, so it's recommended to
-    // at least read through this.
+    // Let's talk about when and how you'll get events (in this case,
+    // DeviceAdded events) from the server.
     //
-    // When a Buttplug Server is created, it in turn creates a Device Manager. The Device
-    // Manager is basically the hub of all hardware communication for Buttplug. A Device
-    // Manager will hold multiple Device Subtype Managers, which is where we get to specifics
-    // about hardware busses and communications. For instance, as of this writing, Buttplug
-    // currently ships with Device Subtype Managers for
+    // The server can fire device connection events at 2 points.
     //
-    // - Bluetooth LE (C# Win10/Typescript)
-    // - USB Raw (C# Win7/Win10)
-    // - USB HID (C# Win7/Win10)
-    // - Serial (C# Win7/Win10)
-    // - XInput/XBox Gamepads (C# Win7/Win10)
-    // - Test/Simulator (C#/Typescript)
+    // - When a client first connects, if the server has a device connection it
+    // is already holding.
     //
-    // When creating a Server, if we don't add subtype managers ourselves, the server will go
-    // looking for them in DLLs around the executable on the first time we call
-    // StartScanning(). This means you can simply add SubtypeManager nuget dependencies, and
-    // they'll instantly be brought in when you start looking for devices.
-    //
-    // We can also specify which device subtype managers we want to use manually, if we want.
-    // For this example, we'll just add a TestDeviceManager so we don't have to deal with
-    // actual hardware. This requires manual setup.
-    //
-    // To do this, we'll get the server from the connector.
-
-    // var server = connector.Server;
-
-    // Then we add a TestDeviceManager to the server. Due to how our logging system works,
-    // the server needs to be able to give the log manager it owns to the new device subtype
-    // manager. That means we pass in a closure to create the manager.
-    //
-    // In this case, we also have to create a Test Device, since we aren't working with
-    // actual hardware. This step won't normally be required if you're working with a
-    // hardware subtype manager.
-
-    // var testDevice = new TestDevice(new ButtplugLogManager(), "Test Device");
-    // server.AddDeviceSubtypeManager(
-    //     aLogManager => new TestDeviceSubtypeManager(testDevice));
-
-    // If you'd like to see what manual setup looks like with an actual hardware manager,
-    // here's how we'd add the XInput (Xbox Gamepad) manager to the server.
-    //
-    // server.AddDeviceSubtypeManager((IButtplugLogManager aLogManager) => new XInputGamepadManager(aLogManager));
-
-    // Now that the server has at least one device subtype manager, whenever we ask it to
-    // scan for devices, it will use the subtype manager to find new devices that it
-    // supports. However, we need a way to know in the client when devices connect and
-    // disconnect, so we'll need to set up event handlers.
-    //
-    // THIS NEXT PART IS IMPORTANT, HENCE CAPS.
-    //
-    // Client device connection event handlers should be set up BEFORE you connect a client
-    // to a server. The server can fire device connection events at 2 points.
-    //
-    // - When a client first connects, if the server has a device connection it is already holding.
     // - During device scanning.
     //
-    // If you do not have event handlers set up before connecting, you may miss connection events.
+    // When the client connects as part of ButtplugClient::run(), it asks the
+    // server for a list of already connected devices. The server will return
+    // these as DeviceAdded events, including a ButtplugDevice instance we can
+    // then use to control the device.
     //
-    // A quick aside on why a server could hold devices. There are a few reasons this could
-    // happen, some chosen, some forced.
+    // A quick aside on why a server could hold devices. There are a few reasons
+    // this could happen, some chosen, some forced.
     //
-    // - On Windows 10, it is sometimes difficult to get bluetooth LE devices to disconnect,
-    // so some software (including the Windows Buttplug Server) leaves devices connected
-    // until either the device is powered off/taken out of bluetooth range, or the program terminates.
+    // - On Windows 10, it is sometimes difficult to get bluetooth LE devices to
+    // disconnect, so some software (including the Windows Buttplug Server)
+    // leaves devices connected until either the device is powered off/taken out
+    // of bluetooth range, or the program terminates.
     //
-    // - Depending on how a server is being used, parts of it like a device manager may stay
-    // alive between client connections. This would mean that if a client disconnected from a
-    // server then reconnected quickly, setup steps wouldn't have to happen again.
+    // - Depending on how a server is being used, parts of it like a device
+    // manager may stay alive between client connections. This would mean that
+    // if a client disconnected from a server then reconnected quickly, setup
+    // steps wouldn't have to happen again.
     //
-    // Anyways, let's set up some simple event handlers.
+    // With that out of the way, let's build our client.
+    let app_closure = |mut client: ButtplugClient| {
+        async move {
+            // First, we'll start the server looking for devices.
+            if let Err(err) = client.start_scanning().await {
+                // If the server disconnected between the time we spun up the
+                // loop and now, the scanning will return an error. At that
+                // point we should just bail out.
+                println!("Client errored when starting scan! {}", err);
+                return;
+            }
+            // Ok, we've started scanning. Now we need to wait to hear back from
+            // the server on whether we got anything. To do that, we call
+            // wait_for_event.
+            //
+            // wait_for_event is to Buttplug's Rust implementation what the
+            // event handlers in C#/JS were to those implementations. However,
+            // since we're not in a GC'd language anymore, event handlers are a
+            // bit difficult to implement, so we just have a stream-like
+            // function instead.
+            //
+            // wait_for_event will return a future that waits until it gets
+            // something from the server. You can either await that and block
+            // until you get something from the server (or race/select it
+            // against other futures), or else save the future and use something
+            // like a timeout join.
+            //
+            // For our purposes for the moment, all we care about is receiving
+            // new devices, so we'll just loop and wait.
+            loop {
+                match client.wait_for_event().await {
+                    // Yay we got an event!
+                    Ok(event) => match event {
+                        ButtplugClientEvent::DeviceAdded(device) => {
+                            // And we actually got a device!
+                            //
+                            // The device we're given is a real
+                            // ButtplugClientDevice object. We could control the
+                            // device with it if we wanted, but that's coming up
+                            // in a later example. For now, we'll just print the
+                            // device name then drop our instance of it.
+                            println!("We got a device: {}", device.name);
+                        }
+                        ButtplugClientEvent::ServerDisconnect => {
+                            // The server disconnected, which means we're done
+                            // here, so just break up to the top level.
+                            println!("Server disconnected!");
+                            break;
+                        }
+                        _ => {
+                            // Something else happened, like scanning finishing,
+                            // devices getting removed, etc... Might as well say
+                            // something about it.
+                            println!("Got some other kind of event we don't care about");
+                        }
+                    }
+                    // Once again, if we disconnected before calling
+                    // wait_for_error, we'll get an error back.
+                    Err(err) => {
+                        println!("Error while waiting for client events: {}", err);
+                        break;
+                    }
+                }
 
-    // client.DeviceAdded += (aObj, aDeviceEventArgs) =>
-    //     Console.WriteLine($"Device {aDeviceEventArgs.Device.Name} Connected!");
-
-    // client.DeviceRemoved += (aObj, aDeviceEventArgs) =>
-    //     Console.WriteLine($"Device {aDeviceEventArgs.Device.Name} Removed!");
-
-    // Now that everything is set up, we can connect.
-
-    // try
-    // {
-    //     await client.ConnectAsync();
-    // }
-    // catch (Exception ex)
-    // {
-    //     Console.WriteLine($"Can't connect to Buttplug Server, exiting! Message: {ex.InnerException.Message}");
-    //     await WaitForKey();
-    //     return;
-    // }
-
-    // We're connected, yay!
-
-    // Console.WriteLine("Connected!");
-
-    // It's time to ask the server what devices it can find. We'll do this using a pair of
-    // calls, StartScanning() and StopScanning(), and an event handler, ScanningFinished.
-    //
-    // We start by calling StartScanning(), which tells all of the device subtype managers to
-    // scan for whatever devices they manage. Some managers may scan and finish immediately,
-    // while others like Bluetooth can take some time to find devices. Once the devices we
-    // want to use are found, we can call StopScanning(), and once all scanning has ceased,
-    // the ScanningFinish event will fire (which allows you to do things like updating UI).
-    //
-    // Sometimes, when all device managers are finished scanning, the ScanningFinished event
-    // can be fired even without calling StopScanning, so that should be set up first.
-
-    // client.ScanningFinished += (aObj, aScanningFinishedArgs) =>
-    //     Console.WriteLine("Device scanning is finished!");
-
-    // Now we can start scanning for devices, and any time a device is found, we should see
-    // the device name printed out. Since we're just using the Test Device Manager here, we
-    // expect that we'll see the Test Device name, then the scanning finished message.
-
-    // await client.StartScanningAsync();
-    // await WaitForKey();
-
-    // The Test Subtype Manager will scan until we still it to stop, so let's stop it now.
-
-    // await client.StopScanningAsync();
-    // await WaitForKey();
-
-    // Since we've scanned, the client holds information about devices it knows about for
-    // us. These devices can be accessed with the Devices getter on the client.
-
-    // Console.WriteLine("Client currently knows about these devices:");
-    // foreach (var device in client.Devices)
-    // {
-    //     Console.WriteLine($"- {device.Name}");
-    // }
-
-    // await WaitForKey();
-
-    // To show what happens when a device disconnects, we'll force the test device to
-    // disconnect, which simulates the device powering off, going out of range, or doing
-    // something else that makes it no longer connected to the server. This should fire off
-    // the DeviceRemoved event.
-
-    // testDevice.Disconnect();
-    // await WaitForKey();
-
-    // And now we disconnect as usual.
-
-    // await client.DisconnectAsync();
-
-    // Now we can connect and see what devices we have, so next we'll learn about sending
-    // them commands!
+                // Hypothetical situation: We've now exited our match block, and
+                // realized that hey, we actually wanted that device object we
+                // dropped in the DeviceAdded branch!
+                //
+                // Never fear, you can always ask for a vec of all devices from
+                // the client. It requires an await as the devices require
+                // creation by the event loop, but it should be pretty quick.
+                //
+                // As with everything else, since the event loop may have shut
+                // down due to server disconnect, this returns a result that
+                // will error if that has happened.
+                if let Ok(devices) = client.devices().await {
+                    println!("Devices currently connected:");
+                    for dev in devices {
+                        println!("- {}", dev.name);
+                    }
+                }
+            }
+            // And now we're done!
+            println!("Exiting example");
+        }
+    };
+    ButtplugClient::run("Example Client",
+                        connector,
+                        app_closure).await.unwrap();
 }
-*/
-fn main() {}
+
+fn main() {
+    task::block_on(async {
+        device_enumeration_example().await;
+    })
+}

@@ -1,3 +1,6 @@
+// Ping still isn't implemented. Wait for #17 to land before reimplementing this
+// example.
+
 // use buttplug::client::ButtplugClient;
 
 // Dummy client class that ignores ping timing, just used here for show.

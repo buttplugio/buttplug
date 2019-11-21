@@ -1,143 +1,133 @@
-// private static async Task WaitForKey()
-// {
-//     Console.WriteLine("Press any key to continue.");
-//     while (!Console.KeyAvailable)
-//     {
-//         await Task.Delay(1);
-//     }
-//     Console.ReadKey(true);
-// }
-
-// private static async Task RunExample()
-// {
-// Finally! It's time to make something move!
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// (In this case, that "something" will just be a Test Device, so this is actually just a
-// simulation of something moving. Sorry to get you all excited.)
-
-// Let's go ahead, put our client/server together, and get connected.
-
-// var connector = new ButtplugEmbeddedConnector("Example Server");
-// var client = new ButtplugClient("Example Client", connector);
-// var server = connector.Server;
-// var testDevice = new TestDevice(new ButtplugLogManager(), "Test Device");
-// server.AddDeviceSubtypeManager(
-//     aLogManager => new TestDeviceSubtypeManager(testDevice));
-// try
-// {
-//     await client.ConnectAsync();
-// }
-// catch (Exception ex)
-// {
-//     Console.WriteLine($"Can't connect to Buttplug Server, exiting! Message: {ex.InnerException.Message}");
-//     await WaitForKey();
-//     return;
-// }
-// Console.WriteLine("Connected!");
-
-// You usually shouldn't run Start/Stop scanning back-to-back like this, but with
-// TestDevice we know our device will be found when we call StartScanning, so we can get
-// away with it.
-
-// await client.StartScanningAsync();
-// await client.StopScanningAsync();
-// Console.WriteLine("Client currently knows about these devices:");
-// foreach (var device in client.Devices)
-// {
-//     Console.WriteLine($"- {device.Name}");
-// }
-
-// await WaitForKey();
-
-// Ok, so we now have a connected client with a device set up. Let's start sending some
-// messages to make the device do things!
+// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
 //
-// It's worth noting that at the moment, a client knowing about a device is enough to
-// assume that device is connected to the server and ready to use. So if a client has a
-// device in its list, we can just start sending control messages.
-//
-// We'll need to see which messages our device handles. Luckily, devices hold this
-// information for you to query.
-//
-// When building applications, we can use AllowedMessages to see what types of messages
-// whatever device handed to us can take, and then react accordingly.
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
 
-// foreach (var device in client.Devices)
-// {
-//     Console.WriteLine($"{device.Name} supports the following messages:");
-//     foreach (var msgInfo in device.AllowedMessages)
-//     {
+// Let's make something move! In this example, we'll see how to tell what a
+// device can do, then send it a command (assuming it vibrates)!
 
-// msgInfo will have two pieces of information
-// - Message Type, which will represent the classes of messages we can send
-// - Message constraints, which can vary depending on the type of message
-//
-// For instance the VibrateCmd message will have a Type of VibrateCmd (the C#
-// class in our library), and a "FeatureCount" of 1 < x < N, depending on the
-// number of vibration motors the device has. Messages that don't have a
-// FeatureCount will leave FeatureCount as null.
-//
-// Since we're working with a TestDevice, we know it will support 3 different
-// types of messages.
-//
-// - VibrateCmd with a FeatureCount of 2, meaning we can send 2 vibration
-// commands at a time.
-// - SingleMotorVibrateCmd, a legacy message that makes all vibrators on a device
-// vibrate at the same speed.
-// - StopDeviceCmd, which stops all output on a device. All devices should
-// support this message.
+#![type_length_limit="3054378"]
 
-//         Console.WriteLine($"- {msgInfo.Key.Name}");
-//         if (msgInfo.Value.FeatureCount != null)
-//         {
-//             Console.WriteLine($"  - Feature Count: {msgInfo.Value.FeatureCount}");
-//         }
-//     }
-// }
+use std::time::Duration;
+use async_std::task;
+use buttplug::client::{connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent, device::VibrateCommand};
 
-// Console.WriteLine("Sending commands");
+async fn device_control_example() {
+    // We're pretty familiar with connectors by now.
+    let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", true);
 
-// Now that we know the message types for our connected device, we can send a message
-// over! Seeing as we want to stick with the modern generic messages, we'll go with VibrateCmd.
-//
-// There's a couple of ways to send this message.
+    // We'll mostly be doing the same thing we did in example #3, up until we
+    // get a device.
+    let app_closure = |mut client: ButtplugClient| {
+        async move {
+            if let Err(err) = client.start_scanning().await {
+                println!("Client errored when starting scan! {}", err);
+                return;
+            }
+            let mut device = None;
+            loop {
+                match client.wait_for_event().await {
+                    Ok(event) => match event {
+                        ButtplugClientEvent::DeviceAdded(dev) => {
+                            println!("We got a device: {}", dev.name);
+                            device = Some(dev);
+                            break;
+                        }
+                        ButtplugClientEvent::ServerDisconnect => {
+                            // The server disconnected, which means we're done
+                            // here, so just break up to the top level.
+                            println!("Server disconnected!");
+                            break;
+                        }
+                        _ => {
+                            // Something else happened, like scanning finishing,
+                            // devices getting removed, etc... Might as well say
+                            // something about it.
+                            println!("Got some other kind of event we don't care about");
+                        }
+                    }
+                    // Once again, if we disconnected before calling
+                    // wait_for_error, we'll get an error back.
+                    Err(err) => {
+                        println!("Error while waiting for client events: {}", err);
+                        break;
+                    }
+                }
+            }
+            // Ok, so we now have a connected client with a device set up. Let's
+            // start sending some messages to make the device do things!
+            //
+            // It's worth noting that at the moment, a client knowing about a
+            // device is enough to assume that device is connected to the server
+            // and ready to use. So if a client has a device in its list, we can
+            // just start sending control messages.
+            if let Some(mut dev) = device {
+                // We'll need to see which messages our device handles. Luckily,
+                // devices hold this information for you to query.
+                //
+                // When building applications, we can use allowed_messages to
+                // see what types of messages whatever device handed to us can
+                // take, and then react accordingly.
+                //
+                // Each entry of allowed_messages will have two pieces of
+                // information
+                //
+                // - Message Type, which will represent the classes of messages
+                // we can send
+                //
+                // - Message Attributes, which can vary depending on the type
+                // of message
+                //
+                // For instance the VibrateCmd message will have a name of
+                // "VibrateCmd", and a "FeatureCount" of 1 < x < N, depending on
+                // the number of vibration motors the device has. Messages that
+                // don't have a FeatureCount will leave Option<FeatureCount> as
+                // None.
+                //
+                // Since we don't know what kind of device we'll be getting
+                // here, we just assume it will be something that vibrates.
+                //
+                // Devices have "generic" commands for vibrate, rotate, and
+                // linear (movement). Each of these takes a enum that is either:
+                //
+                // - A single value to send to all features. For instance if a
+                // device has 6 vibrators, and we send one speed, all 6
+                // vibrators will be set to that speed.
+                //
+                // - A map of index/value pairs, which allows setting certain
+                // device feature indexes to certain values.
+                //
+                // - A vector of values, which can address most or all feature
+                // indexes.
+                //
+                // For this example, we'll use the simple single value.
+                if dev.allowed_messages.contains_key("VibrateCmd") {
+                    dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
+                    println!("{} should start vibrating!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                    // All devices also have a "stop" command that will make
+                    // them stop whatever they're doing.
+                    dev.stop().await.unwrap();
+                    println!("{} should stop vibrating!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                } else {
+                    println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
+                }
 
-// var testClientDevice = client.Devices[0];
+            }
+            // And now we're done!
+            println!("Exiting example");
+        }
+    };
+    ButtplugClient::run("Example Client",
+                        connector,
+                        app_closure).await.unwrap();
+}
 
-// We can use the convenience functions on ButtplugClientDevice to send the message. This
-// version sets all of the motors on a vibrating device to the same speed.
-
-// await testClientDevice.SendVibrateCmd(1.0);
-
-// If we wanted to just set one motor on and the other off, we could try this version
-// that uses an array. It'll throw an exception if the array isn't the same size as the
-// number of motors available as denoted by FeatureCount, though.
-//
-// You can get the vibrator count using the following code, though we know it's 2 so we
-// don't really have to use it.
-
-// var vibratorCount = testClientDevice.GetMessageAttributes<VibrateCmd>().FeatureCount;
-// await testClientDevice.SendVibrateCmd(new[] { 1.0, 0.0 } );
-
-// await WaitForKey();
-
-// And now we disconnect as usual.
-
-// await client.DisconnectAsync();
-
-// If we try to send a command to a device after the client has disconnected, we'll get
-// an exception thrown.
-
-// try
-// {
-//     await testClientDevice.SendVibrateCmd(1.0);
-// }
-// catch (ButtplugClientConnectorException e)
-// {
-//     Console.WriteLine("Tried to send a device message after the client disconnected! Exception: ");
-//     Console.WriteLine(e);
-// }
-// await WaitForKey();
-// }
-
-fn main() {}
+fn main() {
+    task::block_on(async {
+        device_control_example().await;
+    })
+}
