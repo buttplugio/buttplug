@@ -537,10 +537,11 @@ mod test {
     }
 
     #[test]
-    fn test_disconnect_with_no_connect() {
+    fn test_double_disconnect() {
         task::block_on(async {
             connect_test_client(|mut client| {
                 async move {
+                    assert!(client.disconnect().await.is_ok());
                     assert!(client.disconnect().await.is_err());
                 }
             })
