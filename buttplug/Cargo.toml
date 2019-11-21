@@ -11,7 +11,7 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
 [features]
-default=["client", "server"]
+default=["client-ws", "server"]
 client=[]
 server=[]
 serialize_json=["serde", "serde_json", "serde_repr"]

@@ -1,4 +1,4 @@
-# Buttplug
+# Buttplug (Rust Implementation)
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
@@ -10,8 +10,28 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/buttplug)](https://crates.io/crates/buttplug)
 [![Crates.io License](https://img.shields.io/crates/l/buttplug)](https://crates.io/crates/buttplug)
 
+<div align="center">
+  <h3>
+    <a href="https://docs.rs/buttplug">
+      API Documentation
+    </a>
+    <span> | </span>
+    <a href="https://buttplug-spec.docs.buttplug.io">
+      Protocol Spec
+    </a>
+    <span> | </span>
+    <a href="https://buttplug-developer-guide.docs.buttplug.io">
+      Developer Guide
+    </a>
+    <span> | </span>
+    <a href="https://github.com/buttplugio/buttplug-rs/releases">
+      Releases
+    </a>
+  </h3>
+</div>
+
 Rust implementation of the Buttplug Intimate Hardware Protocol,
-including implementations of the client and server.
+including implementations of the client and, at some point, server.
 
 ## Read Me First!
 
@@ -23,7 +43,9 @@ For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
 The Rust code in this repo is currently being rebuilt and rewritten.
-Our [C#](https://github.com/metafetish/buttplug-csharp) and
+It contains a implementation of the Buttplug Client, but the Server
+(hardware accessing) portion is still being worked on. Our
+[C#](https://github.com/metafetish/buttplug-csharp) and
 [Typescript/JS/Node](https://github.com/metafetish/buttplug-js)
 implementations are the most complete for the moment.
 
@@ -44,6 +66,23 @@ The core of buttplug works as a router. It is a Rust based application
 that connects to libraries that registers and communicates with
 different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
+
+## Usage
+
+To use Buttplug in your rust application or library, check out the
+[buttplug package on crates.io](https://crates.io/buttplug).
+
+The following crate features are available
+
+| Feature | Other Features Used | Description |
+| --------- | ----------- | ----------- |
+| `client` | None | Buttplug client implementation (in-process connection only) |
+| `server` | None | Buttplug server implementation (in-process connection only) |
+| `serialize_json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
+| `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers |
+| `client-ws-ssl` | `client`,`serialize_json` | Websocket client connector with SSL capabilities |
+
+Default features are `client-ws` and `server`.
 
 ## Architecture
 
@@ -89,7 +128,7 @@ The core library consists of:
     in-process, or out-of-process via some sort of IPC (pipes,
     websockets, carrier pidgeon, etc...). Also exposes FFI bindings
     for client access in languages other than Rust.
-    
+
 Things not in the core library but still needed by Buttplug include
 either platform/OS specific or optional components, such as:
 
@@ -105,7 +144,7 @@ either platform/OS specific or optional components, such as:
     IPC. These feed clients with messages from the IPC, and are
     usually external implementations as not all uses of Buttplug will
     require all types of IPC.
-    
+
 In prior implementations of Buttplug, including C# and Typescript, the
 core usually existed expecting implementations of
 DeviceSubtypeManagers and Connectors in the same language. As both of
@@ -114,7 +153,7 @@ browser for Typescript/Javascript), making them cross platform
 required rewriting the core implementation. By using Rust, the hope is
 to keep one reference implementation of the core library, and wrapping
 that in FFIs for other implementations or compiling to WASM or other
-intermediaries as needed. 
+intermediaries as needed.
 
 This is hopefully easier than, say, hauling the whole .Net platform
 along with us everywhere we go.
@@ -130,11 +169,18 @@ boundaries and possible IPC tunnels.
 - The server will have an FFI boundary on devices, so we can implement
   platform specific device handling in other languages if needed
   (Swift, Java, C#, etc.)
-  
+
 Incoming messages will still be JSON, because we made a bad decision
 early on and by god we're sticking with it. Internal boundaries (like
 the server/DeviceSubtypeManager boundary) will either be callback
 based, or message-passing via protobuf protocols.
+
+## Contributing
+
+Right now, we mostly need code/API style reviews and feedback. We don't
+really have any good bite-sized chunks to apportion out on the
+implementation yet, but one we do, those will be marked "Help Wanted" in our
+[github issues](https://github.com/buttplugio/buttplug-rs/issues).
 
 ## License
 
@@ -142,21 +188,21 @@ Buttplug is BSD licensed.
 
     Copyright (c) 2016-2019, Nonpolynomial Labs, LLC
     All rights reserved.
-    
+
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
-    
+
     * Redistributions of source code must retain the above copyright notice, this
       list of conditions and the following disclaimer.
-    
+
     * Redistributions in binary form must reproduce the above copyright notice,
       this list of conditions and the following disclaimer in the documentation
       and/or other materials provided with the distribution.
-    
+
     * Neither the name of buttplug nor the names of its
       contributors may be used to endorse or promote products derived from
       this software without specific prior written permission.
-    
+
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
     AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
