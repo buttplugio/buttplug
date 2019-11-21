@@ -8,7 +8,7 @@
 // Let's make something move! In this example, we'll see how to tell what a
 // device can do, then send it a command (assuming it vibrates)!
 
-#![type_length_limit="3054378"]
+#![type_length_limit="5500000"]
 
 use std::time::Duration;
 use async_std::task;
@@ -129,5 +129,5 @@ async fn device_control_example() {
 fn main() {
     task::block_on(async {
         device_control_example().await;
-    })
+    });
 }
