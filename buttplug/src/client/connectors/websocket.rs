@@ -224,7 +224,6 @@ mod test {
     };
     use async_std::task;
     use env_logger;
-    use futures_timer::Delay;
     use log::info;
     use std::time::Duration;
 
@@ -244,61 +243,61 @@ mod test {
         })
     }
 
-    #[test]
-    #[ignore]
-    fn test_client_websocket() {
-        let _ = env_logger::builder().is_test(true).try_init();
-        task::block_on(async {
-            info!("connecting");
-            assert!(ButtplugClient::run(
-                "test client",
-                ButtplugWebsocketClientConnector::new("ws://localhost:12345", false),
-                |mut client| {
-                    async move {
-                        info!("connected");
-                        assert!(client.start_scanning().await.is_ok());
-                        info!("scanning!");
-                        info!("starting event loop!");
-                        while client.connected() {
-                            info!("Waiting for event!");
-                            match client.wait_for_event().await.unwrap() {
-                                ButtplugClientEvent::DeviceAdded(ref mut d) => {
-                                    info!("Got device! {}", d.name);
-                                    if d.allowed_messages.contains_key("VibrateCmd") {
-                                        assert!(d
-                                            .vibrate(VibrateCommand::Speed(1.0))
-                                            .await
-                                            .is_ok());
-                                        info!("Should be vibrating!");
-                                        Delay::new(Duration::from_secs(1)).await;
-                                        assert!(d.stop().await.is_ok());
-                                        // assert!(client.disconnect().await.is_ok());
-                                        Delay::new(Duration::from_secs(1)).await;
-                                        break;
-                                    }
-                                }
-                                ButtplugClientEvent::ServerDisconnect => {
-                                    assert!(false, "Server disconnected!");
-                                    break;
-                                }
-                                _ => info!("Got something else!"),
-                            }
-                        }
-                        info!("Trying to get device again!");
-                        let mut d = client.devices().await.unwrap();
-                        if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
-                            assert!(d[0].vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
-                            info!("Should be vibrating!");
-                            Delay::new(Duration::from_secs(1)).await;
-                            assert!(d[0].stop().await.is_ok());
-                            assert!(client.disconnect().await.is_ok());
-                            Delay::new(Duration::from_secs(1)).await;
-                        }
-                    }
-                }
-            )
-            .await
-            .is_ok());
-        })
-    }
+    // #[test]
+    // #[ignore]
+    // fn test_client_websocket() {
+    //     let _ = env_logger::builder().is_test(true).try_init();
+    //     task::block_on(async {
+    //         info!("connecting");
+    //         assert!(ButtplugClient::run(
+    //             "test client",
+    //             ButtplugWebsocketClientConnector::new("ws://localhost:12345", false),
+    //             |mut client| {
+    //                 async move {
+    //                     info!("connected");
+    //                     assert!(client.start_scanning().await.is_ok());
+    //                     info!("scanning!");
+    //                     info!("starting event loop!");
+    //                     while client.connected() {
+    //                         info!("Waiting for event!");
+    //                         match client.wait_for_event().await.unwrap() {
+    //                             ButtplugClientEvent::DeviceAdded(ref mut d) => {
+    //                                 info!("Got device! {}", d.name);
+    //                                 if d.allowed_messages.contains_key("VibrateCmd") {
+    //                                     assert!(d
+    //                                         .vibrate(VibrateCommand::Speed(1.0))
+    //                                         .await
+    //                                         .is_ok());
+    //                                     info!("Should be vibrating!");
+    //                                     task::sleep(Duration::from_secs(1)).await;
+    //                                     assert!(d.stop().await.is_ok());
+    //                                     // assert!(client.disconnect().await.is_ok());
+    //                                     task::sleep(Duration::from_secs(1)).await;
+    //                                     break;
+    //                                 }
+    //                             }
+    //                             ButtplugClientEvent::ServerDisconnect => {
+    //                                 assert!(false, "Server disconnected!");
+    //                                 break;
+    //                             }
+    //                             _ => info!("Got something else!"),
+    //                         }
+    //                     }
+    //                     info!("Trying to get device again!");
+    //                     let mut d = client.devices().await.unwrap();
+    //                     if d.len() > 0 && d[0].allowed_messages.contains_key("VibrateCmd") {
+    //                         assert!(d[0].vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
+    //                         info!("Should be vibrating!");
+    //                         task::sleep(Duration::from_secs(1)).await;
+    //                         assert!(d[0].stop().await.is_ok());
+    //                         assert!(client.disconnect().await.is_ok());
+    //                         task::sleep(Duration::from_secs(1)).await;
+    //                     }
+    //                 }
+    //             }
+    //         )
+    //         .await
+    //         .is_ok());
+    //     })
+    // }
 }
