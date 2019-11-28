@@ -39,7 +39,7 @@ impl ButtplugServer {
         }
     }
 
-    pub async fn send_message(
+    pub async fn parse_message(
         &mut self,
         msg: &ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
