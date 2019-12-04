@@ -9,6 +9,7 @@ module.exports = {
       "/status.md",
       "/identification.md",
       "/enumeration.md",
+      "/raw.md",
       "/generic.md",
       "/sensors.md",
       "/specific.md",
