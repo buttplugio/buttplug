@@ -4,6 +4,7 @@ module.exports = {
   themeConfig: {
     sidebar: [
       "/",
+      "/changelog.md",
       "/architecture.md",
       "/messages.md",
       "/status.md",
