@@ -35,7 +35,7 @@ reference implementation, endpoint names will be defined in the
 file](https://github.com/buttplugio/buttplug-device-config).
 
 ---
-## RawDataWriteCmd
+## RawWriteCmd
 
 **Description:** Client request to have the server write a byte array
 to a device endpoint.
@@ -61,7 +61,7 @@ to a device endpoint.
 
 <mermaid>
 sequenceDiagram
-    Client->>+Server: RawDataWriteCmd Id=1
+    Client->>+Server: RawWriteCmd Id=1
     Server->>-Client: Ok Id=1
 </mermaid>
 
@@ -70,7 +70,7 @@ sequenceDiagram
 ```json
 [
   {
-    "RawDataWriteCmd": {
+    "RawWriteCmd": {
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "tx",
@@ -81,7 +81,7 @@ sequenceDiagram
 ]
 ```
 ---
-## RawDataReadCmd
+## RawReadCmd
 
 **Description:** Client request to have the server read a byte array
 from a device endpoint.
@@ -100,15 +100,15 @@ from a device endpoint.
 
 **Expected Response:**
 
-* RawDataReading message with matching Id on successful request.
+* RawReading message with matching Id on successful request.
 * Error message on value or message error.
 
 **Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
-    Client->>+Server: RawDataReadCmd Id=1
-    Server->>-Client: RawDataReading Id=1
+    Client->>+Server: RawReadCmd Id=1
+    Server->>-Client: RawReading Id=1
 </mermaid>
 
 **Serialization Example:**
@@ -116,7 +116,7 @@ sequenceDiagram
 ```json
 [
   {
-    "RawDataReadCmd": {
+    "RawReadCmd": {
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "tx",
@@ -128,10 +128,10 @@ sequenceDiagram
 ```
 
 ---
-## RawDataReading
+## RawReading
 
 **Description:** Server response when data is read (in response to
-RawDataReadCmd) or received (after RawDataSubscribe) from a device
+RawReadCmd) or received (after RawSubscribe) from a device
 endpoint.
 
 **Introduced In Spec Version:** 2
@@ -150,7 +150,7 @@ endpoint.
 ```json
 [
   {
-    "RawDataReading": {
+    "RawReading": {
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "rx",
@@ -161,7 +161,7 @@ endpoint.
 ```
 
 ---
-## RawDataSubscribeCmd
+## RawSubscribeCmd
 
 **Description:** Client request to have the server subscribe and send
 all data that comes in from an endpoint that is not explicitly read.
@@ -180,7 +180,7 @@ endpoints.
 
 **Expected Response:**
 
-* Ok if subscription is successful, followed by RawDataReading
+* Ok if subscription is successful, followed by RawReading
   messages on all new readings.
 * Error message on value or message error.
 
@@ -188,10 +188,10 @@ endpoints.
 
 <mermaid>
 sequenceDiagram
-    Client->>+Server: RawDataSubscribeCmd Id=1
+    Client->>+Server: RawSubscribeCmd Id=1
     Server->>-Client: Ok Id=1
-    Server->>+Client: RawDataReading Id=0
-    Server->>+Client: RawDataReading Id=0
+    Server->>+Client: RawReading Id=0
+    Server->>+Client: RawReading Id=0
 </mermaid>
 
 **Serialization Example:**
@@ -199,7 +199,7 @@ sequenceDiagram
 ```json
 [
   {
-    "RawDataSubscribeCmd": {
+    "RawSubscribeCmd": {
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "tx"
@@ -209,7 +209,7 @@ sequenceDiagram
 ```
 
 ---
-## RawDataUnsubscribeCmd
+## RawUnsubscribeCmd
 
 **Description:** Client request to have the server unsubscribe from an
 endpoint to which it had previously subscribed.
@@ -233,7 +233,7 @@ endpoint to which it had previously subscribed.
 
 <mermaid>
 sequenceDiagram
-    Client->>+Server: RawDataUnsubscribeCmd Id=1
+    Client->>+Server: RawUnsubscribeCmd Id=1
     Server->>-Client: Ok Id=1
 </mermaid>
 
@@ -242,7 +242,7 @@ sequenceDiagram
 ```json
 [
   {
-    "RawDataUnsubscribeCmd": {
+    "RawUnsubscribeCmd": {
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "tx"
