@@ -156,6 +156,16 @@ impl Test {
 pub struct MessageAttributes {
     #[cfg_attr(feature = "serialize_json", serde(rename = "FeatureCount"))]
     pub feature_count: Option<u32>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "StepCount"))]
+    pub step_count: Option<Vec<u32>>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoints"))]
+    pub endpoints: Option<Vec<String>>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MaxDuration"))]
+    pub max_duration: Option<Vec<u32>>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Patterns"))]
+    pub patterns: Option<Vec<Vec<String>>>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ActuatorType"))]
+    pub actuator_type: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
