@@ -9,9 +9,21 @@
 
 pub mod device_manager;
 
-use crate::core::errors::*;
-use crate::core::messages::{self, ButtplugMessage, ButtplugMessageUnion};
+use crate::core::{
+    errors::*,
+    messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo},
+};
 use async_std::sync::Sender;
+
+pub enum ButtplugServerEvent {
+    DeviceAdded(DeviceMessageInfo),
+    DeviceRemoved(DeviceMessageInfo),
+    DeviceMessage(ButtplugMessageUnion),
+    ScanningFinished(),
+    ServerError(ButtplugError),
+    PingTimeout(),
+    Log(messages::Log),
+}
 
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
@@ -95,6 +107,9 @@ impl ButtplugServer {
     async fn stop_scanning(&self) -> Result<(), ButtplugError> {
         Ok(())
     }
+
+    // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {
+    // }
 }
 
 #[cfg(test)]
@@ -106,7 +121,7 @@ mod test {
         let (send, _) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         assert_eq!(server.server_name, "Test Server");
-        match server.send_message(&msg_union).await.unwrap() {
+        match server.parse_message(&msg_union).await.unwrap() {
             ButtplugMessageUnion::ServerInfo(_s) => {
                 assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0))
             }
@@ -142,7 +157,7 @@ mod test {
         let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
         task::block_on(async {
             assert!(
-                server.send_message(&msg_union).await.is_err(),
+                server.parse_message(&msg_union).await.is_err(),
                 "Client having higher version than server should fail"
             );
         });
