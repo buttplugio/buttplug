@@ -8,7 +8,7 @@
 //! Device specific identification and protocol implementations.
 
 use crate::core::messages::MessageAttributes;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -16,11 +16,17 @@ const DeviceConfigurationFile: &str = include_str!("../../dependencies/buttplug-
 
 #[derive(Deserialize, Debug)]
 pub struct BluetoothLESpecifier {
-    names: Vec<String>,
-    services: HashMap<Uuid, HashMap<String, Uuid>>
+    pub names: HashSet<String>,
+    pub services: HashMap<Uuid, HashMap<String, Uuid>>
 }
 
-#[derive(Deserialize, Debug)]
+impl PartialEq for BluetoothLESpecifier {
+    fn eq(&self, other: &Self) -> bool {
+        self.names.intersection(&other.names).count() > 0
+    }
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct HIDSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
@@ -37,10 +43,16 @@ pub struct SerialSpecifier {
     #[serde(rename = "stop-bits")]
     stop_bits: u8,
     parity: char,
-    ports: Vec<String>
+    ports: HashSet<String>
 }
 
-#[derive(Deserialize, Debug)]
+impl PartialEq for SerialSpecifier {
+    fn eq(&self, other: &Self) -> bool {
+        self.ports.intersection(&other.ports).count() > 0
+    }
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct USBSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
@@ -67,6 +79,23 @@ struct ProtocolDefinition {
     serial: Option<SerialSpecifier>,
     defaults: Option<ProtocolAttributes>,
     configurations: Vec<ProtocolAttributes>
+}
+
+fn option_some_eq<T>(a: &Option<T>, b: &Option<T>) -> bool
+where T: PartialEq {
+    match (&a, &b) {
+        (Some(a), Some(b)) => a == b,
+        _ => false
+    }
+}
+
+impl PartialEq for ProtocolDefinition {
+    fn eq(&self, other: &Self) -> bool {
+        option_some_eq(&self.bluetooth_le, &other.bluetooth_le) ||
+        option_some_eq(&self.hid, &other.hid) ||
+        option_some_eq(&self.serial, &other.serial) ||
+        option_some_eq(&self.usb, &other.usb)
+    }
 }
 
 #[derive(Deserialize, Debug)]
