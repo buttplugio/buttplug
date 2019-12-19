@@ -9,12 +9,12 @@
 
 use crate::core::messages::MessageAttributes;
 use std::collections::{HashMap, HashSet};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use uuid::Uuid;
 
-const DeviceConfigurationFile: &str = include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
+const DEVICE_CONFIGURATION_FILE: &str = include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
     pub names: HashSet<String>,
     pub services: HashMap<Uuid, HashMap<String, Uuid>>
@@ -22,11 +22,47 @@ pub struct BluetoothLESpecifier {
 
 impl PartialEq for BluetoothLESpecifier {
     fn eq(&self, other: &Self) -> bool {
-        self.names.intersection(&other.names).count() > 0
+        if self.names.intersection(&other.names).count() > 0 {
+            return true;
+        }
+        for name in &self.names {
+            for other_name in &other.names {
+                let compare_name: &String;
+                let mut wildcard: String;
+                if name.ends_with("*") {
+                    wildcard = name.clone();
+                    compare_name = &other_name;
+                }
+                else if other_name.ends_with("*") {
+                    wildcard = other_name.clone();
+                    compare_name = &name;
+                } else {
+                    continue;
+                }
+                // Remove asterisk from the end of the wildcard
+                wildcard.pop();
+                if compare_name.starts_with(&wildcard) {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+impl BluetoothLESpecifier {
+    pub fn new_from_device(name: &str) -> BluetoothLESpecifier {
+        let mut set = HashSet::<String>::new();
+        let map = HashMap::<Uuid, HashMap<String, Uuid>>::new();
+        set.insert(name.to_string());
+        BluetoothLESpecifier {
+            names: set,
+            services: map
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct HIDSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
@@ -34,7 +70,7 @@ pub struct HIDSpecifier {
     product_id: u16
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct SerialSpecifier {
     #[serde(rename = "baud-rate")]
     baud_rate: u32,
@@ -52,7 +88,7 @@ impl PartialEq for SerialSpecifier {
     }
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct USBSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
@@ -60,41 +96,59 @@ pub struct USBSpecifier {
     product_id: u16
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
+pub enum DeviceSpecifier {
+    BluetoothLE(BluetoothLESpecifier),
+    HID(HIDSpecifier),
+    USB(USBSpecifier),
+    Serial(SerialSpecifier)
+}
+
+#[derive(Deserialize, Debug, Clone)]
 struct ProtocolAttributes {
     identifier: Option<Vec<String>>,
     name: Option<HashMap<String, String>>,
     messages: Option<HashMap<String, MessageAttributes>>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct ProtocolDefinition {
-    #[serde(rename = "btle")]
-    bluetooth_le: Option<BluetoothLESpecifier>,
-    #[serde(rename = "hid")]
-    hid: Option<HIDSpecifier>,
-    #[serde(rename = "usb")]
+    // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
+    // they're kept separate here, and we return them in get_specifiers(). Feels
+    // very clumsy, but we really don't do this a bunch during a session.
     usb: Option<USBSpecifier>,
-    #[serde(rename = "serial")]
+    btle: Option<BluetoothLESpecifier>,
     serial: Option<SerialSpecifier>,
+    hid: Option<HIDSpecifier>,
     defaults: Option<ProtocolAttributes>,
-    configurations: Vec<ProtocolAttributes>
+    configurations: Vec<ProtocolAttributes>,
 }
 
-fn option_some_eq<T>(a: &Option<T>, b: &Option<T>) -> bool
+fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
 where T: PartialEq {
-    match (&a, &b) {
-        (Some(a), Some(b)) => a == b,
+    match &a {
+        Some(a) => a == b,
         _ => false
     }
 }
 
-impl PartialEq for ProtocolDefinition {
-    fn eq(&self, other: &Self) -> bool {
-        option_some_eq(&self.bluetooth_le, &other.bluetooth_le) ||
-        option_some_eq(&self.hid, &other.hid) ||
-        option_some_eq(&self.serial, &other.serial) ||
-        option_some_eq(&self.usb, &other.usb)
+impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
+    fn eq(&self, other: &DeviceSpecifier) -> bool {
+        // TODO This seems like a really gross way to do this?
+        match other {
+            DeviceSpecifier::USB(other_usb) => {
+                option_some_eq(&self.usb, other_usb)
+            },
+            DeviceSpecifier::Serial(other_serial) => {
+                option_some_eq(&self.serial, other_serial)
+            },
+            DeviceSpecifier::BluetoothLE(other_btle) => {
+                option_some_eq(&self.btle, other_btle)
+            },
+            DeviceSpecifier::HID(other_hid) => {
+                option_some_eq(&self.hid, other_hid)
+            },
+        }
     }
 }
 
@@ -104,27 +158,49 @@ struct ProtocolConfiguration {
 }
 
 struct DeviceConfigurationManager {
+    pub config: ProtocolConfiguration
 }
 
 impl DeviceConfigurationManager {
-    pub fn new() -> DeviceConfigurationManager {
+    pub fn load_from_internal() -> DeviceConfigurationManager {
+        let config = serde_json::from_str(DEVICE_CONFIGURATION_FILE).unwrap();
         DeviceConfigurationManager {
+            config
         }
     }
 
-    pub fn load() {
-        let config: ProtocolConfiguration = serde_json::from_str(DeviceConfigurationFile).unwrap();
-        println!("{:?}", config);
+    pub fn find_protocol(&self, specifier: &DeviceSpecifier) -> Option<ProtocolDefinition> {
+        for (_, def) in self.config.protocols.iter() {
+            if def == specifier {
+                return Some(def.clone());
+            }
+        }
+        None
     }
 }
 
 
 #[cfg(test)]
 mod test {
-    use super::DeviceConfigurationManager;
+    use super::{DeviceConfigurationManager, BluetoothLESpecifier, DeviceSpecifier};
 
     #[test]
     fn test_load_config() {
-        DeviceConfigurationManager::load();
+        let config = DeviceConfigurationManager::load_from_internal();
+        println!("{:?}", config.config);
+    }
+
+    #[test]
+    fn test_config_equals() {
+        let config = DeviceConfigurationManager::load_from_internal();
+        let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
+        assert!(config.find_protocol(&launch).is_some());
+    }
+
+    #[test]
+    fn test_config_wildcard_equals() {
+        let config = DeviceConfigurationManager::load_from_internal();
+        let lovense = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+        assert!(config.find_protocol(&lovense).is_some());
     }
 }
