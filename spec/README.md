@@ -116,7 +116,7 @@ npm run dev
   - Status: In Development - Not Yet Usable
   - Packages: [Available on Cargo](https://crates.io/crates/buttplug)
   - Maintainers: Core Buttplug Team
-- [buttplug-py](https://github.com/buttplug/buttplug-py): Python
+- [buttplug-py](https://github.com/buttplugio/buttplug-py): Python
   - Status: In Development - Not Yet Usable
   - Packages: [Available on PyPi](https://pypi.org/project/buttplug/)
   - Maintainers: Core Buttplug Team
