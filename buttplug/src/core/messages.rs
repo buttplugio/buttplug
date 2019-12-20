@@ -625,6 +625,86 @@ impl SingleMotorVibrateCmd {
     }
 }
 
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct RawWriteCmd {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+    pub endpoint: String,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Data"))]
+    pub data: Vec<u8>,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "WriteWithResponse"))]
+    pub write_with_response: bool,
+
+}
+
+impl RawWriteCmd {
+    pub fn new(device_index: u32, endpoint: &str, data: Vec<u8>, write_with_response: bool) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            endpoint: endpoint.to_owned(),
+            data,
+            write_with_response
+        }
+    }
+}
+
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct RawReadCmd {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+    pub endpoint: String,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "ExpectedLength"))]
+    pub expected_length: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "WaitForData"))]
+    pub wait_for_data: bool,
+
+}
+
+impl RawReadCmd {
+    pub fn new(device_index: u32, endpoint: &str, expected_length: u32, wait_for_data: bool) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            endpoint: endpoint.to_owned(),
+            expected_length,
+            wait_for_data,
+        }
+    }
+}
+
+#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct RawReading {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+    pub endpoint: String,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Data"))]
+    pub data: Vec<u8>,
+}
+
+impl RawReading {
+    pub fn new(device_index: u32, endpoint: &str, data: Vec<u8>) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            endpoint: endpoint.to_owned(),
+            data
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnion {
@@ -651,6 +731,9 @@ pub enum ButtplugMessageUnion {
     KiirooCmd(KiirooCmd),
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
     SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+    RawWriteCmd(RawWriteCmd),
+    RawReadCmd(RawReadCmd),
+    RawReading(RawReading),
     StopDeviceCmd(StopDeviceCmd),
     StopAllDevices(StopAllDevices),
 }
@@ -681,6 +764,9 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::KiirooCmd(ref msg) => msg.id,
             ButtplugMessageUnion::VorzeA10CycloneCmd(ref msg) => msg.id,
             ButtplugMessageUnion::SingleMotorVibrateCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::RawWriteCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::RawReadCmd(ref msg) => msg.id,
+            ButtplugMessageUnion::RawReading(ref msg) => msg.id,
             ButtplugMessageUnion::StopDeviceCmd(ref msg) => msg.id,
             ButtplugMessageUnion::StopAllDevices(ref msg) => msg.id,
         }
@@ -711,6 +797,9 @@ impl ButtplugMessage for ButtplugMessageUnion {
             ButtplugMessageUnion::KiirooCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::VorzeA10CycloneCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::SingleMotorVibrateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::RawWriteCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::RawReadCmd(ref mut msg) => msg.set_id(id),
+            ButtplugMessageUnion::RawReading(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
             ButtplugMessageUnion::StopAllDevices(ref mut msg) => msg.set_id(id),
         }
