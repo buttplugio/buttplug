@@ -105,14 +105,14 @@ pub enum DeviceSpecifier {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-struct ProtocolAttributes {
+pub struct ProtocolAttributes {
     identifier: Option<Vec<String>>,
     name: Option<HashMap<String, String>>,
     messages: Option<HashMap<String, MessageAttributes>>
 }
 
 #[derive(Deserialize, Debug, Clone)]
-struct ProtocolDefinition {
+pub struct ProtocolDefinition {
     // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
     // they're kept separate here, and we return them in get_specifiers(). Feels
     // very clumsy, but we really don't do this a bunch during a session.
@@ -153,11 +153,11 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
 }
 
 #[derive(Deserialize, Debug)]
-struct ProtocolConfiguration {
+pub struct ProtocolConfiguration {
     protocols: HashMap<String, ProtocolDefinition>
 }
 
-struct DeviceConfigurationManager {
+pub struct DeviceConfigurationManager {
     pub config: ProtocolConfiguration
 }
 

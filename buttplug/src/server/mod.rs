@@ -8,6 +8,8 @@
 //! Handles client sessions, as well as discovery and communication with hardware.
 
 pub mod device_manager;
+pub mod device;
+pub mod comm_managers;
 
 use crate::core::{
     errors::*,
