@@ -9,13 +9,13 @@ use rumble::{
     },
     api::{UUID, Central, Peripheral, CentralEvent},
 };
-use std::time::Duration;
 use async_trait::async_trait;
 use async_std::{
     task,
     sync::channel,
     prelude::StreamExt,
 };
+use std::time::Duration;
 
 struct RumbleBLECommunicationManager {
     manager: Manager,
@@ -78,6 +78,9 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                             error!("{}", name);
                             if device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf)).is_some() {
                                 error!("THIS IS A BUTTPLUG DEVICE");
+                                let mut dev = RumbleBLEDeviceImpl::new(p);
+                                dev.connect().unwrap();
+                                error!("Done in connect!");
                             }
                         }
                     }
@@ -93,6 +96,41 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
 
     fn is_scanning(&mut self) -> bool {
         false
+    }
+}
+
+pub struct RumbleBLEDeviceImpl<T> where T: Peripheral {
+    device: T
+}
+
+unsafe impl<T: Peripheral> Send for RumbleBLEDeviceImpl<T> {}
+unsafe impl<T: Peripheral> Sync for RumbleBLEDeviceImpl<T> {}
+
+impl<T: Peripheral> RumbleBLEDeviceImpl<T> {
+    pub fn new(device: T) -> Self {
+        Self {
+            device
+        }
+    }
+
+    pub fn connect(&mut self) -> Result<(), ButtplugError> {
+        info!("Running connect!");
+        self.device.connect().unwrap();
+        info!("Discovering chars!");
+        self.device.discover_characteristics().unwrap();
+        info!("Getting chars!");
+        let chars = self.device.characteristics();
+        info!("Finding chars!");
+        let mut id = [0x6e, 0x40, 0x00, 0x02, 0xb5, 0xa3, 0xf3, 0x93, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e];
+        // BLE uses little-endian addresses, and the library follows this. So we
+        // have to flip our characteristic UUID.
+        id.reverse();
+        let chr = chars.into_iter().find(|c| { info!("{}", c); c.uuid == UUID::B128(id) }).unwrap();
+        info!("{}", chr);
+        let command = "Vibrate:20;".as_bytes();
+        info!("Sending command!");
+        self.device.command(&chr, &command).unwrap();
+        Ok(())
     }
 }
 
