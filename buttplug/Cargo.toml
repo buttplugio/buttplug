@@ -11,11 +11,12 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
 [features]
-default=["client-ws", "server", "linux-ble"]
+default=["client", "server", "serialize_json"]
 client=[]
 server=[]
 serialize_json=[]
 linux-ble=["rumble"]
+winrt-ble=["rumble"]
 client-ws=["client", "serialize_json", "ws", "url"]
 client-ws-ssl=["client", "serialize_json", "ws", "url", "ws/ssl", "openssl"]
 
