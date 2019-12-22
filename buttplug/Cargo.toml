@@ -35,6 +35,8 @@ ws = { version = "0.9.1", features = ["ssl"], optional = true }
 openssl = { version = "0.10.26", optional = true }
 url = { version = "2.1.0", optional = true }
 rumble = { git = 'https://github.com/qdot/rumble', branch = 'buttplug', optional = true }#{ version = "0.3.0", optional = true }
+strum_macros = "0.17.1"
+strum = "0.17.1"
 
 [dev-dependencies]
 env_logger = "0.7.1"
