@@ -1,5 +1,8 @@
 use crate::{
-    server::device_manager::DeviceCommunicationManager,
+    server::device_manager::{ DeviceCommunicationManager,
+                              DeviceImpl,
+                              ButtplugProtocolRawMessage,
+                              ButtplugDeviceResponseMessage },
     core::{
         errors::{
             ButtplugError,
@@ -23,7 +26,7 @@ use rumble::api::{UUID, Central, Peripheral, CentralEvent, Characteristic};
 use async_trait::async_trait;
 use async_std::{
     task,
-    sync::channel,
+    sync::{channel, Sender, Receiver},
     prelude::StreamExt,
 };
 #[cfg(feature = "winrt-ble")]
@@ -166,11 +169,32 @@ impl<T: Peripheral> RumbleBLEDeviceImpl<T> {
         }
     }
 
-    pub async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
-        info!("Writing value!");
+}
+
+#[async_trait]
+impl<T: Peripheral> DeviceImpl for RumbleBLEDeviceImpl<T> {
+    fn name(&self) -> String {
+        self.device.properties().local_name.unwrap()
+    }
+
+    fn address(&self) -> String {
+        self.device.properties().address.to_string()
+    }
+    fn connected(&self) -> bool {
+        true
+    }
+    fn endpoints(&self) -> Vec<Endpoint> {
+         self.endpoints.keys().map(|v| v.clone()).collect::<Vec<Endpoint>>()
+    }
+    fn disconnect(&self) {
+        todo!("implement disconnect");
+    }
+    fn set_channel(&mut self, receiver: Receiver<ButtplugProtocolRawMessage>, sender: Sender<ButtplugDeviceResponseMessage>) {
+        todo!("implement set channel");
+    }
+   async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
         match self.endpoints.get(&msg.endpoint) {
             Some(chr) => {
-                info!("Wrote value!");
                 self.device.command(&chr, &msg.data).unwrap();
                 Ok(())
             },
@@ -178,7 +202,7 @@ impl<T: Peripheral> RumbleBLEDeviceImpl<T> {
         }
     }
 
-    pub async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
+    async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
         Ok(RawReading::new(0, msg.endpoint, vec!()))
     }
 }

@@ -11,7 +11,10 @@
 use crate::core::errors::ButtplugError;
 use async_trait::async_trait;
 use crate::core::messages::{ self, RawReading, RawWriteCmd, RawReadCmd, ButtplugMessageUnion };
-use crate::devices::protocol::ButtplugProtocol;
+use crate::devices::{
+    protocol::ButtplugProtocol,
+    Endpoint
+};
 use async_std::sync::{ Sender, Receiver, channel };
 
 pub enum ButtplugProtocolRawMessage {
@@ -72,9 +75,11 @@ pub trait DeviceImpl {
     fn name(&self) -> String;
     fn address(&self) -> String;
     fn connected(&self) -> bool;
-    fn endpoints(&self) -> Vec<String>;
+    fn endpoints(&self) -> Vec<Endpoint>;
     fn disconnect(&self);
     fn set_channel(&mut self, receiver: Receiver<ButtplugProtocolRawMessage>, sender: Sender<ButtplugDeviceResponseMessage>);
+    async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
+    async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
 }
 
 // struct DeviceManager {}
