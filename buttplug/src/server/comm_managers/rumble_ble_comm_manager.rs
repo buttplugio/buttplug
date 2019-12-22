@@ -1,10 +1,25 @@
 use crate::{
     server::device_manager::DeviceCommunicationManager,
-    core::errors::ButtplugError,
-    devices::configuration_manager::{DeviceConfigurationManager, BluetoothLESpecifier, DeviceSpecifier},
+    core::{
+        errors::{
+            ButtplugError,
+            ButtplugDeviceError,
+        },
+        messages::RawWriteCmd,
+        messages::RawReadCmd,
+        messages::RawReading,
+    },
+    devices::{
+        Endpoint,
+        configuration_manager::{DeviceConfigurationManager,
+                                BluetoothLESpecifier,
+                                DeviceSpecifier,
+                                ProtocolDefinition},
+    }
 };
-
-use rumble::api::{UUID, Central, Peripheral, CentralEvent};
+use std::collections::HashMap;
+use uuid;
+use rumble::api::{UUID, Central, Peripheral, CentralEvent, Characteristic};
 use async_trait::async_trait;
 use async_std::{
     task,
@@ -14,13 +29,13 @@ use async_std::{
 #[cfg(feature = "winrt-ble")]
 use rumble::winrtble::{manager::Manager, adapter::Adapter};
 #[cfg(feature = "linux-ble")]
-use rumble::bluez::manager::Manager;
-
+use rumble::bluez::{manager::Manager, adapter::ConnectedAdapter};
 
 struct RumbleBLECommunicationManager {
     manager: Manager,
 }
 
+#[cfg(feature = "win-ble")]
 impl RumbleBLECommunicationManager {
     pub fn new() -> Self {
         Self {
@@ -28,13 +43,20 @@ impl RumbleBLECommunicationManager {
         }
     }
 
-    #[cfg(feature = "winrt-ble")]
     fn get_central(&self) -> Adapter {
         self.manager.adapters().unwrap()
     }
+}
 
-    #[cfg(feature = "linux-ble")]
-    fn get_central(&self) -> impl Central {
+#[cfg(feature = "linux-ble")]
+impl RumbleBLECommunicationManager {
+    pub fn new() -> Self {
+        Self {
+            manager: Manager::new().unwrap(),
+        }
+    }
+
+    fn get_central(&self) -> ConnectedAdapter {
         let adapters = self.manager.adapters().unwrap();
         let adapter = adapters.into_iter().nth(0).unwrap();
         adapter.connect().unwrap()
@@ -44,9 +66,8 @@ impl RumbleBLECommunicationManager {
 #[async_trait]
 impl DeviceCommunicationManager for RumbleBLECommunicationManager {
     async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
-        println!("Getting adapter");
         // get the first bluetooth adapter
-
+        debug!("Bringing up adapter.");
         let central = self.get_central();
         let device_mgr = DeviceConfigurationManager::load_from_internal();
         task::block_on(async move {
@@ -63,21 +84,27 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                 }
             };
             central.on_event(Box::new(on_event));
-            println!("Scanning");
+            info!("Starting scan.");
             central.start_scan().unwrap();
             let mut tried_names: Vec<String> = vec!();
+            // This needs a way to cancel when we call stop_scanning.
             while receiver.next().await.unwrap() {
                 for p in central.peripherals() {
                     if let Some(name) = p.properties().local_name {
+                        debug!("Found BLE device {}", name);
+                        // Names are the only way we really have to test devices
+                        // at the moment. Most devices don't send services on
+                        // advertisement.
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
                             let ble_conf = BluetoothLESpecifier::new_from_device(&name);
-                            error!("{}", name);
-                            if device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf)).is_some() {
-                                error!("THIS IS A BUTTPLUG DEVICE");
+                            if let Some(protocol) = device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf)) {
+                                info!("Found Buttplug Device {}", name);
                                 let mut dev = RumbleBLEDeviceImpl::new(p);
-                                dev.connect().unwrap();
-                                error!("Done in connect!");
+                                dev.connect(&protocol).unwrap();
+                                //dev.write_value(&RawWriteCmd::new(0, Endpoint::Tx, "Vibrate:20;".as_bytes().to_vec(), false)).await;
+                            } else {
+                                info!("Device {} is not recognized as a Buttplug Device.", name);
                             }
                         }
                     }
@@ -97,39 +124,62 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
 }
 
 pub struct RumbleBLEDeviceImpl<T> where T: Peripheral {
-    device: T
+    device: T,
+    endpoints: HashMap<Endpoint, Characteristic>
 }
 
 unsafe impl<T: Peripheral> Send for RumbleBLEDeviceImpl<T> {}
 unsafe impl<T: Peripheral> Sync for RumbleBLEDeviceImpl<T> {}
 
+fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
+    let mut rumble_uuid = uuid.as_bytes().clone();
+    rumble_uuid.reverse();
+    UUID::B128(rumble_uuid)
+}
+
 impl<T: Peripheral> RumbleBLEDeviceImpl<T> {
     pub fn new(device: T) -> Self {
         Self {
-            device
+            device,
+            endpoints: HashMap::new()
         }
     }
 
-    pub fn connect(&mut self) -> Result<(), ButtplugError> {
-        println!("Running connect!");
-        self.device.connect().unwrap();
-        println!("Discovering chars!");
-        let chars = self.device.discover_characteristics().unwrap();
-        println!("Getting chars!");
-        //let chars = self.device.characteristics();
-        println!("{:?}", chars);
-        println!("Finding chars!");
-        let mut id = [0x6e, 0x40, 0x00, 0x02, 0xb5, 0xa3, 0xf3, 0x93, 0xe0, 0xa9, 0xe5, 0x0e, 0x24, 0xdc, 0xca, 0x9e];
-        // BLE uses little-endian addresses, and the library follows this. So we
-        // have to flip our characteristic UUID.
-        id.reverse();
-        println!("{:?}", id);
-        let chr = chars.into_iter().find(|c| { println!("{}", c); c.uuid == UUID::B128(id) }).unwrap();
-        println!("{}", chr);
-        let command = "Vibrate:20;".as_bytes();
-        println!("Sending command!");
-        self.device.command(&chr, &command).unwrap();
-        Ok(())
+    pub fn connect(&mut self, protocol: &ProtocolDefinition) -> Result<(), ButtplugError> {
+        if let Some(ref proto) = protocol.btle {
+            self.device.connect().unwrap();
+            let chars = self.device.discover_characteristics().unwrap();
+            for proto_service in proto.services.values() {
+                info!("Searching services");
+                for (chr_name, chr_uuid) in proto_service.into_iter() {
+                    let chr = chars.iter().find(|c| { c.uuid == uuid_to_rumble(chr_uuid) });
+                    if chr.is_some() {
+                        info!("Found valid characteristic {}", chr_uuid);
+                        self.endpoints.insert(*chr_name, chr.unwrap().clone());
+                    }
+                }
+            }
+            // TODO This should fail if we don't find any usable characteristics.
+            Ok(())
+        } else {
+            panic!("Got a protocol with no Bluetooth Definition!");
+        }
+    }
+
+    pub async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
+        info!("Writing value!");
+        match self.endpoints.get(&msg.endpoint) {
+            Some(chr) => {
+                info!("Wrote value!");
+                self.device.command(&chr, &msg.data).unwrap();
+                Ok(())
+            },
+            None => Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("Device does not contain an endpoint named {}",msg.endpoint).to_owned())))
+        }
+    }
+
+    pub async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
+        Ok(RawReading::new(0, msg.endpoint, vec!()))
     }
 }
 
@@ -142,10 +192,8 @@ mod test {
 
     #[test]
     pub fn test_rumble() {
-        println!("Just trying to print anything?");
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async move {
-            println!("Running?");
             let mut mgr = RumbleBLECommunicationManager::new();
             mgr.start_scanning().await;
         });

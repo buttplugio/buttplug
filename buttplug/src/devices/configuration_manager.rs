@@ -7,7 +7,10 @@
 
 //! Device specific identification and protocol implementations.
 
-use crate::core::messages::MessageAttributes;
+use crate::{
+    core::messages::MessageAttributes,
+    devices::Endpoint,
+};
 use std::collections::{HashMap, HashSet};
 use serde::{Deserialize};
 use uuid::Uuid;
@@ -17,7 +20,7 @@ const DEVICE_CONFIGURATION_FILE: &str = include_str!("../../dependencies/buttplu
 #[derive(Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
     pub names: HashSet<String>,
-    pub services: HashMap<Uuid, HashMap<String, Uuid>>
+    pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>
 }
 
 impl PartialEq for BluetoothLESpecifier {
@@ -52,12 +55,11 @@ impl PartialEq for BluetoothLESpecifier {
 
 impl BluetoothLESpecifier {
     pub fn new_from_device(name: &str) -> BluetoothLESpecifier {
-        let mut set = HashSet::<String>::new();
-        let map = HashMap::<Uuid, HashMap<String, Uuid>>::new();
+        let mut set = HashSet::new();
         set.insert(name.to_string());
         BluetoothLESpecifier {
             names: set,
-            services: map
+            services: HashMap::new()
         }
     }
 }
@@ -116,12 +118,12 @@ pub struct ProtocolDefinition {
     // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
     // they're kept separate here, and we return them in get_specifiers(). Feels
     // very clumsy, but we really don't do this a bunch during a session.
-    usb: Option<USBSpecifier>,
-    btle: Option<BluetoothLESpecifier>,
-    serial: Option<SerialSpecifier>,
-    hid: Option<HIDSpecifier>,
-    defaults: Option<ProtocolAttributes>,
-    configurations: Vec<ProtocolAttributes>,
+    pub usb: Option<USBSpecifier>,
+    pub btle: Option<BluetoothLESpecifier>,
+    pub serial: Option<SerialSpecifier>,
+    pub hid: Option<HIDSpecifier>,
+    pub defaults: Option<ProtocolAttributes>,
+    pub configurations: Vec<ProtocolAttributes>,
 }
 
 fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool

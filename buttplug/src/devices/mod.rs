@@ -9,7 +9,7 @@ use std::{
 use serde::{Deserialize, Serialize, Deserializer, Serializer, de::{self, Visitor}};
 
 
-#[derive(EnumString, Clone, Debug, PartialEq, Display)]
+#[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
 pub enum Endpoint {
     Tx,
