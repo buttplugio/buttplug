@@ -33,12 +33,12 @@ pub enum ButtplugDeviceEvent {
     MessageEmitted(),
 }
 
-enum DeviceCommunicationEvent {
+pub enum DeviceCommunicationEvent {
     DeviceAdded(ButtplugDevice),
     ScanningFinished()
 }
 
-struct ButtplugDevice {
+pub struct ButtplugDevice {
     protocol: Box<dyn ButtplugProtocol>,
     device: Box<dyn DeviceImpl>,
 }
@@ -62,8 +62,14 @@ impl ButtplugDevice {
     }
 }
 
+// Storing this in a Vec<Box<dyn T>> causes a associated function issue due to
+// the lack of new. Just create an extra trait for defining comm managers.
+pub trait DeviceCommunicationManagerCreator: Sync + Send {
+    fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;
+}
+
 #[async_trait]
-pub trait DeviceCommunicationManager {
+pub trait DeviceCommunicationManager: Sync + Send {
     async fn start_scanning(&mut self) -> Result<(), ButtplugError>;
     async fn stop_scanning(&mut self) -> Result<(), ButtplugError>;
     fn is_scanning(&mut self) -> bool;
@@ -71,7 +77,7 @@ pub trait DeviceCommunicationManager {
 }
 
 #[async_trait]
-pub trait DeviceImpl {
+pub trait DeviceImpl: Sync + Send {
     fn name(&self) -> String;
     fn address(&self) -> String;
     fn connected(&self) -> bool;
@@ -82,4 +88,36 @@ pub trait DeviceImpl {
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
 }
 
-// struct DeviceManager {}
+pub struct DeviceManager {
+    comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
+    receiver: Receiver<DeviceCommunicationEvent>,
+    sender: Sender<DeviceCommunicationEvent>
+}
+
+impl DeviceManager {
+    pub fn new() -> Self {
+        let (sender, receiver) = channel(256);
+        Self {
+            sender,
+            receiver,
+            comm_managers: vec!()
+        }
+    }
+
+    pub fn add_comm_manager<T>(&mut self)
+    where T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
+        self.comm_managers.push(Box::new(T::new(self.sender.clone())));
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::DeviceManager;
+    use crate::server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager;
+
+    #[test]
+    pub fn test_device_manager_creation() {
+        let mut dm = DeviceManager::new();
+        dm.add_comm_manager::<RumbleBLECommunicationManager>();
+    }
+}

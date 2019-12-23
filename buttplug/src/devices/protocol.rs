@@ -6,7 +6,7 @@ use async_std::sync::{Sender, Receiver};
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ButtplugProtocol {
+pub trait ButtplugProtocol: Sync + Send {
     // TODO Handle raw messages here.
     async fn parse_message(&mut self, message: &ButtplugMessageUnion);
     fn set_channel(&mut self, receiver: Receiver<ButtplugDeviceResponseMessage>, sender: Sender<ButtplugProtocolRawMessage>);
