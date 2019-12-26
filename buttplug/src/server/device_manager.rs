@@ -40,16 +40,11 @@ pub enum DeviceCommunicationEvent {
 
 pub struct ButtplugDevice {
     protocol: Box<dyn ButtplugProtocol>,
-    device: Box<dyn DeviceImpl>,
+    device: Box<dyn DeviceImpl>
 }
 
 impl ButtplugDevice {
-    pub fn new<J, K>(mut device: Box<J>, mut protocol: Box<K>) -> Self
-    where J: 'static + DeviceImpl, K: 'static + ButtplugProtocol {
-        let (protocol_sender, device_receiver) = channel(256);
-        let (device_sender, protocol_receiver) = channel(256);
-        protocol.set_channel(protocol_receiver, protocol_sender);
-        device.set_channel(device_receiver, device_sender);
+    pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
         Self {
             protocol,
             device
@@ -57,7 +52,7 @@ impl ButtplugDevice {
     }
 
     pub async fn parse_message(&mut self, message: &ButtplugMessageUnion) -> ButtplugMessageUnion {
-        self.protocol.parse_message(message).await;
+        self.protocol.parse_message(&self.device, message).await;
         ButtplugMessageUnion::Ok(messages::Ok::default())
     }
 }
@@ -83,7 +78,7 @@ pub trait DeviceImpl: Sync + Send {
     fn connected(&self) -> bool;
     fn endpoints(&self) -> Vec<Endpoint>;
     fn disconnect(&self);
-    fn set_channel(&mut self, receiver: Receiver<ButtplugProtocolRawMessage>, sender: Sender<ButtplugDeviceResponseMessage>);
+
     async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
 }

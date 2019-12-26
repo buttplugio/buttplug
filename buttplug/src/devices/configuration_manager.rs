@@ -8,9 +8,16 @@
 //! Device specific identification and protocol implementations.
 
 use crate::{
-    core::messages::MessageAttributes,
+    core::{
+        messages::MessageAttributes,
+        errors::ButtplugError
+    },
     devices::Endpoint,
+    server::device_manager::{ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage},
 };
+use super::protocol::{ButtplugProtocol, ButtplugProtocolInitializer};
+use super::protocols::lovense::LovenseProtocol;
+use async_std::sync::{Sender, Receiver};
 use std::collections::{HashMap, HashSet};
 use serde::{Deserialize};
 use uuid::Uuid;
@@ -160,24 +167,38 @@ pub struct ProtocolConfiguration {
 }
 
 pub struct DeviceConfigurationManager {
-    pub config: ProtocolConfiguration
+    pub config: ProtocolConfiguration,
+    pub protocols: HashMap<String, Box<dyn Fn(Receiver<ButtplugDeviceResponseMessage>,
+                                              Sender<ButtplugProtocolRawMessage>) -> Box<dyn ButtplugProtocol>>>
 }
+
+unsafe impl Send for DeviceConfigurationManager {}
+unsafe impl Sync for DeviceConfigurationManager {}
 
 impl DeviceConfigurationManager {
     pub fn load_from_internal() -> DeviceConfigurationManager {
         let config = serde_json::from_str(DEVICE_CONFIGURATION_FILE).unwrap();
+        let mut protocols = HashMap::<String, Box<dyn Fn(Receiver<ButtplugDeviceResponseMessage>,
+                                                         Sender<ButtplugProtocolRawMessage>) -> Box::<dyn ButtplugProtocol>>>::new();
+        protocols.insert("lovense".to_owned(), Box::new(|receiver,sender| Box::new(LovenseProtocol::new(receiver, sender)) ));
         DeviceConfigurationManager {
-            config
+            config,
+            protocols
         }
     }
 
-    pub fn find_protocol(&self, specifier: &DeviceSpecifier) -> Option<ProtocolDefinition> {
-        for (_, def) in self.config.protocols.iter() {
+    pub fn find_protocol(&self, specifier: &DeviceSpecifier) -> Option<(String, ProtocolDefinition)> {
+        for (name, def) in self.config.protocols.iter() {
             if def == specifier {
-                return Some(def.clone());
+                return Some((name.clone(), def.clone()));
             }
         }
         None
+    }
+
+    pub fn create_protocol_impl(&self, name: &String, receiver: Receiver<ButtplugDeviceResponseMessage>,
+                                sender: Sender<ButtplugProtocolRawMessage>) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
+        Ok(self.protocols.get(name).unwrap()(receiver, sender))
     }
 }
 

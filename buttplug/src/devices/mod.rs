@@ -1,5 +1,6 @@
 pub mod configuration_manager;
 pub mod protocol;
+pub mod protocols;
 use std::{
     fmt,
     str::FromStr,

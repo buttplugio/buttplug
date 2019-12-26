@@ -2,6 +2,7 @@ use crate::{
     server::device_manager::{ DeviceCommunicationManager,
                               DeviceCommunicationManagerCreator,
                               DeviceImpl,
+                              ButtplugDevice,
                               DeviceCommunicationEvent,
                               ButtplugProtocolRawMessage,
                               ButtplugDeviceResponseMessage },
@@ -10,9 +11,13 @@ use crate::{
             ButtplugError,
             ButtplugDeviceError,
         },
-        messages::RawWriteCmd,
-        messages::RawReadCmd,
-        messages::RawReading,
+        messages::{
+            self,
+            ButtplugMessage,
+            RawWriteCmd,
+            RawReadCmd,
+            RawReading,
+        }
     },
     devices::{
         Endpoint,
@@ -20,16 +25,22 @@ use crate::{
                                 BluetoothLESpecifier,
                                 DeviceSpecifier,
                                 ProtocolDefinition},
-    }
+    },
+    util::future::{ButtplugFutureState,
+                   ButtplugFutureStateShared,
+                   ButtplugFuture},
 };
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    thread,
+};
 use uuid;
 use rumble::api::{UUID, Central, Peripheral, CentralEvent, Characteristic};
 use async_trait::async_trait;
 use async_std::{
     task,
     sync::{channel, Sender, Receiver},
-    prelude::StreamExt,
+    prelude::{StreamExt, FutureExt}
 };
 #[cfg(feature = "winrt-ble")]
 use rumble::winrtble::{manager::Manager, adapter::Adapter};
@@ -58,7 +69,7 @@ impl RumbleBLECommunicationManager {
 }
 
 impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
-#[cfg(feature = "win-ble")]
+    #[cfg(feature = "win-ble")]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
             manager: Manager::new(),
@@ -66,7 +77,7 @@ impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
         }
     }
 
-#[cfg(feature = "linux-ble")]
+    #[cfg(feature = "linux-ble")]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
             manager: Manager::new().unwrap(),
@@ -82,8 +93,9 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
         // get the first bluetooth adapter
         debug!("Bringing up adapter.");
         let central = self.get_central();
+        let device_sender = self.device_sender.clone();
         let device_mgr = DeviceConfigurationManager::load_from_internal();
-        task::block_on(async move {
+        task::spawn(async move {
             let (sender, mut receiver) = channel(256);
             let on_event = move |event: CentralEvent| {
                 match event {
@@ -111,10 +123,15 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
                             let ble_conf = BluetoothLESpecifier::new_from_device(&name);
-                            if let Some(protocol) = device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf)) {
+                            if let Some((protocol_name, protocol)) = device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf)) {
                                 info!("Found Buttplug Device {}", name);
-                                let mut dev = RumbleBLEDeviceImpl::new(p);
-                                dev.connect(&protocol).unwrap();
+                                let (protocol_sender, dev_receiver) = channel(256);
+                                let (dev_sender, protocol_receiver) = channel(256);
+                                let mut dev = connect(p, protocol.clone()).await.unwrap();
+                                let proto = device_mgr.create_protocol_impl(&protocol_name, protocol_receiver, protocol_sender).unwrap();
+                                let d = ButtplugDevice::new(proto, Box::new(dev));
+                                info!("Sending device connected message!");
+                                device_sender.send(DeviceCommunicationEvent::DeviceAdded(d)).await;
                                 //dev.write_value(&RawWriteCmd::new(0, Endpoint::Tx, "Vibrate:20;".as_bytes().to_vec(), false)).await;
                             } else {
                                 info!("Device {} is not recognized as a Buttplug Device.", name);
@@ -136,15 +153,106 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
     }
 }
 
-pub struct RumbleBLEDeviceImpl<T> where T: Peripheral {
-    device: T,
-    endpoints: HashMap<Endpoint, Characteristic>,
-    protocol_sender: Option<Sender<ButtplugDeviceResponseMessage>>,
-    protocol_receiver: Option<Receiver<ButtplugProtocolRawMessage>>,
+enum ButtplugDeviceCommand {
+    Connect,
+    Message(ButtplugProtocolRawMessage),
+    Disconnect,
 }
 
-unsafe impl<T: Peripheral> Send for RumbleBLEDeviceImpl<T> {}
-unsafe impl<T: Peripheral> Sync for RumbleBLEDeviceImpl<T> {}
+enum ButtplugDeviceReturn {
+    Ok(messages::Ok),
+    RawReading(messages::RawReading),
+    Error(ButtplugError)
+}
+
+type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
+type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
+
+enum RumbleCommLoopChannelValue {
+    DeviceCommand(ButtplugDeviceCommand, DeviceReturnStateShared),
+    DeviceOutput(RawReading),
+    ChannelClosed,
+}
+
+async fn rumble_comm_loop<T: Peripheral>(device: T,
+                                         protocol: BluetoothLESpecifier,
+                                         mut write_receiver: Receiver<(ButtplugDeviceCommand,
+                                                                       DeviceReturnStateShared)>,
+                                         mut output_sender: Sender<ButtplugDeviceResponseMessage>) {
+    // TODO How the do we deal with disconnection, as well as spinning down the
+    // thread during shutdown?
+
+    // We'll handle all notifications from a device on a single channel, because
+    // there's no way bluetooth is going to flood us with enough data to
+    // saturate, right? (I am prepared to regret this.)
+    //
+    // Any time we get a request to subscribe somewhere, just load the callback
+    // with the same sender everyone is using and treat this as a mpsc.
+    let (notification_sender, mut notification_receiver) = channel::<RawReading>(256);
+    let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
+    loop {
+        let receiver = async {
+            match write_receiver.next().await {
+                Some((command, state)) => RumbleCommLoopChannelValue::DeviceCommand(command, state),
+                None => RumbleCommLoopChannelValue::ChannelClosed,
+            }
+        };
+        let notification = async {
+            // We own both sides of this so it'll never actually die. Unwrap
+            // with impunity.
+            RumbleCommLoopChannelValue::DeviceOutput(notification_receiver.next().await.unwrap())
+        };
+        // Race our device input (from the client side) and any subscribed
+        // notifications.
+        match receiver.race(notification).await {
+            RumbleCommLoopChannelValue::DeviceCommand(command, state) => {
+                match command {
+                    ButtplugDeviceCommand::Connect => {
+                        device.connect().unwrap();
+                        let chars = device.discover_characteristics().unwrap();
+                        for proto_service in protocol.services.values() {
+                            info!("Searching services");
+                            for (chr_name, chr_uuid) in proto_service.into_iter() {
+                                let chr = chars.iter().find(|c| { c.uuid == uuid_to_rumble(chr_uuid) });
+                                if chr.is_some() {
+                                    info!("Found valid characteristic {}", chr_uuid);
+                                    endpoints.insert(*chr_name, chr.unwrap().clone());
+                                }
+                            }
+                        }
+                        state.lock().unwrap().set_reply(ButtplugDeviceReturn::Ok(messages::Ok::new(1)));
+                    },
+                    ButtplugDeviceCommand::Message(raw_msg) => {
+                        match raw_msg {
+                            ButtplugProtocolRawMessage::RawWriteCmd(msg) => {
+                                match endpoints.get(&msg.endpoint) {
+                                    Some(chr) => {
+                                        device.command(&chr, &msg.data).unwrap();
+                                        state.lock().unwrap().set_reply(ButtplugDeviceReturn::Ok(messages::Ok::new(msg.get_id())));
+                                    },
+                                    None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("Device does not contain an endpoint named {}",msg.endpoint).to_owned()))))
+                                }
+                            },
+                            _ => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new("Buttplug-rs does not yet handle reads"))))
+                        }
+                    }
+                    ButtplugDeviceCommand::Disconnect => {
+                    }
+                }
+            },
+            RumbleCommLoopChannelValue::DeviceOutput(raw_reading) => {},
+            ChannelClosed => {}
+        }
+    }
+}
+
+pub struct RumbleBLEDeviceImpl {
+    thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+    device_thread: thread::JoinHandle<()>,
+}
+
+unsafe impl Send for RumbleBLEDeviceImpl {}
+unsafe impl Sync for RumbleBLEDeviceImpl {}
 
 fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
     let mut rumble_uuid = uuid.as_bytes().clone();
@@ -152,69 +260,68 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
     UUID::B128(rumble_uuid)
 }
 
-impl<T: Peripheral> RumbleBLEDeviceImpl<T> {
-    pub fn new(device: T) -> Self {
-        Self {
-            device,
-            endpoints: HashMap::new(),
-            protocol_sender: None,
-            protocol_receiver: None,
-        }
-    }
-
-    pub fn connect(&mut self, protocol: &ProtocolDefinition) -> Result<(), ButtplugError> {
-        if let Some(ref proto) = protocol.btle {
-            self.device.connect().unwrap();
-            let chars = self.device.discover_characteristics().unwrap();
-            for proto_service in proto.services.values() {
-                info!("Searching services");
-                for (chr_name, chr_uuid) in proto_service.into_iter() {
-                    let chr = chars.iter().find(|c| { c.uuid == uuid_to_rumble(chr_uuid) });
-                    if chr.is_some() {
-                        info!("Found valid characteristic {}", chr_uuid);
-                        self.endpoints.insert(*chr_name, chr.unwrap().clone());
-                    }
-                }
+pub async fn connect<T: Peripheral + 'static>(device: T, protocol: ProtocolDefinition) -> Result<RumbleBLEDeviceImpl, ButtplugError> {
+    if let Some(ref proto) = protocol.btle {
+        let (device_sender, device_receiver) = channel(256);
+        let (output_sender, output_receiver) = channel(256);
+        let p = proto.clone();
+        let thr = thread::spawn(move || {
+            task::spawn(async move {
+                rumble_comm_loop(device, p, device_receiver, output_sender).await;
+            });
+        });
+        let fut = DeviceReturnFuture::default();
+        let waker = fut.get_state_clone();
+        device_sender.send((ButtplugDeviceCommand::Connect, waker)).await;
+        match fut.await {
+            ButtplugDeviceReturn::Ok(_) => {
+                Ok(RumbleBLEDeviceImpl {
+                    thread_sender: device_sender,
+                    device_thread: thr
+                })
+            },
+            _ => {
+                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new("Cannot connect")))
             }
-            // TODO This should fail if we don't find any usable characteristics.
-            Ok(())
-        } else {
-            panic!("Got a protocol with no Bluetooth Definition!");
         }
+    } else {
+        panic!("Got a protocol with no Bluetooth Definition!");
     }
-
 }
 
 #[async_trait]
-impl<T: Peripheral> DeviceImpl for RumbleBLEDeviceImpl<T> {
+impl DeviceImpl for RumbleBLEDeviceImpl {
     fn name(&self) -> String {
-        self.device.properties().local_name.unwrap()
+        //self.device.properties().local_name.unwrap()
+        "Whatever".to_owned()
     }
 
     fn address(&self) -> String {
-        self.device.properties().address.to_string()
+        //self.device.properties().address.to_string()
+        "Whatever".to_owned()
     }
     fn connected(&self) -> bool {
         true
     }
     fn endpoints(&self) -> Vec<Endpoint> {
-         self.endpoints.keys().map(|v| v.clone()).collect::<Vec<Endpoint>>()
+        //self.endpoints.keys().map(|v| v.clone()).collect::<Vec<Endpoint>>()
+        vec!()
     }
     fn disconnect(&self) {
         todo!("implement disconnect");
     }
-    fn set_channel(&mut self, receiver: Receiver<ButtplugProtocolRawMessage>, sender: Sender<ButtplugDeviceResponseMessage>) {
-        self.protocol_receiver = Some(receiver);
-        self.protocol_sender = Some(sender);
-    }
 
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
-        match self.endpoints.get(&msg.endpoint) {
-            Some(chr) => {
-                self.device.command(&chr, &msg.data).unwrap();
+        let fut = DeviceReturnFuture::default();
+        let waker = fut.get_state_clone();
+        self.thread_sender.send((ButtplugDeviceCommand::Message(ButtplugProtocolRawMessage::RawWriteCmd(msg.clone())), waker)).await;
+        match fut.await {
+            ButtplugDeviceReturn::Ok(_) => {
                 Ok(())
             },
-            None => Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("Device does not contain an endpoint named {}",msg.endpoint).to_owned())))
+            _ => {
+                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new("Cannot connect")))
+            }
         }
     }
 
@@ -225,18 +332,41 @@ impl<T: Peripheral> DeviceImpl for RumbleBLEDeviceImpl<T> {
 
 #[cfg(test)]
 mod test {
-    use crate::server::device_manager::DeviceCommunicationManager;
+    use crate::{
+        core::messages::{
+            VibrateCmd,
+            VibrateSubcommand,
+            ButtplugMessageUnion,
+        },
+        server::device_manager::{DeviceCommunicationManager,
+                                 DeviceCommunicationManagerCreator,
+                                 DeviceCommunicationEvent}
+    };
     use super::RumbleBLECommunicationManager;
-    use async_std::task;
+    use async_std::{
+        prelude::StreamExt,
+        task,
+        sync::{channel}
+    };
     use env_logger;
 
     #[test]
-    #[ignore]
     pub fn test_rumble() {
-        // let _ = env_logger::builder().is_test(true).try_init();
-        // task::block_on(async move {
-        //     let mut mgr = RumbleBLECommunicationManager::new();
-        //     mgr.start_scanning().await;
-        // });
+        let _ = env_logger::builder().is_test(true).try_init();
+        task::block_on(async move {
+            let (sender, mut receiver) = channel(256);
+            let mut mgr = RumbleBLECommunicationManager::new(sender);
+            mgr.start_scanning().await;
+            loop {
+                match receiver.next().await.unwrap() {
+                    DeviceCommunicationEvent::DeviceAdded(mut device) => {
+                        info!("Got device!");
+                        device.parse_message(&ButtplugMessageUnion::VibrateCmd(VibrateCmd::new(1, vec!(VibrateSubcommand::new(0, 0.5))))).await;
+                        info!("Sending message!");
+                    },
+                    _ => assert!(false, "Shouldn't get other message types!"),
+                }
+            }
+        });
     }
 }
