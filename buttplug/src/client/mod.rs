@@ -16,15 +16,18 @@ use connectors::{
 };
 use device::ButtplugClientDevice;
 use internal::{
-    client_event_loop, ButtplugClientFuture, ButtplugClientMessage, ButtplugClientMessageFuture,
+    client_event_loop, ButtplugClientMessage,
 };
 
-use crate::core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
-    messages::{
-        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
-        RequestServerInfo, StartScanning,
+use crate::{
+    core::{
+        errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+        messages::{
+            ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
+            RequestServerInfo, StartScanning,
+        },
     },
+    util::future::{ButtplugFuture, ButtplugMessageFuture}
 };
 
 use async_std::{
@@ -357,7 +360,7 @@ impl ButtplugClient {
         self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(
             StartScanning::default(),
         ))
-        .await
+            .await
     }
 
     // Send message to the internal event loop. Mostly for handling boilerplate
@@ -387,7 +390,7 @@ impl ButtplugClient {
         msg: &ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
         // Create a future to pair with the message being resolved.
-        let fut = ButtplugClientMessageFuture::default();
+        let fut = ButtplugMessageFuture::default();
         let internal_msg = ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
 
         // Send message to internal loop and wait for return.
@@ -475,7 +478,7 @@ impl ButtplugClient {
         &mut self,
     ) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {
         info!("Request devices from inner loop!");
-        let fut = ButtplugClientFuture::<Vec<ButtplugClientDevice>>::default();
+        let fut = ButtplugFuture::<Vec<ButtplugClientDevice>>::default();
         let msg = ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
         info!("Sending device request to inner loop!");
         self.send_internal_message(msg).await?;
@@ -493,9 +496,9 @@ mod test {
                 ButtplugClientConnector, ButtplugClientConnectorError,
                 ButtplugEmbeddedClientConnector,
             },
-            internal::ButtplugClientMessageStateShared,
         },
         core::messages::ButtplugMessageUnion,
+        util::future::ButtplugMessageStateShared,
     };
     use async_std::{
         future::Future,
@@ -516,8 +519,8 @@ mod test {
             ButtplugEmbeddedClientConnector::new("Test Server", 0),
             func
         )
-        .await
-        .is_ok());
+                .await
+                .is_ok());
     }
 
     #[derive(Default)]
@@ -536,7 +539,7 @@ mod test {
         async fn send(
             &mut self,
             _msg: &ButtplugMessageUnion,
-            _state: &ButtplugClientMessageStateShared,
+            _state: &ButtplugMessageStateShared,
         ) {
         }
 
@@ -556,8 +559,8 @@ mod test {
                 ButtplugFailingConnector::default(),
                 |_| { async {} }
             )
-            .await
-            .is_err());
+                    .await
+                    .is_err());
         });
     }
 
@@ -570,7 +573,7 @@ mod test {
                     assert!(!client.connected());
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -583,7 +586,7 @@ mod test {
                     assert!(client.disconnect().await.is_err());
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -595,7 +598,7 @@ mod test {
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
             })
-            .await;
+                .await;
         });
     }
 
@@ -607,7 +610,7 @@ mod test {
                     assert!(client.start_scanning().await.is_ok());
                 }
             })
-            .await;
+                .await;
         });
     }
 

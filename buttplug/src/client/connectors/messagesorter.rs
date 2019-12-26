@@ -8,13 +8,13 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-    client::internal::ButtplugClientMessageStateShared,
+    util::future::ButtplugMessageStateShared,
     core::messages::{ButtplugMessage, ButtplugMessageUnion},
 };
 use std::collections::HashMap;
 
 pub struct ClientConnectorMessageSorter {
-    future_map: HashMap<u32, ButtplugClientMessageStateShared>,
+    future_map: HashMap<u32, ButtplugMessageStateShared>,
     current_id: u32,
 }
 
@@ -22,7 +22,7 @@ impl ClientConnectorMessageSorter {
     pub fn register_future(
         &mut self,
         msg: &mut ButtplugMessageUnion,
-        state: &ButtplugClientMessageStateShared,
+        state: &ButtplugMessageStateShared,
     ) {
         msg.set_id(self.current_id);
         self.future_map.insert(self.current_id, state.clone());

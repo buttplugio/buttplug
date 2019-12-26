@@ -9,18 +9,21 @@
 
 use super::{
     connectors::ButtplugClientConnectorError,
-    internal::{
-        ButtplugClientDeviceEvent, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair,
-    },
-    ButtplugClientError, ButtplugClientResult,
+    internal::ButtplugClientDeviceEvent,
+    ButtplugClientError,
+    ButtplugClientResult,
 };
-use crate::core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    messages::{
-        ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, MessageAttributes,
-        RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
-        VibrateSubcommand,
+use crate::
+{
+    core::{
+        errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+        messages::{
+            ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, MessageAttributes,
+            RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
+            VibrateSubcommand,
+        }
     },
+    util::future::{ButtplugMessageFuture, ButtplugMessageFuturePair}
 };
 use async_std::{
     prelude::StreamExt,
@@ -50,7 +53,7 @@ pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
     pub allowed_messages: HashMap<String, MessageAttributes>,
-    message_sender: Sender<ButtplugClientMessageFuturePair>,
+    message_sender: Sender<ButtplugMessageFuturePair>,
     event_receiver: Receiver<ButtplugClientDeviceEvent>,
     events: Vec<ButtplugClientDeviceEvent>,
     device_connected: bool,
@@ -65,7 +68,7 @@ impl ButtplugClientDevice {
         name: &str,
         index: u32,
         allowed_messages: HashMap<String, MessageAttributes>,
-        message_sender: Sender<ButtplugClientMessageFuturePair>,
+        message_sender: Sender<ButtplugMessageFuturePair>,
         event_receiver: Receiver<ButtplugClientDeviceEvent>,
     ) -> Self {
         Self {
@@ -90,7 +93,7 @@ impl ButtplugClientDevice {
         // receiver to see if it's returned None. Always run connection/event
         // checks before sending messages to the event loop.
         self.check_for_events().await?;
-        let fut = ButtplugClientMessageFuture::default();
+        let fut = ButtplugMessageFuture::default();
         self.message_sender
             .send((msg.clone(), fut.get_state_clone()))
             .await;
@@ -386,14 +389,14 @@ impl ButtplugClientDevice {
 impl
     From<(
         &DeviceAdded,
-        Sender<ButtplugClientMessageFuturePair>,
+        Sender<ButtplugMessageFuturePair>,
         Receiver<ButtplugClientDeviceEvent>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceAdded,
-            Sender<ButtplugClientMessageFuturePair>,
+            Sender<ButtplugMessageFuturePair>,
             Receiver<ButtplugClientDeviceEvent>,
         ),
     ) -> Self {
@@ -411,14 +414,14 @@ impl
 impl
     From<(
         &DeviceMessageInfo,
-        Sender<ButtplugClientMessageFuturePair>,
+        Sender<ButtplugMessageFuturePair>,
         Receiver<ButtplugClientDeviceEvent>,
     )> for ButtplugClientDevice
 {
     fn from(
         msg_sender_tuple: (
             &DeviceMessageInfo,
-            Sender<ButtplugClientMessageFuturePair>,
+            Sender<ButtplugMessageFuturePair>,
             Receiver<ButtplugClientDeviceEvent>,
         ),
     ) -> Self {
