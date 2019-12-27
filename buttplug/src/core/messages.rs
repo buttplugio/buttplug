@@ -14,7 +14,10 @@ use crate::devices::Endpoint;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+};
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -34,6 +37,11 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     {
         "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
     }
+}
+
+pub trait ButtplugDeviceMessage: ButtplugMessage {
+    fn get_device_index(&self) -> u32;
+    fn set_device_index(&mut self, id: u32);
 }
 
 /// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
@@ -369,7 +377,7 @@ impl Log {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopDeviceCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -409,7 +417,7 @@ impl VibrateSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VibrateCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -451,7 +459,7 @@ impl VectorSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -493,7 +501,7 @@ impl RotationSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RotateCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -514,7 +522,7 @@ impl RotateCmd {
     }
 }
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -538,7 +546,7 @@ impl FleshlightLaunchFW12Cmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -560,7 +568,7 @@ impl LovenseCmd {
 }
 
 // Dear god this needs to be deprecated
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -581,7 +589,7 @@ impl KiirooCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -605,7 +613,7 @@ impl VorzeA10CycloneCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, Default, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -626,7 +634,7 @@ impl SingleMotorVibrateCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawWriteCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -654,7 +662,7 @@ impl RawWriteCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawReadCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -682,7 +690,7 @@ impl RawReadCmd {
     }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawReading {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -724,6 +732,7 @@ pub enum ButtplugMessageUnion {
     StopScanning(StopScanning),
     ScanningFinished(ScanningFinished),
     RequestDeviceList(RequestDeviceList),
+    StopAllDevices(StopAllDevices),
     VibrateCmd(VibrateCmd),
     LinearCmd(LinearCmd),
     RotateCmd(RotateCmd),
@@ -734,9 +743,8 @@ pub enum ButtplugMessageUnion {
     SingleMotorVibrateCmd(SingleMotorVibrateCmd),
     RawWriteCmd(RawWriteCmd),
     RawReadCmd(RawReadCmd),
-    RawReading(RawReading),
     StopDeviceCmd(StopDeviceCmd),
-    StopAllDevices(StopAllDevices),
+    RawReading(RawReading),
 }
 
 impl ButtplugMessage for ButtplugMessageUnion {
@@ -810,6 +818,150 @@ impl ButtplugMessage for ButtplugMessageUnion {
         panic!("as_union shouldn't be called on union.");
     }
 }
+
+/// Messages that should never be received from the client.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ButtplugSystemMessageUnion {
+    Ok(Ok),
+    Error(Error),
+    Log(Log),
+    ServerInfo(ServerInfo),
+    DeviceList(DeviceList),
+    DeviceAdded(DeviceAdded),
+    DeviceRemoved(DeviceRemoved),
+    ScanningFinished(ScanningFinished),
+    RawReading(RawReading),
+}
+
+impl TryFrom<ButtplugMessageUnion> for ButtplugSystemMessageUnion {
+    type Error = &'static str;
+
+    // TODO Self::Error throws ambiguous type here.
+    fn try_from(msg: ButtplugMessageUnion) -> Result<Self, &'static str> {
+        match msg {
+            ButtplugMessageUnion::Ok(msg) => Ok(ButtplugSystemMessageUnion::Ok(msg)),
+            ButtplugMessageUnion::Error(msg) => Ok(ButtplugSystemMessageUnion::Error(msg)),
+            ButtplugMessageUnion::Log(msg) => Ok(ButtplugSystemMessageUnion::Log(msg)),
+            ButtplugMessageUnion::ServerInfo(msg) => Ok(ButtplugSystemMessageUnion::ServerInfo(msg)),
+            ButtplugMessageUnion::DeviceList(msg) => Ok(ButtplugSystemMessageUnion::DeviceList(msg)),
+            ButtplugMessageUnion::DeviceAdded(msg) => Ok(ButtplugSystemMessageUnion::DeviceAdded(msg)),
+            ButtplugMessageUnion::DeviceRemoved(msg) => Ok(ButtplugSystemMessageUnion::DeviceRemoved(msg)),
+            ButtplugMessageUnion::ScanningFinished(msg) => Ok(ButtplugSystemMessageUnion::ScanningFinished(msg)),
+            ButtplugMessageUnion::RawReading(msg) => Ok(ButtplugSystemMessageUnion::RawReading(msg)),
+            _ => Err("Not a System Message")
+        }
+    }
+}
+
+/// Messages that should be routed to device instances.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ButtplugDeviceCommandMessageUnion {
+    VibrateCmd(VibrateCmd),
+    LinearCmd(LinearCmd),
+    RotateCmd(RotateCmd),
+    FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
+    LovenseCmd(LovenseCmd),
+    KiirooCmd(KiirooCmd),
+    VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+    SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+    RawWriteCmd(RawWriteCmd),
+    RawReadCmd(RawReadCmd),
+    StopDeviceCmd(StopDeviceCmd),
+}
+
+impl ButtplugMessage for ButtplugDeviceCommandMessageUnion {
+    fn get_id(&self) -> u32 {
+        match self {
+            ButtplugDeviceCommandMessageUnion::VibrateCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::LinearCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::RotateCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::LovenseCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::KiirooCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::RawWriteCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::RawReadCmd(ref msg) => msg.id,
+            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(ref msg) => msg.id,
+        }
+    }
+
+    fn set_id(&mut self, id: u32) {
+        match self {
+            ButtplugDeviceCommandMessageUnion::VibrateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::LinearCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::RotateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::LovenseCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::KiirooCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::RawWriteCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::RawReadCmd(ref mut msg) => msg.set_id(id),
+            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_id(id),
+        }
+    }
+
+    fn as_union(self) -> ButtplugMessageUnion {
+        panic!("as_union shouldn't be called on union.");
+    }
+}
+
+impl ButtplugDeviceMessage for ButtplugDeviceCommandMessageUnion {
+    fn get_device_index(&self) -> u32 {
+        match self {
+            ButtplugDeviceCommandMessageUnion::VibrateCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::LinearCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::RotateCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::LovenseCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::KiirooCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::RawWriteCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::RawReadCmd(ref msg) => msg.device_index,
+            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(ref msg) => msg.device_index,
+        }
+    }
+
+    fn set_device_index(&mut self, id: u32) {
+        match self {
+            ButtplugDeviceCommandMessageUnion::VibrateCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::LinearCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::RotateCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::LovenseCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::KiirooCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::RawWriteCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::RawReadCmd(ref mut msg) => msg.set_device_index(id),
+            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(ref mut msg) => msg.set_device_index(id),
+        }
+    }
+}
+
+impl TryFrom<ButtplugMessageUnion> for ButtplugDeviceCommandMessageUnion {
+    type Error = &'static str;
+
+    // TODO Self::Error throws ambiguous type here.
+    fn try_from(msg: ButtplugMessageUnion) -> Result<Self, &'static str> {
+        match msg {
+            ButtplugMessageUnion::VibrateCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::VibrateCmd(msg)),
+            ButtplugMessageUnion::LinearCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::LinearCmd(msg)),
+            ButtplugMessageUnion::RotateCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::RotateCmd(msg)),
+            ButtplugMessageUnion::FleshlightLaunchFW12Cmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(msg)),
+            ButtplugMessageUnion::LovenseCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::LovenseCmd(msg)),
+            ButtplugMessageUnion::KiirooCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::KiirooCmd(msg)),
+            ButtplugMessageUnion::VorzeA10CycloneCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg)),
+            ButtplugMessageUnion::SingleMotorVibrateCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg)),
+            ButtplugMessageUnion::RawWriteCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::RawWriteCmd(msg)),
+            ButtplugMessageUnion::RawReadCmd(msg) => Ok(ButtplugDeviceCommandMessageUnion::RawReadCmd(msg)),
+            _ => Err("Not a Device Command Message")
+        }
+    }
+}
+
 
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
