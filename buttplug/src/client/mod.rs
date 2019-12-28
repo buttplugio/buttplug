@@ -23,7 +23,7 @@ use crate::{
             ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError,
         },
         messages::{
-            ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
+            ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
             RequestServerInfo, StartScanning,
         },
     },

@@ -44,7 +44,7 @@ impl<'de> Visitor<'de> for EndpointVisitor {
     where
         E: de::Error,
     {
-        Endpoint::from_str(value).map_err(|e| E::custom("Parse error"))
+        Endpoint::from_str(value).map_err(|e| E::custom(format!("{}", e)))
     }
 }
 

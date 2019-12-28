@@ -7,14 +7,12 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{ButtplugProtocol, ButtplugProtocolInitializer};
+use super::protocol::ButtplugProtocol;
 use super::protocols::lovense::LovenseProtocol;
 use crate::{
     core::{errors::ButtplugError, messages::MessageAttributes},
     devices::Endpoint,
-    server::device_manager::{ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage},
 };
-use async_std::sync::{Receiver, Sender};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
@@ -162,10 +160,7 @@ pub struct DeviceConfigurationManager {
     pub protocols: HashMap<
         String,
         Box<
-            dyn Fn(
-                Receiver<ButtplugDeviceResponseMessage>,
-                Sender<ButtplugProtocolRawMessage>,
-            ) -> Box<dyn ButtplugProtocol>,
+            dyn Fn() -> Box<dyn ButtplugProtocol>,
         >,
     >,
 }
@@ -179,15 +174,12 @@ impl DeviceConfigurationManager {
         let mut protocols = HashMap::<
             String,
             Box<
-                dyn Fn(
-                    Receiver<ButtplugDeviceResponseMessage>,
-                    Sender<ButtplugProtocolRawMessage>,
-                ) -> Box<dyn ButtplugProtocol>,
+                dyn Fn() -> Box<dyn ButtplugProtocol>,
             >,
         >::new();
         protocols.insert(
             "lovense".to_owned(),
-            Box::new(|receiver, sender| Box::new(LovenseProtocol::new(receiver, sender))),
+            Box::new(|| Box::new(LovenseProtocol::new())),
         );
         DeviceConfigurationManager { config, protocols }
     }
@@ -207,10 +199,8 @@ impl DeviceConfigurationManager {
     pub fn create_protocol_impl(
         &self,
         name: &String,
-        receiver: Receiver<ButtplugDeviceResponseMessage>,
-        sender: Sender<ButtplugProtocolRawMessage>,
     ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
-        Ok(self.protocols.get(name).unwrap()(receiver, sender))
+        Ok(self.protocols.get(name).unwrap()())
     }
 }
 

@@ -14,7 +14,7 @@ use crate::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
         DeviceImpl,
     },
-    util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
+    util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_std::{
     prelude::{FutureExt, StreamExt},
@@ -80,7 +80,7 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
         task::spawn(async move {
             let (sender, mut receiver) = channel(256);
             let on_event = move |event: CentralEvent| match event {
-                CentralEvent::DeviceDiscovered(addr) => {
+                CentralEvent::DeviceDiscovered(_) => {
                     let s = sender.clone();
                     task::spawn(async move {
                         s.send(true).await;
@@ -107,14 +107,10 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                                 device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf))
                             {
                                 info!("Found Buttplug Device {}", name);
-                                let (protocol_sender, dev_receiver) = channel(256);
-                                let (dev_sender, protocol_receiver) = channel(256);
-                                let mut dev = connect(p, protocol.clone()).await.unwrap();
+                                let dev = connect(p, protocol.clone()).await.unwrap();
                                 let proto = device_mgr
                                     .create_protocol_impl(
-                                        &protocol_name,
-                                        protocol_receiver,
-                                        protocol_sender,
+                                        &protocol_name
                                     )
                                     .unwrap();
                                 let d = ButtplugDevice::new(proto, Box::new(dev));
@@ -168,7 +164,8 @@ async fn rumble_comm_loop<T: Peripheral>(
     device: T,
     protocol: BluetoothLESpecifier,
     mut write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    mut output_sender: Sender<ButtplugDeviceResponseMessage>,
+    // TODO implement output sending due to notifications
+    mut _output_sender: Sender<ButtplugDeviceResponseMessage>,
 ) {
     // TODO How the do we deal with disconnection, as well as spinning down the
     // thread during shutdown?
@@ -179,7 +176,7 @@ async fn rumble_comm_loop<T: Peripheral>(
     //
     // Any time we get a request to subscribe somewhere, just load the callback
     // with the same sender everyone is using and treat this as a mpsc.
-    let (notification_sender, mut notification_receiver) = channel::<RawReading>(256);
+    let (_notification_sender, mut notification_receiver) = channel::<RawReading>(256);
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
     loop {
         let receiver = async {
@@ -243,15 +240,16 @@ async fn rumble_comm_loop<T: Peripheral>(
                 },
                 ButtplugDeviceCommand::Disconnect => {}
             },
-            RumbleCommLoopChannelValue::DeviceOutput(raw_reading) => {}
-            ChannelClosed => {}
+            // TODO implement output sending
+            RumbleCommLoopChannelValue::DeviceOutput(_raw_reading) => {},
+            RumbleCommLoopChannelValue::ChannelClosed => {}
         }
     }
 }
 
 pub struct RumbleBLEDeviceImpl {
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    device_thread: thread::JoinHandle<()>,
+    _device_thread: thread::JoinHandle<()>,
 }
 
 unsafe impl Send for RumbleBLEDeviceImpl {}
@@ -269,7 +267,7 @@ pub async fn connect<T: Peripheral + 'static>(
 ) -> Result<RumbleBLEDeviceImpl, ButtplugError> {
     if let Some(ref proto) = protocol.btle {
         let (device_sender, device_receiver) = channel(256);
-        let (output_sender, output_receiver) = channel(256);
+        let (output_sender, _output_receiver) = channel(256);
         let p = proto.clone();
         let thr = thread::spawn(move || {
             task::spawn(async move {
@@ -284,7 +282,7 @@ pub async fn connect<T: Peripheral + 'static>(
         match fut.await {
             ButtplugDeviceReturn::Ok(_) => Ok(RumbleBLEDeviceImpl {
                 thread_sender: device_sender,
-                device_thread: thr,
+                _device_thread: thr,
             }),
             _ => Err(ButtplugError::ButtplugDeviceError(
                 ButtplugDeviceError::new("Cannot connect"),
@@ -295,6 +293,7 @@ pub async fn connect<T: Peripheral + 'static>(
     }
 }
 
+// TODO Actually fill out device information
 #[async_trait]
 impl DeviceImpl for RumbleBLEDeviceImpl {
     fn name(&self) -> String {

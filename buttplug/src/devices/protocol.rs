@@ -3,19 +3,9 @@ use crate::{
         errors::ButtplugError,
         messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
     },
-    server::device_manager::{
-        ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl,
-    },
+    server::device_manager::DeviceImpl,
 };
-use async_std::sync::{Receiver, Sender};
 use async_trait::async_trait;
-
-pub trait ButtplugProtocolInitializer: Sync + Send {
-    fn new(
-        receiver: Receiver<ButtplugDeviceResponseMessage>,
-        sender: Sender<ButtplugProtocolRawMessage>,
-    ) -> Self;
-}
 
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {

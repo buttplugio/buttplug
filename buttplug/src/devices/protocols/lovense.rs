@@ -2,32 +2,25 @@ use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, ButtplugMessageUnion, Error,
-            Ok, RawReading, RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd,
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, ButtplugMessageUnion,
+            RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd,
         },
     },
     devices::{
-        protocol::{ButtplugProtocol, ButtplugProtocolInitializer},
+        protocol::ButtplugProtocol,
         Endpoint,
     },
     server::device_manager::{
-        ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl,
+        DeviceImpl,
     },
 };
-use async_std::sync::{Receiver, Sender};
 use async_trait::async_trait;
 
-pub struct LovenseProtocol {
-    receiver: Receiver<ButtplugDeviceResponseMessage>,
-    sender: Sender<ButtplugProtocolRawMessage>,
-}
+pub struct LovenseProtocol {}
 
-impl ButtplugProtocolInitializer for LovenseProtocol {
-    fn new(
-        receiver: Receiver<ButtplugDeviceResponseMessage>,
-        sender: Sender<ButtplugProtocolRawMessage>,
-    ) -> Self {
-        LovenseProtocol { receiver, sender }
+impl LovenseProtocol {
+    pub fn new() -> Self {
+        LovenseProtocol { }
     }
 }
 
