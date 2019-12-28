@@ -1,14 +1,12 @@
 pub mod configuration_manager;
 pub mod protocol;
 pub mod protocols;
-use std::{
-    fmt,
-    str::FromStr,
-    string::ToString,
-};
 #[cfg(feature = "serialize_json")]
-use serde::{Deserialize, Serialize, Deserializer, Serializer, de::{self, Visitor}};
-
+use serde::{
+    de::{self, Visitor},
+    Deserialize, Deserializer, Serialize, Serializer,
+};
+use std::{fmt, str::FromStr, string::ToString};
 
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]

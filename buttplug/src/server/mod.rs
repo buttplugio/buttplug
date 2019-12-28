@@ -7,17 +7,16 @@
 
 //! Handles client sessions, as well as discovery and communication with hardware.
 
-pub mod device_manager;
-pub mod device;
 pub mod comm_managers;
+pub mod device;
+pub mod device_manager;
 
-
-use device_manager::DeviceManager;
 use crate::core::{
     errors::*,
     messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo},
 };
 use async_std::sync::Sender;
+use device_manager::DeviceManager;
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),

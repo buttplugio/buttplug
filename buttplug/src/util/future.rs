@@ -1,14 +1,10 @@
-use crate::{
-    core::messages::ButtplugMessageUnion
-};
+use crate::core::messages::ButtplugMessageUnion;
 use async_std::{
     future::Future,
     task::{Context, Poll, Waker},
 };
-use std::{
-    sync::{Arc, Mutex},
-};
 use core::pin::Pin;
+use std::sync::{Arc, Mutex};
 
 /// Struct used for waiting on replies from the server.
 ///

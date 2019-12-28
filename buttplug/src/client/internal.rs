@@ -16,15 +16,13 @@ use super::{
 };
 use crate::{
     core::messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo},
-    util::future::{ButtplugFutureStateShared, ButtplugMessageFuturePair}
+    util::future::{ButtplugFutureStateShared, ButtplugMessageFuturePair},
 };
 use async_std::{
     prelude::{FutureExt, StreamExt},
     sync::{channel, Receiver, Sender},
 };
-use std::{
-    collections::HashMap,
-};
+use std::collections::HashMap;
 
 /// Enum used for communication from the client to the event loop.
 pub enum ButtplugClientMessage {

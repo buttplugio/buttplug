@@ -13,11 +13,10 @@ pub mod websocket;
 #[cfg(feature = "server")]
 use crate::server::ButtplugServer;
 use crate::{
-    util::future::{
-        ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared,
-        ButtplugMessageStateShared,
-    },
     core::messages::ButtplugMessageUnion,
+    util::future::{
+        ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared, ButtplugMessageStateShared,
+    },
 };
 use async_std::sync::{channel, Receiver};
 #[cfg(feature = "serialize_json")]
@@ -36,8 +35,7 @@ pub type ButtplugClientConnectionState =
     ButtplugFutureState<Result<(), ButtplugClientConnectorError>>;
 pub type ButtplugClientConnectionStateShared =
     ButtplugFutureStateShared<Result<(), ButtplugClientConnectorError>>;
-pub type ButtplugClientConnectionFuture =
-    ButtplugFuture<Result<(), ButtplugClientConnectorError>>;
+pub type ButtplugClientConnectionFuture = ButtplugFuture<Result<(), ButtplugClientConnectorError>>;
 
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
@@ -171,11 +169,7 @@ impl ButtplugRemoteClientConnectorHelper {
         self.remote_send.clone()
     }
 
-    pub async fn send(
-        &mut self,
-        msg: &ButtplugMessageUnion,
-        state: &ButtplugMessageStateShared,
-    ) {
+    pub async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugMessageStateShared) {
         self.internal_send.send((msg.clone(), state.clone())).await;
     }
 

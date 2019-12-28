@@ -8,22 +8,19 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-    connectors::ButtplugClientConnectorError,
-    internal::ButtplugClientDeviceEvent,
-    ButtplugClientError,
-    ButtplugClientResult,
+    connectors::ButtplugClientConnectorError, internal::ButtplugClientDeviceEvent,
+    ButtplugClientError, ButtplugClientResult,
 };
-use crate::
-{
+use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
         messages::{
             ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, MessageAttributes,
             RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
             VibrateSubcommand,
-        }
+        },
     },
-    util::future::{ButtplugMessageFuture, ButtplugMessageFuturePair}
+    util::future::{ButtplugMessageFuture, ButtplugMessageFuturePair},
 };
 use async_std::{
     prelude::StreamExt,

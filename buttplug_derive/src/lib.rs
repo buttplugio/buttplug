@@ -37,7 +37,7 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
             };
             gen.into()
-        },
+        }
         syn::Data::Struct(_) => {
             let gen = quote! {
                 impl ButtplugMessage for #name {
@@ -51,8 +51,8 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
             };
             gen.into()
-        },
-        _ => panic!("Derivation only works on structs and enums")
+        }
+        _ => panic!("Derivation only works on structs and enums"),
     }
 }
 
@@ -88,7 +88,7 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
             };
             gen.into()
-        },
+        }
         syn::Data::Struct(_) => {
             let gen = quote! {
                 impl ButtplugDeviceMessage for #name {
@@ -102,8 +102,8 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
                 }
             };
             gen.into()
-        },
-        _ => panic!("Derivation only works on structs and enums")
+        }
+        _ => panic!("Derivation only works on structs and enums"),
     }
 }
 

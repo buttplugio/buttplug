@@ -10,24 +10,25 @@
 
 use crate::{
     core::{
-        messages::{ self, RawReading, RawWriteCmd, RawReadCmd, ButtplugMessageUnion, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugMessage, ButtplugDeviceManagerMessageUnion, DeviceAdded },
-        errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError},
+        errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+        messages::{
+            self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
+            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, RawReadCmd,
+            RawReading, RawWriteCmd,
+        },
     },
-    devices::{
-        protocol::ButtplugProtocol,
-        Endpoint
-    }
+    devices::{protocol::ButtplugProtocol, Endpoint},
 };
+use async_std::{
+    prelude::StreamExt,
+    sync::{channel, Receiver, Sender},
+    task,
+};
+use async_trait::async_trait;
 use std::{
     collections::HashMap,
     convert::TryFrom,
     sync::{Arc, Mutex},
-};
-use async_trait::async_trait;
-use async_std::{
-    task,
-    sync::{ Sender, Receiver, channel },
-    prelude::StreamExt
 };
 
 pub enum ButtplugProtocolRawMessage {
@@ -48,27 +49,27 @@ pub enum ButtplugDeviceEvent {
 
 pub enum DeviceCommunicationEvent {
     DeviceAdded(ButtplugDevice),
-    ScanningFinished
+    ScanningFinished,
 }
 
 pub struct ButtplugDevice {
     protocol: Box<dyn ButtplugProtocol>,
-    device: Box<dyn DeviceImpl>
+    device: Box<dyn DeviceImpl>,
 }
 
 impl ButtplugDevice {
     pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
-        Self {
-            protocol,
-            device
-        }
+        Self { protocol, device }
     }
 
     pub fn name(&self) -> String {
         self.device.name()
     }
 
-    pub async fn parse_message(&mut self, message: &ButtplugDeviceCommandMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+    pub async fn parse_message(
+        &mut self,
+        message: &ButtplugDeviceCommandMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugError> {
         self.protocol.parse_message(&self.device, message).await
     }
 }
@@ -106,17 +107,23 @@ pub struct DeviceManager {
     event_sender: Sender<ButtplugMessageUnion>,
 }
 
-async fn wait_for_manager_events(mut receiver: Receiver<DeviceCommunicationEvent>, sender: Sender<ButtplugMessageUnion>, device_map: Arc<Mutex<HashMap<u32, ButtplugDevice>>>) {
+async fn wait_for_manager_events(
+    mut receiver: Receiver<DeviceCommunicationEvent>,
+    sender: Sender<ButtplugMessageUnion>,
+    device_map: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
+) {
     let mut device_index: u32 = 0;
     loop {
         match receiver.next().await.unwrap() {
             DeviceCommunicationEvent::DeviceAdded(device) => {
                 info!("Assigning index {} to {}", device_index, device.name());
                 // TODO Emit a DeviceAdded event here.
-                sender.send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into()).await;
+                sender
+                    .send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into())
+                    .await;
                 device_map.lock().unwrap().insert(device_index, device);
                 device_index += 1;
-            },
+            }
             DeviceCommunicationEvent::ScanningFinished => {
                 // TODO Emit a ScanningFinished event here.
             }
@@ -136,8 +143,8 @@ impl DeviceManager {
         Self {
             sender,
             devices: map,
-            comm_managers: vec!(),
-            event_sender
+            comm_managers: vec![],
+            event_sender,
         }
     }
 
@@ -155,35 +162,48 @@ impl DeviceManager {
         Ok(())
     }
 
-    pub async fn parse_message(&mut self, msg: ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+    pub async fn parse_message(
+        &mut self,
+        msg: ButtplugMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugError> {
         // If this is a device command message, just route it directly to the
         // device.
         if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
             // TODO This lock is going to mean only one device can process a
             // command at any time. That's bad. We should probably have the
             // HashMap be a RWLock that holds a Arc<Mutex<ButtplugDevice>>.
-            if let Some(device) = self.devices.lock().unwrap().get_mut(&device_msg.get_device_index()) {
+            if let Some(device) = self
+                .devices
+                .lock()
+                .unwrap()
+                .get_mut(&device_msg.get_device_index())
+            {
                 device.parse_message(&device_msg).await
             } else {
-                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("No device with index {} available", device_msg.get_device_index()))))
+                Err(ButtplugError::ButtplugDeviceError(
+                    ButtplugDeviceError::new(&format!(
+                        "No device with index {} available",
+                        device_msg.get_device_index()
+                    )),
+                ))
             }
         } else {
             if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
                 match manager_msg {
                     ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
                         Ok(messages::Ok::new(msg.get_id()).into())
-                    },
+                    }
                     ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
                         Ok(messages::Ok::new(msg.get_id()).into())
-                    },
+                    }
                     ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
                         self.start_scanning().await;
                         Ok(messages::Ok::new(msg.get_id()).into())
-                    },
+                    }
                     ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
                         self.stop_scanning().await;
                         Ok(messages::Ok::new(msg.get_id()).into())
-                    },
+                    }
                 }
             } else {
                 Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
@@ -192,8 +212,11 @@ impl DeviceManager {
     }
 
     pub fn add_comm_manager<T>(&mut self)
-    where T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
-        self.comm_managers.push(Box::new(T::new(self.sender.clone())));
+    where
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    {
+        self.comm_managers
+            .push(Box::new(T::new(self.sender.clone())));
     }
 }
 
@@ -201,14 +224,10 @@ impl DeviceManager {
 mod test {
     use super::DeviceManager;
     use crate::{
-        core::messages::{VibrateCmd, VibrateSubcommand, ButtplugMessageUnion},
+        core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
         server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
     };
-    use async_std::{
-        task,
-        sync::channel,
-        prelude::StreamExt,
-    };
+    use async_std::{prelude::StreamExt, sync::channel, task};
     use std::time::Duration;
 
     #[test]
@@ -220,7 +239,10 @@ mod test {
             dm.add_comm_manager::<RumbleBLECommunicationManager>();
             dm.start_scanning().await;
             if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
-                match dm.parse_message(VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await {
+                match dm
+                    .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+                    .await
+                {
                     Ok(_) => info!("Message sent ok!"),
                     Err(e) => assert!(false, e.to_string()),
                 }

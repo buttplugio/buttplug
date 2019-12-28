@@ -14,10 +14,7 @@ use crate::devices::Endpoint;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-};
+use std::{collections::HashMap, convert::TryFrom};
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -219,12 +216,16 @@ pub struct DeviceAdded {
 }
 
 impl DeviceAdded {
-    pub fn new(device_index: u32, device_name: &String, device_messages: &HashMap<String, MessageAttributes>) -> Self {
+    pub fn new(
+        device_index: u32,
+        device_name: &String,
+        device_messages: &HashMap<String, MessageAttributes>,
+    ) -> Self {
         Self {
             id: 0,
             device_index,
             device_name: device_name.to_string(),
-            device_messages: device_messages.clone()
+            device_messages: device_messages.clone(),
         }
     }
 }
@@ -656,17 +657,21 @@ pub struct RawWriteCmd {
     pub data: Vec<u8>,
     #[cfg_attr(feature = "serialize_json", serde(rename = "WriteWithResponse"))]
     pub write_with_response: bool,
-
 }
 
 impl RawWriteCmd {
-    pub fn new(device_index: u32, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
+    pub fn new(
+        device_index: u32,
+        endpoint: Endpoint,
+        data: Vec<u8>,
+        write_with_response: bool,
+    ) -> Self {
         Self {
             id: 1,
             device_index,
             endpoint,
             data,
-            write_with_response
+            write_with_response,
         }
     }
 }
@@ -684,11 +689,15 @@ pub struct RawReadCmd {
     pub expected_length: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "WaitForData"))]
     pub wait_for_data: bool,
-
 }
 
 impl RawReadCmd {
-    pub fn new(device_index: u32, endpoint: Endpoint, expected_length: u32, wait_for_data: bool) -> Self {
+    pub fn new(
+        device_index: u32,
+        endpoint: Endpoint,
+        expected_length: u32,
+        wait_for_data: bool,
+    ) -> Self {
         Self {
             id: 1,
             device_index,
@@ -718,7 +727,7 @@ impl RawReading {
             id: 1,
             device_index,
             endpoint,
-            data
+            data,
         }
     }
 }
@@ -757,7 +766,9 @@ pub enum ButtplugMessageUnion {
 }
 
 /// Messages that should never be received from the client.
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage)]
+#[derive(
+    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage,
+)]
 pub enum ButtplugSystemMessageUnion {
     Ok(Ok),
     Error(Error),
@@ -771,7 +782,9 @@ pub enum ButtplugSystemMessageUnion {
 }
 
 /// Messages that should never be received from the client.
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage)]
+#[derive(
+    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage,
+)]
 pub enum ButtplugDeviceManagerMessageUnion {
     RequestDeviceList(RequestDeviceList),
     StopAllDevices(StopAllDevices),
@@ -780,7 +793,14 @@ pub enum ButtplugDeviceManagerMessageUnion {
 }
 
 /// Messages that should be routed to device instances.
-#[derive(Debug, Clone, PartialEq, ButtplugDeviceMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    ButtplugDeviceMessage,
+    TryFromButtplugMessageUnion,
+    ToSpecificButtplugMessage,
+)]
 pub enum ButtplugDeviceCommandMessageUnion {
     VibrateCmd(VibrateCmd),
     LinearCmd(LinearCmd),
@@ -837,17 +857,22 @@ mod test {
 
     #[test]
     fn test_endpoint_deserialize() {
-        let endpoint_str = "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
+        let endpoint_str =
+            "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
         let union: ButtplugMessageUnion = serde_json::from_str(&endpoint_str).unwrap();
-        assert_eq!(ButtplugMessageUnion::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))), union);
+        assert_eq!(
+            ButtplugMessageUnion::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
+            union
+        );
     }
 
     #[test]
     fn test_endpoint_serialize() {
-        let union = ButtplugMessageUnion::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0)));
+        let union = ButtplugMessageUnion::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
         let js = serde_json::to_string(&union).unwrap();
         println!("{}", js);
-        let endpoint_str = "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
+        let endpoint_str =
+            "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
         assert_eq!(js, endpoint_str);
     }
 }

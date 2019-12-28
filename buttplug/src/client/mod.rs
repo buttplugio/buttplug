@@ -15,19 +15,19 @@ use connectors::{
     ButtplugClientConnectionFuture, ButtplugClientConnector, ButtplugClientConnectorError,
 };
 use device::ButtplugClientDevice;
-use internal::{
-    client_event_loop, ButtplugClientMessage,
-};
+use internal::{client_event_loop, ButtplugClientMessage};
 
 use crate::{
     core::{
-        errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+        errors::{
+            ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError,
+        },
         messages::{
             ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
             RequestServerInfo, StartScanning,
         },
     },
-    util::future::{ButtplugFuture, ButtplugMessageFuture}
+    util::future::{ButtplugFuture, ButtplugMessageFuture},
 };
 
 use async_std::{
@@ -360,7 +360,7 @@ impl ButtplugClient {
         self.send_message_expect_ok(&ButtplugMessageUnion::StartScanning(
             StartScanning::default(),
         ))
-            .await
+        .await
     }
 
     // Send message to the internal event loop. Mostly for handling boilerplate
@@ -491,11 +491,8 @@ impl ButtplugClient {
 mod test {
     use super::ButtplugClient;
     use crate::{
-        client::{
-            connectors::{
-                ButtplugClientConnector, ButtplugClientConnectorError,
-                ButtplugEmbeddedClientConnector,
-            },
+        client::connectors::{
+            ButtplugClientConnector, ButtplugClientConnectorError, ButtplugEmbeddedClientConnector,
         },
         core::messages::ButtplugMessageUnion,
         util::future::ButtplugMessageStateShared,
@@ -519,8 +516,8 @@ mod test {
             ButtplugEmbeddedClientConnector::new("Test Server", 0),
             func
         )
-                .await
-                .is_ok());
+        .await
+        .is_ok());
     }
 
     #[derive(Default)]
@@ -536,11 +533,7 @@ mod test {
             Err(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn send(
-            &mut self,
-            _msg: &ButtplugMessageUnion,
-            _state: &ButtplugMessageStateShared,
-        ) {
+        async fn send(&mut self, _msg: &ButtplugMessageUnion, _state: &ButtplugMessageStateShared) {
         }
 
         fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
@@ -559,8 +552,8 @@ mod test {
                 ButtplugFailingConnector::default(),
                 |_| { async {} }
             )
-                    .await
-                    .is_err());
+            .await
+            .is_err());
         });
     }
 
@@ -573,7 +566,7 @@ mod test {
                     assert!(!client.connected());
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -586,7 +579,7 @@ mod test {
                     assert!(client.disconnect().await.is_err());
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -598,7 +591,7 @@ mod test {
                     assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
                 }
             })
-                .await;
+            .await;
         });
     }
 
@@ -610,7 +603,7 @@ mod test {
                     assert!(client.start_scanning().await.is_ok());
                 }
             })
-                .await;
+            .await;
         });
     }
 

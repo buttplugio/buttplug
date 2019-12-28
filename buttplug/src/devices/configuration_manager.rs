@@ -7,27 +7,25 @@
 
 //! Device specific identification and protocol implementations.
 
+use super::protocol::{ButtplugProtocol, ButtplugProtocolInitializer};
+use super::protocols::lovense::LovenseProtocol;
 use crate::{
-    core::{
-        messages::MessageAttributes,
-        errors::ButtplugError
-    },
+    core::{errors::ButtplugError, messages::MessageAttributes},
     devices::Endpoint,
     server::device_manager::{ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage},
 };
-use super::protocol::{ButtplugProtocol, ButtplugProtocolInitializer};
-use super::protocols::lovense::LovenseProtocol;
-use async_std::sync::{Sender, Receiver};
+use async_std::sync::{Receiver, Sender};
+use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
-use serde::{Deserialize};
 use uuid::Uuid;
 
-const DEVICE_CONFIGURATION_FILE: &str = include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
+const DEVICE_CONFIGURATION_FILE: &str =
+    include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
     pub names: HashSet<String>,
-    pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>
+    pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
 }
 
 impl PartialEq for BluetoothLESpecifier {
@@ -42,8 +40,7 @@ impl PartialEq for BluetoothLESpecifier {
                 if name.ends_with("*") {
                     wildcard = name.clone();
                     compare_name = &other_name;
-                }
-                else if other_name.ends_with("*") {
+                } else if other_name.ends_with("*") {
                     wildcard = other_name.clone();
                     compare_name = &name;
                 } else {
@@ -66,7 +63,7 @@ impl BluetoothLESpecifier {
         set.insert(name.to_string());
         BluetoothLESpecifier {
             names: set,
-            services: HashMap::new()
+            services: HashMap::new(),
         }
     }
 }
@@ -76,7 +73,7 @@ pub struct HIDSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
     #[serde(rename = "product-id")]
-    product_id: u16
+    product_id: u16,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -88,7 +85,7 @@ pub struct SerialSpecifier {
     #[serde(rename = "stop-bits")]
     stop_bits: u8,
     parity: char,
-    ports: HashSet<String>
+    ports: HashSet<String>,
 }
 
 impl PartialEq for SerialSpecifier {
@@ -102,7 +99,7 @@ pub struct USBSpecifier {
     #[serde(rename = "vendor-id")]
     vendor_id: u16,
     #[serde(rename = "product-id")]
-    product_id: u16
+    product_id: u16,
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -110,14 +107,14 @@ pub enum DeviceSpecifier {
     BluetoothLE(BluetoothLESpecifier),
     HID(HIDSpecifier),
     USB(USBSpecifier),
-    Serial(SerialSpecifier)
+    Serial(SerialSpecifier),
 }
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct ProtocolAttributes {
     identifier: Option<Vec<String>>,
     name: Option<HashMap<String, String>>,
-    messages: Option<HashMap<String, MessageAttributes>>
+    messages: Option<HashMap<String, MessageAttributes>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -134,10 +131,12 @@ pub struct ProtocolDefinition {
 }
 
 fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
-where T: PartialEq {
+where
+    T: PartialEq,
+{
     match &a {
         Some(a) => a == b,
-        _ => false
+        _ => false,
     }
 }
 
@@ -145,31 +144,30 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
     fn eq(&self, other: &DeviceSpecifier) -> bool {
         // TODO This seems like a really gross way to do this?
         match other {
-            DeviceSpecifier::USB(other_usb) => {
-                option_some_eq(&self.usb, other_usb)
-            },
-            DeviceSpecifier::Serial(other_serial) => {
-                option_some_eq(&self.serial, other_serial)
-            },
-            DeviceSpecifier::BluetoothLE(other_btle) => {
-                option_some_eq(&self.btle, other_btle)
-            },
-            DeviceSpecifier::HID(other_hid) => {
-                option_some_eq(&self.hid, other_hid)
-            },
+            DeviceSpecifier::USB(other_usb) => option_some_eq(&self.usb, other_usb),
+            DeviceSpecifier::Serial(other_serial) => option_some_eq(&self.serial, other_serial),
+            DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
+            DeviceSpecifier::HID(other_hid) => option_some_eq(&self.hid, other_hid),
         }
     }
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ProtocolConfiguration {
-    protocols: HashMap<String, ProtocolDefinition>
+    protocols: HashMap<String, ProtocolDefinition>,
 }
 
 pub struct DeviceConfigurationManager {
     pub config: ProtocolConfiguration,
-    pub protocols: HashMap<String, Box<dyn Fn(Receiver<ButtplugDeviceResponseMessage>,
-                                              Sender<ButtplugProtocolRawMessage>) -> Box<dyn ButtplugProtocol>>>
+    pub protocols: HashMap<
+        String,
+        Box<
+            dyn Fn(
+                Receiver<ButtplugDeviceResponseMessage>,
+                Sender<ButtplugProtocolRawMessage>,
+            ) -> Box<dyn ButtplugProtocol>,
+        >,
+    >,
 }
 
 unsafe impl Send for DeviceConfigurationManager {}
@@ -178,16 +176,26 @@ unsafe impl Sync for DeviceConfigurationManager {}
 impl DeviceConfigurationManager {
     pub fn load_from_internal() -> DeviceConfigurationManager {
         let config = serde_json::from_str(DEVICE_CONFIGURATION_FILE).unwrap();
-        let mut protocols = HashMap::<String, Box<dyn Fn(Receiver<ButtplugDeviceResponseMessage>,
-                                                         Sender<ButtplugProtocolRawMessage>) -> Box::<dyn ButtplugProtocol>>>::new();
-        protocols.insert("lovense".to_owned(), Box::new(|receiver,sender| Box::new(LovenseProtocol::new(receiver, sender)) ));
-        DeviceConfigurationManager {
-            config,
-            protocols
-        }
+        let mut protocols = HashMap::<
+            String,
+            Box<
+                dyn Fn(
+                    Receiver<ButtplugDeviceResponseMessage>,
+                    Sender<ButtplugProtocolRawMessage>,
+                ) -> Box<dyn ButtplugProtocol>,
+            >,
+        >::new();
+        protocols.insert(
+            "lovense".to_owned(),
+            Box::new(|receiver, sender| Box::new(LovenseProtocol::new(receiver, sender))),
+        );
+        DeviceConfigurationManager { config, protocols }
     }
 
-    pub fn find_protocol(&self, specifier: &DeviceSpecifier) -> Option<(String, ProtocolDefinition)> {
+    pub fn find_protocol(
+        &self,
+        specifier: &DeviceSpecifier,
+    ) -> Option<(String, ProtocolDefinition)> {
         for (name, def) in self.config.protocols.iter() {
             if def == specifier {
                 return Some((name.clone(), def.clone()));
@@ -196,16 +204,19 @@ impl DeviceConfigurationManager {
         None
     }
 
-    pub fn create_protocol_impl(&self, name: &String, receiver: Receiver<ButtplugDeviceResponseMessage>,
-                                sender: Sender<ButtplugProtocolRawMessage>) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
+    pub fn create_protocol_impl(
+        &self,
+        name: &String,
+        receiver: Receiver<ButtplugDeviceResponseMessage>,
+        sender: Sender<ButtplugProtocolRawMessage>,
+    ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
         Ok(self.protocols.get(name).unwrap()(receiver, sender))
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use super::{DeviceConfigurationManager, BluetoothLESpecifier, DeviceSpecifier};
+    use super::{BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier};
 
     #[test]
     fn test_load_config() {
@@ -223,7 +234,8 @@ mod test {
     #[test]
     fn test_config_wildcard_equals() {
         let config = DeviceConfigurationManager::load_from_internal();
-        let lovense = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+        let lovense =
+            DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
         assert!(config.find_protocol(&lovense).is_some());
     }
 }
