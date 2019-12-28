@@ -11,12 +11,14 @@
 #![type_length_limit = "5500000"]
 
 use async_std::task;
+#[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
 use buttplug::client::{
     connectors::websocket::ButtplugWebsocketClientConnector, device::VibrateCommand,
     ButtplugClient, ButtplugClientEvent,
 };
 use std::time::Duration;
 
+#[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
 async fn device_control_example() {
     // We're pretty familiar with connectors by now.
     let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", true);
@@ -129,6 +131,7 @@ async fn device_control_example() {
 }
 
 fn main() {
+    #[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
     task::block_on(async {
         device_control_example().await;
     });

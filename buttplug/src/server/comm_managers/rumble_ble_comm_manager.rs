@@ -340,7 +340,7 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature="winrt-ble", feature="linux-ble")))]
 mod test {
     use super::RumbleBLECommunicationManager;
     use crate::{

@@ -220,7 +220,7 @@ impl DeviceManager {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, any(feature="winrt-ble", feature="linux-ble")))]
 mod test {
     use super::DeviceManager;
     use crate::{
