@@ -114,19 +114,24 @@ async fn wait_for_manager_events(
 ) {
     let mut device_index: u32 = 0;
     loop {
-        match receiver.next().await.unwrap() {
-            DeviceCommunicationEvent::DeviceAdded(device) => {
-                info!("Assigning index {} to {}", device_index, device.name());
-                // TODO Emit a DeviceAdded event here.
-                sender
-                    .send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into())
-                    .await;
-                device_map.lock().unwrap().insert(device_index, device);
-                device_index += 1;
-            }
-            DeviceCommunicationEvent::ScanningFinished => {
-                // TODO Emit a ScanningFinished event here.
-            }
+        match receiver.next().await {
+            Some(event) => {
+                match event {
+                    DeviceCommunicationEvent::DeviceAdded(device) => {
+                        info!("Assigning index {} to {}", device_index, device.name());
+                        // TODO Emit a DeviceAdded event here.
+                        sender
+                            .send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into())
+                            .await;
+                        device_map.lock().unwrap().insert(device_index, device);
+                        device_index += 1;
+                    }
+                    DeviceCommunicationEvent::ScanningFinished => {
+                        // TODO Emit a ScanningFinished event here.
+                    }
+                }
+            },
+            None => break
         }
     }
 }

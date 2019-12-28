@@ -120,10 +120,10 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use async_std::{sync::channel, task};
+    use async_std::{sync::{channel, Receiver}, task};
 
-    async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> ButtplugServer {
-        let (send, _) = channel(256);
+    async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> (ButtplugServer, Receiver<ButtplugMessageUnion>) {
+        let (send, recv) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         assert_eq!(server.server_name, "Test Server");
         match server.parse_message(&msg_union).await.unwrap() {
@@ -132,7 +132,7 @@ mod test {
             }
             _ => assert!(false, "Should've received ok"),
         }
-        server
+        (server, recv)
     }
 
     #[test]
@@ -140,7 +140,7 @@ mod test {
         let msg = messages::RequestServerInfo::new("Test Client", 1);
         let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
         task::block_on(async {
-            let server = test_server_setup(&msg_union).await;
+            let (server, _recv) = test_server_setup(&msg_union).await;
             assert_eq!(server.client_name.unwrap(), "Test Client");
         });
     }
@@ -156,7 +156,7 @@ mod test {
 
     #[test]
     fn test_server_version_gt() {
-        let (send, _) = channel(256);
+        let (send, recv) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
         let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
