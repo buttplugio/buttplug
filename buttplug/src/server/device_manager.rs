@@ -8,14 +8,27 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use crate::core::errors::ButtplugError;
-use async_trait::async_trait;
-use crate::core::messages::{ self, RawReading, RawWriteCmd, RawReadCmd, ButtplugMessageUnion };
-use crate::devices::{
-    protocol::ButtplugProtocol,
-    Endpoint
+use crate::{
+    core::{
+        messages::{ self, RawReading, RawWriteCmd, RawReadCmd, ButtplugMessageUnion, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugMessage, ButtplugDeviceManagerMessageUnion, DeviceAdded },
+        errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError},
+    },
+    devices::{
+        protocol::ButtplugProtocol,
+        Endpoint
+    }
 };
-use async_std::sync::{ Sender, Receiver, channel };
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    sync::{Arc, Mutex},
+};
+use async_trait::async_trait;
+use async_std::{
+    task,
+    sync::{ Sender, Receiver, channel },
+    prelude::StreamExt
+};
 
 pub enum ButtplugProtocolRawMessage {
     RawWriteCmd(RawWriteCmd),
@@ -35,7 +48,7 @@ pub enum ButtplugDeviceEvent {
 
 pub enum DeviceCommunicationEvent {
     DeviceAdded(ButtplugDevice),
-    ScanningFinished()
+    ScanningFinished
 }
 
 pub struct ButtplugDevice {
@@ -51,9 +64,12 @@ impl ButtplugDevice {
         }
     }
 
-    pub async fn parse_message(&mut self, message: &ButtplugMessageUnion) -> ButtplugMessageUnion {
-        self.protocol.parse_message(&self.device, message).await;
-        ButtplugMessageUnion::Ok(messages::Ok::default())
+    pub fn name(&self) -> String {
+        self.device.name()
+    }
+
+    pub async fn parse_message(&mut self, message: &ButtplugDeviceCommandMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+        self.protocol.parse_message(&self.device, message).await
     }
 }
 
@@ -85,17 +101,93 @@ pub trait DeviceImpl: Sync + Send {
 
 pub struct DeviceManager {
     comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
-    receiver: Receiver<DeviceCommunicationEvent>,
-    sender: Sender<DeviceCommunicationEvent>
+    devices: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
+    sender: Sender<DeviceCommunicationEvent>,
+    event_sender: Sender<ButtplugMessageUnion>,
+}
+
+async fn wait_for_manager_events(mut receiver: Receiver<DeviceCommunicationEvent>, sender: Sender<ButtplugMessageUnion>, device_map: Arc<Mutex<HashMap<u32, ButtplugDevice>>>) {
+    let mut device_index: u32 = 0;
+    loop {
+        match receiver.next().await.unwrap() {
+            DeviceCommunicationEvent::DeviceAdded(device) => {
+                info!("Assigning index {} to {}", device_index, device.name());
+                // TODO Emit a DeviceAdded event here.
+                sender.send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into()).await;
+                device_map.lock().unwrap().insert(device_index, device);
+                device_index += 1;
+            },
+            DeviceCommunicationEvent::ScanningFinished => {
+                // TODO Emit a ScanningFinished event here.
+            }
+        }
+    }
 }
 
 impl DeviceManager {
-    pub fn new() -> Self {
+    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
         let (sender, receiver) = channel(256);
+        let map = Arc::new(Mutex::new(HashMap::new()));
+        let map_clone = map.clone();
+        let thread_sender = event_sender.clone();
+        task::spawn(async move {
+            wait_for_manager_events(receiver, thread_sender, map_clone).await;
+        });
         Self {
             sender,
-            receiver,
-            comm_managers: vec!()
+            devices: map,
+            comm_managers: vec!(),
+            event_sender
+        }
+    }
+
+    pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+        for mgr in self.comm_managers.iter_mut() {
+            mgr.start_scanning().await;
+        }
+        Ok(())
+    }
+
+    pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
+        for mgr in self.comm_managers.iter_mut() {
+            mgr.stop_scanning().await;
+        }
+        Ok(())
+    }
+
+    pub async fn parse_message(&mut self, msg: ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+        // If this is a device command message, just route it directly to the
+        // device.
+        if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
+            // TODO This lock is going to mean only one device can process a
+            // command at any time. That's bad. We should probably have the
+            // HashMap be a RWLock that holds a Arc<Mutex<ButtplugDevice>>.
+            if let Some(device) = self.devices.lock().unwrap().get_mut(&device_msg.get_device_index()) {
+                device.parse_message(&device_msg).await
+            } else {
+                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("No device with index {} available", device_msg.get_device_index()))))
+            }
+        } else {
+            if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
+                match manager_msg {
+                    ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
+                        Ok(messages::Ok::new(msg.get_id()).into())
+                    },
+                    ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
+                        Ok(messages::Ok::new(msg.get_id()).into())
+                    },
+                    ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
+                        self.start_scanning().await;
+                        Ok(messages::Ok::new(msg.get_id()).into())
+                    },
+                    ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
+                        self.stop_scanning().await;
+                        Ok(messages::Ok::new(msg.get_id()).into())
+                    },
+                }
+            } else {
+                Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
+            }
         }
     }
 
@@ -108,11 +200,34 @@ impl DeviceManager {
 #[cfg(test)]
 mod test {
     use super::DeviceManager;
-    use crate::server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager;
+    use crate::{
+        core::messages::{VibrateCmd, VibrateSubcommand, ButtplugMessageUnion},
+        server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
+    };
+    use async_std::{
+        task,
+        sync::channel,
+        prelude::StreamExt,
+    };
+    use std::time::Duration;
 
     #[test]
     pub fn test_device_manager_creation() {
-        let mut dm = DeviceManager::new();
-        dm.add_comm_manager::<RumbleBLECommunicationManager>();
+        let _ = env_logger::builder().is_test(true).try_init();
+        task::block_on(async {
+            let (sender, mut receiver) = channel(256);
+            let mut dm = DeviceManager::new(sender);
+            dm.add_comm_manager::<RumbleBLECommunicationManager>();
+            dm.start_scanning().await;
+            if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
+                match dm.parse_message(VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await {
+                    Ok(_) => info!("Message sent ok!"),
+                    Err(e) => assert!(false, e.to_string()),
+                }
+            } else {
+                panic!("Did not get device added message!");
+            }
+            task::sleep(Duration::from_secs(2)).await;
+        });
     }
 }

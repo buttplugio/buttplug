@@ -1,7 +1,7 @@
 use crate::{
     server::device_manager::{ ButtplugProtocolRawMessage, ButtplugDeviceResponseMessage, DeviceImpl },
     core::{
-        messages::ButtplugMessageUnion,
+        messages::{ButtplugMessageUnion, ButtplugDeviceCommandMessageUnion},
         errors::ButtplugError,
     }
 };
@@ -16,5 +16,5 @@ pub trait ButtplugProtocolInitializer: Sync + Send {
 pub trait ButtplugProtocol: Sync + Send {
     async fn initialize(&mut self);
     // TODO Handle raw messages here.
-    async fn parse_message(&mut self, device: &Box<dyn DeviceImpl>,  message: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError>;
+    async fn parse_message(&mut self, device: &Box<dyn DeviceImpl>,  message: &ButtplugDeviceCommandMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError>;
 }

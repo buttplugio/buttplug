@@ -11,6 +11,8 @@ pub mod device_manager;
 pub mod device;
 pub mod comm_managers;
 
+
+use device_manager::DeviceManager;
 use crate::core::{
     errors::*,
     messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo},
@@ -34,6 +36,7 @@ pub struct ButtplugServer {
     client_spec_version: Option<u32>,
     client_name: Option<String>,
     max_ping_time: u32,
+    device_manager: DeviceManager,
     _event_sender: Sender<ButtplugMessageUnion>,
 }
 
@@ -48,6 +51,7 @@ impl ButtplugServer {
             server_spec_version: 1,
             client_name: None,
             client_spec_version: None,
+            device_manager: DeviceManager::new(_event_sender.clone()),
             max_ping_time,
             _event_sender,
         }
@@ -102,12 +106,12 @@ impl ButtplugServer {
         )
     }
 
-    async fn start_scanning(&self) -> Result<(), ButtplugError> {
-        Ok(())
+    pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+        self.device_manager.start_scanning().await
     }
 
-    async fn stop_scanning(&self) -> Result<(), ButtplugError> {
-        Ok(())
+    pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
+        self.device_manager.stop_scanning().await
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {

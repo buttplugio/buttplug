@@ -218,6 +218,17 @@ pub struct DeviceAdded {
     pub device_messages: HashMap<String, MessageAttributes>,
 }
 
+impl DeviceAdded {
+    pub fn new(device_index: u32, device_name: &String, device_messages: &HashMap<String, MessageAttributes>) -> Self {
+        Self {
+            id: 0,
+            device_index,
+            device_name: device_name.to_string(),
+            device_messages: device_messages.clone()
+        }
+    }
+}
+
 #[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceRemoved {
@@ -757,6 +768,15 @@ pub enum ButtplugSystemMessageUnion {
     DeviceRemoved(DeviceRemoved),
     ScanningFinished(ScanningFinished),
     RawReading(RawReading),
+}
+
+/// Messages that should never be received from the client.
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage)]
+pub enum ButtplugDeviceManagerMessageUnion {
+    RequestDeviceList(RequestDeviceList),
+    StopAllDevices(StopAllDevices),
+    StartScanning(StartScanning),
+    StopScanning(StopScanning),
 }
 
 /// Messages that should be routed to device instances.

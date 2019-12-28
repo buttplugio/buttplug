@@ -361,8 +361,18 @@ mod test {
                 match receiver.next().await.unwrap() {
                     DeviceCommunicationEvent::DeviceAdded(mut device) => {
                         info!("Got device!");
-                        device.parse_message(&ButtplugMessageUnion::VibrateCmd(VibrateCmd::new(1, vec!(VibrateSubcommand::new(0, 0.5))))).await;
                         info!("Sending message!");
+                        match device.parse_message(&VibrateCmd::new(1, vec!(VibrateSubcommand::new(0, 0.5))).into()).await {
+                            Ok(msg) => {
+                                match msg {
+                                    ButtplugMessageUnion::Ok(_) => info!("Returned Ok"),
+                                    _ => info!("Returned something other than ok")
+                                }
+                            },
+                            Err(_) => {
+                                assert!(false, "Error returned from parse message");
+                            }
+                        }
                     },
                     _ => assert!(false, "Shouldn't get other message types!"),
                 }

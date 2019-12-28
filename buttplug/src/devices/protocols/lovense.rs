@@ -4,7 +4,7 @@ use crate::{
         Endpoint,
     },
     core::{
-        messages::{self, ButtplugMessage, Ok, Error, ButtplugMessageUnion, RotateCmd, VibrateCmd, StopDeviceCmd, RawWriteCmd, RawReading},
+        messages::{self, ButtplugMessage, Ok, Error, ButtplugMessageUnion, RotateCmd, VibrateCmd, StopDeviceCmd, RawWriteCmd, RawReading, ButtplugDeviceCommandMessageUnion},
         errors::{ButtplugError, ButtplugDeviceError},
     },
     server::device_manager::{ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl},
@@ -31,11 +31,11 @@ impl ButtplugProtocol for LovenseProtocol {
     async fn initialize(&mut self) {
     }
 
-    async fn parse_message(&mut self, device: &Box<dyn DeviceImpl>, message: &ButtplugMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
+    async fn parse_message(&mut self, device: &Box<dyn DeviceImpl>, message: &ButtplugDeviceCommandMessageUnion) -> Result<ButtplugMessageUnion, ButtplugError> {
         match message {
-            ButtplugMessageUnion::StopDeviceCmd(msg) => self.handle_stop_device_cmd(msg).await,
-            ButtplugMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(device, msg).await,
-            ButtplugMessageUnion::RotateCmd(msg) => self.handle_rotate_cmd(msg).await,
+            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => self.handle_stop_device_cmd(msg).await,
+            ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(device, msg).await,
+            ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => self.handle_rotate_cmd(msg).await,
             _ => Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new("LovenseProtocol does not accept this message type.")))
         }
     }
