@@ -284,7 +284,7 @@ impl ButtplugClient {
     async fn handshake(&mut self) -> ButtplugClientResult {
         info!("Running handshake with server.");
         match self
-            .send_message(&RequestServerInfo::new(&self.client_name, 1).as_union())
+            .send_message(&RequestServerInfo::new(&self.client_name, 1).into())
             .await
         {
             Ok(msg) => {

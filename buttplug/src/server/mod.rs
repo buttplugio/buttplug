@@ -70,7 +70,7 @@ impl ButtplugServer {
             ButtplugMessageUnion::RequestDeviceList(_) => {
                 let mut list = messages::DeviceList::default();
                 list.set_id(msg.get_id());
-                Result::Ok(list.as_union())
+                Result::Ok(list.into())
             }
             _ => Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
         }
@@ -98,7 +98,7 @@ impl ButtplugServer {
                 self.server_spec_version,
                 self.max_ping_time,
             )
-            .as_union(),
+            .into(),
         )
     }
 
