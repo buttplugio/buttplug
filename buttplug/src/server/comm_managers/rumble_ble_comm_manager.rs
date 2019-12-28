@@ -35,7 +35,7 @@ pub struct RumbleBLECommunicationManager {
     device_sender: Sender<DeviceCommunicationEvent>,
 }
 
-#[cfg(feature = "win-ble")]
+#[cfg(feature = "winrt-ble")]
 impl RumbleBLECommunicationManager {
     fn get_central(&self) -> Adapter {
         self.manager.adapters().unwrap()
@@ -52,7 +52,7 @@ impl RumbleBLECommunicationManager {
 }
 
 impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
-    #[cfg(feature = "win-ble")]
+    #[cfg(feature = "winrt-ble")]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
             manager: Manager::new(),
