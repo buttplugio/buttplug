@@ -104,23 +104,19 @@ impl ButtplugClientDevice {
                 ButtplugError::from(_err),
             )),
             _ => Err(ButtplugClientError::ButtplugError(
-                ButtplugError::ButtplugMessageError(ButtplugMessageError {
+                ButtplugMessageError {
                     message: "Got unexpected message type.".to_owned(),
-                }),
-            )),
+                }.into()),
+            ),
         }
     }
 
     async fn check_for_events(&mut self) -> ButtplugClientResult {
         if !self.client_connected {
-            return Err(ButtplugClientError::from(
-                ButtplugClientConnectorError::new("Client not connected."),
-            ));
+            return Err(ButtplugClientConnectorError::new("Client not connected.").into());
         }
         if !self.device_connected {
-            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
-                "Device not connected.",
-            )));
+            return Err(ButtplugDeviceError::new("Device not connected.").into());
         }
         while !self.event_receiver.is_empty() {
             match self.event_receiver.next().await {
@@ -138,9 +134,7 @@ impl ButtplugClientDevice {
                     // sender was dropped. We should consider this a disconnect.
                     self.events
                         .push(ButtplugClientDeviceEvent::ClientDisconnect);
-                    return Err(ButtplugClientError::from(
-                        ButtplugClientConnectorError::new("Client not connected."),
-                    ));
+                    return Err(ButtplugClientConnectorError::new("Client not connected.").into());
                 }
             }
         }
@@ -160,14 +154,10 @@ impl ButtplugClientDevice {
     ) -> Result<ButtplugClientDeviceEvent, ButtplugClientError> {
         debug!("Device waiting for event.");
         if !self.client_connected {
-            return Err(ButtplugClientError::from(
-                ButtplugClientConnectorError::new("Client not connected."),
-            ));
+            return Err(ButtplugClientConnectorError::new("Client not connected.").into());
         }
         if !self.device_connected {
-            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
-                "Device not connected.",
-            )));
+            return Err(ButtplugDeviceError::new("Device not connected.").into());
         }
         Ok({
             if !self.events.is_empty() {
@@ -189,9 +179,7 @@ impl ButtplugClientDevice {
 
     pub async fn vibrate(&mut self, speed_cmd: VibrateCommand) -> ButtplugClientResult {
         if !self.allowed_messages.contains_key("VibrateCmd") {
-            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
-                "Device does not support vibration.",
-            )));
+            return Err(ButtplugDeviceError::new("Device does not support vibration.").into());
         }
         let mut vibrator_count: u32 = 0;
         if let Some(features) = self.allowed_messages.get("VibrateCmd") {
@@ -209,36 +197,36 @@ impl ButtplugClientDevice {
             }
             VibrateCommand::SpeedMap(map) => {
                 if map.len() as u32 > vibrator_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} vibrators, but {} commands were sent.",
                             vibrator_count,
                             map.len()
                         ),
-                    )));
+                    ).into());
                 }
                 speed_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, speed) in map {
                     if idx > vibrator_count - 1 {
-                        return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                        return Err(ButtplugDeviceError::new(
                             &format!(
                                 "Max vibrator index is {}, command referenced {}.",
                                 vibrator_count, idx
                             ),
-                        )));
+                        ).into());
                     }
                     speed_vec.push(VibrateSubcommand::new(idx, speed));
                 }
             }
             VibrateCommand::SpeedVec(vec) => {
                 if vec.len() as u32 > vibrator_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} vibrators, but {} commands were sent.",
                             vibrator_count,
                             vec.len()
                         ),
-                    )));
+                    ).into());
                 }
                 speed_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -246,15 +234,13 @@ impl ButtplugClientDevice {
                 }
             }
         }
-        let msg = ButtplugMessageUnion::VibrateCmd(VibrateCmd::new(self.index, speed_vec));
+        let msg = VibrateCmd::new(self.index, speed_vec).into();
         self.send_message_expect_ok(msg).await
     }
 
     pub async fn linear(&mut self, linear_cmd: LinearCommand) -> ButtplugClientResult {
         if !self.allowed_messages.contains_key("LinearCmd") {
-            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
-                "Device does not support linear movement.",
-            )));
+            return Err(ButtplugDeviceError::new("Device does not support linear movement.").into());
         }
         let mut linear_count: u32 = 0;
         if let Some(features) = self.allowed_messages.get("LinearCmd") {
@@ -272,36 +258,36 @@ impl ButtplugClientDevice {
             }
             LinearCommand::LinearMap(map) => {
                 if map.len() as u32 > linear_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} linear actuators, but {} commands were sent.",
                             linear_count,
                             map.len()
                         ),
-                    )));
+                    ).into());
                 }
                 linear_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, (dur, pos)) in map {
                     if idx > linear_count - 1 {
-                        return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                        return Err(ButtplugDeviceError::new(
                             &format!(
                                 "Max linear index is {}, command referenced {}.",
                                 linear_count, idx
                             ),
-                        )));
+                        ).into());
                     }
                     linear_vec.push(VectorSubcommand::new(idx, dur, pos));
                 }
             }
             LinearCommand::LinearVec(vec) => {
                 if vec.len() as u32 > linear_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} linear actuators, but {} commands were sent.",
                             linear_count,
                             vec.len()
                         ),
-                    )));
+                    ).into());
                 }
                 linear_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -309,15 +295,13 @@ impl ButtplugClientDevice {
                 }
             }
         }
-        let msg = ButtplugMessageUnion::LinearCmd(LinearCmd::new(self.index, linear_vec));
+        let msg = LinearCmd::new(self.index, linear_vec).into();
         self.send_message_expect_ok(msg).await
     }
 
     pub async fn rotate(&mut self, rotate_cmd: RotateCommand) -> ButtplugClientResult {
         if !self.allowed_messages.contains_key("RotateCmd") {
-            return Err(ButtplugClientError::from(ButtplugDeviceError::new(
-                "Device does not support rotation.",
-            )));
+            return Err(ButtplugDeviceError::new("Device does not support rotation.").into());
         }
         let mut rotate_count: u32 = 0;
         if let Some(features) = self.allowed_messages.get("RotateCmd") {
@@ -335,36 +319,36 @@ impl ButtplugClientDevice {
             }
             RotateCommand::RotateMap(map) => {
                 if map.len() as u32 > rotate_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} rotators, but {} commands were sent.",
                             rotate_count,
                             map.len()
                         ),
-                    )));
+                    ).into());
                 }
                 rotate_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, (speed, clockwise)) in map {
                     if idx > rotate_count - 1 {
-                        return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                        return Err(ButtplugDeviceError::new(
                             &format!(
                                 "Max rotate index is {}, command referenced {}.",
                                 rotate_count, idx
                             ),
-                        )));
+                        ).into());
                     }
                     rotate_vec.push(RotationSubcommand::new(idx, speed, clockwise));
                 }
             }
             RotateCommand::RotateVec(vec) => {
                 if vec.len() as u32 > rotate_count {
-                    return Err(ButtplugClientError::from(ButtplugDeviceError::new(
+                    return Err(ButtplugDeviceError::new(
                         &format!(
                             "Device only has {} rotators, but {} commands were sent.",
                             rotate_count,
                             vec.len()
                         ),
-                    )));
+                    ).into());
                 }
                 rotate_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -372,14 +356,13 @@ impl ButtplugClientDevice {
                 }
             }
         }
-        let msg = ButtplugMessageUnion::RotateCmd(RotateCmd::new(self.index, rotate_vec));
+        let msg = RotateCmd::new(self.index, rotate_vec).into();
         self.send_message_expect_ok(msg).await
     }
 
     pub async fn stop(&mut self) -> ButtplugClientResult {
         // All devices accept StopDeviceCmd
-        self.send_message_expect_ok(ButtplugMessageUnion::StopDeviceCmd(StopDeviceCmd::default()))
-            .await
+        self.send_message_expect_ok(StopDeviceCmd::default().into()).await
     }
 }
 
