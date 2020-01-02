@@ -14,7 +14,7 @@ use crate::{
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
             ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, RawReadCmd,
-            RawReading, RawWriteCmd,
+            RawReading, RawWriteCmd, ScanningFinished
         },
     },
     devices::{protocol::ButtplugProtocol, Endpoint},
@@ -57,6 +57,15 @@ pub struct ButtplugDevice {
     device: Box<dyn DeviceImpl>,
 }
 
+impl Clone for ButtplugDevice {
+    fn clone(&self) -> Self {
+        ButtplugDevice {
+            protocol: self.protocol.clone(),
+            device: self.device.clone()
+        }
+    }
+}
+
 impl ButtplugDevice {
     pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
         Self { protocol, device }
@@ -95,9 +104,16 @@ pub trait DeviceImpl: Sync + Send {
     fn connected(&self) -> bool;
     fn endpoints(&self) -> Vec<Endpoint>;
     fn disconnect(&self);
+    fn box_clone(&self) -> Box<dyn DeviceImpl>;
 
     async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
+}
+
+impl Clone for Box<dyn DeviceImpl> {
+    fn clone(&self) -> Box<dyn DeviceImpl> {
+        self.box_clone()
+    }
 }
 
 pub struct DeviceManager {
@@ -106,6 +122,9 @@ pub struct DeviceManager {
     sender: Sender<DeviceCommunicationEvent>,
     event_sender: Sender<ButtplugMessageUnion>,
 }
+
+unsafe impl Send for DeviceManager {}
+unsafe impl Sync for DeviceManager {}
 
 async fn wait_for_manager_events(
     mut receiver: Receiver<DeviceCommunicationEvent>,
@@ -119,7 +138,6 @@ async fn wait_for_manager_events(
                 match event {
                     DeviceCommunicationEvent::DeviceAdded(device) => {
                         info!("Assigning index {} to {}", device_index, device.name());
-                        // TODO Emit a DeviceAdded event here.
                         sender
                             .send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into())
                             .await;
@@ -127,7 +145,9 @@ async fn wait_for_manager_events(
                         device_index += 1;
                     }
                     DeviceCommunicationEvent::ScanningFinished => {
-                        // TODO Emit a ScanningFinished event here.
+                        sender
+                            .send(ScanningFinished::default().into())
+                            .await;
                     }
                 }
             },
@@ -154,6 +174,7 @@ impl DeviceManager {
     }
 
     pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+        // TODO This should error if we have no device managers
         for mgr in self.comm_managers.iter_mut() {
             mgr.start_scanning().await;
         }
@@ -161,6 +182,7 @@ impl DeviceManager {
     }
 
     pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
+        // TODO This should error if we have no device managers
         for mgr in self.comm_managers.iter_mut() {
             mgr.stop_scanning().await;
         }
@@ -174,24 +196,21 @@ impl DeviceManager {
         // If this is a device command message, just route it directly to the
         // device.
         if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
-            // TODO This lock is going to mean only one device can process a
-            // command at any time. That's bad. We should probably have the
-            // HashMap be a RWLock that holds a Arc<Mutex<ButtplugDevice>>.
+            let mut dev;
             if let Some(device) = self
                 .devices
                 .lock()
                 .unwrap()
                 .get_mut(&device_msg.get_device_index())
             {
-                device.parse_message(&device_msg).await
+                dev = device.clone();
             } else {
-                Err(ButtplugError::ButtplugDeviceError(
-                    ButtplugDeviceError::new(&format!(
-                        "No device with index {} available",
-                        device_msg.get_device_index()
-                    )),
-                ))
+                return Err(ButtplugDeviceError::new(&format!(
+                    "No device with index {} available",
+                    device_msg.get_device_index())).into())
             }
+            // TODO This should probably spawn or something
+            dev.parse_message(&device_msg).await
         } else {
             if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
                 match manager_msg {
@@ -202,11 +221,11 @@ impl DeviceManager {
                         Ok(messages::Ok::new(msg.get_id()).into())
                     }
                     ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
-                        self.start_scanning().await;
+                        self.start_scanning().await?;
                         Ok(messages::Ok::new(msg.get_id()).into())
                     }
                     ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
-                        self.stop_scanning().await;
+                        self.stop_scanning().await?;
                         Ok(messages::Ok::new(msg.get_id()).into())
                     }
                 }
@@ -218,8 +237,7 @@ impl DeviceManager {
 
     pub fn add_comm_manager<T>(&mut self)
     where
-        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
-    {
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
         self.comm_managers
             .push(Box::new(T::new(self.sender.clone())));
     }

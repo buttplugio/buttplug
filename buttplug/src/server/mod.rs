@@ -13,10 +13,12 @@ pub mod device_manager;
 
 use crate::core::{
     errors::*,
-    messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo},
+    messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
+               ButtplugDeviceManagerMessageUnion, ButtplugDeviceCommandMessageUnion},
 };
+use std::convert::TryFrom;
 use async_std::sync::Sender;
-use device_manager::DeviceManager;
+use device_manager::{DeviceManager, DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -56,26 +58,31 @@ impl ButtplugServer {
         }
     }
 
+    pub fn add_comm_manager<T>(&mut self)
+    where
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
+        self.device_manager.add_comm_manager::<T>();
+    }
+
     pub async fn parse_message(
         &mut self,
         msg: &ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        match msg {
-            ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
-            ButtplugMessageUnion::StartScanning(_) => {
-                self.start_scanning().await?;
-                Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+        if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok() || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok() {
+            self.device_manager.parse_message(msg.clone()).await
+        } else {
+            match msg {
+                ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
+                ButtplugMessageUnion::RequestDeviceList(_) => {
+                    let mut list = messages::DeviceList::default();
+                    list.set_id(msg.get_id());
+                    Ok(list.into())
+                }
+                // TODO Implement Ping
+                // TODO Implement Test
+                // TODO Implement Log
+                _ => Err(ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg).to_owned()).into()),
             }
-            ButtplugMessageUnion::StopScanning(_) => {
-                self.stop_scanning().await?;
-                Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
-            }
-            ButtplugMessageUnion::RequestDeviceList(_) => {
-                let mut list = messages::DeviceList::default();
-                list.set_id(msg.get_id());
-                Result::Ok(list.into())
-            }
-            _ => Result::Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id()))),
         }
     }
 
@@ -84,33 +91,21 @@ impl ButtplugServer {
         msg: &messages::RequestServerInfo,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         if self.server_spec_version < msg.message_version {
-            return Result::Err(ButtplugError::ButtplugHandshakeError(
-                ButtplugHandshakeError {
-                    message: format!(
-                        "Server version ({}) must be equal to or greater than client version ({}).",
-                        self.server_spec_version, msg.message_version
-                    ),
-                },
-            ));
+            return Err(
+                ButtplugHandshakeError::new(&format!(
+                    "Server version ({}) must be equal to or greater than client version ({}).",
+                    self.server_spec_version, msg.message_version).to_owned()).into());
         }
-        self.client_name = Option::Some(msg.client_name.clone());
-        self.client_spec_version = Option::Some(msg.message_version);
+        self.client_name = Some(msg.client_name.clone());
+        self.client_spec_version = Some(msg.message_version);
         Result::Ok(
             messages::ServerInfo::new(
                 &self.server_name,
                 self.server_spec_version,
                 self.max_ping_time,
             )
-            .into(),
+                .into(),
         )
-    }
-
-    pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
-        self.device_manager.start_scanning().await
-    }
-
-    pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
-        self.device_manager.stop_scanning().await
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {

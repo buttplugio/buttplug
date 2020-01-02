@@ -16,6 +16,7 @@ use crate::{
 };
 use async_trait::async_trait;
 
+#[derive(Clone)]
 pub struct LovenseProtocol {}
 
 impl LovenseProtocol {
@@ -27,6 +28,10 @@ impl LovenseProtocol {
 #[async_trait]
 impl ButtplugProtocol for LovenseProtocol {
     async fn initialize(&mut self) {}
+
+    fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
+        Box::new((*self).clone())
+    }
 
     async fn parse_message(
         &mut self,

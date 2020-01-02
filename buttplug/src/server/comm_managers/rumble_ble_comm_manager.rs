@@ -247,9 +247,9 @@ async fn rumble_comm_loop<T: Peripheral>(
     }
 }
 
+#[derive(Clone)]
 pub struct RumbleBLEDeviceImpl {
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    _device_thread: thread::JoinHandle<()>,
 }
 
 unsafe impl Send for RumbleBLEDeviceImpl {}
@@ -269,10 +269,14 @@ pub async fn connect<T: Peripheral + 'static>(
         let (device_sender, device_receiver) = channel(256);
         let (output_sender, _output_receiver) = channel(256);
         let p = proto.clone();
-        let thr = thread::spawn(move || {
-            task::spawn(async move {
-                rumble_comm_loop(device, p, device_receiver, output_sender).await;
-            });
+        // TODO This is not actually async. We're currently using blocking
+        // rumble calls, so this will block whatever thread it's spawned to. We
+        // should probably switch to using async rumble calls w/ callbacks.
+        //
+        // The new watchdog async-std executor will at least leave this task on
+        // its own thread in time, but I'm not sure when that's landing.
+        task::spawn(async move {
+            rumble_comm_loop(device, p, device_receiver, output_sender).await;
         });
         let fut = DeviceReturnFuture::default();
         let waker = fut.get_state_clone();
@@ -282,7 +286,6 @@ pub async fn connect<T: Peripheral + 'static>(
         match fut.await {
             ButtplugDeviceReturn::Ok(_) => Ok(RumbleBLEDeviceImpl {
                 thread_sender: device_sender,
-                _device_thread: thr,
             }),
             _ => Err(ButtplugError::ButtplugDeviceError(
                 ButtplugDeviceError::new("Cannot connect"),
@@ -310,10 +313,13 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
     fn endpoints(&self) -> Vec<Endpoint> {
         //self.endpoints.keys().map(|v| v.clone()).collect::<Vec<Endpoint>>()
-        vec![]
+        vec!()
     }
     fn disconnect(&self) {
         todo!("implement disconnect");
+    }
+    fn box_clone(&self) -> Box<dyn DeviceImpl> {
+        Box::new((*self).clone())
     }
 
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
@@ -336,6 +342,7 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
 
     async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
+        // TODO Actually implement value reading
         Ok(RawReading::new(0, msg.endpoint, vec![]))
     }
 }
