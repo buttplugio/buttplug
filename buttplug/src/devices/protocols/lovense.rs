@@ -3,7 +3,7 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, ButtplugMessageUnion,
-            RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd,
+            RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
         },
     },
     devices::{
@@ -40,7 +40,7 @@ impl ButtplugProtocol for LovenseProtocol {
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         match message {
             ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
-                self.handle_stop_device_cmd(msg).await
+                self.handle_stop_device_cmd(device, msg).await
             }
             ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
                 self.handle_vibrate_cmd(device, msg).await
@@ -56,9 +56,10 @@ impl ButtplugProtocol for LovenseProtocol {
 impl LovenseProtocol {
     async fn handle_stop_device_cmd(
         &self,
-        msg: &StopDeviceCmd,
+        device: &Box<dyn DeviceImpl>,
+        _: &StopDeviceCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+        self.handle_vibrate_cmd(device, &VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.0)))).await
     }
 
     async fn handle_vibrate_cmd(
@@ -69,7 +70,7 @@ impl LovenseProtocol {
         let msg = RawWriteCmd::new(
             msg.device_index,
             Endpoint::Tx,
-            "Vibrate:20;".as_bytes().to_vec(),
+            format!("Vibrate:{};", (msg.speeds[0].speed * 20.0) as u32).as_bytes().to_vec(),
             false,
         );
         device.write_value(&msg).await;
