@@ -13,11 +13,13 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, RawReadCmd,
-            RawReading, RawWriteCmd, ScanningFinished
+            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded,
+            ScanningFinished
         },
     },
-    devices::{protocol::ButtplugProtocol, Endpoint},
+    devices::{
+        device::ButtplugDevice,
+    },
 };
 use async_std::{
     prelude::StreamExt,
@@ -31,56 +33,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-pub enum ButtplugProtocolRawMessage {
-    RawWriteCmd(RawWriteCmd),
-    RawReadCmd(RawReadCmd),
-}
-
-pub enum ButtplugDeviceResponseMessage {
-    Ok(messages::Ok),
-    Error(messages::Error),
-    RawReading(RawReading),
-}
-
-pub enum ButtplugDeviceEvent {
-    DeviceRemoved(),
-    MessageEmitted(),
-}
-
 pub enum DeviceCommunicationEvent {
     DeviceAdded(ButtplugDevice),
     ScanningFinished,
-}
-
-pub struct ButtplugDevice {
-    protocol: Box<dyn ButtplugProtocol>,
-    device: Box<dyn DeviceImpl>,
-}
-
-impl Clone for ButtplugDevice {
-    fn clone(&self) -> Self {
-        ButtplugDevice {
-            protocol: self.protocol.clone(),
-            device: self.device.clone()
-        }
-    }
-}
-
-impl ButtplugDevice {
-    pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
-        Self { protocol, device }
-    }
-
-    pub fn name(&self) -> String {
-        self.device.name()
-    }
-
-    pub async fn parse_message(
-        &mut self,
-        message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        self.protocol.parse_message(&self.device, message).await
-    }
 }
 
 // Storing this in a Vec<Box<dyn T>> causes a associated function issue due to
@@ -97,30 +52,10 @@ pub trait DeviceCommunicationManager: Sync + Send {
     // Events happen via channel senders passed to the comm manager.
 }
 
-#[async_trait]
-pub trait DeviceImpl: Sync + Send {
-    fn name(&self) -> String;
-    fn address(&self) -> String;
-    fn connected(&self) -> bool;
-    fn endpoints(&self) -> Vec<Endpoint>;
-    fn disconnect(&self);
-    fn box_clone(&self) -> Box<dyn DeviceImpl>;
-
-    async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
-    async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
-}
-
-impl Clone for Box<dyn DeviceImpl> {
-    fn clone(&self) -> Box<dyn DeviceImpl> {
-        self.box_clone()
-    }
-}
-
 pub struct DeviceManager {
     comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
     devices: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
     sender: Sender<DeviceCommunicationEvent>,
-    event_sender: Sender<ButtplugMessageUnion>,
 }
 
 unsafe impl Send for DeviceManager {}
@@ -169,7 +104,6 @@ impl DeviceManager {
             sender,
             devices: map,
             comm_managers: vec![],
-            event_sender,
         }
     }
 

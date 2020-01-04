@@ -10,10 +10,9 @@ use crate::{
         Endpoint,
     },
     server::device_manager::{
-        ButtplugDevice, ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage,
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
-        DeviceImpl,
     },
+    devices::device::{ButtplugDevice, ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl},
     util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_std::{

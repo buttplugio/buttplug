@@ -10,9 +10,7 @@ use crate::{
         protocol::ButtplugProtocol,
         Endpoint,
     },
-    server::device_manager::{
-        DeviceImpl,
-    },
+    devices::device::DeviceImpl,
 };
 use async_trait::async_trait;
 

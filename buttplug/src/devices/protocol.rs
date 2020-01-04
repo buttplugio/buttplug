@@ -3,8 +3,8 @@ use crate::{
         errors::ButtplugError,
         messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
     },
-    server::device_manager::DeviceImpl,
 };
+use super::device::DeviceImpl;
 use async_trait::async_trait;
 
 #[async_trait]
