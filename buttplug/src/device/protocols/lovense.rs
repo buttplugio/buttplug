@@ -3,16 +3,18 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, ButtplugMessageUnion,
-            RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
+            RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd, VibrateSubcommand, SubscribeCmd,
+            UnsubscribeCmd
         },
     },
     device::{
         protocol::ButtplugProtocol,
         Endpoint,
-        device::DeviceImpl,
+        device::{DeviceImpl, ButtplugDeviceEvent},
     },
 };
 use async_trait::async_trait;
+use async_std::prelude::StreamExt;
 
 #[derive(Clone)]
 pub struct LovenseProtocol {}
@@ -25,7 +27,21 @@ impl LovenseProtocol {
 
 #[async_trait]
 impl ButtplugProtocol for LovenseProtocol {
-    async fn initialize(&mut self) {}
+    async fn initialize(&mut self,
+                        device: &Box<dyn DeviceImpl>) {
+        device.subscribe(&SubscribeCmd::new(0, Endpoint::Rx, "RawReading")).await;
+        let msg = RawWriteCmd::new(
+            0,
+            Endpoint::Tx,
+            "DeviceType;".as_bytes().to_vec(),
+            false,
+        );
+        device.write_value(&msg).await;
+        if let Some(ButtplugDeviceEvent::Notification(_, n)) = device.get_event_receiver().next().await {
+            info!("{}", std::str::from_utf8(&n).unwrap());
+        }
+        device.unsubscribe(&UnsubscribeCmd::new(0, Endpoint::Rx, "RawReading")).await;
+    }
 
     fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
         Box::new((*self).clone())
@@ -72,13 +88,13 @@ impl LovenseProtocol {
             false,
         );
         device.write_value(&msg).await;
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }
 
     async fn handle_rotate_cmd(
         &self,
         msg: &RotateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::new(msg.get_id())))
+        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }
 }

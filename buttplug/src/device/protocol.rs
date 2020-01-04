@@ -9,7 +9,7 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
-    async fn initialize(&mut self);
+    async fn initialize(&mut self, device: &Box<dyn DeviceImpl>);
     fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
     // TODO Handle raw messages here.
     async fn parse_message(
