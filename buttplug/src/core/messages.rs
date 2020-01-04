@@ -30,7 +30,7 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     where
         Self: ButtplugMessage + Serialize + Deserialize<'static>,
     {
-        "[".to_owned() + &serde_json::to_string(&self).unwrap() + "]"
+        serde_json::to_string(&[&self]).unwrap()
     }
 }
 
@@ -818,8 +818,8 @@ pub enum ButtplugDeviceCommandMessageUnion {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok, RawReading};
-    use crate::devices::Endpoint;
+    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok, RawReading, ButtplugMessage};
+    use crate::device::Endpoint;
 
     const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
     const ERROR_STR: &str =
@@ -830,6 +830,14 @@ mod test {
         let ok = ButtplugMessageUnion::Ok(Ok::new(0));
         let js = serde_json::to_string(&ok).unwrap();
         assert_eq!(OK_STR, js);
+    }
+
+    #[test]
+    fn test_protocol_json() {
+        const PROTOCOL_STR: &str = "[{\"Ok\":{\"Id\":0}}]";
+        let ok = ButtplugMessageUnion::Ok(Ok::new(0));
+        let js = ok.as_protocol_json();
+        assert_eq!(PROTOCOL_STR, js);
     }
 
     #[test]
