@@ -3,7 +3,7 @@ use crate::{
         errors::ButtplugError,
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd,
-            RawReading, RawWriteCmd
+            RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd
         },
     },
     device::{protocol::ButtplugProtocol, Endpoint},
@@ -37,6 +37,8 @@ pub trait DeviceImpl: Sync + Send {
 
     async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
     async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
+    async fn subscribe(&self, msg: &SubscribeCmd) -> Result<(), ButtplugError>;
+    async fn unsubscribe(&self, msg: &UnsubscribeCmd) -> Result<(), ButtplugError>;
 }
 
 impl Clone for Box<dyn DeviceImpl> {

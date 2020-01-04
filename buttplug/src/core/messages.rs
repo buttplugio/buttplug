@@ -14,7 +14,7 @@ use crate::device::Endpoint;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::{collections::HashMap, convert::TryFrom};
+use std::{collections::HashMap, convert::{TryFrom, From}};
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -687,8 +687,8 @@ pub struct RawReadCmd {
     pub endpoint: Endpoint,
     #[cfg_attr(feature = "serialize_json", serde(rename = "ExpectedLength"))]
     pub expected_length: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "WaitForData"))]
-    pub wait_for_data: bool,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Timeout"))]
+    pub timeout: u32,
 }
 
 impl RawReadCmd {
@@ -696,14 +696,14 @@ impl RawReadCmd {
         device_index: u32,
         endpoint: Endpoint,
         expected_length: u32,
-        wait_for_data: bool,
+        timeout: u32,
     ) -> Self {
         Self {
             id: 1,
             device_index,
             endpoint,
             expected_length,
-            wait_for_data,
+            timeout,
         }
     }
 }
@@ -728,6 +728,54 @@ impl RawReading {
             device_index,
             endpoint,
             data,
+        }
+    }
+}
+
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct SubscribeCmd {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+    pub endpoint: Endpoint,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageType"))]
+    pub message_type: String,
+}
+
+impl SubscribeCmd {
+    pub fn new(device_index: u32, endpoint: Endpoint, message_type: &str) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            endpoint,
+            message_type: message_type.to_owned(),
+        }
+    }
+}
+
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct UnsubscribeCmd {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+    pub endpoint: Endpoint,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageType"))]
+    pub message_type: String,
+}
+
+impl UnsubscribeCmd {
+    pub fn new(device_index: u32, endpoint: Endpoint, message_type: &str) -> Self {
+        Self {
+            id: 1,
+            device_index,
+            endpoint,
+            message_type: message_type.to_owned(),
         }
     }
 }
@@ -763,6 +811,8 @@ pub enum ButtplugMessageUnion {
     RawReadCmd(RawReadCmd),
     StopDeviceCmd(StopDeviceCmd),
     RawReading(RawReading),
+    SubscribeCmd(SubscribeCmd),
+    UnsubscribeCmd(UnsubscribeCmd),
 }
 
 /// Messages that should never be received from the client.
@@ -813,6 +863,8 @@ pub enum ButtplugDeviceCommandMessageUnion {
     RawWriteCmd(RawWriteCmd),
     RawReadCmd(RawReadCmd),
     StopDeviceCmd(StopDeviceCmd),
+    SubscribeCmd(SubscribeCmd),
+    UnsubscribeCmd(UnsubscribeCmd),
 }
 
 #[cfg(feature = "serialize_json")]

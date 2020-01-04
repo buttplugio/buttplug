@@ -1,7 +1,7 @@
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::{self, ButtplugMessage, RawReadCmd, RawReading, RawWriteCmd},
+        messages::{self, ButtplugMessage, RawReadCmd, RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd},
     },
     device::{
         configuration_manager::{
@@ -343,6 +343,16 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
         // TODO Actually implement value reading
         Ok(RawReading::new(0, msg.endpoint, vec![]))
+    }
+
+    async fn subscribe(&self, msg: &SubscribeCmd) -> Result<(), ButtplugError> {
+        // TODO Actually implement subscriptions
+        Ok(())
+    }
+
+    async fn unsubscribe(&self, msg: &UnsubscribeCmd) -> Result<(), ButtplugError> {
+        // TODO Actually implement unsubscriptions
+        Ok(())
     }
 }
 
