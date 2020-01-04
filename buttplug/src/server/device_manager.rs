@@ -14,7 +14,7 @@ use crate::{
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
             ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded,
-            ScanningFinished
+            ScanningFinished,
         },
     },
     device::device::ButtplugDevice,
@@ -67,24 +67,22 @@ async fn wait_for_manager_events(
     let mut device_index: u32 = 0;
     loop {
         match receiver.next().await {
-            Some(event) => {
-                match event {
-                    DeviceCommunicationEvent::DeviceAdded(device) => {
-                        info!("Assigning index {} to {}", device_index, device.name());
-                        sender
-                            .send(DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into())
-                            .await;
-                        device_map.lock().unwrap().insert(device_index, device);
-                        device_index += 1;
-                    }
-                    DeviceCommunicationEvent::ScanningFinished => {
-                        sender
-                            .send(ScanningFinished::default().into())
-                            .await;
-                    }
+            Some(event) => match event {
+                DeviceCommunicationEvent::DeviceAdded(device) => {
+                    info!("Assigning index {} to {}", device_index, device.name());
+                    sender
+                        .send(
+                            DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into(),
+                        )
+                        .await;
+                    device_map.lock().unwrap().insert(device_index, device);
+                    device_index += 1;
+                }
+                DeviceCommunicationEvent::ScanningFinished => {
+                    sender.send(ScanningFinished::default().into()).await;
                 }
             },
-            None => break
+            None => break,
         }
     }
 }
@@ -139,7 +137,9 @@ impl DeviceManager {
             } else {
                 return Err(ButtplugDeviceError::new(&format!(
                     "No device with index {} available",
-                    device_msg.get_device_index())).into())
+                    device_msg.get_device_index()
+                ))
+                .into());
             }
             // TODO This should probably spawn or something
             dev.parse_message(&device_msg).await
@@ -169,13 +169,14 @@ impl DeviceManager {
 
     pub fn add_comm_manager<T>(&mut self)
     where
-        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    {
         self.comm_managers
             .push(Box::new(T::new(self.sender.clone())));
     }
 }
 
-#[cfg(all(test, any(feature="winrt-ble", feature="linux-ble")))]
+#[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble")))]
 mod test {
     use super::DeviceManager;
     use crate::{

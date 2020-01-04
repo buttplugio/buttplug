@@ -14,7 +14,10 @@ use crate::device::Endpoint;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::{collections::HashMap, convert::{TryFrom, From}};
+use std::{
+    collections::HashMap,
+    convert::{From, TryFrom},
+};
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -692,12 +695,7 @@ pub struct RawReadCmd {
 }
 
 impl RawReadCmd {
-    pub fn new(
-        device_index: u32,
-        endpoint: Endpoint,
-        expected_length: u32,
-        timeout: u32,
-    ) -> Self {
+    pub fn new(device_index: u32, endpoint: Endpoint, expected_length: u32, timeout: u32) -> Self {
         Self {
             id: 1,
             device_index,
@@ -870,7 +868,7 @@ pub enum ButtplugDeviceCommandMessageUnion {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-    use super::{ButtplugMessageUnion, Error, ErrorCode, Ok, RawReading, ButtplugMessage};
+    use super::{ButtplugMessage, ButtplugMessageUnion, Error, ErrorCode, Ok, RawReading};
     use crate::device::Endpoint;
 
     const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";

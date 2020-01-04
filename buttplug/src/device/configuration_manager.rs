@@ -157,12 +157,7 @@ pub struct ProtocolConfiguration {
 
 pub struct DeviceConfigurationManager {
     pub config: ProtocolConfiguration,
-    pub protocols: HashMap<
-        String,
-        Box<
-            dyn Fn() -> Box<dyn ButtplugProtocol>,
-        >,
-    >,
+    pub protocols: HashMap<String, Box<dyn Fn() -> Box<dyn ButtplugProtocol>>>,
 }
 
 unsafe impl Send for DeviceConfigurationManager {}
@@ -171,12 +166,7 @@ unsafe impl Sync for DeviceConfigurationManager {}
 impl DeviceConfigurationManager {
     pub fn load_from_internal() -> DeviceConfigurationManager {
         let config = serde_json::from_str(DEVICE_CONFIGURATION_FILE).unwrap();
-        let mut protocols = HashMap::<
-            String,
-            Box<
-                dyn Fn() -> Box<dyn ButtplugProtocol>,
-            >,
-        >::new();
+        let mut protocols = HashMap::<String, Box<dyn Fn() -> Box<dyn ButtplugProtocol>>>::new();
         protocols.insert(
             "lovense".to_owned(),
             Box::new(|| Box::new(LovenseProtocol::new())),

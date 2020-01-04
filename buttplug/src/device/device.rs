@@ -2,14 +2,14 @@ use crate::{
     core::{
         errors::ButtplugError,
         messages::{
-            ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd,
-            RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd
+            ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd, RawReading,
+            RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
         },
     },
     device::{protocol::ButtplugProtocol, Endpoint},
 };
-use async_trait::async_trait;
 use async_std::sync::Receiver;
+use async_trait::async_trait;
 
 pub struct DeviceReadCmd {
     pub endpoint: Endpoint,
@@ -69,9 +69,7 @@ pub struct DeviceSubscribeCmd {
 
 impl DeviceSubscribeCmd {
     pub fn new(endpoint: Endpoint) -> Self {
-        Self {
-            endpoint,
-        }
+        Self { endpoint }
     }
 }
 
@@ -89,9 +87,7 @@ pub struct DeviceUnsubscribeCmd {
 
 impl DeviceUnsubscribeCmd {
     pub fn new(endpoint: Endpoint) -> Self {
-        Self {
-            endpoint,
-        }
+        Self { endpoint }
     }
 }
 
@@ -200,7 +196,7 @@ impl Clone for ButtplugDevice {
     fn clone(&self) -> Self {
         ButtplugDevice {
             protocol: self.protocol.clone(),
-            device: self.device.clone()
+            device: self.device.clone(),
         }
     }
 }
@@ -225,5 +221,3 @@ impl ButtplugDevice {
         self.protocol.parse_message(&self.device, message).await
     }
 }
-
-

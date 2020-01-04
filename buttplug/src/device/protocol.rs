@@ -1,10 +1,8 @@
-use crate::{
-    core::{
-        errors::ButtplugError,
-        messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
-    },
-};
 use super::device::DeviceImpl;
+use crate::core::{
+    errors::ButtplugError,
+    messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
+};
 use async_trait::async_trait;
 
 #[async_trait]

@@ -20,8 +20,8 @@ use super::{
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
 use crate::{
-    util::future::ButtplugMessageStateShared,
     core::messages::{ButtplugMessage, ButtplugMessageUnion},
+    util::future::ButtplugMessageStateShared,
 };
 use async_std::{
     sync::{channel, Receiver, Sender},

@@ -106,8 +106,9 @@ impl ButtplugClientDevice {
             _ => Err(ButtplugClientError::ButtplugError(
                 ButtplugMessageError {
                     message: "Got unexpected message type.".to_owned(),
-                }.into()),
-            ),
+                }
+                .into(),
+            )),
         }
     }
 
@@ -197,36 +198,33 @@ impl ButtplugClientDevice {
             }
             VibrateCommand::SpeedMap(map) => {
                 if map.len() as u32 > vibrator_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} vibrators, but {} commands were sent.",
-                            vibrator_count,
-                            map.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} vibrators, but {} commands were sent.",
+                        vibrator_count,
+                        map.len()
+                    ))
+                    .into());
                 }
                 speed_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, speed) in map {
                     if idx > vibrator_count - 1 {
-                        return Err(ButtplugDeviceError::new(
-                            &format!(
-                                "Max vibrator index is {}, command referenced {}.",
-                                vibrator_count, idx
-                            ),
-                        ).into());
+                        return Err(ButtplugDeviceError::new(&format!(
+                            "Max vibrator index is {}, command referenced {}.",
+                            vibrator_count, idx
+                        ))
+                        .into());
                     }
                     speed_vec.push(VibrateSubcommand::new(idx, speed));
                 }
             }
             VibrateCommand::SpeedVec(vec) => {
                 if vec.len() as u32 > vibrator_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} vibrators, but {} commands were sent.",
-                            vibrator_count,
-                            vec.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} vibrators, but {} commands were sent.",
+                        vibrator_count,
+                        vec.len()
+                    ))
+                    .into());
                 }
                 speed_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -240,7 +238,9 @@ impl ButtplugClientDevice {
 
     pub async fn linear(&mut self, linear_cmd: LinearCommand) -> ButtplugClientResult {
         if !self.allowed_messages.contains_key("LinearCmd") {
-            return Err(ButtplugDeviceError::new("Device does not support linear movement.").into());
+            return Err(
+                ButtplugDeviceError::new("Device does not support linear movement.").into(),
+            );
         }
         let mut linear_count: u32 = 0;
         if let Some(features) = self.allowed_messages.get("LinearCmd") {
@@ -258,36 +258,33 @@ impl ButtplugClientDevice {
             }
             LinearCommand::LinearMap(map) => {
                 if map.len() as u32 > linear_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} linear actuators, but {} commands were sent.",
-                            linear_count,
-                            map.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} linear actuators, but {} commands were sent.",
+                        linear_count,
+                        map.len()
+                    ))
+                    .into());
                 }
                 linear_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, (dur, pos)) in map {
                     if idx > linear_count - 1 {
-                        return Err(ButtplugDeviceError::new(
-                            &format!(
-                                "Max linear index is {}, command referenced {}.",
-                                linear_count, idx
-                            ),
-                        ).into());
+                        return Err(ButtplugDeviceError::new(&format!(
+                            "Max linear index is {}, command referenced {}.",
+                            linear_count, idx
+                        ))
+                        .into());
                     }
                     linear_vec.push(VectorSubcommand::new(idx, dur, pos));
                 }
             }
             LinearCommand::LinearVec(vec) => {
                 if vec.len() as u32 > linear_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} linear actuators, but {} commands were sent.",
-                            linear_count,
-                            vec.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} linear actuators, but {} commands were sent.",
+                        linear_count,
+                        vec.len()
+                    ))
+                    .into());
                 }
                 linear_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -319,36 +316,33 @@ impl ButtplugClientDevice {
             }
             RotateCommand::RotateMap(map) => {
                 if map.len() as u32 > rotate_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} rotators, but {} commands were sent.",
-                            rotate_count,
-                            map.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} rotators, but {} commands were sent.",
+                        rotate_count,
+                        map.len()
+                    ))
+                    .into());
                 }
                 rotate_vec = Vec::with_capacity(map.len() as usize);
                 for (idx, (speed, clockwise)) in map {
                     if idx > rotate_count - 1 {
-                        return Err(ButtplugDeviceError::new(
-                            &format!(
-                                "Max rotate index is {}, command referenced {}.",
-                                rotate_count, idx
-                            ),
-                        ).into());
+                        return Err(ButtplugDeviceError::new(&format!(
+                            "Max rotate index is {}, command referenced {}.",
+                            rotate_count, idx
+                        ))
+                        .into());
                     }
                     rotate_vec.push(RotationSubcommand::new(idx, speed, clockwise));
                 }
             }
             RotateCommand::RotateVec(vec) => {
                 if vec.len() as u32 > rotate_count {
-                    return Err(ButtplugDeviceError::new(
-                        &format!(
-                            "Device only has {} rotators, but {} commands were sent.",
-                            rotate_count,
-                            vec.len()
-                        ),
-                    ).into());
+                    return Err(ButtplugDeviceError::new(&format!(
+                        "Device only has {} rotators, but {} commands were sent.",
+                        rotate_count,
+                        vec.len()
+                    ))
+                    .into());
                 }
                 rotate_vec = Vec::with_capacity(vec.len() as usize);
                 for (i, v) in vec.iter().enumerate() {
@@ -362,7 +356,8 @@ impl ButtplugClientDevice {
 
     pub async fn stop(&mut self) -> ButtplugClientResult {
         // All devices accept StopDeviceCmd
-        self.send_message_expect_ok(StopDeviceCmd::default().into()).await
+        self.send_message_expect_ok(StopDeviceCmd::default().into())
+            .await
     }
 }
 

@@ -10,12 +10,12 @@
 // servers which devices are available.
 
 use async_std::task;
-#[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
+#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 use buttplug::client::{
     connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent,
 };
 
-#[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
+#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 async fn device_enumeration_example() {
     // Since as of this writing we don't actually have devices in Rust yet,
     // we'll have to use a websocket connector. You'll want to have Intiface
@@ -152,7 +152,7 @@ async fn device_enumeration_example() {
 }
 
 fn main() {
-    #[cfg(any(feature="client-ws", feature="client-ws-ssl"))]
+    #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
     task::block_on(async {
         device_enumeration_example().await;
     })

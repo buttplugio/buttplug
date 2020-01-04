@@ -12,12 +12,16 @@ pub mod device_manager;
 
 use crate::core::{
     errors::*,
-    messages::{self, ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
-               ButtplugDeviceManagerMessageUnion, ButtplugDeviceCommandMessageUnion},
+    messages::{
+        self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
+        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
+    },
+};
+use async_std::sync::Sender;
+use device_manager::{
+    DeviceCommunicationManager, DeviceCommunicationManagerCreator, DeviceManager,
 };
 use std::convert::TryFrom;
-use async_std::sync::Sender;
-use device_manager::{DeviceManager, DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -59,7 +63,8 @@ impl ButtplugServer {
 
     pub fn add_comm_manager<T>(&mut self)
     where
-        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator {
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    {
         self.device_manager.add_comm_manager::<T>();
     }
 
@@ -67,7 +72,9 @@ impl ButtplugServer {
         &mut self,
         msg: &ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok() || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok() {
+        if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
+            || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
+        {
             self.device_manager.parse_message(msg.clone()).await
         } else {
             match msg {
@@ -80,7 +87,10 @@ impl ButtplugServer {
                 // TODO Implement Ping
                 // TODO Implement Test
                 // TODO Implement Log
-                _ => Err(ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg).to_owned()).into()),
+                _ => Err(ButtplugMessageError::new(
+                    &format!("Message {:?} not handled by server loop.", msg).to_owned(),
+                )
+                .into()),
             }
         }
     }
@@ -90,10 +100,14 @@ impl ButtplugServer {
         msg: &messages::RequestServerInfo,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         if self.server_spec_version < msg.message_version {
-            return Err(
-                ButtplugHandshakeError::new(&format!(
+            return Err(ButtplugHandshakeError::new(
+                &format!(
                     "Server version ({}) must be equal to or greater than client version ({}).",
-                    self.server_spec_version, msg.message_version).to_owned()).into());
+                    self.server_spec_version, msg.message_version
+                )
+                .to_owned(),
+            )
+            .into());
         }
         self.client_name = Some(msg.client_name.clone());
         self.client_spec_version = Some(msg.message_version);
@@ -103,7 +117,7 @@ impl ButtplugServer {
                 self.server_spec_version,
                 self.max_ping_time,
             )
-                .into(),
+            .into(),
         )
     }
 
@@ -115,14 +129,16 @@ impl ButtplugServer {
 mod test {
     use super::*;
     use crate::server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager;
-    use std::time::Duration;
     use async_std::{
+        prelude::StreamExt,
         sync::{channel, Receiver},
         task,
-        prelude::StreamExt,
     };
+    use std::time::Duration;
 
-    async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> (ButtplugServer, Receiver<ButtplugMessageUnion>) {
+    async fn test_server_setup(
+        msg_union: &messages::ButtplugMessageUnion,
+    ) -> (ButtplugServer, Receiver<ButtplugMessageUnion>) {
         let (send, recv) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         assert_eq!(server.server_name, "Test Server");
