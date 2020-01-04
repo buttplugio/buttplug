@@ -6,11 +6,11 @@ use crate::{
             RawWriteCmd, RotateCmd, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
         },
     },
-    devices::{
+    device::{
         protocol::ButtplugProtocol,
         Endpoint,
+        device::DeviceImpl,
     },
-    devices::device::DeviceImpl,
 };
 use async_trait::async_trait;
 

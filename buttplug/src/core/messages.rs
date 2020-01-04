@@ -9,7 +9,7 @@
 //! Protocol](https://buttplug-spec.docs.buttplug.io) messages
 
 use super::errors::*;
-use crate::devices::Endpoint;
+use crate::device::Endpoint;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]

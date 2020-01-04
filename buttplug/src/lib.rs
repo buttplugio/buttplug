@@ -96,7 +96,7 @@ extern crate strum_macros;
 #[cfg(feature = "client")]
 pub mod client;
 pub mod core;
-pub mod devices;
+pub mod device;
 #[cfg(feature = "server")]
 pub mod server;
 pub mod util;

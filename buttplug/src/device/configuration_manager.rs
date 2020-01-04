@@ -11,7 +11,7 @@ use super::protocol::ButtplugProtocol;
 use super::protocols::lovense::LovenseProtocol;
 use crate::{
     core::{errors::ButtplugError, messages::MessageAttributes},
-    devices::Endpoint,
+    device::Endpoint,
 };
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};

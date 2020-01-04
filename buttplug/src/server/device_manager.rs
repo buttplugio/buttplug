@@ -17,9 +17,7 @@ use crate::{
             ScanningFinished
         },
     },
-    devices::{
-        device::ButtplugDevice,
-    },
+    device::device::ButtplugDevice,
 };
 use async_std::{
     prelude::StreamExt,

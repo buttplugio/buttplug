@@ -6,7 +6,7 @@ use crate::{
             RawReading, RawWriteCmd
         },
     },
-    devices::{protocol::ButtplugProtocol, Endpoint},
+    device::{protocol::ButtplugProtocol, Endpoint},
 };
 use async_trait::async_trait;
 

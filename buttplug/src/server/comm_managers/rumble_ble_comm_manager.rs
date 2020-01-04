@@ -3,16 +3,16 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{self, ButtplugMessage, RawReadCmd, RawReading, RawWriteCmd},
     },
-    devices::{
+    device::{
         configuration_manager::{
             BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition,
         },
         Endpoint,
+        device::{ButtplugDevice, ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl},
     },
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
-    devices::device::{ButtplugDevice, ButtplugDeviceResponseMessage, ButtplugProtocolRawMessage, DeviceImpl},
     util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_std::{
