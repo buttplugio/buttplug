@@ -26,7 +26,7 @@ use rumble::api::{Central, CentralEvent, Characteristic, Peripheral, UUID};
 use rumble::bluez::{adapter::ConnectedAdapter, manager::Manager};
 #[cfg(feature = "winrt-ble")]
 use rumble::winrtble::{adapter::Adapter, manager::Manager};
-use std::{collections::HashMap, thread};
+use std::collections::HashMap;
 use uuid;
 
 pub struct RumbleBLECommunicationManager {

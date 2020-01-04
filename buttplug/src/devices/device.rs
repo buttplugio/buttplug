@@ -1,10 +1,9 @@
 use crate::{
     core::{
-        errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+        errors::ButtplugError,
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, RawReadCmd,
-            RawReading, RawWriteCmd, ScanningFinished
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd,
+            RawReading, RawWriteCmd
         },
     },
     devices::{protocol::ButtplugProtocol, Endpoint},

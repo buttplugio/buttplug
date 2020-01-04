@@ -8,7 +8,6 @@
 //! Handles client sessions, as well as discovery and communication with hardware.
 
 pub mod comm_managers;
-pub mod device;
 pub mod device_manager;
 
 use crate::core::{
@@ -115,7 +114,13 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use async_std::{sync::{channel, Receiver}, task};
+    use crate::server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager;
+    use std::time::Duration;
+    use async_std::{
+        sync::{channel, Receiver},
+        task,
+        prelude::StreamExt,
+    };
 
     async fn test_server_setup(msg_union: &messages::ButtplugMessageUnion) -> (ButtplugServer, Receiver<ButtplugMessageUnion>) {
         let (send, recv) = channel(256);
