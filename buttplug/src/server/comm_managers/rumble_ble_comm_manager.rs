@@ -1,14 +1,14 @@
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::{self, RawReadCmd, RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd},
+        messages::{self, RawReading},
     },
     device::{
         configuration_manager::{
             BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition,
         },
         Endpoint,
-        device::{ButtplugDevice, ButtplugDeviceEvent, DeviceImplCommand, DeviceImpl},
+        device::{ButtplugDevice, ButtplugDeviceEvent, DeviceImplCommand, DeviceImpl, DeviceWriteCmd, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd},
     },
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
@@ -223,10 +223,10 @@ async fn rumble_comm_loop<T: Peripheral>(
                         .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::new(1)));
                 }
                 ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
-                    DeviceImplCommand::Write(endpoint, data, write_with_response) => {
-                        match endpoints.get(&endpoint) {
+                    DeviceImplCommand::Write(write_msg) => {
+                        match endpoints.get(&write_msg.endpoint) {
                             Some(chr) => {
-                                device.command(&chr, &data).unwrap();
+                                device.command(&chr, &write_msg.data).unwrap();
                                 state.lock().unwrap().set_reply(ButtplugDeviceReturn::Ok(
                                     messages::Ok::default(),
                                 ));
@@ -235,15 +235,15 @@ async fn rumble_comm_loop<T: Peripheral>(
                                 ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
                                     &format!(
                                         "Device does not contain an endpoint named {}",
-                                        endpoint
+                                        write_msg.endpoint
                                     )
                                     .to_owned(),
                                 )),
                             )),
                         }
                     },
-                    DeviceImplCommand::Subscribe(endpoint) => {
-                        match endpoints.get(&endpoint) {
+                    DeviceImplCommand::Subscribe(sub_msg) => {
+                        match endpoints.get(&sub_msg.endpoint) {
                             Some(chr) => {
                                 device.subscribe(&chr).unwrap();
                                 state.lock().unwrap().set_reply(ButtplugDeviceReturn::Ok(
@@ -254,7 +254,26 @@ async fn rumble_comm_loop<T: Peripheral>(
                                 ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
                                     &format!(
                                         "Device does not contain an endpoint named {}",
-                                        endpoint
+                                        sub_msg.endpoint
+                                    )
+                                    .to_owned(),
+                                )),
+                            )),
+                        }
+                    },
+                    DeviceImplCommand::Unsubscribe(sub_msg) => {
+                        match endpoints.get(&sub_msg.endpoint) {
+                            Some(chr) => {
+                                device.unsubscribe(&chr).unwrap();
+                                state.lock().unwrap().set_reply(ButtplugDeviceReturn::Ok(
+                                    messages::Ok::default(),
+                                ));
+                            },
+                            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+                                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+                                    &format!(
+                                        "Device does not contain an endpoint named {}",
+                                        sub_msg.endpoint
                                     )
                                     .to_owned(),
                                 )),
@@ -374,21 +393,21 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
         Box::new((*self).clone())
     }
 
-    async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.clone().into()), "Cannot write to endpoint").await
+    async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
+        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()), "Cannot write to endpoint").await
     }
 
-    async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError> {
+    async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
         // TODO Actually implement value reading
         Ok(RawReading::new(0, msg.endpoint, vec![]))
     }
 
-    async fn subscribe(&self, msg: &SubscribeCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.clone().into()), "Cannot subscribe").await
+    async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
+        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()), "Cannot subscribe").await
     }
 
-    async fn unsubscribe(&self, msg: &UnsubscribeCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.clone().into()), "Cannot unsubscribe").await
+    async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
+        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()), "Cannot unsubscribe").await
     }
 }
 

@@ -10,7 +10,7 @@ use crate::{
     device::{
         protocol::ButtplugProtocol,
         Endpoint,
-        device::{DeviceImpl, ButtplugDeviceEvent},
+        device::{DeviceImpl, ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd},
     },
 };
 use async_trait::async_trait;
@@ -29,18 +29,17 @@ impl LovenseProtocol {
 impl ButtplugProtocol for LovenseProtocol {
     async fn initialize(&mut self,
                         device: &Box<dyn DeviceImpl>) {
-        device.subscribe(&SubscribeCmd::new(0, Endpoint::Rx, "RawReading")).await;
-        let msg = RawWriteCmd::new(
-            0,
+        device.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx).into()).await;
+        let msg = DeviceWriteCmd::new(
             Endpoint::Tx,
             "DeviceType;".as_bytes().to_vec(),
             false,
         );
-        device.write_value(&msg).await;
+        device.write_value(msg.into()).await;
         if let Some(ButtplugDeviceEvent::Notification(_, n)) = device.get_event_receiver().next().await {
             info!("{}", std::str::from_utf8(&n).unwrap());
         }
-        device.unsubscribe(&UnsubscribeCmd::new(0, Endpoint::Rx, "RawReading")).await;
+        device.unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx).into()).await;
     }
 
     fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
@@ -81,13 +80,12 @@ impl LovenseProtocol {
         device: &Box<dyn DeviceImpl>,
         msg: &VibrateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        let msg = RawWriteCmd::new(
-            msg.device_index,
+        let msg = DeviceWriteCmd::new(
             Endpoint::Tx,
             format!("Vibrate:{};", (msg.speeds[0].speed * 20.0) as u32).as_bytes().to_vec(),
             false,
         );
-        device.write_value(&msg).await;
+        device.write_value(msg.into()).await;
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }
 

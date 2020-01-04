@@ -11,36 +11,152 @@ use crate::{
 use async_trait::async_trait;
 use async_std::sync::Receiver;
 
+pub struct DeviceReadCmd {
+    pub endpoint: Endpoint,
+    pub length: u32,
+    pub timeout_ms: u32,
+}
+
+impl DeviceReadCmd {
+    pub fn new(endpoint: Endpoint, length: u32, timeout_ms: u32) -> Self {
+        Self {
+            endpoint,
+            length,
+            timeout_ms,
+        }
+    }
+}
+
+impl From<RawReadCmd> for DeviceReadCmd {
+    fn from(msg: RawReadCmd) -> Self {
+        Self {
+            endpoint: msg.endpoint,
+            length: msg.expected_length,
+            timeout_ms: msg.timeout,
+        }
+    }
+}
+
+pub struct DeviceWriteCmd {
+    pub endpoint: Endpoint,
+    pub data: Vec<u8>,
+    pub write_with_response: bool,
+}
+
+impl DeviceWriteCmd {
+    pub fn new(endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
+        Self {
+            endpoint,
+            data,
+            write_with_response,
+        }
+    }
+}
+
+impl From<RawWriteCmd> for DeviceWriteCmd {
+    fn from(msg: RawWriteCmd) -> Self {
+        Self {
+            endpoint: msg.endpoint,
+            data: msg.data,
+            write_with_response: msg.write_with_response,
+        }
+    }
+}
+
+pub struct DeviceSubscribeCmd {
+    pub endpoint: Endpoint,
+}
+
+impl DeviceSubscribeCmd {
+    pub fn new(endpoint: Endpoint) -> Self {
+        Self {
+            endpoint,
+        }
+    }
+}
+
+impl From<SubscribeCmd> for DeviceSubscribeCmd {
+    fn from(msg: SubscribeCmd) -> Self {
+        Self {
+            endpoint: msg.endpoint,
+        }
+    }
+}
+
+pub struct DeviceUnsubscribeCmd {
+    pub endpoint: Endpoint,
+}
+
+impl DeviceUnsubscribeCmd {
+    pub fn new(endpoint: Endpoint) -> Self {
+        Self {
+            endpoint,
+        }
+    }
+}
+
+impl From<UnsubscribeCmd> for DeviceUnsubscribeCmd {
+    fn from(msg: UnsubscribeCmd) -> Self {
+        Self {
+            endpoint: msg.endpoint,
+        }
+    }
+}
+
 pub enum DeviceImplCommand {
     // Endpoint, data, write with response
-    Write(Endpoint, Vec<u8>, bool),
+    Write(DeviceWriteCmd),
     // Endpoint, length, timeout in ms
-    Read(Endpoint, u32, u32),
-    Subscribe(Endpoint),
-    Unsubscribe(Endpoint),
+    Read(DeviceReadCmd),
+    Subscribe(DeviceSubscribeCmd),
+    Unsubscribe(DeviceUnsubscribeCmd),
 }
 
 impl From<RawReadCmd> for DeviceImplCommand {
     fn from(msg: RawReadCmd) -> Self {
-        DeviceImplCommand::Read(msg.endpoint, msg.expected_length, msg.timeout)
+        DeviceImplCommand::Read(msg.into())
     }
 }
 
 impl From<RawWriteCmd> for DeviceImplCommand {
     fn from(msg: RawWriteCmd) -> Self {
-        DeviceImplCommand::Write(msg.endpoint, msg.data, msg.write_with_response)
+        DeviceImplCommand::Write(msg.into())
     }
 }
 
 impl From<SubscribeCmd> for DeviceImplCommand {
     fn from(msg: SubscribeCmd) -> Self {
-        DeviceImplCommand::Subscribe(msg.endpoint)
+        DeviceImplCommand::Subscribe(msg.into())
     }
 }
 
 impl From<UnsubscribeCmd> for DeviceImplCommand {
     fn from(msg: UnsubscribeCmd) -> Self {
-        DeviceImplCommand::Unsubscribe(msg.endpoint)
+        DeviceImplCommand::Unsubscribe(msg.into())
+    }
+}
+
+impl From<DeviceReadCmd> for DeviceImplCommand {
+    fn from(msg: DeviceReadCmd) -> Self {
+        DeviceImplCommand::Read(msg)
+    }
+}
+
+impl From<DeviceWriteCmd> for DeviceImplCommand {
+    fn from(msg: DeviceWriteCmd) -> Self {
+        DeviceImplCommand::Write(msg)
+    }
+}
+
+impl From<DeviceSubscribeCmd> for DeviceImplCommand {
+    fn from(msg: DeviceSubscribeCmd) -> Self {
+        DeviceImplCommand::Subscribe(msg)
+    }
+}
+
+impl From<DeviceUnsubscribeCmd> for DeviceImplCommand {
+    fn from(msg: DeviceUnsubscribeCmd) -> Self {
+        DeviceImplCommand::Unsubscribe(msg)
     }
 }
 
@@ -63,10 +179,10 @@ pub trait DeviceImpl: Sync + Send {
     // TODO Taking messages mean we have to form full messages in the protocol.
     // This seems silly. We can probably make stripped down versions to send
     // that don't have message IDs or device indexes.
-    async fn read_value(&self, msg: &RawReadCmd) -> Result<RawReading, ButtplugError>;
-    async fn write_value(&self, msg: &RawWriteCmd) -> Result<(), ButtplugError>;
-    async fn subscribe(&self, msg: &SubscribeCmd) -> Result<(), ButtplugError>;
-    async fn unsubscribe(&self, msg: &UnsubscribeCmd) -> Result<(), ButtplugError>;
+    async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError>;
+    async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError>;
+    async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError>;
+    async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError>;
 }
 
 impl Clone for Box<dyn DeviceImpl> {
