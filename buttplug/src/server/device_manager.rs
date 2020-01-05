@@ -17,7 +17,7 @@ use crate::{
             ScanningFinished,
         },
     },
-    device::device::ButtplugDevice,
+    device::device::{DeviceImpl, ButtplugDevice, ButtplugDeviceImplCreator},
 };
 use async_std::{
     prelude::StreamExt,
@@ -32,7 +32,9 @@ use std::{
 };
 
 pub enum DeviceCommunicationEvent {
-    DeviceAdded(ButtplugDevice),
+    // This event only means that a device has been found. The work still needs
+    // to be done to make sure we can use it.
+    DeviceFound(Box<dyn ButtplugDeviceImplCreator>),
     ScanningFinished,
 }
 
@@ -68,15 +70,25 @@ async fn wait_for_manager_events(
     loop {
         match receiver.next().await {
             Some(event) => match event {
-                DeviceCommunicationEvent::DeviceAdded(device) => {
-                    info!("Assigning index {} to {}", device_index, device.name());
-                    sender
-                        .send(
-                            DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into(),
-                        )
-                        .await;
-                    device_map.lock().unwrap().insert(device_index, device);
-                    device_index += 1;
+                DeviceCommunicationEvent::DeviceFound(device_creator) => {
+                    match ButtplugDevice::try_create_device(device_creator).await {
+                        Ok(option_dev) => {
+                            match option_dev {
+                                Some(device) => {
+                                    info!("Assigning index {} to {}", device_index, device.name());
+                                    sender
+                                        .send(
+                                            DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into(),
+                                        )
+                                        .await;
+                                    device_map.lock().unwrap().insert(device_index, device);
+                                    device_index += 1;
+                                }
+                                None => debug!("Device could not be matched to a protocol.")
+                            }
+                        },
+                        Err(e) => error!("Device errored while trying to connect: {}", e)
+                    }
                 }
                 DeviceCommunicationEvent::ScanningFinished => {
                     sender.send(ScanningFinished::default().into()).await;

@@ -6,7 +6,11 @@ use crate::{
             RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
         },
     },
-    device::{protocol::ButtplugProtocol, Endpoint},
+    device::{
+        protocol::ButtplugProtocol,
+        Endpoint,
+        configuration_manager::{DeviceSpecifier, ProtocolDefinition, DeviceConfigurationManager},
+    },
 };
 use async_std::sync::Receiver;
 use async_trait::async_trait;
@@ -158,7 +162,7 @@ impl From<DeviceUnsubscribeCmd> for DeviceImplCommand {
 
 #[derive(Debug)]
 pub enum ButtplugDeviceEvent {
-    DeviceRemoved(),
+    DeviceRemoved,
     Notification(Endpoint, Vec<u8>),
 }
 
@@ -187,6 +191,12 @@ impl Clone for Box<dyn DeviceImpl> {
     }
 }
 
+#[async_trait]
+pub trait ButtplugDeviceImplCreator: Sync + Send {
+    fn get_specifier(&self) -> DeviceSpecifier;
+    async fn try_create_device_impl(&mut self, protocol: ProtocolDefinition) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
+}
+
 pub struct ButtplugDevice {
     protocol: Box<dyn ButtplugProtocol>,
     device: Box<dyn DeviceImpl>,
@@ -206,12 +216,50 @@ impl ButtplugDevice {
         Self { protocol, device }
     }
 
-    pub fn name(&self) -> String {
-        self.device.name()
+    pub async fn try_create_device(mut device_creator: Box<dyn ButtplugDeviceImplCreator>) -> Result<Option<ButtplugDevice>, ButtplugError> {
+        let device_mgr = DeviceConfigurationManager::new();
+        // First off, we need to see if we even have a configuration available
+        // for the device we're trying to create. If we don't, return Ok(None),
+        // because this isn't actually an error. However, if we *do* have a
+        // configuration but something goes wrong after this, then it's an
+        // error.
+
+        match device_mgr.find_configuration(&device_creator.get_specifier()) {
+            Some((config_name, config)) => {
+                // Now that we have both a possible device implementation and a
+                // configuration for that device, try to initialize the implementation.
+                // This usually means trying to connect to whatever the device is,
+                // finding endpoints, etc.
+                match device_creator.try_create_device_impl(config).await {
+                    Ok(device_impl) => {
+                        info!("Found Buttplug Device {}", device_impl.name());
+                        // If we've made it this far, we now have a connected device
+                        // implementation with endpoints set up. We now need to run whatever
+                        // protocol initialization might need to happen. We'll fetch a protocol
+                        // creator, pass the device implementation to it, then let it do
+                        // whatever it needs. For most protocols, this is a no-op. However, for
+                        // devices like Lovense, some Kiiroo, etc, this can get fairly
+                        // complicated.
+
+                        let proto_creator =
+                            device_mgr.get_protocol_creator(&config_name).unwrap();
+                        match proto_creator.try_create_protocol(&device_impl).await {
+                            Ok(protocol_impl) => {
+                                Ok(Some(ButtplugDevice::new(protocol_impl, device_impl)))
+                            },
+                            Err(e) => Err(e)
+                        }
+                    },
+                    Err(e) => Err(e)
+                }
+            },
+            None => return Ok(None)
+        }
+
     }
 
-    pub async fn initialize(&mut self) {
-        self.protocol.initialize(&self.device).await;
+    pub fn name(&self) -> String {
+        self.device.name()
     }
 
     pub async fn parse_message(

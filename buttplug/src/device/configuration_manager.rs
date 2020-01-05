@@ -7,11 +7,14 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::ButtplugProtocol;
-use super::protocols::lovense::LovenseProtocol;
+use super::protocol::{ButtplugProtocol, ButtplugProtocolCreator};
+use super::protocols::lovense::LovenseProtocolCreator;
 use crate::{
     core::{errors::ButtplugError, messages::MessageAttributes, errors::ButtplugDeviceError},
-    device::Endpoint,
+    device::{
+        Endpoint,
+        device::{ButtplugDeviceImplCreator, ButtplugDevice},
+    },
 };
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
@@ -210,7 +213,7 @@ impl DeviceProtocolConfiguration {
     }
 }
 
-type ProtocolConstructor = Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocol>>;
+type ProtocolConstructor = Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
 
 pub struct DeviceConfigurationManager {
     config: ProtocolConfiguration,
@@ -244,12 +247,12 @@ impl DeviceConfigurationManager {
         let mut protocols = HashMap::<String, ProtocolConstructor>::new();
         protocols.insert(
             "lovense".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| Box::new(LovenseProtocol::new(config))),
+            Box::new(|config: DeviceProtocolConfiguration| Box::new(LovenseProtocolCreator::new(config))),
         );
         DeviceConfigurationManager { config, protocols }
     }
 
-    pub fn find_protocol(
+    pub fn find_configuration(
         &self,
         specifier: &DeviceSpecifier,
     ) -> Option<(String, ProtocolDefinition)> {
@@ -261,17 +264,15 @@ impl DeviceConfigurationManager {
         None
     }
 
-    pub fn create_protocol_impl(
+    pub fn get_protocol_creator(
         &self,
         name: &String,
-    ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
+    ) -> Option<Box<dyn ButtplugProtocolCreator>> {
         match self.config.protocols.get(name) {
             Some(proto) => {
-                Ok(self.protocols.get(name).unwrap()(DeviceProtocolConfiguration::new(proto.defaults.clone(), proto.configurations.clone())))
+                Some(self.protocols.get(name).unwrap()(DeviceProtocolConfiguration::new(proto.defaults.clone(), proto.configurations.clone())))
             },
-            None => {
-                Err(ButtplugDeviceError::new(&format!("No protocol named {} available", name)).into())
-            }
+            None => None
         }
     }
 }
@@ -292,7 +293,7 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         let config = DeviceConfigurationManager::new();
         let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
-        assert!(config.find_protocol(&launch).is_some());
+        assert!(config.find_configuration(&launch).is_some());
     }
 
     #[test]
@@ -301,7 +302,7 @@ mod test {
         let config = DeviceConfigurationManager::new();
         let lovense =
             DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-        assert!(config.find_protocol(&lovense).is_some());
+        assert!(config.find_configuration(&lovense).is_some());
     }
 
     #[test]
@@ -310,7 +311,7 @@ mod test {
         let config = DeviceConfigurationManager::new();
         let lovense =
             DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-        let proto = config.find_protocol(&lovense).unwrap();
+        let proto = config.find_configuration(&lovense).unwrap();
         let proto_config = DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations.clone());
         let (name_map, message_map) = proto_config.get_attributes("P").unwrap();
         // Make sure we got the right name

@@ -9,7 +9,7 @@ use crate::{
         },
         device::{
             ButtplugDevice, ButtplugDeviceEvent, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
-            DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
+            DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, ButtplugDeviceImplCreator,
         },
         Endpoint,
     },
@@ -78,7 +78,6 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
         debug!("Bringing up adapter.");
         let central = self.get_central();
         let device_sender = self.device_sender.clone();
-        let device_mgr = DeviceConfigurationManager::new();
         task::spawn(async move {
             let (sender, mut receiver) = channel(256);
             let on_event = move |event: CentralEvent| match event {
@@ -93,10 +92,17 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
             central.on_event(Box::new(on_event));
             info!("Starting scan.");
             central.start_scan().unwrap();
+            // TODO This should be "tried addresses" probably. Otherwise if we
+            // want to connect, say, 2 launches, we're going to have a Bad Time.
             let mut tried_names: Vec<String> = vec![];
             // This needs a way to cancel when we call stop_scanning.
             while receiver.next().await.unwrap() {
                 for p in central.peripherals() {
+                    // If a device has no discernable name, we can't do anything
+                    // with it, just ignore it.
+                    //
+                    // TODO Should probably at least log this and add it to the
+                    // tried_addresses thing, once that exists.
                     if let Some(name) = p.properties().local_name {
                         debug!("Found BLE device {}", name);
                         // Names are the only way we really have to test devices
@@ -104,23 +110,10 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                         // advertisement.
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
-                            let ble_conf = BluetoothLESpecifier::new_from_device(&name);
-                            if let Some((protocol_name, protocol)) =
-                                device_mgr.find_protocol(&DeviceSpecifier::BluetoothLE(ble_conf))
-                            {
-                                info!("Found Buttplug Device {}", name);
-                                let dev = connect(p, protocol.clone()).await.unwrap();
-                                let proto =
-                                    device_mgr.create_protocol_impl(&protocol_name).unwrap();
-                                let mut d = ButtplugDevice::new(proto, Box::new(dev));
-                                d.initialize().await;
-                                info!("Sending device connected message!");
-                                device_sender
-                                    .send(DeviceCommunicationEvent::DeviceAdded(d))
-                                    .await;
-                            } else {
-                                info!("Device {} is not recognized as a Buttplug Device.", name);
-                            }
+                            let device_creator = Box::new(RumbleBLEDeviceImplCreator::new(p));
+                            device_sender
+                                .send(DeviceCommunicationEvent::DeviceFound(device_creator))
+                                .await;
                         }
                     }
                 }
@@ -244,7 +237,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         write_msg.endpoint
                                     )
-                                    .to_owned(),
+                                        .to_owned(),
                                 )),
                             )),
                         }
@@ -264,7 +257,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         sub_msg.endpoint
                                     )
-                                    .to_owned(),
+                                        .to_owned(),
                                 )),
                             )),
                         }
@@ -284,7 +277,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         sub_msg.endpoint
                                     )
-                                    .to_owned(),
+                                        .to_owned(),
                                 )),
                             )),
                         }
@@ -304,6 +297,68 @@ async fn rumble_comm_loop<T: Peripheral>(
     }
 }
 
+pub struct RumbleBLEDeviceImplCreator<T: Peripheral + 'static> {
+    device: Option<T>
+}
+
+impl<T: Peripheral> RumbleBLEDeviceImplCreator<T> {
+    pub fn new(device: T) -> Self {
+        Self {
+            device: Some(device)
+        }
+    }
+}
+
+#[async_trait]
+impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> {
+    fn get_specifier(&self) -> DeviceSpecifier {
+        if self.device.is_none() {
+            panic!("Cannot call get_specifier after device is taken!");
+        }
+        let name = self.device.as_ref().unwrap().properties().local_name.unwrap();
+        DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&name))
+    }
+
+    async fn try_create_device_impl(&mut self, protocol: ProtocolDefinition)
+                                    -> Result<Box<dyn DeviceImpl>, ButtplugError> {
+        // TODO ugggggggh there's gotta be a way to ensure this at compile time.
+        if self.device.is_none() {
+            panic!("Cannot call try_create_device_impl twice!");
+        }
+        let device = self.device.take().unwrap();
+        if let Some(ref proto) = protocol.btle {
+            let (device_sender, device_receiver) = channel(256);
+            let (output_sender, output_receiver) = channel(256);
+            let p = proto.clone();
+            // TODO This is not actually async. We're currently using blocking
+            // rumble calls, so this will block whatever thread it's spawned to. We
+            // should probably switch to using async rumble calls w/ callbacks.
+            //
+            // The new watchdog async-std executor will at least leave this task on
+            // its own thread in time, but I'm not sure when that's landing.
+            task::spawn(async move {
+                rumble_comm_loop(device, p, device_receiver, output_sender).await;
+            });
+            let fut = DeviceReturnFuture::default();
+            let waker = fut.get_state_clone();
+            device_sender
+                .send((ButtplugDeviceCommand::Connect, waker))
+                .await;
+            match fut.await {
+                ButtplugDeviceReturn::Ok(_) => Ok(Box::new(RumbleBLEDeviceImpl {
+                    thread_sender: device_sender,
+                    event_receiver: output_receiver,
+                })),
+                _ => Err(ButtplugError::ButtplugDeviceError(
+                    ButtplugDeviceError::new("Cannot connect"),
+                )),
+            }
+        } else {
+            panic!("Got a protocol with no Bluetooth Definition!");
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct RumbleBLEDeviceImpl {
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
@@ -319,42 +374,6 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
     UUID::B128(rumble_uuid)
 }
 
-pub async fn connect<T: Peripheral + 'static>(
-    device: T,
-    protocol: ProtocolDefinition,
-) -> Result<RumbleBLEDeviceImpl, ButtplugError> {
-    if let Some(ref proto) = protocol.btle {
-        let (device_sender, device_receiver) = channel(256);
-        let (output_sender, output_receiver) = channel(256);
-        let p = proto.clone();
-        // TODO This is not actually async. We're currently using blocking
-        // rumble calls, so this will block whatever thread it's spawned to. We
-        // should probably switch to using async rumble calls w/ callbacks.
-        //
-        // The new watchdog async-std executor will at least leave this task on
-        // its own thread in time, but I'm not sure when that's landing.
-        task::spawn(async move {
-            rumble_comm_loop(device, p, device_receiver, output_sender).await;
-        });
-        let fut = DeviceReturnFuture::default();
-        let waker = fut.get_state_clone();
-        device_sender
-            .send((ButtplugDeviceCommand::Connect, waker))
-            .await;
-        match fut.await {
-            ButtplugDeviceReturn::Ok(_) => Ok(RumbleBLEDeviceImpl {
-                thread_sender: device_sender,
-                event_receiver: output_receiver,
-            }),
-            _ => Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::new("Cannot connect"),
-            )),
-        }
-    } else {
-        panic!("Got a protocol with no Bluetooth Definition!");
-    }
-}
-
 impl RumbleBLEDeviceImpl {
     async fn send_to_device_task(
         &self,
@@ -367,7 +386,7 @@ impl RumbleBLEDeviceImpl {
         match fut.await {
             ButtplugDeviceReturn::Ok(_) => Ok(()),
             _ => Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::new("Cannot connect"),
+                ButtplugDeviceError::new(err_msg),
             )),
         }
     }
@@ -446,6 +465,7 @@ mod test {
     use env_logger;
 
     #[test]
+    #[ignore]
     pub fn test_rumble() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async move {
@@ -454,23 +474,26 @@ mod test {
             mgr.start_scanning().await;
             loop {
                 match receiver.next().await.unwrap() {
-                    DeviceCommunicationEvent::DeviceAdded(mut device) => {
+                    DeviceCommunicationEvent::DeviceFound(mut device) => {
                         info!("Got device!");
                         info!("Sending message!");
-                        match device
-                            .parse_message(
-                                &VibrateCmd::new(1, vec![VibrateSubcommand::new(0, 0.5)]).into(),
-                            )
-                            .await
-                        {
-                            Ok(msg) => match msg {
-                                ButtplugMessageUnion::Ok(_) => info!("Returned Ok"),
-                                _ => info!("Returned something other than ok"),
-                            },
-                            Err(_) => {
-                                assert!(false, "Error returned from parse message");
-                            }
-                        }
+                        // TODO since we don't return full devices as this point
+                        // anymore, we need to find some other way to test this.
+                        //
+                        // match device
+                        //     .parse_message(
+                        //         &VibrateCmd::new(1, vec![VibrateSubcommand::new(0, 0.5)]).into(),
+                        //     )
+                        //     .await
+                        // {
+                        //     Ok(msg) => match msg {
+                        //         ButtplugMessageUnion::Ok(_) => info!("Returned Ok"),
+                        //         _ => info!("Returned something other than ok"),
+                        //     },
+                        //     Err(_) => {
+                        //         assert!(false, "Error returned from parse message");
+                        //     }
+                        // }
                     }
                     _ => assert!(false, "Shouldn't get other message types!"),
                 }

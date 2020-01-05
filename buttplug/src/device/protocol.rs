@@ -1,4 +1,6 @@
-use super::device::DeviceImpl;
+use super::{
+    device::DeviceImpl,
+};
 use crate::core::{
     errors::ButtplugError,
     messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
@@ -6,8 +8,12 @@ use crate::core::{
 use async_trait::async_trait;
 
 #[async_trait]
+pub trait ButtplugProtocolCreator: Sync + Send  {
+    async fn try_create_protocol(&self, device_impl: &Box<dyn DeviceImpl>) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
+}
+
+#[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
-    async fn initialize(&mut self, device: &Box<dyn DeviceImpl>);
     fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
     // TODO Handle raw messages here.
     async fn parse_message(
