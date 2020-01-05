@@ -11,6 +11,7 @@ use crate::{
             ButtplugDeviceEvent, DeviceImpl, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
             DeviceWriteCmd,
         },
+        configuration_manager::DeviceProtocolConfiguration,
         protocol::ButtplugProtocol,
         Endpoint,
     },
@@ -19,11 +20,15 @@ use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 
 #[derive(Clone)]
-pub struct LovenseProtocol {}
+pub struct LovenseProtocol {
+    config: DeviceProtocolConfiguration
+}
 
 impl LovenseProtocol {
-    pub fn new() -> Self {
-        LovenseProtocol {}
+    pub fn new(config: DeviceProtocolConfiguration) -> Self {
+        LovenseProtocol {
+            config
+        }
     }
 }
 
