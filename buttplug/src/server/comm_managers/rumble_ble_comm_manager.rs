@@ -5,7 +5,7 @@ use crate::{
     },
     device::{
         configuration_manager::{
-            BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition,
+            BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition
         },
         device::{
             ButtplugDevice, ButtplugDeviceEvent, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
@@ -78,7 +78,7 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
         debug!("Bringing up adapter.");
         let central = self.get_central();
         let device_sender = self.device_sender.clone();
-        let device_mgr = DeviceConfigurationManager::load_from_internal();
+        let device_mgr = DeviceConfigurationManager::new();
         task::spawn(async move {
             let (sender, mut receiver) = channel(256);
             let on_event = move |event: CentralEvent| match event {

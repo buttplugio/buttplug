@@ -16,15 +16,30 @@ use crate::{
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
+use once_cell::sync::Lazy;
+// TODO Use parking_lot? We don't really need extra speed for this though.
+use std::sync::{RwLock, Arc};
+
+static DEVICE_CONFIGURATION_JSON: &str =
+    include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
+static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> = Lazy::new(|| Arc::new(RwLock::new(None)));
+static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> = Lazy::new(|| Arc::new(RwLock::new(None)));
+
+pub fn set_external_device_config(config: Option<&'static str>) {
+    let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
+    *c = config.clone();
+}
+
+pub fn set_user_device_config(config: Option<&'static str>) {
+    let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
+    *c = config.clone();
+}
 
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
 // DeviceProtocolConfiguraation) if needed elsewhere in the codebase. It's not
 // gonna hurt anything and making a ton of serde attributes is just going to get
 // confusing (see the messages impl).
-
-const DEVICE_CONFIGURATION_FILE: &str =
-    include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
@@ -206,8 +221,23 @@ unsafe impl Send for DeviceConfigurationManager {}
 unsafe impl Sync for DeviceConfigurationManager {}
 
 impl DeviceConfigurationManager {
-    pub fn load_from_internal() -> DeviceConfigurationManager {
-        let config = serde_json::from_str(DEVICE_CONFIGURATION_FILE).unwrap();
+    pub fn new() -> Self {
+        let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
+        let external_config = external_config_guard.read().unwrap();
+        let mut config;
+        // TODO This can absolutely fail if the external JSON isn't correct. We
+        // should check validity somewhere.
+        //
+        // TODO We should already load the JSON into the file statics, and just
+        // clone it out of our statics as needed.
+        if let Some(cfg) = *external_config {
+            config = serde_json::from_str(cfg).unwrap();
+        } else {
+            config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+        }
+
+        // TODO actually load user configuration and merge into maps
+
         // Do not try to use HashMap::new() here. We need the explicit typing,
         // otherwise we'll just get an anonymous closure type during insert that
         // won't match.
@@ -253,14 +283,14 @@ mod test {
     #[test]
     fn test_load_config() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let config = DeviceConfigurationManager::load_from_internal();
+        let config = DeviceConfigurationManager::new();
         debug!("{:?}", config.config);
     }
 
     #[test]
     fn test_config_equals() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let config = DeviceConfigurationManager::load_from_internal();
+        let config = DeviceConfigurationManager::new();
         let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
         assert!(config.find_protocol(&launch).is_some());
     }
@@ -268,7 +298,7 @@ mod test {
     #[test]
     fn test_config_wildcard_equals() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let config = DeviceConfigurationManager::load_from_internal();
+        let config = DeviceConfigurationManager::new();
         let lovense =
             DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
         assert!(config.find_protocol(&lovense).is_some());
@@ -277,7 +307,7 @@ mod test {
     #[test]
     fn test_specific_device_config_creation() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let config = DeviceConfigurationManager::load_from_internal();
+        let config = DeviceConfigurationManager::new();
         let lovense =
             DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
         let proto = config.find_protocol(&lovense).unwrap();
