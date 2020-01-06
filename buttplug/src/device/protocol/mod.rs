@@ -1,8 +1,6 @@
 pub mod lovense;
 
-use super::{
-    device::DeviceImpl,
-};
+use super::device::DeviceImpl;
 use crate::core::{
     errors::ButtplugError,
     messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap},
@@ -10,8 +8,11 @@ use crate::core::{
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait ButtplugProtocolCreator: Sync + Send  {
-    async fn try_create_protocol(&self, device_impl: &Box<dyn DeviceImpl>) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
+pub trait ButtplugProtocolCreator: Sync + Send {
+    async fn try_create_protocol(
+        &self,
+        device_impl: &Box<dyn DeviceImpl>,
+    ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
 
 #[async_trait]

@@ -4,13 +4,11 @@ use crate::{
         messages::{self, RawReading},
     },
     device::{
-        configuration_manager::{
-            BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition
-        },
+        configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
         device::{
-            ButtplugDeviceEvent, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
-            DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, ButtplugDeviceImplCreator,
-            ButtplugDeviceImplInfo, ButtplugDeviceReturn, ButtplugDeviceCommand
+            ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
+            ButtplugDeviceImplInfo, ButtplugDeviceReturn, DeviceImpl, DeviceImplCommand,
+            DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
         },
         Endpoint,
     },
@@ -210,7 +208,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                         endpoints: endpoints.keys().cloned().collect(),
                         manufacturer_name: None,
                         product_name: None,
-                        serial_number: None
+                        serial_number: None,
                     };
                     info!("Device connected!");
                     state
@@ -234,7 +232,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         write_msg.endpoint
                                     )
-                                        .to_owned(),
+                                    .to_owned(),
                                 )),
                             )),
                         }
@@ -254,7 +252,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         sub_msg.endpoint
                                     )
-                                        .to_owned(),
+                                    .to_owned(),
                                 )),
                             )),
                         }
@@ -274,7 +272,7 @@ async fn rumble_comm_loop<T: Peripheral>(
                                         "Device does not contain an endpoint named {}",
                                         sub_msg.endpoint
                                     )
-                                        .to_owned(),
+                                    .to_owned(),
                                 )),
                             )),
                         }
@@ -295,13 +293,13 @@ async fn rumble_comm_loop<T: Peripheral>(
 }
 
 pub struct RumbleBLEDeviceImplCreator<T: Peripheral + 'static> {
-    device: Option<T>
+    device: Option<T>,
 }
 
 impl<T: Peripheral> RumbleBLEDeviceImplCreator<T> {
     pub fn new(device: T) -> Self {
         Self {
-            device: Some(device)
+            device: Some(device),
         }
     }
 }
@@ -312,12 +310,20 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
         if self.device.is_none() {
             panic!("Cannot call get_specifier after device is taken!");
         }
-        let name = self.device.as_ref().unwrap().properties().local_name.unwrap();
+        let name = self
+            .device
+            .as_ref()
+            .unwrap()
+            .properties()
+            .local_name
+            .unwrap();
         DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&name))
     }
 
-    async fn try_create_device_impl(&mut self, protocol: ProtocolDefinition)
-                                    -> Result<Box<dyn DeviceImpl>, ButtplugError> {
+    async fn try_create_device_impl(
+        &mut self,
+        protocol: ProtocolDefinition,
+    ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
         // TODO ugggggggh there's gotta be a way to ensure this at compile time.
         if self.device.is_none() {
             panic!("Cannot call try_create_device_impl twice!");
@@ -380,11 +386,13 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
 }
 
 impl RumbleBLEDeviceImpl {
-    pub fn new(name: &String,
-               address: &String,
-               endpoints: Vec<Endpoint>,
-               thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-               event_receiver: Receiver<ButtplugDeviceEvent>) -> Self {
+    pub fn new(
+        name: &String,
+        address: &String,
+        endpoints: Vec<Endpoint>,
+        thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+        event_receiver: Receiver<ButtplugDeviceEvent>,
+    ) -> Self {
         Self {
             name: name.to_string(),
             address: address.to_string(),

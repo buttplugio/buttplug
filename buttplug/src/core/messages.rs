@@ -161,17 +161,41 @@ impl Test {
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct MessageAttributes {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "FeatureCount"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "FeatureCount"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub feature_count: Option<u32>,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "StepCount"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "StepCount"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub step_count: Option<Vec<u32>>,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoints"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "Endpoints"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub endpoints: Option<Vec<Endpoint>>,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "MaxDuration"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "MaxDuration"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub max_duration: Option<Vec<u32>>,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Patterns"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "Patterns"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub patterns: Option<Vec<Vec<String>>>,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "ActuatorType"), serde(skip_serializing_if = "Option::is_none"))]
+    #[cfg_attr(
+        feature = "serialize_json",
+        serde(rename = "ActuatorType"),
+        serde(skip_serializing_if = "Option::is_none")
+    )]
     pub actuator_type: Option<Vec<String>>,
 }
 

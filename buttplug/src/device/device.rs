@@ -2,14 +2,14 @@ use crate::{
     core::{
         errors::ButtplugError,
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd, RawReading,
-            RawWriteCmd, SubscribeCmd, UnsubscribeCmd, MessageAttributesMap
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
+            RawReadCmd, RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
         },
     },
     device::{
+        configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
         protocol::ButtplugProtocol,
         Endpoint,
-        configuration_manager::{DeviceSpecifier, ProtocolDefinition, DeviceConfigurationManager},
     },
 };
 use async_std::sync::Receiver;
@@ -211,7 +211,10 @@ impl Clone for Box<dyn DeviceImpl> {
 #[async_trait]
 pub trait ButtplugDeviceImplCreator: Sync + Send {
     fn get_specifier(&self) -> DeviceSpecifier;
-    async fn try_create_device_impl(&mut self, protocol: ProtocolDefinition) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
+    async fn try_create_device_impl(
+        &mut self,
+        protocol: ProtocolDefinition,
+    ) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
 }
 
 pub struct ButtplugDevice {
@@ -233,7 +236,9 @@ impl ButtplugDevice {
         Self { protocol, device }
     }
 
-    pub async fn try_create_device(mut device_creator: Box<dyn ButtplugDeviceImplCreator>) -> Result<Option<ButtplugDevice>, ButtplugError> {
+    pub async fn try_create_device(
+        mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
+    ) -> Result<Option<ButtplugDevice>, ButtplugError> {
         let device_mgr = DeviceConfigurationManager::new();
         // First off, we need to see if we even have a configuration available
         // for the device we're trying to create. If we don't, return Ok(None),
@@ -258,21 +263,19 @@ impl ButtplugDevice {
                         // devices like Lovense, some Kiiroo, etc, this can get fairly
                         // complicated.
 
-                        let proto_creator =
-                            device_mgr.get_protocol_creator(&config_name).unwrap();
+                        let proto_creator = device_mgr.get_protocol_creator(&config_name).unwrap();
                         match proto_creator.try_create_protocol(&device_impl).await {
                             Ok(protocol_impl) => {
                                 Ok(Some(ButtplugDevice::new(protocol_impl, device_impl)))
-                            },
-                            Err(e) => Err(e)
+                            }
+                            Err(e) => Err(e),
                         }
-                    },
-                    Err(e) => Err(e)
+                    }
+                    Err(e) => Err(e),
                 }
-            },
-            None => return Ok(None)
+            }
+            None => return Ok(None),
         }
-
     }
 
     pub fn name(&self) -> &str {

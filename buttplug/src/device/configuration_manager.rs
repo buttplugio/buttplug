@@ -7,22 +7,24 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{ButtplugProtocolCreator, lovense::LovenseProtocolCreator};
+use super::protocol::{lovense::LovenseProtocolCreator, ButtplugProtocolCreator};
 use crate::{
-    core::{errors::ButtplugError, messages::MessageAttributes, errors::ButtplugDeviceError},
+    core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
     device::Endpoint,
 };
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-use once_cell::sync::Lazy;
 // TODO Use parking_lot? We don't really need extra speed for this though.
-use std::sync::{RwLock, Arc};
+use std::sync::{Arc, RwLock};
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
-static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> = Lazy::new(|| Arc::new(RwLock::new(None)));
-static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> = Lazy::new(|| Arc::new(RwLock::new(None)));
+static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
+    Lazy::new(|| Arc::new(RwLock::new(None)));
+static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
+    Lazy::new(|| Arc::new(RwLock::new(None)));
 
 pub fn set_external_device_config(config: Option<&'static str>) {
     let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
@@ -182,14 +184,20 @@ pub struct DeviceProtocolConfiguration {
 }
 
 impl DeviceProtocolConfiguration {
-    pub fn new(defaults: Option<ProtocolAttributes>, configurations: Vec<ProtocolAttributes>) -> Self {
+    pub fn new(
+        defaults: Option<ProtocolAttributes>,
+        configurations: Vec<ProtocolAttributes>,
+    ) -> Self {
         Self {
             defaults,
-            configurations
+            configurations,
         }
     }
 
-    pub fn get_attributes(&self, identifier: &str) -> Result<(HashMap<String, String>, HashMap<String, MessageAttributes>), ButtplugError> {
+    pub fn get_attributes(
+        &self,
+        identifier: &str,
+    ) -> Result<(HashMap<String, String>, HashMap<String, MessageAttributes>), ButtplugError> {
         let mut attributes = HashMap::<String, MessageAttributes>::new();
         // If we find defaults, set those up first.
         if let Some(ref attrs) = self.defaults {
@@ -197,19 +205,30 @@ impl DeviceProtocolConfiguration {
                 attributes = msg_attrs.clone();
             }
         }
-        match self.configurations.iter().find(|attrs| attrs.identifier.as_ref().unwrap().contains(&identifier.to_owned())) {
+        match self.configurations.iter().find(|attrs| {
+            attrs
+                .identifier
+                .as_ref()
+                .unwrap()
+                .contains(&identifier.to_owned())
+        }) {
             Some(ref attrs) => {
                 if let Some(ref msg_attrs) = attrs.messages {
                     attributes.extend(msg_attrs.clone());
                 }
                 Ok((attrs.name.as_ref().unwrap().clone(), attributes))
-            },
-            None => Err(ButtplugDeviceError::new(&format!("Cannot find identifier {} in protocol.", identifier)).into())
+            }
+            None => Err(ButtplugDeviceError::new(&format!(
+                "Cannot find identifier {} in protocol.",
+                identifier
+            ))
+            .into()),
         }
     }
 }
 
-type ProtocolConstructor = Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
+type ProtocolConstructor =
+    Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
 
 pub struct DeviceConfigurationManager {
     config: ProtocolConfiguration,
@@ -243,7 +262,9 @@ impl DeviceConfigurationManager {
         let mut protocols = HashMap::<String, ProtocolConstructor>::new();
         protocols.insert(
             "lovense".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| Box::new(LovenseProtocolCreator::new(config))),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LovenseProtocolCreator::new(config))
+            }),
         );
         DeviceConfigurationManager { config, protocols }
     }
@@ -260,22 +281,25 @@ impl DeviceConfigurationManager {
         None
     }
 
-    pub fn get_protocol_creator(
-        &self,
-        name: &String,
-    ) -> Option<Box<dyn ButtplugProtocolCreator>> {
+    pub fn get_protocol_creator(&self, name: &String) -> Option<Box<dyn ButtplugProtocolCreator>> {
         match self.config.protocols.get(name) {
-            Some(proto) => {
-                Some(self.protocols.get(name).unwrap()(DeviceProtocolConfiguration::new(proto.defaults.clone(), proto.configurations.clone())))
-            },
-            None => None
+            Some(proto) => Some(self.protocols.get(name).unwrap()(
+                DeviceProtocolConfiguration::new(
+                    proto.defaults.clone(),
+                    proto.configurations.clone(),
+                ),
+            )),
+            None => None,
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, DeviceProtocolConfiguration};
+    use super::{
+        BluetoothLESpecifier, DeviceConfigurationManager, DeviceProtocolConfiguration,
+        DeviceSpecifier,
+    };
 
     #[test]
     fn test_load_config() {
@@ -308,11 +332,21 @@ mod test {
         let lovense =
             DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
         let proto = config.find_configuration(&lovense).unwrap();
-        let proto_config = DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations.clone());
+        let proto_config = DeviceProtocolConfiguration::new(
+            proto.1.defaults.clone(),
+            proto.1.configurations.clone(),
+        );
         let (name_map, message_map) = proto_config.get_attributes("P").unwrap();
         // Make sure we got the right name
         assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
         // Make sure we overwrote the default of 1
-        assert_eq!(message_map.get("VibrateCmd").unwrap().feature_count.unwrap(), 2);
+        assert_eq!(
+            message_map
+                .get("VibrateCmd")
+                .unwrap()
+                .feature_count
+                .unwrap(),
+            2
+        );
     }
 }

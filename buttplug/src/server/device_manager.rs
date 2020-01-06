@@ -72,22 +72,25 @@ async fn wait_for_manager_events(
             Some(event) => match event {
                 DeviceCommunicationEvent::DeviceFound(device_creator) => {
                     match ButtplugDevice::try_create_device(device_creator).await {
-                        Ok(option_dev) => {
-                            match option_dev {
-                                Some(device) => {
-                                    info!("Assigning index {} to {}", device_index, device.name());
-                                    sender
-                                        .send(
-                                            DeviceAdded::new(device_index, &device.name().to_owned(), &device.message_attributes()).into(),
+                        Ok(option_dev) => match option_dev {
+                            Some(device) => {
+                                info!("Assigning index {} to {}", device_index, device.name());
+                                sender
+                                    .send(
+                                        DeviceAdded::new(
+                                            device_index,
+                                            &device.name().to_owned(),
+                                            &device.message_attributes(),
                                         )
-                                        .await;
-                                    device_map.lock().unwrap().insert(device_index, device);
-                                    device_index += 1;
-                                }
-                                None => debug!("Device could not be matched to a protocol.")
+                                        .into(),
+                                    )
+                                    .await;
+                                device_map.lock().unwrap().insert(device_index, device);
+                                device_index += 1;
                             }
+                            None => debug!("Device could not be matched to a protocol."),
                         },
-                        Err(e) => error!("Device errored while trying to connect: {}", e)
+                        Err(e) => error!("Device errored while trying to connect: {}", e),
                     }
                 }
                 DeviceCommunicationEvent::ScanningFinished => {
@@ -192,7 +195,7 @@ impl DeviceManager {
 mod test {
     use super::DeviceManager;
     use crate::{
-        core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, ButtplugMessage},
+        core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
         server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
