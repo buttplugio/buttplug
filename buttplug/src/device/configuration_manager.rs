@@ -105,6 +105,7 @@ pub struct SerialSpecifier {
     #[serde(rename = "stop-bits")]
     stop_bits: u8,
     parity: char,
+    #[serde(default)]
     ports: HashSet<String>,
 }
 

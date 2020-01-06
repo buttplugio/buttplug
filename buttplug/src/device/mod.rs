@@ -13,6 +13,9 @@ use std::{fmt, str::FromStr, string::ToString};
 pub enum Endpoint {
     Tx,
     Rx,
+    RxPressure,
+    RxTouch,
+    RxAccel,
     Command,
     Firmware,
     TxMode,
