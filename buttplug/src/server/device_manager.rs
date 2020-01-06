@@ -118,7 +118,7 @@ impl DeviceManager {
     pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
         // TODO This should error if we have no device managers
         for mgr in self.comm_managers.iter_mut() {
-            mgr.start_scanning().await;
+            mgr.start_scanning().await?;
         }
         Ok(())
     }
@@ -126,7 +126,7 @@ impl DeviceManager {
     pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
         // TODO This should error if we have no device managers
         for mgr in self.comm_managers.iter_mut() {
-            mgr.stop_scanning().await;
+            mgr.stop_scanning().await?;
         }
         Ok(())
     }

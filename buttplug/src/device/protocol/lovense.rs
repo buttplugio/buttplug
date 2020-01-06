@@ -36,9 +36,9 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
     async fn try_create_protocol(&self, device_impl: &Box<dyn DeviceImpl>) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
         device_impl
             .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx).into())
-            .await;
+            .await?;
         let msg = DeviceWriteCmd::new(Endpoint::Tx, "DeviceType;".as_bytes().to_vec(), false);
-        device_impl.write_value(msg.into()).await;
+        device_impl.write_value(msg.into()).await?;
         // TODO Put some sort of very quick timeout here, we should just fail if
         // we don't get something back quickly.
         let identifier;
@@ -53,7 +53,7 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
         };
         device_impl
             .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx).into())
-            .await;
+            .await?;
 
         let (names, attrs) = self.config.get_attributes(&identifier).unwrap();
         let name = names.get("en-us").unwrap();
@@ -135,7 +135,7 @@ impl LovenseProtocol {
                 .to_vec(),
             false,
         );
-        device.write_value(msg.into()).await;
+        device.write_value(msg.into()).await?;
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }
 
