@@ -175,6 +175,8 @@ pub struct MessageAttributes {
     pub actuator_type: Option<Vec<String>>,
 }
 
+pub type MessageAttributesMap = HashMap<String, MessageAttributes>;
+
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {
@@ -183,7 +185,7 @@ pub struct DeviceMessageInfo {
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
     pub device_name: String,
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
-    pub device_messages: HashMap<String, MessageAttributes>,
+    pub device_messages: MessageAttributesMap,
 }
 
 impl From<&DeviceAdded> for DeviceMessageInfo {
@@ -215,14 +217,14 @@ pub struct DeviceAdded {
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
     pub device_name: String,
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
-    pub device_messages: HashMap<String, MessageAttributes>,
+    pub device_messages: MessageAttributesMap,
 }
 
 impl DeviceAdded {
     pub fn new(
         device_index: u32,
         device_name: &String,
-        device_messages: &HashMap<String, MessageAttributes>,
+        device_messages: &MessageAttributesMap,
     ) -> Self {
         Self {
             id: 0,

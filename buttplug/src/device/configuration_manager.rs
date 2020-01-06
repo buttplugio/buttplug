@@ -7,14 +7,11 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{ButtplugProtocol, ButtplugProtocolCreator};
+use super::protocol::ButtplugProtocolCreator;
 use super::protocols::lovense::LovenseProtocolCreator;
 use crate::{
     core::{errors::ButtplugError, messages::MessageAttributes, errors::ButtplugDeviceError},
-    device::{
-        Endpoint,
-        device::{ButtplugDeviceImplCreator, ButtplugDevice},
-    },
+    device::Endpoint,
 };
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
@@ -227,7 +224,7 @@ impl DeviceConfigurationManager {
     pub fn new() -> Self {
         let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
         let external_config = external_config_guard.read().unwrap();
-        let mut config;
+        let config;
         // TODO This can absolutely fail if the external JSON isn't correct. We
         // should check validity somewhere.
         //

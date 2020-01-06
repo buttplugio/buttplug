@@ -3,7 +3,7 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RotateCmd,
-            StopDeviceCmd, VibrateCmd, VibrateSubcommand,
+            StopDeviceCmd, VibrateCmd, VibrateSubcommand, MessageAttributesMap
         },
     },
     device::{
@@ -56,24 +56,36 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
             .await;
 
         let (names, attrs) = self.config.get_attributes(&identifier).unwrap();
-        Ok(Box::new(LovenseProtocol::new()))
+        let name = names.get("en-us").unwrap();
+        Ok(Box::new(LovenseProtocol::new(name, attrs)))
     }
 }
 
 #[derive(Clone)]
 pub struct LovenseProtocol {
-
+    name: String,
+    attributes: MessageAttributesMap
 }
 
 impl LovenseProtocol {
-    pub fn new() -> Self {
+    pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
         LovenseProtocol {
+            name: name.to_owned(),
+            attributes
         }
     }
 }
 
 #[async_trait]
 impl ButtplugProtocol for LovenseProtocol {
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn message_attributes(&self) -> MessageAttributesMap {
+        self.attributes.clone()
+    }
+
     fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
         Box::new((*self).clone())
     }
@@ -129,7 +141,7 @@ impl LovenseProtocol {
 
     async fn handle_rotate_cmd(
         &self,
-        msg: &RotateCmd,
+        _msg: &RotateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }

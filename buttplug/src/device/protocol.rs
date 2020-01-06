@@ -3,7 +3,7 @@ use super::{
 };
 use crate::core::{
     errors::ButtplugError,
-    messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion},
+    messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap},
 };
 use async_trait::async_trait;
 
@@ -14,6 +14,8 @@ pub trait ButtplugProtocolCreator: Sync + Send  {
 
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
+    fn name(&self) -> &str;
+    fn message_attributes(&self) -> MessageAttributesMap;
     fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
     // TODO Handle raw messages here.
     async fn parse_message(

@@ -17,7 +17,7 @@ use crate::{
             ScanningFinished,
         },
     },
-    device::device::{DeviceImpl, ButtplugDevice, ButtplugDeviceImplCreator},
+    device::device::{ButtplugDevice, ButtplugDeviceImplCreator},
 };
 use async_std::{
     prelude::StreamExt,
@@ -78,7 +78,7 @@ async fn wait_for_manager_events(
                                     info!("Assigning index {} to {}", device_index, device.name());
                                     sender
                                         .send(
-                                            DeviceAdded::new(device_index, &device.name().to_owned(), &HashMap::new()).into(),
+                                            DeviceAdded::new(device_index, &device.name().to_owned(), &device.message_attributes()).into(),
                                         )
                                         .await;
                                     device_map.lock().unwrap().insert(device_index, device);
@@ -192,7 +192,7 @@ impl DeviceManager {
 mod test {
     use super::DeviceManager;
     use crate::{
-        core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
+        core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, ButtplugMessage},
         server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
@@ -207,6 +207,8 @@ mod test {
             dm.add_comm_manager::<RumbleBLECommunicationManager>();
             dm.start_scanning().await;
             if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
+                info!("{:?}", msg);
+                info!("{:?}", msg.as_protocol_json());
                 match dm
                     .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
                     .await

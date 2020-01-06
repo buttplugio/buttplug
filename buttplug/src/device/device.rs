@@ -3,7 +3,7 @@ use crate::{
         errors::ButtplugError,
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd, RawReading,
-            RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
+            RawWriteCmd, SubscribeCmd, UnsubscribeCmd, MessageAttributesMap
         },
     },
     device::{
@@ -279,7 +279,11 @@ impl ButtplugDevice {
     }
 
     pub fn name(&self) -> &str {
-        self.device.name()
+        self.protocol.name()
+    }
+
+    pub fn message_attributes(&self) -> MessageAttributesMap {
+        self.protocol.message_attributes()
     }
 
     pub async fn parse_message(
