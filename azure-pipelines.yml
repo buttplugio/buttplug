@@ -1,0 +1,44 @@
+trigger:
+- master
+
+variables:
+  buildNum: $[ counter() ]
+
+jobs:
+  - job: "Linux"
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+    - script: |
+        yarn
+      displayName: 'Install packages'
+      env: { "CI": "true" }
+    - script: |
+        yarn build
+      displayName: 'Build JSON version of device file'
+      env: { "CI": "true" }
+    - task: CopyFiles@2
+      displayName: "Copy config files to staging"
+      inputs:
+        contents: "$(System.DefaultWorkingDirectory)/buttplug-device-config.*"
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishPipelineArtifact@0
+      displayName: "Publish artifacts"
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'config'
+    - task: GitHubRelease@0
+      displayName: Upload device config release to Github if files changed
+      inputs:
+        gitHubConnection: "release"
+        repositoryName: "buttplugio/buttplug-device-config"
+        action: "create"
+        tagSource: "manual"
+        tag: "v$(buildNum)"
+        title: "Buttplug Device Config File Version $(buildNum)"
+        assets: "$(Build.ArtifactStagingDirectory)/*"
+        
