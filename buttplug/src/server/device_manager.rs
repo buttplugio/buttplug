@@ -14,7 +14,7 @@ use crate::{
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
             ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded,
-            ScanningFinished,
+            ScanningFinished, DeviceMessageInfo, DeviceList,
         },
     },
     device::device::{ButtplugDevice, ButtplugDeviceImplCreator},
@@ -64,6 +64,7 @@ unsafe impl Sync for DeviceManager {}
 async fn wait_for_manager_events(
     mut receiver: Receiver<DeviceCommunicationEvent>,
     sender: Sender<ButtplugMessageUnion>,
+    // TODO This should be an Arc<RwLock<T>>
     device_map: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
 ) {
     let mut device_index: u32 = 0;
@@ -162,7 +163,22 @@ impl DeviceManager {
             if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
                 match manager_msg {
                     ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
-                        Ok(messages::Ok::new(msg.get_id()).into())
+                        let devices = self
+                            .devices
+                            .lock()
+                            .unwrap()
+                            .iter()
+                            .map(|(id, device)|
+                                 DeviceMessageInfo {
+                                     device_index: *id,
+                                     device_name: device.name().to_string(),
+                                     device_messages: device.message_attributes(),
+                                 }
+                            )
+                            .collect();
+                        let mut device_list = DeviceList::new(devices);
+                        device_list.set_id(msg.get_id());
+                        Ok(device_list.into())
                     }
                     ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
                         Ok(messages::Ok::new(msg.get_id()).into())
@@ -195,7 +211,7 @@ impl DeviceManager {
 mod test {
     use super::DeviceManager;
     use crate::{
-        core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
+        core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, RequestDeviceList},
         server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
@@ -212,6 +228,13 @@ mod test {
             if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
                 info!("{:?}", msg);
                 info!("{:?}", msg.as_protocol_json());
+                match dm
+                    .parse_message(RequestDeviceList::default().into())
+                    .await
+                {
+                    Ok(msg) => info!("{:?}", msg),
+                    Err(e) => assert!(false, e.to_string()),
+                }
                 match dm
                     .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
                     .await

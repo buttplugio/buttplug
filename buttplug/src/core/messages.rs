@@ -231,6 +231,15 @@ pub struct DeviceList {
     pub devices: Vec<DeviceMessageInfo>,
 }
 
+impl DeviceList {
+    pub fn new(devices: Vec<DeviceMessageInfo>) -> Self {
+        Self {
+            id: 0,
+            devices
+        }
+    }
+}
+
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceAdded {

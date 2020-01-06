@@ -14,7 +14,7 @@ use crate::core::{
     errors::*,
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
+        ButtplugMessageUnion, DeviceMessageInfo,
     },
 };
 use async_std::sync::Sender;
@@ -79,11 +79,6 @@ impl ButtplugServer {
         } else {
             match msg {
                 ButtplugMessageUnion::RequestServerInfo(ref _s) => self.perform_handshake(_s),
-                ButtplugMessageUnion::RequestDeviceList(_) => {
-                    let mut list = messages::DeviceList::default();
-                    list.set_id(msg.get_id());
-                    Ok(list.into())
-                }
                 // TODO Implement Ping
                 // TODO Implement Test
                 // TODO Implement Log
