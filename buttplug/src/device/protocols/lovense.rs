@@ -48,7 +48,7 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
                 info!("Lovense Device Type Response: {}", type_response);
                 identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
             },
-            Some(ButtplugDeviceEvent::DeviceRemoved) => return Err(ButtplugDeviceError::new("Lovense Device disconnected while getting DeviceType info.").into()),
+            Some(ButtplugDeviceEvent::Removed) => return Err(ButtplugDeviceError::new("Lovense Device disconnected while getting DeviceType info.").into()),
             None => return Err(ButtplugDeviceError::new("Did not get DeviceType return from Lovense device in time").into())
         };
         device_impl

@@ -2,7 +2,7 @@ use crate::{
     core::{
         errors::ButtplugError,
         messages::{
-            ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd, RawReading,
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, RawReadCmd, RawReading,
             RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
         },
     },
@@ -160,16 +160,36 @@ impl From<DeviceUnsubscribeCmd> for DeviceImplCommand {
     }
 }
 
+pub struct ButtplugDeviceImplInfo {
+    pub endpoints: Vec<Endpoint>,
+    pub manufacturer_name: Option<String>,
+    pub product_name: Option<String>,
+    pub serial_number: Option<String>,
+}
+
+pub enum ButtplugDeviceCommand {
+    Connect,
+    Message(DeviceImplCommand),
+    Disconnect,
+}
+
+pub enum ButtplugDeviceReturn {
+    Connected(ButtplugDeviceImplInfo),
+    Ok(messages::Ok),
+    RawReading(messages::RawReading),
+    Error(ButtplugError),
+}
+
 #[derive(Debug)]
 pub enum ButtplugDeviceEvent {
-    DeviceRemoved,
     Notification(Endpoint, Vec<u8>),
+    Removed,
 }
 
 #[async_trait]
 pub trait DeviceImpl: Sync + Send {
-    fn name(&self) -> String;
-    fn address(&self) -> String;
+    fn name(&self) -> &str;
+    fn address(&self) -> &str;
     fn connected(&self) -> bool;
     fn endpoints(&self) -> Vec<Endpoint>;
     fn disconnect(&self);
@@ -258,7 +278,7 @@ impl ButtplugDevice {
 
     }
 
-    pub fn name(&self) -> String {
+    pub fn name(&self) -> &str {
         self.device.name()
     }
 

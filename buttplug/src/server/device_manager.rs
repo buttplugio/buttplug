@@ -78,7 +78,7 @@ async fn wait_for_manager_events(
                                     info!("Assigning index {} to {}", device_index, device.name());
                                     sender
                                         .send(
-                                            DeviceAdded::new(device_index, &device.name(), &HashMap::new()).into(),
+                                            DeviceAdded::new(device_index, &device.name().to_owned(), &HashMap::new()).into(),
                                         )
                                         .await;
                                     device_map.lock().unwrap().insert(device_index, device);

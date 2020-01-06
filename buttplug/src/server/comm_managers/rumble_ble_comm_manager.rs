@@ -5,11 +5,12 @@ use crate::{
     },
     device::{
         configuration_manager::{
-            BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition
+            BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition
         },
         device::{
-            ButtplugDevice, ButtplugDeviceEvent, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
+            ButtplugDeviceEvent, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
             DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, ButtplugDeviceImplCreator,
+            ButtplugDeviceImplInfo, ButtplugDeviceReturn, ButtplugDeviceCommand
         },
         Endpoint,
     },
@@ -131,18 +132,6 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
     }
 }
 
-enum ButtplugDeviceCommand {
-    Connect,
-    Message(DeviceImplCommand),
-    Disconnect,
-}
-
-enum ButtplugDeviceReturn {
-    Ok(messages::Ok),
-    RawReading(messages::RawReading),
-    Error(ButtplugError),
-}
-
 type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
 
@@ -153,7 +142,7 @@ enum RumbleCommLoopChannelValue {
 }
 
 // TODO There is way, way too much shit happening in here. Break it down into
-// smaller bits.
+// smaller bits, possibly as a struct.
 async fn rumble_comm_loop<T: Peripheral>(
     device: T,
     protocol: BluetoothLESpecifier,
@@ -188,6 +177,7 @@ async fn rumble_comm_loop<T: Peripheral>(
         match receiver.race(notification).await {
             RumbleCommLoopChannelValue::DeviceCommand(command, state) => match command {
                 ButtplugDeviceCommand::Connect => {
+                    info!("Connecting to device!");
                     device.connect().unwrap();
                     // Rumble only gives you the u16 endpoint handle during
                     // notifications so we've gotta create yet another mapping.
@@ -216,10 +206,17 @@ async fn rumble_comm_loop<T: Peripheral>(
                                 .await
                         });
                     }));
+                    let device_info = ButtplugDeviceImplInfo {
+                        endpoints: endpoints.keys().cloned().collect(),
+                        manufacturer_name: None,
+                        product_name: None,
+                        serial_number: None
+                    };
+                    info!("Device connected!");
                     state
                         .lock()
                         .unwrap()
-                        .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::new(1)));
+                        .set_reply(ButtplugDeviceReturn::Connected(device_info));
                 }
                 ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
                     DeviceImplCommand::Write(write_msg) => {
@@ -330,6 +327,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
             let (device_sender, device_receiver) = channel(256);
             let (output_sender, output_receiver) = channel(256);
             let p = proto.clone();
+            let name = device.properties().local_name.unwrap();
+            let address = device.properties().address.to_string();
             // TODO This is not actually async. We're currently using blocking
             // rumble calls, so this will block whatever thread it's spawned to. We
             // should probably switch to using async rumble calls w/ callbacks.
@@ -345,7 +344,10 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
                 .send((ButtplugDeviceCommand::Connect, waker))
                 .await;
             match fut.await {
-                ButtplugDeviceReturn::Ok(_) => Ok(Box::new(RumbleBLEDeviceImpl {
+                ButtplugDeviceReturn::Connected(info) => Ok(Box::new(RumbleBLEDeviceImpl {
+                    name,
+                    address,
+                    endpoints: info.endpoints,
                     thread_sender: device_sender,
                     event_receiver: output_receiver,
                 })),
@@ -361,6 +363,9 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
 
 #[derive(Clone)]
 pub struct RumbleBLEDeviceImpl {
+    name: String,
+    address: String,
+    endpoints: Vec<Endpoint>,
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     event_receiver: Receiver<ButtplugDeviceEvent>,
 }
@@ -375,6 +380,20 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
 }
 
 impl RumbleBLEDeviceImpl {
+    pub fn new(name: &String,
+               address: &String,
+               endpoints: Vec<Endpoint>,
+               thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+               event_receiver: Receiver<ButtplugDeviceEvent>) -> Self {
+        Self {
+            name: name.to_string(),
+            address: address.to_string(),
+            endpoints,
+            thread_sender,
+            event_receiver,
+        }
+    }
+
     async fn send_to_device_task(
         &self,
         cmd: ButtplugDeviceCommand,
@@ -392,28 +411,28 @@ impl RumbleBLEDeviceImpl {
     }
 }
 
-// TODO Actually fill out device information
 #[async_trait]
 impl DeviceImpl for RumbleBLEDeviceImpl {
     fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent> {
         self.event_receiver.clone()
     }
 
-    fn name(&self) -> String {
-        //self.device.properties().local_name.unwrap()
-        "Whatever".to_owned()
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn address(&self) -> String {
-        //self.device.properties().address.to_string()
-        "Whatever".to_owned()
+    fn address(&self) -> &str {
+        &self.address
     }
+
     fn connected(&self) -> bool {
+        // TODO Should figure out how we wanna deal with this across the
+        // representation and inner loop.
         true
     }
+
     fn endpoints(&self) -> Vec<Endpoint> {
-        //self.endpoints.keys().map(|v| v.clone()).collect::<Vec<Endpoint>>()
-        vec![]
+        self.endpoints.clone()
     }
     fn disconnect(&self) {
         todo!("implement disconnect");
