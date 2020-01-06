@@ -53,13 +53,13 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
                 return Err(ButtplugDeviceError::new(
                     "Lovense Device disconnected while getting DeviceType info.",
                 )
-                .into())
+                .into());
             }
             None => {
                 return Err(ButtplugDeviceError::new(
                     "Did not get DeviceType return from Lovense device in time",
                 )
-                .into())
+                .into());
             }
         };
         device_impl

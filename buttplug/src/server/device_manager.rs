@@ -28,7 +28,7 @@ use async_trait::async_trait;
 use std::{
     collections::HashMap,
     convert::TryFrom,
-    sync::{Arc, Mutex},
+    sync::{Arc, RwLock},
 };
 
 pub enum DeviceCommunicationEvent {
@@ -54,7 +54,7 @@ pub trait DeviceCommunicationManager: Sync + Send {
 
 pub struct DeviceManager {
     comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
-    devices: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
+    devices: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
     sender: Sender<DeviceCommunicationEvent>,
 }
 
@@ -64,8 +64,7 @@ unsafe impl Sync for DeviceManager {}
 async fn wait_for_manager_events(
     mut receiver: Receiver<DeviceCommunicationEvent>,
     sender: Sender<ButtplugMessageUnion>,
-    // TODO This should be an Arc<RwLock<T>>
-    device_map: Arc<Mutex<HashMap<u32, ButtplugDevice>>>,
+    device_map: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
 ) {
     let mut device_index: u32 = 0;
     loop {
@@ -86,7 +85,7 @@ async fn wait_for_manager_events(
                                         .into(),
                                     )
                                     .await;
-                                device_map.lock().unwrap().insert(device_index, device);
+                                device_map.write().unwrap().insert(device_index, device);
                                 device_index += 1;
                             }
                             None => debug!("Device could not be matched to a protocol."),
@@ -106,7 +105,7 @@ async fn wait_for_manager_events(
 impl DeviceManager {
     pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
         let (sender, receiver) = channel(256);
-        let map = Arc::new(Mutex::new(HashMap::new()));
+        let map = Arc::new(RwLock::new(HashMap::new()));
         let map_clone = map.clone();
         let thread_sender = event_sender.clone();
         task::spawn(async move {
@@ -145,9 +144,9 @@ impl DeviceManager {
             let mut dev;
             if let Some(device) = self
                 .devices
-                .lock()
+                .read()
                 .unwrap()
-                .get_mut(&device_msg.get_device_index())
+                .get(&device_msg.get_device_index())
             {
                 dev = device.clone();
             } else {
@@ -165,7 +164,7 @@ impl DeviceManager {
                     ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
                         let devices = self
                             .devices
-                            .lock()
+                            .read()
                             .unwrap()
                             .iter()
                             .map(|(id, device)|
