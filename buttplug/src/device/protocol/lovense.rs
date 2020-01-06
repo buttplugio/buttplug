@@ -12,10 +12,10 @@ use crate::{
             DeviceWriteCmd,
         },
         configuration_manager::DeviceProtocolConfiguration,
-        protocol::{ButtplugProtocol, ButtplugProtocolCreator},
         Endpoint,
     },
 };
+use super::{ButtplugProtocol, ButtplugProtocolCreator};
 use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 

@@ -7,8 +7,7 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::ButtplugProtocolCreator;
-use super::protocols::lovense::LovenseProtocolCreator;
+use super::protocol::{ButtplugProtocolCreator, lovense::LovenseProtocolCreator};
 use crate::{
     core::{errors::ButtplugError, messages::MessageAttributes, errors::ButtplugDeviceError},
     device::Endpoint,

@@ -196,9 +196,6 @@ pub trait DeviceImpl: Sync + Send {
     fn box_clone(&self) -> Box<dyn DeviceImpl>;
     fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent>;
 
-    // TODO Taking messages mean we have to form full messages in the protocol.
-    // This seems silly. We can probably make stripped down versions to send
-    // that don't have message IDs or device indexes.
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError>;
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError>;
     async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError>;
@@ -292,4 +289,6 @@ impl ButtplugDevice {
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         self.protocol.parse_message(&self.device, message).await
     }
+
+    // TODO Handle raw messages here.
 }

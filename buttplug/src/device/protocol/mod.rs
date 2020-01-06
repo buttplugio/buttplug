@@ -1,3 +1,5 @@
+pub mod lovense;
+
 use super::{
     device::DeviceImpl,
 };
@@ -17,7 +19,6 @@ pub trait ButtplugProtocol: Sync + Send {
     fn name(&self) -> &str;
     fn message_attributes(&self) -> MessageAttributesMap;
     fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
-    // TODO Handle raw messages here.
     async fn parse_message(
         &mut self,
         device: &Box<dyn DeviceImpl>,
