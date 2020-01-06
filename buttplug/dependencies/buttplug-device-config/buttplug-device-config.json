@@ -1,0 +1,2089 @@
+{
+  "protocols": {
+    "lovense": {
+      "btle": {
+        "names": [
+          "LVS-*"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
+            "rx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          },
+          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e",
+            "rx": "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+          },
+          "50300001-0024-4bd4-bbd5-a6920e4c5653": {
+            "tx": "50300002-0024-4bd4-bbd5-a6920e4c5653",
+            "rx": "50300003-0024-4bd4-bbd5-a6920e4c5653"
+          },
+          "57300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "57300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "57300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "5a300001-0024-4bd4-bbd5-a6920e4c5653": {
+            "tx": "5a300002-0024-4bd4-bbd5-a6920e4c5653",
+            "rx": "5a300003-0024-4bd4-bbd5-a6920e4c5653"
+          },
+          "50300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "50300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "50300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "53300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "53300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "5a300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "5a300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "5a300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "4f300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "4f300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "4f300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "42300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "42300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "42300003-0023-4bd4-bbd5-a6920e4c5653"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              20
+            ]
+          },
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "B"
+          ],
+          "name": {
+            "en-us": "Lovense Max"
+          }
+        },
+        {
+          "identifier": [
+            "P"
+          ],
+          "name": {
+            "en-us": "Lovense Edge"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                20,
+                20
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "A",
+            "C"
+          ],
+          "name": {
+            "en-us": "Lovense Nora"
+          },
+          "messages": {
+            "RotateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                20
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "L"
+          ],
+          "name": {
+            "en-us": "Lovense Ambi"
+          }
+        },
+        {
+          "identifier": [
+            "S"
+          ],
+          "name": {
+            "en-us": "Lovense Lush"
+          }
+        },
+        {
+          "identifier": [
+            "Z"
+          ],
+          "name": {
+            "en-us": "Lovense Hush"
+          }
+        },
+        {
+          "identifier": [
+            "W"
+          ],
+          "name": {
+            "en-us": "Lovense Domi"
+          }
+        },
+        {
+          "identifier": [
+            "O"
+          ],
+          "name": {
+            "en-us": "Lovense Osci"
+          }
+        }
+      ]
+    },
+    "xinput": {
+      "defaults": {
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              65535,
+              65535
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Xbox Gamepad"
+          ],
+          "name": {
+            "en-us": "XBox (XInput) Compatible Gamepad"
+          }
+        }
+      ]
+    },
+    "kiiroo-v2": {
+      "btle": {
+        "names": [
+          "Launch",
+          "Onyx2"
+        ],
+        "services": {
+          "88f80580-0000-01e6-aace-0002a5d5c51b": {
+            "tx": "88f80581-0000-01e6-aace-0002a5d5c51b",
+            "rx": "88f80582-0000-01e6-aace-0002a5d5c51b",
+            "firmware": "88f80583-0000-01e6-aace-0002a5d5c51b"
+          },
+          "f60402a6-0293-4bdb-9f20-6758133f7090": {
+            "tx": "02962ac9-e86f-4094-989d-231d69995fc2",
+            "rx": "d44d0393-0731-43b3-a373-8fc70b1f3323",
+            "firmware": "c7b7a04b-2cc4-40ff-8b10-5d531d1161db"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "LinearCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              99
+            ]
+          },
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Launch"
+          ],
+          "name": {
+            "en-us": "Fleshlight Launch"
+          }
+        },
+        {
+          "identifier": [
+            "Onyx2"
+          ],
+          "name": {
+            "en-us": "Kiiroo Onyx 2"
+          }
+        }
+      ]
+    },
+    "libo-elle": {
+      "btle": {
+        "names": [
+          "PiPiJing",
+          "Shuidi"
+        ],
+        "services": {
+          "00006000-0000-1000-8000-00805f9b34fb": {
+            "tx": "00006001-0000-1000-8000-00805f9b34fb",
+            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              3,
+              14
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "PiPiJing"
+          ],
+          "name": {
+            "en-us": "LiBo Elle"
+          }
+        },
+        {
+          "identifier": [
+            "Shuidi"
+          ],
+          "name": {
+            "en-us": "Libo Elle 2"
+          }
+        }
+      ]
+    },
+    "libo-shark": {
+      "btle": {
+        "names": [
+          "ShaYu"
+        ],
+        "services": {
+          "00006000-0000-1000-8000-00805f9b34fb": {
+            "tx": "00006001-0000-1000-8000-00805f9b34fb",
+            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              3,
+              3
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "ShaYu"
+          ],
+          "name": {
+            "en-us": "Libo Shark"
+          }
+        }
+      ]
+    },
+    "libo-karen": {
+      "btle": {
+        "names": [
+          "SuoYinQiu"
+        ],
+        "services": {
+          "00006000-0000-1000-8000-00805f9b34fb": {
+            "tx": "00006001-0000-1000-8000-00805f9b34fb",
+            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+          },
+          "00006050-0000-1000-8000-00805f9b34fb": {
+            "rxpressure": "00006051-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "SuoYinQiu"
+          ],
+          "name": {
+            "en-us": "Libo Karen"
+          }
+        }
+      ]
+    },
+    "libo-vibes": {
+      "btle": {
+        "names": [
+          "XiaoLu",
+          "LuXiaoHan",
+          "BaiHu",
+          "MonsterPub",
+          "Gugudai",
+          "Yuyi",
+          "LuWuShuang",
+          "LiBo",
+          "QingTing",
+          "Huohu"
+        ],
+        "services": {
+          "00006000-0000-1000-8000-00805f9b34fb": {
+            "tx": "00006001-0000-1000-8000-00805f9b34fb",
+            "txmode": "00006002-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "XiaoLu"
+          ],
+          "name": {
+            "en-us": "Libo Lottie"
+          }
+        },
+        {
+          "identifier": [
+            "MonsterPub"
+          ],
+          "name": {
+            "en-us": "Sistalk MonsterPub"
+          }
+        },
+        {
+          "identifier": [
+            "LuXiaoHan"
+          ],
+          "name": {
+            "en-us": "Libo LuLu"
+          }
+        },
+        {
+          "identifier": [
+            "Yuyi"
+          ],
+          "name": {
+            "en-us": "Libo Lina"
+          }
+        },
+        {
+          "identifier": [
+            "LuWuShuang"
+          ],
+          "name": {
+            "en-us": "Libo Adel"
+          }
+        },
+        {
+          "identifier": [
+            "LiBo"
+          ],
+          "name": {
+            "en-us": "Libo Lily"
+          }
+        },
+        {
+          "identifier": [
+            "QingTing"
+          ],
+          "name": {
+            "en-us": "Libo Lucy"
+          }
+        },
+        {
+          "identifier": [
+            "Huohu"
+          ],
+          "name": {
+            "en-us": "Libo Lara"
+          }
+        },
+        {
+          "identifier": [
+            "BaiHu"
+          ],
+          "name": {
+            "en-us": "Libo LaLa"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Gugudai"
+          ],
+          "name": {
+            "en-us": "Libo Carlos"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                3
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "magic-motion-1": {
+      "btle": {
+        "names": [
+          "Smart Mini Vibe*",
+          "Flamingo",
+          "Smart Bean",
+          "Magic Cell",
+          "Magic Wand",
+          "Fugu"
+        ],
+        "services": {
+          "78667579-7b48-43db-b8c5-7928a6b0a335": {
+            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Smart Mini Vibe"
+          ],
+          "name": {
+            "en-us": "MagicMotion Smart Mini Vibe"
+          }
+        },
+        {
+          "identifier": [
+            "Smart Mini Vibe3"
+          ],
+          "name": {
+            "en-us": "MagicMotion Vini"
+          }
+        },
+        {
+          "identifier": [
+            "Flamingo"
+          ],
+          "name": {
+            "en-us": "MagicMotion Flamingo"
+          }
+        },
+        {
+          "identifier": [
+            "Magic Bean"
+          ],
+          "name": {
+            "en-us": "MagicMotion Kegel"
+          }
+        },
+        {
+          "identifier": [
+            "Magic Cell"
+          ],
+          "name": {
+            "en-us": "MagicMotion Dante/Candy"
+          }
+        },
+        {
+          "identifier": [
+            "Magic Wand"
+          ],
+          "name": {
+            "en-us": "MagicMotion Wand"
+          }
+        },
+        {
+          "identifier": [
+            "Magic Fugu"
+          ],
+          "name": {
+            "en-us": "MagicMotion Fugu"
+          }
+        }
+      ]
+    },
+    "magic-motion-2": {
+      "btle": {
+        "names": [
+          "Eidolon",
+          "Lipstick",
+          "Sword",
+          "Curve"
+        ],
+        "services": {
+          "78667579-7b48-43db-b8c5-7928a6b0a335": {
+            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Lipstick"
+          ],
+          "name": {
+            "en-us": "MagicMotion Awaken"
+          }
+        },
+        {
+          "identifier": [
+            "Sword"
+          ],
+          "name": {
+            "en-us": "MagicMotion Equinox"
+          }
+        },
+        {
+          "identifier": [
+            "Curve"
+          ],
+          "name": {
+            "en-us": "MagicMotion Solstice"
+          }
+        },
+        {
+          "identifier": [
+            "Eidolon"
+          ],
+          "name": {
+            "en-us": "MagicMotion Eidolon"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "magic-motion-3": {
+      "btle": {
+        "names": [
+          "Krush"
+        ],
+        "services": {
+          "78667579-7b48-43db-b8c5-7928a6b0a335": {
+            "tx": "78667579-a914-49a4-8333-aa3c0cd8fedc"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              77
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Krush"
+          ],
+          "name": {
+            "en-us": "LoveLife Krush"
+          }
+        }
+      ]
+    },
+    "mysteryvibe": {
+      "btle": {
+        "names": [
+          "MV Crescendo",
+          "MV Tenuto*"
+        ],
+        "services": {
+          "f0006900-110c-478b-b74b-6f403b364a9c": {
+            "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
+            "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 6,
+            "StepCount": [
+              56,
+              56,
+              56,
+              56,
+              56,
+              56
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "MV Crescendo"
+          ],
+          "name": {
+            "en-us": "MysteryVibe Crescendo"
+          }
+        },
+        {
+          "identifier": [
+            "MV Tenuto"
+          ],
+          "name": {
+            "en-us": "MysteryVibe Tenuto"
+          }
+        }
+      ]
+    },
+    "picobong": {
+      "btle": {
+        "names": [
+          "Blow hole",
+          "Picobong Male Toy",
+          "Diver",
+          "Picobong Egg",
+          "Life guard",
+          "Picobong Ring",
+          "Surfer",
+          "Picobong Butt Plug",
+          "Egg driver",
+          "Surfer_plug"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              10
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Blow hole",
+            "Picobong Male Toy"
+          ],
+          "name": {
+            "en-us": "Picobong Blow hole"
+          }
+        },
+        {
+          "identifier": [
+            "Diver",
+            "Picobong Egg"
+          ],
+          "name": {
+            "en-us": "Picobong Diver"
+          }
+        },
+        {
+          "identifier": [
+            "Life guard",
+            "Picobong Ring"
+          ],
+          "name": {
+            "en-us": "Picobong Life guard"
+          }
+        },
+        {
+          "identifier": [
+            "Surfer",
+            "Picobong Butt Plug",
+            "Egg driver",
+            "Surfer_plug"
+          ],
+          "name": {
+            "en-us": "Picobong Surfer"
+          }
+        }
+      ]
+    },
+    "vibratissimo": {
+      "btle": {
+        "names": [
+          "Vibratissimo"
+        ],
+        "services": {
+          "00001523-1212-efde-1523-785feabcd123": {
+            "txmode": "00001524-1212-efde-1523-785feabcd123",
+            "txvibrate": "00001526-1212-efde-1523-785feabcd123",
+            "rx": "00001527-1212-efde-1523-785feabcd123"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              255
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Vibratissimo"
+          ],
+          "name": {
+            "en-us": "Vibratissimo"
+          }
+        }
+      ]
+    },
+    "wevibe": {
+      "btle": {
+        "names": [
+          "Cougar",
+          "4 Plus",
+          "4_Plus",
+          "4plus",
+          "Bloom",
+          "classic",
+          "Classic",
+          "Ditto",
+          "Gala",
+          "Jive",
+          "Melt",
+          "Nova",
+          "NOVAV2",
+          "Pivot",
+          "Rave",
+          "Sync",
+          "Verge",
+          "Wish"
+        ],
+        "services": {
+          "f000bb03-0451-4000-b000-000000000000": {
+            "tx": "f000c000-0451-4000-b000-000000000000",
+            "rx": "f000b000-0451-4000-b000-000000000000"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              15
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Bloom"
+          ],
+          "name": {
+            "en-us": "WeVibe Bloom"
+          }
+        },
+        {
+          "identifier": [
+            "Ditto"
+          ],
+          "name": {
+            "en-us": "WeVibe Ditto"
+          }
+        },
+        {
+          "identifier": [
+            "Jive"
+          ],
+          "name": {
+            "en-us": "WeVibe Jive"
+          }
+        },
+        {
+          "identifier": [
+            "Melt"
+          ],
+          "name": {
+            "en-us": "WeVibe Melt"
+          }
+        },
+        {
+          "identifier": [
+            "Pivot"
+          ],
+          "name": {
+            "en-us": "WeVibe Pivot"
+          }
+        },
+        {
+          "identifier": [
+            "Rave"
+          ],
+          "name": {
+            "en-us": "WeVibe Rave"
+          }
+        },
+        {
+          "identifier": [
+            "Verge"
+          ],
+          "name": {
+            "en-us": "WeVibe Verge"
+          }
+        },
+        {
+          "identifier": [
+            "Wish"
+          ],
+          "name": {
+            "en-us": "WeVibe Wish"
+          }
+        },
+        {
+          "identifier": [
+            "Cougar",
+            "4 Plus",
+            "4_Plus",
+            "4plus",
+            "classic",
+            "Classic"
+          ],
+          "name": {
+            "en-us": "WeVibe 4 Plus"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                15,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Gala"
+          ],
+          "name": {
+            "en-us": "WeVibe Gala"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                15,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Nova",
+            "NOVAV2"
+          ],
+          "name": {
+            "en-us": "WeVibe Nova"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                15,
+                15
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Sync"
+          ],
+          "name": {
+            "en-us": "WeVibe Sync"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                15,
+                15
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "wevibe-8bit": {
+      "btle": {
+        "names": [
+          "Moxie",
+          "Vector"
+        ],
+        "services": {
+          "f000bb03-0451-4000-b000-000000000000": {
+            "tx": "f000c000-0451-4000-b000-000000000000",
+            "rx": "f000b000-0451-4000-b000-000000000000"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              12
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Moxie"
+          ],
+          "name": {
+            "en-us": "WeVibe Moxie"
+          }
+        },
+        {
+          "identifier": [
+            "Vector"
+          ],
+          "name": {
+            "en-us": "WeVibe Vector"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                12,
+                12
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "wevibe-legacy": {
+      "btle": {
+        "names": [
+          "Rey",
+          "We-Vibe Rocketman",
+          "Reina",
+          "imassager",
+          "Interactive Massager",
+          "03"
+        ],
+        "services": {
+          "f000bb03-0451-4000-b000-000000000000": {
+            "tx": "f000c000-0451-4000-b000-000000000000",
+            "rx": "f000b000-0451-4000-b000-000000000000"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Rey",
+            "We-Vibe Rocketman"
+          ],
+          "name": {
+            "en-us": "WeVibe Realm Rey"
+          }
+        },
+        {
+          "identifier": [
+            "Reina",
+            "imassager",
+            "Interactive Massager",
+            "03"
+          ],
+          "name": {
+            "en-us": "WeVibe Realm Reina"
+          }
+        }
+      ]
+    },
+    "youcups": {
+      "btle": {
+        "names": [
+          "Youcups"
+        ],
+        "services": {
+          "0000fee9-0000-1000-8000-00805f9b34fb": {
+            "tx": "d44bc439-abfd-45a2-b575-925416129600"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              8
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Youcups"
+          ],
+          "name": {
+            "en-us": "Youcups Warrior II"
+          }
+        }
+      ]
+    },
+    "cueme": {
+      "btle": {
+        "names": [
+          "FUNCODE_*"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 8,
+            "StepCount": [
+              15,
+              15,
+              15,
+              15,
+              15,
+              15,
+              15,
+              15
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "1"
+          ],
+          "name": {
+            "en-us": "Cueme Mens"
+          }
+        },
+        {
+          "identifier": [
+            "2"
+          ],
+          "name": {
+            "en-us": "Cueme Bra"
+          }
+        },
+        {
+          "identifier": [
+            "3"
+          ],
+          "name": {
+            "en-us": "Cueme Womans"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 4,
+              "StepCount": [
+                15,
+                15,
+                15,
+                15
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "kiiroo-v2-vibrator": {
+      "btle": {
+        "names": [
+          "Pearl2",
+          "Fuse",
+          "Virtual Blowbot",
+          "Titan"
+        ],
+        "services": {
+          "88f82580-0000-01e6-aace-0002a5d5c51b": {
+            "tx": "88f82581-0000-01e6-aace-0002a5d5c51b",
+            "rxtouch": "88f82582-0000-01e6-aace-0002a5d5c51b",
+            "rxaccel": "88f82584-0000-01e6-aace-0002a5d5c51b"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 3,
+            "StepCount": [
+              100,
+              100,
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Pearl2"
+          ],
+          "name": {
+            "en-us": "Kiiroo Pearl 2"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Fuse"
+          ],
+          "name": {
+            "en-us": "OhMiBod Fuse"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                100
+              ],
+              "FeatureOrder": [
+                1,
+                0
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Virtual Blowbot"
+          ],
+          "name": {
+            "en-us": "PornHub Virtual Blowbot"
+          }
+        },
+        {
+          "identifier": [
+            "Titan"
+          ],
+          "name": {
+            "en-us": "Kiiroo Titan"
+          }
+        }
+      ]
+    },
+    "kiiroo-v21": {
+      "btle": {
+        "names": [
+          "Onyx2.1",
+          "Titan1.1",
+          "Cliona",
+          "Pearl2.1",
+          "OhMiBod 4.0"
+        ],
+        "services": {
+          "00001900-0000-1000-8000-00805f9b34fb": {
+            "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
+            "tx": "00001902-0000-1000-8000-00805f9b34fb",
+            "rx": "00001903-0000-1000-8000-00805f9b34fb"
+          },
+          "a0d70001-4c16-4ba7-977a-d394920e13a3": {
+            "tx": "a0d70002-4c16-4ba7-977a-d394920e13a3",
+            "rx": "a0d70003-4c16-4ba7-977a-d394920e13a3"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Pearl2.1"
+          ],
+          "name": {
+            "en-us": "Kiiroo Pearl 2.1"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Cliona"
+          ],
+          "name": {
+            "en-us": "Kiiroo Cliona"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod 4.0"
+          ],
+          "name": {
+            "en-us": "OhMiBod Esca 2"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Titan1.1"
+          ],
+          "name": {
+            "en-us": "Kiiroo Titan 1.1"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            },
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Onyx2.1"
+          ],
+          "name": {
+            "en-us": "Kiiroo Onyx 2.1"
+          },
+          "messages": {
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "erostek-et312": {
+      "serial": {
+        "baud-rate": 19200,
+        "data-bits": 8,
+        "parity": "N",
+        "stop-bits": 1
+      },
+      "defaults": {
+        "messages": {
+          "LinearCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              99
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "et312"
+          ],
+          "name": {
+            "en-us": "Erostek ET312"
+          }
+        }
+      ]
+    },
+    "vorze-cyclone-x": {
+      "hid": {
+        "vendor-id": 1155,
+        "product-id": 22352
+      },
+      "defaults": {
+        "messages": {
+          "RotateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              10
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "CycloneX10"
+          ],
+          "name": {
+            "en-us": "Rends Cyclone X10"
+          }
+        }
+      ]
+    },
+    "rez-trancevibrator": {
+      "usb": {
+        "vendor-id": 2889,
+        "product-id": 1615
+      },
+      "defaults": {
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              255
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Trancevibrator"
+          ],
+          "name": {
+            "en-us": "Rez Trancevibrator"
+          }
+        }
+      ]
+    },
+    "kiiroo-v1": {
+      "btle": {
+        "names": [
+          "ONYX",
+          "PEARL"
+        ],
+        "services": {
+          "49535343-fe7d-4ae5-8fa9-9fafd205e455": {
+            "rx": "49535343-1e4d-4bd9-ba61-23c647249616",
+            "tx": "49535343-8841-43f4-a8d4-ecbe34729bb3",
+            "command": "49535343-aca3-481c-91ec-d85e28a60318"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "PEARL"
+          ],
+          "name": {
+            "en-us": "Kiiroo Pearl"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                4
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "ONYX"
+          ],
+          "name": {
+            "en-us": "Kiiroo Onyx"
+          },
+          "messages": {
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                4
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "vorze-sa": {
+      "btle": {
+        "names": [
+          "Bach smart",
+          "CycSA",
+          "UFOSA"
+        ],
+        "services": {
+          "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
+            "tx": "40ee2222-63ec-4b7f-8ce7-712efd55b90e"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Bach smart"
+          ],
+          "name": {
+            "en-us": "Vorze Bach"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "CycSA"
+          ],
+          "name": {
+            "en-us": "Vorze A10 Cyclone SA"
+          },
+          "messages": {
+            "RotateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "UFOSA"
+          ],
+          "name": {
+            "en-us": "Vorze UFO SA"
+          },
+          "messages": {
+            "RotateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "youou": {
+      "btle": {
+        "names": [
+          "VX001_*"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              255
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "VX001_"
+          ],
+          "name": {
+            "en-us": "Youou Wand Vibrator"
+          }
+        }
+      ]
+    },
+    "realtouch": {
+      "hid": {
+        "vendor-id": 8020,
+        "product-id": 1
+      },
+      "defaults": {
+        "messages": {
+          "LinearCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              99
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "RealTouch"
+          ],
+          "name": {
+            "en-us": "RealTouch"
+          }
+        }
+      ]
+    },
+    "prettylove": {
+      "btle": {
+        "names": [
+          "Aogu BLE *"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              3
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Aogu BLE"
+          ],
+          "name": {
+            "en-us": "Pretty Love Device"
+          }
+        }
+      ]
+    },
+    "svakom": {
+      "btle": {
+        "names": [
+          "Aogu SCB"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              19
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Aogu SCB"
+          ],
+          "name": {
+            "en-us": "Svakom Ella"
+          }
+        }
+      ]
+    },
+    "realov": {
+      "btle": {
+        "names": [
+          "REALOV_VIBE"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              50
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "REALOV_VIBE"
+          ],
+          "name": {
+            "en-us": "Realov Device"
+          }
+        }
+      ]
+    },
+    "motorbunny": {
+      "btle": {
+        "names": [
+          "MB Controller"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff6-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              255
+            ]
+          },
+          "RotateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              255
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "MB Controller"
+          ],
+          "name": {
+            "en-us": "Motorbunny"
+          }
+        }
+      ]
+    },
+    "zalo": {
+      "btle": {
+        "names": [
+          "ZALO-Queen"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              7,
+              7
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "ZALO-Queen"
+          ],
+          "name": {
+            "en-us": "Zalo Queen"
+          }
+        }
+      ]
+    },
+    "sayberx": {
+      "btle": {
+        "names": [
+          "SayberX",
+          "X-Ring *"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff6-0000-1000-8000-00805f9b34fb",
+            "rx": "0000fff8-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "SayberX"
+          ],
+          "name": {
+            "en-us": "SayberX"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                4
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "X-Ring"
+          ],
+          "name": {
+            "en-us": "Sayber X-Ring"
+          }
+        }
+      ]
+    },
+    "muse": {
+      "btle": {
+        "names": [
+          "WB-ZDB-WST",
+          "WB-TDD"
+        ],
+        "services": {
+          "0000aaa0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000aaa1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              9
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "WB-ZDB-WST"
+          ],
+          "name": {
+            "en-us": "Dream Lover Archer 2"
+          }
+        },
+        {
+          "identifier": [
+            "WB-TDD"
+          ],
+          "name": {
+            "en-us": "Galaku Panty Vib"
+          }
+        }
+      ]
+    },
+    "lelo-f1s": {
+      "btle": {
+        "names": [
+          "F1s"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              100,
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "F1s"
+          ],
+          "name": {
+            "en-us": "Lelo F1s"
+          }
+        }
+      ]
+    },
+    "aneros": {
+      "btle": {
+        "names": [
+          "Massage Demo"
+        ],
+        "services": {
+          "0000ff00-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              127
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Massage Demo"
+          ],
+          "name": {
+            "en-us": "Aneros Vivi"
+          }
+        }
+      ]
+    },
+    "lovehoney-desire": {
+      "btle": {
+        "names": [
+          "PROSTATE VIBE",
+          "KNICKER VIBE"
+        ],
+        "services": {
+          "0000ff00-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ff01-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              127,
+              127
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "PROSTATE VIBE"
+          ],
+          "name": {
+            "en-us": "Lovehoney Desire Prostate Vibrator"
+          }
+        },
+        {
+          "identifier": [
+            "KNICKER VIBE"
+          ],
+          "name": {
+            "en-us": "Lovehoney Desire Knicker Vibrator"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                127
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "twerkingbutt": {
+      "btle": {
+        "names": [
+          "BODIKANG",
+          "Twerking Butt",
+          "TwerkingButt"
+        ],
+        "services": {
+          "00000a60-0000-1000-8000-00805f9b34fb": {
+            "tx": "00000a66-0000-1000-8000-00805f9b34fb",
+            "rx": "00000a67-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "BODIKANG",
+            "Twerking Butt",
+            "TwerkingButt"
+          ],
+          "name": {
+            "en-us": "Lovehoney Desire Prostate Vibrator"
+          }
+        }
+      ]
+    }
+  }
+}

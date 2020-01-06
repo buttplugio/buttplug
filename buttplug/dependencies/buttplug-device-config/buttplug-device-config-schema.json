@@ -1,0 +1,310 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "Buttplug Device Config Schema",
+  "version": 2,
+  "description": "JSON format for Buttplug Device Config Files.",
+  "components": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "btle-definition": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "services": {
+          "type": "object",
+          "patternProperties": {
+            "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$": {
+              "type": "object",
+              "patternProperties": {
+                "^(tx|rx|firmware|txmode|txvibrate|rxtouch|rxaccel|rxpressure|whitelist)$": {
+                  "$ref": "#/components/uuid"
+                }
+              },
+              "minProperties": 1
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "names",
+        "services"
+      ]
+    },
+    "serial-definition": {
+      "type": "object",
+      "properties": {
+        "baud-rate": {
+          "type": "integer"
+        },
+        "data-bits": {
+          "type": "integer"
+        },
+        "parity": {
+          "type": "string"
+        },
+        "stop-bits": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "baud-rate",
+        "data-bits",
+        "parity",
+        "stop-bits"
+      ],
+      "additionalProperties": false
+    },
+    "usb-definition": {
+      "type": "object",
+      "properties": {
+        "vendor-id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "product-id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        }
+      },
+      "required": [
+        "vendor-id",
+        "product-id"
+      ],
+      "additionalProperties": false
+    },
+    "FeatureCount": {
+      "description": "Number of features on device.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "StepCount": {
+      "description": "Specifies granularity of each feature on the device.",
+      "type": "array",
+      "items": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minItems": 1
+    },
+    "FeatureOrder": {
+      "description": "Specifies the order features are exposed in by the ButtplugMessages.",
+      "type": "array",
+      "items": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 2
+    },
+    "NullMessageAttributes": {
+      "description": "Attributes for device message that have no attributes.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 0,
+      "maxProperties": 0
+    },
+    "GenericMessageAttributes": {
+      "description": "Attributes for device messages.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "FeatureOrder": { "$ref": "#/components/FeatureOrder" }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "RawMessageAttributes": {
+      "description": "Attributes for raw device messages.",
+      "type": "object",
+      "properties": {
+        "Endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minItems": 1
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "PatternMessageAttributes": {
+      "description": "Attributes for PatternPlaybackCmd.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "ActuatorType": {
+          "description": "Types of actuators for pattern playback (Vibrate, Rotate, Linear)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Patterns": {
+          "description": "Names of patterns to play back, per actuator.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "ShockMessageAttributes": {
+      "description": "Attributes for ShockCmd.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "MaxDuration": {
+          "description": "Maximum duration of shock for each actuator",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "DeviceMessagesEx": {
+      "description": "A list of the messages a device will accept on this server implementation.",
+      "type": "object",
+      "properties": {
+        "StopDeviceCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "LovenseCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "VorzeA10CycloneCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "KiirooCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "SingleMotorVibrateCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "BatteryLevelCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "RSSILevelCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "PatternPlaybackCmd": { "$ref": "#/components/PatternMessageAttributes" },
+        "ShockCmd": { "$ref": "#/components/ShockMessageAttributes" },
+        "ToneEmitterCmd": { "$ref": "#/components/GenericMessageAttributes" }
+      },
+      "additionalProperties": false
+    },
+    "name-field": {
+      "type": "object",
+      "patternProperties": {
+        "^(en-us)$": {
+          "type": "string"
+        },
+        "^[a-z]{2}-[A-Z]{2}$": {
+          "type": "string"
+        }
+      },
+      "minProperties": 1,
+      "required": [
+        "en-us"
+      ]
+    },
+    "defaults-definition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/components/name-field"
+        },
+        "messages": {
+          "$ref": "#/components/DeviceMessagesEx"
+        }
+      },
+      "required": [
+        "messages"
+      ]
+    },
+    "configurations-definition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "name": {
+            "$ref": "#/components/name-field"
+          },
+          "messages": {
+            "$ref": "#/components/DeviceMessagesEx"
+          }
+        },
+        "required": [
+          "identifier",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "type": "object",
+  "properties": {
+    "protocols": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "btle": {
+              "$ref": "#/components/btle-definition"
+            },
+            "serial": {
+              "$ref": "#/components/serial-definition"
+            },
+            "usb": {
+              "$ref": "#/components/usb-definition"
+            },
+            "hid": {
+              "$ref": "#/components/usb-definition"
+            },
+            "defaults": {
+              "$ref": "#/components/defaults-definition"
+            },
+            "configurations": {
+              "$ref": "#/components/configurations-definition"
+            }
+          },
+          "required": [
+            "configurations"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "additionalProperties": false
+  },
+  "required": [
+    "protocols"
+  ],
+  "additionalProperties": false
+}
