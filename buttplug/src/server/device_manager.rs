@@ -10,7 +10,7 @@
 
 use crate::{
     core::{
-        errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+        errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
             ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded,
@@ -123,7 +123,11 @@ impl DeviceManager {
         for mgr in self.comm_managers.iter_mut() {
             mgr.start_scanning().await?;
         }
-        Ok(())
+        if self.comm_managers.is_empty() {
+            Err(ButtplugUnknownError::new("No device managers!").into())
+        } else {
+            Ok(())
+        }
     }
 
     pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
