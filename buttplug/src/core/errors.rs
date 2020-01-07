@@ -235,6 +235,12 @@ impl From<ButtplugHandshakeError> for ButtplugError {
     }
 }
 
+impl From<ButtplugUnknownError> for ButtplugError {
+    fn from(error: ButtplugUnknownError) -> Self {
+        ButtplugError::ButtplugUnknownError(error)
+    }
+}
+
 impl From<messages::Error> for ButtplugError {
     /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
     fn from(error: messages::Error) -> Self {
