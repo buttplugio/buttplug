@@ -274,6 +274,7 @@ impl DeviceConfigurationManager {
         &self,
         specifier: &DeviceSpecifier,
     ) -> Option<(String, ProtocolDefinition)> {
+        info!("Looking for protocol that matches spec: {:?}", specifier);
         for (name, def) in self.config.protocols.iter() {
             if def == specifier {
                 return Some((name.clone(), def.clone()));
@@ -283,15 +284,19 @@ impl DeviceConfigurationManager {
     }
 
     pub fn get_protocol_creator(&self, name: &String) -> Option<Box<dyn ButtplugProtocolCreator>> {
-        match self.config.protocols.get(name) {
-            Some(proto) => Some(self.protocols.get(name).unwrap()(
-                DeviceProtocolConfiguration::new(
-                    proto.defaults.clone(),
-                    proto.configurations.clone(),
-                ),
-            )),
-            None => None,
+        info!("Looking for protocol {}", name);
+        if let Some(proto) = self.config.protocols.get(name) {
+            info!("Found a protocol definition for {}", name);
+            if let Some(constructor) = self.protocols.get(name) {
+                info!("Found a protocol implementation for {}", name);
+                return Option::from(constructor(
+                        DeviceProtocolConfiguration::new(
+                            proto.defaults.clone(),
+                            proto.configurations.clone(),
+                        )));
+            }
         }
+        None
     }
 }
 
