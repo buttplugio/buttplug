@@ -211,7 +211,7 @@ mod test {
     use super::DeviceManager;
     use crate::{
         core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, RequestDeviceList},
-        server::comm_managers::rumble_ble_comm_manager::RumbleBLECommunicationManager,
+        server::comm_managers::rumble::RumbleBLECommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
     use std::time::Duration;
