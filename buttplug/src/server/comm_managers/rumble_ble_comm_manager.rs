@@ -136,158 +136,200 @@ type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
 enum RumbleCommLoopChannelValue {
     DeviceCommand(ButtplugDeviceCommand, DeviceReturnStateShared),
     DeviceOutput(RawReading),
+    DeviceEvent(CentralEvent),
     ChannelClosed,
 }
 
-// TODO There is way, way too much shit happening in here. Break it down into
-// smaller bits, possibly as a struct.
-async fn rumble_comm_loop<T: Peripheral>(
+struct RumbleInternalEventLoop<T: Peripheral> {
     device: T,
     protocol: BluetoothLESpecifier,
-    mut write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+    write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     output_sender: Sender<ButtplugDeviceEvent>,
-) {
-    // TODO How the do we deal with disconnection, as well as spinning down the
-    // thread during shutdown?
+    endpoints: HashMap<Endpoint, Characteristic>,
+}
 
-    // We'll handle all notifications from a device on a single channel, because
-    // there's no way bluetooth is going to flood us with enough data to
-    // saturate, right? (I am prepared to regret this.)
-    //
-    // Any time we get a request to subscribe somewhere, just load the callback
-    // with the same sender everyone is using and treat this as a mpsc.
-    let (_notification_sender, mut notification_receiver) = channel::<RawReading>(256);
-    let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
-    loop {
-        let receiver = async {
-            match write_receiver.next().await {
-                Some((command, state)) => RumbleCommLoopChannelValue::DeviceCommand(command, state),
-                None => RumbleCommLoopChannelValue::ChannelClosed,
-            }
-        };
-        let notification = async {
-            // We own both sides of this so it'll never actually die. Unwrap
-            // with impunity.
-            RumbleCommLoopChannelValue::DeviceOutput(notification_receiver.next().await.unwrap())
-        };
-        // Race our device input (from the client side) and any subscribed
-        // notifications.
-        match receiver.race(notification).await {
-            RumbleCommLoopChannelValue::DeviceCommand(command, state) => match command {
-                ButtplugDeviceCommand::Connect => {
-                    info!("Connecting to device!");
-                    device.connect().unwrap();
-                    // Rumble only gives you the u16 endpoint handle during
-                    // notifications so we've gotta create yet another mapping.
-                    let mut handle_map = HashMap::<u16, Endpoint>::new();
-                    let chars = device.discover_characteristics().unwrap();
-                    for proto_service in protocol.services.values() {
-                        for (chr_name, chr_uuid) in proto_service.into_iter() {
-                            let maybe_chr =
-                                chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
-                            if let Some(chr) = maybe_chr {
-                                endpoints.insert(*chr_name, chr.clone());
-                                handle_map.insert(chr.value_handle, *chr_name);
-                            }
-                        }
-                    }
-                    let os = output_sender.clone();
-                    device.on_notification(Box::new(move |notification: ValueNotification| {
-                        let endpoint = handle_map.get(&notification.handle).unwrap().clone();
-                        let sender = os.clone();
-                        task::spawn(async move {
-                            sender
-                                .send(ButtplugDeviceEvent::Notification(
-                                    endpoint,
-                                    notification.value,
-                                ))
-                                .await
-                        });
-                    }));
-                    let device_info = ButtplugDeviceImplInfo {
-                        endpoints: endpoints.keys().cloned().collect(),
-                        manufacturer_name: None,
-                        product_name: None,
-                        serial_number: None,
-                    };
-                    info!("Device connected!");
-                    state
-                        .lock()
-                        .unwrap()
-                        .set_reply(ButtplugDeviceReturn::Connected(device_info));
+fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
+    let mut rumble_uuid = uuid.as_bytes().clone();
+    rumble_uuid.reverse();
+    UUID::B128(rumble_uuid)
+}
+
+impl<T: Peripheral> RumbleInternalEventLoop<T> {
+    pub fn new(device: T,
+               protocol: BluetoothLESpecifier,
+               write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+               output_sender: Sender<ButtplugDeviceEvent>) -> Self {
+        RumbleInternalEventLoop {
+            device,
+            protocol,
+            write_receiver,
+            output_sender,
+            endpoints: HashMap::new()
+        }
+    }
+
+    fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
+        info!("Connecting to device!");
+        self.device.connect().unwrap();
+        // Rumble only gives you the u16 endpoint handle during
+        // notifications so we've gotta create yet another mapping.
+        let mut handle_map = HashMap::<u16, Endpoint>::new();
+        let chars = self.device.discover_characteristics().unwrap();
+        for proto_service in self.protocol.services.values() {
+            for (chr_name, chr_uuid) in proto_service.into_iter() {
+                let maybe_chr =
+                    chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
+                if let Some(chr) = maybe_chr {
+                    self.endpoints.insert(*chr_name, chr.clone());
+                    handle_map.insert(chr.value_handle, *chr_name);
                 }
-                ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
-                    DeviceImplCommand::Write(write_msg) => {
-                        match endpoints.get(&write_msg.endpoint) {
-                            Some(chr) => {
-                                device.command(&chr, &write_msg.data).unwrap();
-                                state
-                                    .lock()
-                                    .unwrap()
-                                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
-                            }
-                            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
-                                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-                                    &format!(
-                                        "Device does not contain an endpoint named {}",
-                                        write_msg.endpoint
-                                    )
-                                    .to_owned(),
-                                )),
-                            )),
-                        }
-                    }
-                    DeviceImplCommand::Subscribe(sub_msg) => {
-                        match endpoints.get(&sub_msg.endpoint) {
-                            Some(chr) => {
-                                device.subscribe(&chr).unwrap();
-                                state
-                                    .lock()
-                                    .unwrap()
-                                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
-                            }
-                            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
-                                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-                                    &format!(
-                                        "Device does not contain an endpoint named {}",
-                                        sub_msg.endpoint
-                                    )
-                                    .to_owned(),
-                                )),
-                            )),
-                        }
-                    }
-                    DeviceImplCommand::Unsubscribe(sub_msg) => {
-                        match endpoints.get(&sub_msg.endpoint) {
-                            Some(chr) => {
-                                device.unsubscribe(&chr).unwrap();
-                                state
-                                    .lock()
-                                    .unwrap()
-                                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
-                            }
-                            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
-                                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-                                    &format!(
-                                        "Device does not contain an endpoint named {}",
-                                        sub_msg.endpoint
-                                    )
-                                    .to_owned(),
-                                )),
-                            )),
-                        }
-                    }
-                    _ => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
-                        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-                            "Buttplug-rs does not yet handle reads",
-                        )),
+            }
+        }
+        let os = self.output_sender.clone();
+        self.device.on_notification(Box::new(move |notification: ValueNotification| {
+            let endpoint = handle_map.get(&notification.handle).unwrap().clone();
+            let sender = os.clone();
+            task::spawn(async move {
+                sender
+                    .send(ButtplugDeviceEvent::Notification(
+                        endpoint,
+                        notification.value,
+                    ))
+                    .await
+            });
+        }));
+        let device_info = ButtplugDeviceImplInfo {
+            endpoints: self.endpoints.keys().cloned().collect(),
+            manufacturer_name: None,
+            product_name: None,
+            serial_number: None,
+        };
+        info!("Device connected!");
+        state
+            .lock()
+            .unwrap()
+            .set_reply(ButtplugDeviceReturn::Connected(device_info));
+    }
+
+    fn handle_write(&mut self, write_msg: &DeviceWriteCmd, state: &mut DeviceReturnStateShared) {
+        match self.endpoints.get(&write_msg.endpoint) {
+            Some(chr) => {
+                self.device.command(&chr, &write_msg.data).unwrap();
+                state
+                    .lock()
+                    .unwrap()
+                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+            }
+            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+                    &format!(
+                        "Device does not contain an endpoint named {}",
+                        write_msg.endpoint
+                    )
+                        .to_owned(),
+                )),
+            )),
+        }
+    }
+
+    fn handle_subscribe(&mut self, sub_msg: &DeviceSubscribeCmd, state: &mut DeviceReturnStateShared) {
+        match self.endpoints.get(&sub_msg.endpoint) {
+            Some(chr) => {
+                self.device.subscribe(&chr).unwrap();
+                state
+                    .lock()
+                    .unwrap()
+                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+            }
+            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+                    &format!(
+                        "Device does not contain an endpoint named {}",
+                        sub_msg.endpoint
+                    )
+                        .to_owned(),
+                )),
+            )),
+        }
+    }
+
+    fn handle_unsubscribe(&mut self, sub_msg: &DeviceUnsubscribeCmd, state: &mut DeviceReturnStateShared) {
+        match self.endpoints.get(&sub_msg.endpoint) {
+            Some(chr) => {
+                self.device.subscribe(&chr).unwrap();
+                state
+                    .lock()
+                    .unwrap()
+                    .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+            }
+            None => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+                ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+                    &format!(
+                        "Device does not contain an endpoint named {}",
+                        sub_msg.endpoint
+                    )
+                        .to_owned(),
+                )),
+            )),
+        }
+    }
+
+    pub fn handle_device_command(&mut self, command: &ButtplugDeviceCommand, state: &mut DeviceReturnStateShared) {
+        match command {
+            ButtplugDeviceCommand::Connect => {
+                self.handle_connection(state);
+            }
+            ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
+                DeviceImplCommand::Write(write_msg) => {
+                    self.handle_write(write_msg, state);
+                }
+                DeviceImplCommand::Subscribe(sub_msg) => {
+                    self.handle_subscribe(sub_msg, state);
+                }
+                DeviceImplCommand::Unsubscribe(sub_msg) => {
+                    self.handle_unsubscribe(sub_msg, state);
+                }
+                _ => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+                    ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+                        "Buttplug-rs does not yet handle reads",
                     )),
-                },
-                ButtplugDeviceCommand::Disconnect => {}
+                )),
             },
-            // TODO implement output sending
-            RumbleCommLoopChannelValue::DeviceOutput(_raw_reading) => {}
-            RumbleCommLoopChannelValue::ChannelClosed => {}
+            ButtplugDeviceCommand::Disconnect => {
+                self.device.disconnect();
+            }
+        }
+    }
+
+    pub fn handle_device_notification(&mut self, reading: &RawReading) {
+    }
+
+    pub fn handle_device_event(&mut self, event: &CentralEvent) {
+    }
+
+    pub async fn run(&mut self) {
+        let (_notification_sender, mut notification_receiver) = channel::<RawReading>(256);
+        loop {
+            let receiver = async {
+                match self.write_receiver.next().await {
+                    Some((command, state)) => RumbleCommLoopChannelValue::DeviceCommand(command, state),
+                    None => RumbleCommLoopChannelValue::ChannelClosed,
+                }
+            };
+            let notification = async {
+                // We own both sides of this so it'll never actually die. Unwrap
+                // with impunity.
+                RumbleCommLoopChannelValue::DeviceOutput(notification_receiver.next().await.unwrap())
+            };
+            // Race our device input (from the client side) and any subscribed
+            // notifications.
+            match receiver.race(notification).await {
+                RumbleCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state),
+                // TODO implement output sending
+                RumbleCommLoopChannelValue::DeviceOutput(_raw_reading) => {}
+                RumbleCommLoopChannelValue::DeviceEvent(_event) => {}
+                RumbleCommLoopChannelValue::ChannelClosed => {}
+            }
         }
     }
 }
@@ -342,7 +384,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
             // The new watchdog async-std executor will at least leave this task on
             // its own thread in time, but I'm not sure when that's landing.
             task::spawn(async move {
-                rumble_comm_loop(device, p, device_receiver, output_sender).await;
+                let mut event_loop = RumbleInternalEventLoop::new(device, p, device_receiver, output_sender);
+                event_loop.run().await;
             });
             let fut = DeviceReturnFuture::default();
             let waker = fut.get_state_clone();
@@ -378,12 +421,6 @@ pub struct RumbleBLEDeviceImpl {
 
 unsafe impl Send for RumbleBLEDeviceImpl {}
 unsafe impl Sync for RumbleBLEDeviceImpl {}
-
-fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
-    let mut rumble_uuid = uuid.as_bytes().clone();
-    rumble_uuid.reverse();
-    UUID::B128(rumble_uuid)
-}
 
 impl RumbleBLEDeviceImpl {
     pub fn new(
@@ -442,9 +479,14 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     fn endpoints(&self) -> Vec<Endpoint> {
         self.endpoints.clone()
     }
-    fn disconnect(&self) {
-        todo!("implement disconnect");
+
+    async fn disconnect(&self) {
+        self.send_to_device_task(
+            ButtplugDeviceCommand::Disconnect,
+            "Cannot disconnect device"
+        ).await;
     }
+
     fn box_clone(&self) -> Box<dyn DeviceImpl> {
         Box::new((*self).clone())
     }
@@ -454,7 +496,7 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
             ButtplugDeviceCommand::Message(msg.into()),
             "Cannot write to endpoint",
         )
-        .await
+            .await
     }
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
@@ -467,7 +509,7 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
             ButtplugDeviceCommand::Message(msg.into()),
             "Cannot subscribe",
         )
-        .await
+            .await
     }
 
     async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
@@ -475,7 +517,7 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
             ButtplugDeviceCommand::Message(msg.into()),
             "Cannot unsubscribe",
         )
-        .await
+            .await
     }
 }
 

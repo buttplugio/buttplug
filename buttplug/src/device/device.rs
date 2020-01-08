@@ -192,7 +192,7 @@ pub trait DeviceImpl: Sync + Send {
     fn address(&self) -> &str;
     fn connected(&self) -> bool;
     fn endpoints(&self) -> Vec<Endpoint>;
-    fn disconnect(&self);
+    async fn disconnect(&self);
     fn box_clone(&self) -> Box<dyn DeviceImpl>;
     fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent>;
 
