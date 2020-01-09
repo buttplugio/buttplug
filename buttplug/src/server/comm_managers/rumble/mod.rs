@@ -3,7 +3,7 @@ mod rumble_device_impl;
 
 use crate::{
     core::{
-        errors::ButtplugError,
+        errors::{ButtplugError, ButtplugDeviceError},
     },
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
@@ -23,8 +23,11 @@ use rumble::bluez::{adapter::ConnectedAdapter, manager::Manager};
 use rumble::winrtble::{adapter::Adapter, manager::Manager};
 
 pub struct RumbleBLECommunicationManager {
+    // Rumble says to only have one manager at a time, so we'll have the comm
+    // manager hold it.
     manager: Manager,
     device_sender: Sender<DeviceCommunicationEvent>,
+    scanning_sender: Option<Sender<bool>>
 }
 
 #[cfg(feature = "winrt-ble")]
@@ -49,6 +52,7 @@ impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
         Self {
             manager: Manager::new(),
             device_sender,
+            scanning_sender: None,
         }
     }
 
@@ -57,6 +61,7 @@ impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
         Self {
             manager: Manager::new().unwrap(),
             device_sender,
+            scanning_sender: None,
         }
     }
 }
@@ -68,8 +73,9 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
         debug!("Bringing up adapter.");
         let central = self.get_central();
         let device_sender = self.device_sender.clone();
+        let (sender, mut receiver) = channel(256);
+        self.scanning_sender = Some(sender.clone());
         task::spawn(async move {
-            let (sender, mut receiver) = channel(256);
             let on_event = move |event: CentralEvent| match event {
                 CentralEvent::DeviceDiscovered(_) => {
                     let s = sender.clone();
@@ -79,13 +85,17 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                 }
                 _ => {}
             };
+            // TODO There's no way to unsubscribe central event handlers. That
+            // needs to be fixed in rumble somehow, but for now we'll have to
+            // make our handlers exit early after dying or something?
             central.on_event(Box::new(on_event));
             info!("Starting scan.");
             central.start_scan().unwrap();
             // TODO This should be "tried addresses" probably. Otherwise if we
             // want to connect, say, 2 launches, we're going to have a Bad Time.
             let mut tried_names: Vec<String> = vec![];
-            // This needs a way to cancel when we call stop_scanning.
+            // When stop_scanning is called, this will get false and stop the
+            // task.
             while receiver.next().await.unwrap() {
                 for p in central.peripherals() {
                     // If a device has no discernable name, we can't do anything
@@ -108,12 +118,20 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                     }
                 }
             }
+            central.stop_scan().unwrap();
+            info!("Exiting rumble scanning");
         });
         Ok(())
     }
 
     async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
-        Ok(())
+        if self.scanning_sender.is_some() {
+            let sender = self.scanning_sender.take().unwrap();
+            sender.send(false).await;
+            Ok(())
+        } else {
+            Err(ButtplugDeviceError::new("Scanning not currently happening.").into())
+        }
     }
 
     fn is_scanning(&mut self) -> bool {
