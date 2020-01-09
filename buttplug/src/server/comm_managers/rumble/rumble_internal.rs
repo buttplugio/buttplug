@@ -19,7 +19,7 @@ use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
-use rumble::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
+use rumble::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use std::collections::HashMap;
 use uuid;
 
@@ -28,7 +28,6 @@ pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
 
 enum RumbleCommLoopChannelValue {
     DeviceCommand(ButtplugDeviceCommand, DeviceReturnStateShared),
-    DeviceOutput(RawReading),
     DeviceEvent(CentralEvent),
     ChannelClosed,
 }
@@ -37,6 +36,7 @@ pub struct RumbleInternalEventLoop<T: Peripheral> {
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+    event_receiver: Receiver<CentralEvent>,
     output_sender: Sender<ButtplugDeviceEvent>,
     endpoints: HashMap<Endpoint, Characteristic>,
 }
@@ -48,22 +48,61 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
 }
 
 impl<T: Peripheral> RumbleInternalEventLoop<T> {
-    pub fn new(device: T,
-               protocol: BluetoothLESpecifier,
-               write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-               output_sender: Sender<ButtplugDeviceEvent>) -> Self {
+    pub fn new<C>(central: C,
+                  device: T,
+                  protocol: BluetoothLESpecifier,
+                  write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+                  output_sender: Sender<ButtplugDeviceEvent>) -> Self
+    where C: Central<T> {
+        let (event_sender, event_receiver) = channel(256);
+        // Add ourselves to the central event handler output now, so we don't
+        // have to carry around the Central object. We'll be using this in
+        // connect anyways.
+        let on_event = move |event: CentralEvent| match event {
+            CentralEvent::DeviceConnected(_) => {
+                let s = event_sender.clone();
+                let e = event.clone();
+                task::spawn(async move {
+                    s.send(e).await;
+                });
+            },
+            CentralEvent::DeviceDisconnected(_) => {
+                let s = event_sender.clone();
+                let e = event.clone();
+                task::spawn(async move {
+                    s.send(e).await;
+                });
+            },
+            _ => {}
+        };
+        // TODO There's no way to unsubscribe central event handlers. That
+        // needs to be fixed in rumble somehow, but for now we'll have to
+        // make our handlers exit early after dying or something?
+        central.on_event(Box::new(on_event));
         RumbleInternalEventLoop {
             device,
             protocol,
             write_receiver,
+            event_receiver,
             output_sender,
             endpoints: HashMap::new()
         }
     }
 
-    fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
+    async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
         info!("Connecting to device!");
         self.device.connect().unwrap();
+        loop {
+            match self.event_receiver.next().await.unwrap() {
+                CentralEvent::DeviceConnected(addr) => {
+                    if addr == self.device.address() {
+                        info!("Device {:?} connected!", self.device.properties().local_name);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
         // Rumble only gives you the u16 endpoint handle during
         // notifications so we've gotta create yet another mapping.
         let mut handle_map = HashMap::<u16, Endpoint>::new();
@@ -167,10 +206,10 @@ impl<T: Peripheral> RumbleInternalEventLoop<T> {
         }
     }
 
-    pub fn handle_device_command(&mut self, command: &ButtplugDeviceCommand, state: &mut DeviceReturnStateShared) {
+    pub async fn handle_device_command(&mut self, command: &ButtplugDeviceCommand, state: &mut DeviceReturnStateShared) {
         match command {
             ButtplugDeviceCommand::Connect => {
-                self.handle_connection(state);
+                self.handle_connection(state).await;
             }
             ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
                 DeviceImplCommand::Write(write_msg) => {
@@ -194,33 +233,46 @@ impl<T: Peripheral> RumbleInternalEventLoop<T> {
         }
     }
 
-    pub fn handle_device_notification(&mut self, reading: &RawReading) {
-    }
-
-    pub fn handle_device_event(&mut self, event: &CentralEvent) {
+    pub async fn handle_device_event(&mut self, event: &CentralEvent) {
+        match event {
+            // TODO Ok. Great. We can disconnect, but output_sender doesn't
+            // really *go* anywhere right now. We're just using it in the
+            // Lovense protocol and that's it. We need to be watching for this
+            // up in the device manager too, which is going to be...
+            // interesting, as I have no idea how we'll deal with instances
+            // where we disconnect while waiting in a protocol (for instance, if
+            // the device disconnects while we're doing Lovense init). I may
+            // need to rethink this.
+            CentralEvent::DeviceDisconnected(addr) => {
+                if self.device.address() == *addr {
+                    info!("Device {:?} disconnected", self.device.properties().local_name);
+                    self.output_sender.send(ButtplugDeviceEvent::Removed).await;
+                }
+            },
+            _ => {}
+        }
     }
 
     pub async fn run(&mut self) {
-        let (_notification_sender, mut notification_receiver) = channel::<RawReading>(256);
         loop {
+            let mut wr = self.write_receiver.clone();
             let receiver = async {
-                match self.write_receiver.next().await {
+                match wr.next().await {
                     Some((command, state)) => RumbleCommLoopChannelValue::DeviceCommand(command, state),
                     None => RumbleCommLoopChannelValue::ChannelClosed,
                 }
             };
-            let notification = async {
+            let mut er = self.event_receiver.clone();
+            let event = async {
                 // We own both sides of this so it'll never actually die. Unwrap
                 // with impunity.
-                RumbleCommLoopChannelValue::DeviceOutput(notification_receiver.next().await.unwrap())
+                RumbleCommLoopChannelValue::DeviceEvent(er.next().await.unwrap())
             };
             // Race our device input (from the client side) and any subscribed
             // notifications.
-            match receiver.race(notification).await {
-                RumbleCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state),
-                // TODO implement output sending
-                RumbleCommLoopChannelValue::DeviceOutput(_raw_reading) => {}
-                RumbleCommLoopChannelValue::DeviceEvent(_event) => {}
+            match receiver.race(event).await {
+                RumbleCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state).await,
+                RumbleCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(&event).await,
                 RumbleCommLoopChannelValue::ChannelClosed => {}
             }
         }

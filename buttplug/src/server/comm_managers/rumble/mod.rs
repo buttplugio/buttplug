@@ -110,7 +110,7 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                         // advertisement.
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
-                            let device_creator = Box::new(RumbleBLEDeviceImplCreator::new(p));
+                            let device_creator = Box::new(RumbleBLEDeviceImplCreator::new(p, central.clone()));
                             device_sender
                                 .send(DeviceCommunicationEvent::DeviceFound(device_creator))
                                 .await;

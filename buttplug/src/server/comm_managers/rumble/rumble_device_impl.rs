@@ -17,24 +17,26 @@ use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
-use rumble::api::Peripheral;
+use rumble::api::{Peripheral, Central};
 use async_trait::async_trait;
 use super::rumble_internal::{RumbleInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared};
 
-pub struct RumbleBLEDeviceImplCreator<T: Peripheral + 'static> {
+pub struct RumbleBLEDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
     device: Option<T>,
+    central: C
 }
 
-impl<T: Peripheral> RumbleBLEDeviceImplCreator<T> {
-    pub fn new(device: T) -> Self {
+impl<T: Peripheral, C: Central<T>> RumbleBLEDeviceImplCreator<T, C> {
+    pub fn new(device: T, central: C) -> Self {
         Self {
             device: Some(device),
+            central
         }
     }
 }
 
 #[async_trait]
-impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> {
+impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T, C> {
     fn get_specifier(&self) -> DeviceSpecifier {
         if self.device.is_none() {
             panic!("Cannot call get_specifier after device is taken!");
@@ -70,8 +72,9 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T> 
             //
             // The new watchdog async-std executor will at least leave this task on
             // its own thread in time, but I'm not sure when that's landing.
+            let central = self.central.clone();
             task::spawn(async move {
-                let mut event_loop = RumbleInternalEventLoop::new(device, p, device_receiver, output_sender);
+                let mut event_loop = RumbleInternalEventLoop::new(central, device, p, device_receiver, output_sender);
                 event_loop.run().await;
             });
             let fut = DeviceReturnFuture::default();
@@ -168,10 +171,8 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
 
     async fn disconnect(&self) {
-        self.send_to_device_task(
-            ButtplugDeviceCommand::Disconnect,
-            "Cannot disconnect device"
-        ).await;
+        self.send_to_device_task(ButtplugDeviceCommand::Disconnect,
+                                 "Cannot disconnect device").await;
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {
@@ -179,11 +180,8 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
 
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(
-            ButtplugDeviceCommand::Message(msg.into()),
-            "Cannot write to endpoint",
-        )
-            .await
+        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()),
+                                 "Cannot write to endpoint").await
     }
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
@@ -192,11 +190,8 @@ impl DeviceImpl for RumbleBLEDeviceImpl {
     }
 
     async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(
-            ButtplugDeviceCommand::Message(msg.into()),
-            "Cannot subscribe",
-        )
-            .await
+        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()),
+                                 "Cannot subscribe").await
     }
 
     async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
