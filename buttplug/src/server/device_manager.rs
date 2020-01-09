@@ -146,14 +146,21 @@ impl DeviceManager {
         {
             Some(device) => {
                 dev = device.clone();
-                // TODO This should probably spawn or something
-                dev.parse_message(&device_msg).await
             }
-            None => Err(ButtplugDeviceError::new(&format!(
-                "No device with index {} available",
-                device_msg.get_device_index()
-            )).into())
+            None => {
+                return Err(ButtplugDeviceError::new(&format!(
+                    "No device with index {} available",
+                    device_msg.get_device_index()
+                )).into());
+            }
         }
+        // Note: Don't try moving this up into the Some branch of unlock/get for
+        // the device array. We need to just copy the device out of that as
+        // quickly as possible to release the lock, then actually parse the
+        // message.
+        //
+        // TODO This should probably spawn or something
+        dev.parse_message(&device_msg).await
     }
 
     async fn parse_device_manager_message(&mut self,
@@ -237,6 +244,7 @@ mod test {
             dm.add_comm_manager::<RumbleBLECommunicationManager>();
             dm.start_scanning().await;
             if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
+                dm.stop_scanning().await;
                 info!("{:?}", msg);
                 info!("{:?}", msg.as_protocol_json());
                 match dm
@@ -256,7 +264,7 @@ mod test {
             } else {
                 panic!("Did not get device added message!");
             }
-            task::sleep(Duration::from_secs(2)).await;
+            task::sleep(Duration::from_secs(10)).await;
         });
     }
 }
