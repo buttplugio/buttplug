@@ -82,7 +82,7 @@ async fn wait_for_manager_events(
                                             &device.name().to_owned(),
                                             &device.message_attributes(),
                                         )
-                                        .into(),
+                                            .into(),
                                     )
                                     .await;
                                 device_map.write().unwrap().insert(device_index, device);
@@ -134,65 +134,77 @@ impl DeviceManager {
         Ok(())
     }
 
+    async fn parse_device_message(&mut self,
+                                  device_msg: ButtplugDeviceCommandMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+        let mut dev;
+        match self
+            .devices
+            .read()
+            .unwrap()
+            .get(&device_msg.get_device_index())
+        {
+            Some(device) => {
+                dev = device.clone();
+                // TODO This should probably spawn or something
+                dev.parse_message(&device_msg).await
+            }
+            None => Err(ButtplugDeviceError::new(&format!(
+                "No device with index {} available",
+                device_msg.get_device_index()
+            )).into())
+        }
+    }
+
+    async fn parse_device_manager_message(&mut self,
+                                          manager_msg: ButtplugDeviceManagerMessageUnion,
+    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+        match manager_msg {
+            ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
+                let devices = self
+                    .devices
+                    .read()
+                    .unwrap()
+                    .iter()
+                    .map(|(id, device)|
+                         DeviceMessageInfo {
+                             device_index: *id,
+                             device_name: device.name().to_string(),
+                             device_messages: device.message_attributes(),
+                         }
+                    )
+                    .collect();
+                let mut device_list = DeviceList::new(devices);
+                device_list.set_id(msg.get_id());
+                Ok(device_list.into())
+            }
+            ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
+                Ok(messages::Ok::new(msg.get_id()).into())
+            }
+            ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
+                self.start_scanning().await?;
+                Ok(messages::Ok::new(msg.get_id()).into())
+            }
+            ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
+                self.stop_scanning().await?;
+                Ok(messages::Ok::new(msg.get_id()).into())
+            }
+        }
+    }
+
     pub async fn parse_message(
         &mut self,
         msg: ButtplugMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         // If this is a device command message, just route it directly to the
         // device.
-        if let Ok(device_msg) = ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
-            let mut dev;
-            if let Some(device) = self
-                .devices
-                .read()
-                .unwrap()
-                .get(&device_msg.get_device_index())
-            {
-                dev = device.clone();
-            } else {
-                return Err(ButtplugDeviceError::new(&format!(
-                    "No device with index {} available",
-                    device_msg.get_device_index()
-                ))
-                .into());
-            }
-            // TODO This should probably spawn or something
-            dev.parse_message(&device_msg).await
-        } else {
-            if let Ok(manager_msg) = ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
-                match manager_msg {
-                    ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
-                        let devices = self
-                            .devices
-                            .read()
-                            .unwrap()
-                            .iter()
-                            .map(|(id, device)|
-                                 DeviceMessageInfo {
-                                     device_index: *id,
-                                     device_name: device.name().to_string(),
-                                     device_messages: device.message_attributes(),
-                                 }
-                            )
-                            .collect();
-                        let mut device_list = DeviceList::new(devices);
-                        device_list.set_id(msg.get_id());
-                        Ok(device_list.into())
-                    }
-                    ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
-                        Ok(messages::Ok::new(msg.get_id()).into())
-                    }
-                    ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
-                        self.start_scanning().await?;
-                        Ok(messages::Ok::new(msg.get_id()).into())
-                    }
-                    ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
-                        self.stop_scanning().await?;
-                        Ok(messages::Ok::new(msg.get_id()).into())
-                    }
+        match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
+            Ok(device_msg) => self.parse_device_message(device_msg).await,
+            Err(_) => {
+                match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
+                    Ok(manager_msg) => self.parse_device_manager_message(manager_msg).await,
+                    Err(_) => Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
                 }
-            } else {
-                Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
             }
         }
     }
