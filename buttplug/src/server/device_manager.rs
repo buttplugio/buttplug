@@ -236,6 +236,7 @@ mod test {
     use std::time::Duration;
 
     #[test]
+    #[ignore]
     pub fn test_device_manager_creation() {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async {
