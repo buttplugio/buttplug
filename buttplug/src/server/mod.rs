@@ -124,7 +124,7 @@ impl ButtplugServer {
 mod test {
     use super::*;
     #[cfg(any(feature = "linux-ble", feature = "winrt-ble"))]
-    use crate::server::comm_managers::rumble::RumbleBLECommunicationManager;
+    use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
     use async_std::{
         prelude::StreamExt,
         sync::{channel, Receiver},

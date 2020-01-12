@@ -1,5 +1,5 @@
-mod rumble_internal;
-mod rumble_device_impl;
+mod btleplug_internal;
+mod btleplug_device_impl;
 
 use crate::{
     core::{
@@ -14,16 +14,16 @@ use async_std::{
     sync::{channel, Sender},
     task,
 };
-use rumble_device_impl::RumbleBLEDeviceImplCreator;
+use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use async_trait::async_trait;
-use rumble::api::{Central, CentralEvent, Peripheral};
+use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(feature = "linux-ble")]
-use rumble::bluez::{adapter::ConnectedAdapter, manager::Manager};
+use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
 #[cfg(feature = "winrt-ble")]
-use rumble::winrtble::{adapter::Adapter, manager::Manager};
+use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 
-pub struct RumbleBLECommunicationManager {
-    // Rumble says to only have one manager at a time, so we'll have the comm
+pub struct BtlePlugCommunicationManager {
+    // BtlePlug says to only have one manager at a time, so we'll have the comm
     // manager hold it.
     manager: Manager,
     device_sender: Sender<DeviceCommunicationEvent>,
@@ -31,14 +31,14 @@ pub struct RumbleBLECommunicationManager {
 }
 
 #[cfg(feature = "winrt-ble")]
-impl RumbleBLECommunicationManager {
+impl BtlePlugCommunicationManager {
     fn get_central(&self) -> Adapter {
         self.manager.adapters().unwrap()
     }
 }
 
 #[cfg(feature = "linux-ble")]
-impl RumbleBLECommunicationManager {
+impl BtlePlugCommunicationManager {
     fn get_central(&self) -> ConnectedAdapter {
         let adapters = self.manager.adapters().unwrap();
         let adapter = adapters.into_iter().nth(0).unwrap();
@@ -46,7 +46,7 @@ impl RumbleBLECommunicationManager {
     }
 }
 
-impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
+impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
     #[cfg(feature = "winrt-ble")]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
@@ -67,7 +67,7 @@ impl DeviceCommunicationManagerCreator for RumbleBLECommunicationManager {
 }
 
 #[async_trait]
-impl DeviceCommunicationManager for RumbleBLECommunicationManager {
+impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
         // get the first bluetooth adapter
         debug!("Bringing up adapter.");
@@ -104,13 +104,13 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
                     // TODO Should probably at least log this and add it to the
                     // tried_addresses thing, once that exists.
                     if let Some(name) = p.properties().local_name {
-                        debug!("Found BLE device {}", name);
+                        debug!("Found  device {}", name);
                         // Names are the only way we really have to test devices
                         // at the moment. Most devices don't send services on
                         // advertisement.
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
-                            let device_creator = Box::new(RumbleBLEDeviceImplCreator::new(p, central.clone()));
+                            let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
                             device_sender
                                 .send(DeviceCommunicationEvent::DeviceFound(device_creator))
                                 .await;
@@ -141,7 +141,7 @@ impl DeviceCommunicationManager for RumbleBLECommunicationManager {
 
 #[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble")))]
 mod test {
-    use super::RumbleBLECommunicationManager;
+    use super::BtlePlugCommunicationManager;
     use crate::{
         core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
         server::device_manager::{
@@ -157,7 +157,7 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         task::block_on(async move {
             let (sender, mut receiver) = channel(256);
-            let mut mgr = RumbleBLECommunicationManager::new(sender);
+            let mut mgr = BtlePlugCommunicationManager::new(sender);
             mgr.start_scanning().await;
             loop {
                 match receiver.next().await.unwrap() {

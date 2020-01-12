@@ -17,16 +17,16 @@ use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
-use rumble::api::{Peripheral, Central};
+use btleplug::api::{Peripheral, Central};
 use async_trait::async_trait;
-use super::rumble_internal::{RumbleInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared};
+use super::btleplug_internal::{BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared};
 
-pub struct RumbleBLEDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
+pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
     device: Option<T>,
     central: C
 }
 
-impl<T: Peripheral, C: Central<T>> RumbleBLEDeviceImplCreator<T, C> {
+impl<T: Peripheral, C: Central<T>> BtlePlugDeviceImplCreator<T, C> {
     pub fn new(device: T, central: C) -> Self {
         Self {
             device: Some(device),
@@ -36,7 +36,7 @@ impl<T: Peripheral, C: Central<T>> RumbleBLEDeviceImplCreator<T, C> {
 }
 
 #[async_trait]
-impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for RumbleBLEDeviceImplCreator<T, C> {
+impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T, C> {
     fn get_specifier(&self) -> DeviceSpecifier {
         if self.device.is_none() {
             panic!("Cannot call get_specifier after device is taken!");
@@ -74,7 +74,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for RumbleBLEDevice
             // its own thread in time, but I'm not sure when that's landing.
             let central = self.central.clone();
             task::spawn(async move {
-                let mut event_loop = RumbleInternalEventLoop::new(central, device, p, device_receiver, output_sender);
+                let mut event_loop = BtlePlugInternalEventLoop::new(central, device, p, device_receiver, output_sender);
                 event_loop.run().await;
             });
             let fut = DeviceReturnFuture::default();
@@ -83,7 +83,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for RumbleBLEDevice
                 .send((ButtplugDeviceCommand::Connect, waker))
                 .await;
             match fut.await {
-                ButtplugDeviceReturn::Connected(info) => Ok(Box::new(RumbleBLEDeviceImpl {
+                ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl {
                     name,
                     address,
                     endpoints: info.endpoints,
@@ -101,7 +101,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for RumbleBLEDevice
 }
 
 #[derive(Clone)]
-pub struct RumbleBLEDeviceImpl {
+pub struct BtlePlugDeviceImpl {
     name: String,
     address: String,
     endpoints: Vec<Endpoint>,
@@ -109,10 +109,10 @@ pub struct RumbleBLEDeviceImpl {
     event_receiver: Receiver<ButtplugDeviceEvent>,
 }
 
-unsafe impl Send for RumbleBLEDeviceImpl {}
-unsafe impl Sync for RumbleBLEDeviceImpl {}
+unsafe impl Send for BtlePlugDeviceImpl {}
+unsafe impl Sync for BtlePlugDeviceImpl {}
 
-impl RumbleBLEDeviceImpl {
+impl BtlePlugDeviceImpl {
     pub fn new(
         name: &String,
         address: &String,
@@ -147,7 +147,7 @@ impl RumbleBLEDeviceImpl {
 }
 
 #[async_trait]
-impl DeviceImpl for RumbleBLEDeviceImpl {
+impl DeviceImpl for BtlePlugDeviceImpl {
     fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent> {
         self.event_receiver.clone()
     }

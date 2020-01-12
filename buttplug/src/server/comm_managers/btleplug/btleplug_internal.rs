@@ -19,20 +19,20 @@ use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
-use rumble::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
+use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use std::collections::HashMap;
 use uuid;
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
 
-enum RumbleCommLoopChannelValue {
+enum BtlePlugCommLoopChannelValue {
     DeviceCommand(ButtplugDeviceCommand, DeviceReturnStateShared),
     DeviceEvent(CentralEvent),
     ChannelClosed,
 }
 
-pub struct RumbleInternalEventLoop<T: Peripheral> {
+pub struct BtlePlugInternalEventLoop<T: Peripheral> {
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
@@ -47,7 +47,7 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
     UUID::B128(rumble_uuid)
 }
 
-impl<T: Peripheral> RumbleInternalEventLoop<T> {
+impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     pub fn new<C>(central: C,
                   device: T,
                   protocol: BluetoothLESpecifier,
@@ -79,7 +79,7 @@ impl<T: Peripheral> RumbleInternalEventLoop<T> {
         // needs to be fixed in rumble somehow, but for now we'll have to
         // make our handlers exit early after dying or something?
         central.on_event(Box::new(on_event));
-        RumbleInternalEventLoop {
+        BtlePlugInternalEventLoop {
             device,
             protocol,
             write_receiver,
@@ -103,7 +103,7 @@ impl<T: Peripheral> RumbleInternalEventLoop<T> {
                 _ => {}
             }
         }
-        // Rumble only gives you the u16 endpoint handle during
+        // BtlePlug only gives you the u16 endpoint handle during
         // notifications so we've gotta create yet another mapping.
         let mut handle_map = HashMap::<u16, Endpoint>::new();
         let chars = self.device.discover_characteristics().unwrap();
@@ -258,22 +258,22 @@ impl<T: Peripheral> RumbleInternalEventLoop<T> {
             let mut wr = self.write_receiver.clone();
             let receiver = async {
                 match wr.next().await {
-                    Some((command, state)) => RumbleCommLoopChannelValue::DeviceCommand(command, state),
-                    None => RumbleCommLoopChannelValue::ChannelClosed,
+                    Some((command, state)) => BtlePlugCommLoopChannelValue::DeviceCommand(command, state),
+                    None => BtlePlugCommLoopChannelValue::ChannelClosed,
                 }
             };
             let mut er = self.event_receiver.clone();
             let event = async {
                 // We own both sides of this so it'll never actually die. Unwrap
                 // with impunity.
-                RumbleCommLoopChannelValue::DeviceEvent(er.next().await.unwrap())
+                BtlePlugCommLoopChannelValue::DeviceEvent(er.next().await.unwrap())
             };
             // Race our device input (from the client side) and any subscribed
             // notifications.
             match receiver.race(event).await {
-                RumbleCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state).await,
-                RumbleCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(&event).await,
-                RumbleCommLoopChannelValue::ChannelClosed => {}
+                BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state).await,
+                BtlePlugCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(&event).await,
+                BtlePlugCommLoopChannelValue::ChannelClosed => {}
             }
         }
     }

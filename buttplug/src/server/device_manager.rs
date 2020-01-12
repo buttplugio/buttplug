@@ -230,7 +230,7 @@ mod test {
     use super::DeviceManager;
     use crate::{
         core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, RequestDeviceList},
-        server::comm_managers::rumble::RumbleBLECommunicationManager,
+        server::comm_managers::btleplug::BtlePlugCommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
     use std::time::Duration;
@@ -241,7 +241,7 @@ mod test {
         task::block_on(async {
             let (sender, mut receiver) = channel(256);
             let mut dm = DeviceManager::new(sender);
-            dm.add_comm_manager::<RumbleBLECommunicationManager>();
+            dm.add_comm_manager::<BtlePlugCommunicationManager>();
             dm.start_scanning().await;
             if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
                 dm.stop_scanning().await;
