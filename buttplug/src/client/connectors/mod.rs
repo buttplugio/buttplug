@@ -30,6 +30,7 @@ use futures::future::Future;
 #[cfg(feature = "serialize_json")]
 use messagesorter::ClientConnectorMessageSorter;
 use std::{error::Error, fmt};
+use crate::server::device_manager::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 
 pub type ButtplugClientConnectionState =
     ButtplugFutureState<Result<(), ButtplugClientConnectorError>>;
@@ -90,6 +91,13 @@ impl ButtplugEmbeddedClientConnector {
             recv: Some(recv),
             server: ButtplugServer::new(&name, max_ping_time, send),
         }
+    }
+
+    pub fn add_comm_manager<T>(&mut self)
+        where
+            T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    {
+        self.server.add_comm_manager::<T>();
     }
 }
 
