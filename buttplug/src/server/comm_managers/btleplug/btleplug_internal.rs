@@ -93,14 +93,15 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         info!("Connecting to device!");
         self.device.connect().unwrap();
         loop {
-            match self.event_receiver.next().await.unwrap() {
+            let event = self.event_receiver.next().await;
+            match event.unwrap() {
                 CentralEvent::DeviceConnected(addr) => {
                     if addr == self.device.address() {
                         info!("Device {:?} connected!", self.device.properties().local_name);
                         break;
                     }
                 }
-                _ => {}
+                _ => warn!("Got unexpected message {:?}", event),
             }
         }
         // BtlePlug only gives you the u16 endpoint handle during
