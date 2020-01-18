@@ -7,7 +7,8 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{lovense::LovenseProtocolCreator, ButtplugProtocolCreator};
+use super::protocol::{lovense::LovenseProtocolCreator, picobong::PicobongProtocolCreator,
+                      ButtplugProtocolCreator};
 use crate::{
     core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
     device::Endpoint,
@@ -265,6 +266,12 @@ impl DeviceConfigurationManager {
             "lovense".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(LovenseProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "picobong".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(PicobongProtocolCreator::new(config))
             }),
         );
         DeviceConfigurationManager { config, protocols }

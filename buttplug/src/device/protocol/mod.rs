@@ -1,4 +1,5 @@
 pub mod lovense;
+pub mod picobong;
 
 use super::device::DeviceImpl;
 use crate::core::{
