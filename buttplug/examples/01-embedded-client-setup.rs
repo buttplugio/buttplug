@@ -182,13 +182,13 @@ async fn embedded_connector_example() {
 
                 if dev.allowed_messages.contains_key("VibrateCmd") {
                     dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
-                    println!("{} should start vibrating!", dev.name);/*
+                    println!("{} should start vibrating!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;
                     // All devices also have a "stop" command that will make
                     // them stop whatever they're doing.
                     dev.stop().await.unwrap();
                     println!("{} should stop vibrating!", dev.name);
-                    task::sleep(Duration::from_secs(1)).await;*/
+                    task::sleep(Duration::from_secs(1)).await;
                 } else {
                     println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
                 }
