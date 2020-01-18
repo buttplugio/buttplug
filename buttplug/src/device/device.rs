@@ -252,27 +252,29 @@ impl ButtplugDevice {
                 // configuration for that device, try to initialize the implementation.
                 // This usually means trying to connect to whatever the device is,
                 // finding endpoints, etc.
-                match device_creator.try_create_device_impl(config).await {
-                    Ok(device_impl) => {
-                        info!("Found Buttplug Device {}", device_impl.name());
-                        // If we've made it this far, we now have a connected device
-                        // implementation with endpoints set up. We now need to run whatever
-                        // protocol initialization might need to happen. We'll fetch a protocol
-                        // creator, pass the device implementation to it, then let it do
-                        // whatever it needs. For most protocols, this is a no-op. However, for
-                        // devices like Lovense, some Kiiroo, etc, this can get fairly
-                        // complicated.
-
-                        let proto_creator = device_mgr.get_protocol_creator(&config_name).unwrap();
-                        match proto_creator.try_create_protocol(&device_impl).await {
-                            Ok(protocol_impl) => {
-                                Ok(Some(ButtplugDevice::new(protocol_impl, device_impl)))
+                if let Some(proto_creator) = device_mgr.get_protocol_creator(&config_name)
+                {
+                    return match device_creator.try_create_device_impl(config).await {
+                        Ok(device_impl) => {
+                            info!("Found Buttplug Device {}", device_impl.name());
+                            // If we've made it this far, we now have a connected device
+                            // implementation with endpoints set up. We now need to run whatever
+                            // protocol initialization might need to happen. We'll fetch a protocol
+                            // creator, pass the device implementation to it, then let it do
+                            // whatever it needs. For most protocols, this is a no-op. However, for
+                            // devices like Lovense, some Kiiroo, etc, this can get fairly
+                            // complicated.
+                            match proto_creator.try_create_protocol(&device_impl).await {
+                                Ok(protocol_impl) => {
+                                    Ok(Some(ButtplugDevice::new(protocol_impl, device_impl)))
+                                }
+                                Err(e) => Err(e),
                             }
-                            Err(e) => Err(e),
                         }
+                        Err(e) => Err(e),
                     }
-                    Err(e) => Err(e),
                 }
+                return Ok(None)
             }
             None => return Ok(None),
         }
