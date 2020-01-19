@@ -1,13 +1,13 @@
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::{self, RawReading},
+        messages::{self},
     },
     device::{
         device::{
             ButtplugDeviceCommand, ButtplugDeviceEvent,
             ButtplugDeviceImplInfo, ButtplugDeviceReturn, DeviceImplCommand,
-            DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
+            DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
         },
         configuration_manager::BluetoothLESpecifier,
         Endpoint,
