@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+#![type_length_limit = "5500000"]
+
 // To begin our exploration of the Buttplug library, we're going to set up a client
 // with an embedded connector.
 //
