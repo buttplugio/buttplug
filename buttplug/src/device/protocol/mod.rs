@@ -1,5 +1,11 @@
 pub mod lovense;
+pub mod maxpro;
 pub mod picobong;
+pub mod prettylove;
+pub mod realov;
+pub mod svakom;
+pub mod youcups;
+pub mod youou;
 
 use super::device::DeviceImpl;
 use crate::core::{
