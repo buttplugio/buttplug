@@ -225,7 +225,13 @@ impl DeviceManager {
     }
 }
 
-#[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble")))]
+impl Drop for DeviceManager {
+    fn drop(&mut self) {
+        info!("Dropping device manager!");
+    }
+}
+
+#[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble", feature = "corebluetooth-ble")))]
 mod test {
     use super::DeviceManager;
     use crate::{

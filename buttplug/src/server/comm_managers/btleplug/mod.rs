@@ -21,16 +21,18 @@ use btleplug::api::{Central, CentralEvent, Peripheral};
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
 #[cfg(feature = "winrt-ble")]
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
+#[cfg(feature = "corebluetooth-ble")]
+use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 
 pub struct BtlePlugCommunicationManager {
     // BtlePlug says to only have one manager at a time, so we'll have the comm
     // manager hold it.
     manager: Manager,
     device_sender: Sender<DeviceCommunicationEvent>,
-    scanning_sender: Option<Sender<bool>>
+    scanning_sender: Option<Sender<bool>>,
 }
 
-#[cfg(feature = "winrt-ble")]
+#[cfg(any(feature = "winrt-ble", feature = "corebluetooth-ble"))]
 impl BtlePlugCommunicationManager {
     fn get_central(&self) -> Adapter {
         self.manager.adapters().unwrap()
@@ -47,7 +49,7 @@ impl BtlePlugCommunicationManager {
 }
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
-    #[cfg(feature = "winrt-ble")]
+    #[cfg(any(feature = "winrt-ble", feature = "corebluetooth-ble"))]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
             manager: Manager::new(),
@@ -136,6 +138,15 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
     fn is_scanning(&mut self) -> bool {
         false
+    }
+}
+
+impl Drop for BtlePlugCommunicationManager {
+    fn drop(&mut self) {
+        info!("Dropping Comm Manager!");
+        task::block_on(async {
+            self.stop_scanning().await;
+        });
     }
 }
 

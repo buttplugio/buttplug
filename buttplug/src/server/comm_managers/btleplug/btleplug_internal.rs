@@ -103,9 +103,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                 _ => {}
             }
         }
-        // BtlePlug only gives you the u16 endpoint handle during
-        // notifications so we've gotta create yet another mapping.
-        let mut handle_map = HashMap::<u16, Endpoint>::new();
+        // Map UUIDs to endpoints
+        let mut uuid_map = HashMap::<UUID, Endpoint>::new();
         let chars = self.device.discover_characteristics().unwrap();
         for proto_service in self.protocol.services.values() {
             for (chr_name, chr_uuid) in proto_service.into_iter() {
@@ -113,13 +112,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                     chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
                 if let Some(chr) = maybe_chr {
                     self.endpoints.insert(*chr_name, chr.clone());
-                    handle_map.insert(chr.value_handle, *chr_name);
+                    uuid_map.insert(uuid_to_rumble(chr_uuid), *chr_name);
                 }
             }
         }
         let os = self.output_sender.clone();
         self.device.on_notification(Box::new(move |notification: ValueNotification| {
-            let endpoint = handle_map.get(&notification.handle).unwrap().clone();
+            let endpoint = uuid_map.get(&notification.uuid).unwrap().clone();
             let sender = os.clone();
             task::spawn(async move {
                 sender
@@ -273,7 +272,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
             match receiver.race(event).await {
                 BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => self.handle_device_command(command, state).await,
                 BtlePlugCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(&event).await,
-                BtlePlugCommLoopChannelValue::ChannelClosed => {}
+                BtlePlugCommLoopChannelValue::ChannelClosed => {
+                    info!("CHANNEL CLOSED");
+                    return;
+                }
             }
         }
     }
