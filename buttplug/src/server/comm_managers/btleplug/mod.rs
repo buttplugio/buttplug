@@ -49,16 +49,6 @@ impl BtlePlugCommunicationManager {
 }
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
-    #[cfg(any(feature = "winrt-ble", feature = "corebluetooth-ble"))]
-    fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
-        Self {
-            manager: Manager::new(),
-            device_sender,
-            scanning_sender: None,
-        }
-    }
-
-    #[cfg(feature = "linux-ble")]
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
         Self {
             manager: Manager::new().unwrap(),
@@ -106,7 +96,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                     // TODO Should probably at least log this and add it to the
                     // tried_addresses thing, once that exists.
                     if let Some(name) = p.properties().local_name {
-                        debug!("Found  device {}", name);
+                        debug!("Found device {}", name);
                         // Names are the only way we really have to test devices
                         // at the moment. Most devices don't send services on
                         // advertisement.
