@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+#![type_length_limit = "15974808"]
+
 // To begin our exploration of the Buttplug library, we're going to set up a client
 // with an embedded connector.
 //
@@ -23,7 +25,7 @@ use buttplug::client::{
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
 use async_std::task;
-use buttplug::client::device::VibrateCommand;
+use buttplug::client::device::{RotateCommand, VibrateCommand};
 #[cfg(any(
     feature = "linux-ble",
     feature = "winrt-ble",
@@ -192,7 +194,31 @@ async fn embedded_connector_example() {
                 //
                 // For this example, we'll use the simple single value.
 
+                println!("Device: {:?}", dev);
+
                 if dev.allowed_messages.contains_key("VibrateCmd") {
+                    let count = dev
+                        .allowed_messages
+                        .get("VibrateCmd")
+                        .unwrap()
+                        .feature_count
+                        .unwrap();
+
+                    if count > 1 {
+                        for i in 0..count {
+                            let mut speeds: Vec<f64> = vec![];
+                            for j in 0..count {
+                                speeds.push(if i == j { 1.0 } else { 0.0 });
+                            }
+                            dev.vibrate(VibrateCommand::SpeedVec(speeds)).await.unwrap();
+                            println!("{} should start vibrating on motor {}!", dev.name, i + 1);
+                            task::sleep(Duration::from_secs(1)).await;
+                        }
+                        dev.stop().await.unwrap();
+                        println!("{} should stop vibrating!", dev.name);
+                        task::sleep(Duration::from_secs(1)).await;
+                    }
+
                     dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
                     println!("{} should start vibrating!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;
@@ -201,8 +227,20 @@ async fn embedded_connector_example() {
                     dev.stop().await.unwrap();
                     println!("{} should stop vibrating!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;
-                } else {
-                    println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
+                }
+
+                if dev.allowed_messages.contains_key("RotateCmd") {
+                    dev.rotate(RotateCommand::Rotate(1.0, true)).await.unwrap();
+                    println!("{} should start rotating!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                    dev.rotate(RotateCommand::Rotate(1.0, false)).await.unwrap();
+                    println!("{} should start rotating the other way!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                    // All devices also have a "stop" command that will make
+                    // them stop whatever they're doing.
+                    dev.stop().await.unwrap();
+                    println!("{} should stop rotating!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
                 }
             }
             // And now we're done!

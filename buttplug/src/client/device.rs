@@ -26,6 +26,7 @@ use async_std::{
     prelude::StreamExt,
     sync::{Receiver, Sender},
 };
+use core::fmt;
 use std::collections::HashMap;
 
 pub enum VibrateCommand {
@@ -55,6 +56,16 @@ pub struct ButtplugClientDevice {
     events: Vec<ButtplugClientDeviceEvent>,
     device_connected: bool,
     client_connected: bool,
+}
+
+impl fmt::Debug for ButtplugClientDevice {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "(Name: {:?}, Index: {:?}, Messages: {:?})",
+            self.name, self.index, self.allowed_messages
+        )
+    }
 }
 
 unsafe impl Send for ButtplugClientDevice {}
