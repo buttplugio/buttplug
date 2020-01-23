@@ -124,7 +124,7 @@ impl DeviceManager {
             mgr.start_scanning().await?;
         }
         if self.comm_managers.is_empty() {
-            Err(ButtplugUnknownError::new("No device managers!").into())
+            Err(ButtplugUnknownError::new("Cannot start scanning. Server has no device communication managers to scan with.").into())
         } else {
             Ok(())
         }
