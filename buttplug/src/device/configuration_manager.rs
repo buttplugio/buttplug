@@ -285,18 +285,23 @@ impl DeviceConfigurationManager {
 
     pub fn get_protocol_creator(&self, name: &String) -> Option<Box<dyn ButtplugProtocolCreator>> {
         info!("Looking for protocol {}", name);
+        // TODO It feels like maybe there should be a cleaner way to do this,
+        // but I'm not really sure what it is?
         if let Some(proto) = self.config.protocols.get(name) {
             info!("Found a protocol definition for {}", name);
             if let Some(constructor) = self.protocols.get(name) {
                 info!("Found a protocol implementation for {}", name);
-                return Option::from(constructor(
-                        DeviceProtocolConfiguration::new(
-                            proto.defaults.clone(),
-                            proto.configurations.clone(),
-                        )));
+                Option::from(constructor(
+                    DeviceProtocolConfiguration::new(
+                        proto.defaults.clone(),
+                        proto.configurations.clone(),
+                    )))
+            } else {
+                None
             }
+        } else {
+            None
         }
-        None
     }
 }
 
