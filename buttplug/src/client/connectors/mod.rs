@@ -93,6 +93,8 @@ impl ButtplugEmbeddedClientConnector {
         }
     }
 
+    // TODO Is there some way to do this on the server then pass the server in,
+    // versus just adding through the connector? This feels a little weird.
     pub fn add_comm_manager<T>(&mut self)
         where
             T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
