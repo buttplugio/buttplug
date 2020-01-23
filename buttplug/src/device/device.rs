@@ -254,7 +254,7 @@ impl ButtplugDevice {
                 // finding endpoints, etc.
                 if let Some(proto_creator) = device_mgr.get_protocol_creator(&config_name)
                 {
-                    return match device_creator.try_create_device_impl(config).await {
+                    match device_creator.try_create_device_impl(config).await {
                         Ok(device_impl) => {
                             info!("Found Buttplug Device {}", device_impl.name());
                             // If we've made it this far, we now have a connected device
@@ -273,8 +273,9 @@ impl ButtplugDevice {
                         }
                         Err(e) => Err(e),
                     }
+                } else {
+                    Ok(None)
                 }
-                return Ok(None)
             }
             None => return Ok(None),
         }
