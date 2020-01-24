@@ -21,10 +21,12 @@ use buttplug::client::{connectors::ButtplugEmbeddedClientConnector, ButtplugClie
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
 use async_std::task;
+#[cfg(any(feature = "linux-ble", feature = "winrt-ble", feature = "corebluetooth-ble"))]
 use buttplug::server::comm_managers::btleplug::BtlePlugCommunicationManager;
 use std::time::Duration;
 use buttplug::client::device::VibrateCommand;
 
+#[cfg(any(feature = "linux-ble", feature = "winrt-ble", feature = "corebluetooth-ble"))]
 async fn embedded_connector_example() {
     env_logger::init();
     // We'll need a connector first, as creating a client requires a connector.
@@ -206,7 +208,9 @@ async fn embedded_connector_example() {
 
 fn main() {
     // Setup a client, and wait until everything is done before exiting.
+    #[cfg(any(feature = "linux-ble", feature = "winrt-ble", feature = "corebluetooth-ble"))]
     task::block_on(async {
         embedded_connector_example().await;
     });
+    ()
 }
