@@ -595,7 +595,9 @@ mod test {
         });
     }
 
+    // Test ignored until we have a test device manager.
     #[test]
+    #[ignore]
     fn test_start_scanning() {
         task::block_on(async {
             connect_test_client(|mut client| {
