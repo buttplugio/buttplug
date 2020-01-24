@@ -5,7 +5,7 @@ trigger:
     include: ['*']
 
 stages:
- - template: azure/stages.yml@templates
+ - template: default.yml@templates
    parameters:
      # Turn off feature checking since this is a workspace
      check_all_features: false
