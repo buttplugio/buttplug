@@ -87,11 +87,26 @@ The following crate features are available
 
 Default features are `client`, `server`, and `serialize_json`.
 
-## Architecture
+## Building on Windows
 
-**Warning:** Here lies monsters. Or at least, stupidity. Everything I
-am about to say may end up fabulously wrong, in which case, enjoy the
-comedy of errors that is this repo.
+In order to build with Websocket support on windows, OpenSSL is
+required. To build with OpenSSL, use the following commands in cmd
+(Powershell will require different commands):
+
+```
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+bootstrap-vcpkg.bat -disableMetrics
+vcpkg install openssl:x64-windows
+set VCPKGRS_DYNAMIC=1
+cd ..\buttplug-rs\buttplug
+cargo test --features client-ws-ssl,winrt-ble
+```
+
+If you have issues getting this to build, please [file an
+issue](https://github.com/buttplugio/buttplug-rs/issues).
+
+## Architecture
 
 This section is a discussion of the idea behind the new (Sept 2019)
 Rust implementation of Buttplug.
