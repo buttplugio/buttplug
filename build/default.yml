@@ -1,0 +1,118 @@
+# Taken from https://github.com/crate-ci/azure-pipelines/blob/master/default.yml
+#
+# The default file there builds with all/no-features, which won't work
+# for us since we have platform specific features.
+
+parameters:
+  minrust: 1.32.0 # Rust 2018 with uniform paths
+  setup: []
+  services: {}
+  env: {}
+  cross: true
+
+jobs:
+ - job: style
+   displayName: Style linting
+   strategy:
+     matrix:
+       stable:
+         rust: stable
+       beta:
+         rust: beta
+   pool:
+     vmImage: ubuntu-16.04
+   continueOnError: $[eq(variables.rust, 'beta')]
+   steps:
+     - template: install-rust.yml@templates
+       parameters:
+         rust: $(rust)
+         components:
+           - rustfmt
+           - clippy
+     # Run any user-specific setup steps
+     - ${{ parameters.setup }}
+     - script: cargo fmt --all -- --check
+       displayName: cargo fmt --check
+     - script: cargo clippy --all
+       displayName: cargo clippy
+ - job: main
+   displayName: Compile and test
+   dependsOn: []
+   ${{ if eq('true', parameters.cross) }}:
+     strategy:
+       matrix:
+         "Linux (nightly)":
+           vmImage: ubuntu-16.04
+           rust: nightly
+         "Linux (beta)":
+           vmImage: ubuntu-16.04
+           rust: beta
+         Linux:
+           vmImage: ubuntu-16.04
+           rust: stable
+         MacOS:
+           vmImage: macOS-10.14
+           rust: stable
+         Windows:
+           vmImage: windows-2019
+           rust: stable
+   ${{ if ne('true', parameters.cross) }}:
+     strategy:
+       matrix:
+         "Linux (nightly)":
+           vmImage: ubuntu-16.04
+           rust: nightly
+         "Linux (beta)":
+           vmImage: ubuntu-16.04
+           rust: beta
+         Linux:
+           vmImage: ubuntu-16.04
+           rust: stable
+   pool:
+     vmImage: $(vmImage)
+   services:
+     ${{ insert }}: ${{ parameters.services }}
+   continueOnError: $[eq(variables.rust, 'nightly')]
+   steps:
+     - template: install-rust.yml@templates
+       parameters:
+         rust: $(rust)
+     # Run any user-specific setup steps
+     - ${{ parameters.setup }}
+     - script: cargo check --all --bins --examples
+       displayName: cargo check
+     # - script: cargo check --all --bins --examples --no-default-features
+     #   displayName: cargo check --no-default-features
+     # - script: cargo check --all --bins --examples --all-features
+     #   displayName: cargo check --all-features
+     - script: cargo test --all
+       displayName: cargo test
+       env:
+         ${{ insert }}: ${{ parameters.env }}
+ - ${{ if ne('false', parameters.minrust) }}:
+   - job: msrv
+     displayName: "${{ format('Minimum supported Rust version: {0}', parameters.minrust) }}"
+     dependsOn: []
+     # This represents the minimum Rust version supported.
+     # Tests are not run as tests may require newer versions of rust.
+     pool:
+       vmImage: ubuntu-16.04
+     steps:
+       - template: install-rust.yml@templates
+         parameters:
+           rust: ${{ parameters.minrust }}
+       # Run any user-specific setup steps
+       - ${{ parameters.setup }}
+       - script: cargo check --all --bins --examples
+         displayName: cargo check
+       - script: cargo check --all --bins --examples --no-default-features
+         displayName: cargo check --no-default-features
+       - script: cargo check --all --bins --examples --all-features
+         displayName: cargo check --all-features
+ - ${{ if ne('', parameters.codecov_token) }}:
+   - template: coverage.yml@templates
+     parameters:
+       token: ${{ parameters.codecov_token }}
+       setup: ${{ parameters.setup }}
+       services: ${{ parameters.services }}
+       env: ${{ parameters.env }}

@@ -5,7 +5,7 @@ trigger:
     include: ['*']
 
 jobs:
- - template: default.yml@templates
+ - template: build/default.yml
    parameters:
      # Turn off feature checking since this is a workspace
      check_all_features: false
