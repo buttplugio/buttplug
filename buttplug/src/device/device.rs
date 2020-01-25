@@ -217,18 +217,10 @@ pub trait ButtplugDeviceImplCreator: Sync + Send {
     ) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
 }
 
+#[derive(Clone)]
 pub struct ButtplugDevice {
     protocol: Box<dyn ButtplugProtocol>,
     device: Box<dyn DeviceImpl>,
-}
-
-impl Clone for ButtplugDevice {
-    fn clone(&self) -> Self {
-        ButtplugDevice {
-            protocol: self.protocol.clone(),
-            device: self.device.clone(),
-        }
-    }
 }
 
 impl ButtplugDevice {
