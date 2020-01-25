@@ -9,7 +9,7 @@ use crate::{
     },
     device::{
         configuration_manager::DeviceProtocolConfiguration,
-        device::{ DeviceImpl, DeviceWriteCmd },
+        device::{DeviceImpl, DeviceWriteCmd},
         Endpoint,
     },
 };
@@ -105,7 +105,9 @@ impl YoucupsProtocol {
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let msg = DeviceWriteCmd::new(
             Endpoint::Tx,
-            format!("$SYS,{}?", (msg.speeds[0].speed * 8.0) as u8).as_bytes().to_vec(),
+            format!("$SYS,{}?", (msg.speeds[0].speed * 8.0) as u8)
+                .as_bytes()
+                .to_vec(),
             false,
         );
         device.write_value(msg.into()).await?;

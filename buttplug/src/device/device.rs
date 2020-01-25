@@ -252,8 +252,7 @@ impl ButtplugDevice {
                 // configuration for that device, try to initialize the implementation.
                 // This usually means trying to connect to whatever the device is,
                 // finding endpoints, etc.
-                if let Some(proto_creator) = device_mgr.get_protocol_creator(&config_name)
-                {
+                if let Some(proto_creator) = device_mgr.get_protocol_creator(&config_name) {
                     match device_creator.try_create_device_impl(config).await {
                         Ok(device_impl) => {
                             info!("Found Buttplug Device {}", device_impl.name());

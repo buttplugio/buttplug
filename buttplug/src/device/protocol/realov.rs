@@ -9,7 +9,7 @@ use crate::{
     },
     device::{
         configuration_manager::DeviceProtocolConfiguration,
-        device::{ DeviceImpl, DeviceWriteCmd },
+        device::{DeviceImpl, DeviceWriteCmd},
         Endpoint,
     },
 };
@@ -104,11 +104,7 @@ impl RealovProtocol {
         msg: &VibrateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let speed = (msg.speeds[0].speed * 50.0) as u8;
-        let msg = DeviceWriteCmd::new(
-            Endpoint::Tx,
-            [ 0xc5, 0x55, speed, 0xaa ].to_vec(),
-            false,
-        );
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, [0xc5, 0x55, speed, 0xaa].to_vec(), false);
         device.write_value(msg.into()).await?;
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }

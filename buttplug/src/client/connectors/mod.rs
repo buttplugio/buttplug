@@ -10,6 +10,9 @@ pub mod messagesorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
+use crate::server::device_manager::{
+    DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+};
 #[cfg(feature = "server")]
 use crate::server::ButtplugServer;
 use crate::{
@@ -30,7 +33,6 @@ use futures::future::Future;
 #[cfg(feature = "serialize_json")]
 use messagesorter::ClientConnectorMessageSorter;
 use std::{error::Error, fmt};
-use crate::server::device_manager::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 
 pub type ButtplugClientConnectionState =
     ButtplugFutureState<Result<(), ButtplugClientConnectorError>>;
@@ -96,8 +98,8 @@ impl ButtplugEmbeddedClientConnector {
     // TODO Is there some way to do this on the server then pass the server in,
     // versus just adding through the connector? This feels a little weird.
     pub fn add_comm_manager<T>(&mut self)
-        where
-            T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    where
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
     {
         self.server.add_comm_manager::<T>();
     }

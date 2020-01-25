@@ -1,3 +1,6 @@
+use super::btleplug_internal::{
+    BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared,
+};
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
@@ -17,20 +20,19 @@ use async_std::{
     sync::{channel, Receiver, Sender},
     task,
 };
-use btleplug::api::{Peripheral, Central};
 use async_trait::async_trait;
-use super::btleplug_internal::{BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared};
+use btleplug::api::{Central, Peripheral};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
     device: Option<T>,
-    central: C
+    central: C,
 }
 
 impl<T: Peripheral, C: Central<T>> BtlePlugDeviceImplCreator<T, C> {
     pub fn new(device: T, central: C) -> Self {
         Self {
             device: Some(device),
-            central
+            central,
         }
     }
 }
@@ -74,7 +76,13 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
             // its own thread in time, but I'm not sure when that's landing.
             let central = self.central.clone();
             task::spawn(async move {
-                let mut event_loop = BtlePlugInternalEventLoop::new(central, device, p, device_receiver, output_sender);
+                let mut event_loop = BtlePlugInternalEventLoop::new(
+                    central,
+                    device,
+                    p,
+                    device_receiver,
+                    output_sender,
+                );
                 event_loop.run().await;
             });
             let fut = DeviceReturnFuture::default();
@@ -171,8 +179,11 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     }
 
     async fn disconnect(&self) {
-        self.send_to_device_task(ButtplugDeviceCommand::Disconnect,
-                                 "Cannot disconnect device").await;
+        self.send_to_device_task(
+            ButtplugDeviceCommand::Disconnect,
+            "Cannot disconnect device",
+        )
+        .await;
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {
@@ -180,8 +191,11 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     }
 
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()),
-                                 "Cannot write to endpoint").await
+        self.send_to_device_task(
+            ButtplugDeviceCommand::Message(msg.into()),
+            "Cannot write to endpoint",
+        )
+        .await
     }
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
@@ -190,8 +204,11 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     }
 
     async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
-        self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()),
-                                 "Cannot subscribe").await
+        self.send_to_device_task(
+            ButtplugDeviceCommand::Message(msg.into()),
+            "Cannot subscribe",
+        )
+        .await
     }
 
     async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
@@ -199,6 +216,6 @@ impl DeviceImpl for BtlePlugDeviceImpl {
             ButtplugDeviceCommand::Message(msg.into()),
             "Cannot unsubscribe",
         )
-            .await
+        .await
     }
 }

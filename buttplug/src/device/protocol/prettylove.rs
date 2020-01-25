@@ -9,7 +9,7 @@ use crate::{
     },
     device::{
         configuration_manager::DeviceProtocolConfiguration,
-        device::{ DeviceImpl, DeviceWriteCmd },
+        device::{DeviceImpl, DeviceWriteCmd},
         Endpoint,
     },
 };
@@ -107,11 +107,7 @@ impl PrettyLoveProtocol {
         if speed == 0 {
             speed = 0xff;
         }
-        let msg = DeviceWriteCmd::new(
-            Endpoint::Tx,
-            [ 0x00, speed ].to_vec(),
-            false,
-        );
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, [0x00, speed].to_vec(), false);
         device.write_value(msg.into()).await?;
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }

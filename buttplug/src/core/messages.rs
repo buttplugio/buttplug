@@ -198,10 +198,7 @@ pub struct MessageAttributes {
     )]
     pub actuator_type: Option<Vec<String>>,
     // Never serialize this, its for internal use only
-    #[cfg_attr(
-        feature = "serialize_json",
-        serde(rename = "FeatureOrder"),
-    )]
+    #[cfg_attr(feature = "serialize_json", serde(rename = "FeatureOrder"))]
     pub feature_order: Option<Vec<u32>>,
 }
 
@@ -239,10 +236,7 @@ pub struct DeviceList {
 
 impl DeviceList {
     pub fn new(devices: Vec<DeviceMessageInfo>) -> Self {
-        Self {
-            id: 0,
-            devices
-        }
+        Self { id: 0, devices }
     }
 }
 

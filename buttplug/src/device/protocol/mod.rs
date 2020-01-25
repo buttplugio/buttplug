@@ -7,7 +7,7 @@ pub mod svakom;
 pub mod youcups;
 pub mod youou;
 
-use super::device::DeviceImpl;
+use super::device::{DeviceImpl};
 use crate::core::{
     errors::ButtplugError,
     messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap},

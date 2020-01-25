@@ -13,8 +13,8 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded,
-            ScanningFinished, DeviceMessageInfo, DeviceList,
+            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceList,
+            DeviceMessageInfo, ScanningFinished,
         },
     },
     device::device::{ButtplugDevice, ButtplugDeviceImplCreator},
@@ -82,7 +82,7 @@ async fn wait_for_manager_events(
                                             &device.name().to_owned(),
                                             &device.message_attributes(),
                                         )
-                                            .into(),
+                                        .into(),
                                     )
                                     .await;
                                 device_map.write().unwrap().insert(device_index, device);
@@ -124,7 +124,10 @@ impl DeviceManager {
             mgr.start_scanning().await?;
         }
         if self.comm_managers.is_empty() {
-            Err(ButtplugUnknownError::new("Cannot start scanning. Server has no device communication managers to scan with.").into())
+            Err(ButtplugUnknownError::new(
+                "Cannot start scanning. Server has no device communication managers to scan with.",
+            )
+            .into())
         } else {
             Ok(())
         }
@@ -138,8 +141,9 @@ impl DeviceManager {
         Ok(())
     }
 
-    async fn parse_device_message(&mut self,
-                                  device_msg: ButtplugDeviceCommandMessageUnion,
+    async fn parse_device_message(
+        &mut self,
+        device_msg: ButtplugDeviceCommandMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let mut dev;
         match self
@@ -155,7 +159,8 @@ impl DeviceManager {
                 return Err(ButtplugDeviceError::new(&format!(
                     "No device with index {} available",
                     device_msg.get_device_index()
-                )).into());
+                ))
+                .into());
             }
         }
         // Note: Don't try moving this up into the Some branch of unlock/get for
@@ -167,8 +172,9 @@ impl DeviceManager {
         dev.parse_message(&device_msg).await
     }
 
-    async fn parse_device_manager_message(&mut self,
-                                          manager_msg: ButtplugDeviceManagerMessageUnion,
+    async fn parse_device_manager_message(
+        &mut self,
+        manager_msg: ButtplugDeviceManagerMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         match manager_msg {
             ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
@@ -177,13 +183,11 @@ impl DeviceManager {
                     .read()
                     .unwrap()
                     .iter()
-                    .map(|(id, device)|
-                         DeviceMessageInfo {
-                             device_index: *id,
-                             device_name: device.name().to_string(),
-                             device_messages: device.message_attributes(),
-                         }
-                    )
+                    .map(|(id, device)| DeviceMessageInfo {
+                        device_index: *id,
+                        device_name: device.name().to_string(),
+                        device_messages: device.message_attributes(),
+                    })
                     .collect();
                 let mut device_list = DeviceList::new(devices);
                 device_list.set_id(msg.get_id());
@@ -211,12 +215,13 @@ impl DeviceManager {
         // device.
         match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
             Ok(device_msg) => self.parse_device_message(device_msg).await,
-            Err(_) => {
-                match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
-                    Ok(manager_msg) => self.parse_device_manager_message(manager_msg).await,
-                    Err(_) => Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
-                }
-            }
+            Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
+                Ok(manager_msg) => self.parse_device_manager_message(manager_msg).await,
+                Err(_) => Err(ButtplugMessageError::new(
+                    "Message type not handled by Device Manager",
+                )
+                .into()),
+            },
         }
     }
 
@@ -235,11 +240,20 @@ impl Drop for DeviceManager {
     }
 }
 
-#[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble", feature = "corebluetooth-ble")))]
+#[cfg(all(
+    test,
+    any(
+        feature = "winrt-ble",
+        feature = "linux-ble",
+        feature = "corebluetooth-ble"
+    )
+))]
 mod test {
     use super::DeviceManager;
     use crate::{
-        core::messages::{ButtplugMessage, ButtplugMessageUnion, VibrateCmd, VibrateSubcommand, RequestDeviceList},
+        core::messages::{
+            ButtplugMessage, ButtplugMessageUnion, RequestDeviceList, VibrateCmd, VibrateSubcommand,
+        },
         server::comm_managers::btleplug::BtlePlugCommunicationManager,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
@@ -258,10 +272,7 @@ mod test {
                 dm.stop_scanning().await;
                 info!("{:?}", msg);
                 info!("{:?}", msg.as_protocol_json());
-                match dm
-                    .parse_message(RequestDeviceList::default().into())
-                    .await
-                {
+                match dm.parse_message(RequestDeviceList::default().into()).await {
                     Ok(msg) => info!("{:?}", msg),
                     Err(e) => assert!(false, e.to_string()),
                 }

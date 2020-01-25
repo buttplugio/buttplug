@@ -560,11 +560,9 @@ mod test {
     #[test]
     fn test_disconnect_status() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.disconnect().await.is_ok());
-                    assert!(!client.connected());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.disconnect().await.is_ok());
+                assert!(!client.connected());
             })
             .await;
         });
@@ -573,11 +571,9 @@ mod test {
     #[test]
     fn test_double_disconnect() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.disconnect().await.is_ok());
-                    assert!(client.disconnect().await.is_err());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.disconnect().await.is_ok());
+                assert!(client.disconnect().await.is_err());
             })
             .await;
         });
@@ -586,10 +582,8 @@ mod test {
     #[test]
     fn test_connect_init() {
         task::block_on(async {
-            connect_test_client(|client| {
-                async move {
-                    assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-                }
+            connect_test_client(|client| async move {
+                assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
             })
             .await;
         });
@@ -600,10 +594,8 @@ mod test {
     #[ignore]
     fn test_start_scanning() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.start_scanning().await.is_ok());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.start_scanning().await.is_ok());
             })
             .await;
         });

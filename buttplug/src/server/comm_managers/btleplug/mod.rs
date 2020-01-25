@@ -1,10 +1,8 @@
-mod btleplug_internal;
 mod btleplug_device_impl;
+mod btleplug_internal;
 
 use crate::{
-    core::{
-        errors::{ButtplugError, ButtplugDeviceError},
-    },
+    core::errors::{ButtplugDeviceError, ButtplugError},
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
@@ -14,15 +12,15 @@ use async_std::{
     sync::{channel, Sender},
     task,
 };
-use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use async_trait::async_trait;
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(feature = "linux-ble")]
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
-#[cfg(feature = "winrt-ble")]
-use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 #[cfg(feature = "corebluetooth-ble")]
 use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
+#[cfg(feature = "winrt-ble")]
+use btleplug::winrtble::{adapter::Adapter, manager::Manager};
+use btleplug_device_impl::BtlePlugDeviceImplCreator;
 
 pub struct BtlePlugCommunicationManager {
     // BtlePlug says to only have one manager at a time, so we'll have the comm
@@ -102,7 +100,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                         // advertisement.
                         if name.len() > 0 && !tried_names.contains(&name) {
                             tried_names.push(name.clone());
-                            let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
+                            let device_creator =
+                                Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
                             device_sender
                                 .send(DeviceCommunicationEvent::DeviceFound(device_creator))
                                 .await;

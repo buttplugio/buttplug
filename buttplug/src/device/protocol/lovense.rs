@@ -103,7 +103,7 @@ impl LovenseProtocol {
             sent_rotation: false,
             sent_vibration: false,
             vibrations,
-            rotations
+            rotations,
         }
     }
 }
@@ -155,14 +155,16 @@ impl LovenseProtocol {
             for i in 0..self.vibrations.len() {
                 subs.push(VibrateSubcommand::new(i as u32, 0.0));
             }
-            self.handle_vibrate_cmd(device, &VibrateCmd::new(0, subs)).await;
+            self.handle_vibrate_cmd(device, &VibrateCmd::new(0, subs))
+                .await;
         }
         if self.rotations.len() > 0 {
             let mut subs: Vec<RotationSubcommand> = vec![];
             for i in 0..self.rotations.len() {
                 subs.push(RotationSubcommand::new(i as u32, 0.0, self.rotations[i].1));
             }
-            self.handle_rotate_cmd(device, &RotateCmd::new(0, subs)).await;
+            self.handle_rotate_cmd(device, &RotateCmd::new(0, subs))
+                .await;
         }
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
     }
@@ -225,7 +227,7 @@ impl LovenseProtocol {
 
                 let msg = DeviceWriteCmd::new(
                     Endpoint::Tx,
-                    format!("Vibrate{}:{};", i+1, self.vibrations[i])
+                    format!("Vibrate{}:{};", i + 1, self.vibrations[i])
                         .as_bytes()
                         .to_vec(),
                     false,
@@ -243,7 +245,7 @@ impl LovenseProtocol {
         msg: &RotateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let mut new_rotations = self.rotations.clone();
-        let mut messages = vec!();
+        let mut messages = vec![];
 
         if new_rotations.len() == 0 {
             // TODO: Should probably be an error
@@ -255,16 +257,17 @@ impl LovenseProtocol {
         for i in 0..msg.rotations.len() {
             // TODO: Need safeguards
             let index = msg.rotations[i].index as usize;
-            new_rotations[index] = ((msg.rotations[i].speed * 20.0) as u32, msg.rotations[i].clockwise);
+            new_rotations[index] = (
+                (msg.rotations[i].speed * 20.0) as u32,
+                msg.rotations[i].clockwise,
+            );
             if new_rotations[index] != self.rotations[index] {
                 changed[index] = true;
             }
             if new_rotations[i].1 != self.rotations[i].1 {
                 messages.push(DeviceWriteCmd::new(
                     Endpoint::Tx,
-                    "RotateChange;"
-                        .as_bytes()
-                        .to_vec(),
+                    "RotateChange;".as_bytes().to_vec(),
                     false,
                 ));
             }

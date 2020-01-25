@@ -7,15 +7,12 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{lovense::LovenseProtocolCreator,
-                      maxpro::MaxproProtocolCreator,
-                      picobong::PicobongProtocolCreator,
-                      prettylove::PrettyLoveProtocolCreator,
-                      realov::RealovProtocolCreator,
-                      svakom::SvakomProtocolCreator,
-                      youcups::YoucupsProtocolCreator,
-                      youou::YououProtocolCreator,
-                      ButtplugProtocolCreator};
+use super::protocol::{
+    lovense::LovenseProtocolCreator, maxpro::MaxproProtocolCreator,
+    picobong::PicobongProtocolCreator, prettylove::PrettyLoveProtocolCreator,
+    realov::RealovProtocolCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
+    youou::YououProtocolCreator, ButtplugProtocolCreator,
+};
 use crate::{
     core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
     device::Endpoint,
@@ -269,14 +266,57 @@ impl DeviceConfigurationManager {
         // otherwise we'll just get an anonymous closure type during insert that
         // won't match.
         let mut protocols = HashMap::<String, ProtocolConstructor>::new();
-        protocols.insert("lovense".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(LovenseProtocolCreator::new(config)) }) );
-        protocols.insert("picobong".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(PicobongProtocolCreator::new(config)) }) );
-        protocols.insert("maxpro".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(MaxproProtocolCreator::new(config)) }) );
-        protocols.insert("prettylove".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(PrettyLoveProtocolCreator::new(config)) }) );
-        protocols.insert("realov".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(RealovProtocolCreator::new(config)) }) );
-        protocols.insert("svakom".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(SvakomProtocolCreator::new(config)) }) );
-        protocols.insert("youcups".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(YoucupsProtocolCreator::new(config)) }) );
-        protocols.insert("youou".to_owned(),Box::new(|config: DeviceProtocolConfiguration| { Box::new(YououProtocolCreator::new(config)) }) );
+        // TODO Seems like we should be able to clean up the repeated
+        // protocolcreator code but due to it being an async trait, I'm not
+        // quite sure how.
+        protocols.insert(
+            "lovense".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LovenseProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "picobong".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(PicobongProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "maxpro".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(MaxproProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "prettylove".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(PrettyLoveProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "realov".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(RealovProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "svakom".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(SvakomProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "youcups".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(YoucupsProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "youou".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(YououProtocolCreator::new(config))
+            }),
+        );
         DeviceConfigurationManager { config, protocols }
     }
 
@@ -301,11 +341,10 @@ impl DeviceConfigurationManager {
             info!("Found a protocol definition for {}", name);
             if let Some(constructor) = self.protocols.get(name) {
                 info!("Found a protocol implementation for {}", name);
-                Option::from(constructor(
-                    DeviceProtocolConfiguration::new(
-                        proto.defaults.clone(),
-                        proto.configurations.clone(),
-                    )))
+                Option::from(constructor(DeviceProtocolConfiguration::new(
+                    proto.defaults.clone(),
+                    proto.configurations.clone(),
+                )))
             } else {
                 None
             }
