@@ -65,13 +65,6 @@ impl fmt::Display for ButtplugClientError {
 }
 
 impl Error for ButtplugClientError {
-    fn description(&self) -> &str {
-        match *self {
-            ButtplugClientError::ButtplugError(ref e) => e.description(),
-            ButtplugClientError::ButtplugClientConnectorError(ref e) => e.description(),
-        }
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }

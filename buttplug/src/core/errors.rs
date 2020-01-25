@@ -38,10 +38,6 @@ impl fmt::Display for ButtplugHandshakeError {
 }
 
 impl Error for ButtplugHandshakeError {
-    fn description(&self) -> &str {
-        self.message.as_str()
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
@@ -69,10 +65,6 @@ impl fmt::Display for ButtplugMessageError {
 }
 
 impl Error for ButtplugMessageError {
-    fn description(&self) -> &str {
-        self.message.as_str()
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
@@ -101,10 +93,6 @@ impl fmt::Display for ButtplugPingError {
 }
 
 impl Error for ButtplugPingError {
-    fn description(&self) -> &str {
-        self.message.as_str()
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
@@ -133,10 +121,6 @@ impl fmt::Display for ButtplugDeviceError {
 }
 
 impl Error for ButtplugDeviceError {
-    fn description(&self) -> &str {
-        self.message.as_str()
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
@@ -164,10 +148,6 @@ impl fmt::Display for ButtplugUnknownError {
 }
 
 impl Error for ButtplugUnknownError {
-    fn description(&self) -> &str {
-        self.message.as_str()
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
@@ -196,16 +176,6 @@ impl fmt::Display for ButtplugError {
 }
 
 impl Error for ButtplugError {
-    fn description(&self) -> &str {
-        match *self {
-            ButtplugError::ButtplugDeviceError(ref e) => e.description(),
-            ButtplugError::ButtplugMessageError(ref e) => e.description(),
-            ButtplugError::ButtplugPingError(ref e) => e.description(),
-            ButtplugError::ButtplugHandshakeError(ref e) => e.description(),
-            ButtplugError::ButtplugUnknownError(ref e) => e.description(),
-        }
-    }
-
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         None
     }
