@@ -83,8 +83,13 @@ jobs:
      - ${{ parameters.setup }}
      - script: cargo check --all --bins --examples
        displayName: cargo check
+     # Can't do no features because we're in a workspace
+     #
      # - script: cargo check --all --bins --examples --no-default-features
      #   displayName: cargo check --no-default-features
+
+     # Can't do all features because we have platform specific features
+     #
      # - script: cargo check --all --bins --examples --all-features
      #   displayName: cargo check --all-features
      - script: cargo test --all
