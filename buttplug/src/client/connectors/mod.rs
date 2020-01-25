@@ -87,7 +87,7 @@ pub struct ButtplugEmbeddedClientConnector {
 
 #[cfg(feature = "server")]
 impl ButtplugEmbeddedClientConnector {
-    pub fn new(name: &str, max_ping_time: u32) -> Self {
+    pub fn new(name: &str, max_ping_time: u128) -> Self {
         let (send, recv) = channel(256);
         Self {
             recv: Some(recv),
