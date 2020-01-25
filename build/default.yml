@@ -15,10 +15,12 @@ jobs:
    displayName: Style linting
    strategy:
      matrix:
-       stable:
-         rust: stable
-       beta:
-         rust: beta
+       # stable:
+       #   rust: stable
+       # beta:
+       #   rust: beta
+       nightly:
+         rust: nightly
    pool:
      vmImage: ubuntu-16.04
    continueOnError: $[eq(variables.rust, 'beta')]
