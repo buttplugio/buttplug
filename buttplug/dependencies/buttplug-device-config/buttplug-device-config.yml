@@ -329,7 +329,7 @@ protocols:
             - ShaYu
           name:
             en-us: Libo Shark
-  libo-karen:
+  libo-kegel:
       btle:
         names:
           - SuoYinQiu # Karen - Kegel

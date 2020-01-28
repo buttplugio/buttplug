@@ -1,3 +1,7 @@
+pub mod libo_elle;
+pub mod libo_kegel;
+pub mod libo_shark;
+pub mod libo_vibes;
 pub mod lovense;
 pub mod maxpro;
 pub mod picobong;

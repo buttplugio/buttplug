@@ -8,6 +8,8 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
+    libo_elle::LiboElleProtocolCreator, libo_kegel::LiboKegelProtocolCreator,
+    libo_shark::LiboSharkProtocolCreator, libo_vibes::LiboVibesProtocolCreator,
     lovense::LovenseProtocolCreator, maxpro::MaxproProtocolCreator,
     picobong::PicobongProtocolCreator, prettylove::PrettyLoveProtocolCreator,
     realov::RealovProtocolCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
@@ -269,6 +271,30 @@ impl DeviceConfigurationManager {
         // TODO Seems like we should be able to clean up the repeated
         // protocolcreator code but due to it being an async trait, I'm not
         // quite sure how.
+        protocols.insert(
+            "libo-elle".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LiboElleProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "libo-kegel".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LiboKegelProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "libo-shark".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LiboSharkProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "libo-vibes".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LiboVibesProtocolCreator::new(config))
+            }),
+        );
         protocols.insert(
             "lovense".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
