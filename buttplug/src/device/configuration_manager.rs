@@ -29,6 +29,7 @@ use crate::device::protocol::kiiroo_gen2::KiirooGen2ProtocolCreator;
 use crate::device::protocol::kiiroo_gen2vibe::KiirooGen2VibeProtocolCreator;
 use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
 use crate::device::protocol::aneros::AnerosProtocolCreator;
+use crate::device::protocol::lelo_f1s::LeloF1sProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -297,6 +298,12 @@ impl DeviceConfigurationManager {
             "kiiroo-v21".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(KiirooGen21ProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "lelo-f1s".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LeloF1sProtocolCreator::new(config))
             }),
         );
         protocols.insert(

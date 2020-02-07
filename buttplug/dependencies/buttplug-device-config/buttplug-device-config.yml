@@ -1339,6 +1339,9 @@ protocols:
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
+          rx: 00000aa4-0000-1000-8000-00805f9b34fb
+          # rx is the button characteristic, which we need to
+          # subscribe to to avoid the power button turning it off.
           # There are a LOT of sensor characteristics
           # I figure we'll add them as support for those sensor
           # types is added to Buttplug

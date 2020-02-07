@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#![type_length_limit = "22746408"]
+#![type_length_limit = "24978768"]
 
 // To begin our exploration of the Buttplug library, we're going to set up a client
 // with an embedded connector.
@@ -195,6 +195,12 @@ async fn embedded_connector_example() {
                 // For this example, we'll use the simple single value.
 
                 println!("Device: {:?}", dev);
+
+                if dev.name.contains("F1s") {
+                    // Give me time to press the button
+                    println!("Press the power button once!");
+                    task::sleep(Duration::from_secs(5)).await;
+                }
 
                 if dev.allowed_messages.contains_key("VibrateCmd") {
                     let count = dev
