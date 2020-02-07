@@ -30,6 +30,7 @@ use crate::device::protocol::kiiroo_gen2vibe::KiirooGen2VibeProtocolCreator;
 use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
 use crate::device::protocol::aneros::AnerosProtocolCreator;
 use crate::device::protocol::lelo_f1s::LeloF1sProtocolCreator;
+use crate::device::protocol::lovehoney_desire::LovehoneyDesireProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -334,6 +335,12 @@ impl DeviceConfigurationManager {
             "libo-vibes".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(LiboVibesProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "lovehoney-desire".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(LovehoneyDesireProtocolCreator::new(config))
             }),
         );
         protocols.insert(
