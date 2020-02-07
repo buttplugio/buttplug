@@ -31,6 +31,9 @@ use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
 use crate::device::protocol::aneros::AnerosProtocolCreator;
 use crate::device::protocol::lelo_f1s::LeloF1sProtocolCreator;
 use crate::device::protocol::lovehoney_desire::LovehoneyDesireProtocolCreator;
+use crate::device::protocol::magicmotion1::MagicMotion1ProtocolCreator;
+use crate::device::protocol::magicmotion3::MagicMotion3ProtocolCreator;
+use crate::device::protocol::magicmotion2::MagicMotion2ProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -350,15 +353,33 @@ impl DeviceConfigurationManager {
             }),
         );
         protocols.insert(
-            "picobong".to_owned(),
+            "magic-motion-1".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(PicobongProtocolCreator::new(config))
+                Box::new(MagicMotion1ProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "magic-motion-2".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(MagicMotion2ProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "magic-motion-3".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(MagicMotion3ProtocolCreator::new(config))
             }),
         );
         protocols.insert(
             "maxpro".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(MaxproProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "picobong".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(PicobongProtocolCreator::new(config))
             }),
         );
         protocols.insert(

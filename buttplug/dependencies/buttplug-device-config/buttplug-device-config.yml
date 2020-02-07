@@ -464,7 +464,7 @@ protocols:
         name:
           en-us: MagicMotion Flamingo
       - identifier:
-          - Magic Bean
+          - Smart Bean
         name:
           en-us: MagicMotion Kegel
       - identifier:
@@ -476,7 +476,7 @@ protocols:
         name:
           en-us: MagicMotion Wand
       - identifier:
-          - Magic Fugu
+          - Fugu
         name:
           en-us: MagicMotion Fugu
   magic-motion-2:
