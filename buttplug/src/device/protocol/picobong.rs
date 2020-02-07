@@ -4,19 +4,18 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            RotateCmd, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
+            StopDeviceCmd, VibrateCmd, VibrateSubcommand,
         },
     },
     device::{
         configuration_manager::DeviceProtocolConfiguration,
         device::{
-            ButtplugDeviceEvent, DeviceImpl, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
+            DeviceImpl,
             DeviceWriteCmd,
         },
         Endpoint,
     },
 };
-use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 
 pub struct PicobongProtocolCreator {
