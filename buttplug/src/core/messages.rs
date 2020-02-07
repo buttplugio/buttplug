@@ -25,7 +25,7 @@ use std::{
 pub trait ButtplugMessage: Send + Sync + Clone {
     /// Returns the id number of the message
     fn get_id(&self) -> u32;
-    /// Sets the id number of the message
+    /// Sets the id number of the message.
     fn set_id(&mut self, id: u32);
     /// Returns the message as a string in Buttplug JSON Protocol format.
     #[cfg(feature = "serialize_json")]
@@ -145,7 +145,7 @@ pub struct Test {
     id: u32,
     /// Test string, which will be echo'd back to client when sent to server.
     #[cfg_attr(feature = "serialize_json", serde(rename = "TestString"))]
-    test_string: String,
+    pub test_string: String,
 }
 
 impl Test {

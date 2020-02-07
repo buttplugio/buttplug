@@ -153,7 +153,7 @@ impl ButtplugServer {
             match msg {
                 ButtplugMessageUnion::RequestServerInfo(ref m) => self.perform_handshake(m),
                 ButtplugMessageUnion::Ping(ref p) => self.handle_ping(p),
-                // TODO Implement Test
+                ButtplugMessageUnion::Test(ref t) => self.handle_test(t),
                 // TODO Implement Log
                 _ => Err(ButtplugMessageError::new(
                     &format!("Message {:?} not handled by server loop.", msg).to_owned(),
@@ -202,6 +202,12 @@ impl ButtplugServer {
         } else {
             Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())
         }
+    }
+
+    fn handle_test(&mut self, msg: &messages::Test) -> Result<ButtplugMessageUnion, ButtplugError> {
+        let mut test_return = messages::Test::new(&msg.test_string);
+        test_return.set_id(msg.get_id());
+        Result::Ok(test_return.into())
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {
