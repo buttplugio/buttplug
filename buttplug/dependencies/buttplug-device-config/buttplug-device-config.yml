@@ -654,7 +654,6 @@ protocols:
         - Ditto
         - Gala
         - Jive
-        - Melt
         - Nova
         - NOVAV2
         - Pivot
@@ -688,10 +687,6 @@ protocols:
           - Jive
         name:
           en-us: WeVibe Jive
-      - identifier:
-          - Melt
-        name:
-          en-us: WeVibe Melt
       - identifier:
           - Pivot
         name:
@@ -758,6 +753,7 @@ protocols:
   wevibe-8bit:
     btle:
       names:
+        - Melt
         - Moxie
         - Vector
       services:
@@ -773,6 +769,15 @@ protocols:
           StepCount:
             - 12
     configurations:
+      - identifier:
+          - Melt
+        name:
+          en-us: WeVibe Melt
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 22
       - identifier:
           - Moxie
         name:

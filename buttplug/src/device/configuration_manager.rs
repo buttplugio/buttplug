@@ -34,6 +34,8 @@ use crate::device::protocol::lovehoney_desire::LovehoneyDesireProtocolCreator;
 use crate::device::protocol::magicmotion1::MagicMotion1ProtocolCreator;
 use crate::device::protocol::magicmotion3::MagicMotion3ProtocolCreator;
 use crate::device::protocol::magicmotion2::MagicMotion2ProtocolCreator;
+use crate::device::protocol::wevibe8bit::WeVibe8bitProtocolCreator;
+use crate::device::protocol::wevibe::WeVibeProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -398,6 +400,18 @@ impl DeviceConfigurationManager {
             "svakom".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(SvakomProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "wevibe".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(WeVibeProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "wevibe-8bit".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(WeVibe8bitProtocolCreator::new(config))
             }),
         );
         protocols.insert(
