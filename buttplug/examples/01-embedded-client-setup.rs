@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#![type_length_limit = "15974808"]
+#![type_length_limit = "22746408"]
 
 // To begin our exploration of the Buttplug library, we're going to set up a client
 // with an embedded connector.
@@ -25,7 +25,7 @@ use buttplug::client::{
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
 use async_std::task;
-use buttplug::client::device::{RotateCommand, VibrateCommand};
+use buttplug::client::device::{RotateCommand, VibrateCommand, LinearCommand};
 #[cfg(any(
     feature = "linux-ble",
     feature = "winrt-ble",
@@ -240,6 +240,18 @@ async fn embedded_connector_example() {
                     // them stop whatever they're doing.
                     dev.stop().await.unwrap();
                     println!("{} should stop rotating!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                }
+
+                if dev.allowed_messages.contains_key("LinearCmd") {
+                    dev.linear(LinearCommand::Linear(250, 0.95)).await.unwrap();
+                    println!("{} should start moving!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                    dev.linear(LinearCommand::Linear(250, 0.05)).await.unwrap();
+                    println!("{} should start moving in reverse!", dev.name);
+                    task::sleep(Duration::from_secs(1)).await;
+                    dev.linear(LinearCommand::Linear(250, 0.95)).await.unwrap();
+                    println!("{} should start moving in reverse!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;
                 }
             }

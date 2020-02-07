@@ -1,3 +1,6 @@
+pub mod kiiroo_gen2;
+pub mod kiiroo_gen21;
+pub mod kiiroo_gen2vibe;
 pub mod libo_elle;
 pub mod libo_kegel;
 pub mod libo_shark;
