@@ -147,8 +147,25 @@ impl DeviceManager {
         }
     }
 
+    async fn stop_all_devices(&mut self) -> Result<(), ButtplugError> {
+        let devices_ids: Vec<u32> = self
+            .devices
+            .read()
+            .unwrap()
+            .keys()
+            .map(|id| id.clone())
+            .collect();
+        // TODO This should be done in parallel, versus waiting for every device
+        // to stop in order.
+        for id in devices_ids {
+            // TODO Figure out what we do here if anything fails.
+            self.parse_device_message(messages::StopDeviceCmd::new(id).into()).await;
+        }
+        Ok(())
+    }
+
     async fn parse_device_message(
-        &mut self,
+        &self,
         device_msg: ButtplugDeviceCommandMessageUnion,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let mut dev;
@@ -174,7 +191,7 @@ impl DeviceManager {
         // quickly as possible to release the lock, then actually parse the
         // message.
         //
-        // TODO This should probably spawn or something
+        // TODO This should spawn so we're not blocking our receiver.
         dev.parse_message(&device_msg).await
     }
 
@@ -200,6 +217,7 @@ impl DeviceManager {
                 Ok(device_list.into())
             }
             ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
+                self.stop_all_devices().await;
                 Ok(messages::Ok::new(msg.get_id()).into())
             }
             ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
