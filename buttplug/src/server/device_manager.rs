@@ -118,7 +118,7 @@ impl DeviceManager {
         }
     }
 
-    pub async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+    async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
         if self.comm_managers.is_empty() {
             Err(ButtplugUnknownError::new(
                 "Cannot start scanning. Server has no device communication managers to scan with.",
@@ -133,7 +133,7 @@ impl DeviceManager {
         }
     }
 
-    pub async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
+    async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
         if self.comm_managers.is_empty() {
             Err(ButtplugUnknownError::new(
                 "Cannot stop scanning. Server has no device communication managers to scan with.",
