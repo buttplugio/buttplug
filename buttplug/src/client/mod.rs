@@ -349,11 +349,12 @@ impl ButtplugClient {
     /// fails due to issues with DeviceManagers on the server, disconnection,
     /// etc.
     pub async fn start_scanning(&mut self) -> ButtplugClientResult {
-        self.send_message_expect_ok(&StartScanning::default().into()).await
+        self.send_message_expect_ok(&StartScanning::default().into())
+            .await
     }
 
     // Don't expose outside of crate, just handy to use for internal tests.
-    pub (crate) async fn test(&mut self) -> ButtplugClientResult {
+    pub(crate) async fn test(&mut self) -> ButtplugClientResult {
         let test_string = "client test";
         self.send_message(&messages::Test::new(test_string).into())
             .await
@@ -362,10 +363,14 @@ impl ButtplugClient {
                     if m.test_string == test_string {
                         Ok(())
                     } else {
-                        Err(ButtplugClientError::ButtplugError(ButtplugUnknownError::new("Test strings did not match").into()))
+                        Err(ButtplugClientError::ButtplugError(
+                            ButtplugUnknownError::new("Test strings did not match").into(),
+                        ))
                     }
                 } else {
-                    Err(ButtplugClientError::ButtplugError(ButtplugUnknownError::new("Test did not return Test message").into()))
+                    Err(ButtplugClientError::ButtplugError(
+                        ButtplugUnknownError::new("Test did not return Test message").into(),
+                    ))
                 }
             })
             .map_err(|err| err)
@@ -604,8 +609,10 @@ mod test {
     #[test]
     fn test_test_msg() {
         task::block_on(async {
-            connect_test_client(|mut client| async move {
-                assert!(client.test().await.is_ok());
+            connect_test_client(|mut client| {
+                async move {
+                    assert!(client.test().await.is_ok());
+                }
             })
             .await;
         });

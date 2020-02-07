@@ -1,10 +1,12 @@
 use super::{ButtplugProtocol, ButtplugProtocolCreator};
+use crate::core::messages::FleshlightLaunchFW12Cmd;
+use crate::util::fleshlight_helper::FleshlightHelper;
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            StopDeviceCmd, VibrateCmd, VibrateSubcommand, LinearCmd,
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, LinearCmd,
+            MessageAttributesMap, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
         },
     },
     device::{
@@ -14,8 +16,6 @@ use crate::{
     },
 };
 use async_trait::async_trait;
-use crate::core::messages::FleshlightLaunchFW12Cmd;
-use crate::util::fleshlight_helper::FleshlightHelper;
 
 pub struct KiirooGen21ProtocolCreator {
     config: DeviceProtocolConfiguration,
@@ -200,7 +200,7 @@ impl KiirooGen21Protocol {
             //ToDo: Should probably be an error
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
-        let v =  &msg.vectors[0];
+        let v = &msg.vectors[0];
 
         self.last_position = v.position;
         //ToDo: We know the position, the target position and the duration.
@@ -211,10 +211,11 @@ impl KiirooGen21Protocol {
             [
                 0x03,
                 0x00,
-                (FleshlightHelper::get_speed((self.last_position - v.position).abs(), v.duration) * 99.0) as u8,
+                (FleshlightHelper::get_speed((self.last_position - v.position).abs(), v.duration)
+                    * 99.0) as u8,
                 (v.position * 99.0) as u8,
             ]
-                .to_vec(),
+            .to_vec(),
             false,
         );
         device.write_value(msg.into()).await?;
@@ -227,19 +228,12 @@ impl KiirooGen21Protocol {
         device: &Box<dyn DeviceImpl>,
         msg: &FleshlightLaunchFW12Cmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-
         // Repeated logic for removable deprecation
         self.last_position = msg.position as f64 / 99.0;
 
         let msg = DeviceWriteCmd::new(
             Endpoint::Tx,
-            [
-                0x03,
-                0x00,
-                msg.speed,
-                msg.position,
-            ]
-                .to_vec(),
+            [0x03, 0x00, msg.speed, msg.position].to_vec(),
             false,
         );
         device.write_value(msg.into()).await?;

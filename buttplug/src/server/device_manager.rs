@@ -159,7 +159,8 @@ impl DeviceManager {
         // to stop in order.
         for id in devices_ids {
             // TODO Figure out what we do here if anything fails.
-            self.parse_device_message(messages::StopDeviceCmd::new(id).into()).await;
+            self.parse_device_message(messages::StopDeviceCmd::new(id).into())
+                .await;
         }
         Ok(())
     }

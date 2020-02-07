@@ -89,7 +89,9 @@ impl ButtplugProtocol for LovehoneyDesireProtocol {
                 self.handle_vibrate_cmd(device, msg).await
             }
             _ => Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::new("LovehoneyDesireProtocol does not accept this message type."),
+                ButtplugDeviceError::new(
+                    "LovehoneyDesireProtocol does not accept this message type.",
+                ),
             )),
         }
     }

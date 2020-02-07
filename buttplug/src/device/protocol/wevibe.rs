@@ -53,7 +53,7 @@ impl WeVibeProtocol {
                 vibrations = vec![0; count as usize];
             }
         }
-       WeVibeProtocol {
+        WeVibeProtocol {
             name: name.to_owned(),
             attributes,
             sent_vibration: false,
@@ -146,7 +146,7 @@ impl WeVibeProtocol {
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
 
-        let mut data = vec![ 0x0f, 0x03, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00 ];
+        let mut data = vec![0x0f, 0x03, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00];
         let speed_int = self.vibrations[0];
         let speed_ext = self.vibrations[self.vibrations.len() - 1];
 

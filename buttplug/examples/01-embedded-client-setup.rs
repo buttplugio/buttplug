@@ -25,7 +25,7 @@ use buttplug::client::{
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
 use async_std::task;
-use buttplug::client::device::{RotateCommand, VibrateCommand, LinearCommand};
+use buttplug::client::device::{LinearCommand, RotateCommand, VibrateCommand};
 #[cfg(any(
     feature = "linux-ble",
     feature = "winrt-ble",

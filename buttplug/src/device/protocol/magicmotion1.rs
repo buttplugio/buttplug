@@ -146,7 +146,24 @@ impl MagicMotion1Protocol {
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
 
-        let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, self.vibrations[0], 0x64, 0x00], false);
+        let msg = DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![
+                0x0b,
+                0xff,
+                0x04,
+                0x0a,
+                0x32,
+                0x32,
+                0x00,
+                0x04,
+                0x08,
+                self.vibrations[0],
+                0x64,
+                0x00,
+            ],
+            false,
+        );
         device.write_value(msg.into()).await?;
 
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))

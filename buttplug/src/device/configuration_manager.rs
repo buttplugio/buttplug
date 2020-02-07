@@ -24,18 +24,18 @@ use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
-use std::sync::{Arc, RwLock};
-use crate::device::protocol::kiiroo_gen2::KiirooGen2ProtocolCreator;
-use crate::device::protocol::kiiroo_gen2vibe::KiirooGen2VibeProtocolCreator;
-use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
 use crate::device::protocol::aneros::AnerosProtocolCreator;
+use crate::device::protocol::kiiroo_gen2::KiirooGen2ProtocolCreator;
+use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
+use crate::device::protocol::kiiroo_gen2vibe::KiirooGen2VibeProtocolCreator;
 use crate::device::protocol::lelo_f1s::LeloF1sProtocolCreator;
 use crate::device::protocol::lovehoney_desire::LovehoneyDesireProtocolCreator;
 use crate::device::protocol::magicmotion1::MagicMotion1ProtocolCreator;
-use crate::device::protocol::magicmotion3::MagicMotion3ProtocolCreator;
 use crate::device::protocol::magicmotion2::MagicMotion2ProtocolCreator;
-use crate::device::protocol::wevibe8bit::WeVibe8bitProtocolCreator;
+use crate::device::protocol::magicmotion3::MagicMotion3ProtocolCreator;
 use crate::device::protocol::wevibe::WeVibeProtocolCreator;
+use crate::device::protocol::wevibe8bit::WeVibe8bitProtocolCreator;
+use std::sync::{Arc, RwLock};
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");

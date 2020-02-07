@@ -14,20 +14,17 @@ use crate::core::{
     errors::*,
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-        ButtplugMessageUnion, DeviceMessageInfo, ButtplugMessage,
+        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
     },
 };
-use async_std::{
-    sync::Sender,
-    task,
-};
+use async_std::{sync::Sender, task};
 use device_manager::{
     DeviceCommunicationManager, DeviceCommunicationManagerCreator, DeviceManager,
 };
 use std::{
     convert::{TryFrom, TryInto},
-    time::{Instant, Duration},
     sync::{Arc, RwLock},
+    time::{Duration, Instant},
 };
 
 pub enum ButtplugServerEvent {
@@ -46,7 +43,7 @@ struct PingTimer {
     // https://github.com/rust-lang/rust/issues/58580
     max_ping_time: u128,
     last_ping_time: Arc<RwLock<Instant>>,
-    pinged_out: Arc<RwLock<bool>>
+    pinged_out: Arc<RwLock<bool>>,
 }
 
 impl PingTimer {
@@ -74,8 +71,14 @@ impl PingTimer {
                 if last_ping > max_ping_time {
                     error!("Pinged out.");
                     *pinged_out.write().unwrap() = true;
-                    let err: ButtplugError = ButtplugPingError::new(&format!("Pinged out. Ping took {} but max ping time is {}.", last_ping, max_ping_time)).into();
-                    event_sender.send(ButtplugMessageUnion::Error(err.into())).await;
+                    let err: ButtplugError = ButtplugPingError::new(&format!(
+                        "Pinged out. Ping took {} but max ping time is {}.",
+                        last_ping, max_ping_time
+                    ))
+                    .into();
+                    event_sender
+                        .send(ButtplugMessageUnion::Error(err.into()))
+                        .await;
                     break;
                 }
             }
@@ -158,7 +161,7 @@ impl ButtplugServer {
                 _ => Err(ButtplugMessageError::new(
                     &format!("Message {:?} not handled by server loop.", msg).to_owned(),
                 )
-                         .into()),
+                .into()),
             }
         }
     }
@@ -173,9 +176,9 @@ impl ButtplugServer {
                     "Server version ({}) must be equal to or greater than client version ({}).",
                     self.server_spec_version, msg.message_version
                 )
-                    .to_owned(),
+                .to_owned(),
             )
-                       .into());
+            .into());
         }
         self.client_name = Some(msg.client_name.clone());
         self.client_spec_version = Some(msg.message_version);
@@ -191,7 +194,7 @@ impl ButtplugServer {
                 self.server_spec_version,
                 max_ping_time.try_into().unwrap(),
             )
-                .into(),
+            .into(),
         )
     }
 
@@ -200,7 +203,10 @@ impl ButtplugServer {
             timer.update_ping_time();
             Result::Ok(messages::Ok::new(msg.get_id()).into())
         } else {
-            Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())
+            Err(
+                ButtplugPingError::new("Ping message invalid, as ping timer is not running.")
+                    .into(),
+            )
         }
     }
 
@@ -287,8 +293,13 @@ mod test {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             task::sleep(Duration::from_millis(150)).await;
             let reply = server.parse_message(&msg.into()).await;
-            assert!(reply.is_ok(),
-                    format!("ping timer shouldn't start until handshake finished. {:?}", reply));
+            assert!(
+                reply.is_ok(),
+                format!(
+                    "ping timer shouldn't start until handshake finished. {:?}",
+                    reply
+                )
+            );
             task::sleep(Duration::from_millis(150)).await;
             let pingmsg = messages::Ping::default();
             match server.parse_message(&pingmsg.into()).await {

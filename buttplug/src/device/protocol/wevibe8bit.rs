@@ -60,7 +60,7 @@ impl WeVibe8bitProtocol {
                 }
             }
         }
-       WeVibe8bitProtocol {
+        WeVibe8bitProtocol {
             name: name.to_owned(),
             attributes,
             sent_vibration: false,
@@ -154,14 +154,18 @@ impl WeVibe8bitProtocol {
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
 
-        let mut data = vec![ 0x0f, 0x03, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00 ];
+        let mut data = vec![0x0f, 0x03, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00];
         let speed_int = self.vibrations[0];
         let speed_ext = self.vibrations[self.vibrations.len() - 1];
 
         data[3] = self.vibrations[self.vibrations.len() - 1] + 3; // External
         data[4] = self.vibrations[0] + 3; // Internal
-        data[5] = if self.vibrations[0] == 0 {0} else {1};
-        data[5] |= if self.vibrations[self.vibrations.len() - 1] == 0 {0} else {2};
+        data[5] = if self.vibrations[0] == 0 { 0 } else { 1 };
+        data[5] |= if self.vibrations[self.vibrations.len() - 1] == 0 {
+            0
+        } else {
+            2
+        };
 
         if self.vibrations[0] == 0 && self.vibrations[self.vibrations.len() - 1] == 0 {
             data[1] = 0x00;

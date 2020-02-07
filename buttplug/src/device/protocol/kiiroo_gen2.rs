@@ -3,8 +3,8 @@ use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            StopDeviceCmd, LinearCmd, FleshlightLaunchFW12Cmd,
+            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, FleshlightLaunchFW12Cmd,
+            LinearCmd, MessageAttributesMap, StopDeviceCmd,
         },
     },
     device::{
@@ -36,12 +36,7 @@ impl ButtplugProtocolCreator for KiirooGen2ProtocolCreator {
         let name = names.get("en-us").unwrap();
 
         // Initialise
-        let msg = DeviceWriteCmd::new(
-            Endpoint::Firmware,
-            [ 0x00 ]
-                .to_vec(),
-            false,
-        );
+        let msg = DeviceWriteCmd::new(Endpoint::Firmware, [0x00].to_vec(), false);
         device_impl.write_value(msg.into()).await?;
 
         Ok(Box::new(KiirooGen2Protocol::new(name, attrs)))
@@ -120,25 +115,22 @@ impl KiirooGen2Protocol {
             //ToDo: Should probably be an error
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
-        let v =  &msg.vectors[0];
+        let v = &msg.vectors[0];
 
         //ToDo: We know the position, the target position and the duration.
         // We can work out if we're being redirected mid move!
 
-        let speed = (FleshlightHelper::get_speed((self.last_position - v.position).abs(), v.duration) * 99.0) as u8;
+        let speed =
+            (FleshlightHelper::get_speed((self.last_position - v.position).abs(), v.duration)
+                * 99.0) as u8;
         let position = (v.position * 99.0) as u8;
-        debug!("Moving Fleshlight from {} to {} at speed {}", self.last_position, v.position, speed);
+        debug!(
+            "Moving Fleshlight from {} to {} at speed {}",
+            self.last_position, v.position, speed
+        );
         self.last_position = v.position;
 
-        let msg = DeviceWriteCmd::new(
-            Endpoint::Tx,
-            [
-                position,
-                speed,
-            ]
-                .to_vec(),
-            false,
-        );
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, [position, speed].to_vec(), false);
         device.write_value(msg.into()).await?;
 
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
@@ -149,19 +141,10 @@ impl KiirooGen2Protocol {
         device: &Box<dyn DeviceImpl>,
         msg: &FleshlightLaunchFW12Cmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
-
         // Repeated logic for removable deprecation
         self.last_position = msg.position as f64 / 99.0;
 
-        let msg = DeviceWriteCmd::new(
-            Endpoint::Tx,
-            [
-                msg.position,
-                msg.speed,
-            ]
-                .to_vec(),
-            false,
-        );
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, [msg.position, msg.speed].to_vec(), false);
         device.write_value(msg.into()).await?;
 
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))

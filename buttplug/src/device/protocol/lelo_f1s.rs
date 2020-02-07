@@ -1,4 +1,5 @@
 use super::{ButtplugProtocol, ButtplugProtocolCreator};
+use crate::device::device::DeviceSubscribeCmd;
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
@@ -14,7 +15,6 @@ use crate::{
     },
 };
 use async_trait::async_trait;
-use crate::device::device::DeviceSubscribeCmd;
 
 pub struct LeloF1sProtocolCreator {
     config: DeviceProtocolConfiguration,
@@ -149,7 +149,11 @@ impl LeloF1sProtocol {
             return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
         }
 
-        let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, self.vibrations[0], self.vibrations[1]], false);
+        let msg = DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0x01, self.vibrations[0], self.vibrations[1]],
+            false,
+        );
         device.write_value(msg.into()).await?;
 
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))

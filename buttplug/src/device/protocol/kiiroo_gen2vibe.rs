@@ -177,8 +177,16 @@ impl KiirooGen2VibeProtocol {
             Endpoint::Tx,
             [
                 self.vibrations[self.vibration_order[0]] as u8,
-                if self.vibrations.len() >= 2 {self.vibrations[self.vibration_order[1]] as u8} else {0},
-                if self.vibrations.len() >= 3 {self.vibrations[self.vibration_order[2]] as u8} else {0},
+                if self.vibrations.len() >= 2 {
+                    self.vibrations[self.vibration_order[1]] as u8
+                } else {
+                    0
+                },
+                if self.vibrations.len() >= 3 {
+                    self.vibrations[self.vibration_order[2]] as u8
+                } else {
+                    0
+                },
             ]
             .to_vec(),
             false,
