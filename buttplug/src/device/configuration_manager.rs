@@ -28,6 +28,7 @@ use std::sync::{Arc, RwLock};
 use crate::device::protocol::kiiroo_gen2::KiirooGen2ProtocolCreator;
 use crate::device::protocol::kiiroo_gen2vibe::KiirooGen2VibeProtocolCreator;
 use crate::device::protocol::kiiroo_gen21::KiirooGen21ProtocolCreator;
+use crate::device::protocol::aneros::AnerosProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -274,6 +275,12 @@ impl DeviceConfigurationManager {
         // TODO Seems like we should be able to clean up the repeated
         // protocolcreator code but due to it being an async trait, I'm not
         // quite sure how.
+        protocols.insert(
+            "aneros".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(AnerosProtocolCreator::new(config))
+            }),
+        );
         protocols.insert(
             "kiiroo-v2".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
