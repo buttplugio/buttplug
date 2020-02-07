@@ -23,6 +23,7 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
 use std::sync::{Arc, RwLock};
+use crate::device::protocol::aneros::AnerosProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -269,6 +270,12 @@ impl DeviceConfigurationManager {
         // TODO Seems like we should be able to clean up the repeated
         // protocolcreator code but due to it being an async trait, I'm not
         // quite sure how.
+        protocols.insert(
+            "aneros".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(AnerosProtocolCreator::new(config))
+            }),
+        );
         protocols.insert(
             "lovense".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {

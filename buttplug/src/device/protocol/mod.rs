@@ -1,3 +1,4 @@
+pub mod aneros;
 pub mod lovense;
 pub mod maxpro;
 pub mod picobong;
