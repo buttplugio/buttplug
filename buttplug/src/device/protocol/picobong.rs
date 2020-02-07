@@ -9,13 +9,11 @@ use crate::{
     },
     device::{
         configuration_manager::DeviceProtocolConfiguration,
-        device::{
-            DeviceImpl,
-            DeviceWriteCmd,
-        },
+        device::{DeviceImpl, DeviceWriteCmd},
         Endpoint,
     },
 };
+use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 
 pub struct PicobongProtocolCreator {
