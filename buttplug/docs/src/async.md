@@ -51,3 +51,7 @@ As hardware can disconnect, or send data unprovoked, or do other things we don't
 ## Future Queuing
 
 _TODO: Talk about how we shuttle futures around inside the library_
+
+## Getting Around Associated Functions Like new()
+
+_TODO: Talk about non-async constructor traits_
