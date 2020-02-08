@@ -8,5 +8,8 @@ Cargo.lock
 target
 Cargo.lock
 
+# Local Netlify folder
+.netlify
+
 # book output
 /buttplug/docs/book
