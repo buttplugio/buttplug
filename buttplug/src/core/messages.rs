@@ -158,7 +158,7 @@ impl Test {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct MessageAttributes {
     #[cfg_attr(
