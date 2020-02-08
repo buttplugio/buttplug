@@ -17,6 +17,7 @@ pub mod picobong;
 pub mod prettylove;
 pub mod realov;
 pub mod svakom;
+pub mod vorzesa;
 pub mod wevibe;
 pub mod wevibe8bit;
 pub mod youcups;

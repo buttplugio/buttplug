@@ -33,6 +33,7 @@ use crate::device::protocol::lovehoney_desire::LovehoneyDesireProtocolCreator;
 use crate::device::protocol::magicmotion1::MagicMotion1ProtocolCreator;
 use crate::device::protocol::magicmotion2::MagicMotion2ProtocolCreator;
 use crate::device::protocol::magicmotion3::MagicMotion3ProtocolCreator;
+use crate::device::protocol::vorzesa::VorzeSAProtocolCreator;
 use crate::device::protocol::wevibe::WeVibeProtocolCreator;
 use crate::device::protocol::wevibe8bit::WeVibe8bitProtocolCreator;
 use std::sync::{Arc, RwLock};
@@ -400,6 +401,12 @@ impl DeviceConfigurationManager {
             "svakom".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
                 Box::new(SvakomProtocolCreator::new(config))
+            }),
+        );
+        protocols.insert(
+            "vorze-sa".to_owned(),
+            Box::new(|config: DeviceProtocolConfiguration| {
+                Box::new(VorzeSAProtocolCreator::new(config))
             }),
         );
         protocols.insert(
