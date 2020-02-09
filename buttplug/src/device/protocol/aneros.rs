@@ -42,8 +42,9 @@ impl AnerosProtocol {
 }
 
 create_buttplug_protocol_impl!(AnerosProtocol,
-                               (VibrateCmd, handle_vibrate_cmd),
-                               (StopDeviceCmd, handle_stop_device_cmd));
+    (VibrateCmd, handle_vibrate_cmd),
+    (StopDeviceCmd, handle_stop_device_cmd)
+);
 
 impl AnerosProtocol {
     async fn handle_stop_device_cmd(
@@ -107,5 +108,34 @@ impl AnerosProtocol {
         }
 
         Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        core::messages::{VibrateCmd, VibrateSubcommand},
+        test::test_device::{TestDevice, TestDeviceImplCreator},
+        device::{
+            Endpoint,
+            device::{ButtplugDevice, DeviceImplCommand, DeviceWriteCmd},
+            configuration_manager::{DeviceSpecifier, BluetoothLESpecifier},
+        }
+    };
+    use async_std::task;
+
+    #[test]
+    pub fn test_aneros_protocol() {
+        task::block_on(async move {
+            let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Massage Demo"));
+            let device_impl = TestDevice::new("Massage Demo", vec!(Endpoint::Tx));
+            let mut device_impl_clone = device_impl.clone();
+            let device_impl_creator = TestDeviceImplCreator::new(specifier, Box::new(device_impl));
+            let mut device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator)).await.unwrap().unwrap();
+            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
+            let command_receiver = device_impl_clone.endpoint_channels.get_mut(&Endpoint::Tx).unwrap().1.clone();
+            let command = command_receiver.recv().await.unwrap();
+            assert_eq!(command, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)));
+        });
     }
 }

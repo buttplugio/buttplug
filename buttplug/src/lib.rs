@@ -100,3 +100,5 @@ pub mod device;
 #[cfg(feature = "server")]
 pub mod server;
 pub mod util;
+
+mod test;
