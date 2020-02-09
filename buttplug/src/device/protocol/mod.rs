@@ -119,7 +119,6 @@ impl Clone for Box<dyn ButtplugProtocol> {
 }
 
 pub struct GenericCommandManager {
-    attributes: MessageAttributesMap,
     sent_vibration: bool,
     sent_rotation: bool,
     sent_linear: bool,
@@ -166,7 +165,6 @@ impl GenericCommandManager {
         }
 
         Self {
-            attributes: attributes.clone(),
             sent_vibration: false,
             sent_rotation: false,
             sent_linear: false,
@@ -201,6 +199,7 @@ impl GenericCommandManager {
                 return Err(ButtplugDeviceError::new(&format!("VibrateCmd has {} commands, device has {} vibrators.",
                 msg.speeds.len(), self.vibrations.len())).into());
             }
+
             let speed = (speed_command.speed * self.vibration_step_counts[index] as f64) as u32;
             // If we've already sent commands, we don't want to send them again,
             // because some of our communication busses are REALLY slow. Make sure
@@ -217,26 +216,46 @@ impl GenericCommandManager {
         Ok(result)
     }
 
-    pub fn update_rotation(self, msg: &RotateCmd) -> Result<Option<Vec<(u32, bool)>>, ButtplugError> {
-        // First, make sure this is a valid command, that doesn't contain an
-        // index we can't reach.
-
-        // If we've already sent commands before, we should check against our
-        // old values. Otherwise, we should always send whatever command we're
-        // going to send.
+    pub fn update_rotation(&mut self, msg: &RotateCmd) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
+        // First, make sure this is a valid command, that contains at least one
+        // command.
+        if msg.rotations.len() == 0 {
+            return Err(ButtplugDeviceError::new(&format!("RotateCmd has 0 commands, will not do anything.")).into());
+        }
 
         // Now we convert from the generic 0.0-1.0 range to the StepCount
         // attribute given by the device config.
 
-        // If we've already sent commands, we don't want to send them again,
-        // because some of our communication busses are REALLY slow. Make sure
-        // these values get None in our return vector.
+        // If we've already sent commands before, we should check against our
+        // old values. Otherwise, we should always send whatever command we're
+        // going to send.
+        let mut result: Vec<Option<(u32, bool)>> = vec![None; self.rotations.len()];
+        for rotate_command in &msg.rotations {
+            let index = rotate_command.index as usize;
+            // Since we're going to iterate here anyways, we do our index check
+            // here instead of in a filter above.
+            if index >= self.rotations.len() {
+                return Err(ButtplugDeviceError::new(&format!("RotateCmd has {} commands, device has {} rotators.",
+                msg.rotations.len(), self.rotations.len())).into());
+            }
+            let speed = (rotate_command.speed * self.rotation_step_counts[index] as f64) as u32;
+            let clockwise = rotate_command.clockwise;
+            // If we've already sent commands, we don't want to send them again,
+            // because some of our communication busses are REALLY slow. Make sure
+            // these values get None in our return vector.
+            if !self.sent_rotation || speed != self.rotations[index].0 || clockwise != self.rotations[index].1 {
+                self.rotations[index] = (speed, clockwise);
+                result[index] = Some((speed, clockwise));
+            }
+        }
+
+        self.sent_rotation = true;
 
         // Return the command vector for the protocol to turn into proprietary commands
-        Ok(None)
+        Ok(result)
     }
 
-    pub fn update_linear(self, msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
+    pub fn update_linear(&mut self, msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
         // First, make sure this is a valid command, that doesn't contain an
         // index we can't reach.
 
@@ -262,7 +281,7 @@ mod test {
     use super::GenericCommandManager;
     use crate::core::{
         messages::{
-            MessageAttributesMap, MessageAttributes, VibrateCmd, VibrateSubcommand
+            MessageAttributesMap, MessageAttributes, VibrateCmd, VibrateSubcommand, RotateCmd, RotationSubcommand
         }
     };
     #[test]
@@ -281,5 +300,23 @@ mod test {
         assert_eq!(mgr.update_vibration(&vibrate_msg_2).unwrap(), vec![None, Some(15)]);
         let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
         assert!(mgr.update_vibration(&vibrate_msg_invalid).is_err());
+    }
+
+    #[test]
+    pub fn test_command_generator_rotation() {
+        let mut attributes_map = MessageAttributesMap::new();
+
+        let mut rotate_attributes = MessageAttributes::default();
+        rotate_attributes.feature_count = Some(2);
+        rotate_attributes.step_count = Some(vec![20, 20]);
+        attributes_map.insert("RotateCmd".to_owned(), rotate_attributes);
+        let mut mgr = GenericCommandManager::new(&attributes_map);
+        let rotate_msg = RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true), RotationSubcommand::new(1, 0.5, true)]);
+        assert_eq!(mgr.update_rotation(&rotate_msg).unwrap(), vec![Some((10, true)), Some((10, true))]);
+        assert_eq!(mgr.update_rotation(&rotate_msg).unwrap(), vec![None, None]);
+        let rotate_msg_2 = RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true), RotationSubcommand::new(1, 0.75, false)]);
+        assert_eq!(mgr.update_rotation(&rotate_msg_2).unwrap(), vec![None, Some((15, false))]);
+        let rotate_msg_invalid = RotateCmd::new(0, vec![RotationSubcommand::new(2, 0.5, true)]);
+        assert!(mgr.update_rotation(&rotate_msg_invalid).is_err());
     }
 }
