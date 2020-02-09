@@ -15,6 +15,7 @@ use crate::{
 use async_std::sync::Receiver;
 use async_trait::async_trait;
 
+#[derive(PartialEq, Debug)]
 pub struct DeviceReadCmd {
     pub endpoint: Endpoint,
     pub length: u32,
@@ -41,6 +42,7 @@ impl From<RawReadCmd> for DeviceReadCmd {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct DeviceWriteCmd {
     pub endpoint: Endpoint,
     pub data: Vec<u8>,
@@ -67,6 +69,7 @@ impl From<RawWriteCmd> for DeviceWriteCmd {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct DeviceSubscribeCmd {
     pub endpoint: Endpoint,
 }
@@ -85,6 +88,7 @@ impl From<SubscribeCmd> for DeviceSubscribeCmd {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub struct DeviceUnsubscribeCmd {
     pub endpoint: Endpoint,
 }
@@ -103,6 +107,7 @@ impl From<UnsubscribeCmd> for DeviceUnsubscribeCmd {
     }
 }
 
+#[derive(PartialEq, Debug)]
 pub enum DeviceImplCommand {
     // Endpoint, data, write with response
     Write(DeviceWriteCmd),

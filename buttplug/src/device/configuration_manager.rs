@@ -129,7 +129,7 @@ pub struct USBSpecifier {
     product_id: u16,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq, Clone)]
 pub enum DeviceSpecifier {
     BluetoothLE(BluetoothLESpecifier),
     HID(HIDSpecifier),
