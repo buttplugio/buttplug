@@ -54,4 +54,4 @@ _TODO: Talk about how we shuttle futures around inside the library_
 
 ## Getting Around Associated Functions Like new()
 
-_TODO: Talk about non-async constructor traits_
+_TODO: Talk about non-async constructor traits, factories like DeviceCreatorImpl, etc..._
