@@ -1984,6 +1984,7 @@
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
+              127,
               127
             ]
           }

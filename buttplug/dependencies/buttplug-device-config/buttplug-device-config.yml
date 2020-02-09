@@ -1371,6 +1371,7 @@ protocols:
           FeatureCount: 2
           StepCount:
            - 127
+           - 127
     configurations:
       - identifier:
           - Massage Demo
