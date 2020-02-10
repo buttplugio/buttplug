@@ -253,7 +253,7 @@ impl GenericCommandManager {
             // direction command, but is that really a big deal? We can just
             // have it ignore the direction difference on a 0.0 speed?
             let mut subcommands = vec!();
-            for i in 0..vibrations.len() {
+            for i in 0..rotations.len() {
                 subcommands.push(RotationSubcommand::new(i as u32, 0.0, false));
             }
             stop_commands.push(RotateCmd::new(
