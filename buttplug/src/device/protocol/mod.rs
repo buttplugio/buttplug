@@ -31,6 +31,9 @@ pub trait ButtplugProtocolCreator: Sync + Send {
     ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
 
+// TODO These macros could use some compilation tests to make sure we're
+// bringing in everything we need.
+
 // Note: We have to use tt instead of ident here due to the async_trait macro.
 // See https://github.com/dtolnay/async-trait/issues/46 for more info.
 #[macro_export]
@@ -156,6 +159,9 @@ macro_rules! create_buttplug_protocol (
     }
 );
 
+// TODO This should really handle all device type stoppage, since we'll already
+// know what the attributes are. It should just generate the stoppage set on
+// device creation and return that.
 #[macro_export]
 macro_rules! stop_device_cmd_vibration {
     () => {
