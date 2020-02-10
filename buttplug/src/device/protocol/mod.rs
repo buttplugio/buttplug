@@ -134,6 +134,24 @@ macro_rules! create_buttplug_protocol (
     }
 );
 
+#[macro_export]
+macro_rules! stop_device_cmd_vibration {
+    () => {
+        async fn handle_stop_device_cmd(
+            &mut self,
+            device: &Box<dyn DeviceImpl>,
+            _: &StopDeviceCmd,
+        ) -> Result<ButtplugMessageUnion, ButtplugError> {
+            let msg = &self.manager.lock().await.create_vibration_stop_cmd();
+            self.handle_vibrate_cmd(
+                device,
+                msg,
+            )
+            .await
+        }
+    };
+}
+
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
     fn name(&self) -> &str;

@@ -1,6 +1,7 @@
 use super::{ButtplugProtocol, ButtplugProtocolCreator, GenericCommandManager};
 use crate::{
     create_buttplug_protocol,
+    stop_device_cmd_vibration,
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
@@ -23,18 +24,7 @@ create_buttplug_protocol!(AnerosProtocol,
 );
 
 impl AnerosProtocol {
-    async fn handle_stop_device_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        _: &StopDeviceCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        let msg = &self.manager.lock().await.create_vibration_stop_cmd();
-        self.handle_vibrate_cmd(
-            device,
-            msg,
-        )
-        .await
-    }
+    stop_device_cmd_vibration!();
 
     async fn handle_vibrate_cmd(
         &mut self,
