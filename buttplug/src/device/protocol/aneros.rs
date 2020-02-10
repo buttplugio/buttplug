@@ -1,9 +1,9 @@
 use crate::{
     create_buttplug_protocol,
-    stop_device_cmd_vibration,
+    generate_stop_device_cmd,
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages,
+        messages::{self, ButtplugMessage},
     },
     device::{
         device::{DeviceImpl, DeviceWriteCmd},
@@ -17,7 +17,7 @@ create_buttplug_protocol!(AnerosProtocol,
 );
 
 impl AnerosProtocol {
-    stop_device_cmd_vibration!();
+    generate_stop_device_cmd!();
 
     async fn handle_vibrate_cmd(
         &mut self,

@@ -17,7 +17,7 @@ use crate::
         messages::
         {
             ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            RotateCmd, VibrateCmd, LinearCmd, VibrateSubcommand
+            RotateCmd, VibrateCmd, LinearCmd, VibrateSubcommand, RotationSubcommand
         },
     }
 };
@@ -144,38 +144,38 @@ macro_rules! create_buttplug_protocol (
             name: String,
             attributes: MessageAttributesMap,
             manager: Arc<Mutex<GenericCommandManager>>,
+            stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
         }
 
         impl $protocol_name {
             pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
+                let manager = GenericCommandManager::new(&attributes);
+
                 $protocol_name {
                     name: name.to_owned(),
-                    // Borrow attributes before we store it.
-                    manager: Arc::new(Mutex::new(GenericCommandManager::new(&attributes))),
                     attributes,
+                    stop_commands: manager.get_stop_commands(),
+                    manager: Arc::new(Mutex::new(manager)),
                 }
             }
         }
     }
 );
 
-// TODO This should really handle all device type stoppage, since we'll already
-// know what the attributes are. It should just generate the stoppage set on
-// device creation and return that.
 #[macro_export]
-macro_rules! stop_device_cmd_vibration {
+macro_rules! generate_stop_device_cmd {
     () => {
         async fn handle_stop_device_cmd(
             &mut self,
             device: &Box<dyn DeviceImpl>,
-            _: &StopDeviceCmd,
+            stop_msg: &StopDeviceCmd,
         ) -> Result<ButtplugMessageUnion, ButtplugError> {
-            let msg = &self.manager.lock().await.create_vibration_stop_cmd();
-            self.handle_vibrate_cmd(
-                device,
-                msg,
-            )
-            .await
+            // TODO This clone definitely shouldn't be needed but I'm tired. GOOD FIRST BUG.
+            let cmds = self.stop_commands.clone();
+            for msg in cmds {
+                self.parse_message(device, &msg).await?;
+            }
+            Ok(messages::Ok::new(stop_msg.get_id()).into())
         }
     };
 }
@@ -208,6 +208,7 @@ pub struct GenericCommandManager {
     rotation_step_counts: Vec<u32>,
     linears: Vec<(u32, u32)>,
     linear_step_counts: Vec<u32>,
+    stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
 impl GenericCommandManager {
@@ -219,6 +220,9 @@ impl GenericCommandManager {
         let mut linears: Vec<(u32, u32)> = vec![];
         let mut linear_step_counts: Vec<u32> = vec![];
 
+        let mut stop_commands = vec!();
+
+        // TODO We should probably panic here if we don't have feature and step counts?
         if let Some(attr) = attributes.get("VibrateCmd") {
             if let Some(count) = attr.feature_count {
                 vibrations = vec![0; count as usize];
@@ -226,6 +230,15 @@ impl GenericCommandManager {
             if let Some(step_counts) = &attr.step_count {
                 vibration_step_counts = step_counts.clone();
             }
+
+            let mut subcommands = vec!();
+            for i in 0..vibrations.len() {
+                subcommands.push(VibrateSubcommand::new(i as u32, 0.0).into());
+            }
+            stop_commands.push(VibrateCmd::new(
+                0,
+                subcommands
+            ).into());
         }
         if let Some(attr) = attributes.get("RotateCmd") {
             if let Some(count) = attr.feature_count {
@@ -234,6 +247,19 @@ impl GenericCommandManager {
             if let Some(step_counts) = &attr.step_count {
                 rotation_step_counts = step_counts.clone();
             }
+
+            // TODO Can we assume clockwise is false here? We might send extra
+            // messages on Lovense since it'll require both a speed and change
+            // direction command, but is that really a big deal? We can just
+            // have it ignore the direction difference on a 0.0 speed?
+            let mut subcommands = vec!();
+            for i in 0..vibrations.len() {
+                subcommands.push(RotationSubcommand::new(i as u32, 0.0, false));
+            }
+            stop_commands.push(RotateCmd::new(
+                0,
+                subcommands
+            ).into());
         }
         if let Some(attr) = attributes.get("LinearCmd") {
             if let Some(count) = attr.feature_count {
@@ -253,7 +279,8 @@ impl GenericCommandManager {
             linears,
             vibration_step_counts,
             rotation_step_counts,
-            linear_step_counts
+            linear_step_counts,
+            stop_commands,
         }
     }
 
@@ -354,16 +381,8 @@ impl GenericCommandManager {
         Ok(None)
     }
 
-    pub fn create_vibration_stop_cmd(&self) -> VibrateCmd {
-        // TODO There's gotta be a more concise way to do this.
-        let mut subcommands = vec!();
-        for i in 0..self.vibrations.len() {
-            subcommands.push(VibrateSubcommand::new(i as u32, 0.0));
-        }
-        VibrateCmd::new(
-            0,
-            subcommands
-        )
+    pub fn get_stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
+        self.stop_commands.clone()
     }
 }
 
