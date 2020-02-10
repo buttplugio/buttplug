@@ -81,7 +81,7 @@ impl AnerosProtocol {
 #[cfg(test)]
 mod test {
     use crate::{
-        core::messages::{VibrateCmd, VibrateSubcommand},
+        core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd},
         test::test_device::{TestDevice},
         device::{
             Endpoint,
@@ -100,9 +100,13 @@ mod test {
             // Since we only created one subcommand, we should only receive one command.
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
             assert!(command_receiver.is_empty());
-            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.0), VibrateSubcommand::new(1, 0.5))).into()).await.unwrap();
-            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)));
+            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.1), VibrateSubcommand::new(1, 0.5))).into()).await.unwrap();
+            // TODO There's probably a more concise way to do this.
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 12], false)));
             assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 63], false)));
+            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)));
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)));
         });
     }
 }
