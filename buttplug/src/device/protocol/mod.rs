@@ -273,6 +273,13 @@ impl GenericCommandManager {
         // Return the command vector for the protocol to turn into proprietary commands
         Ok(None)
     }
+
+    pub fn create_vibration_stop_cmd(&self) -> VibrateCmd {
+        VibrateCmd::new(
+            0,
+            vec![VibrateSubcommand::new(0, 0.0); self.vibrations.len()],
+        )
+    }
 }
 
 #[cfg(test)]
