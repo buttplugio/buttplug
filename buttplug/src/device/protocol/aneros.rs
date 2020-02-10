@@ -96,11 +96,13 @@ mod test {
             let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo").await.unwrap();
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
-            let command = command_receiver.recv().await.unwrap();
-            assert_eq!(command, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)));
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)));
             // Since we only created one subcommand, we should only receive one command.
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
-            assert!(command_receiver.is_empty())
+            assert!(command_receiver.is_empty());
+            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.0), VibrateSubcommand::new(1, 0.5))).into()).await.unwrap();
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)));
+            assert_eq!(command_receiver.recv().await.unwrap(), DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 63], false)));
         });
     }
 }
