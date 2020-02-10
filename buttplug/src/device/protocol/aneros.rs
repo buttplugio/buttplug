@@ -1,22 +1,15 @@
-use super::{ButtplugProtocol, ButtplugProtocolCreator, GenericCommandManager};
 use crate::{
     create_buttplug_protocol,
     stop_device_cmd_vibration,
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            StopDeviceCmd, VibrateCmd,
-        },
+        messages,
     },
     device::{
-        configuration_manager::DeviceProtocolConfiguration,
         device::{DeviceImpl, DeviceWriteCmd},
         Endpoint,
     },
 };
-use async_trait::async_trait;
-use async_std::sync::{Arc, Mutex};
 
 create_buttplug_protocol!(AnerosProtocol,
     (VibrateCmd, handle_vibrate_cmd),

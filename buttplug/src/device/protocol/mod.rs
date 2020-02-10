@@ -41,6 +41,23 @@ macro_rules! create_buttplug_protocol_impl (
             ( $message_name:tt, $message_handler:tt )
         ),+
     ) => {
+        use async_trait::async_trait;
+        use crate::{
+            device::{
+                protocol::{ButtplugProtocol, ButtplugProtocolCreator},
+                configuration_manager::DeviceProtocolConfiguration,
+            },
+            core::{
+                messages::{
+                    ButtplugMessageUnion,
+                    ButtplugDeviceCommandMessageUnion,
+                    $(
+                        $message_name
+                    ),*
+                }
+            },
+        };
+
         paste::item! {
             pub struct [<$protocol_name Creator>] {
                 config: DeviceProtocolConfiguration,
@@ -108,7 +125,12 @@ macro_rules! create_buttplug_protocol (
             ( $message_name:tt, $message_handler:tt )
         ),+
     ) => {
-        use crate::create_buttplug_protocol_impl;
+        use crate::{
+            create_buttplug_protocol_impl,
+            device::protocol::GenericCommandManager,
+            core::messages::MessageAttributesMap,
+        };
+        use async_std::sync::{Arc, Mutex};
 
         create_buttplug_protocol_impl!($protocol_name, $(
             ( $message_name, $message_handler )
