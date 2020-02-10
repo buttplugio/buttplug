@@ -1,6 +1,6 @@
 use super::{ButtplugProtocol, ButtplugProtocolCreator, GenericCommandManager};
 use crate::{
-    create_buttplug_protocol_impl,
+    create_buttplug_protocol,
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
         messages::{
@@ -17,25 +17,7 @@ use crate::{
 use async_trait::async_trait;
 use async_std::sync::{Arc, Mutex};
 
-#[derive(Clone)]
-pub struct AnerosProtocol {
-    name: String,
-    attributes: MessageAttributesMap,
-    manager: Arc<Mutex<GenericCommandManager>>,
-}
-
-impl AnerosProtocol {
-    pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
-        AnerosProtocol {
-            name: name.to_owned(),
-            // Borrow attributes before we store it.
-            manager: Arc::new(Mutex::new(GenericCommandManager::new(&attributes))),
-            attributes,
-        }
-    }
-}
-
-create_buttplug_protocol_impl!(AnerosProtocol,
+create_buttplug_protocol!(AnerosProtocol,
     (VibrateCmd, handle_vibrate_cmd),
     (StopDeviceCmd, handle_stop_device_cmd)
 );

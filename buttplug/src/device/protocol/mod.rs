@@ -100,6 +100,40 @@ macro_rules! create_buttplug_protocol_impl (
     }
 );
 
+#[macro_export]
+macro_rules! create_buttplug_protocol (
+    (
+        $protocol_name:tt,
+        $(
+            ( $message_name:tt, $message_handler:tt )
+        ),+
+    ) => {
+        use crate::create_buttplug_protocol_impl;
+
+        create_buttplug_protocol_impl!($protocol_name, $(
+            ( $message_name, $message_handler )
+        ),+);
+
+        #[derive(Clone)]
+        pub struct $protocol_name {
+            name: String,
+            attributes: MessageAttributesMap,
+            manager: Arc<Mutex<GenericCommandManager>>,
+        }
+
+        impl $protocol_name {
+            pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
+                $protocol_name {
+                    name: name.to_owned(),
+                    // Borrow attributes before we store it.
+                    manager: Arc::new(Mutex::new(GenericCommandManager::new(&attributes))),
+                    attributes,
+                }
+            }
+        }
+    }
+);
+
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
     fn name(&self) -> &str;
