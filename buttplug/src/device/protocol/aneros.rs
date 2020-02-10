@@ -115,11 +115,10 @@ impl AnerosProtocol {
 mod test {
     use crate::{
         core::messages::{VibrateCmd, VibrateSubcommand},
-        test::test_device::{TestDevice, TestDeviceImplCreator},
+        test::test_device::{TestDevice},
         device::{
             Endpoint,
-            device::{ButtplugDevice, DeviceImplCommand, DeviceWriteCmd},
-            configuration_manager::{DeviceSpecifier, BluetoothLESpecifier},
+            device::{DeviceImplCommand, DeviceWriteCmd},
         }
     };
     use async_std::task;
@@ -127,15 +126,19 @@ mod test {
     #[test]
     pub fn test_aneros_protocol() {
         task::block_on(async move {
-            let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Massage Demo"));
-            let device_impl = TestDevice::new("Massage Demo", vec!(Endpoint::Tx));
-            let mut device_impl_clone = device_impl.clone();
-            let device_impl_creator = TestDeviceImplCreator::new(specifier, Box::new(device_impl));
-            let mut device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator)).await.unwrap().unwrap();
+            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo").await.unwrap();
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
-            let command_receiver = device_impl_clone.endpoint_channels.get_mut(&Endpoint::Tx).unwrap().1.clone();
-            let command = command_receiver.recv().await.unwrap();
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let mut command = command_receiver.recv().await.unwrap();
             assert_eq!(command, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)));
+            println!("{:?}", command);
+            // TODO We didn't address the second motor, nothing should happen
+            // with it. This will change with integration of the
+            // GenericCommandManager.
+            command = command_receiver.recv().await.unwrap();
+            println!("{:?}", command);
+            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
+            assert!(command_receiver.is_empty())
         });
     }
 }
