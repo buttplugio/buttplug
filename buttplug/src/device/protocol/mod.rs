@@ -275,9 +275,14 @@ impl GenericCommandManager {
     }
 
     pub fn create_vibration_stop_cmd(&self) -> VibrateCmd {
+        // TODO There's gotta be a more concise way to do this.
+        let mut subcommands = vec!();
+        for i in 0..self.vibrations.len() {
+            subcommands.push(VibrateSubcommand::new(i as u32, 0.0));
+        }
         VibrateCmd::new(
             0,
-            vec![VibrateSubcommand::new(0, 0.0); self.vibrations.len()],
+            subcommands
         )
     }
 }
@@ -326,4 +331,6 @@ mod test {
         let rotate_msg_invalid = RotateCmd::new(0, vec![RotationSubcommand::new(2, 0.5, true)]);
         assert!(mgr.update_rotation(&rotate_msg_invalid).is_err());
     }
+
+    // TODO Write test for vibration stop generator
 }
