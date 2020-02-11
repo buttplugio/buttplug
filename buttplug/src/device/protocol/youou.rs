@@ -1,134 +1,87 @@
-use super::{ButtplugProtocol, ButtplugProtocolCreator};
-use crate::{
-    core::{
-        errors::{ButtplugDeviceError, ButtplugError},
-        messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            StopDeviceCmd, VibrateCmd, VibrateSubcommand,
-        },
-    },
-    device::{
-        configuration_manager::DeviceProtocolConfiguration,
-        device::{DeviceImpl, DeviceWriteCmd},
-        Endpoint,
-    },
-};
-use async_trait::async_trait;
+use crate::create_buttplug_protocol;
 
-pub struct YououProtocolCreator {
-    config: DeviceProtocolConfiguration,
-}
+create_buttplug_protocol!(
+    // Protocol name,
+    Youou,
+    // Protocol members
+    (
+        (packet_id: Arc<Mutex<u8>> = Arc::new(Mutex::new(0)))
+    ),
+    (
+        (VibrateCmd, {
+            // TODO Convert to using generic command manager
+    
+            // Byte 2 seems to be a monotonically increasing packet id of some kind Speed seems to be
+            // 0-247 or so. Anything above that sets a pattern which isn't what we want here.
+            let max_value: f64 = 247.0;
+            let speed: u8 = (msg.speeds[0].speed * max_value) as u8;
+            let state: u8 = if speed > 0 { 1 } else { 0 };
 
-impl YououProtocolCreator {
-    pub fn new(config: DeviceProtocolConfiguration) -> Self {
-        Self { config }
-    }
-}
-
-#[async_trait]
-impl ButtplugProtocolCreator for YououProtocolCreator {
-    async fn try_create_protocol(
-        &self,
-        device_impl: &Box<dyn DeviceImpl>,
-    ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
-        let (names, attrs) = self.config.get_attributes("VX001_").unwrap();
-        let name = names.get("en-us").unwrap();
-        Ok(Box::new(YououProtocol::new(name, attrs)))
-    }
-}
-
-#[derive(Clone)]
-pub struct YououProtocol {
-    name: String,
-    attributes: MessageAttributesMap,
-    // TODO This needs to be shared across all instances, so Arc<Mutex<T>>
-    packet_id: u8,
-}
-
-impl YououProtocol {
-    pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
-        YououProtocol {
-            name: name.to_owned(),
-            attributes,
-            packet_id: 0,
-        }
-    }
-}
-
-#[async_trait]
-impl ButtplugProtocol for YououProtocol {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn message_attributes(&self) -> MessageAttributesMap {
-        self.attributes.clone()
-    }
-
-    fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
-        Box::new((*self).clone())
-    }
-
-    async fn parse_message(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        match message {
-            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
-                self.handle_stop_device_cmd(device, msg).await
+            let mut data;
+            {
+                let mut packet_id = self.packet_id.lock().await;
+                data = vec![0xaa, 0x55, *packet_id, 0x02, 0x03, 0x01, speed, state];
+                *packet_id = packet_id.wrapping_add(1);
             }
-            ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
-                self.handle_vibrate_cmd(device, msg).await
+            let mut crc: u8 = 0;
+    
+            // Simple XOR of everything up to the 9th byte for CRC.
+            for b in data.clone() {
+                crc = b ^ crc;
             }
-            _ => Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::new("YououProtocol does not accept this message type."),
-            )),
+    
+            let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+            data.append(&mut data2);
+    
+            // Hopefully this will wrap back to 0 at 256
+            // self.packet_id = self.packet_id.wrapping_add(1);
+    
+            let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
+            device.write_value(msg.into()).await?;
+            Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+        })
+    )
+);
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd},
+        test::test_device::{TestDevice},
+        device::{
+            Endpoint,
+            device::{DeviceImplCommand, DeviceWriteCmd},
         }
+    };
+    use async_std::{
+        task,
+        sync::Receiver,
+    };
+    
+    pub async fn check_recv_value(receiver: &Receiver<DeviceImplCommand>, command: DeviceImplCommand) {
+        assert!(!receiver.is_empty());
+        assert_eq!(receiver.recv().await.unwrap(), command);
     }
-}
-
-impl YououProtocol {
-    async fn handle_stop_device_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        _: &StopDeviceCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        self.handle_vibrate_cmd(
-            device,
-            &VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.0)]),
-        )
-        .await
-    }
-
-    async fn handle_vibrate_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        msg: &VibrateCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        // TODO Convert to using generic command manager
-
-        // Byte 2 seems to be a monotonically increasing packet id of some kind Speed seems to be
-        // 0-247 or so. Anything above that sets a pattern which isn't what we want here.
-        let max_value: f64 = 247.0;
-        let speed: u8 = (msg.speeds[0].speed * max_value) as u8;
-        let state: u8 = if speed > 0 { 1 } else { 0 };
-        let mut data = vec![0xaa, 0x55, self.packet_id, 0x02, 0x03, 0x01, speed, state];
-        let mut crc: u8 = 0;
-
-        // Simple XOR of everything up to the 9th byte for CRC.
-        for b in data.clone() {
-            crc = b ^ crc;
-        }
-
-        let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
-        data.append(&mut data2);
-
-        // Hopefully this will wrap back to 0 at 256
-        self.packet_id = self.packet_id.wrapping_add(1);
-
-        let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
-        device.write_value(msg.into()).await?;
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+    
+    #[test]
+    pub fn test_youou_protocol() {
+        task::block_on(async move {
+            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_").await.unwrap();
+            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            check_recv_value(&command_receiver, 
+                DeviceImplCommand::Write(
+                        DeviceWriteCmd::new(Endpoint::Tx, 
+                                            vec![0xaa, 0x55, 0x00, 0x02, 0x03, 0x01, (247.0f32 / 2.0f32) as u8, 0x01, 0x85, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 
+                                            false))).await;
+            // Test a cloned device to make sure we handle packet IDs across protocol clones correctly.
+            let mut device2 = device.clone();
+            device2.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            check_recv_value(&command_receiver, 
+                DeviceImplCommand::Write(
+                        DeviceWriteCmd::new(Endpoint::Tx, 
+                                            vec![0xaa, 0x55, 0x01, 0x02, 0x03, 0x01, 0x00, 0x00, 0xfe, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], 
+                                            false))).await;
+        });
     }
 }

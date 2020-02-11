@@ -152,7 +152,7 @@ macro_rules! create_buttplug_protocol (
         $protocol_name:tt,
         (
             $( 
-                ( $member_name:tt: $member_type:ty = $member_initial_value:tt )
+                ( $member_name:tt: $member_type:ty = $member_initial_value:expr )
             ),*
         ),
         (
@@ -184,6 +184,9 @@ macro_rules! create_buttplug_protocol (
             attributes: MessageAttributesMap,
             manager: Arc<Mutex<GenericCommandManager>>,
             stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+            $(
+                $member_name: $member_type
+            ),*
         }
 
         paste::item! {
@@ -196,6 +199,9 @@ macro_rules! create_buttplug_protocol (
                         attributes,
                         stop_commands: manager.get_stop_commands(),
                         manager: Arc::new(Mutex::new(manager)),
+                        $(
+                            $member_name: $member_initial_value
+                        ),*
                     }
                 }
 
