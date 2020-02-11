@@ -15,9 +15,14 @@ create_buttplug_protocol!(
                     // - Set both motors with one command
                     // - Set each motor separately
                     //
-                    // We'll need to check what we got back and write our commands accordingly.
+                    // We'll need to check what we got back and write our
+                    // commands accordingly.
                     //
-                    // Neat way of checking if everything is the same via https://sts10.github.io/2019/06/06/is-all-equal-function.html
+                    // Neat way of checking if everything is the same via
+                    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+                    //
+                    // Just make sure we're not matching on None, 'cause if
+                    // that's the case we ain't got shit to do.
                     if !cmds[0].is_none() && cmds.windows(2).all(|w| w[0] == w[1]) {
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF3, 0, cmds[0].unwrap() as u8], false)).await?;
                         return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
@@ -79,6 +84,10 @@ mod test {
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.0), VibrateSubcommand::new(1, 0.5))).into()).await.unwrap();
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF3, 0x01, 0x00], false))).await;
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF3, 0x02, 0x3f], false))).await;
+            assert!(command_receiver.is_empty());
+
+            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF3, 0x02, 0x0], false))).await;
             assert!(command_receiver.is_empty());
         });
     }
