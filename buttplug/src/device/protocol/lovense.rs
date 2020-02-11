@@ -29,6 +29,7 @@ impl LovenseProtocolCreator {
     }
 }
 
+// TODO Figure out how we're gonna handle creation of protocols that require non-default initializers.
 #[async_trait]
 impl ButtplugProtocolCreator for LovenseProtocolCreator {
     async fn try_create_protocol(
