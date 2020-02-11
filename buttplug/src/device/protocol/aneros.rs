@@ -2,7 +2,7 @@ use crate::{
     create_buttplug_protocol,
 };
 
-create_buttplug_protocol!(AnerosProtocol,
+create_buttplug_protocol!(Aneros,
     (VibrateCmd, {
         // Store off result before the match, so we drop the lock ASAP.
         let result = self.manager.lock().await.update_vibration(msg);

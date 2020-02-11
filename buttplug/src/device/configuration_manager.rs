@@ -8,7 +8,8 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
-    lovense::LovenseProtocolCreator, maxpro::MaxproProtocolCreator,
+    aneros::AnerosCreator,
+    lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
     picobong::PicobongProtocolCreator, prettylove::PrettyLoveProtocolCreator,
     realov::RealovProtocolCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
     youou::YououProtocolCreator, ButtplugProtocolCreator,
@@ -23,7 +24,6 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
 use std::sync::{Arc, RwLock};
-use crate::device::protocol::aneros::AnerosProtocolCreator;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -273,7 +273,7 @@ impl DeviceConfigurationManager {
         protocols.insert(
             "aneros".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(AnerosProtocolCreator::new(config))
+                Box::new(AnerosCreator::new(config))
             }),
         );
         protocols.insert(
