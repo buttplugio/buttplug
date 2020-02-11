@@ -291,7 +291,7 @@ impl DeviceConfigurationManager {
         protocols.insert(
             "maxpro".to_owned(),
             Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(MaxproProtocolCreator::new(config))
+                Box::new(MaxproCreator::new(config))
             }),
         );
         protocols.insert(
