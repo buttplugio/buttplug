@@ -2,25 +2,33 @@ use crate::{
     create_buttplug_protocol,
 };
 
-create_buttplug_protocol!(Aneros,
-    (VibrateCmd, {
-        // Store off result before the match, so we drop the lock ASAP.
-        let result = self.manager.lock().await.update_vibration(msg);
-        // My life for an async closure so I could just do this via and_then(). :(
-        match result {
-            Ok(cmds) => {
-                let mut index = 0u8;
-                for cmd in cmds {
-                    if let Some(speed) = cmd {
-                        device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1 + index, speed as u8], false)).await?;
-                    }
-                    index += 1;
+create_buttplug_protocol!(
+    // Protocol name
+    Aneros,
+    // No extra members
+    (),
+    // Only implements VibrateCmd
+    (
+        (VibrateCmd, {
+            // Store off result before the match, so we drop the lock ASAP.
+            let result = self.manager.lock().await.update_vibration(msg);
+            // My life for an async closure so I could just do this via and_then(). :(
+                match result {
+                    Ok(cmds) => {
+                        let mut index = 0u8;
+                        for cmd in cmds {
+                            if let Some(speed) = cmd {
+                                device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1 + index, speed as u8], false)).await?;
+                            }
+                            index += 1;
+                        }
+                        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                    },
+                    Err(e) => Err(e)
                 }
-                Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
-            },
-            Err(e) => Err(e)
-        }
-    })
+            }
+        )
+    )
 );
 
 #[cfg(test)]
@@ -37,12 +45,12 @@ mod test {
         task,
         sync::Receiver,
     };
-
+    
     pub async fn check_recv_value(receiver: &Receiver<DeviceImplCommand>, command: DeviceImplCommand) {
         assert!(!receiver.is_empty());
         assert_eq!(receiver.recv().await.unwrap(), command);
     }
-
+    
     #[test]
     pub fn test_aneros_protocol() {
         task::block_on(async move {

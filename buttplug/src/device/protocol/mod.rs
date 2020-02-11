@@ -150,9 +150,16 @@ macro_rules! create_buttplug_protocol_impl (
 macro_rules! create_buttplug_protocol (
     (
         $protocol_name:tt,
-        $(
-            ( $message_name:tt, $message_handler_body:block )
-        ),+
+        (
+            $( 
+                ( $member_name:tt: $member_type:ty = $member_initial_value:tt )
+            ),*
+        ),
+        (
+            $(
+                ( $message_name:tt, $message_handler_body:block )
+            ),+
+        )
     ) => {
         use crate::{
             create_buttplug_protocol_impl,
