@@ -11,13 +11,17 @@ create_buttplug_protocol!(
         (VibrateCmd, {
             // TODO Convert to using generic command manager
     
-            // Byte 2 seems to be a monotonically increasing packet id of some kind Speed seems to be
-            // 0-247 or so. Anything above that sets a pattern which isn't what we want here.
+            // Byte 2 seems to be a monotonically increasing packet id of some kind 
+            // 
+            // Speed seems to be 0-247 or so.
+            // 
+            // Anything above that sets a pattern which isn't what we want here.
             let max_value: f64 = 247.0;
             let speed: u8 = (msg.speeds[0].speed * max_value) as u8;
             let state: u8 = if speed > 0 { 1 } else { 0 };
 
             let mut data;
+            // Scope the packet id set so we can unlock ASAP.
             {
                 let mut packet_id = self.packet_id.lock().await;
                 data = vec![0xaa, 0x55, *packet_id, 0x02, 0x03, 0x01, speed, state];
@@ -32,9 +36,6 @@ create_buttplug_protocol!(
     
             let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
             data.append(&mut data2);
-    
-            // Hopefully this will wrap back to 0 at 256
-            // self.packet_id = self.packet_id.wrapping_add(1);
     
             let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
             device.write_value(msg.into()).await?;
