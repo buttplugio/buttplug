@@ -41,6 +41,7 @@ impl ButtplugProtocolCreator for YououProtocolCreator {
 pub struct YououProtocol {
     name: String,
     attributes: MessageAttributesMap,
+    // TODO This needs to be shared across all instances, so Arc<Mutex<T>>
     packet_id: u8,
 }
 
@@ -105,6 +106,8 @@ impl YououProtocol {
         device: &Box<dyn DeviceImpl>,
         msg: &VibrateCmd,
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
+        // TODO Convert to using generic command manager
+
         // Byte 2 seems to be a monotonically increasing packet id of some kind Speed seems to be
         // 0-247 or so. Anything above that sets a pattern which isn't what we want here.
         let max_value: f64 = 247.0;

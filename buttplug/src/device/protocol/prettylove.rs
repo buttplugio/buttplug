@@ -2,6 +2,7 @@ use crate::create_buttplug_protocol;
 
 create_buttplug_protocol!(PrettyLove,
     (VibrateCmd, {
+        // TODO Convert to using generic command manager
         let mut speed = (msg.speeds[0].speed * 3.0) as u8;
         if speed == 0 {
             speed = 0xff;
