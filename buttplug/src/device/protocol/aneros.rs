@@ -1,29 +1,9 @@
 use crate::{
     create_buttplug_protocol,
-    generate_stop_device_cmd,
-    core::{
-        errors::{ButtplugDeviceError, ButtplugError},
-        messages::{self, ButtplugMessage},
-    },
-    device::{
-        device::{DeviceImpl, DeviceWriteCmd},
-        Endpoint,
-    },
 };
 
 create_buttplug_protocol!(AnerosProtocol,
-    (VibrateCmd, handle_vibrate_cmd),
-    (StopDeviceCmd, handle_stop_device_cmd)
-);
-
-impl AnerosProtocol {
-    generate_stop_device_cmd!();
-
-    async fn handle_vibrate_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        msg: &VibrateCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    (VibrateCmd, {
         // Store off result before the match, so we drop the lock ASAP.
         let result = self.manager.lock().await.update_vibration(msg);
         // My life for an async closure so I could just do this via and_then(). :(
@@ -40,8 +20,8 @@ impl AnerosProtocol {
             },
             Err(e) => Err(e)
         }
-    }
-}
+    })
+);
 
 #[cfg(test)]
 mod test {
