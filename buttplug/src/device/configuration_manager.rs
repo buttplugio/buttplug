@@ -8,7 +8,7 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
-    aneros::AnerosCreator,
+    aneros::AnerosCreator, lovehoney_desire::LovehoneyDesireCreator,
     lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
     picobong::PicobongCreator, prettylove::PrettyLoveCreator,
     realov::RealovCreator, svakom::SvakomCreator, youcups::YoucupsCreator,
@@ -292,7 +292,8 @@ impl DeviceConfigurationManager {
             ("prettylove", PrettyLoveCreator),
             ("svakom", SvakomCreator),
             ("youcups", YoucupsCreator),
-            ("youou", YououCreator)
+            ("youou", YououCreator),
+            ("lovehoney-desire", LovehoneyDesireCreator)
         );
         DeviceConfigurationManager { config, protocols }
     }
