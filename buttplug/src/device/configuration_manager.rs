@@ -11,7 +11,7 @@ use super::protocol::{
     aneros::AnerosCreator,
     lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
     picobong::PicobongCreator, prettylove::PrettyLoveCreator,
-    realov::RealovProtocolCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
+    realov::RealovCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
     youou::YououProtocolCreator, ButtplugProtocolCreator,
 };
 use crate::{
@@ -288,7 +288,7 @@ impl DeviceConfigurationManager {
             ("maxpro", MaxproCreator),
             ("lovense", LovenseProtocolCreator),
             ("picobong", PicobongCreator),
-            ("realov", RealovProtocolCreator),
+            ("realov", RealovCreator),
             ("prettylove", PrettyLoveCreator),
             ("svakom", SvakomProtocolCreator),
             ("youcups", YoucupsProtocolCreator),
