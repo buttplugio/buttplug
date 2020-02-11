@@ -267,62 +267,32 @@ impl DeviceConfigurationManager {
         // otherwise we'll just get an anonymous closure type during insert that
         // won't match.
         let mut protocols = HashMap::<String, ProtocolConstructor>::new();
-        // TODO Seems like we should be able to clean up the repeated
-        // protocolcreator code but due to it being an async trait, I'm not
-        // quite sure how.
-        protocols.insert(
-            "aneros".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(AnerosCreator::new(config))
-            }),
+
+        macro_rules! add_protocols (
+            (
+                $(($config_name:tt, $protocol_creator:tt)),*
+            ) => {
+                $(
+                   protocols.insert(
+                        $config_name.to_owned(),
+                        Box::new(|config: DeviceProtocolConfiguration| {
+                            Box::new($protocol_creator::new(config))
+                        }),
+                    );
+                )*
+            }
         );
-        protocols.insert(
-            "lovense".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(LovenseProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "picobong".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(PicobongProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "maxpro".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(MaxproCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "prettylove".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(PrettyLoveProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "realov".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(RealovProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "svakom".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(SvakomProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "youcups".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(YoucupsProtocolCreator::new(config))
-            }),
-        );
-        protocols.insert(
-            "youou".to_owned(),
-            Box::new(|config: DeviceProtocolConfiguration| {
-                Box::new(YououProtocolCreator::new(config))
-            }),
+
+        add_protocols!(
+            ("aneros", AnerosCreator),
+            ("maxpro", MaxproCreator),
+            ("lovense", LovenseProtocolCreator),
+            ("picobong", PicobongProtocolCreator),
+            ("realov", RealovProtocolCreator),
+            ("prettylove", PrettyLoveProtocolCreator),
+            ("svakom", SvakomProtocolCreator),
+            ("youcups", YoucupsProtocolCreator),
+            ("youou", YououProtocolCreator)
         );
         DeviceConfigurationManager { config, protocols }
     }
