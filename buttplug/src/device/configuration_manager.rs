@@ -12,7 +12,7 @@ use super::protocol::{
     lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
     picobong::PicobongCreator, prettylove::PrettyLoveCreator,
     realov::RealovCreator, svakom::SvakomCreator, youcups::YoucupsCreator,
-    youou::YououCreator, ButtplugProtocolCreator,
+    youou::YououCreator, ButtplugProtocolCreator, vorze_sa::VorzeSACreator,
 };
 use crate::{
     core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
@@ -293,7 +293,8 @@ impl DeviceConfigurationManager {
             ("svakom", SvakomCreator),
             ("youcups", YoucupsCreator),
             ("youou", YououCreator),
-            ("lovehoney-desire", LovehoneyDesireCreator)
+            ("lovehoney-desire", LovehoneyDesireCreator),
+            ("vorze-sa", VorzeSACreator)
         );
         DeviceConfigurationManager { config, protocols }
     }

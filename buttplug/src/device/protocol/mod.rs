@@ -8,6 +8,7 @@ pub mod svakom;
 pub mod youcups;
 pub mod youou;
 pub mod lovehoney_desire;
+pub mod vorze_sa;
 mod generic_command_manager;
 
 use super::device::DeviceImpl;
