@@ -48,21 +48,14 @@ create_buttplug_protocol!(
 mod test {
     use crate::{
         core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd},
-        test::test_device::{TestDevice},
+        test::{TestDevice, check_recv_value},
         device::{
             Endpoint,
             device::{DeviceImplCommand, DeviceWriteCmd},
         }
     };
-    use async_std::{
-        task,
-        sync::Receiver,
-    };
+    use async_std::task;
 
-    pub async fn check_recv_value(receiver: &Receiver<DeviceImplCommand>, command: DeviceImplCommand) {
-        assert!(!receiver.is_empty());
-        assert_eq!(receiver.recv().await.unwrap(), command);
-    }
 
     #[test]
     pub fn test_lovehoney_desire_protocol() {

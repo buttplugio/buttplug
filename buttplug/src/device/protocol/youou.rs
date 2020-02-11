@@ -47,21 +47,13 @@ create_buttplug_protocol!(
 mod test {
     use crate::{
         core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd},
-        test::test_device::{TestDevice},
+        test::{check_recv_value, TestDevice},
         device::{
             Endpoint,
             device::{DeviceImplCommand, DeviceWriteCmd},
         }
     };
-    use async_std::{
-        task,
-        sync::Receiver,
-    };
-    
-    pub async fn check_recv_value(receiver: &Receiver<DeviceImplCommand>, command: DeviceImplCommand) {
-        assert!(!receiver.is_empty());
-        assert_eq!(receiver.recv().await.unwrap(), command);
-    }
+    use async_std::task;
     
     #[test]
     pub fn test_youou_protocol() {
