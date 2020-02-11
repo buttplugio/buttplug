@@ -10,7 +10,7 @@
 use super::protocol::{
     aneros::AnerosCreator,
     lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
-    picobong::PicobongProtocolCreator, prettylove::PrettyLoveProtocolCreator,
+    picobong::PicobongCreator, prettylove::PrettyLoveProtocolCreator,
     realov::RealovProtocolCreator, svakom::SvakomProtocolCreator, youcups::YoucupsProtocolCreator,
     youou::YououProtocolCreator, ButtplugProtocolCreator,
 };
@@ -287,7 +287,7 @@ impl DeviceConfigurationManager {
             ("aneros", AnerosCreator),
             ("maxpro", MaxproCreator),
             ("lovense", LovenseProtocolCreator),
-            ("picobong", PicobongProtocolCreator),
+            ("picobong", PicobongCreator),
             ("realov", RealovProtocolCreator),
             ("prettylove", PrettyLoveProtocolCreator),
             ("svakom", SvakomProtocolCreator),
