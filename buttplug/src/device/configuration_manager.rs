@@ -7,13 +7,7 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{
-    aneros::AnerosCreator, lovehoney_desire::LovehoneyDesireCreator,
-    lovense::LovenseProtocolCreator, maxpro::MaxproCreator,
-    picobong::PicobongCreator, prettylove::PrettyLoveCreator,
-    realov::RealovCreator, svakom::SvakomCreator, youcups::YoucupsCreator,
-    youou::YououCreator, ButtplugProtocolCreator, vorze_sa::VorzeSACreator,
-};
+use super::protocol::{self, ButtplugProtocolCreator};
 use crate::{
     core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
     device::Endpoint,
@@ -234,7 +228,7 @@ impl DeviceProtocolConfiguration {
     }
 }
 
-type ProtocolConstructor =
+pub type ProtocolConstructor =
     Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
 
 pub struct DeviceConfigurationManager {
@@ -266,36 +260,8 @@ impl DeviceConfigurationManager {
         // Do not try to use HashMap::new() here. We need the explicit typing,
         // otherwise we'll just get an anonymous closure type during insert that
         // won't match.
-        let mut protocols = HashMap::<String, ProtocolConstructor>::new();
 
-        macro_rules! add_protocols (
-            (
-                $(($config_name:tt, $protocol_creator:tt)),*
-            ) => {
-                $(
-                   protocols.insert(
-                        $config_name.to_owned(),
-                        Box::new(|config: DeviceProtocolConfiguration| {
-                            Box::new($protocol_creator::new(config))
-                        }),
-                    );
-                )*
-            }
-        );
-
-        add_protocols!(
-            ("aneros", AnerosCreator),
-            ("maxpro", MaxproCreator),
-            ("lovense", LovenseProtocolCreator),
-            ("picobong", PicobongCreator),
-            ("realov", RealovCreator),
-            ("prettylove", PrettyLoveCreator),
-            ("svakom", SvakomCreator),
-            ("youcups", YoucupsCreator),
-            ("youou", YououCreator),
-            ("lovehoney-desire", LovehoneyDesireCreator),
-            ("vorze-sa", VorzeSACreator)
-        );
+        let protocols = protocol::create_protocol_creator_map();
         DeviceConfigurationManager { config, protocols }
     }
 

@@ -1,16 +1,6 @@
-pub mod aneros;
-pub mod lovense;
-pub mod maxpro;
-pub mod picobong;
-pub mod prettylove;
-pub mod realov;
-pub mod svakom;
-pub mod youcups;
-pub mod youou;
-pub mod lovehoney_desire;
-pub mod vorze_sa;
 mod generic_command_manager;
 
+use std::collections::HashMap;
 use super::device::DeviceImpl;
 use crate::
 {
@@ -21,9 +11,64 @@ use crate::
         {
             ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
         },
-    }
+    },
+    device::configuration_manager::{ProtocolConstructor, DeviceProtocolConfiguration}
 };
 use async_trait::async_trait;
+
+macro_rules! create_protocols(
+    (
+        $(
+            ($protocol_config_name:tt, $protocol_module:tt, $protocol_name:tt)
+        ),*
+    ) => {
+        paste::item! {
+            $(
+                mod $protocol_module;
+                use $protocol_module::[<$protocol_name Creator>];
+            )*
+
+            pub fn create_protocol_creator_map() -> HashMap::<String, ProtocolConstructor> {
+                // Do not try to use HashMap::new() here. We need the explicit typing,
+                // otherwise we'll just get an anonymous closure type during insert that
+                // won't match.
+                let mut protocols = HashMap::<String, ProtocolConstructor>::new();
+
+                $(
+                    protocols.insert(
+                        $protocol_config_name.to_owned(),
+                        Box::new(|config: DeviceProtocolConfiguration| {
+                            Box::new([<$protocol_name Creator>]::new(config))
+                        }),
+                    );
+                )*
+                protocols
+            }
+        }
+    }
+);
+
+// IF YOU WANT TO ADD NEW PROTOCOLS TO THE SYSTEM, DO IT HERE.
+//
+// This takes a tuple per protocol:
+//
+// - the name of the protocol in the device configuration file
+// - the name of the module
+// - the base name of the protocol, as used in create_buttplug_protocol!
+create_protocols!(
+    ("aneros", aneros, Aneros),
+    ("maxpro", maxpro, Maxpro),
+    ("lovense", lovense, Lovense),
+    ("picobong", picobong, Picobong),
+    ("realov", realov, Realov),
+    ("prettylove", prettylove, PrettyLove),
+    ("svakom", svakom, Svakom),
+    ("youcups", youcups, Youcups),
+    ("youou", youou, Youou),
+    ("lovehoney-desire", lovehoney_desire, LovehoneyDesire),
+    ("vorze-sa", vorze_sa, VorzeSA)
+);
+
 
 #[async_trait]
 pub trait ButtplugProtocolCreator: Sync + Send {
