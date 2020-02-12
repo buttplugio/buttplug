@@ -1,19 +1,11 @@
 use super::{ButtplugProtocol, ButtplugProtocolCreator};
 use crate::{
-    core::{
-        errors::{ButtplugDeviceError, ButtplugError},
-        messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-            RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
-        },
-    },
+    create_buttplug_protocol,
     device::{
-        configuration_manager::DeviceProtocolConfiguration,
         device::{
-            ButtplugDeviceEvent, DeviceImpl, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
-            DeviceWriteCmd,
+            ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
         },
-        Endpoint,
+        configuration_manager::DeviceProtocolConfiguration
     },
 };
 use async_std::prelude::StreamExt;
@@ -37,8 +29,8 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
         device_impl: &Box<dyn DeviceImpl>,
     ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
         device_impl
-            .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx).into())
-            .await?;
+        .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx).into())
+        .await?;
         let msg = DeviceWriteCmd::new(Endpoint::Tx, "DeviceType;".as_bytes().to_vec(), false);
         device_impl.write_value(msg.into()).await?;
         // TODO Put some sort of very quick timeout here, we should just fail if
@@ -64,233 +56,90 @@ impl ButtplugProtocolCreator for LovenseProtocolCreator {
             }
         };
         device_impl
-            .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx).into())
-            .await?;
+        .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx).into())
+        .await?;
 
         let (names, attrs) = self.config.get_attributes(&identifier).unwrap();
         let name = names.get("en-us").unwrap();
-        Ok(Box::new(LovenseProtocol::new(name, attrs)))
+        Ok(Box::new(Lovense::new(name, attrs)))
     }
 }
 
-#[derive(Clone)]
-pub struct LovenseProtocol {
-    name: String,
-    attributes: MessageAttributesMap,
-    sent_vibration: bool,
-    sent_rotation: bool,
-    vibrations: Vec<u32>,
-    rotations: Vec<(u32, bool)>,
-}
-
-impl LovenseProtocol {
-    pub fn new(name: &str, attributes: MessageAttributesMap) -> Self {
-        let mut vibrations: Vec<u32> = vec![];
-        let mut rotations: Vec<(u32, bool)> = vec![];
-        if let Some(attr) = attributes.get("VibrateCmd") {
-            if let Some(count) = attr.feature_count {
-                vibrations = vec![0; count as usize];
-            }
-        }
-        if let Some(attr) = attributes.get("RotateCmd") {
-            if let Some(count) = attr.feature_count {
-                rotations = vec![(0, true); count as usize];
-            }
-        }
-
-        LovenseProtocol {
-            name: name.to_owned(),
-            attributes,
-            sent_rotation: false,
-            sent_vibration: false,
-            vibrations,
-            rotations,
-        }
-    }
-}
-
-#[async_trait]
-impl ButtplugProtocol for LovenseProtocol {
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn message_attributes(&self) -> MessageAttributesMap {
-        self.attributes.clone()
-    }
-
-    fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
-        Box::new((*self).clone())
-    }
-
-    async fn parse_message(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        match message {
-            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
-                self.handle_stop_device_cmd(device, msg).await
-            }
-            ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
-                self.handle_vibrate_cmd(device, msg).await
-            }
-            ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
-                self.handle_rotate_cmd(device, msg).await
-            }
-            _ => Err(ButtplugError::ButtplugDeviceError(
-                ButtplugDeviceError::new("LovenseProtocol does not accept this message type."),
-            )),
-        }
-    }
-}
-
-impl LovenseProtocol {
-    async fn handle_stop_device_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        _: &StopDeviceCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        if self.vibrations.len() > 0 {
-            let mut subs: Vec<VibrateSubcommand> = vec![];
-            for i in 0..self.vibrations.len() {
-                subs.push(VibrateSubcommand::new(i as u32, 0.0));
-            }
-            self.handle_vibrate_cmd(device, &VibrateCmd::new(0, subs))
-                .await;
-        }
-        if self.rotations.len() > 0 {
-            let mut subs: Vec<RotationSubcommand> = vec![];
-            for i in 0..self.rotations.len() {
-                subs.push(RotationSubcommand::new(i as u32, 0.0, self.rotations[i].1));
-            }
-            self.handle_rotate_cmd(device, &RotateCmd::new(0, subs))
-                .await;
-        }
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
-    }
-
-    async fn handle_vibrate_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        msg: &VibrateCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        let mut new_speeds = self.vibrations.clone();
-        let mut changed: Vec<bool> = vec![];
-        for _ in 0..new_speeds.len() {
-            changed.push(!self.sent_vibration);
-        }
-
-        if new_speeds.len() == 0 {
-            // Should probably be an error
-            return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
-        }
-
-        for i in 0..msg.speeds.len() {
-            //ToDo: Need safeguards
-            let index = msg.speeds[i].index as usize;
-            new_speeds[index] = (msg.speeds[i].speed * 20.0) as u32;
-            if new_speeds[index] != self.vibrations[index] {
-                changed[index] = true;
-            }
-        }
-
-        let mut asOne = true;
-        if new_speeds.len() > 1 {
-            let speed = new_speeds[0];
-            for i in 1..new_speeds.len() {
-                if new_speeds[i] != speed {
-                    asOne = false;
-                    break;
+create_buttplug_protocol!(
+    Lovense,
+    false,
+    (
+        (last_rotation: Arc<Mutex<Option<(u32, bool)>>> = Arc::new(Mutex::new(None)))
+    ),
+    ((VibrateCmd, {
+        // Store off result before the match, so we drop the lock ASAP.
+        let result = self.manager.lock().await.update_vibration(msg);
+        // Lovense is the same situation as the Lovehoney Desire, where commands
+        // are different if we're addressing all motors or seperate motors.
+        // Difference here being that there's Lovense variants with different
+        // numbers of motors.
+        //
+        // Neat way of checking if everything is the same via
+        // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+        //
+        // Just make sure we're not matching on None, 'cause if that's the case
+        // we ain't got shit to do.
+        match result {
+            Ok(cmds) => {
+                if !cmds[0].is_none() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
+                    let lovense_cmd = format!("Vibrate:{};", cmds[0].unwrap()).as_bytes().to_vec();
+                    device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)).await?;
+                    return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
                 }
-            }
-        }
-
-        self.sent_vibration = true;
-        self.vibrations = new_speeds;
-
-        if asOne {
-            if changed[0] {
-                let msg = DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    format!("Vibrate:{};", self.vibrations[0])
-                        .as_bytes()
-                        .to_vec(),
-                    false,
-                );
-                device.write_value(msg.into()).await?;
-            }
-        } else {
-            for i in 0..self.vibrations.len() {
-                if !changed[i] {
-                    continue;
+                for i in 0..cmds.len() {
+                    if let Some(speed) = cmds[i] {
+                        let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
+                        device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)).await?;
+                    }
                 }
-
-                let msg = DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    format!("Vibrate{}:{};", i + 1, self.vibrations[i])
-                        .as_bytes()
-                        .to_vec(),
-                    false,
-                );
-                device.write_value(msg.into()).await?;
-            }
+                return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
+            },
+            Err(e) => Err(e)
         }
-
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
-    }
-
-    async fn handle_rotate_cmd(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        msg: &RotateCmd,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
-        let mut new_rotations = self.rotations.clone();
-        let mut messages = vec![];
-
-        if new_rotations.len() == 0 {
-            // TODO: Should probably be an error
-            return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
+    }),
+    (RotateCmd, {
+        let result = self.manager.lock().await.update_rotation(msg);
+        match result {
+            Ok(cmds) => {
+                // Due to lovense devices having separate commands for rotation
+                // and speed, we can't completely depend on the generic command
+                // manager here.
+                //
+                // TODO Should the generic command manager maybe store the
+                // previous command as well as returning the next? That might
+                // save us having to store this in the protocol members, but I'm
+                // also not sure anyone but Lovense does this. For Vorze, we
+                // need speed and direction regardless because they form a
+                // single command.
+                if let Some((speed, clockwise)) = cmds[0] {
+                    let mut lovense_cmds = vec!();
+                    {
+                        let mut last_rotation = self.last_rotation.lock().await;
+                        if let Some((rot_speed, rot_dir)) = *last_rotation {
+                            if rot_dir != clockwise {
+                                lovense_cmds.push("RotateChange;".as_bytes().to_vec());
+                            }
+                            if rot_speed != speed {
+                                lovense_cmds.push(format!("Rotate:{};", speed).as_bytes().to_vec());
+                            }
+                        }
+                        *last_rotation = Some((speed, clockwise));
+                    }
+                    for cmd in lovense_cmds {
+                        device.write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false)).await?;
+                    }
+                }
+                Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+            },
+            Err(e) => Err(e)
         }
+    }))
+);
 
-        let mut changed: Vec<bool> = vec![!self.sent_rotation; new_rotations.len() as usize];
-
-        for i in 0..msg.rotations.len() {
-            // TODO: Need safeguards
-            let index = msg.rotations[i].index as usize;
-            new_rotations[index] = (
-                (msg.rotations[i].speed * 20.0) as u32,
-                msg.rotations[i].clockwise,
-            );
-            if new_rotations[index] != self.rotations[index] {
-                changed[index] = true;
-            }
-            if new_rotations[i].1 != self.rotations[i].1 {
-                messages.push(DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    "RotateChange;".as_bytes().to_vec(),
-                    false,
-                ));
-            }
-        }
-
-        self.sent_rotation = true;
-        self.rotations = new_rotations;
-
-        if changed[0] {
-            messages.push(DeviceWriteCmd::new(
-                Endpoint::Tx,
-                format!("Rotate:{};", self.rotations[0].0)
-                    .as_bytes()
-                    .to_vec(),
-                false,
-            ));
-        }
-
-        for msg in messages {
-            device.write_value(msg.into()).await?;
-        }
-
-        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
-    }
-}
+// TODO Gonna need to add the ability to set subscribe data in tests before
+// writing Lovense tests. Oops.
