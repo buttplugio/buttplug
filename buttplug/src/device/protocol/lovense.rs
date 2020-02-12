@@ -11,19 +11,18 @@ use crate::{
 use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 
-pub struct LovenseProtocolCreator {
+pub struct LovenseCreator {
     config: DeviceProtocolConfiguration,
 }
 
-impl LovenseProtocolCreator {
+impl LovenseCreator {
     pub fn new(config: DeviceProtocolConfiguration) -> Self {
         Self { config }
     }
 }
 
-// TODO Figure out how we're gonna handle creation of protocols that require non-default initializers.
 #[async_trait]
-impl ButtplugProtocolCreator for LovenseProtocolCreator {
+impl ButtplugProtocolCreator for LovenseCreator {
     async fn try_create_protocol(
         &self,
         device_impl: &Box<dyn DeviceImpl>,
