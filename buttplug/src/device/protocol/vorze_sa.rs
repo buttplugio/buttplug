@@ -68,6 +68,10 @@ mod test {
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x06, 0x01, 50], false))).await;
             assert!(command_receiver.is_empty());
+
+            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x06, 0x01, 0x0], false))).await;
+            assert!(command_receiver.is_empty());
         });
     }
 
@@ -82,6 +86,10 @@ mod test {
 
             device.parse_message(&RotateCmd::new(0, vec!(RotationSubcommand::new(0, 0.5, true))).into()).await.unwrap();
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x03, 177], false))).await;
+            assert!(command_receiver.is_empty());
+
+            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x03, 0x0], false))).await;
             assert!(command_receiver.is_empty());
         });
     }
