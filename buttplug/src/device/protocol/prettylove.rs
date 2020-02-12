@@ -3,6 +3,8 @@ use crate::create_buttplug_protocol;
 create_buttplug_protocol!(
     // ProtocolName
     PrettyLove,
+    // Use the default protocol creator implementation. No special init needed.
+    true,
     // No extra members,
     (),
     (

@@ -58,29 +58,16 @@ impl Clone for Box<dyn ButtplugProtocol> {
 // Note: We have to use tt instead of ident here due to the async_trait macro.
 // See https://github.com/dtolnay/async-trait/issues/46 for more info.
 #[macro_export]
-macro_rules! create_buttplug_protocol_impl (
+macro_rules! create_protocol_creator_impl (
     (
-        $protocol_name:tt,
-        $(
-            ( $message_name:tt )
-        ),+
+        true,
+        $protocol_name:tt
     ) => {
         use async_trait::async_trait;
         use crate::{
             device::{
-                Endpoint,
-                device::DeviceWriteCmd,
                 protocol::{ButtplugProtocol, ButtplugProtocolCreator},
                 configuration_manager::DeviceProtocolConfiguration,
-            },
-            core::{
-                messages::{
-                    ButtplugMessageUnion,
-                    ButtplugDeviceCommandMessageUnion,
-                    $(
-                        $message_name
-                    ),*
-                }
             },
         };
 
@@ -106,54 +93,22 @@ macro_rules! create_buttplug_protocol_impl (
                     Ok(Box::new($protocol_name::new(name, attrs)))
                 }
             }
-
         }
-
-        paste::item! {
-            #[async_trait]
-            impl ButtplugProtocol for $protocol_name {
-                fn name(&self) -> &str {
-                    &self.name
-                }
-
-                fn message_attributes(&self) -> MessageAttributesMap {
-                    self.attributes.clone()
-                }
-
-                fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
-                    Box::new((*self).clone())
-                }
-
-                async fn parse_message(
-                    &mut self,
-                    device: &Box<dyn DeviceImpl>,
-                    message: &ButtplugDeviceCommandMessageUnion,
-                ) -> Result<ButtplugMessageUnion, ButtplugError> {
-                    match message {
-                        $(
-                            ButtplugDeviceCommandMessageUnion::$message_name(msg) => {
-                                self.[<$message_name _handler>](device, msg).await
-                            }
-                        ),*
-                        ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
-                            self.handle_stop_device_cmd(device, msg).await
-                        }
-                        _ => Err(ButtplugError::ButtplugDeviceError(
-                            ButtplugDeviceError::new("AnerosProtocol does not accept this message type."),
-                        )),
-                    }
-                }
-            }
-        }
-    }
+    };
+    (
+        false,
+        $protocol_name:tt
+    ) => {
+    };
 );
 
 #[macro_export]
 macro_rules! create_buttplug_protocol (
     (
         $protocol_name:tt,
+        $create_protocol_creator_impl:tt,
         (
-            $( 
+            $(
                 ( $member_name:tt: $member_type:ty = $member_initial_value:expr )
             ),*
         ),
@@ -164,21 +119,30 @@ macro_rules! create_buttplug_protocol (
         )
     ) => {
         use crate::{
-            create_buttplug_protocol_impl,
+            create_protocol_creator_impl,
             device::{
-                device::DeviceImpl,
+                Endpoint,
+                device::{DeviceWriteCmd, DeviceImpl},
                 protocol::generic_command_manager::GenericCommandManager,
             },
             core::{
                 errors::{ButtplugError, ButtplugDeviceError},
-                messages::{self, ButtplugMessage, StopDeviceCmd, MessageAttributesMap},
+                messages::{
+                    self,
+                    ButtplugMessage,
+                    StopDeviceCmd,
+                    MessageAttributesMap,
+                    ButtplugMessageUnion,
+                    ButtplugDeviceCommandMessageUnion,
+                    $(
+                        $message_name
+                    ),*
+                },
             },
         };
         use async_std::sync::{Arc, Mutex};
 
-        create_buttplug_protocol_impl!($protocol_name, $(
-            ( $message_name )
-        ),+);
+        create_protocol_creator_impl!($create_protocol_creator_impl, $protocol_name);
 
         #[derive(Clone)]
         pub struct $protocol_name {
@@ -227,6 +191,42 @@ macro_rules! create_buttplug_protocol (
                         msg: &$message_name,) -> Result<ButtplugMessageUnion, ButtplugError>
                         $message_handler_body
                     )*
+                }
+            }
+            paste::item! {
+                #[async_trait]
+                impl ButtplugProtocol for $protocol_name {
+                    fn name(&self) -> &str {
+                        &self.name
+                    }
+
+                    fn message_attributes(&self) -> MessageAttributesMap {
+                        self.attributes.clone()
+                    }
+
+                    fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
+                        Box::new((*self).clone())
+                    }
+
+                    async fn parse_message(
+                        &mut self,
+                        device: &Box<dyn DeviceImpl>,
+                        message: &ButtplugDeviceCommandMessageUnion,
+                    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+                        match message {
+                            $(
+                                ButtplugDeviceCommandMessageUnion::$message_name(msg) => {
+                                    self.[<$message_name _handler>](device, msg).await
+                                }
+                            ),*
+                            ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
+                                self.handle_stop_device_cmd(device, msg).await
+                            }
+                            _ => Err(ButtplugError::ButtplugDeviceError(
+                                ButtplugDeviceError::new("AnerosProtocol does not accept this message type."),
+                            )),
+                        }
+                    }
                 }
             }
         }

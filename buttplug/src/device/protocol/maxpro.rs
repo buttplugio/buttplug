@@ -5,6 +5,8 @@ use crate::{
 create_buttplug_protocol!(
     // Protocol name
     Maxpro,
+    // Use the default protocol creator implementation. No special init needed.
+    true,
     // No extra members
     (),
     // Only implements VibrateCmd

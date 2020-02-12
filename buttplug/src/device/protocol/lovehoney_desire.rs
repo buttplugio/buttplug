@@ -2,6 +2,7 @@ use crate::create_buttplug_protocol;
 
 create_buttplug_protocol!(
     LovehoneyDesire,
+    true,
     (),
     (
         (VibrateCmd, {

@@ -16,6 +16,8 @@ enum VorzeActions {
 create_buttplug_protocol!(
     // Protocol Name
     VorzeSA,
+    // Use the default protocol creator implementation. No special init needed.
+    true,
     // No special members,
     (),
     (
@@ -59,7 +61,7 @@ mod test {
         }
     };
     use async_std::task;
-    
+
     #[test]
     pub fn test_vorze_sa_vibration_protocol() {
         task::block_on(async move {
