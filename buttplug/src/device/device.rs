@@ -14,6 +14,10 @@ use crate::{
 };
 use async_std::sync::Receiver;
 use async_trait::async_trait;
+use broadcaster::BroadcastChannel;
+use futures_channel;
+
+pub type BoundedDeviceEventBroadcaster = BroadcastChannel<ButtplugDeviceEvent, futures_channel::mpsc::Sender<ButtplugDeviceEvent>, futures_channel::mpsc::Receiver<ButtplugDeviceEvent>>;
 
 #[derive(PartialEq, Debug)]
 pub struct DeviceReadCmd {
@@ -185,7 +189,7 @@ pub enum ButtplugDeviceReturn {
     Error(ButtplugError),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ButtplugDeviceEvent {
     Notification(Endpoint, Vec<u8>),
     Removed,
@@ -199,7 +203,7 @@ pub trait DeviceImpl: Sync + Send {
     fn endpoints(&self) -> Vec<Endpoint>;
     async fn disconnect(&self);
     fn box_clone(&self) -> Box<dyn DeviceImpl>;
-    fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent>;
+    fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError>;
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError>;
@@ -292,5 +296,8 @@ impl ButtplugDevice {
         self.protocol.parse_message(&self.device, message).await
     }
 
+    pub fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
+        self.device.get_event_receiver()
+    }
     // TODO Handle raw messages here.
 }

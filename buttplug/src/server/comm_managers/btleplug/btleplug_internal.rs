@@ -8,7 +8,7 @@ use crate::{
         device::{
             ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo,
             ButtplugDeviceReturn, DeviceImplCommand, DeviceReadCmd, DeviceSubscribeCmd,
-            DeviceUnsubscribeCmd, DeviceWriteCmd,
+            DeviceUnsubscribeCmd, DeviceWriteCmd, BoundedDeviceEventBroadcaster
         },
         Endpoint,
     },
@@ -37,7 +37,7 @@ pub struct BtlePlugInternalEventLoop<T: Peripheral> {
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     event_receiver: Receiver<CentralEvent>,
-    output_sender: Sender<ButtplugDeviceEvent>,
+    output_sender: BoundedDeviceEventBroadcaster,
     endpoints: HashMap<Endpoint, Characteristic>,
 }
 
@@ -53,7 +53,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         device: T,
         protocol: BluetoothLESpecifier,
         write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-        output_sender: Sender<ButtplugDeviceEvent>,
+        output_sender: BoundedDeviceEventBroadcaster,
     ) -> Self
     where
         C: Central<T>,
@@ -130,7 +130,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                 let sender = os.clone();
                 task::spawn(async move {
                     sender
-                        .send(ButtplugDeviceEvent::Notification(
+                        .send(&ButtplugDeviceEvent::Notification(
                             endpoint,
                             notification.value,
                         ))
@@ -268,7 +268,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                         "Device {:?} disconnected",
                         self.device.properties().local_name
                     );
-                    self.output_sender.send(ButtplugDeviceEvent::Removed).await;
+                    self.output_sender.send(&ButtplugDeviceEvent::Removed).await;
                 }
             }
             _ => {}

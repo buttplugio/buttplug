@@ -11,15 +11,17 @@ use crate::{
         device::{
             ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
             ButtplugDeviceReturn, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd,
-            DeviceUnsubscribeCmd, DeviceWriteCmd,
+            DeviceUnsubscribeCmd, DeviceWriteCmd, BoundedDeviceEventBroadcaster
         },
         Endpoint,
     },
 };
 use async_std::{
-    sync::{channel, Receiver, Sender},
+    sync::{Arc, channel, Receiver, Sender},
     task,
 };
+use futures_channel;
+use broadcaster::BroadcastChannel;
 use async_trait::async_trait;
 use btleplug::api::{Central, Peripheral};
 
@@ -64,7 +66,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
         let device = self.device.take().unwrap();
         if let Some(ref proto) = protocol.btle {
             let (device_sender, device_receiver) = channel(256);
-            let (output_sender, output_receiver) = channel(256);
+            let output_broadcaster = BroadcastChannel::with_cap(256);
             let p = proto.clone();
             let name = device.properties().local_name.unwrap();
             let address = device.properties().address.to_string();
@@ -75,13 +77,14 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
             // The new watchdog async-std executor will at least leave this task on
             // its own thread in time, but I'm not sure when that's landing.
             let central = self.central.clone();
+            let broadcaster_clone = output_broadcaster.clone();
             task::spawn(async move {
                 let mut event_loop = BtlePlugInternalEventLoop::new(
                     central,
                     device,
                     p,
                     device_receiver,
-                    output_sender,
+                    broadcaster_clone,
                 );
                 event_loop.run().await;
             });
@@ -96,7 +99,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
                     address,
                     endpoints: info.endpoints,
                     thread_sender: device_sender,
-                    event_receiver: output_receiver,
+                    event_receiver: output_broadcaster.clone(),
                 })),
                 _ => Err(ButtplugError::ButtplugDeviceError(
                     ButtplugDeviceError::new("Cannot connect"),
@@ -114,7 +117,7 @@ pub struct BtlePlugDeviceImpl {
     address: String,
     endpoints: Vec<Endpoint>,
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    event_receiver: Receiver<ButtplugDeviceEvent>,
+    event_receiver: BoundedDeviceEventBroadcaster,
 }
 
 unsafe impl Send for BtlePlugDeviceImpl {}
@@ -126,7 +129,7 @@ impl BtlePlugDeviceImpl {
         address: &String,
         endpoints: Vec<Endpoint>,
         thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-        event_receiver: Receiver<ButtplugDeviceEvent>,
+        event_receiver: BoundedDeviceEventBroadcaster,
     ) -> Self {
         Self {
             name: name.to_string(),
@@ -156,7 +159,7 @@ impl BtlePlugDeviceImpl {
 
 #[async_trait]
 impl DeviceImpl for BtlePlugDeviceImpl {
-    fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent> {
+    fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
         self.event_receiver.clone()
     }
 

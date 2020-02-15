@@ -282,6 +282,14 @@ pub struct DeviceRemoved {
     pub device_index: u32,
 }
 
+impl DeviceRemoved {
+    pub fn new(device_index: u32) -> Self {
+        Self {
+            id: 0,
+            device_index
+        }
+    }
+}
 #[derive(Debug, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StartScanning {

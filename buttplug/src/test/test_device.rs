@@ -3,7 +3,7 @@ use crate::{
         Endpoint,
         device::{DeviceImpl, DeviceImplCommand, DeviceReadCmd, DeviceWriteCmd, 
             DeviceSubscribeCmd, DeviceUnsubscribeCmd, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
-            ButtplugDevice},
+            ButtplugDevice, BoundedDeviceEventBroadcaster},
         configuration_manager::{DeviceSpecifier, ProtocolDefinition, BluetoothLESpecifier},
     },
     core::{
@@ -64,8 +64,7 @@ pub struct TestDevice {
     // for creation in ButtplugDevice, so initialization and cloning order
     // matters here.
     pub endpoint_channels: Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>,
-    pub event_sender: Sender<ButtplugDeviceEvent>,
-    pub event_receiver: Receiver<ButtplugDeviceEvent>,
+    pub event_broadcaster: BoundedDeviceEventBroadcaster,
 }
 
 impl TestDevice {
@@ -75,14 +74,13 @@ impl TestDevice {
             let (sender, receiver) = channel(256);
             endpoint_channels.insert(endpoint.clone(), (sender, receiver));
         }
-        let (event_sender, event_receiver) = channel(256);
+        let event_broadcaster = BoundedDeviceEventBroadcaster::with_cap(256);
         Self {
             name: name.to_string(),
             address: "".to_string(),
             endpoints,
             endpoint_channels: Arc::new(RwLock::new(endpoint_channels)),
-            event_sender,
-            event_receiver
+            event_broadcaster
         }
     }
 
@@ -136,8 +134,8 @@ impl DeviceImpl for TestDevice {
         Box::new((*self).clone())
     }
 
-    fn get_event_receiver(&self) -> Receiver<ButtplugDeviceEvent> {
-        self.event_receiver.clone()
+    fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
+        self.event_broadcaster.clone()
     }
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
