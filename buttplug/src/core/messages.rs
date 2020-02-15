@@ -14,6 +14,8 @@ use crate::device::Endpoint;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
+#[cfg(feature = "serialize_json")]
+use serde_json;
 use std::{
     collections::HashMap,
     convert::{From, TryFrom},
@@ -849,6 +851,15 @@ pub enum ButtplugMessageUnion {
     RawReading(RawReading),
     SubscribeCmd(SubscribeCmd),
     UnsubscribeCmd(UnsubscribeCmd),
+}
+
+#[cfg(feature = "serialize_json")]
+impl ButtplugMessageUnion {
+    pub fn try_deserialize(msg_str: &str) -> Result<Self, ButtplugError> {
+        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
+            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
+            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
+    }
 }
 
 /// Messages that should never be received from the client.
