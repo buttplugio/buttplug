@@ -1,6 +1,6 @@
 [package]
 name = "buttplug_derive"
-version = "0.0.2"
+version = "0.1.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Trait Derive Macros for Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -13,5 +13,5 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-syn = "1.0.13"
+syn = "1.0.14"
 quote = "1.0.2"
