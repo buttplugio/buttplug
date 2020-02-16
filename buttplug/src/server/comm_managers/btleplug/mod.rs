@@ -14,11 +14,11 @@ use async_std::{
 };
 use async_trait::async_trait;
 use btleplug::api::{Central, CentralEvent, Peripheral};
-#[cfg(feature = "linux-ble")]
+#[cfg(target_os="linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
-#[cfg(feature = "corebluetooth-ble")]
+#[cfg(any(target_os="macos", target_os="ios"))]
 use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
-#[cfg(feature = "winrt-ble")]
+#[cfg(target_os="windows")]
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 
@@ -30,14 +30,14 @@ pub struct BtlePlugCommunicationManager {
     scanning_sender: Option<Sender<bool>>,
 }
 
-#[cfg(any(feature = "winrt-ble", feature = "corebluetooth-ble"))]
+#[cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))]
 impl BtlePlugCommunicationManager {
     fn get_central(&self) -> Adapter {
         self.manager.adapters().unwrap()
     }
 }
 
-#[cfg(feature = "linux-ble")]
+#[cfg(target_os = "linux")]
 impl BtlePlugCommunicationManager {
     fn get_central(&self) -> ConnectedAdapter {
         let adapters = self.manager.adapters().unwrap();
@@ -139,7 +139,7 @@ impl Drop for BtlePlugCommunicationManager {
     }
 }
 
-#[cfg(all(test, any(feature = "winrt-ble", feature = "linux-ble")))]
+#[cfg(test)]
 mod test {
     use super::BtlePlugCommunicationManager;
     use crate::{

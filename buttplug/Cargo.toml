@@ -11,13 +11,11 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
 
 [features]
-default=["client", "server", "serialize_json"]
+default=["client", "server", "serialize_json", "btleplug-manager"]
 client=[]
 server=[]
 serialize_json=[]
-linux-ble=["btleplug"]
-winrt-ble=["btleplug"]
-corebluetooth-ble=["btleplug"]
+btleplug-manager=["btleplug"]
 client-ws=["client", "serialize_json", "ws", "url"]
 client-ws-ssl=["client", "serialize_json", "ws", "url", "ws/ssl", "openssl"]
 

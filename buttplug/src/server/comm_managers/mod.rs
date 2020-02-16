@@ -1,6 +1,2 @@
-#[cfg(any(
-    feature = "linux-ble",
-    feature = "winrt-ble",
-    feature = "corebluetooth-ble"
-))]
+#[cfg(feature = "btleplug-manager")]
 pub mod btleplug;
