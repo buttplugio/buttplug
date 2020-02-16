@@ -43,9 +43,9 @@ For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
 The Rust code in this repo is currently being rebuilt and rewritten.
-It contains a implementation of the Buttplug Client, but the Server
-(hardware accessing) portion is still being worked on. Our
-[C#](https://github.com/metafetish/buttplug-csharp) and
+It contains a implementation of the Buttplug Client, and a mostly
+functioning Server (hardware accessing) portion is still being worked
+on. Our [C#](https://github.com/metafetish/buttplug-csharp) and
 [Typescript/JS/Node](https://github.com/metafetish/buttplug-js)
 implementations are the most complete for the moment.
 
