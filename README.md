@@ -81,11 +81,9 @@ The following crate features are available
 | `serialize_json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
 | `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers |
 | `client-ws-ssl` | `client`,`serialize_json` | Websocket client connector with SSL capabilities |
-| `linux-ble` | None | Bluetooth on Linux (Bluez) |
-| `winrt-ble` | None | Bluetooth on Windows 10 (UWP/WinRT) |
-| `corebluetooth-ble` | None | Bluetooth on macOS/iOS (CoreBluetooth) |
+| `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
 
-Default features are `client`, `server`, and `serialize_json`.
+Default features are `client`, `server`, `serialize_json`, and `btleplug-manager`.
 
 ## Building on Windows
 
