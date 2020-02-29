@@ -62,27 +62,39 @@ unsafe impl Sync for DeviceManager {}
 
 enum DeviceEvent {
     DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
-    DeviceEvent(Option<(u32, ButtplugDeviceEvent)>)
+    DeviceEvent(Option<(u32, ButtplugDeviceEvent)>),
+    PingTimeout
 }
 
 async fn wait_for_manager_events(
-    receiver: Receiver<DeviceCommunicationEvent>,
+    mut device_comm_receiver: Receiver<DeviceCommunicationEvent>,
+    ping_receiver: Option<Receiver<bool>>,
     sender: Sender<ButtplugMessageUnion>,
     device_map: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
 ) {
     let mut device_index: u32 = 0;
     let (device_event_sender, mut device_event_receiver) = channel::<(u32, ButtplugDeviceEvent)>(256);
     loop {
-        let mut recv_clone = receiver.clone();
         let recv_fut = async {
-            DeviceEvent::DeviceCommunicationEvent(recv_clone.next().await)
+            DeviceEvent::DeviceCommunicationEvent(device_comm_receiver.next().await)
         };
 
         let device_event_fut = async {
             DeviceEvent::DeviceEvent(device_event_receiver.next().await)
         };
 
-        let race_fut = recv_fut.race(device_event_fut);
+        let ping_fut = async {
+            if let Some(recv) = &ping_receiver {
+                recv.recv().await;
+            } else {
+                futures::future::pending::<bool>().await;
+            }
+            // If the ping receiver ever gets anything, we've pinged out, so
+            // just stop everything and exit.
+            DeviceEvent::PingTimeout
+        };
+
+        let race_fut = recv_fut.race(device_event_fut).race(ping_fut);
 
         match race_fut.await {
             DeviceEvent::DeviceCommunicationEvent(e) => {
@@ -150,6 +162,15 @@ async fn wait_for_manager_events(
                     },
                     None => break,
                 }
+            },
+            DeviceEvent::PingTimeout => {
+                // TODO This should be done in parallel, versus waiting for every device
+                // to stop in order.
+                for (_, ref mut device) in device_map.write().await.iter_mut() {
+                    // TODO Figure out what we do here if anything fails.
+                    device.parse_message(&messages::StopDeviceCmd::new(1).into()).await;
+                }
+                break;
             }
         }
     }
@@ -157,13 +178,13 @@ async fn wait_for_manager_events(
 
 
 impl DeviceManager {
-    pub fn new(event_sender: Sender<ButtplugMessageUnion>) -> Self {
+    pub fn new(event_sender: Sender<ButtplugMessageUnion>, ping_receiver: Option<Receiver<bool>>) -> Self {
         let (sender, receiver) = channel(256);
         let map = Arc::new(RwLock::new(HashMap::new()));
         let map_clone = map.clone();
         let thread_sender = event_sender.clone();
         task::spawn(async move {
-            wait_for_manager_events(receiver, thread_sender, map_clone).await;
+            wait_for_manager_events(receiver, ping_receiver, thread_sender, map_clone).await;
         });
         Self {
             sender,

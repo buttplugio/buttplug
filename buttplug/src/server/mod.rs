@@ -18,7 +18,7 @@ use crate::core::{
     },
 };
 use async_std::{
-    sync::Sender,
+    sync::{Sender, Receiver, channel},
     task,
 };
 use device_manager::{
@@ -46,20 +46,25 @@ struct PingTimer {
     // https://github.com/rust-lang/rust/issues/58580
     max_ping_time: u128,
     last_ping_time: Arc<RwLock<Instant>>,
-    pinged_out: Arc<RwLock<bool>>
+    pinged_out: Arc<RwLock<bool>>,
+    // This should really be a Condvar but async_std::Condvar isn't done yet, so
+    // we'll just use a channel. The channel receiver will get passed to the
+    // device manager, so it can stop devices
+    ping_channel: Sender<bool>
 }
 
 impl PingTimer {
-    pub fn new(max_ping_time: u128) -> Self {
+    pub fn new(max_ping_time: u128) -> (Self, Receiver<bool>) {
         if max_ping_time == 0 {
             panic!("Can't create ping timer with no max ping time.");
         }
-
-        Self {
+        let (sender, receiver) = channel(1);
+        (Self {
             max_ping_time,
             last_ping_time: Arc::new(RwLock::new(Instant::now())),
             pinged_out: Arc::new(RwLock::new(false)),
-        }
+            ping_channel: sender
+        }, receiver)
     }
 
     pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugMessageUnion>) {
@@ -115,15 +120,20 @@ impl ButtplugServer {
         event_sender: Sender<ButtplugMessageUnion>,
     ) -> Self {
         let mut ping_timer = None;
+        let mut ping_receiver = None;
+
         if max_ping_time > 0 {
-            ping_timer = Some(PingTimer::new(max_ping_time));
+            let (timer, receiver) = PingTimer::new(max_ping_time);
+            ping_timer = Some(timer);
+            ping_receiver = Some(receiver);
         }
+
         Self {
             server_name: name.to_string(),
             server_spec_version: 1,
             client_name: None,
             client_spec_version: None,
-            device_manager: DeviceManager::new(event_sender.clone()),
+            device_manager: DeviceManager::new(event_sender.clone(), ping_receiver),
             ping_timer,
             event_sender,
         }
