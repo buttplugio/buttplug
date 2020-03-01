@@ -1,20 +1,15 @@
 mod generic_command_manager;
 
-use std::collections::HashMap;
 use super::device::DeviceImpl;
-use crate::
-{
-    core::
-    {
+use crate::{
+    core::{
         errors::ButtplugError,
-        messages::
-        {
-            ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
-        },
+        messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap},
     },
-    device::configuration_manager::{ProtocolConstructor, DeviceProtocolConfiguration}
+    device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
 };
 use async_trait::async_trait;
+use std::collections::HashMap;
 
 macro_rules! create_protocols(
     (
@@ -69,7 +64,6 @@ create_protocols!(
     ("vorze-sa", vorze_sa, VorzeSA)
 );
 
-
 #[async_trait]
 pub trait ButtplugProtocolCreator: Sync + Send {
     async fn try_create_protocol(
@@ -77,7 +71,6 @@ pub trait ButtplugProtocolCreator: Sync + Send {
         device_impl: &Box<dyn DeviceImpl>,
     ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
-
 
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {

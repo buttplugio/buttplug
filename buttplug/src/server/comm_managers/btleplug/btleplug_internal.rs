@@ -6,9 +6,9 @@ use crate::{
     device::{
         configuration_manager::BluetoothLESpecifier,
         device::{
-            ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo,
-            ButtplugDeviceReturn, DeviceImplCommand, DeviceSubscribeCmd,
-            DeviceUnsubscribeCmd, DeviceWriteCmd, BoundedDeviceEventBroadcaster
+            BoundedDeviceEventBroadcaster, ButtplugDeviceCommand, ButtplugDeviceEvent,
+            ButtplugDeviceImplInfo, ButtplugDeviceReturn, DeviceImplCommand, DeviceSubscribeCmd,
+            DeviceUnsubscribeCmd, DeviceWriteCmd,
         },
         Endpoint,
     },

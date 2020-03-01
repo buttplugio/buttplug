@@ -13,9 +13,9 @@ use crate::device::Endpoint;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
-use serde_repr::{Deserialize_repr, Serialize_repr};
-#[cfg(feature = "serialize_json")]
 use serde_json;
+#[cfg(feature = "serialize_json")]
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::{
     collections::HashMap,
     convert::{From, TryFrom},
@@ -203,7 +203,8 @@ pub struct MessageAttributes {
     #[cfg_attr(
         feature = "serialize_json",
         serde(rename = "FeatureOrder"),
-        serde(skip_serializing))]
+        serde(skip_serializing)
+    )]
     pub feature_order: Option<Vec<u32>>,
 }
 
@@ -286,7 +287,7 @@ impl DeviceRemoved {
     pub fn new(device_index: u32) -> Self {
         Self {
             id: 0,
-            device_index
+            device_index,
         }
     }
 }

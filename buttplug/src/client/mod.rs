@@ -349,12 +349,13 @@ impl ButtplugClient {
     /// fails due to issues with DeviceManagers on the server, disconnection,
     /// etc.
     pub async fn start_scanning(&mut self) -> ButtplugClientResult {
-        self.send_message_expect_ok(&StartScanning::default().into()).await
+        self.send_message_expect_ok(&StartScanning::default().into())
+            .await
     }
 
     // Don't expose outside of crate, just handy to use for internal tests.
     #[allow(dead_code)]
-    pub (crate) async fn test(&mut self) -> ButtplugClientResult {
+    pub(crate) async fn test(&mut self) -> ButtplugClientResult {
         let test_string = "client test";
         self.send_message(&messages::Test::new(test_string).into())
             .await
@@ -363,10 +364,14 @@ impl ButtplugClient {
                     if m.test_string == test_string {
                         Ok(())
                     } else {
-                        Err(ButtplugClientError::ButtplugError(ButtplugUnknownError::new("Test strings did not match").into()))
+                        Err(ButtplugClientError::ButtplugError(
+                            ButtplugUnknownError::new("Test strings did not match").into(),
+                        ))
                     }
                 } else {
-                    Err(ButtplugClientError::ButtplugError(ButtplugUnknownError::new("Test did not return Test message").into()))
+                    Err(ButtplugClientError::ButtplugError(
+                        ButtplugUnknownError::new("Test did not return Test message").into(),
+                    ))
                 }
             })
             .map_err(|err| err)
@@ -567,11 +572,9 @@ mod test {
     #[test]
     fn test_disconnect_status() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.disconnect().await.is_ok());
-                    assert!(!client.connected());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.disconnect().await.is_ok());
+                assert!(!client.connected());
             })
             .await;
         });
@@ -580,11 +583,9 @@ mod test {
     #[test]
     fn test_double_disconnect() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.disconnect().await.is_ok());
-                    assert!(client.disconnect().await.is_err());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.disconnect().await.is_ok());
+                assert!(client.disconnect().await.is_err());
             })
             .await;
         });
@@ -593,10 +594,8 @@ mod test {
     #[test]
     fn test_connect_init() {
         task::block_on(async {
-            connect_test_client(|client| {
-                async move {
-                    assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-                }
+            connect_test_client(|client| async move {
+                assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
             })
             .await;
         });
@@ -617,10 +616,8 @@ mod test {
     #[ignore]
     fn test_start_scanning() {
         task::block_on(async {
-            connect_test_client(|mut client| {
-                async move {
-                    assert!(client.start_scanning().await.is_ok());
-                }
+            connect_test_client(|mut client| async move {
+                assert!(client.start_scanning().await.is_ok());
             })
             .await;
         });

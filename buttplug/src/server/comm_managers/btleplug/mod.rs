@@ -14,11 +14,11 @@ use async_std::{
 };
 use async_trait::async_trait;
 use btleplug::api::{Central, CentralEvent, Peripheral};
-#[cfg(target_os="linux")]
+#[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
-#[cfg(any(target_os="macos", target_os="ios"))]
+#[cfg(any(target_os = "macos", target_os = "ios"))]
 use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
-#[cfg(target_os="windows")]
+#[cfg(target_os = "windows")]
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 
@@ -144,10 +144,8 @@ impl Drop for BtlePlugCommunicationManager {
 #[cfg(test)]
 mod test {
     use super::BtlePlugCommunicationManager;
-    use crate::{
-        server::device_manager::{
-            DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
-        },
+    use crate::server::device_manager::{
+        DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};
     use env_logger;

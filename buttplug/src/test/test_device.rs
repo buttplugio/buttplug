@@ -1,22 +1,21 @@
 use crate::{
-    device::{
-        Endpoint,
-        device::{DeviceImpl, DeviceImplCommand, DeviceReadCmd, DeviceWriteCmd, 
-            DeviceSubscribeCmd, DeviceUnsubscribeCmd, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
-            ButtplugDevice, BoundedDeviceEventBroadcaster},
-        configuration_manager::{DeviceSpecifier, ProtocolDefinition, BluetoothLESpecifier},
-    },
     core::{
-        errors::{ ButtplugError, ButtplugDeviceError },
-        messages::{ RawReading },
-    }
+        errors::{ButtplugDeviceError, ButtplugError},
+        messages::RawReading,
+    },
+    device::{
+        configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
+        device::{
+            BoundedDeviceEventBroadcaster, ButtplugDevice, ButtplugDeviceEvent,
+            ButtplugDeviceImplCreator, DeviceImpl, DeviceImplCommand, DeviceReadCmd,
+            DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
+        },
+        Endpoint,
+    },
 };
-use std::collections::HashMap;
-use async_std::{
-    sync::{channel, Sender, Receiver, RwLock, Arc}
-};
+use async_std::sync::{channel, Arc, Receiver, RwLock, Sender};
 use async_trait::async_trait;
-
+use std::collections::HashMap;
 
 pub struct TestDeviceImplCreator {
     specifier: DeviceSpecifier,
@@ -27,7 +26,7 @@ impl TestDeviceImplCreator {
     pub fn new(specifier: DeviceSpecifier, device_impl: TestDevice) -> Self {
         Self {
             specifier,
-            device_impl: Some(device_impl)
+            device_impl: Some(device_impl),
         }
     }
 }
@@ -63,7 +62,8 @@ pub struct TestDevice {
     // However, it means we can only store off the device after we send it off
     // for creation in ButtplugDevice, so initialization and cloning order
     // matters here.
-    pub endpoint_channels: Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>,
+    pub endpoint_channels:
+        Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>,
     pub event_broadcaster: BoundedDeviceEventBroadcaster,
 }
 
@@ -80,7 +80,7 @@ impl TestDevice {
             address: "".to_string(),
             endpoints,
             endpoint_channels: Arc::new(RwLock::new(endpoint_channels)),
-            event_broadcaster
+            event_broadcaster,
         }
     }
 
@@ -92,27 +92,39 @@ impl TestDevice {
         }
     }
 
-    pub fn new_bluetoothle_test_device_impl_creator(name: &str) -> (TestDevice, TestDeviceImplCreator) {
+    pub fn new_bluetoothle_test_device_impl_creator(
+        name: &str,
+    ) -> (TestDevice, TestDeviceImplCreator) {
         let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name));
-        let device_impl = TestDevice::new(name, vec!());
+        let device_impl = TestDevice::new(name, vec![]);
         let device_impl_clone = device_impl.clone();
         let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);
         (device_impl_clone, device_impl_creator)
     }
 
-    pub async fn new_bluetoothle_test_device(name: &str) -> Result<(ButtplugDevice, TestDevice), ButtplugError> {
-        let (device_impl, device_impl_creator) = TestDevice::new_bluetoothle_test_device_impl_creator(name);
+    pub async fn new_bluetoothle_test_device(
+        name: &str,
+    ) -> Result<(ButtplugDevice, TestDevice), ButtplugError> {
+        let (device_impl, device_impl_creator) =
+            TestDevice::new_bluetoothle_test_device_impl_creator(name);
         let device_impl_clone = device_impl.clone();
-        let device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator)).await.unwrap().unwrap();
+        let device: ButtplugDevice =
+            ButtplugDevice::try_create_device(Box::new(device_impl_creator))
+                .await
+                .unwrap()
+                .unwrap();
         Ok((device, device_impl_clone))
     }
 
-    pub async fn get_endpoint_channel_clone(&self, endpoint: &Endpoint) -> (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>) {
+    pub async fn get_endpoint_channel_clone(
+        &self,
+        endpoint: &Endpoint,
+    ) -> (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>) {
         let endpoint_channels = self.endpoint_channels.read().await;
         let (sender, receiver) = endpoint_channels.get(endpoint).unwrap();
         (sender.clone(), receiver.clone())
     }
- }
+}
 
 #[async_trait]
 impl DeviceImpl for TestDevice {
@@ -133,7 +145,9 @@ impl DeviceImpl for TestDevice {
     }
 
     async fn disconnect(&self) {
-        self.event_broadcaster.send(&ButtplugDeviceEvent::Removed).await;
+        self.event_broadcaster
+            .send(&ButtplugDeviceEvent::Removed)
+            .await;
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {
@@ -145,7 +159,7 @@ impl DeviceImpl for TestDevice {
     }
 
     async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
-        Ok(RawReading::new(0, msg.endpoint, vec!()))
+        Ok(RawReading::new(0, msg.endpoint, vec![]))
     }
 
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
@@ -155,10 +169,12 @@ impl DeviceImpl for TestDevice {
             Some((sender, _)) => {
                 sender.send(msg.into()).await;
                 Ok(())
-            },
-            None => {
-                Err(ButtplugDeviceError::new(&format!("Endpoint {} does not exist for {}", msg.endpoint, self.name)).into())
             }
+            None => Err(ButtplugDeviceError::new(&format!(
+                "Endpoint {} does not exist for {}",
+                msg.endpoint, self.name
+            ))
+            .into()),
         }
     }
 

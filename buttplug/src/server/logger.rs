@@ -1,9 +1,6 @@
-use log::{Level, Log, Metadata, Record};
-use async_std::{
-    sync::Sender,
-    task
-};
 use crate::core::messages::{self, ButtplugMessageUnion};
+use async_std::{sync::Sender, task};
+use log::{Level, Log, Metadata, Record};
 
 pub struct ButtplugLogHandler {
     level: Level,
@@ -14,7 +11,7 @@ impl ButtplugLogHandler {
     pub fn new(level: &messages::LogLevel, message_sender: Sender<ButtplugMessageUnion>) -> Self {
         Self {
             level: level.clone().into(),
-            message_sender
+            message_sender,
         }
     }
 }
@@ -36,7 +33,9 @@ impl Log for ButtplugLogHandler {
             let level: messages::LogLevel = record.level().into();
             let log_msg = format!("[{}] {}", target, record.args());
             task::spawn(async move {
-                sender_clone.send(messages::Log::new(level, log_msg).into()).await;
+                sender_clone
+                    .send(messages::Log::new(level, log_msg).into())
+                    .await;
             });
         }
     }

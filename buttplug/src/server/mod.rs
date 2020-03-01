@@ -15,23 +15,23 @@ use crate::core::{
     errors::*,
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-        ButtplugMessageUnion, DeviceMessageInfo, ButtplugMessage,
+        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
     },
 };
 use async_std::{
-    sync::{Sender, Receiver, channel},
+    sync::{channel, Receiver, Sender},
     task,
 };
 use device_manager::{
     DeviceCommunicationManager, DeviceCommunicationManagerCreator, DeviceManager,
 };
+use log;
+use logger::ButtplugLogHandler;
 use std::{
     convert::{TryFrom, TryInto},
-    time::{Instant, Duration},
     sync::{Arc, RwLock},
+    time::{Duration, Instant},
 };
-use logger::ButtplugLogHandler;
-use log;
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -53,7 +53,7 @@ struct PingTimer {
     // This should really be a Condvar but async_std::Condvar isn't done yet, so
     // we'll just use a channel. The channel receiver will get passed to the
     // device manager, so it can stop devices
-    ping_channel: Sender<bool>
+    ping_channel: Sender<bool>,
 }
 
 impl PingTimer {
@@ -62,12 +62,15 @@ impl PingTimer {
             panic!("Can't create ping timer with no max ping time.");
         }
         let (sender, receiver) = channel(1);
-        (Self {
-            max_ping_time,
-            last_ping_time: Arc::new(RwLock::new(Instant::now())),
-            pinged_out: Arc::new(RwLock::new(false)),
-            ping_channel: sender
-        }, receiver)
+        (
+            Self {
+                max_ping_time,
+                last_ping_time: Arc::new(RwLock::new(Instant::now())),
+                pinged_out: Arc::new(RwLock::new(false)),
+                ping_channel: sender,
+            },
+            receiver,
+        )
     }
 
     pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugMessageUnion>) {
@@ -84,8 +87,14 @@ impl PingTimer {
                     error!("Pinged out.");
                     *pinged_out.write().unwrap() = true;
                     ping_channel.send(true).await;
-                    let err: ButtplugError = ButtplugPingError::new(&format!("Pinged out. Ping took {} but max ping time is {}.", last_ping, max_ping_time)).into();
-                    event_sender.send(ButtplugMessageUnion::Error(err.into())).await;
+                    let err: ButtplugError = ButtplugPingError::new(&format!(
+                        "Pinged out. Ping took {} but max ping time is {}.",
+                        last_ping, max_ping_time
+                    ))
+                    .into();
+                    event_sender
+                        .send(ButtplugMessageUnion::Error(err.into()))
+                        .await;
                     break;
                 }
             }
@@ -173,7 +182,7 @@ impl ButtplugServer {
                 _ => Err(ButtplugMessageError::new(
                     &format!("Message {:?} not handled by server loop.", msg).to_owned(),
                 )
-                         .into()),
+                .into()),
             }
         }
     }
@@ -188,9 +197,9 @@ impl ButtplugServer {
                     "Server version ({}) must be equal to or greater than client version ({}).",
                     self.server_spec_version, msg.message_version
                 )
-                    .to_owned(),
+                .to_owned(),
             )
-                       .into());
+            .into());
         }
         self.client_name = Some(msg.client_name.clone());
         self.client_spec_version = Some(msg.message_version);
@@ -206,7 +215,7 @@ impl ButtplugServer {
                 self.server_spec_version,
                 max_ping_time.try_into().unwrap(),
             )
-                .into(),
+            .into(),
         )
     }
 
@@ -215,7 +224,10 @@ impl ButtplugServer {
             timer.update_ping_time();
             Result::Ok(messages::Ok::new(msg.get_id()).into())
         } else {
-            Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())
+            Err(
+                ButtplugPingError::new("Ping message invalid, as ping timer is not running.")
+                    .into(),
+            )
         }
     }
 
@@ -225,15 +237,20 @@ impl ButtplugServer {
         Result::Ok(test_return.into())
     }
 
-    fn handle_log(&mut self, msg: &messages::RequestLog) -> Result<ButtplugMessageUnion, ButtplugError> {
+    fn handle_log(
+        &mut self,
+        msg: &messages::RequestLog,
+    ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
         log::set_boxed_logger(Box::new(handler))
-        .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
-        .and_then(|_| {
-            let level: log::LevelFilter = msg.log_level.clone().into();
-            log::set_max_level(level);
-            Result::Ok(messages::Ok::new(msg.get_id()).into())
-        })
+            .map_err(|e| {
+                ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into()
+            })
+            .and_then(|_| {
+                let level: log::LevelFilter = msg.log_level.clone().into();
+                log::set_max_level(level);
+                Result::Ok(messages::Ok::new(msg.get_id()).into())
+            })
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {
@@ -244,12 +261,13 @@ impl ButtplugServer {
 mod test {
     use super::*;
     #[cfg(any(feature = "linux-ble", feature = "winrt-ble"))]
+    use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
     use crate::{
-        server::comm_managers::btleplug::BtlePlugCommunicationManager,
-    };
-    use crate::{
-        test::{TestDeviceCommunicationManager, TestDevice, check_recv_value},
-        device::{device::{DeviceImplCommand, DeviceWriteCmd}, Endpoint},
+        device::{
+            device::{DeviceImplCommand, DeviceWriteCmd},
+            Endpoint,
+        },
+        test::{check_recv_value, TestDevice, TestDeviceCommunicationManager},
     };
     use async_std::{
         prelude::StreamExt,
@@ -319,8 +337,13 @@ mod test {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             task::sleep(Duration::from_millis(150)).await;
             let reply = server.parse_message(&msg.into()).await;
-            assert!(reply.is_ok(),
-                    format!("ping timer shouldn't start until handshake finished. {:?}", reply));
+            assert!(
+                reply.is_ok(),
+                format!(
+                    "ping timer shouldn't start until handshake finished. {:?}",
+                    reply
+                )
+            );
             task::sleep(Duration::from_millis(150)).await;
             let pingmsg = messages::Ping::default();
             match server.parse_message(&pingmsg.into()).await {
@@ -353,27 +376,44 @@ mod test {
         let (send, mut recv) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 100, send);
         // TODO This should probably use a test protocol we control, not the aneros protocol
-        let (device, device_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+        let (device, device_creator) =
+            TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
         TestDeviceCommunicationManager::add_test_device(device_creator);
         server.add_comm_manager::<TestDeviceCommunicationManager>();
         task::block_on(async {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             let mut reply = server.parse_message(&msg.into()).await;
-            assert!(reply.is_ok(),
-                format!("Should get back ok: {:?}", reply));
-            reply = server.parse_message(&messages::StartScanning::default().into()).await;
-            assert!(reply.is_ok(),
-                format!("Should get back ok: {:?}", reply));
+            assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+            reply = server
+                .parse_message(&messages::StartScanning::default().into())
+                .await;
+            assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
             // Check that we got an event back about a new device.
             let msg = recv.next().await.unwrap();
             if let ButtplugMessageUnion::DeviceAdded(da) = msg {
                 assert_eq!(da.device_name, "Aneros Vivi");
             } else {
-                assert!(false, format!("Returned message was not a DeviceAdded message or timed out: {:?}", msg));
+                assert!(
+                    false,
+                    format!(
+                        "Returned message was not a DeviceAdded message or timed out: {:?}",
+                        msg
+                    )
+                );
             }
-            server.parse_message(&messages::VibrateCmd::new(0, vec!(messages::VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
+            server
+                .parse_message(
+                    &messages::VibrateCmd::new(0, vec![messages::VibrateSubcommand::new(0, 0.5)])
+                        .into(),
+                )
+                .await
+                .unwrap();
             let (_, command_receiver) = device.get_endpoint_channel_clone(&Endpoint::Tx).await;
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false))).await;
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),
+            )
+            .await;
             // Wait out the ping, we should get a stop message.
             let mut i = 0u32;
             while command_receiver.is_empty() {
@@ -382,8 +422,12 @@ mod test {
                 i += 1;
                 assert!(i < 10, "Slept for too long while waiting for stop command!");
             }
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false))).await;
-         });
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+            )
+            .await;
+        });
     }
 
     // Warning: This test is brittle. If any log messages are fired between our
@@ -403,11 +447,11 @@ mod test {
         task::block_on(async {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             let mut reply = server.parse_message(&msg.into()).await;
-            assert!(reply.is_ok(),
-                format!("Should get back ok: {:?}", reply));
-            reply = server.parse_message(&messages::RequestLog::new(messages::LogLevel::Debug).into()).await;
-            assert!(reply.is_ok(),
-                format!("Should get back ok: {:?}", reply));
+            assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+            reply = server
+                .parse_message(&messages::RequestLog::new(messages::LogLevel::Debug).into())
+                .await;
+            assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
             debug!("Test log message");
 
             let mut did_log = false;
@@ -426,6 +470,6 @@ mod test {
             }
 
             assert!(did_log, "Should've gotten log message");
-         });
+        });
     }
 }

@@ -14,21 +14,18 @@ use crate::{
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
             ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceList,
-            DeviceMessageInfo, ScanningFinished, DeviceRemoved
+            DeviceMessageInfo, DeviceRemoved, ScanningFinished,
         },
     },
-    device::device::{ButtplugDevice, ButtplugDeviceImplCreator, ButtplugDeviceEvent},
+    device::device::{ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceImplCreator},
 };
 use async_std::{
-    prelude::{StreamExt, FutureExt},
-    sync::{channel, Receiver, Sender, Arc, RwLock},
+    prelude::{FutureExt, StreamExt},
+    sync::{channel, Arc, Receiver, RwLock, Sender},
     task,
 };
 use async_trait::async_trait;
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-};
+use std::{collections::HashMap, convert::TryFrom};
 
 pub enum DeviceCommunicationEvent {
     // This event only means that a device has been found. The work still needs
@@ -63,7 +60,7 @@ unsafe impl Sync for DeviceManager {}
 enum DeviceEvent {
     DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
     DeviceEvent(Option<(u32, ButtplugDeviceEvent)>),
-    PingTimeout
+    PingTimeout,
 }
 
 async fn wait_for_manager_events(
@@ -73,15 +70,14 @@ async fn wait_for_manager_events(
     device_map: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
 ) {
     let mut device_index: u32 = 0;
-    let (device_event_sender, mut device_event_receiver) = channel::<(u32, ButtplugDeviceEvent)>(256);
+    let (device_event_sender, mut device_event_receiver) =
+        channel::<(u32, ButtplugDeviceEvent)>(256);
     loop {
-        let recv_fut = async {
-            DeviceEvent::DeviceCommunicationEvent(device_comm_receiver.next().await)
-        };
+        let recv_fut =
+            async { DeviceEvent::DeviceCommunicationEvent(device_comm_receiver.next().await) };
 
-        let device_event_fut = async {
-            DeviceEvent::DeviceEvent(device_event_receiver.next().await)
-        };
+        let device_event_fut =
+            async { DeviceEvent::DeviceEvent(device_event_receiver.next().await) };
 
         let ping_fut = async {
             if let Some(recv) = &ping_receiver {
@@ -97,71 +93,61 @@ async fn wait_for_manager_events(
         let race_fut = recv_fut.race(device_event_fut).race(ping_fut);
 
         match race_fut.await {
-            DeviceEvent::DeviceCommunicationEvent(e) => {
-                match e {
-                    Some(event) =>  {
-                        match event {
-                            DeviceCommunicationEvent::DeviceFound(device_creator) => {
-                                match ButtplugDevice::try_create_device(device_creator).await {
-                                    Ok(option_dev) => match option_dev {
-                                        Some(device) => {
-                                            info!("Assigning index {} to {}", device_index, device.name());
-                                            let mut recv = device.get_event_receiver();
-                                            let sender_clone = device_event_sender.clone();
-                                            let idx_clone = device_index.clone();
-                                            task::spawn(async move {
-                                                loop {
-                                                    match recv.next().await {
-                                                        Some(e) => sender_clone.send((idx_clone, e)).await,
-                                                        None => break,
-                                                    }
-                                                }
-                                            });
-                                            sender
-                                            .send(
-                                                DeviceAdded::new(
-                                                    device_index,
-                                                    &device.name().to_owned(),
-                                                    &device.message_attributes(),
-                                                )
-                                                .into(),
-                                            )
-                                            .await;
-                                            device_map.write().await.insert(device_index, device);
-                                            device_index += 1;
+            DeviceEvent::DeviceCommunicationEvent(e) => match e {
+                Some(event) => match event {
+                    DeviceCommunicationEvent::DeviceFound(device_creator) => {
+                        match ButtplugDevice::try_create_device(device_creator).await {
+                            Ok(option_dev) => match option_dev {
+                                Some(device) => {
+                                    info!("Assigning index {} to {}", device_index, device.name());
+                                    let mut recv = device.get_event_receiver();
+                                    let sender_clone = device_event_sender.clone();
+                                    let idx_clone = device_index.clone();
+                                    task::spawn(async move {
+                                        loop {
+                                            match recv.next().await {
+                                                Some(e) => sender_clone.send((idx_clone, e)).await,
+                                                None => break,
+                                            }
                                         }
-                                        None => debug!("Device could not be matched to a protocol."),
-                                    },
-                                    Err(e) => error!("Device errored while trying to connect: {}", e),
+                                    });
+                                    sender
+                                        .send(
+                                            DeviceAdded::new(
+                                                device_index,
+                                                &device.name().to_owned(),
+                                                &device.message_attributes(),
+                                            )
+                                            .into(),
+                                        )
+                                        .await;
+                                    device_map.write().await.insert(device_index, device);
+                                    device_index += 1;
                                 }
-                            }
-                            DeviceCommunicationEvent::ScanningFinished => {
-                                sender.send(ScanningFinished::default().into()).await;
-                            }
+                                None => debug!("Device could not be matched to a protocol."),
+                            },
+                            Err(e) => error!("Device errored while trying to connect: {}", e),
                         }
-                    },
-                    None => break,
-                }
+                    }
+                    DeviceCommunicationEvent::ScanningFinished => {
+                        sender.send(ScanningFinished::default().into()).await;
+                    }
+                },
+                None => break,
             },
-            DeviceEvent::DeviceEvent(e) => {
-                match e {
-                    Some((idx, event)) => {
-                        match event {
-                            ButtplugDeviceEvent::Removed => {
-                                let mut map = device_map.write().await;
-                                map.remove(&idx);
-                                sender.send(
-                                    DeviceRemoved::new(
-                                        idx
-                                    ).into()
-                                ).await;
-                            }
-                            _ => {}
+            DeviceEvent::DeviceEvent(e) => match e {
+                Some((idx, event)) => {
+                    match event {
+                        ButtplugDeviceEvent::Removed => {
+                            let mut map = device_map.write().await;
+                            map.remove(&idx);
+                            sender.send(DeviceRemoved::new(idx).into()).await;
                         }
-                        info!("Got device event: {:?}", event);
-                    },
-                    None => break,
+                        _ => {}
+                    }
+                    info!("Got device event: {:?}", event);
                 }
+                None => break,
             },
             DeviceEvent::PingTimeout => {
                 // TODO This should be done in parallel, versus waiting for every device
@@ -169,7 +155,9 @@ async fn wait_for_manager_events(
                 error!("Pinged out, shutting down devices");
                 for (_, ref mut device) in device_map.write().await.iter_mut() {
                     // TODO Figure out what we do here if anything fails.
-                    device.parse_message(&messages::StopDeviceCmd::new(1).into()).await;
+                    device
+                        .parse_message(&messages::StopDeviceCmd::new(1).into())
+                        .await;
                 }
                 break;
             }
@@ -177,9 +165,11 @@ async fn wait_for_manager_events(
     }
 }
 
-
 impl DeviceManager {
-    pub fn new(event_sender: Sender<ButtplugMessageUnion>, ping_receiver: Option<Receiver<bool>>) -> Self {
+    pub fn new(
+        event_sender: Sender<ButtplugMessageUnion>,
+        ping_receiver: Option<Receiver<bool>>,
+    ) -> Self {
         let (sender, receiver) = channel(256);
         let map = Arc::new(RwLock::new(HashMap::new()));
         let map_clone = map.clone();
@@ -224,17 +214,18 @@ impl DeviceManager {
 
     async fn stop_all_devices(&mut self) -> Result<(), ButtplugError> {
         let devices_ids: Vec<u32> = self
-        .devices
-        .read()
-        .await
-        .keys()
-        .map(|id| id.clone())
-        .collect();
+            .devices
+            .read()
+            .await
+            .keys()
+            .map(|id| id.clone())
+            .collect();
         // TODO This should be done in parallel, versus waiting for every device
         // to stop in order.
         for id in devices_ids {
             // TODO Figure out what we do here if anything fails.
-            self.parse_device_message(messages::StopDeviceCmd::new(id).into()).await;
+            self.parse_device_message(messages::StopDeviceCmd::new(id).into())
+                .await;
         }
         Ok(())
     }
@@ -245,10 +236,10 @@ impl DeviceManager {
     ) -> Result<ButtplugMessageUnion, ButtplugError> {
         let mut dev;
         match self
-        .devices
-        .read()
-        .await
-        .get(&device_msg.get_device_index())
+            .devices
+            .read()
+            .await
+            .get(&device_msg.get_device_index())
         {
             Some(device) => {
                 dev = device.clone();
@@ -277,16 +268,16 @@ impl DeviceManager {
         match manager_msg {
             ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
                 let devices = self
-                .devices
-                .read()
-                .await
-                .iter()
-                .map(|(id, device)| DeviceMessageInfo {
-                    device_index: *id,
-                    device_name: device.name().to_string(),
-                    device_messages: device.message_attributes(),
-                })
-                .collect();
+                    .devices
+                    .read()
+                    .await
+                    .iter()
+                    .map(|(id, device)| DeviceMessageInfo {
+                        device_index: *id,
+                        device_name: device.name().to_string(),
+                        device_messages: device.message_attributes(),
+                    })
+                    .collect();
                 let mut device_list = DeviceList::new(devices);
                 device_list.set_id(msg.get_id());
                 Ok(device_list.into())
@@ -326,10 +317,10 @@ impl DeviceManager {
 
     pub fn add_comm_manager<T>(&mut self)
     where
-    T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
     {
         self.comm_managers
-        .push(Box::new(T::new(self.sender.clone())));
+            .push(Box::new(T::new(self.sender.clone())));
     }
 }
 
@@ -375,8 +366,8 @@ mod test {
                     Err(e) => assert!(false, e.to_string()),
                 }
                 match dm
-                .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-                .await
+                    .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+                    .await
                 {
                     Ok(_) => info!("Message sent ok!"),
                     Err(e) => assert!(false, e.to_string()),

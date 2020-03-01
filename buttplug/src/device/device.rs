@@ -16,7 +16,11 @@ use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use futures_channel;
 
-pub type BoundedDeviceEventBroadcaster = BroadcastChannel<ButtplugDeviceEvent, futures_channel::mpsc::Sender<ButtplugDeviceEvent>, futures_channel::mpsc::Receiver<ButtplugDeviceEvent>>;
+pub type BoundedDeviceEventBroadcaster = BroadcastChannel<
+    ButtplugDeviceEvent,
+    futures_channel::mpsc::Sender<ButtplugDeviceEvent>,
+    futures_channel::mpsc::Receiver<ButtplugDeviceEvent>,
+>;
 
 #[derive(PartialEq, Debug)]
 pub struct DeviceReadCmd {
