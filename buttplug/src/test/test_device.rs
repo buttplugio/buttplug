@@ -92,11 +92,17 @@ impl TestDevice {
         }
     }
 
-    pub async fn new_bluetoothle_test_device(name: &str) -> Result<(ButtplugDevice, TestDevice), ButtplugError> {
+    pub fn new_bluetoothle_test_device_impl_creator(name: &str) -> (TestDevice, TestDeviceImplCreator) {
         let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name));
         let device_impl = TestDevice::new(name, vec!());
         let device_impl_clone = device_impl.clone();
         let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);
+        (device_impl_clone, device_impl_creator)
+    }
+
+    pub async fn new_bluetoothle_test_device(name: &str) -> Result<(ButtplugDevice, TestDevice), ButtplugError> {
+        let (device_impl, device_impl_creator) = TestDevice::new_bluetoothle_test_device_impl_creator(name);
+        let device_impl_clone = device_impl.clone();
         let device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator)).await.unwrap().unwrap();
         Ok((device, device_impl_clone))
     }
