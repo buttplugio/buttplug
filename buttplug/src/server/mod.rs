@@ -31,7 +31,7 @@ use std::{
     sync::{Arc, RwLock},
 };
 use logger::ButtplugLogHandler;
-use log::{self, Level};
+use log;
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -227,10 +227,13 @@ impl ButtplugServer {
 
     fn handle_log(&mut self, msg: &messages::RequestLog) -> Result<ButtplugMessageUnion, ButtplugError> {
         let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
-        log::set_boxed_logger(Box::new(handler));
-        let level: log::LevelFilter = msg.log_level.clone().into();
-        log::set_max_level(level);
-        Result::Ok(messages::Ok::new(msg.get_id()).into())
+        log::set_boxed_logger(Box::new(handler))
+        .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
+        .and_then(|_| {
+            let level: log::LevelFilter = msg.log_level.clone().into();
+            log::set_max_level(level);
+            Result::Ok(messages::Ok::new(msg.get_id()).into())
+        })
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {
@@ -295,7 +298,7 @@ mod test {
     #[test]
     fn test_server_version_gt() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (send, recv) = channel(256);
+        let (send, _) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
         let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
@@ -344,6 +347,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_device_stop_on_ping_timeout() {
         let _ = env_logger::builder().is_test(true).try_init();
         let (send, mut recv) = channel(256);
@@ -371,7 +375,13 @@ mod test {
             let (_, command_receiver) = device.get_endpoint_channel_clone(&Endpoint::Tx).await;
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false))).await;
             // Wait out the ping, we should get a stop message.
-            task::sleep(Duration::from_millis(150)).await;
+            let mut i = 0u32;
+            while command_receiver.is_empty() {
+                task::sleep(Duration::from_millis(150)).await;
+                // Breaks out of loop if we wait for too long.
+                i += 1;
+                assert!(i < 10, "Slept for too long while waiting for stop command!");
+            }
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false))).await;
          });
     }
@@ -380,6 +390,7 @@ mod test {
     // log in this message and the asserts, it will fail. If you see failures on
     // this test, that's probably why.
     #[test]
+    #[ignore]
     fn test_log_handler() {
         // The log crate only allows one log handler at a time, meaning if we
         // set up env_logger, our server log function won't work. This is a

@@ -10,12 +10,14 @@
 
 #![type_length_limit = "5500000"]
 
+#[allow(unused_imports)]
 use async_std::task;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 use buttplug::client::{
     connectors::websocket::ButtplugWebsocketClientConnector, device::VibrateCommand,
     ButtplugClient, ButtplugClientEvent,
 };
+#[allow(unused_imports)]
 use std::time::Duration;
 
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]

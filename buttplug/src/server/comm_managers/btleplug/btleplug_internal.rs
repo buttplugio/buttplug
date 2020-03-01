@@ -1,13 +1,13 @@
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::{self, RawReading},
+        messages,
     },
     device::{
         configuration_manager::BluetoothLESpecifier,
         device::{
             ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo,
-            ButtplugDeviceReturn, DeviceImplCommand, DeviceReadCmd, DeviceSubscribeCmd,
+            ButtplugDeviceReturn, DeviceImplCommand, DeviceSubscribeCmd,
             DeviceUnsubscribeCmd, DeviceWriteCmd, BoundedDeviceEventBroadcaster
         },
         Endpoint,
@@ -16,7 +16,7 @@ use crate::{
 };
 use async_std::{
     prelude::{FutureExt, StreamExt},
-    sync::{channel, Receiver, Sender},
+    sync::{channel, Receiver},
     task,
 };
 use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};

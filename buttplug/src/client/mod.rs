@@ -353,6 +353,7 @@ impl ButtplugClient {
     }
 
     // Don't expose outside of crate, just handy to use for internal tests.
+    #[allow(dead_code)]
     pub (crate) async fn test(&mut self) -> ButtplugClientResult {
         let test_string = "client test";
         self.send_message(&messages::Test::new(test_string).into())

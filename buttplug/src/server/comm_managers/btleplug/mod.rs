@@ -134,7 +134,9 @@ impl Drop for BtlePlugCommunicationManager {
     fn drop(&mut self) {
         info!("Dropping Comm Manager!");
         task::block_on(async {
-            self.stop_scanning().await;
+            if let Err(e) = self.stop_scanning().await {
+                error!("Error stopping scanning during comm manager drop: {:?}", e);
+            }
         });
     }
 }
@@ -143,7 +145,6 @@ impl Drop for BtlePlugCommunicationManager {
 mod test {
     use super::BtlePlugCommunicationManager;
     use crate::{
-        core::messages::{ButtplugMessageUnion, VibrateCmd, VibrateSubcommand},
         server::device_manager::{
             DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
         },
@@ -161,7 +162,7 @@ mod test {
             mgr.start_scanning().await;
             loop {
                 match receiver.next().await.unwrap() {
-                    DeviceCommunicationEvent::DeviceFound(mut device) => {
+                    DeviceCommunicationEvent::DeviceFound(_device) => {
                         info!("Got device!");
                         info!("Sending message!");
                         // TODO since we don't return full devices as this point

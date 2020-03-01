@@ -14,13 +14,13 @@ use crate::
 pub struct GenericCommandManager {
     sent_vibration: bool,
     sent_rotation: bool,
-    sent_linear: bool,
+    _sent_linear: bool,
     vibrations: Vec<u32>,
     vibration_step_counts: Vec<u32>,
     rotations: Vec<(u32, bool)>,
     rotation_step_counts: Vec<u32>,
-    linears: Vec<(u32, u32)>,
-    linear_step_counts: Vec<u32>,
+    _linears: Vec<(u32, u32)>,
+    _linear_step_counts: Vec<u32>,
     stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
@@ -86,13 +86,13 @@ impl GenericCommandManager {
         Self {
             sent_vibration: false,
             sent_rotation: false,
-            sent_linear: false,
+            _sent_linear: false,
             vibrations,
             rotations,
-            linears,
+            _linears: linears,
             vibration_step_counts,
             rotation_step_counts,
-            linear_step_counts,
+            _linear_step_counts: linear_step_counts,
             stop_commands,
         }
     }
@@ -175,7 +175,7 @@ impl GenericCommandManager {
         Ok(result)
     }
 
-    pub fn update_linear(&mut self, msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
+    pub fn _update_linear(&mut self, _msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
         // First, make sure this is a valid command, that doesn't contain an
         // index we can't reach.
 

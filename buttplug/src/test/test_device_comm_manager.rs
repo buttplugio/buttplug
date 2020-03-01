@@ -1,6 +1,6 @@
 use crate::{
-    core::errors::{ButtplugDeviceError, ButtplugError},
-    device::device::{ButtplugDevice, ButtplugDeviceImplCreator},
+    core::errors::ButtplugError,
+    device::device::ButtplugDeviceImplCreator,
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
@@ -27,6 +27,7 @@ pub struct TestDeviceCommunicationManager {
 }
 
 impl TestDeviceCommunicationManager {
+    #[allow(dead_code)]
     pub fn add_test_device(device_impl_creator: TestDeviceImplCreator) {
         task::block_on(async {
             DEVICE_LIST.lock().await.push(Box::new(device_impl_creator));

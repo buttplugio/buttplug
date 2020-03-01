@@ -202,7 +202,6 @@ impl DeviceManager {
             .into())
         } else {
             for mgr in self.comm_managers.iter_mut() {
-                // TODO This should error if anything can't scan.
                 mgr.start_scanning().await?;
             }
             Ok(())
@@ -293,7 +292,7 @@ impl DeviceManager {
                 Ok(device_list.into())
             }
             ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
-                self.stop_all_devices().await;
+                self.stop_all_devices().await?;
                 Ok(messages::Ok::new(msg.get_id()).into())
             }
             ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {

@@ -12,7 +12,6 @@ use crate::{
         Endpoint,
     },
 };
-use async_std::sync::Receiver;
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use futures_channel;

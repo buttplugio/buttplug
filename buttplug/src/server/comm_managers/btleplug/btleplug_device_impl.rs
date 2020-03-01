@@ -9,7 +9,7 @@ use crate::{
     device::{
         configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
         device::{
-            ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
+            ButtplugDeviceCommand, ButtplugDeviceImplCreator,
             ButtplugDeviceReturn, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd,
             DeviceUnsubscribeCmd, DeviceWriteCmd, BoundedDeviceEventBroadcaster
         },
@@ -17,10 +17,9 @@ use crate::{
     },
 };
 use async_std::{
-    sync::{Arc, channel, Receiver, Sender},
+    sync::{channel, Sender},
     task,
 };
-use futures_channel;
 use broadcaster::BroadcastChannel;
 use async_trait::async_trait;
 use btleplug::api::{Central, Peripheral};
