@@ -9,6 +9,7 @@
 
 pub mod comm_managers;
 pub mod device_manager;
+mod logger;
 
 use crate::core::{
     errors::*,
@@ -29,6 +30,8 @@ use std::{
     time::{Instant, Duration},
     sync::{Arc, RwLock},
 };
+use logger::ButtplugLogHandler;
+use log::{self, Level};
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -166,7 +169,7 @@ impl ButtplugServer {
                 ButtplugMessageUnion::RequestServerInfo(ref m) => self.perform_handshake(m),
                 ButtplugMessageUnion::Ping(ref p) => self.handle_ping(p),
                 ButtplugMessageUnion::Test(ref t) => self.handle_test(t),
-                // TODO Implement Log
+                ButtplugMessageUnion::RequestLog(ref l) => self.handle_log(l),
                 _ => Err(ButtplugMessageError::new(
                     &format!("Message {:?} not handled by server loop.", msg).to_owned(),
                 )
@@ -220,6 +223,14 @@ impl ButtplugServer {
         let mut test_return = messages::Test::new(&msg.test_string);
         test_return.set_id(msg.get_id());
         Result::Ok(test_return.into())
+    }
+
+    fn handle_log(&mut self, msg: &messages::RequestLog) -> Result<ButtplugMessageUnion, ButtplugError> {
+        let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
+        log::set_boxed_logger(Box::new(handler));
+        let level: log::LevelFilter = msg.log_level.clone().into();
+        log::set_max_level(level);
+        Result::Ok(messages::Ok::new(msg.get_id()).into())
     }
 
     // async fn wait_for_event(&self) -> Result<ButtplugServerEvent> {
@@ -362,6 +373,48 @@ mod test {
             // Wait out the ping, we should get a stop message.
             task::sleep(Duration::from_millis(150)).await;
             check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false))).await;
+         });
+    }
+
+    // Warning: This test is brittle. If any log messages are fired between our
+    // log in this message and the asserts, it will fail. If you see failures on
+    // this test, that's probably why.
+    #[test]
+    fn test_log_handler() {
+        // The log crate only allows one log handler at a time, meaning if we
+        // set up env_logger, our server log function won't work. This is a
+        // problem. Only uncomment this if this test if failing and you need to
+        // see output.
+        //
+        // let _ = env_logger::builder().is_test(true).try_init();
+        let (send, mut recv) = channel(256);
+        let mut server = ButtplugServer::new("Test Server", 0, send);
+        task::block_on(async {
+            let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
+            let mut reply = server.parse_message(&msg.into()).await;
+            assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+            reply = server.parse_message(&messages::RequestLog::new(messages::LogLevel::Debug).into()).await;
+            assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+            debug!("Test log message");
+
+            let mut did_log = false;
+            // Check that we got an event back about a new device.
+
+            while let Some(msg) = recv.next().await {
+                if let ButtplugMessageUnion::Log(log) = msg {
+                    // We can't assert here, because we may get multiple log
+                    // messages back, so we just want to break whenever we get
+                    // what we expected.
+                    assert_eq!(log.log_level, messages::LogLevel::Debug);
+                    assert!(log.log_message.contains("Test log message"));
+                    did_log = true;
+                    break;
+                }
+            }
+
+            assert!(did_log, "Should've gotten log message");
          });
     }
 }
