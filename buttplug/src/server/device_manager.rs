@@ -166,6 +166,7 @@ async fn wait_for_manager_events(
             DeviceEvent::PingTimeout => {
                 // TODO This should be done in parallel, versus waiting for every device
                 // to stop in order.
+                error!("Pinged out, shutting down devices");
                 for (_, ref mut device) in device_map.write().await.iter_mut() {
                     // TODO Figure out what we do here if anything fails.
                     device.parse_message(&messages::StopDeviceCmd::new(1).into()).await;

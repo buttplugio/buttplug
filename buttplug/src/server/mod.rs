@@ -72,6 +72,7 @@ impl PingTimer {
         let max_ping_time = self.max_ping_time.clone();
         let last_ping_time = self.last_ping_time.clone();
         let pinged_out = self.pinged_out.clone();
+        let ping_channel = self.ping_channel.clone();
         task::spawn(async move {
             loop {
                 task::sleep(Duration::from_millis(max_ping_time.try_into().unwrap())).await;
@@ -79,6 +80,7 @@ impl PingTimer {
                 if last_ping > max_ping_time {
                     error!("Pinged out.");
                     *pinged_out.write().unwrap() = true;
+                    ping_channel.send(true).await;
                     let err: ButtplugError = ButtplugPingError::new(&format!("Pinged out. Ping took {} but max ping time is {}.", last_ping, max_ping_time)).into();
                     event_sender.send(ButtplugMessageUnion::Error(err.into())).await;
                     break;
@@ -232,7 +234,8 @@ mod test {
         server::comm_managers::btleplug::BtlePlugCommunicationManager,
     };
     use crate::{
-        test::{TestDeviceCommunicationManager, TestDevice},
+        test::{TestDeviceCommunicationManager, TestDevice, check_recv_value},
+        device::{device::{DeviceImplCommand, DeviceWriteCmd}, Endpoint},
     };
     use async_std::{
         prelude::StreamExt,
@@ -352,6 +355,39 @@ mod test {
             } else {
                 assert!(false, format!("Returned message was not a DeviceAdded message or timed out: {:?}", msg));
             }
+         });
+    }
+
+    #[test]
+    fn test_device_stop_on_ping_timeout() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        let (send, mut recv) = channel(256);
+        let mut server = ButtplugServer::new("Test Server", 100, send);
+        // TODO This should probably use a test protocol we control, not the aneros protocol
+        let (device, device_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+        TestDeviceCommunicationManager::add_test_device(device_creator);
+        server.add_comm_manager::<TestDeviceCommunicationManager>();
+        task::block_on(async {
+            let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
+            let mut reply = server.parse_message(&msg.into()).await;
+            assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+            reply = server.parse_message(&messages::StartScanning::default().into()).await;
+            assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+            // Check that we got an event back about a new device.
+            let msg = recv.next().await.unwrap();
+            if let ButtplugMessageUnion::DeviceAdded(da) = msg {
+                assert_eq!(da.device_name, "Aneros Vivi");
+            } else {
+                assert!(false, format!("Returned message was not a DeviceAdded message or timed out: {:?}", msg));
+            }
+            server.parse_message(&messages::VibrateCmd::new(0, vec!(messages::VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
+            let (_, command_receiver) = device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false))).await;
+            // Wait out the ping, we should get a stop message.
+            task::sleep(Duration::from_millis(150)).await;
+            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false))).await;
          });
     }
 }
