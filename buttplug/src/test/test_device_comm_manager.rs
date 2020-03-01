@@ -14,6 +14,11 @@ use async_std::{
 use lazy_static::lazy_static;
 
 lazy_static! {
+    // We create device comm manager instances within the buttplug server,
+    // meaning we can't actually store devices within an instance, because we
+    // may not be able to get it back out. The device list is kept as a module
+    // static, so we can add devices without worrying about when/where the comm
+    // manager exists.
     static ref DEVICE_LIST: Arc<Mutex<Vec<Box<dyn ButtplugDeviceImplCreator>>>> = Arc::new(Mutex::new(vec!()));
 }
 
