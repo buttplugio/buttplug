@@ -133,7 +133,7 @@ impl DeviceImpl for TestDevice {
     }
 
     async fn disconnect(&self) {
-
+        self.event_broadcaster.send(&ButtplugDeviceEvent::Removed).await;
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {

@@ -66,3 +66,54 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
     }
 }
 
+#[cfg(test)]
+mod test {
+    #[cfg(test)]
+    mod test {
+        use crate::{
+            core::messages::{self, ButtplugMessageUnion},
+            server::{ButtplugServer},
+            test::{TestDeviceCommunicationManager, TestDevice},
+            device::device::DeviceImpl,
+        };
+        use async_std::{
+            prelude::StreamExt,
+            sync::channel,
+            task,
+        };
+
+        #[test]
+        fn test_test_device_comm_manager() {
+            let _ = env_logger::builder().is_test(true).try_init();
+            let (send, mut recv) = channel(256);
+            let mut server = ButtplugServer::new("Test Server", 0, send);
+            let (device, device_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+            TestDeviceCommunicationManager::add_test_device(device_creator);
+            server.add_comm_manager::<TestDeviceCommunicationManager>();
+            task::block_on(async {
+                let msg = messages::RequestServerInfo::new("Test Client", 1);
+                let mut reply = server.parse_message(&msg.into()).await;
+                assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+                reply = server.parse_message(&messages::StartScanning::default().into()).await;
+                assert!(reply.is_ok(),
+                format!("Should get back ok: {:?}", reply));
+                // Check that we got an event back about a new device.
+                let msg = recv.next().await.unwrap();
+                if let ButtplugMessageUnion::DeviceAdded(da) = msg {
+                    assert_eq!(da.device_name, "Aneros Vivi");
+                } else {
+                    assert!(false, format!("Returned message was not a DeviceAdded message or timed out: {:?}", msg));
+                }
+                device.disconnect().await;
+                // Check that we got an event back about a removed device.
+                let msg = recv.next().await.unwrap();
+                if let ButtplugMessageUnion::DeviceRemoved(da) = msg {
+                    assert_eq!(da.device_index, 0);
+                } else {
+                    assert!(false, format!("Returned message was not a DeviceRemoved message or timed out: {:?}", msg));
+                }
+            });
+        }
+    }
+}
