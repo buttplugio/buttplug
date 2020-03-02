@@ -154,10 +154,11 @@ async fn wait_for_manager_events(
                 // to stop in order.
                 error!("Pinged out, shutting down devices");
                 for (_, ref mut device) in device_map.write().await.iter_mut() {
-                    // TODO Figure out what we do here if anything fails.
-                    device
-                        .parse_message(&messages::StopDeviceCmd::new(1).into())
-                        .await;
+                    // Device index doesn't matter here, since we're sending the
+                    // message directly to the device itself.
+                    if let Err(e) = device.parse_message(&messages::StopDeviceCmd::new(1).into()).await {
+                        error!("Error stopping device {} on ping timeout: {}", device.name(), e);
+                    }
                 }
                 break;
             }
@@ -223,9 +224,8 @@ impl DeviceManager {
         // TODO This should be done in parallel, versus waiting for every device
         // to stop in order.
         for id in devices_ids {
-            // TODO Figure out what we do here if anything fails.
             self.parse_device_message(messages::StopDeviceCmd::new(id).into())
-                .await;
+                .await?;
         }
         Ok(())
     }

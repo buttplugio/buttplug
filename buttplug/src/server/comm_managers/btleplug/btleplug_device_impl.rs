@@ -93,13 +93,13 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
                 .send((ButtplugDeviceCommand::Connect, waker))
                 .await;
             match fut.await {
-                ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl {
-                    name,
-                    address,
-                    endpoints: info.endpoints,
-                    thread_sender: device_sender,
-                    event_receiver: output_broadcaster.clone(),
-                })),
+                ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl::new(
+                    &name,
+                    &address,
+                    info.endpoints,
+                    device_sender,
+                    output_broadcaster.clone()
+                ))),
                 _ => Err(ButtplugError::ButtplugDeviceError(
                     ButtplugDeviceError::new("Cannot connect"),
                 )),
@@ -181,11 +181,12 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     }
 
     async fn disconnect(&self) {
-        self.send_to_device_task(
+        if let Err(e) = self.send_to_device_task(
             ButtplugDeviceCommand::Disconnect,
             "Cannot disconnect device",
-        )
-        .await;
+        ).await {
+            error!("Error disconnecting BtlePlug device {}: {:?}", self.name, e);
+        }
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {

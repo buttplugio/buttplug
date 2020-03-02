@@ -157,7 +157,7 @@ mod test {
         task::block_on(async move {
             let (sender, mut receiver) = channel(256);
             let mut mgr = BtlePlugCommunicationManager::new(sender);
-            mgr.start_scanning().await;
+            mgr.start_scanning().await.unwrap();
             loop {
                 match receiver.next().await.unwrap() {
                     DeviceCommunicationEvent::DeviceFound(_device) => {

@@ -23,6 +23,7 @@ pub struct TestDeviceImplCreator {
 }
 
 impl TestDeviceImplCreator {
+    #[allow(dead_code)]
     pub fn new(specifier: DeviceSpecifier, device_impl: TestDevice) -> Self {
         Self {
             specifier,
@@ -68,6 +69,7 @@ pub struct TestDevice {
 }
 
 impl TestDevice {
+    #[allow(dead_code)]
     pub fn new(name: &str, endpoints: Vec<Endpoint>) -> Self {
         let mut endpoint_channels = HashMap::new();
         for endpoint in &endpoints {
@@ -92,6 +94,7 @@ impl TestDevice {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new_bluetoothle_test_device_impl_creator(
         name: &str,
     ) -> (TestDevice, TestDeviceImplCreator) {
@@ -102,6 +105,7 @@ impl TestDevice {
         (device_impl_clone, device_impl_creator)
     }
 
+    #[allow(dead_code)]
     pub async fn new_bluetoothle_test_device(
         name: &str,
     ) -> Result<(ButtplugDevice, TestDevice), ButtplugError> {
@@ -116,6 +120,7 @@ impl TestDevice {
         Ok((device, device_impl_clone))
     }
 
+    #[allow(dead_code)]
     pub async fn get_endpoint_channel_clone(
         &self,
         endpoint: &Endpoint,
@@ -147,7 +152,8 @@ impl DeviceImpl for TestDevice {
     async fn disconnect(&self) {
         self.event_broadcaster
             .send(&ButtplugDeviceEvent::Removed)
-            .await;
+            .await
+            .unwrap();
     }
 
     fn box_clone(&self) -> Box<dyn DeviceImpl> {
@@ -178,11 +184,11 @@ impl DeviceImpl for TestDevice {
         }
     }
 
-    async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
+    async fn subscribe(&self, _msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
         Ok(())
     }
 
-    async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
+    async fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
         Ok(())
     }
 }

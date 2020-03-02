@@ -247,7 +247,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                 )),
             },
             ButtplugDeviceCommand::Disconnect => {
-                self.device.disconnect();
+                if let Err(e) = self.device.disconnect() {
+                    error!("Error disconnecting device {:?}: {:?}", self.device.properties().local_name, e);
+                }
             }
         }
     }
@@ -268,7 +270,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
                         "Device {:?} disconnected",
                         self.device.properties().local_name
                     );
-                    self.output_sender.send(&ButtplugDeviceEvent::Removed).await;
+                    // This should always succeed
+                    self.output_sender.send(&ButtplugDeviceEvent::Removed).await.unwrap();
                 }
             }
             _ => {}
