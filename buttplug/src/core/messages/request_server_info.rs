@@ -16,7 +16,9 @@ pub struct RequestServerInfo {
     pub(super) id: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "ClientName"))]
     pub client_name: String,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
+    // Default for this message is set to 0, as this field didn't exist in the
+    // first version of the protocol.
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"), serde(default))]
     pub message_version: u32,
 }
 
@@ -27,5 +29,45 @@ impl RequestServerInfo {
             client_name: client_name.to_string(),
             message_version,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::RequestServerInfo;
+
+    #[cfg(feature = "serialize_json")]
+    #[test]
+    fn test_request_server_info_version1_json_conversion() {
+        let new_json = r#"
+{
+        "Id": 1,
+        "ClientName": "Test Client",
+        "MessageVersion": 2
+}
+        "#;
+        let new_msg = RequestServerInfo {
+            id: 1,
+            client_name: "Test Client".to_owned(),
+            message_version: 2
+        };
+        assert_eq!(serde_json::from_str::<RequestServerInfo>(new_json).unwrap(), new_msg);
+    }
+
+    #[cfg(feature = "serialize_json")]
+    #[test]
+    fn test_request_server_info_version0_json_conversion() {
+        let old_json = r#"
+{
+        "Id": 1,
+        "ClientName": "Test Client"
+}
+        "#;
+        let old_msg = RequestServerInfo {
+            id: 1,
+            client_name: "Test Client".to_owned(),
+            message_version: 0
+        };
+        assert_eq!(serde_json::from_str::<RequestServerInfo>(old_json).unwrap(), old_msg);
     }
 }
