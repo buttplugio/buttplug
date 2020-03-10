@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugMessage, DeviceMessageInfo};
+use super::{ButtplugMessage, ButtplugUpgradableMessage, ButtplugMessageUnion, DeviceMessageInfo};
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[derive(Default, ButtplugMessage, ButtplugUpgradableMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceList {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]

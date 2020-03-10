@@ -171,3 +171,44 @@ fn impl_to_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> Tok
         panic!("TryFromButtplugMessageUnion only works on structs");
     }
 }
+
+#[proc_macro_derive(ButtplugUpgradableMessage)]
+pub fn buttplug_upgradable_message_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_upgradable_message_macro(&ast)
+}
+
+fn impl_buttplug_upgradable_message_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+
+    match ast.data {
+        syn::Data::Enum(ref e) => {
+            let idents = e.variants.iter().map(|x| x.ident.clone());
+            let gen = quote! {
+                impl ButtplugUpgradableMessage for #name {
+                    fn convert_to_current_spec_version(self) -> ButtplugMessageUnion {
+                        match self {
+                            #( #name::#idents(msg) => msg.convert_to_current_spec_version(),)*
+                        }
+                    }
+                }
+            };
+            gen.into()
+        }
+        syn::Data::Struct(_) => {
+            let gen = quote! {
+                impl ButtplugUpgradableMessage for #name {
+                    fn convert_to_current_spec_version(self) -> ButtplugMessageUnion {
+                        self.into()
+                    }
+                }
+            };
+            gen.into()
+        }
+        _ => panic!("Derivation only works on structs and enums"),
+    }
+}

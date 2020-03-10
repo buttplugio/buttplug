@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::ButtplugMessage;
+use super::{ButtplugMessage, ButtplugUpgradableMessage, ButtplugMessageUnion};
 use crate::core::errors::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
@@ -27,7 +27,7 @@ pub enum ErrorCode {
 
 /// Represents the Buttplug Protocol Error message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#error).
-#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
+#[derive(Debug, ButtplugMessage, ButtplugUpgradableMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Error {
     /// Message Id, used for matching message pairs in remote connection instances.

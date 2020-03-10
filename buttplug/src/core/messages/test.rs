@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::ButtplugMessage;
+use super::{ButtplugMessage, ButtplugMessageUnion, ButtplugUpgradableMessage};
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, ButtplugUpgradableMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Test {
     /// Message Id, used for matching message pairs in remote connection instances.

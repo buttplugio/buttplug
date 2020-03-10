@@ -5,11 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugMessage, LogLevel};
+use super::{ButtplugMessage, LogLevel, ButtplugUpgradableMessage, ButtplugMessageUnion};
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, ButtplugUpgradableMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestLog {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
