@@ -114,7 +114,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
     fn set_device_index(&mut self, id: u32);
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnion {
     // Status messages
@@ -164,7 +164,7 @@ impl ButtplugMessageUnion {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, ToButtplugMessageUnion)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnionVersion2 {
    Ok(Ok),
@@ -197,7 +197,7 @@ pub enum ButtplugMessageUnionVersion2 {
    UnsubscribeCmd(UnsubscribeCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugUpgradableMessage, ToSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToButtplugMessageUnion, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 enum ButtplugMessageUnionVersion1 {
     Ok(Ok),
@@ -227,7 +227,7 @@ enum ButtplugMessageUnionVersion1 {
     StopDeviceCmd(StopDeviceCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugUpgradableMessage, ToSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToButtplugMessageUnion, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 enum ButtplugMessageSpecVersion0 {
     Ok(Ok),
@@ -256,7 +256,7 @@ enum ButtplugMessageSpecVersion0 {
 
 /// Messages that should never be received from the client.
 #[derive(
-    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage,
+    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, FromSpecificButtplugMessage,
 )]
 pub enum ButtplugSystemMessageUnion {
     Ok(Ok),
@@ -272,7 +272,12 @@ pub enum ButtplugSystemMessageUnion {
 
 /// Messages that should never be received from the client.
 #[derive(
-    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, ToSpecificButtplugMessage,
+    Debug, 
+    Clone, 
+    PartialEq, 
+    ButtplugMessage, 
+    TryFromButtplugMessageUnion, 
+    FromSpecificButtplugMessage,
 )]
 pub enum ButtplugDeviceManagerMessageUnion {
     RequestDeviceList(RequestDeviceList),
@@ -288,7 +293,7 @@ pub enum ButtplugDeviceManagerMessageUnion {
     PartialEq,
     ButtplugDeviceMessage,
     TryFromButtplugMessageUnion,
-    ToSpecificButtplugMessage,
+    FromSpecificButtplugMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnion {
     VibrateCmd(VibrateCmd),

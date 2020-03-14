@@ -131,14 +131,6 @@ fn impl_try_from_message_union_derive_macro(ast: &syn::DeriveInput) -> TokenStre
                     }
                 }
             }
-
-            impl From<#name> for ButtplugMessageUnion {
-                fn from(msg: #name) -> ButtplugMessageUnion {
-                    match msg {
-                        #( #name::#idents(msg) => ButtplugMessageUnion::#idents(msg),)*
-                    }
-                }
-            }
         };
         gen.into()
     } else {
@@ -146,16 +138,16 @@ fn impl_try_from_message_union_derive_macro(ast: &syn::DeriveInput) -> TokenStre
     }
 }
 
-#[proc_macro_derive(ToSpecificButtplugMessage)]
-pub fn to_specific_buttplug_message_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(FromSpecificButtplugMessage)]
+pub fn from_specific_buttplug_message_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 
-    impl_to_specific_buttplug_message_derive_macro(&ast)
+    impl_from_specific_buttplug_message_derive_macro(&ast)
 }
 
-fn impl_to_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     if let syn::Data::Enum(ref e) = ast.data {
         let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
