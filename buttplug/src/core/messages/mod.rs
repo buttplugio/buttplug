@@ -105,8 +105,6 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     }
 }
 
-trait ButtplugUpgradableMessage: ButtplugMessage {
-    fn convert_to_current_spec_version(self) -> ButtplugMessageUnion;
 }
 
 pub trait ButtplugDeviceMessage: ButtplugMessage {
