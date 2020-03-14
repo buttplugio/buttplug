@@ -172,27 +172,27 @@ fn impl_to_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> Tok
     }
 }
 
-#[proc_macro_derive(ButtplugUpgradableMessage)]
-pub fn buttplug_upgradable_message_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(ToButtplugMessageUnion)]
+pub fn to_buttplug_message_union_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 
     // Build the trait implementation
-    impl_buttplug_upgradable_message_macro(&ast)
+    impl_to_buttplug_message_union_macro(&ast)
 }
 
-fn impl_buttplug_upgradable_message_macro(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_to_buttplug_message_union_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
 
     match ast.data {
         syn::Data::Enum(ref e) => {
             let idents = e.variants.iter().map(|x| x.ident.clone());
             let gen = quote! {
-                impl ButtplugUpgradableMessage for #name {
-                    fn convert_to_current_spec_version(self) -> ButtplugMessageUnion {
-                        match self {
-                            #( #name::#idents(msg) => msg.convert_to_current_spec_version(),)*
+                impl From<#name> for ButtplugMessageUnion {
+                    fn from(msg: #name) -> ButtplugMessageUnion {
+                        match msg {
+                            #( #name::#idents(msg) => ButtplugMessageUnion::#idents(msg),)*
                         }
                     }
                 }
@@ -201,9 +201,40 @@ fn impl_buttplug_upgradable_message_macro(ast: &syn::DeriveInput) -> TokenStream
         }
         syn::Data::Struct(_) => {
             let gen = quote! {
-                impl ButtplugUpgradableMessage for #name {
-                    fn convert_to_current_spec_version(self) -> ButtplugMessageUnion {
-                        self.into()
+                impl From<#name> for ButtplugMessageUnion {
+                    fn from(msg: #name) -> ButtplugMessageUnion {
+                        ButtplugMessageUnion::#name(msg)
+                    }
+                }
+            };
+            gen.into()
+        }
+        _ => panic!("Derivation only works on structs and enums"),
+    }
+}
+
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+}
+
+    let name = &ast.ident;
+
+    match ast.data {
+        syn::Data::Enum(ref e) => {
+            let idents = e.variants.iter().map(|x| x.ident.clone());
+            let gen = quote! {
+                        match self {
+                        }
+                    }
+                }
+            };
+            gen.into()
+        }
+        syn::Data::Struct(_) => {
+            let gen = quote! {
                     }
                 }
             };

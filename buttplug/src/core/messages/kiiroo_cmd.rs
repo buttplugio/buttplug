@@ -10,7 +10,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 // Dear god this needs to be deprecated
-#[derive(Debug, ButtplugDeviceMessage, ButtplugUpgradableMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, ToButtplugMessageUnion, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]

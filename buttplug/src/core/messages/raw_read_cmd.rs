@@ -10,7 +10,7 @@ use crate::device::Endpoint;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, ButtplugUpgradableMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, ToButtplugMessageUnion, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawReadCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]

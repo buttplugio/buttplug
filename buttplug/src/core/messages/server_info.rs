@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, ButtplugUpgradableMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugMessage, ToButtplugMessageUnion, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
