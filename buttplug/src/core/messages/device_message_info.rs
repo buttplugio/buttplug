@@ -8,7 +8,7 @@
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use super::{MessageAttributes, DeviceAdded};
+use super::*;
 
 pub type MessageAttributesMap = HashMap<String, MessageAttributes>;
 
