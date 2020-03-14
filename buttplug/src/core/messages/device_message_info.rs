@@ -10,7 +10,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use super::*;
 
-pub type MessageAttributesMap = HashMap<String, MessageAttributes>;
+// TODO This should be keyed on a struct with message name variants, not a
+// string.
+pub type MessageAttributesMap = HashMap<ButtplugDeviceMessageType, MessageAttributes>;
 
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]

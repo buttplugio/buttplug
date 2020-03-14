@@ -112,6 +112,85 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
     fn set_device_index(&mut self, id: u32);
 }
 
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub enum ButtplugMessageType {
+    // Status messages
+    Ok,
+    Error,
+    Ping,
+    Test,
+    RequestLog,
+    Log,
+    // Handshake messages
+    RequestServerInfo,
+    ServerInfo,
+    // Device enumeration messages
+    DeviceList,
+    DeviceAdded,
+    DeviceRemoved,
+    StartScanning,
+    StopScanning,
+    ScanningFinished,
+    RequestDeviceList,
+    // Generic commands
+    StopAllDevices,
+    VibrateCmd,
+    LinearCmd,
+    RotateCmd,
+    RawWriteCmd,
+    RawReadCmd,
+    StopDeviceCmd,
+    RawReading,
+    SubscribeCmd,
+    UnsubscribeCmd,
+    // Deprecated generic commands
+    SingleMotorVibrateCmd,
+    // Deprecated device specific commands
+    FleshlightLaunchFW12Cmd,
+    LovenseCmd,
+    KiirooCmd,
+    VorzeA10CycloneCmd,
+    // To Add:
+    // PatternCmd
+    // BatteryLevelCmd
+    // BatteryLevelReading
+    // RSSILevelCmd
+    // RSSILevelReading
+    // ShockCmd?
+    // ToneEmitterCmd?
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub enum ButtplugDeviceMessageType {
+    // Generic commands
+    VibrateCmd,
+    LinearCmd,
+    RotateCmd,
+    RawWriteCmd,
+    RawReadCmd,
+    StopDeviceCmd,
+    SubscribeCmd,
+    UnsubscribeCmd,
+    // Deprecated generic commands
+    SingleMotorVibrateCmd,
+    // Deprecated device specific commands
+    FleshlightLaunchFW12Cmd,
+    LovenseCmd,
+    KiirooCmd,
+    VorzeA10CycloneCmd,
+    // To Add:
+    // PatternCmd
+    // BatteryLevelCmd
+    // BatteryLevelReading
+    // RSSILevelCmd
+    // RSSILevelReading
+    // ShockCmd?
+    // ToneEmitterCmd?
+}
+
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnion {
@@ -160,39 +239,54 @@ impl ButtplugMessageUnion {
             .and_then(|msg_vec| Ok(msg_vec[0].clone()))
             .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
     }
+    // To Add:
+    // PatternCmd
+    // BatteryLevelCmd
+    // BatteryLevelReading
+    // RSSILevelCmd
+    // RSSILevelReading
+    // ShockCmd?
+    // ToneEmitterCmd?
 }
 
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, ToButtplugMessageUnion)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnionVersion2 {
-   Ok(Ok),
-   Error(Error),
-   Ping(Ping),
-   Test(Test),
-   RequestLog(RequestLog),
-   Log(Log),
-   // Handshake messages
-   RequestServerInfo(RequestServerInfo),
-   ServerInfo(ServerInfo),
-   // Device enumeration messages
-   DeviceList(DeviceList),
-   DeviceAdded(DeviceAdded),
-   DeviceRemoved(DeviceRemoved),
-   StartScanning(StartScanning),
-   StopScanning(StopScanning),
-   ScanningFinished(ScanningFinished),
-   RequestDeviceList(RequestDeviceList),
-   // Generic commands
-   StopAllDevices(StopAllDevices),
-   VibrateCmd(VibrateCmd),
-   LinearCmd(LinearCmd),
-   RotateCmd(RotateCmd),
-   RawWriteCmd(RawWriteCmd),
-   RawReadCmd(RawReadCmd),
-   StopDeviceCmd(StopDeviceCmd),
-   RawReading(RawReading),
-   SubscribeCmd(SubscribeCmd),
-   UnsubscribeCmd(UnsubscribeCmd),
+    Ok(Ok),
+    Error(Error),
+    Ping(Ping),
+    Test(Test),
+    RequestLog(RequestLog),
+    Log(Log),
+    // Handshake messages
+    RequestServerInfo(RequestServerInfo),
+    ServerInfo(ServerInfo),
+    // Device enumeration messages
+    DeviceList(DeviceList),
+    DeviceAdded(DeviceAdded),
+    DeviceRemoved(DeviceRemoved),
+    StartScanning(StartScanning),
+    StopScanning(StopScanning),
+    ScanningFinished(ScanningFinished),
+    RequestDeviceList(RequestDeviceList),
+    // Generic commands
+    StopAllDevices(StopAllDevices),
+    VibrateCmd(VibrateCmd),
+    LinearCmd(LinearCmd),
+    RotateCmd(RotateCmd),
+    RawWriteCmd(RawWriteCmd),
+    RawReadCmd(RawReadCmd),
+    StopDeviceCmd(StopDeviceCmd),
+    RawReading(RawReading),
+    SubscribeCmd(SubscribeCmd),
+    UnsubscribeCmd(UnsubscribeCmd),
+    // PatternCmd
+    // BatteryLevelCmd
+    // BatteryLevelReading
+    // RSSILevelCmd
+    // RSSILevelReading
+    // ShockCmd?
+    // ToneEmitterCmd?
 }
 
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, ToButtplugMessageUnion, FromSpecificButtplugMessage)]
@@ -294,6 +388,11 @@ pub enum ButtplugDeviceManagerMessageUnion {
     FromSpecificButtplugMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnion {
+    FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
+    SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+    VorzeA10CycloneCmd(VorzeA10CycloneCmd),
+    KiirooCmd(KiirooCmd),
+    // No LovenseCmd, it was never implemented anywhere.
     VibrateCmd(VibrateCmd),
     LinearCmd(LinearCmd),
     RotateCmd(RotateCmd),

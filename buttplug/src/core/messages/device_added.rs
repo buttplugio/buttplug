@@ -47,7 +47,7 @@ pub struct DeviceAddedVersion0 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
     pub device_name: String,
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
-    pub device_messages: Vec<String>,
+    pub device_messages: Vec<ButtplugDeviceMessageType>,
 }
 
 impl From<DeviceAdded> for DeviceAddedVersion0 {
