@@ -131,6 +131,14 @@ fn impl_try_from_buttplug_in_message_derive_macro(ast: &syn::DeriveInput) -> Tok
                     }
                 }
             }
+
+            impl From<#name> for ButtplugInMessage {
+                fn from(msg: #name) -> ButtplugInMessage {
+                    match msg {
+                        #( #name::#idents(msg) => ButtplugInMessage::#idents(msg),)*
+                    }
+                }
+            }
         };
         gen.into()
     } else {

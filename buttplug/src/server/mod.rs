@@ -9,13 +9,17 @@
 
 pub mod comm_managers;
 pub mod device_manager;
+mod wrapper;
 mod logger;
+
+pub use wrapper::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
 
 use crate::core::{
     errors::*,
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
         ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceMessageInfo,
+        ButtplugClientOutMessage, ButtplugClientInMessage
     },
 };
 use async_std::{
@@ -32,6 +36,7 @@ use std::{
     sync::{Arc, RwLock},
     time::{Duration, Instant},
 };
+use async_trait::async_trait;
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -130,27 +135,25 @@ pub struct ButtplugServer {
 impl ButtplugServer {
     pub fn new(
         name: &str,
-        max_ping_time: u128,
-        event_sender: Sender<ButtplugOutMessage>,
-    ) -> Self {
+        max_ping_time: u128
+    ) -> (Self, Receiver<ButtplugOutMessage>) {
         let mut ping_timer = None;
         let mut ping_receiver = None;
-
+        let (send, recv) = channel(256);
         if max_ping_time > 0 {
             let (timer, receiver) = PingTimer::new(max_ping_time);
             ping_timer = Some(timer);
             ping_receiver = Some(receiver);
         }
-
-        Self {
+        (Self {
             server_name: name.to_string(),
             server_spec_version: 1,
             client_name: None,
             client_spec_version: None,
-            device_manager: DeviceManager::new(event_sender.clone(), ping_receiver),
+            device_manager: DeviceManager::new(send.clone(), ping_receiver),
             ping_timer,
-            event_sender,
-        }
+            event_sender: send,
+        }, recv)
     }
 
     pub fn add_comm_manager<T>(&mut self)
@@ -275,8 +278,7 @@ mod test {
         msg_union: &messages::ButtplugInMessage,
     ) -> (ButtplugServer, Receiver<ButtplugOutMessage>) {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (send, recv) = channel(256);
-        let mut server = ButtplugServer::new("Test Server", 0, send);
+        let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
         assert_eq!(server.server_name, "Test Server");
         match server.parse_message(&msg_union).await.unwrap() {
             ButtplugOutMessage::ServerInfo(_s) => {
@@ -309,8 +311,7 @@ mod test {
     #[test]
     fn test_server_version_gt() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (send, _) = channel(256);
-        let mut server = ButtplugServer::new("Test Server", 0, send);
+        let (mut server, _) = ButtplugServer::new("Test Server", 0);
         let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1).into();
         task::block_on(async {
             assert!(
@@ -323,8 +324,7 @@ mod test {
     #[test]
     fn test_ping_timeout() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (send, mut recv) = channel(256);
-        let mut server = ButtplugServer::new("Test Server", 100, send);
+        let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
         task::block_on(async {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             task::sleep(Duration::from_millis(150)).await;
@@ -365,8 +365,7 @@ mod test {
     #[ignore]
     fn test_device_stop_on_ping_timeout() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (send, mut recv) = channel(256);
-        let mut server = ButtplugServer::new("Test Server", 100, send);
+        let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
         // TODO This should probably use a test protocol we control, not the aneros protocol
         let (device, device_creator) =
             TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
@@ -434,8 +433,7 @@ mod test {
         // see output.
         //
         // let _ = env_logger::builder().is_test(true).try_init();
-        let (send, mut recv) = channel(256);
-        let mut server = ButtplugServer::new("Test Server", 0, send);
+        let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
         task::block_on(async {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
             let mut reply = server.parse_message(&msg.into()).await;

@@ -14,9 +14,9 @@ use crate::server::device_manager::{
     DeviceCommunicationManager, DeviceCommunicationManagerCreator,
 };
 #[cfg(feature = "server")]
-use crate::server::ButtplugServer;
+use crate::server::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
 use crate::{
-    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugInMessage},
+    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
     util::future::{
         ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared, ButtplugMessageStateShared,
     },
@@ -81,17 +81,17 @@ pub trait ButtplugClientConnector: Send {
 
 #[cfg(feature = "server")]
 pub struct ButtplugEmbeddedClientConnector {
-    server: ButtplugServer,
+    server: ButtplugInProcessServerWrapper,
     recv: Option<Receiver<ButtplugClientOutMessage>>,
 }
 
 #[cfg(feature = "server")]
 impl ButtplugEmbeddedClientConnector {
     pub fn new(name: &str, max_ping_time: u128) -> Self {
-        let (send, recv) = channel(256);
+        let (server, recv) = ButtplugInProcessServerWrapper::new(&name, max_ping_time);
         Self {
             recv: Some(recv),
-            server: ButtplugServer::new(&name, max_ping_time, send),
+            server
         }
     }
 
@@ -101,7 +101,7 @@ impl ButtplugEmbeddedClientConnector {
     where
         T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
     {
-        self.server.add_comm_manager::<T>();
+        self.server.server_ref().add_comm_manager::<T>();
     }
 }
 
@@ -116,8 +116,10 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
         Ok(())
     }
 
+    async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+        let ret_msg = self.server.parse_message(msg).await;
         let mut waker_state = state.lock().unwrap();
-        waker_state.set_reply(ret_msg.unwrap());
+        waker_state.set_reply(ret_msg);
     }
 
     fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
