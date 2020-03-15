@@ -15,7 +15,7 @@ use super::{
     ButtplugClientEvent, ButtplugClientResult,
 };
 use crate::{
-    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
+    core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
     util::future::{ButtplugFutureStateShared, ButtplugMessageFuturePair},
 };
 use async_std::{

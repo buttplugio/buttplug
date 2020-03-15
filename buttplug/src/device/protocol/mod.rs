@@ -4,7 +4,7 @@ use super::device::DeviceImpl;
 use crate::{
     core::{
         errors::ButtplugError,
-        messages::{ButtplugDeviceCommandMessageUnion, ButtplugInMessage, ButtplugOutMessage, MessageAttributesMap},
+        messages::{ButtplugDeviceCommandMessageUnion, ButtplugOutMessage, MessageAttributesMap},
     },
     device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
 };

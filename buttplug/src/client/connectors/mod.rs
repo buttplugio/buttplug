@@ -32,7 +32,7 @@ use async_trait::async_trait;
 use futures::future::Future;
 #[cfg(feature = "serialize_json")]
 use messagesorter::ClientConnectorMessageSorter;
-use std::{error::Error, fmt, convert::TryInto};
+use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionState =
     ButtplugFutureState<Result<(), ButtplugClientConnectorError>>;

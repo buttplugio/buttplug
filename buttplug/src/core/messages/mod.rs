@@ -76,7 +76,6 @@ pub use unsubscribe_cmd::UnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
-use super::errors::*;
 use std::convert::TryFrom;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};

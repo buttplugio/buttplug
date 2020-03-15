@@ -15,7 +15,7 @@ use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
         messages::{
-            ButtplugClientInMessage, ButtplugClientOutMessage, DeviceAdded, DeviceMessageInfo, 
+            ButtplugClientInMessage, ButtplugClientOutMessage, DeviceMessageInfo,
             LinearCmd, ButtplugDeviceMessageType,
             RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
             VibrateSubcommand, MessageAttributesMap

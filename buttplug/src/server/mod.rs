@@ -19,7 +19,6 @@ use crate::core::{
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
         ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceMessageInfo,
-        ButtplugClientOutMessage, ButtplugClientInMessage
     },
 };
 use async_std::{
@@ -36,7 +35,6 @@ use std::{
     sync::{Arc, RwLock},
     time::{Duration, Instant},
 };
-use async_trait::async_trait;
 
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
@@ -269,7 +267,7 @@ mod test {
     };
     use async_std::{
         prelude::StreamExt,
-        sync::{channel, Receiver},
+        sync::Receiver,
         task,
     };
     use std::time::Duration;
@@ -278,7 +276,7 @@ mod test {
         msg_union: &messages::ButtplugInMessage,
     ) -> (ButtplugServer, Receiver<ButtplugOutMessage>) {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+        let (mut server, recv) = ButtplugServer::new("Test Server", 0);
         assert_eq!(server.server_name, "Test Server");
         match server.parse_message(&msg_union).await.unwrap() {
             ButtplugOutMessage::ServerInfo(_s) => {

@@ -21,10 +21,9 @@ use crate::{
     core::{
         errors::{
             ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError,
-            ButtplugUnknownError,
         },
         messages::{
-            self, ButtplugClientInMessage, ButtplugClientOutMessage, DeviceMessageInfo, LogLevel, RequestDeviceList,
+            ButtplugClientInMessage, ButtplugClientOutMessage, DeviceMessageInfo, LogLevel, RequestDeviceList,
             RequestServerInfo, StartScanning,
         },
     },
