@@ -9,7 +9,10 @@
 
 use super::protocol::{self, ButtplugProtocolCreator};
 use crate::{
-    core::{errors::ButtplugDeviceError, errors::ButtplugError, messages::MessageAttributes},
+    core::{
+        errors::{ButtplugDeviceError, ButtplugError}, 
+        messages::MessageAttributesMap
+    },
     device::Endpoint,
 };
 use once_cell::sync::Lazy;
@@ -135,7 +138,7 @@ pub enum DeviceSpecifier {
 pub struct ProtocolAttributes {
     identifier: Option<Vec<String>>,
     name: Option<HashMap<String, String>>,
-    messages: Option<HashMap<String, MessageAttributes>>,
+    messages: Option<MessageAttributesMap>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -198,8 +201,8 @@ impl DeviceProtocolConfiguration {
     pub fn get_attributes(
         &self,
         identifier: &str,
-    ) -> Result<(HashMap<String, String>, HashMap<String, MessageAttributes>), ButtplugError> {
-        let mut attributes = HashMap::<String, MessageAttributes>::new();
+    ) -> Result<(HashMap<String, String>, MessageAttributesMap), ButtplugError> {
+        let mut attributes = MessageAttributesMap::new();
         // If we find defaults, set those up first.
         if let Some(ref attrs) = self.defaults {
             if let Some(ref msg_attrs) = attrs.messages {
@@ -305,6 +308,7 @@ mod test {
         BluetoothLESpecifier, DeviceConfigurationManager, DeviceProtocolConfiguration,
         DeviceSpecifier,
     };
+    use crate::core::messages::ButtplugDeviceMessageType;
 
     #[test]
     fn test_load_config() {
@@ -347,7 +351,7 @@ mod test {
         // Make sure we overwrote the default of 1
         assert_eq!(
             message_map
-                .get("VibrateCmd")
+                .get(&ButtplugDeviceMessageType::VibrateCmd)
                 .unwrap()
                 .feature_count
                 .unwrap(),

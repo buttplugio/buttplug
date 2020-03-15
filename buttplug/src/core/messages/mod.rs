@@ -142,6 +142,8 @@ pub enum ButtplugMessageType {
     RawReading,
     SubscribeCmd,
     UnsubscribeCmd,
+    BatteryLevelCmd,
+    RSSILevelCmd,
     // Deprecated generic commands
     SingleMotorVibrateCmd,
     // Deprecated device specific commands
@@ -178,6 +180,8 @@ pub enum ButtplugDeviceMessageType {
     LovenseCmd,
     KiirooCmd,
     VorzeA10CycloneCmd,
+    BatteryLevelCmd,
+    RSSILevelCmd,
     // To Add:
     // PatternCmd
     // BatteryLevelCmd

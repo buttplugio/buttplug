@@ -19,6 +19,7 @@
 use buttplug::client::{
     connectors::ButtplugEmbeddedClientConnector, ButtplugClient, ButtplugClientEvent,
 };
+use buttplug::core::messages::ButtplugDeviceMessageType;
 
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
@@ -184,7 +185,7 @@ async fn embedded_connector_example() {
                 //
                 // For this example, we'll use the simple single value.
 
-                if dev.allowed_messages.contains_key("VibrateCmd") {
+                if dev.allowed_messages.contains_key(&ButtplugDeviceMessageType::VibrateCmd) {
                     dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
                     println!("{} should start vibrating!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;

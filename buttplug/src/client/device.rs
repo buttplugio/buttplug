@@ -15,9 +15,9 @@ use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
         messages::{
-            ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, MessageAttributes,
+            ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, ButtplugDeviceMessageType,
             RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
-            VibrateSubcommand,
+            VibrateSubcommand, MessageAttributesMap
         },
     },
     util::future::{ButtplugMessageFuture, ButtplugMessageFuturePair},
@@ -49,7 +49,7 @@ pub enum LinearCommand {
 pub struct ButtplugClientDevice {
     pub name: String,
     index: u32,
-    pub allowed_messages: HashMap<String, MessageAttributes>,
+    pub allowed_messages: MessageAttributesMap,
     message_sender: Sender<ButtplugMessageFuturePair>,
     event_receiver: Receiver<ButtplugClientDeviceEvent>,
     events: Vec<ButtplugClientDeviceEvent>,
@@ -64,7 +64,7 @@ impl ButtplugClientDevice {
     pub(crate) fn new(
         name: &str,
         index: u32,
-        allowed_messages: HashMap<String, MessageAttributes>,
+        allowed_messages: MessageAttributesMap,
         message_sender: Sender<ButtplugMessageFuturePair>,
         event_receiver: Receiver<ButtplugClientDeviceEvent>,
     ) -> Self {
@@ -179,11 +179,11 @@ impl ButtplugClientDevice {
     }
 
     pub async fn vibrate(&mut self, speed_cmd: VibrateCommand) -> ButtplugClientResult {
-        if !self.allowed_messages.contains_key("VibrateCmd") {
+        if !self.allowed_messages.contains_key(&ButtplugDeviceMessageType::VibrateCmd) {
             return Err(ButtplugDeviceError::new("Device does not support vibration.").into());
         }
         let mut vibrator_count: u32 = 0;
-        if let Some(features) = self.allowed_messages.get("VibrateCmd") {
+        if let Some(features) = self.allowed_messages.get(&ButtplugDeviceMessageType::VibrateCmd) {
             if let Some(v) = features.feature_count {
                 vibrator_count = v;
             }
@@ -237,13 +237,13 @@ impl ButtplugClientDevice {
     }
 
     pub async fn linear(&mut self, linear_cmd: LinearCommand) -> ButtplugClientResult {
-        if !self.allowed_messages.contains_key("LinearCmd") {
+        if !self.allowed_messages.contains_key(&ButtplugDeviceMessageType::LinearCmd) {
             return Err(
                 ButtplugDeviceError::new("Device does not support linear movement.").into(),
             );
         }
         let mut linear_count: u32 = 0;
-        if let Some(features) = self.allowed_messages.get("LinearCmd") {
+        if let Some(features) = self.allowed_messages.get(&ButtplugDeviceMessageType::LinearCmd) {
             if let Some(v) = features.feature_count {
                 linear_count = v;
             }
@@ -297,11 +297,11 @@ impl ButtplugClientDevice {
     }
 
     pub async fn rotate(&mut self, rotate_cmd: RotateCommand) -> ButtplugClientResult {
-        if !self.allowed_messages.contains_key("RotateCmd") {
+        if !self.allowed_messages.contains_key(&ButtplugDeviceMessageType::RotateCmd) {
             return Err(ButtplugDeviceError::new("Device does not support rotation.").into());
         }
         let mut rotate_count: u32 = 0;
-        if let Some(features) = self.allowed_messages.get("RotateCmd") {
+        if let Some(features) = self.allowed_messages.get(&ButtplugDeviceMessageType::RotateCmd) {
             if let Some(v) = features.feature_count {
                 rotate_count = v;
             }
