@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, ButtplugMessage, ToButtplugMessageUnion, Clone, Debug, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceAdded {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]

@@ -31,8 +31,7 @@ pub enum ErrorCode {
     Debug, 
     Clone,
     PartialEq,
-    ButtplugMessage, 
-    ToButtplugMessageUnion
+    ButtplugMessage,
 )]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Error {

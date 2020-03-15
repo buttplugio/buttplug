@@ -105,13 +105,10 @@ pub trait ButtplugMessage: Send + Sync + Clone {
     }
 }
 
-}
-
 pub trait ButtplugDeviceMessage: ButtplugMessage {
     fn get_device_index(&self) -> u32;
     fn set_device_index(&mut self, id: u32);
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
@@ -230,15 +227,6 @@ pub enum ButtplugMessageUnion {
     LovenseCmd(LovenseCmd),
     KiirooCmd(KiirooCmd),
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
-}
-
-#[cfg(feature = "serialize_json")]
-impl ButtplugMessageUnion {
-    pub fn try_deserialize(message_version: &ButtplugMessageSpecVersion, msg_str: &str) -> Result<Self, ButtplugError> {
-        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
-            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
-            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
-    }
     // To Add:
     // PatternCmd
     // BatteryLevelCmd
@@ -249,7 +237,16 @@ impl ButtplugMessageUnion {
     // ToneEmitterCmd?
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, ToButtplugMessageUnion)]
+#[cfg(feature = "serialize_json")]
+impl ButtplugMessageUnion {
+    pub fn try_deserialize(msg_str: &str) -> Result<Self, ButtplugError> {
+        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
+            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
+            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageUnionVersion2 {
     Ok(Ok),
@@ -289,7 +286,7 @@ pub enum ButtplugMessageUnionVersion2 {
     // ToneEmitterCmd?
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToButtplugMessageUnion, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 enum ButtplugMessageUnionVersion1 {
     Ok(Ok),
@@ -319,7 +316,7 @@ enum ButtplugMessageUnionVersion1 {
     StopDeviceCmd(StopDeviceCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ToButtplugMessageUnion, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 enum ButtplugMessageSpecVersion0 {
     Ok(Ok),

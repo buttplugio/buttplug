@@ -30,7 +30,7 @@ impl RotationSubcommand {
     }
 }
 
-#[derive(Debug, Default, ButtplugDeviceMessage, ToButtplugMessageUnion, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RotateCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]

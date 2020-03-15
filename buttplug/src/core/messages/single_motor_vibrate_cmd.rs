@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, ToButtplugMessageUnion, Default, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
