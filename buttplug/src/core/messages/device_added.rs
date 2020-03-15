@@ -39,6 +39,30 @@ impl DeviceAdded {
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub struct DeviceAddedVersion1 {
+    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+    pub(super) id: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+    pub device_index: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceName"))]
+    pub device_name: String,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceMessages"))]
+    pub device_messages: MessageAttributesMap,
+}
+
+impl From<DeviceAdded> for DeviceAddedVersion1 {
+    fn from(msg: DeviceAdded) -> Self {
+        Self {
+            id: msg.get_id(),
+            device_index: msg.device_index,
+            device_name: msg.device_name,
+            device_messages: msg.device_messages
+        }
+    }
+}
+
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedVersion0 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub(super) id: u32,

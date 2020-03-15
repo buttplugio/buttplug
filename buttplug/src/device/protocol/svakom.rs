@@ -18,7 +18,7 @@ create_buttplug_protocol!(
                 false,
             );
             device.write_value(msg.into()).await?;
-            Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+            Ok(messages::Ok::default().into())
         })
     )
 );

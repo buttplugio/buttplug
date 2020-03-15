@@ -26,7 +26,7 @@ create_buttplug_protocol!(
                     // that's the case we ain't got shit to do.
                     if !cmds[0].is_none() && cmds.windows(2).all(|w| w[0] == w[1]) {
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF3, 0, cmds[0].unwrap() as u8], false)).await?;
-                        return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
+                        return Ok(messages::Ok::default().into());
                     }
                     // We have differening values. Set each motor separately.
                     let mut i = 1;
@@ -37,7 +37,7 @@ create_buttplug_protocol!(
                         i += 1;
                     }
 
-                    Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                    Ok(messages::Ok::default().into())
                 },
                 Err(e) => Err(e)
             }

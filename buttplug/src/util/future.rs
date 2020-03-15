@@ -1,4 +1,4 @@
-use crate::core::messages::ButtplugMessageUnion;
+use crate::core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage};
 use async_std::{
     future::Future,
     task::{Context, Poll, Waker},
@@ -117,8 +117,9 @@ impl<T> Future for ButtplugFuture<T> {
     }
 }
 
-pub type ButtplugMessageState = ButtplugFutureState<ButtplugMessageUnion>;
-pub type ButtplugMessageStateShared = ButtplugFutureStateShared<ButtplugMessageUnion>;
-pub type ButtplugMessageFuture = ButtplugFuture<ButtplugMessageUnion>;
-
-pub type ButtplugMessageFuturePair = (ButtplugMessageUnion, ButtplugMessageStateShared);
+// TODO These are only used in the client. Should move them to that module and
+// change their name to ButtplugClientMessage*
+pub type ButtplugMessageState = ButtplugFutureState<ButtplugClientOutMessage>;
+pub type ButtplugMessageStateShared = ButtplugFutureStateShared<ButtplugClientOutMessage>;
+pub type ButtplugMessageFuture = ButtplugFuture<ButtplugClientOutMessage>;
+pub type ButtplugMessageFuturePair = (ButtplugClientInMessage, ButtplugMessageStateShared);

@@ -17,7 +17,7 @@ create_buttplug_protocol!(
             let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
             let msg = DeviceWriteCmd::new(Endpoint::Tx, [0x01, mode, speed].to_vec(), false);
             device.write_value(msg.into()).await?;
-            Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+            Ok(messages::Ok::default().into())
         })
     )
 );

@@ -2,7 +2,7 @@ use crate::{
     core::{
         errors::ButtplugError,
         messages::{
-            self, ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap,
+            self, ButtplugDeviceCommandMessageUnion, ButtplugOutMessage, MessageAttributesMap,
             RawReadCmd, RawReading, RawWriteCmd, SubscribeCmd, UnsubscribeCmd,
         },
     },
@@ -295,7 +295,7 @@ impl ButtplugDevice {
     pub async fn parse_message(
         &mut self,
         message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    ) -> Result<ButtplugOutMessage, ButtplugError> {
         self.protocol.parse_message(&self.device, message).await
     }
 

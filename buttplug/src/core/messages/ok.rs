@@ -29,13 +29,13 @@ impl Ok {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-    use crate::core::messages::{ButtplugMessage, ButtplugMessageUnion, Ok};
+    use crate::core::messages::{ButtplugMessage, ButtplugClientOutMessage, Ok};
 
     const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
     
     #[test]
     fn test_ok_serialize() {
-        let ok = ButtplugMessageUnion::Ok(Ok::new(0));
+        let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
         let js = serde_json::to_string(&ok).unwrap();
         assert_eq!(OK_STR, js);
     }
@@ -43,14 +43,14 @@ mod test {
     #[test]
     fn test_protocol_json() {
         const PROTOCOL_STR: &str = "[{\"Ok\":{\"Id\":0}}]";
-        let ok = ButtplugMessageUnion::Ok(Ok::new(0));
+        let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
         let js = ok.as_protocol_json();
         assert_eq!(PROTOCOL_STR, js);
     }
 
     #[test]
     fn test_ok_deserialize() {
-        let union: ButtplugMessageUnion = serde_json::from_str(&OK_STR).unwrap();
-        assert_eq!(ButtplugMessageUnion::Ok(Ok::new(0)), union);
+        let union: ButtplugClientOutMessage = serde_json::from_str(&OK_STR).unwrap();
+        assert_eq!(ButtplugClientOutMessage::Ok(Ok::new(0)), union);
     }
 }

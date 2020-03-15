@@ -15,7 +15,8 @@ use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
         messages::{
-            ButtplugMessageUnion, DeviceAdded, DeviceMessageInfo, LinearCmd, ButtplugDeviceMessageType,
+            ButtplugClientInMessage, ButtplugClientOutMessage, DeviceAdded, DeviceMessageInfo, 
+            LinearCmd, ButtplugDeviceMessageType,
             RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
             VibrateSubcommand, MessageAttributesMap
         },
@@ -82,8 +83,8 @@ impl ButtplugClientDevice {
 
     async fn send_message(
         &mut self,
-        msg: ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        msg: ButtplugClientInMessage,
+    ) -> Result<ButtplugClientOutMessage, ButtplugClientError> {
         // Since we're using async_std channels, if we send a message and the
         // event loop has shut down, we may never know (and therefore possibly
         // block infinitely) if we don't check the status of an event loop
@@ -97,10 +98,10 @@ impl ButtplugClientDevice {
         Ok(fut.await)
     }
 
-    async fn send_message_expect_ok(&mut self, msg: ButtplugMessageUnion) -> ButtplugClientResult {
+    async fn send_message_expect_ok(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult {
         match self.send_message(msg).await? {
-            ButtplugMessageUnion::Ok(_) => Ok(()),
-            ButtplugMessageUnion::Error(_err) => Err(ButtplugClientError::ButtplugError(
+            ButtplugClientOutMessage::Ok(_) => Ok(()),
+            ButtplugClientOutMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(
                 ButtplugError::from(_err),
             )),
             _ => Err(ButtplugClientError::ButtplugError(
@@ -358,31 +359,6 @@ impl ButtplugClientDevice {
         // All devices accept StopDeviceCmd
         self.send_message_expect_ok(StopDeviceCmd::default().into())
             .await
-    }
-}
-
-impl
-    From<(
-        &DeviceAdded,
-        Sender<ButtplugMessageFuturePair>,
-        Receiver<ButtplugClientDeviceEvent>,
-    )> for ButtplugClientDevice
-{
-    fn from(
-        msg_sender_tuple: (
-            &DeviceAdded,
-            Sender<ButtplugMessageFuturePair>,
-            Receiver<ButtplugClientDeviceEvent>,
-        ),
-    ) -> Self {
-        let msg = msg_sender_tuple.0.clone();
-        ButtplugClientDevice::new(
-            &*msg.device_name,
-            msg.device_index,
-            msg.device_messages,
-            msg_sender_tuple.1,
-            msg_sender_tuple.2,
-        )
     }
 }
 

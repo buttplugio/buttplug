@@ -70,7 +70,7 @@ mod test {
     #[cfg(test)]
     mod test {
         use crate::{
-            core::messages::{self, ButtplugMessageUnion},
+            core::messages::{self, ButtplugOutMessage},
             device::device::DeviceImpl,
             server::ButtplugServer,
             test::{TestDevice, TestDeviceCommunicationManager},
@@ -96,7 +96,7 @@ mod test {
                 assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
                 // Check that we got an event back about a new device.
                 let msg = recv.next().await.unwrap();
-                if let ButtplugMessageUnion::DeviceAdded(da) = msg {
+                if let ButtplugOutMessage::DeviceAdded(da) = msg {
                     assert_eq!(da.device_name, "Aneros Vivi");
                 } else {
                     assert!(
@@ -110,7 +110,7 @@ mod test {
                 device.disconnect().await;
                 // Check that we got an event back about a removed device.
                 let msg = recv.next().await.unwrap();
-                if let ButtplugMessageUnion::DeviceRemoved(da) = msg {
+                if let ButtplugOutMessage::DeviceRemoved(da) = msg {
                     assert_eq!(da.device_index, 0);
                 } else {
                     assert!(

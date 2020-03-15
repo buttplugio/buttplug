@@ -24,7 +24,7 @@ create_buttplug_protocol!(
                             }
                             index += 1;
                         }
-                        Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                        Ok(messages::Ok::default().into())
                     },
                     Err(e) => Err(e)
                 }

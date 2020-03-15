@@ -4,7 +4,7 @@ use super::device::DeviceImpl;
 use crate::{
     core::{
         errors::ButtplugError,
-        messages::{ButtplugDeviceCommandMessageUnion, ButtplugMessageUnion, MessageAttributesMap},
+        messages::{ButtplugDeviceCommandMessageUnion, ButtplugInMessage, ButtplugOutMessage, MessageAttributesMap},
     },
     device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
 };
@@ -81,7 +81,7 @@ pub trait ButtplugProtocol: Sync + Send {
         &mut self,
         device: &Box<dyn DeviceImpl>,
         message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError>;
+    ) -> Result<ButtplugOutMessage, ButtplugError>;
 }
 
 impl Clone for Box<dyn ButtplugProtocol> {
@@ -170,7 +170,7 @@ macro_rules! create_buttplug_protocol (
                     ButtplugMessage,
                     StopDeviceCmd,
                     MessageAttributesMap,
-                    ButtplugMessageUnion,
+                    ButtplugOutMessage,
                     ButtplugDeviceCommandMessageUnion,
                     $(
                         $message_name
@@ -213,7 +213,7 @@ macro_rules! create_buttplug_protocol (
                     &mut self,
                     device: &Box<dyn DeviceImpl>,
                     stop_msg: &StopDeviceCmd,
-                ) -> Result<ButtplugMessageUnion, ButtplugError> {
+                ) -> Result<ButtplugOutMessage, ButtplugError> {
                     // TODO This clone definitely shouldn't be needed but I'm tired. GOOD FIRST BUG.
                     let cmds = self.stop_commands.clone();
                     for msg in cmds {
@@ -226,7 +226,7 @@ macro_rules! create_buttplug_protocol (
                     #[allow(non_snake_case)]
                     pub async fn [<$message_name _handler>](&mut self,
                         device: &Box<dyn DeviceImpl>,
-                        msg: &$message_name,) -> Result<ButtplugMessageUnion, ButtplugError>
+                        msg: &$message_name,) -> Result<ButtplugOutMessage, ButtplugError>
                         $message_handler_body
                     )*
                 }
@@ -250,7 +250,7 @@ macro_rules! create_buttplug_protocol (
                         &mut self,
                         device: &Box<dyn DeviceImpl>,
                         message: &ButtplugDeviceCommandMessageUnion,
-                    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+                    ) -> Result<ButtplugOutMessage, ButtplugError> {
                         match message {
                             $(
                                 ButtplugDeviceCommandMessageUnion::$message_name(msg) => {

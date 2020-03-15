@@ -15,7 +15,7 @@ use crate::core::{
     errors::*,
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-        ButtplugMessage, ButtplugMessageUnion, DeviceMessageInfo,
+        ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceMessageInfo,
     },
 };
 use async_std::{
@@ -36,7 +36,7 @@ use std::{
 pub enum ButtplugServerEvent {
     DeviceAdded(DeviceMessageInfo),
     DeviceRemoved(DeviceMessageInfo),
-    DeviceMessage(ButtplugMessageUnion),
+    DeviceMessage(ButtplugOutMessage),
     ScanningFinished(),
     ServerError(ButtplugError),
     PingTimeout(),
@@ -73,7 +73,7 @@ impl PingTimer {
         )
     }
 
-    pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugMessageUnion>) {
+    pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugOutMessage>) {
         // Since we've received the handshake, start the ping timer if needed.
         let max_ping_time = self.max_ping_time.clone();
         let last_ping_time = self.last_ping_time.clone();
@@ -93,7 +93,7 @@ impl PingTimer {
                     ))
                     .into();
                     event_sender
-                        .send(ButtplugMessageUnion::Error(err.into()))
+                        .send(ButtplugOutMessage::Error(err.into()))
                         .await;
                     break;
                 }
@@ -123,7 +123,7 @@ pub struct ButtplugServer {
     client_spec_version: Option<u32>,
     client_name: Option<String>,
     device_manager: DeviceManager,
-    event_sender: Sender<ButtplugMessageUnion>,
+    event_sender: Sender<ButtplugOutMessage>,
     ping_timer: Option<PingTimer>,
 }
 
@@ -131,7 +131,7 @@ impl ButtplugServer {
     pub fn new(
         name: &str,
         max_ping_time: u128,
-        event_sender: Sender<ButtplugMessageUnion>,
+        event_sender: Sender<ButtplugOutMessage>,
     ) -> Self {
         let mut ping_timer = None;
         let mut ping_receiver = None;
@@ -162,8 +162,8 @@ impl ButtplugServer {
 
     pub async fn parse_message(
         &mut self,
-        msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+        msg: &ButtplugInMessage,
+    ) -> Result<ButtplugOutMessage, ButtplugError> {
         if let Some(timer) = &self.ping_timer {
             if timer.pinged_out() {
                 return Err(ButtplugPingError::new("Server has pinged out.").into());
@@ -175,10 +175,12 @@ impl ButtplugServer {
             self.device_manager.parse_message(msg.clone()).await
         } else {
             match msg {
-                ButtplugMessageUnion::RequestServerInfo(ref m) => self.perform_handshake(m),
-                ButtplugMessageUnion::Ping(ref p) => self.handle_ping(p),
-                ButtplugMessageUnion::Test(ref t) => self.handle_test(t),
-                ButtplugMessageUnion::RequestLog(ref l) => self.handle_log(l),
+                ButtplugInMessage::RequestServerInfo(ref m) => 
+                    self.perform_handshake(m).and_then(|m| Ok(m.into())),
+                ButtplugInMessage::Ping(ref p) => 
+                    self.handle_ping(p).and_then(|m| Ok(m.into())),
+                ButtplugInMessage::RequestLog(ref l) => 
+                    self.handle_log(l).and_then(|m| Ok(m.into())),
                 _ => Err(ButtplugMessageError::new(
                     &format!("Message {:?} not handled by server loop.", msg).to_owned(),
                 )
@@ -190,7 +192,7 @@ impl ButtplugServer {
     fn perform_handshake(
         &mut self,
         msg: &messages::RequestServerInfo,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    ) -> Result<messages::ServerInfo, ButtplugError> {
         if self.server_spec_version < msg.message_version {
             return Err(ButtplugHandshakeError::new(
                 &format!(
@@ -215,14 +217,13 @@ impl ButtplugServer {
                 self.server_spec_version,
                 max_ping_time.try_into().unwrap(),
             )
-            .into(),
         )
     }
 
-    fn handle_ping(&mut self, msg: &messages::Ping) -> Result<ButtplugMessageUnion, ButtplugError> {
+    fn handle_ping(&mut self, msg: &messages::Ping) -> Result<messages::Ok, ButtplugError> {
         if let Some(timer) = &mut self.ping_timer {
             timer.update_ping_time();
-            Result::Ok(messages::Ok::new(msg.get_id()).into())
+            Result::Ok(messages::Ok::new(msg.get_id()))
         } else {
             Err(
                 ButtplugPingError::new("Ping message invalid, as ping timer is not running.")
@@ -231,16 +232,10 @@ impl ButtplugServer {
         }
     }
 
-    fn handle_test(&mut self, msg: &messages::Test) -> Result<ButtplugMessageUnion, ButtplugError> {
-        let mut test_return = messages::Test::new(&msg.test_string);
-        test_return.set_id(msg.get_id());
-        Result::Ok(test_return.into())
-    }
-
     fn handle_log(
         &mut self,
         msg: &messages::RequestLog,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    ) -> Result<messages::Ok, ButtplugError> {
         let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
         log::set_boxed_logger(Box::new(handler))
             .map_err(|e| {
@@ -249,7 +244,7 @@ impl ButtplugServer {
             .and_then(|_| {
                 let level: log::LevelFilter = msg.log_level.clone().into();
                 log::set_max_level(level);
-                Result::Ok(messages::Ok::new(msg.get_id()).into())
+                Result::Ok(messages::Ok::new(msg.get_id()))
             })
     }
 
@@ -277,14 +272,14 @@ mod test {
     use std::time::Duration;
 
     async fn test_server_setup(
-        msg_union: &messages::ButtplugMessageUnion,
-    ) -> (ButtplugServer, Receiver<ButtplugMessageUnion>) {
+        msg_union: &messages::ButtplugInMessage,
+    ) -> (ButtplugServer, Receiver<ButtplugOutMessage>) {
         let _ = env_logger::builder().is_test(true).try_init();
         let (send, recv) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
         assert_eq!(server.server_name, "Test Server");
         match server.parse_message(&msg_union).await.unwrap() {
-            ButtplugMessageUnion::ServerInfo(_s) => {
+            ButtplugOutMessage::ServerInfo(_s) => {
                 assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0))
             }
             _ => assert!(false, "Should've received ok"),
@@ -295,10 +290,9 @@ mod test {
     #[test]
     fn test_server_handshake() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let msg = messages::RequestServerInfo::new("Test Client", 1);
-        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        let msg = messages::RequestServerInfo::new("Test Client", 1).into();
         task::block_on(async {
-            let (server, _recv) = test_server_setup(&msg_union).await;
+            let (server, _recv) = test_server_setup(&msg).await;
             assert_eq!(server.client_name.unwrap(), "Test Client");
         });
     }
@@ -306,10 +300,9 @@ mod test {
     #[test]
     fn test_server_version_lt() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let msg = messages::RequestServerInfo::new("Test Client", 0);
-        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        let msg = messages::RequestServerInfo::new("Test Client", 0).into();
         task::block_on(async {
-            test_server_setup(&msg_union).await;
+            test_server_setup(&msg).await;
         });
     }
 
@@ -318,11 +311,10 @@ mod test {
         let _ = env_logger::builder().is_test(true).try_init();
         let (send, _) = channel(256);
         let mut server = ButtplugServer::new("Test Server", 0, send);
-        let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1);
-        let msg_union = ButtplugMessageUnion::RequestServerInfo(msg);
+        let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1).into();
         task::block_on(async {
             assert!(
-                server.parse_message(&msg_union).await.is_err(),
+                server.parse_message(&msg).await.is_err(),
                 "Client having higher version than server should fail"
             );
         });
@@ -358,7 +350,7 @@ mod test {
             }
             // Check that we got an event back about the ping out.
             let msg = recv.next().await.unwrap();
-            if let ButtplugMessageUnion::Error(e) = msg {
+            if let ButtplugOutMessage::Error(e) = msg {
                 if let ButtplugError::ButtplugPingError(_) = e.into() {
                 } else {
                     panic!("Didn't get a ping error");
@@ -390,7 +382,7 @@ mod test {
             assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
             // Check that we got an event back about a new device.
             let msg = recv.next().await.unwrap();
-            if let ButtplugMessageUnion::DeviceAdded(da) = msg {
+            if let ButtplugOutMessage::DeviceAdded(da) = msg {
                 assert_eq!(da.device_name, "Aneros Vivi");
             } else {
                 assert!(
@@ -458,7 +450,7 @@ mod test {
             // Check that we got an event back about a new device.
 
             while let Some(msg) = recv.next().await {
-                if let ButtplugMessageUnion::Log(log) = msg {
+                if let ButtplugOutMessage::Log(log) = msg {
                     // We can't assert here, because we may get multiple log
                     // messages back, so we just want to break whenever we get
                     // what we expected.

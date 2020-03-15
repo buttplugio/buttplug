@@ -28,7 +28,7 @@ create_buttplug_protocol!(
                     if let Some(speed) = cmds[0] {
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![VorzeDevices::Bach as u8, VorzeActions::Vibrate as u8, speed as u8], false).into()).await?;
                     }
-                    Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                    Ok(messages::Ok::default().into())
                 },
                 Err(e) => Err(e)
             }
@@ -42,7 +42,7 @@ create_buttplug_protocol!(
                         let data: u8 = (clockwise as u8) << 7 | (speed as u8);
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![dev_id as u8, VorzeActions::Rotate as u8, data], false).into()).await?;
                     }
-                    Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                    Ok(messages::Ok::default().into())
                 },
                 Err(e) => Err(e)
             }

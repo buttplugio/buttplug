@@ -107,34 +107,65 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
     }
 }
 
-#[proc_macro_derive(TryFromButtplugMessageUnion)]
-pub fn try_from_buttplug_message_union_derive(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(TryFromButtplugInMessage)]
+pub fn try_from_buttplug_in_message_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 
-    impl_try_from_message_union_derive_macro(&ast)
+    impl_try_from_buttplug_in_message_derive_macro(&ast)
 }
 
-fn impl_try_from_message_union_derive_macro(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_try_from_buttplug_in_message_derive_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     if let syn::Data::Enum(ref e) = ast.data {
         let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
         let gen = quote! {
-            impl TryFrom<ButtplugMessageUnion> for #name {
+            impl TryFrom<ButtplugInMessage> for #name {
                 type Error = &'static str;
 
-                fn try_from(msg: ButtplugMessageUnion) -> Result<Self, &'static str> {
+                fn try_from(msg: ButtplugInMessage) -> Result<Self, &'static str> {
                     match msg {
-                        #( ButtplugMessageUnion::#idents(msg) => Ok(#name::#idents(msg)),)*
-                        _ => Err("ButtplugMessageUnion cannot be converted to #name")
+                        #( ButtplugInMessage::#idents(msg) => Ok(#name::#idents(msg)),)*
+                        _ => Err("ButtplugInMessage cannot be converted to #name")
                     }
                 }
             }
         };
         gen.into()
     } else {
-        panic!("TryFromButtplugMessageUnion only works on structs");
+        panic!("TryFromButtplugInMessage only works on structs");
+    }
+}
+
+#[proc_macro_derive(TryFromButtplugOutMessage)]
+pub fn try_from_buttplug_out_message_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    impl_try_from_buttplug_out_message_derive_macro(&ast)
+}
+
+fn impl_try_from_buttplug_out_message_derive_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    if let syn::Data::Enum(ref e) = ast.data {
+        let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
+        let gen = quote! {
+            impl TryFrom<ButtplugOutMessage> for #name {
+                type Error = &'static str;
+
+                fn try_from(msg: ButtplugOutMessage) -> Result<Self, &'static str> {
+                    match msg {
+                        #( ButtplugOutMessage::#idents(msg) => Ok(#name::#idents(msg)),)*
+                        _ => Err("ButtplugOutMessage cannot be converted to #name")
+                    }
+                }
+            }
+        };
+        gen.into()
+    } else {
+        panic!("TryFromButtplugOutMessage only works on structs");
     }
 }
 

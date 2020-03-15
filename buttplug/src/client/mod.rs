@@ -24,7 +24,7 @@ use crate::{
             ButtplugUnknownError,
         },
         messages::{
-            self, ButtplugMessageUnion, DeviceMessageInfo, LogLevel, RequestDeviceList,
+            self, ButtplugClientInMessage, ButtplugClientOutMessage, DeviceMessageInfo, LogLevel, RequestDeviceList,
             RequestServerInfo, StartScanning,
         },
     },
@@ -283,7 +283,7 @@ impl ButtplugClient {
         {
             Ok(msg) => {
                 debug!("Got ServerInfo return.");
-                if let ButtplugMessageUnion::ServerInfo(server_info) = msg {
+                if let ButtplugClientOutMessage::ServerInfo(server_info) = msg {
                     info!("Connected to {}", server_info.server_name);
                     self.server_name = Option::Some(server_info.server_name);
                     // TODO Handle ping time in the internal event loop
@@ -294,7 +294,7 @@ impl ButtplugClient {
                     let msg = self
                         .send_message(&RequestDeviceList::default().into())
                         .await?;
-                    if let ButtplugMessageUnion::DeviceList(m) = msg {
+                    if let ButtplugClientOutMessage::DeviceList(m) = msg {
                         self.send_internal_message(ButtplugClientMessage::HandleDeviceList(m))
                             .await?;
                     }
@@ -353,30 +353,6 @@ impl ButtplugClient {
             .await
     }
 
-    // Don't expose outside of crate, just handy to use for internal tests.
-    #[allow(dead_code)]
-    pub(crate) async fn test(&mut self) -> ButtplugClientResult {
-        let test_string = "client test";
-        self.send_message(&messages::Test::new(test_string).into())
-            .await
-            .and_then(|msg| {
-                if let ButtplugMessageUnion::Test(m) = msg {
-                    if m.test_string == test_string {
-                        Ok(())
-                    } else {
-                        Err(ButtplugClientError::ButtplugError(
-                            ButtplugUnknownError::new("Test strings did not match").into(),
-                        ))
-                    }
-                } else {
-                    Err(ButtplugClientError::ButtplugError(
-                        ButtplugUnknownError::new("Test did not return Test message").into(),
-                    ))
-                }
-            })
-            .map_err(|err| err)
-    }
-
     // Send message to the internal event loop. Mostly for handling boilerplate
     // around possible send errors.
     async fn send_internal_message(
@@ -401,8 +377,8 @@ impl ButtplugClient {
     // ButtplugMessage back from the server.
     async fn send_message(
         &mut self,
-        msg: &ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugClientError> {
+        msg: &ButtplugClientInMessage,
+    ) -> Result<ButtplugClientOutMessage, ButtplugClientError> {
         // Create a future to pair with the message being resolved.
         let fut = ButtplugMessageFuture::default();
         let internal_msg = ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
@@ -414,9 +390,9 @@ impl ButtplugClient {
 
     // Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
     // type ButtplugMessage back from the server.
-    async fn send_message_expect_ok(&mut self, msg: &ButtplugMessageUnion) -> ButtplugClientResult {
+    async fn send_message_expect_ok(&mut self, msg: &ButtplugClientInMessage) -> ButtplugClientResult {
         match self.send_message(msg).await? {
-            ButtplugMessageUnion::Ok(_) => Ok(()),
+            ButtplugClientOutMessage::Ok(_) => Ok(()),
             _ => Err(ButtplugMessageError::new("Got non-Ok message back").into()),
         }
     }
@@ -506,7 +482,7 @@ mod test {
         client::connectors::{
             ButtplugClientConnector, ButtplugClientConnectorError, ButtplugEmbeddedClientConnector,
         },
-        core::messages::ButtplugMessageUnion,
+        core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
         util::future::ButtplugMessageStateShared,
     };
     use async_std::{
@@ -545,10 +521,10 @@ mod test {
             Err(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn send(&mut self, _msg: &ButtplugMessageUnion, _state: &ButtplugMessageStateShared) {
+        async fn send(&mut self, _msg: &ButtplugClientInMessage, _state: &ButtplugMessageStateShared) {
         }
 
-        fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
+        fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
             // This will panic if we've already taken the receiver.
             let (_send, recv) = channel(256);
             recv
@@ -596,16 +572,6 @@ mod test {
         task::block_on(async {
             connect_test_client(|client| async move {
                 assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-            })
-            .await;
-        });
-    }
-
-    #[test]
-    fn test_test_msg() {
-        task::block_on(async {
-            connect_test_client(|mut client| async move {
-                assert!(client.test().await.is_ok());
             })
             .await;
         });

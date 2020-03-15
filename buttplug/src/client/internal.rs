@@ -15,7 +15,7 @@ use super::{
     ButtplugClientEvent, ButtplugClientResult,
 };
 use crate::{
-    core::messages::{ButtplugMessageUnion, DeviceList, DeviceMessageInfo},
+    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
     util::future::{ButtplugFutureStateShared, ButtplugMessageFuturePair},
 };
 use async_std::{
@@ -51,11 +51,11 @@ pub enum ButtplugClientMessage {
 pub enum ButtplugClientDeviceEvent {
     DeviceDisconnect,
     ClientDisconnect,
-    Message(ButtplugMessageUnion),
+    Message(ButtplugClientOutMessage),
 }
 
 enum StreamReturn {
-    ConnectorMessage(ButtplugMessageUnion),
+    ConnectorMessage(ButtplugClientOutMessage),
     ClientMessage(ButtplugClientMessage),
     DeviceMessage(ButtplugMessageFuturePair),
     Disconnect,
@@ -69,7 +69,7 @@ struct ButtplugClientEventLoop {
     event_sender: Sender<ButtplugClientEvent>,
     client_receiver: Receiver<ButtplugClientMessage>,
     connector: Box<dyn ButtplugClientConnector>,
-    connector_receiver: Receiver<ButtplugMessageUnion>,
+    connector_receiver: Receiver<ButtplugClientOutMessage>,
 }
 
 impl ButtplugClientEventLoop {
@@ -103,7 +103,7 @@ impl ButtplugClientEventLoop {
                             info!("Connected!");
                             let mut waker_state = state.lock().unwrap();
                             waker_state.set_reply(Ok(()));
-                            let (device_message_sender, device_message_receiver) = channel(256);
+                            let (device_message_sender, device_message_receiver) = channel::<ButtplugMessageFuturePair>(256);
                             Ok(ButtplugClientEventLoop {
                                 devices: HashMap::new(),
                                 device_event_senders: HashMap::new(),
@@ -136,10 +136,10 @@ impl ButtplugClientEventLoop {
         ButtplugClientDevice::from((info, self.device_message_sender.clone(), event_receiver))
     }
 
-    async fn parse_connector_message(&mut self, msg: ButtplugMessageUnion) {
+    async fn parse_connector_message(&mut self, msg: ButtplugClientOutMessage) {
         info!("Sending message to clients.");
         match &msg {
-            ButtplugMessageUnion::DeviceAdded(dev) => {
+            ButtplugClientOutMessage::DeviceAdded(dev) => {
                 let info = DeviceMessageInfo::from(dev);
                 let device = self.create_client_device(&info);
                 self.devices.insert(dev.device_index, info);
@@ -147,7 +147,7 @@ impl ButtplugClientEventLoop {
                     .send(ButtplugClientEvent::DeviceAdded(device))
                     .await;
             }
-            ButtplugMessageUnion::DeviceList(dev) => {
+            ButtplugClientOutMessage::DeviceList(dev) => {
                 for d in &dev.devices {
                     let device = self.create_client_device(&d);
                     self.devices.insert(d.device_index, d.clone());
@@ -156,7 +156,7 @@ impl ButtplugClientEventLoop {
                         .await;
                 }
             }
-            ButtplugMessageUnion::DeviceRemoved(dev) => {
+            ButtplugClientOutMessage::DeviceRemoved(dev) => {
                 let info = self.devices.remove(&dev.device_index);
                 self.device_event_senders.remove(&dev.device_index);
                 self.event_sender

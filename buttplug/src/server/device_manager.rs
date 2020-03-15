@@ -13,7 +13,7 @@ use crate::{
         errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
         messages::{
             self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
-            ButtplugDeviceMessage, ButtplugMessage, ButtplugMessageUnion, DeviceAdded, DeviceList,
+            ButtplugDeviceMessage, ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceAdded, DeviceList,
             DeviceMessageInfo, DeviceRemoved, ScanningFinished,
         },
     },
@@ -66,7 +66,7 @@ enum DeviceEvent {
 async fn wait_for_manager_events(
     mut device_comm_receiver: Receiver<DeviceCommunicationEvent>,
     ping_receiver: Option<Receiver<bool>>,
-    sender: Sender<ButtplugMessageUnion>,
+    sender: Sender<ButtplugOutMessage>,
     device_map: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
 ) {
     let mut device_index: u32 = 0;
@@ -168,7 +168,7 @@ async fn wait_for_manager_events(
 
 impl DeviceManager {
     pub fn new(
-        event_sender: Sender<ButtplugMessageUnion>,
+        event_sender: Sender<ButtplugOutMessage>,
         ping_receiver: Option<Receiver<bool>>,
     ) -> Self {
         let (sender, receiver) = channel(256);
@@ -233,7 +233,7 @@ impl DeviceManager {
     async fn parse_device_message(
         &self,
         device_msg: ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    ) -> Result<ButtplugOutMessage, ButtplugError> {
         let mut dev;
         match self
             .devices
@@ -264,7 +264,7 @@ impl DeviceManager {
     async fn parse_device_manager_message(
         &mut self,
         manager_msg: ButtplugDeviceManagerMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+    ) -> Result<ButtplugOutMessage, ButtplugError> {
         match manager_msg {
             ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
                 let devices = self
@@ -299,8 +299,8 @@ impl DeviceManager {
 
     pub async fn parse_message(
         &mut self,
-        msg: ButtplugMessageUnion,
-    ) -> Result<ButtplugMessageUnion, ButtplugError> {
+        msg: ButtplugInMessage,
+    ) -> Result<ButtplugOutMessage, ButtplugError> {
         // If this is a device command message, just route it directly to the
         // device.
         match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {

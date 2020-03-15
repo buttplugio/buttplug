@@ -193,25 +193,14 @@ pub enum ButtplugDeviceMessageType {
 }
 
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub enum ButtplugMessageUnion {
-    // Status messages
-    Ok(Ok),
-    Error(Error),
+pub enum ButtplugInMessage {
     Ping(Ping),
-    Test(Test),
     RequestLog(RequestLog),
-    Log(Log),
     // Handshake messages
     RequestServerInfo(RequestServerInfo),
-    ServerInfo(ServerInfo),
     // Device enumeration messages
-    DeviceList(DeviceList),
-    DeviceAdded(DeviceAdded),
-    DeviceRemoved(DeviceRemoved),
     StartScanning(StartScanning),
     StopScanning(StopScanning),
-    ScanningFinished(ScanningFinished),
     RequestDeviceList(RequestDeviceList),
     // Generic commands
     StopAllDevices(StopAllDevices),
@@ -221,7 +210,6 @@ pub enum ButtplugMessageUnion {
     RawWriteCmd(RawWriteCmd),
     RawReadCmd(RawReadCmd),
     StopDeviceCmd(StopDeviceCmd),
-    RawReading(RawReading),
     SubscribeCmd(SubscribeCmd),
     UnsubscribeCmd(UnsubscribeCmd),
     // Deprecated generic commands
@@ -234,41 +222,44 @@ pub enum ButtplugMessageUnion {
     // To Add:
     // PatternCmd
     // BatteryLevelCmd
-    // BatteryLevelReading
     // RSSILevelCmd
-    // RSSILevelReading
     // ShockCmd?
     // ToneEmitterCmd?
 }
 
-#[cfg(feature = "serialize_json")]
-impl ButtplugMessageUnion {
-    pub fn try_deserialize(msg_str: &str) -> Result<Self, ButtplugError> {
-        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
-            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
-            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub enum ButtplugMessageUnionVersion2 {
+pub enum ButtplugOutMessage {
+    // Status messages
     Ok(Ok),
     Error(Error),
-    Ping(Ping),
     Test(Test),
-    RequestLog(RequestLog),
     Log(Log),
     // Handshake messages
-    RequestServerInfo(RequestServerInfo),
     ServerInfo(ServerInfo),
     // Device enumeration messages
     DeviceList(DeviceList),
     DeviceAdded(DeviceAdded),
     DeviceRemoved(DeviceRemoved),
+    ScanningFinished(ScanningFinished),
+    // Generic commands
+    RawReading(RawReading),
+    // To Add:
+    // BatteryLevelReading
+    // RSSILevelReading
+}
+
+pub type ButtplugClientInMessage = ButtplugSpecV2InMessage;
+pub type ButtplugClientOutMessage = ButtplugSpecV2OutMessage;
+
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugInMessage)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+pub enum ButtplugSpecV2InMessage {
+    RequestLog(RequestLog),
+    // Handshake messages
+    RequestServerInfo(RequestServerInfo),
+    // Device enumeration messages
     StartScanning(StartScanning),
     StopScanning(StopScanning),
-    ScanningFinished(ScanningFinished),
     RequestDeviceList(RequestDeviceList),
     // Generic commands
     StopAllDevices(StopAllDevices),
@@ -278,99 +269,135 @@ pub enum ButtplugMessageUnionVersion2 {
     RawWriteCmd(RawWriteCmd),
     RawReadCmd(RawReadCmd),
     StopDeviceCmd(StopDeviceCmd),
-    RawReading(RawReading),
     SubscribeCmd(SubscribeCmd),
     UnsubscribeCmd(UnsubscribeCmd),
+    // To Add:
     // PatternCmd
     // BatteryLevelCmd
-    // BatteryLevelReading
     // RSSILevelCmd
-    // RSSILevelReading
     // ShockCmd?
     // ToneEmitterCmd?
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugOutMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugMessageUnionVersion1 {
-    Ok(Ok),
-    Error(Error),
-    Ping(Ping),
-    Test(Test),
+pub enum ButtplugSpecV2OutMessage {
+        // Status messages
+        Ok(Ok),
+        Error(Error),
+        Log(Log),
+        // Handshake messages
+        ServerInfo(ServerInfo),
+        // Device enumeration messages
+        DeviceList(DeviceList),
+        DeviceAdded(DeviceAdded),
+        DeviceRemoved(DeviceRemoved),
+        ScanningFinished(ScanningFinished),
+        // Generic commands
+        RawReading(RawReading),
+        // To Add:
+        // BatteryLevelReading
+        // RSSILevelReading
+}
+
+#[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+enum ButtplugSpecV1InMessage {
     RequestLog(RequestLog),
-    Log(Log),
+    // Handshake messages
     RequestServerInfo(RequestServerInfo),
-    ServerInfo(ServerInfo),
-    DeviceList(DeviceList),
-    DeviceAdded(DeviceAdded),
-    DeviceRemoved(DeviceRemoved),
+    // Device enumeration messages
     StartScanning(StartScanning),
     StopScanning(StopScanning),
-    ScanningFinished(ScanningFinished),
     RequestDeviceList(RequestDeviceList),
+    // Generic commands
     StopAllDevices(StopAllDevices),
     VibrateCmd(VibrateCmd),
     LinearCmd(LinearCmd),
     RotateCmd(RotateCmd),
+    StopDeviceCmd(StopDeviceCmd),
+    // Deprecated generic commands
+    SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+    // Deprecated device specific commands
     FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
     LovenseCmd(LovenseCmd),
     KiirooCmd(KiirooCmd),
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
-    SingleMotorVibrateCmd(SingleMotorVibrateCmd),
-    StopDeviceCmd(StopDeviceCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
+#[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugMessageSpecVersion0 {
+enum ButtplugSpecV1OutMessage {
+    // Status messages
     Ok(Ok),
     Error(Error),
     Log(Log),
-    RequestLog(RequestLog),
-    Ping(Ping),
-    Test(Test),
-    RequestServerInfo(RequestServerInfo),
-    ServerInfo(ServerInfo),
-    RequestDeviceList(RequestDeviceList),
-    DeviceList(DeviceList),
-    DeviceAdded(DeviceAdded),
+    // Handshake messages
+    //ServerInfo(ServerInfoV0),
+    // Device enumeration messages
+    //DeviceList(DeviceListV1),
+    //DeviceAdded(DeviceAddedV1),
     DeviceRemoved(DeviceRemoved),
+    ScanningFinished(ScanningFinished), 
+}
+
+#[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+enum ButtplugSpecV0InMessage {
+    RequestLog(RequestLog),
+    // Handshake messages
+    RequestServerInfo(RequestServerInfo),
+    // Device enumeration messages
     StartScanning(StartScanning),
     StopScanning(StopScanning),
-    ScanningFinished(ScanningFinished),
+    RequestDeviceList(RequestDeviceList),
+    // Generic commands
+    StopAllDevices(StopAllDevices),
+    StopDeviceCmd(StopDeviceCmd),
+    // Deprecated generic commands
     SingleMotorVibrateCmd(SingleMotorVibrateCmd),
+    // Deprecated device specific commands
     FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
     LovenseCmd(LovenseCmd),
     KiirooCmd(KiirooCmd),
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
-    StopDeviceCmd(StopDeviceCmd),
-    StopAllDevices(StopAllDevices),
 }
 
-/// Messages that should never be received from the client.
-#[derive(
-    Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugMessageUnion, FromSpecificButtplugMessage,
-)]
-pub enum ButtplugSystemMessageUnion {
-    Ok(Ok),
-    Error(Error),
-    Log(Log),
-    ServerInfo(ServerInfo),
-    DeviceList(DeviceList),
-    DeviceAdded(DeviceAdded),
-    DeviceRemoved(DeviceRemoved),
-    ScanningFinished(ScanningFinished),
-    RawReading(RawReading),
+#[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+enum ButtplugSpecV0OutMessage {
+       // Status messages
+       Ok(Ok),
+       Error(Error),
+       Log(Log),
+       // Handshake messages
+       //ServerInfo(ServerInfoV0),
+       // Device enumeration messages
+       //DeviceList(DeviceListV0),
+       //DeviceAdded(DeviceAddedV0),
+       DeviceRemoved(DeviceRemoved),
+       ScanningFinished(ScanningFinished),
 }
+
+/*
+#[cfg(feature = "serialize_json")]
+impl ButtplugMessageUnion {
+    pub fn try_deserialize(msg_str: &str) -> Result<Self, ButtplugError> {
+        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
+            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
+            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
+    }
+}
+*/
 
 /// Messages that should never be received from the client.
 #[derive(
     Debug, 
     Clone, 
     PartialEq, 
-    ButtplugMessage, 
-    TryFromButtplugMessageUnion, 
+    ButtplugMessage,
     FromSpecificButtplugMessage,
+    TryFromButtplugInMessage,
 )]
 pub enum ButtplugDeviceManagerMessageUnion {
     RequestDeviceList(RequestDeviceList),
@@ -385,8 +412,8 @@ pub enum ButtplugDeviceManagerMessageUnion {
     Clone,
     PartialEq,
     ButtplugDeviceMessage,
-    TryFromButtplugMessageUnion,
     FromSpecificButtplugMessage,
+    TryFromButtplugInMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnion {
     FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),

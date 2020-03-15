@@ -88,7 +88,7 @@ create_buttplug_protocol!(
                 if !cmds[0].is_none() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
                     let lovense_cmd = format!("Vibrate:{};", cmds[0].unwrap()).as_bytes().to_vec();
                     device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)).await?;
-                    return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
+                    return Ok(messages::Ok::default().into());
                 }
                 for i in 0..cmds.len() {
                     if let Some(speed) = cmds[i] {
@@ -96,7 +96,7 @@ create_buttplug_protocol!(
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)).await?;
                     }
                 }
-                return Ok(ButtplugMessageUnion::Ok(messages::Ok::default()));
+                return Ok(messages::Ok::default().into());
             },
             Err(e) => Err(e)
         }
@@ -133,7 +133,7 @@ create_buttplug_protocol!(
                         device.write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false)).await?;
                     }
                 }
-                Ok(ButtplugMessageUnion::Ok(messages::Ok::default()))
+                Ok(messages::Ok::default().into())
             },
             Err(e) => Err(e)
         }
