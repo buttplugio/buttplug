@@ -13,7 +13,7 @@ pub trait ButtplugServerWrapper<'a> {
     type Input;
     type Output;
 
-    async fn parse_message(&mut self, msg: &Self::Input) -> Self::Output;
+    async fn parse_message(&mut self, msg: Self::Input) -> Self::Output;
     fn server_ref(&'a mut self) -> &'a mut ButtplugServer;
 }
 
@@ -52,10 +52,56 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugInProcessServerWrapper {
     type Input = ButtplugClientInMessage; 
     type Output = ButtplugClientOutMessage;
 
-    async fn parse_message(&mut self, msg: &Self::Input) -> Self::Output {
+    async fn parse_message(&mut self, msg: Self::Input) -> Self::Output {
         let input = ButtplugInProcessServerWrapper::convert_incoming(msg.clone());
         let output = self.server.parse_message(&input).await.unwrap();
         ButtplugInProcessServerWrapper::convert_outgoing(output)
+    }
+
+    fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
+        &mut self.server
+    }
+}
+
+pub struct ButtplugJSONServerWrapper {
+    server: ButtplugServer
+}
+
+impl ButtplugJSONServerWrapper {
+    pub fn new(name: &str,
+        max_ping_time: u128
+    ) -> (Self, Receiver<ButtplugClientOutMessage>) {
+        let (send, recv) = channel(256);
+        let (server, mut recv_server) = ButtplugServer::new(name, max_ping_time);
+        
+        task::spawn(async move {
+            while let Some(event) = recv_server.next().await {
+                let converted_event = ButtplugInProcessServerWrapper::convert_outgoing(event);
+                send.send(converted_event).await;
+            }
+        });
+
+        (Self { server }, recv)
+    }
+
+    fn convert_incoming(msg: String) -> ButtplugInMessage {
+        //msg.into()
+        ButtplugInMessage::Ping(messages::Ping::default())
+    }
+
+    fn convert_outgoing(msg: ButtplugOutMessage) -> String {
+        //msg.try_into().unwrap()
+        "test".to_string()
+    }
+}
+
+#[async_trait]
+impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
+    type Input = String;
+    type Output = String;
+
+    async fn parse_message(&mut self, msg: Self::Input) -> Self::Output {
+        "test".to_string()
     }
 
     fn server_ref(&'a mut self) -> &'a mut ButtplugServer {

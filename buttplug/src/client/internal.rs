@@ -172,7 +172,7 @@ impl ButtplugClientEventLoop {
         match msg {
             ButtplugClientMessage::Message(msg_fut) => {
                 debug!("Sending message through connector.");
-                self.connector.send(&msg_fut.0, &msg_fut.1).await;
+                self.connector.send(msg_fut.0, &msg_fut.1).await;
                 true
             }
             ButtplugClientMessage::Disconnect(state) => {
@@ -261,7 +261,7 @@ impl ButtplugClientEventLoop {
                 StreamReturn::DeviceMessage(msg_fut) => {
                     // TODO Check whether we actually are still connected to
                     // this device.
-                    self.connector.send(&msg_fut.0, &msg_fut.1).await;
+                    self.connector.send(msg_fut.0, &msg_fut.1).await;
                 }
                 StreamReturn::Disconnect => {
                     info!("Disconnected!");

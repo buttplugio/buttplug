@@ -521,7 +521,7 @@ mod test {
             Err(ButtplugClientConnectorError::new("Always fails"))
         }
 
-        async fn send(&mut self, _msg: &ButtplugClientInMessage, _state: &ButtplugMessageStateShared) {
+        async fn send(&mut self, _msg: ButtplugClientInMessage, _state: &ButtplugMessageStateShared) {
         }
 
         fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {

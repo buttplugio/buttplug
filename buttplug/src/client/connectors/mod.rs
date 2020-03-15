@@ -75,7 +75,7 @@ impl Error for ButtplugClientConnectorError {
 pub trait ButtplugClientConnector: Send {
     async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError>;
     async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError>;
-    async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugMessageStateShared);
+    async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared);
     fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
 
@@ -116,7 +116,7 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
         Ok(())
     }
 
-    async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+    async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
         let ret_msg = self.server.parse_message(msg).await;
         let mut waker_state = state.lock().unwrap();
         waker_state.set_reply(ret_msg);
