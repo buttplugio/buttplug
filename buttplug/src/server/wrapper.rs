@@ -3,7 +3,7 @@ use super::ButtplugServer;
 use crate::core::{
     messages::{self, ButtplugClientOutMessage, ButtplugClientInMessage, ButtplugInMessage, ButtplugOutMessage, 
         ButtplugSpecV2InMessage, ButtplugSpecV2OutMessage, ButtplugSpecV1InMessage, ButtplugSpecV1OutMessage,
-        ButtplugSpecV0InMessage, ButtplugSpecV0OutMessage },
+        ButtplugSpecV0InMessage, ButtplugSpecV0OutMessage, ButtplugMessage, ButtplugMessageSpecVersion },
     errors::{ButtplugError, ButtplugMessageError},
 };
 use async_std::{
@@ -96,7 +96,7 @@ impl ButtplugJSONServerWrapper {
         (Self { server, message_version: None }, recv)
     }
 
-    fn deserialize<T>(msg: String) -> Result<T, ButtplugError>
+    pub(crate) fn deserialize<T>(msg: String) -> Result<T, ButtplugError>
         where T: serde::de::DeserializeOwned + Clone {
         serde_json::from_str::<Vec<T>>(&msg)
             .and_then(|msg_vec| Ok(msg_vec[0].clone()))
@@ -108,19 +108,32 @@ impl ButtplugJSONServerWrapper {
         // RequestServerInfo message to get the version. RequestServerInfo can
         // always be parsed as the latest message version, as we keep it
         // compatible across versions via serde options.
-        if self.message_version.is_none() {
+        if let Some(version) = self.message_version {
+            match version {
+                ButtplugMessageSpecVersion::Version0 => {
+                    let bp_msg = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV0InMessage>(msg)?;
+                    Ok(bp_msg.into())
+                },
+                ButtplugMessageSpecVersion::Version1 => {
+                    let bp_msg = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV1InMessage>(msg)?;
+                    Ok(bp_msg.into())
+                }
+                ButtplugMessageSpecVersion::Version2 => {
+                    let bp_msg = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2InMessage>(msg)?;
+                    Ok(bp_msg.into())
+                }
+            }
+        } else {
             let msg_union = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2InMessage>(msg)?;
-            if let ButtplugSpecV2InMessage::RequestServerInfo(rsi) = msg_union {
+            if let ButtplugSpecV2InMessage::RequestServerInfo(rsi) = &msg_union {
                 self.message_version = Some(rsi.message_version);
             }
+            Ok(msg_union.into())
         }
-
-        Ok(ButtplugInMessage::Ping(messages::Ping::default()))
     }
 
     fn convert_outgoing(&self, msg: ButtplugOutMessage) -> String {
-        //msg.try_into().unwrap()
-        "test".to_string()
+        msg.as_protocol_json()
     }
 }
 
@@ -134,13 +147,65 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
     type Input = String;
     type Output = String;
 
-    async fn parse_message(&mut self, msg: Self::Input) -> Self::Output {
-        let input = self.convert_incoming(msg);
-        let output = self.server.parse_message(&input.unwrap()).await.unwrap();
-        self.convert_outgoing(output)
+    async fn parse_message(&mut self, str_msg: Self::Input) -> Self::Output {
+        match self.convert_incoming(str_msg) {
+            Ok(msg) => {
+                let server_response = self.server.parse_message(&msg).await.unwrap();
+                self.convert_outgoing(server_response) 
+            },
+            Err(err) => self.convert_outgoing(ButtplugOutMessage::Error(err.into()))
+        }
     }
 
     fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
         &mut self.server
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use async_std::task;
+
+    #[test]
+    fn test_correct_message_version() {
+        let (mut json_wrapper, _) = ButtplugJSONServerWrapper::new("Test Wrapper", 0);
+        let json = r#"[{
+            "RequestServerInfo": {
+                "Id": 1,
+                "ClientName": "Test Client",
+                "MessageVersion": 2
+            }
+        }]"#;
+        task::block_on(async move {
+            let msg = json_wrapper.parse_message(json.to_owned()).await;
+            let err_msg = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2OutMessage>(msg).unwrap();
+            if let ButtplugSpecV2OutMessage::ServerInfo(e) = err_msg {
+                assert!(true, format!("Correct message! {:?}", e));
+            } else {
+                assert!(false, format!("Wrong message! {:?}", err_msg));
+            }
+        });
+    }
+
+    #[test]
+    fn test_wrong_message_version() {
+        let (mut json_wrapper, _) = ButtplugJSONServerWrapper::new("Test Wrapper", 0);
+        let json = r#"[{
+            "RequestServerInfo": {
+                "Id": 1,
+                "ClientName": "Test Client",
+                "MessageVersion": 100
+            }
+        }]"#;
+        task::block_on(async move {
+            let msg = json_wrapper.parse_message(json.to_owned()).await;
+            let err_msg = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2OutMessage>(msg).unwrap();
+            if let ButtplugSpecV2OutMessage::Error(e) = err_msg {
+                assert!(true, "Correct message! {:?}", e);
+            } else {
+                assert!(false, "Wrong message!");
+            }
+        });
     }
 }
