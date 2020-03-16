@@ -83,7 +83,7 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]
-#[repr(u8)]
+#[repr(u32)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize_repr, Deserialize_repr))]
 pub enum ButtplugMessageSpecVersion {
     Version0 = 0,
