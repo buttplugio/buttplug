@@ -79,7 +79,12 @@ pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 use std::convert::TryFrom;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "serialize_json")]
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]
+#[repr(u8)]
+#[cfg_attr(feature = "serialize_json", derive(Serialize_repr, Deserialize_repr))]
 pub enum ButtplugMessageSpecVersion {
     Version0 = 0,
     Version1 = 1,
@@ -301,7 +306,7 @@ pub enum ButtplugSpecV2OutMessage {
 
 #[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugSpecV1InMessage {
+pub(crate) enum ButtplugSpecV1InMessage {
     RequestLog(RequestLog),
     // Handshake messages
     RequestServerInfo(RequestServerInfo),
@@ -326,7 +331,7 @@ enum ButtplugSpecV1InMessage {
 
 #[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugSpecV1OutMessage {
+pub(crate) enum ButtplugSpecV1OutMessage {
     // Status messages
     Ok(Ok),
     Error(Error),
@@ -342,7 +347,7 @@ enum ButtplugSpecV1OutMessage {
 
 #[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugSpecV0InMessage {
+pub(crate) enum ButtplugSpecV0InMessage {
     RequestLog(RequestLog),
     // Handshake messages
     RequestServerInfo(RequestServerInfo),
@@ -364,7 +369,7 @@ enum ButtplugSpecV0InMessage {
 
 #[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-enum ButtplugSpecV0OutMessage {
+pub(crate) enum ButtplugSpecV0OutMessage {
        // Status messages
        Ok(Ok),
        Error(Error),
@@ -377,17 +382,6 @@ enum ButtplugSpecV0OutMessage {
        DeviceRemoved(DeviceRemoved),
        ScanningFinished(ScanningFinished),
 }
-
-/*
-#[cfg(feature = "serialize_json")]
-impl ButtplugMessageUnion {
-    pub fn try_deserialize(msg_str: &str) -> Result<Self, ButtplugError> {
-        serde_json::from_str::<Vec<ButtplugMessageUnion>>(&msg_str)
-            .and_then(|msg_vec| Ok(msg_vec[0].clone()))
-            .map_err(|e| ButtplugMessageError::new(&e.to_string()).into())
-    }
-}
-*/
 
 /// Messages that should never be received from the client.
 #[derive(
