@@ -42,9 +42,9 @@ mod unsubscribe_cmd;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
-pub use device_added::DeviceAdded;
+pub use device_added::{DeviceAdded, DeviceAddedV1, DeviceAddedV0};
 pub use device_removed::DeviceRemoved;
-pub use device_list::DeviceList;
+pub use device_list::{DeviceList, DeviceListV1, DeviceListV0};
 pub use device_message_info::{DeviceMessageInfo, MessageAttributesMap};
 pub use error::{Error, ErrorCode};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
@@ -64,7 +64,7 @@ pub use request_log::RequestLog;
 pub use request_server_info::RequestServerInfo;
 pub use rotate_cmd::{RotateCmd, RotationSubcommand};
 pub use scanning_finished::ScanningFinished;
-pub use server_info::ServerInfo;
+pub use server_info::{ServerInfo, ServerInfoV0};
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
 pub use start_scanning::StartScanning;
 pub use stop_all_devices::StopAllDevices;
@@ -76,6 +76,7 @@ pub use unsubscribe_cmd::UnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
+use crate::core::errors::ButtplugMessageError;
 use std::convert::TryFrom;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
@@ -306,7 +307,7 @@ pub enum ButtplugSpecV2OutMessage {
         // RSSILevelReading
 }
 
-#[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugInMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1InMessage {
     RequestLog(RequestLog),
@@ -331,7 +332,7 @@ pub(crate) enum ButtplugSpecV1InMessage {
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1OutMessage {
     // Status messages
@@ -339,15 +340,47 @@ pub(crate) enum ButtplugSpecV1OutMessage {
     Error(Error),
     Log(Log),
     // Handshake messages
-    //ServerInfo(ServerInfoV0),
+    ServerInfo(ServerInfoV0),
     // Device enumeration messages
-    //DeviceList(DeviceListV1),
-    //DeviceAdded(DeviceAddedV1),
+    DeviceList(DeviceListV1),
+    DeviceAdded(DeviceAddedV1),
     DeviceRemoved(DeviceRemoved),
-    ScanningFinished(ScanningFinished), 
+    ScanningFinished(ScanningFinished),
 }
 
-#[derive(Debug, Clone, PartialEq, TryFromButtplugInMessage)]
+// TODO This was implementated as a derive, but for some reason the .into()
+// calls wouldn't work correctly when used as a device. If the actual
+// implementation is here, things work fine. Luckily it won't ever be changed
+// much.
+impl TryFrom<ButtplugOutMessage> for ButtplugSpecV1OutMessage {
+    type Error = ButtplugMessageError;
+    fn try_from(msg: ButtplugOutMessage)
+     -> Result<Self, ButtplugMessageError> {
+        match msg {
+            ButtplugOutMessage::Ok(msg) =>
+            Ok(ButtplugSpecV1OutMessage::Ok(msg.into())),
+            ButtplugOutMessage::Error(msg) =>
+            Ok(ButtplugSpecV1OutMessage::Error(msg.into())),
+            ButtplugOutMessage::Log(msg) =>
+            Ok(ButtplugSpecV1OutMessage::Log(msg.into())),
+            ButtplugOutMessage::ServerInfo(msg) =>
+            Ok(ButtplugSpecV1OutMessage::ServerInfo(msg.into())),
+            ButtplugOutMessage::DeviceList(msg) =>
+            Ok(ButtplugSpecV1OutMessage::DeviceList(msg.into())),
+            ButtplugOutMessage::DeviceAdded(msg) =>
+            Ok(ButtplugSpecV1OutMessage::DeviceAdded(msg.into())),
+            ButtplugOutMessage::DeviceRemoved(msg) =>
+            Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg.into())),
+            ButtplugOutMessage::ScanningFinished(msg) =>
+            Ok(ButtplugSpecV1OutMessage::ScanningFinished(msg.into())),
+            _ =>
+            Err(ButtplugMessageError::new("ButtplugOutMessage cannot be converted to #name")),
+        }
+    }
+}
+
+
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugInMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0InMessage {
     RequestLog(RequestLog),
@@ -369,7 +402,7 @@ pub(crate) enum ButtplugSpecV0InMessage {
     VorzeA10CycloneCmd(VorzeA10CycloneCmd),
 }
 
-#[derive(Debug, Clone, PartialEq, TryFromButtplugOutMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0OutMessage {
        // Status messages
@@ -377,14 +410,44 @@ pub(crate) enum ButtplugSpecV0OutMessage {
        Error(Error),
        Log(Log),
        // Handshake messages
-       //ServerInfo(ServerInfoV0),
+       ServerInfo(ServerInfoV0),
        // Device enumeration messages
-       //DeviceList(DeviceListV0),
-       //DeviceAdded(DeviceAddedV0),
+       DeviceList(DeviceListV0),
+       DeviceAdded(DeviceAddedV0),
        DeviceRemoved(DeviceRemoved),
        ScanningFinished(ScanningFinished),
 }
 
+// TODO This was implementated as a derive, but for some reason the .into()
+// calls wouldn't work correctly when used as a device. If the actual
+// implementation is here, things work fine. Luckily it won't ever be changed
+// much.
+impl TryFrom<ButtplugOutMessage> for ButtplugSpecV0OutMessage {
+    type Error = ButtplugMessageError;
+    fn try_from(msg: ButtplugOutMessage)
+     -> Result<Self, ButtplugMessageError> {
+        match msg {
+            ButtplugOutMessage::Ok(msg) =>
+            Ok(ButtplugSpecV0OutMessage::Ok(msg.into())),
+            ButtplugOutMessage::Error(msg) =>
+            Ok(ButtplugSpecV0OutMessage::Error(msg.into())),
+            ButtplugOutMessage::Log(msg) =>
+            Ok(ButtplugSpecV0OutMessage::Log(msg.into())),
+            ButtplugOutMessage::ServerInfo(msg) =>
+            Ok(ButtplugSpecV0OutMessage::ServerInfo(msg.into())),
+            ButtplugOutMessage::DeviceList(msg) =>
+            Ok(ButtplugSpecV0OutMessage::DeviceList(msg.into())),
+            ButtplugOutMessage::DeviceAdded(msg) =>
+            Ok(ButtplugSpecV0OutMessage::DeviceAdded(msg.into())),
+            ButtplugOutMessage::DeviceRemoved(msg) =>
+            Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg.into())),
+            ButtplugOutMessage::ScanningFinished(msg) =>
+            Ok(ButtplugSpecV0OutMessage::ScanningFinished(msg.into())),
+            _ =>
+            Err(ButtplugMessageError::new("ButtplugOutMessage cannot be converted to ButtplugSepcV0OutMessage")),
+        }
+    }
+}
 /// Messages that should never be received from the client.
 #[derive(
     Debug, 

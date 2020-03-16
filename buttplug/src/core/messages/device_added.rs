@@ -39,7 +39,7 @@ impl DeviceAdded {
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub struct DeviceAddedVersion1 {
+pub struct DeviceAddedV1 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub(super) id: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
@@ -50,7 +50,7 @@ pub struct DeviceAddedVersion1 {
     pub device_messages: MessageAttributesMap,
 }
 
-impl From<DeviceAdded> for DeviceAddedVersion1 {
+impl From<DeviceAdded> for DeviceAddedV1 {
     fn from(msg: DeviceAdded) -> Self {
         Self {
             id: msg.get_id(),
@@ -63,7 +63,7 @@ impl From<DeviceAdded> for DeviceAddedVersion1 {
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub struct DeviceAddedVersion0 {
+pub struct DeviceAddedV0 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub(super) id: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
@@ -74,7 +74,7 @@ pub struct DeviceAddedVersion0 {
     pub device_messages: Vec<ButtplugDeviceMessageType>,
 }
 
-impl From<DeviceAdded> for DeviceAddedVersion0 {
+impl From<DeviceAdded> for DeviceAddedV0 {
     fn from(msg: DeviceAdded) -> Self {
         Self {
             id: msg.get_id(),

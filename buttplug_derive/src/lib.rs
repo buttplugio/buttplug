@@ -161,12 +161,12 @@ fn impl_try_from_buttplug_out_message_derive_macro(ast: &syn::DeriveInput) -> To
         let idents: Vec<_> = e.variants.iter().map(|x| x.ident.clone()).collect();
         let gen = quote! {
             impl TryFrom<ButtplugOutMessage> for #name {
-                type Error = &'static str;
+                type Error = ButtplugMessageError;
 
-                fn try_from(msg: ButtplugOutMessage) -> Result<Self, &'static str> {
+                fn try_from(msg: ButtplugOutMessage) -> Result<Self, ButtplugMessageError> {
                     match msg {
-                        #( ButtplugOutMessage::#idents(msg) => Ok(#name::#idents(msg)),)*
-                        _ => Err("ButtplugOutMessage cannot be converted to #name")
+                        #( ButtplugOutMessage::#idents(msg) => Ok(#name::#idents(msg.into())),)*
+                        _ => Err(ButtplugMessageError::new("ButtplugOutMessage cannot be converted to #name"))
                     }
                 }
             }

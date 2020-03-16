@@ -12,7 +12,7 @@ use async_std::{
     task,
 };
 use serde::{Deserialize};
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 
 #[async_trait]
 pub trait ButtplugServerWrapper<'a> {
@@ -80,6 +80,8 @@ pub struct ButtplugJSONServerWrapper {
 }
 
 impl ButtplugJSONServerWrapper {
+    // This won't be called anywhere inside of the library, but we'll need it anyways.
+    #[allow(dead_code)]
     pub fn new(name: &str,
         max_ping_time: u128
     ) -> (Self, Receiver<ButtplugClientOutMessage>) {
@@ -133,7 +135,30 @@ impl ButtplugJSONServerWrapper {
     }
 
     fn convert_outgoing(&self, msg: ButtplugOutMessage) -> String {
-        msg.as_protocol_json()
+        if let Some(version) = self.message_version {
+            match version {
+                ButtplugMessageSpecVersion::Version0 => {
+                    match ButtplugSpecV0OutMessage::try_from(msg) {
+                        Ok(msgv0) => msgv0.as_protocol_json(),
+                        Err(err) => ButtplugSpecV0OutMessage::Error(ButtplugError::ButtplugMessageError(err).into()).as_protocol_json()
+                    }
+                },
+                ButtplugMessageSpecVersion::Version1 => {
+                    match ButtplugSpecV1OutMessage::try_from(msg) {
+                        Ok(msgv1) => msgv1.as_protocol_json(),
+                        Err(err) => ButtplugSpecV1OutMessage::Error(ButtplugError::ButtplugMessageError(err).into()).as_protocol_json()
+                    }
+                }
+                ButtplugMessageSpecVersion::Version2 => {
+                    match ButtplugSpecV2OutMessage::try_from(msg) {
+                        Ok(msgv2) => msgv2.as_protocol_json(),
+                        Err(err) => ButtplugSpecV2OutMessage::Error(ButtplugError::ButtplugMessageError(err).into()).as_protocol_json()
+                    }
+                }
+            }
+        } else {
+            ButtplugOutMessage::Error(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Got outgoing message before incoming?!")).into()).as_protocol_json()
+        }
     }
 }
 
