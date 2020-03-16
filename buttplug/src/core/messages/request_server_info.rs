@@ -9,7 +9,11 @@ use super::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+fn return_version0() -> ButtplugMessageSpecVersion {
+    ButtplugMessageSpecVersion::Version0
+}
+
+#[derive(Debug, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -18,12 +22,12 @@ pub struct RequestServerInfo {
     pub client_name: String,
     // Default for this message is set to 0, as this field didn't exist in the
     // first version of the protocol.
-    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"), serde(default))]
-    pub message_version: u32,
+    #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"), serde(default = "return_version0"))]
+    pub message_version: ButtplugMessageSpecVersion,
 }
 
 impl RequestServerInfo {
-    pub fn new(client_name: &str, message_version: u32) -> Self {
+    pub fn new(client_name: &str, message_version: ButtplugMessageSpecVersion) -> Self {
         Self {
             id: 1,
             client_name: client_name.to_string(),
@@ -34,7 +38,7 @@ impl RequestServerInfo {
 
 #[cfg(test)]
 mod test {
-    use super::RequestServerInfo;
+    use super::{RequestServerInfo, ButtplugMessageSpecVersion};
 
     #[cfg(feature = "serialize_json")]
     #[test]
@@ -49,7 +53,7 @@ mod test {
         let new_msg = RequestServerInfo {
             id: 1,
             client_name: "Test Client".to_owned(),
-            message_version: 2
+            message_version: ButtplugMessageSpecVersion::Version2
         };
         assert_eq!(serde_json::from_str::<RequestServerInfo>(new_json).unwrap(), new_msg);
     }
@@ -66,7 +70,7 @@ mod test {
         let old_msg = RequestServerInfo {
             id: 1,
             client_name: "Test Client".to_owned(),
-            message_version: 0
+            message_version: ButtplugMessageSpecVersion::Version0
         };
         assert_eq!(serde_json::from_str::<RequestServerInfo>(old_json).unwrap(), old_msg);
     }

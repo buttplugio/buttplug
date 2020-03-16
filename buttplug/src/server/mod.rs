@@ -19,6 +19,7 @@ use crate::core::{
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
         ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceMessageInfo,
+        ButtplugMessageSpecVersion
     },
 };
 use async_std::{
@@ -122,8 +123,8 @@ impl PingTimer {
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
     server_name: String,
-    server_spec_version: u32,
-    client_spec_version: Option<u32>,
+    server_spec_version: ButtplugMessageSpecVersion,
+    client_spec_version: Option<ButtplugMessageSpecVersion>,
     client_name: Option<String>,
     device_manager: DeviceManager,
     event_sender: Sender<ButtplugOutMessage>,
@@ -145,7 +146,7 @@ impl ButtplugServer {
         }
         (Self {
             server_name: name.to_string(),
-            server_spec_version: 1,
+            server_spec_version: ButtplugMessageSpecVersion::Version2,
             client_name: None,
             client_spec_version: None,
             device_manager: DeviceManager::new(send.clone(), ping_receiver),
@@ -280,7 +281,7 @@ mod test {
         assert_eq!(server.server_name, "Test Server");
         match server.parse_message(&msg_union).await.unwrap() {
             ButtplugOutMessage::ServerInfo(_s) => {
-                assert_eq!(_s, messages::ServerInfo::new("Test Server", 1, 0))
+                assert_eq!(_s, messages::ServerInfo::new("Test Server", ButtplugMessageSpecVersion::Version2, 0))
             }
             _ => assert!(false, "Should've received ok"),
         }
@@ -290,7 +291,7 @@ mod test {
     #[test]
     fn test_server_handshake() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let msg = messages::RequestServerInfo::new("Test Client", 1).into();
+        let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
         task::block_on(async {
             let (server, _recv) = test_server_setup(&msg).await;
             assert_eq!(server.client_name.unwrap(), "Test Client");
@@ -300,7 +301,7 @@ mod test {
     #[test]
     fn test_server_version_lt() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let msg = messages::RequestServerInfo::new("Test Client", 0).into();
+        let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
         task::block_on(async {
             test_server_setup(&msg).await;
         });
@@ -310,7 +311,7 @@ mod test {
     fn test_server_version_gt() {
         let _ = env_logger::builder().is_test(true).try_init();
         let (mut server, _) = ButtplugServer::new("Test Server", 0);
-        let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version + 1).into();
+        let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
         task::block_on(async {
             assert!(
                 server.parse_message(&msg).await.is_err(),

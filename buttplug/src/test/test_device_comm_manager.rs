@@ -70,7 +70,7 @@ mod test {
     #[cfg(test)]
     mod test {
         use crate::{
-            core::messages::{self, ButtplugOutMessage},
+            core::messages::{self, ButtplugOutMessage, ButtplugMessageSpecVersion},
             device::device::DeviceImpl,
             server::ButtplugServer,
             test::{TestDevice, TestDeviceCommunicationManager},
@@ -86,7 +86,7 @@ mod test {
             TestDeviceCommunicationManager::add_test_device(device_creator);
             server.add_comm_manager::<TestDeviceCommunicationManager>();
             task::block_on(async {
-                let msg = messages::RequestServerInfo::new("Test Client", 1);
+                let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
                 let mut reply = server.parse_message(&msg.into()).await;
                 assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
                 reply = server

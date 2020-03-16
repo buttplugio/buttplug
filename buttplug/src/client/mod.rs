@@ -24,7 +24,7 @@ use crate::{
         },
         messages::{
             ButtplugClientInMessage, ButtplugClientOutMessage, DeviceMessageInfo, LogLevel, RequestDeviceList,
-            RequestServerInfo, StartScanning,
+            RequestServerInfo, StartScanning, ButtplugMessageSpecVersion
         },
     },
     util::future::{ButtplugFuture, ButtplugMessageFuture},
@@ -277,7 +277,7 @@ impl ButtplugClient {
     async fn handshake(&mut self) -> ButtplugClientResult {
         info!("Running handshake with server.");
         match self
-            .send_message(&RequestServerInfo::new(&self.client_name, 1).into())
+            .send_message(&RequestServerInfo::new(&self.client_name, ButtplugMessageSpecVersion::Version2).into())
             .await
         {
             Ok(msg) => {

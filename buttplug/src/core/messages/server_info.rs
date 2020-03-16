@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
@@ -21,7 +21,7 @@ pub struct ServerInfo {
     #[cfg_attr(feature = "serialize_json", serde(rename = "BuildVersion"))]
     pub build_version: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
-    pub message_version: u32,
+    pub message_version: ButtplugMessageSpecVersion,
     #[cfg_attr(feature = "serialize_json", serde(rename = "MaxPingTime"))]
     pub max_ping_time: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "ServerName"))]
@@ -29,7 +29,7 @@ pub struct ServerInfo {
 }
 
 impl ServerInfo {
-    pub fn new(server_name: &str, message_version: u32, max_ping_time: u32) -> Self {
+    pub fn new(server_name: &str, message_version: ButtplugMessageSpecVersion, max_ping_time: u32) -> Self {
         Self {
             id: 0,
             major_version: 0,
