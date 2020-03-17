@@ -34,7 +34,7 @@ uuid = { version = "0.8.1", features = ["serde"] }
 ws = { version = "0.9.1", features = ["ssl"], optional = true }
 openssl = { version = "0.10.28", optional = true }
 url = { version = "2.1.1", optional = true }
-btleplug = { version = "0.4.0", optional = true }
+btleplug = { version = "0.4.1", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.18.0"
