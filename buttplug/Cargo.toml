@@ -54,3 +54,7 @@ path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
+
+# Only build docs on one platform (linux)
+[package.metadata.docs.rs]
+targets = []
