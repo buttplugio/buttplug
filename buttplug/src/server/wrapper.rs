@@ -11,7 +11,6 @@ use async_std::{
     sync::{channel, Receiver},
     task,
 };
-use serde::{Deserialize};
 use std::convert::{TryFrom, TryInto};
 
 #[async_trait]
