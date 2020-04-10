@@ -138,7 +138,9 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
     async fn parse_message(&mut self, str_msg: Self::Input) -> Self::Output {
         match self.convert_incoming(str_msg) {
             Ok(msg) => {
-                let server_response = self.server.parse_message(&msg).await.unwrap();
+                let mut server_response = self.server.parse_message(&msg).await.unwrap();
+                // Make sure we set the response ID to match what is expected.
+                server_response.set_id(msg.get_id());
                 self.convert_outgoing(server_response) 
             },
             Err(err) => self.convert_outgoing(ButtplugOutMessage::Error(err.into()))
