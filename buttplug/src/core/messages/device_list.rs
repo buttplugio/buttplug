@@ -6,6 +6,7 @@
 // for full license information.
 
 use super::*;
+use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1};
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
@@ -30,14 +31,18 @@ pub struct DeviceListV1 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub(super) id: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "Devices"))]
-    pub devices: Vec<DeviceMessageInfo>,
+    pub devices: Vec<DeviceMessageInfoV1>,
 }
 
 impl From<DeviceList> for DeviceListV1 {
     fn from(msg: DeviceList) -> Self {
+        let mut devices = vec!();
+        for d in msg.devices {
+            devices.push(DeviceMessageInfoV1::from(d));
+        }
         Self {
             id: msg.id,
-            devices: msg.devices
+            devices: devices
         }
     }
 }
@@ -48,14 +53,19 @@ pub struct DeviceListV0 {
     #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
     pub(super) id: u32,
     #[cfg_attr(feature = "serialize_json", serde(rename = "Devices"))]
-    pub devices: Vec<DeviceMessageInfo>,
+    pub devices: Vec<DeviceMessageInfoV0>,
 }
 
 impl From<DeviceList> for DeviceListV0 {
     fn from(msg: DeviceList) -> Self {
+        let mut devices = vec!();
+        for d in msg.devices {
+            let dmiv1 = DeviceMessageInfoV1::from(d);
+            devices.push(DeviceMessageInfoV0::from(dmiv1));
+        }
         Self {
             id: msg.id,
-            devices: msg.devices
+            devices: devices
         }
     }
 }

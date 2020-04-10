@@ -160,9 +160,7 @@ pub enum ButtplugMessageType {
     VorzeA10CycloneCmd,
     // To Add:
     // PatternCmd
-    // BatteryLevelCmd
     // BatteryLevelReading
-    // RSSILevelCmd
     // RSSILevelReading
     // ShockCmd?
     // ToneEmitterCmd?
@@ -191,9 +189,7 @@ pub enum ButtplugDeviceMessageType {
     RSSILevelCmd,
     // To Add:
     // PatternCmd
-    // BatteryLevelCmd
     // BatteryLevelReading
-    // RSSILevelCmd
     // RSSILevelReading
     // ShockCmd?
     // ToneEmitterCmd?

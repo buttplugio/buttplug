@@ -6,6 +6,8 @@
 // for full license information.
 
 use super::*;
+use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1};
+
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 
@@ -52,11 +54,15 @@ pub struct DeviceAddedV1 {
 
 impl From<DeviceAdded> for DeviceAddedV1 {
     fn from(msg: DeviceAdded) -> Self {
+        let id = msg.get_id();
+        let dmi = DeviceMessageInfo::from(msg);
+        let dmiv1 = DeviceMessageInfoV1::from(dmi);
+
         Self {
-            id: msg.get_id(),
-            device_index: msg.device_index,
-            device_name: msg.device_name,
-            device_messages: msg.device_messages
+            id,
+            device_index: dmiv1.device_index,
+            device_name: dmiv1.device_name,
+            device_messages: dmiv1.device_messages
         }
     }
 }
@@ -76,11 +82,16 @@ pub struct DeviceAddedV0 {
 
 impl From<DeviceAdded> for DeviceAddedV0 {
     fn from(msg: DeviceAdded) -> Self {
+        let id = msg.get_id();
+        let dmi = DeviceMessageInfo::from(msg);
+        let dmiv1 = DeviceMessageInfoV1::from(dmi);
+        let dmiv0 = DeviceMessageInfoV0::from(dmiv1);
+
         Self {
-            id: msg.get_id(),
-            device_index: msg.device_index,
-            device_name: msg.device_name,
-            device_messages: msg.device_messages.keys().cloned().collect()
+            id,
+            device_index: dmiv0.device_index,
+            device_name: dmiv0.device_name,
+            device_messages: dmiv0.device_messages
         }
     }
 }
