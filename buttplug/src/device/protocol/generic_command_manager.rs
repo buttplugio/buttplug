@@ -89,9 +89,10 @@ impl GenericCommandManager {
     pub fn update_vibration(
         &mut self,
         msg: &VibrateCmd,
-    ) -> Result<Vec<Option<u32>>, ButtplugError> {
+        match_all: bool,
+    ) -> Result<Option<Vec<Option<u32>>>, ButtplugError> {
         // First, make sure this is a valid command, that contains at least one
-        // command.
+        // subcommand.
         if msg.speeds.len() == 0 {
             return Err(ButtplugDeviceError::new(&format!(
                 "VibrateCmd has 0 commands, will not do anything."
@@ -105,6 +106,7 @@ impl GenericCommandManager {
         // If we've already sent commands before, we should check against our
         // old values. Otherwise, we should always send whatever command we're
         // going to send.
+        let mut changed_value = false;
         let mut result: Vec<Option<u32>> = vec![None; self.vibrations.len()];
         for speed_command in &msg.speeds {
             let index = speed_command.index as usize;
@@ -123,7 +125,17 @@ impl GenericCommandManager {
             // If we've already sent commands, we don't want to send them again,
             // because some of our communication busses are REALLY slow. Make sure
             // these values get None in our return vector.
-            if !self.sent_vibration || speed != self.vibrations[index] {
+            if !self.sent_vibration || speed != self.vibrations[index] || match_all {
+                // For some hardware, we always have to send all vibration
+                // values, otherwise if we update one motor but not the other,
+                // we'll stop the other motor completely if we send 0 to it.
+                // That's what "match_all" is used for, so we always fall
+                // through and set all of our values. However, in the case where
+                // *no* motor speed changed, we don't want to send anything.
+                // This is what changed_value checks.
+                if speed != self.vibrations[index] || !self.sent_vibration {
+                    changed_value = true;
+                }
                 self.vibrations[index] = speed;
                 result[index] = Some(speed);
             }
@@ -132,7 +144,11 @@ impl GenericCommandManager {
         self.sent_vibration = true;
 
         // Return the command vector for the protocol to turn into proprietary commands
-        Ok(result)
+        if !changed_value {
+            Ok(None)
+        } else {
+            Ok(Some(result))
+        }
     }
 
     pub fn update_rotation(
@@ -239,12 +255,12 @@ mod test {
             ],
         );
         assert_eq!(
-            mgr.update_vibration(&vibrate_msg).unwrap(),
-            vec![Some(10), Some(10)]
+            mgr.update_vibration(&vibrate_msg, false).unwrap(),
+            Some(vec![Some(10), Some(10)])
         );
         assert_eq!(
-            mgr.update_vibration(&vibrate_msg).unwrap(),
-            vec![None, None]
+            mgr.update_vibration(&vibrate_msg, false).unwrap(),
+            None
         );
         let vibrate_msg_2 = VibrateCmd::new(
             0,
@@ -254,11 +270,11 @@ mod test {
             ],
         );
         assert_eq!(
-            mgr.update_vibration(&vibrate_msg_2).unwrap(),
-            vec![None, Some(15)]
+            mgr.update_vibration(&vibrate_msg_2, false).unwrap(),
+            Some(vec![None, Some(15)])
         );
         let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
-        assert!(mgr.update_vibration(&vibrate_msg_invalid).is_err());
+        assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
     }
 
     #[test]

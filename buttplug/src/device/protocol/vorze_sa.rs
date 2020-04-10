@@ -22,15 +22,30 @@ create_buttplug_protocol!(
     (),
     (
         (VibrateCmd, {
-            let result = self.manager.lock().await.update_vibration(msg);
+            let result = self.manager.lock().await.update_vibration(msg, false);
             match result {
-                Ok(cmds) => {
-                    if let Some(speed) = cmds[0] {
-                        device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![VorzeDevices::Bach as u8, VorzeActions::Vibrate as u8, speed as u8], false).into()).await?;
+                Ok(cmds_option) => {
+                    if let Some(cmds) = cmds_option {
+                        if let Some(speed) = cmds[0] {
+                            device
+                                .write_value(
+                                    DeviceWriteCmd::new(
+                                        Endpoint::Tx,
+                                        vec![
+                                            VorzeDevices::Bach as u8,
+                                            VorzeActions::Vibrate as u8,
+                                            speed as u8,
+                                        ],
+                                        false,
+                                    )
+                                    .into(),
+                                )
+                                .await?;
+                        }
                     }
                     Ok(messages::Ok::default().into())
-                },
-                Err(e) => Err(e)
+                }
+                Err(e) => Err(e),
             }
         }),
         (RotateCmd, {
@@ -38,13 +53,26 @@ create_buttplug_protocol!(
             match result {
                 Ok(cmds) => {
                     if let Some((speed, clockwise)) = cmds[0] {
-                        let dev_id = if self.name.contains("UFO") { VorzeDevices::UFO } else { VorzeDevices::Cyclone };
+                        let dev_id = if self.name.contains("UFO") {
+                            VorzeDevices::UFO
+                        } else {
+                            VorzeDevices::Cyclone
+                        };
                         let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-                        device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![dev_id as u8, VorzeActions::Rotate as u8, data], false).into()).await?;
+                        device
+                            .write_value(
+                                DeviceWriteCmd::new(
+                                    Endpoint::Tx,
+                                    vec![dev_id as u8, VorzeActions::Rotate as u8, data],
+                                    false,
+                                )
+                                .into(),
+                            )
+                            .await?;
                     }
                     Ok(messages::Ok::default().into())
-                },
-                Err(e) => Err(e)
+                }
+                Err(e) => Err(e),
             }
         })
     )
@@ -53,26 +81,52 @@ create_buttplug_protocol!(
 #[cfg(test)]
 mod test {
     use crate::{
-        core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd, RotateCmd, RotationSubcommand},
-        test::{TestDevice, check_recv_value},
+        core::messages::{
+            RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
+        },
         device::{
-            Endpoint,
             device::{DeviceImplCommand, DeviceWriteCmd},
-        }
+            Endpoint,
+        },
+        test::{check_recv_value, TestDevice},
     };
     use async_std::task;
 
     #[test]
     pub fn test_vorze_sa_vibration_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart").await.unwrap();
+            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart")
+                .await
+                .unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
-            device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x06, 0x03, 50], false))).await;
+            device
+                .parse_message(&VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+                .await
+                .unwrap();
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(
+                    Endpoint::Tx,
+                    vec![0x06, 0x03, 50],
+                    false,
+                )),
+            )
+            .await;
             assert!(command_receiver.is_empty());
 
-            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x06, 0x03, 0x0], false))).await;
+            device
+                .parse_message(&StopDeviceCmd::new(0).into())
+                .await
+                .unwrap();
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(
+                    Endpoint::Tx,
+                    vec![0x06, 0x03, 0x0],
+                    false,
+                )),
+            )
+            .await;
             assert!(command_receiver.is_empty());
         });
     }
@@ -80,18 +134,57 @@ mod test {
     #[test]
     pub fn test_vorze_sa_rotation_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA").await.unwrap();
+            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA")
+                .await
+                .unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
-            device.parse_message(&RotateCmd::new(0, vec!(RotationSubcommand::new(0, 0.5, false))).into()).await.unwrap();
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x01, 49], false))).await;
+            device
+                .parse_message(
+                    &RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into(),
+                )
+                .await
+                .unwrap();
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(
+                    Endpoint::Tx,
+                    vec![0x01, 0x01, 49],
+                    false,
+                )),
+            )
+            .await;
             assert!(command_receiver.is_empty());
 
-            device.parse_message(&RotateCmd::new(0, vec!(RotationSubcommand::new(0, 0.5, true))).into()).await.unwrap();
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x01, 177], false))).await;
+            device
+                .parse_message(
+                    &RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true)]).into(),
+                )
+                .await
+                .unwrap();
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(
+                    Endpoint::Tx,
+                    vec![0x01, 0x01, 177],
+                    false,
+                )),
+            )
+            .await;
             assert!(command_receiver.is_empty());
 
-            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
-            check_recv_value(&command_receiver, DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x01, 0x0], false))).await;
+            device
+                .parse_message(&StopDeviceCmd::new(0).into())
+                .await
+                .unwrap();
+            check_recv_value(
+                &command_receiver,
+                DeviceImplCommand::Write(DeviceWriteCmd::new(
+                    Endpoint::Tx,
+                    vec![0x01, 0x01, 0x0],
+                    false,
+                )),
+            )
+            .await;
             assert!(command_receiver.is_empty());
         });
     }
