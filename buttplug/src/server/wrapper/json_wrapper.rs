@@ -6,7 +6,7 @@ use crate::{
     messages::{self, ButtplugInMessage, ButtplugOutMessage, 
         ButtplugSpecV2InMessage, ButtplugSpecV2OutMessage, ButtplugSpecV1InMessage, ButtplugSpecV1OutMessage,
         ButtplugSpecV0InMessage, ButtplugSpecV0OutMessage, ButtplugMessage, ButtplugMessageSpecVersion },
-    errors::{ButtplugError, ButtplugMessageError},
+    errors::{ButtplugError, ButtplugMessageError, ButtplugHandshakeError},
     }
 };
 use async_std::{
@@ -64,14 +64,13 @@ impl ButtplugJSONServerWrapper {
             }
         } else {
             let msg_union = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2InMessage>(msg)?;
-            let mut version = ButtplugMessageSpecVersion::Version0;
+            let version;
             if let ButtplugSpecV2InMessage::RequestServerInfo(rsi) = &msg_union {
                 info!("Setting JSON Wrapper message version to {}", rsi.message_version); 
                 self.message_version = Some(rsi.message_version);
                 version = rsi.message_version;
             } else {
-                panic!("Wrong message type! {:?}", msg_union);
-                // TODO Error here
+                return Err(ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::new("First message received must be a RequestServerInfo message.")));
             }
             let mut recv_server = self.recv_server.take().unwrap();
             let send = self.event_sender.take().unwrap();
@@ -118,7 +117,9 @@ impl ButtplugJSONServerWrapper {
             if let ButtplugOutMessage::Error(_) = &msg {
                 ButtplugJSONServerWrapper::convert_outgoing_associated(ButtplugMessageSpecVersion::Version2, msg.clone())
             } else {
-                ButtplugOutMessage::Error(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Got outgoing message before incoming?!")).into()).as_protocol_json()
+                // If we don't even have enough info to know which message
+                // version to convert to, consider this a handshake error.
+                ButtplugOutMessage::Error(ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::new("Got outgoing message before version was set.")).into()).as_protocol_json()
             }
         }
     }
