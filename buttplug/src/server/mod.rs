@@ -9,7 +9,7 @@
 
 pub mod comm_managers;
 pub mod device_manager;
-mod wrapper;
+pub mod wrapper;
 mod logger;
 
 pub use wrapper::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
