@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 /// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(Debug, PartialEq, Default, ButtplugMessage, Clone)]
+#[derive(Debug, PartialEq, ButtplugMessage, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Ok {
     /// Message Id, used for matching message pairs in remote connection instances.
@@ -23,6 +23,12 @@ impl Ok {
     /// Creates a new Ok message with the given Id.
     pub fn new(id: u32) -> Self {
         Self { id }
+    }
+}
+
+impl Default for Ok {
+    fn default() -> Self {
+        Self{ id: 1 }
     }
 }
 
