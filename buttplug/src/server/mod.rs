@@ -19,7 +19,7 @@ use crate::core::{
     messages::{
         self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceManagerMessageUnion,
         ButtplugMessage, ButtplugInMessage, ButtplugOutMessage, DeviceMessageInfo,
-        ButtplugMessageSpecVersion
+        ButtplugMessageSpecVersion, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION
     },
 };
 use async_std::{
@@ -146,7 +146,7 @@ impl ButtplugServer {
         }
         (Self {
             server_name: name.to_string(),
-            server_spec_version: ButtplugMessageSpecVersion::Version2,
+            server_spec_version: BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
             client_name: None,
             client_spec_version: None,
             device_manager: DeviceManager::new(send.clone(), ping_receiver),

@@ -92,6 +92,8 @@ pub enum ButtplugMessageSpecVersion {
     Version2 = 2,
 }
 
+pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion = ButtplugMessageSpecVersion::Version2;
+
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and [ButtplugMessageUnion] enums, serialization, etc...
