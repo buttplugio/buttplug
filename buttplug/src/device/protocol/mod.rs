@@ -4,7 +4,10 @@ use super::device::DeviceImpl;
 use crate::{
     core::{
         errors::ButtplugError,
-        messages::{ButtplugDeviceCommandMessageUnion, ButtplugOutMessage, MessageAttributesMap},
+        messages::{
+            ButtplugDeviceCommandMessageUnion, ButtplugOutMessage,
+            MessageAttributesMap
+        },
     },
     device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
 };
@@ -171,6 +174,8 @@ macro_rules! create_buttplug_protocol (
                     StopDeviceCmd,
                     MessageAttributesMap,
                     ButtplugOutMessage,
+                    VibrateSubcommand,
+                    ButtplugDeviceMessageType,
                     ButtplugDeviceCommandMessageUnion,
                     $(
                         $message_name
@@ -256,12 +261,42 @@ macro_rules! create_buttplug_protocol (
                                 ButtplugDeviceCommandMessageUnion::$message_name(msg) => {
                                     self.[<$message_name _handler>](device, msg).await
                                 }
-                            ),*
+                            ),*,
+                            ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => {
+                                // Time for sadness! In order to handle conversion of
+                                // SingleMotorVibrateCmd, we need to know how many
+                                // vibrators a device has. We don't actually know that
+                                // until we get to the protocol level, so we're stuck
+                                // parsing this here. Since we can assume
+                                // SingleMotorVibrateCmd will ALWAYS map to vibration,
+                                // we can convert to VibrateCmd here and save ourselves
+                                // having to handle it in every protocol, meaning spec
+                                // v0 and v1 programs will still be forward compatible
+                                // with vibrators.
+                                let vibrator_count;
+                                if let Some(attr) = self.attributes.get(&ButtplugDeviceMessageType::VibrateCmd) {
+                                    if let Some(count) = attr.feature_count {
+                                        vibrator_count = count as usize;
+                                    } else {
+                                        return Err(ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.").into());
+                                    }
+                                } else {
+                                    return Err(ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd to use SingleMotorVibrateCmd.").into());
+                                }
+                                let speed = msg.speed;
+                                let mut cmds = vec!();
+                                for i in 0..vibrator_count {
+                                    cmds.push(VibrateSubcommand::new(i as u32, speed));
+                                }
+                                let mut vibrate_cmd = VibrateCmd::new(msg.device_index, cmds);
+                                vibrate_cmd.set_id(msg.get_id());
+                                self.parse_message(device, &vibrate_cmd.into()).await
+                            },
                             ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
                                 self.handle_stop_device_cmd(device, msg).await
-                            }
+                            },
                             _ => Err(ButtplugError::ButtplugDeviceError(
-                                ButtplugDeviceError::new("AnerosProtocol does not accept this message type."),
+                                ButtplugDeviceError::new("$protocol_name does not accept this message type."),
                             )),
                         }
                     }

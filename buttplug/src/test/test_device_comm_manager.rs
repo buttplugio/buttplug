@@ -33,6 +33,12 @@ impl TestDeviceCommunicationManager {
             DEVICE_LIST.lock().await.push(Box::new(device_impl_creator));
         });
     }
+
+    pub fn clear_test_devices() {
+        task::block_on(async {
+            DEVICE_LIST.lock().await.clear();
+        });
+    }
 }
 
 impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
