@@ -64,12 +64,13 @@ impl ButtplugJSONServerWrapper {
             }
         } else {
             let msg_union = ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2InMessage>(msg)?;
-
             let mut version = ButtplugMessageSpecVersion::Version0;
             if let ButtplugSpecV2InMessage::RequestServerInfo(rsi) = &msg_union {
+                info!("Setting JSON Wrapper message version to {}", rsi.message_version); 
                 self.message_version = Some(rsi.message_version);
                 version = rsi.message_version;
             } else {
+                panic!("Wrong message type! {:?}", msg_union);
                 // TODO Error here
             }
             let mut recv_server = self.recv_server.take().unwrap();
@@ -111,7 +112,14 @@ impl ButtplugJSONServerWrapper {
         if let Some(version) = self.message_version {
             ButtplugJSONServerWrapper::convert_outgoing_associated(version, msg)
         } else {
-            ButtplugOutMessage::Error(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Got outgoing message before incoming?!")).into()).as_protocol_json()
+            // In the rare event that there is a problem with the
+            // RequestServerInfo message (so we can't set up our known spec
+            // version), just encode to the latest and return.
+            if let ButtplugOutMessage::Error(_) = &msg {
+                ButtplugJSONServerWrapper::convert_outgoing_associated(ButtplugMessageSpecVersion::Version2, msg.clone())
+            } else {
+                ButtplugOutMessage::Error(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Got outgoing message before incoming?!")).into()).as_protocol_json()
+            }
         }
     }
 }
