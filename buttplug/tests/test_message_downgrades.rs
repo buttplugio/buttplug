@@ -2,32 +2,81 @@ extern crate buttplug;
 
 #[cfg(test)]
 mod test {
-  use buttplug::{
-    core::messages::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-    server::ButtplugServerWrapper,
-    server::wrapper::ButtplugJSONServerWrapper,
-  };
-  use async_std::task;
+    use async_std::{
+      task,
+      prelude::StreamExt,
+    };
+    use buttplug::{
+        core::messages::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+        server::wrapper::ButtplugJSONServerWrapper, server::ButtplugServerWrapper,
+        test::{TestDevice, TestDeviceCommunicationManager}
+    };
 
-  #[test]
-  fn test_version0_connection() {
-    let _ = env_logger::builder().is_test(true).try_init();
-    task::block_on(async {
-      let (mut server, _) = ButtplugJSONServerWrapper::new("Test Server", 0);
-      let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
-      let output = server.parse_message(rsi.to_owned()).await;
-      assert_eq!(output, format!(r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32));
-    });
-  }
+    #[test]
+    fn test_version0_connection() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        task::block_on(async {
+            let (mut server, _) = ButtplugJSONServerWrapper::new("Test Server", 0);
+            let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
+            let output = server.parse_message(rsi.to_owned()).await;
+            assert_eq!(
+                output,
+                format!(
+                    r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+                    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
+                )
+            );
+        });
+    }
 
-  #[test]
-  fn test_version2_connection() {
-    let _ = env_logger::builder().is_test(true).try_init();
-    task::block_on(async {
-      let (mut server, _) = ButtplugJSONServerWrapper::new("Test Server", 0);
-      let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
-      let output = server.parse_message(rsi.to_owned()).await;
-      assert_eq!(output, format!(r#"[{{"ServerInfo":{{"Id":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32));
-    });
-  }
+    #[test]
+    fn test_version2_connection() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        task::block_on(async {
+            let (mut server, _) = ButtplugJSONServerWrapper::new("Test Server", 0);
+            let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
+            let output = server.parse_message(rsi.to_owned()).await;
+            assert_eq!(
+                output,
+                format!(
+                    r#"[{{"ServerInfo":{{"Id":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+                    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
+                )
+            );
+        });
+    }
+
+    #[test]
+    fn test_version0_device_added_device_list() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        let (mut server, mut recv) = ButtplugJSONServerWrapper::new("Test Server", 0);
+        let (device, device_creator) =
+        TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+        TestDeviceCommunicationManager::add_test_device(device_creator);
+        server.server_ref().add_comm_manager::<TestDeviceCommunicationManager>();
+        task::block_on(async {
+            let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
+            let mut output = server.parse_message(rsi.to_owned()).await;
+            assert_eq!(
+                output,
+                format!(
+                    r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+                    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
+                )
+            );
+            // Skip JSON parsing here, we aren't converting versions.
+            let mut reply = server
+                .server_ref()
+                .parse_message(&messages::StartScanning::default().into())
+                .await;
+            assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+            // Check that we got an event back about a new device.
+            let msg = recv.next().await.unwrap();
+            // We should get back an aneros with only SingleMotorVibrateCmd
+            assert_eq!(msg, r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#);
+            output = server.parse_message(r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned()).await;
+            assert_eq!(
+              output, r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}]}}]"#);
+        });
+    }
 }

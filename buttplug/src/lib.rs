@@ -101,4 +101,4 @@ pub mod device;
 pub mod server;
 pub mod util;
 
-mod test;
+pub mod test;
