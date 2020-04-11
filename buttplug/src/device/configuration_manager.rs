@@ -10,7 +10,7 @@
 use super::protocol::{self, ButtplugProtocolCreator};
 use crate::{
     core::{
-        errors::{ButtplugDeviceError, ButtplugError}, 
+        errors::{ButtplugDeviceError, ButtplugError},
         messages::MessageAttributesMap
     },
     device::Endpoint,
@@ -21,9 +21,13 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
 use std::sync::{Arc, RwLock};
+use serde_json::Value;
+use valico::json_schema;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
+static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
+    include_str!("../../dependencies/buttplug-device-config/buttplug-device-config-schema.json");
 static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
     Lazy::new(|| Arc::new(RwLock::new(None)));
 static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
@@ -268,15 +272,26 @@ impl DeviceConfigurationManager {
     pub fn new() -> Self {
         let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
         let external_config = external_config_guard.read().unwrap();
-        let config;
-        // TODO This can absolutely fail if the external JSON isn't correct. We
-        // should check validity somewhere.
-        //
+        let config: ProtocolConfiguration;
         // TODO We should already load the JSON into the file statics, and just
         // clone it out of our statics as needed.
+        let configuration_schema: Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
+        let mut scope = json_schema::Scope::new();
+        let schema = scope.compile_and_return(configuration_schema.clone(), false).unwrap();
+
         if let Some(cfg) = *external_config {
+            let config_check = serde_json::from_str(cfg).unwrap();
+            let state = schema.validate(&config_check);
+            if !state.is_valid() {
+                panic!("Built-in configuration schema is invalid! Aborting! {:?}", state);
+            }
             config = serde_json::from_str(cfg).unwrap();
         } else {
+            let config_check = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+            let state = schema.validate(&config_check);
+            if !state.is_valid() {
+                panic!("Built-in configuration schema is invalid! Aborting! {:?}", state);
+            }
             config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
         }
 
