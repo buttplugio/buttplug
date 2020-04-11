@@ -20,7 +20,7 @@ use super::{
     ButtplugRemoteClientConnectorMessage, ButtplugRemoteClientConnectorSender,
 };
 use crate::{
-    core::messages::{ButtplugMessage, ButtplugMessageUnion},
+    core::messages::{ButtplugMessage, ButtplugClientInMessage, ButtplugClientOutMessage},
     util::future::ButtplugMessageStateShared,
 };
 use async_std::{
@@ -109,7 +109,7 @@ impl Handler for InternalClient {
 pub struct ButtplugWebsocketClientConnector {
     helper: ButtplugRemoteClientConnectorHelper,
     ws_thread: Option<thread::JoinHandle<()>>,
-    recv: Option<Receiver<ButtplugMessageUnion>>,
+    recv: Option<Receiver<ButtplugClientOutMessage>>,
     address: String,
     bypass_cert_verify: bool,
 }
@@ -141,7 +141,7 @@ impl ButtplugWebsocketWrappedSender {
 }
 
 impl ButtplugRemoteClientConnectorSender for ButtplugWebsocketWrappedSender {
-    fn send(&self, msg: ButtplugMessageUnion) {
+    fn send(&self, msg: ButtplugClientInMessage) {
         let m = msg.as_protocol_json();
         debug!("Sending message: {}", m);
         match self.sender.send(m) {
@@ -205,11 +205,11 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         Ok(())
     }
 
-    async fn send(&mut self, msg: &ButtplugMessageUnion, state: &ButtplugMessageStateShared) {
-        self.helper.send(msg, state).await;
+    async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+        self.helper.send(&msg, state).await;
     }
 
-    fn get_event_receiver(&mut self) -> Receiver<ButtplugMessageUnion> {
+    fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
         // This will panic if we've already taken the receiver.
         self.recv.take().unwrap()
     }
