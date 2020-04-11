@@ -15,6 +15,7 @@ default=["client", "server", "serialize_json", "btleplug-manager"]
 client=[]
 server=[]
 serialize_json=[]
+xinput=[]
 btleplug-manager=["btleplug"]
 client-ws=["client", "serialize_json", "ws", "url"]
 client-ws-ssl=["client", "serialize_json", "ws", "url", "ws/ssl", "openssl"]
@@ -44,6 +45,10 @@ paste = "0.1.10"
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
 futures-channel = "0.3.4"
 lazy_static = "1.4.0"
+byteorder = "1.3.4"
+
+[target.'cfg(windows)'.dependencies]
+rusty-xinput = "1.2.0"
 
 [dev-dependencies]
 env_logger = "0.7.1"

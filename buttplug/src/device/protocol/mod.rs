@@ -64,7 +64,8 @@ create_protocols!(
     ("youcups", youcups, Youcups),
     ("youou", youou, Youou),
     ("lovehoney-desire", lovehoney_desire, LovehoneyDesire),
-    ("vorze-sa", vorze_sa, VorzeSA)
+    ("vorze-sa", vorze_sa, VorzeSA),
+    ("xinput", xinput, XInput)
 );
 
 #[async_trait]

@@ -91,6 +91,25 @@ impl BluetoothLESpecifier {
     }
 }
 
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub struct XInputSpecifier {
+    exists: bool
+}
+
+impl Default for XInputSpecifier {
+    fn default() -> Self {
+        Self {
+            exists: true
+        }
+    }
+}
+
+impl PartialEq for XInputSpecifier {
+    fn eq(&self, other: &Self) -> bool {
+        true
+    }
+}
+
 #[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct HIDSpecifier {
     #[serde(rename = "vendor-id")]
@@ -132,6 +151,7 @@ pub enum DeviceSpecifier {
     HID(HIDSpecifier),
     USB(USBSpecifier),
     Serial(SerialSpecifier),
+    XInput(XInputSpecifier),
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -150,6 +170,7 @@ pub struct ProtocolDefinition {
     pub btle: Option<BluetoothLESpecifier>,
     pub serial: Option<SerialSpecifier>,
     pub hid: Option<HIDSpecifier>,
+    pub xinput: Option<XInputSpecifier>,
     pub defaults: Option<ProtocolAttributes>,
     pub configurations: Vec<ProtocolAttributes>,
 }
@@ -172,6 +193,7 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
             DeviceSpecifier::Serial(other_serial) => option_some_eq(&self.serial, other_serial),
             DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
             DeviceSpecifier::HID(other_hid) => option_some_eq(&self.hid, other_hid),
+            DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput)
         }
     }
 }
@@ -275,9 +297,11 @@ impl DeviceConfigurationManager {
         info!("Looking for protocol that matches spec: {:?}", specifier);
         for (name, def) in self.config.protocols.iter() {
             if def == specifier {
+                debug!("Found protocol for spec!");
                 return Some((name.clone(), def.clone()));
             }
         }
+        info!("No protocol found for spec!");
         None
     }
 
@@ -297,6 +321,7 @@ impl DeviceConfigurationManager {
                 None
             }
         } else {
+            debug!("None found");
             None
         }
     }
