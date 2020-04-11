@@ -11,7 +11,7 @@ use super::protocol::{self, ButtplugProtocolCreator};
 use crate::{
     core::{
         errors::{ButtplugDeviceError, ButtplugError},
-        messages::MessageAttributesMap
+        messages::MessageAttributesMap,
     },
     device::Endpoint,
 };
@@ -20,14 +20,17 @@ use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
-use std::sync::{Arc, RwLock};
 use serde_json::Value;
+use std::sync::{Arc, RwLock};
 use valico::json_schema;
+use std::mem;
 
 static DEVICE_CONFIGURATION_JSON: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config-schema.json");
+static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
+    include_str!("../../dependencies/buttplug-device-config/buttplug-user-device-config-schema.json");
 static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
     Lazy::new(|| Arc::new(RwLock::new(None)));
 static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
@@ -43,9 +46,14 @@ pub fn set_user_device_config(config: Option<&'static str>) {
     *c = config.clone();
 }
 
+fn clear_user_device_config() {
+    let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
+    *c = None;
+}
+
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
-// DeviceProtocolConfiguraation) if needed elsewhere in the codebase. It's not
+// DeviceProtocolConfiguration) if needed elsewhere in the codebase. It's not
 // gonna hurt anything and making a ton of serde attributes is just going to get
 // confusing (see the messages impl).
 
@@ -97,14 +105,12 @@ impl BluetoothLESpecifier {
 
 #[derive(Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
-    exists: bool
+    exists: bool,
 }
 
 impl Default for XInputSpecifier {
     fn default() -> Self {
-        Self {
-            exists: true
-        }
+        Self { exists: true }
     }
 }
 
@@ -131,13 +137,12 @@ pub struct SerialSpecifier {
     #[serde(rename = "stop-bits")]
     stop_bits: u8,
     parity: char,
-    #[serde(default)]
-    ports: HashSet<String>,
+    port: String,
 }
 
 impl PartialEq for SerialSpecifier {
     fn eq(&self, other: &Self) -> bool {
-        self.ports.intersection(&other.ports).count() > 0
+        self.port == other.port
     }
 }
 
@@ -170,41 +175,76 @@ pub struct ProtocolDefinition {
     // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
     // they're kept separate here, and we return them in get_specifiers(). Feels
     // very clumsy, but we really don't do this a bunch during a session.
-    pub usb: Option<USBSpecifier>,
+    pub usb: Option<Vec<USBSpecifier>>,
     pub btle: Option<BluetoothLESpecifier>,
-    pub serial: Option<SerialSpecifier>,
-    pub hid: Option<HIDSpecifier>,
+    pub serial: Option<Vec<SerialSpecifier>>,
+    pub hid: Option<Vec<HIDSpecifier>>,
     pub xinput: Option<XInputSpecifier>,
     pub defaults: Option<ProtocolAttributes>,
     pub configurations: Vec<ProtocolAttributes>,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct UserProtocolDefinition {
+    // Right now, we only allow users to specify serial ports through this
+    // interface. It will contain more additions in the future.
+    pub serial: Option<Vec<SerialSpecifier>>,
+}
+
+
 fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
 where
     T: PartialEq,
 {
-    match &a {
-        Some(a) => a == b,
-        _ => false,
-    }
+    a.as_ref().map_or(false, |x| x == b)
+}
+
+fn option_some_eq_vec<T>(a_opt: &Option<Vec<T>>, b: &T) -> bool
+where
+    T: PartialEq,
+{
+    a_opt.as_ref().map_or(false, |a_vec| a_vec.contains(b))
 }
 
 impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
     fn eq(&self, other: &DeviceSpecifier) -> bool {
         // TODO This seems like a really gross way to do this?
         match other {
-            DeviceSpecifier::USB(other_usb) => option_some_eq(&self.usb, other_usb),
-            DeviceSpecifier::Serial(other_serial) => option_some_eq(&self.serial, other_serial),
+            DeviceSpecifier::USB(other_usb) => option_some_eq_vec(&self.usb, other_usb),
+            DeviceSpecifier::Serial(other_serial) => option_some_eq_vec(&self.serial, other_serial),
             DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
-            DeviceSpecifier::HID(other_hid) => option_some_eq(&self.hid, other_hid),
-            DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput)
+            DeviceSpecifier::HID(other_hid) => option_some_eq_vec(&self.hid, other_hid),
+            DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput),
         }
     }
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ProtocolConfiguration {
-    protocols: HashMap<String, ProtocolDefinition>,
+    pub(self) protocols: HashMap<String, ProtocolDefinition>,
+}
+
+
+#[derive(Deserialize, Debug)]
+pub struct UserProtocolConfiguration {
+    pub protocols: HashMap<String, UserProtocolDefinition>,
+}
+
+impl ProtocolConfiguration {
+    pub fn merge_user_config(&mut self, other: UserProtocolConfiguration) {
+        // For now, we're only merging serial info in.
+        for (protocol, conf) in other.protocols {
+            if self.protocols.contains_key(&protocol) {
+                let our_serial_conf_option = &mut self.protocols.get_mut(&protocol).unwrap().serial;
+                let mut other_serial_conf = conf.serial;
+                if let Some(ref mut our_serial_config) = our_serial_conf_option {
+                    our_serial_config.extend(other_serial_conf.unwrap());
+                } else {
+                    mem::swap(our_serial_conf_option, &mut other_serial_conf);
+                }
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -261,8 +301,8 @@ pub type ProtocolConstructor =
     Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
 
 pub struct DeviceConfigurationManager {
-    config: ProtocolConfiguration,
-    protocols: HashMap<String, ProtocolConstructor>,
+    pub(self) config: ProtocolConfiguration,
+    pub(self) protocols: HashMap<String, ProtocolConstructor>,
 }
 
 unsafe impl Send for DeviceConfigurationManager {}
@@ -272,30 +312,58 @@ impl DeviceConfigurationManager {
     pub fn new() -> Self {
         let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
         let external_config = external_config_guard.read().unwrap();
-        let config: ProtocolConfiguration;
+        let mut config: ProtocolConfiguration;
         // TODO We should already load the JSON into the file statics, and just
         // clone it out of our statics as needed.
-        let configuration_schema: Value = serde_json::from_str(DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
+        let configuration_schema: Value =
+            serde_json::from_str(DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
         let mut scope = json_schema::Scope::new();
-        let schema = scope.compile_and_return(configuration_schema.clone(), false).unwrap();
+        let schema = scope
+            .compile_and_return(configuration_schema.clone(), false)
+            .unwrap();
 
         if let Some(cfg) = *external_config {
             let config_check = serde_json::from_str(cfg).unwrap();
             let state = schema.validate(&config_check);
             if !state.is_valid() {
-                panic!("Built-in configuration schema is invalid! Aborting! {:?}", state);
+                panic!(
+                    "External configuration schema is invalid! Aborting! {:?}",
+                    state
+                );
             }
             config = serde_json::from_str(cfg).unwrap();
         } else {
             let config_check = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
             let state = schema.validate(&config_check);
             if !state.is_valid() {
-                panic!("Built-in configuration schema is invalid! Aborting! {:?}", state);
+                panic!(
+                    "Built-in configuration schema is invalid! Aborting! {:?}",
+                    state
+                );
             }
             config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
         }
 
         // TODO actually load user configuration and merge into maps
+        let user_config_guard = DEVICE_USER_CONFIGURATION_JSON.clone();
+        let user_config_str = user_config_guard.read().unwrap();
+        if let Some(user_cfg) = *user_config_str {
+            let user_configuration_schema: Value =
+            serde_json::from_str(USER_DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
+            let mut user_scope = json_schema::Scope::new();
+            let user_schema = user_scope
+                .compile_and_return(user_configuration_schema.clone(), false)
+                .unwrap();
+            let config_check = serde_json::from_str(user_cfg).unwrap();
+            let state = user_schema.validate(&config_check);
+            if !state.is_valid() {
+                panic!(
+                    "User configuration schema is invalid! Aborting! {:?}",
+                    state
+                );
+            }
+            config.merge_user_config(serde_json::from_str(user_cfg).unwrap());
+        }
 
         // Do not try to use HashMap::new() here. We need the explicit typing,
         // otherwise we'll just get an anonymous closure type during insert that
@@ -346,7 +414,7 @@ impl DeviceConfigurationManager {
 mod test {
     use super::{
         BluetoothLESpecifier, DeviceConfigurationManager, DeviceProtocolConfiguration,
-        DeviceSpecifier,
+        DeviceSpecifier, set_user_device_config, clear_user_device_config
     };
     use crate::core::messages::ButtplugDeviceMessageType;
 
@@ -397,5 +465,37 @@ mod test {
                 .unwrap(),
             2
         );
+    }
+
+    #[test]
+    fn test_user_config_loading() {
+        let _ = env_logger::builder().is_test(true).try_init();
+        let mut config = DeviceConfigurationManager::new();
+        assert!(config.config.protocols.contains_key("erostek-et312"));
+        assert!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().is_some());
+        assert_eq!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().unwrap().len(), 1);
+        set_user_device_config(Some(r#"
+        { 
+            "protocols": {
+                "erostek-et312": {
+                    "serial": [
+                        {
+                            "port": "COM1",
+                            "baud-rate": 19200,
+                            "data-bits": 8,
+                            "parity": "N",
+                            "stop-bits": 1
+                        }
+                    ]
+                }
+            }
+        }
+        "#));
+        config = DeviceConfigurationManager::new();
+        assert!(config.config.protocols.contains_key("erostek-et312"));
+        assert!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().is_some());
+        assert_eq!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().unwrap().len(), 2);
+        assert!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().unwrap().iter().any(|x| x.port == "COM1"));
+        clear_user_device_config();
     }
 }

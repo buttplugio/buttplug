@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "Buttplug User Device Config Schema",
+  "version": 2,
+  "description": "JSON format for Buttplug User Created Device Config Files.",
+  "components": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "serial-definition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string"
+          },
+          "baud-rate": {
+            "type": "integer"
+          },
+          "data-bits": {
+            "type": "integer"
+          },
+          "parity": {
+            "type": "string"
+          },
+          "stop-bits": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "port",
+          "baud-rate",
+          "data-bits",
+          "parity",
+          "stop-bits"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "type": "object",
+  "properties": {
+    "protocols": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "serial": {
+              "$ref": "#/components/serial-definition"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "additionalProperties": false
+  },
+  "required": [
+    "protocols"
+  ],
+  "additionalProperties": false
+}
