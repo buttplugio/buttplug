@@ -65,6 +65,14 @@
       ],
       "additionalProperties": false
     },
+    "xinput-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
     "usb-definition": {
       "type": "object",
       "properties": {
@@ -286,6 +294,9 @@
             },
             "hid": {
               "$ref": "#/components/usb-definition"
+            },
+            "xinput": {
+              "$ref": "#/components/xinput-definition"
             },
             "defaults": {
               "$ref": "#/components/defaults-definition"

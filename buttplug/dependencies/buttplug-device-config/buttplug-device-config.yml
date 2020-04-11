@@ -228,6 +228,11 @@ protocols:
     #
     # TODO Maybe just start calling this "gamepad"? Maybe add "VR
     # Controller" too?
+    #
+    # The specifier needs to be an object and have some content, but it
+    # doesn't matter what.
+    xinput: 
+      exists: true
     defaults:
       messages:
         VibrateCmd:
@@ -240,7 +245,7 @@ protocols:
           # We already know what this is as its communication manager
           # is specifically built for it, so there's nothing to
           # identify. Just make this a string that we'll ignore.
-          - Xbox Gamepad
+          - XInput Gamepad
         name:
           en-us: XBox (XInput) Compatible Gamepad
   kiiroo-v2:

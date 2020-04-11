@@ -146,6 +146,9 @@
       ]
     },
     "xinput": {
+      "xinput": {
+        "exists": true
+      },
       "defaults": {
         "messages": {
           "VibrateCmd": {
@@ -160,7 +163,7 @@
       "configurations": [
         {
           "identifier": [
-            "Xbox Gamepad"
+            "XInput Gamepad"
           ],
           "name": {
             "en-us": "XBox (XInput) Compatible Gamepad"
