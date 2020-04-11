@@ -1,0 +1,290 @@
+[
+  {
+    "Description": "Ok Message",
+    "Messages": [
+      {
+        "Ok": {
+          "Id": 1
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "Error Message",
+    "Messages": [
+      {
+        "Error": {
+          "Id": 0,
+          "ErrorMessage": "Server received invalid JSON.",
+          "ErrorCode": 3
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "Ping Message",
+    "Messages": [
+      {
+        "Ping": {
+          "Id": 5
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "Test Message",
+    "Messages": [
+      {
+        "Test": {
+          "Id": 5,
+          "TestString": "Moo"
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RequestLog Message",
+    "Messages": [
+      {
+        "RequestLog": {
+          "Id": 1,
+          "LogLevel": "Warn"
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RequestLog Message with invalid level",
+    "Messages": [
+      {
+        "RequestLog": {
+          "Id": 1,
+          "LogLevel": "NotALevel"
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldFailParse"
+    ]
+  },
+  {
+    "Description": "Log Message",
+    "Messages": [
+      {
+        "Log": {
+          "Id": 0,
+          "LogLevel": "Trace",
+          "LogMessage": "This is a Log Message."
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "Array with no elements",
+    "Messages": [],
+    "Tests": [
+      "ShouldFailParse"
+    ]
+  },
+  {
+    "Description": "Array with null object",
+    "Messages": [{}],
+    "Tests": [
+      "ShouldFailParse"
+    ]
+  },
+  {
+    "Description": "DeviceAdded should Pass with FeatureCount and StepCount",
+    "Messages": [
+      {
+        "DeviceAdded": {
+          "Id": 0,
+          "DeviceName": "TestDevice 1",
+          "DeviceIndex": 0,
+          "DeviceMessages": {
+            "SingleMotorVibrateCmd": {},
+            "VibrateCmd": { "FeatureCount": 2, "StepCount": [20, 20] },
+            "StopDeviceCmd": {}
+          }
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse"
+    ]
+  },
+  {
+    "Description": "RawReadCmd",
+    "Messages": [
+      {
+        "RawReadCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Endpoint": "rx",
+          "Length": 0,
+          "WaitForData": false
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RawWriteCmd",
+    "Messages": [
+      {
+        "RawWriteCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Endpoint": "rx",
+          "Data": [0, 0, 0]
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RawSubscribeCmd",
+    "Messages": [
+      {
+        "RawSubscribeCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Endpoint": "rx"
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RawUnsubscribeCmd",
+    "Messages": [
+      {
+        "RawUnsubscribeCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Endpoint": "rx"
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "RawReading",
+    "Messages": [
+      {
+        "RawReading": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Endpoint": "rx",
+          "Data": [0, 0, 0]
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "PatternPlaybackCmd",
+    "Messages": [
+      {
+        "PatternPlaybackCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Patterns": [
+            {
+              "Index": 0,
+              "Pattern": "Wave",
+              "Strength": 1.0
+            }
+          ]
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "ShockCmd",
+    "Messages": [
+      {
+        "ShockCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Shocks": [
+            {
+              "Index": 0,
+              "Duration": 500,
+              "Strength": 0.5
+            }
+          ]
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  },
+  {
+    "Description": "ToneEmitterCmd",
+    "Messages": [
+      {
+        "ToneEmitterCmd": {
+          "Id": 0,
+          "DeviceIndex": 0,
+          "Tones": [
+            {
+              "Index": 0,
+              "Duration": 500,
+              "Volume": 0.5
+            }
+          ]
+        }
+      }
+    ],
+    "Tests": [
+      "ShouldPassParse",
+      "ShouldFailOnExtraField"
+    ]
+  }
+]

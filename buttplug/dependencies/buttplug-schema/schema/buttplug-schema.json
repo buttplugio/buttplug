@@ -1,0 +1,1045 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "Buttplug Message Schema",
+  "version": 1,
+  "description": "The JSON Protocol format for the Buttplug Protocol.",
+  "components": {
+    "Id": {
+      "description": "User-set id for the message. 0 denotes system message and is reserved.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "SystemId": {
+      "description": "Used for non-direct-reply messages that can only be sent from server to client, using the reserved system message Id of 0.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 0
+    },
+    "DeviceName": {
+      "description": "Name of the device",
+      "type": "string"
+    },
+    "DeviceIndex": {
+      "description": "Index used for referencing the device in device messages.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "IdMessage": {
+      "description": "Message types that are expected to have an Id and nothing else.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "required": [
+        "Id"
+      ]
+    },
+    "DeviceMessages": {
+      "description": "A list of the messages a device will accept on this server implementation.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1
+      }
+    },
+    "NullMessageAttributes": {
+      "description": "Attributes for device message that have no attributes.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 0,
+      "maxProperties": 0
+    },
+    "GenericMessageAttributes": {
+      "description": "Attributes for device messages.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "RawMessageAttributes": {
+      "description": "Attributes for raw device messages.",
+      "type": "object",
+      "properties": {
+        "Endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minItems": 1
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "PatternMessageAttributes": {
+      "description": "Attributes for PatternPlaybackCmd.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "ActuatorType": {
+          "description": "Types of actuators for pattern playback (Vibrate, Rotate, Linear)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Patterns": {
+          "description": "Names of patterns to play back, per actuator.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "ShockMessageAttributes": {
+      "description": "Attributes for ShockCmd.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "MaxDuration": {
+          "description": "Maximum duration of shock for each actuator",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "DeviceMessagesEx": {
+      "description": "A list of the messages a device will accept on this server implementation.",
+      "type": "object",
+      "properties": {
+        "StopDeviceCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "LovenseCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "VorzeA10CycloneCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "KiirooCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "SingleMotorVibrateCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "FleshlightLaunchFW12Cmd": { "$ref": "#/components/NullMessageAttributes" },
+        "BatteryLevelCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "RSSILevelCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
+        "PatternPlaybackCmd": { "$ref": "#/components/PatternMessageAttributes" },
+        "ShockCmd": { "$ref": "#/components/ShockMessageAttributes" },
+        "ToneEmitterCmd": { "$ref": "#/components/GenericMessageAttributes" }
+      },
+      "additionalProperties": false
+    },
+    "SystemIdMessage": {
+      "description": "Message sent by the server that is not in direct reply to a message send from the client, and always uses system Id.",
+      "properties": {
+        "Id": { "$ref": "#/components/SystemId" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id"
+      ]
+    },
+    "DeviceIndexMessage": {
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
+    "FeatureCount": {
+      "description": "Number of features on device.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "StepCount": {
+      "description": "Specifies granularity of each feature on the device.",
+      "type": "array",
+      "items": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "minItems": 1
+    }
+  },
+  "messages": {
+    "Ok": {
+      "type": "object",
+      "description": "Signifies successful processing of the message indicated by the id.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "Ping": {
+      "type": "object",
+      "description": "Connection keep-alive message.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "Error": {
+      "type": "object",
+      "description": "Signifies the server encountered an error while processing the message indicated by the id.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "ErrorMessage": {
+          "type": "string"
+        },
+        "ErrorCode": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "ErrorMessage",
+        "ErrorCode"
+      ]
+    },
+    "Test": {
+      "type": "object",
+      "description": "Used for connection/application testing. Causes server to echo back the string sent. Sending string of 'Error' will result in a server error. ",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "TestString": {
+          "description": "String to be echo'd back from server. Setting this to 'Error' will cause an error to be thrown.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "TestString"
+      ]
+    },
+    "DeviceList": {
+      "type": "object",
+      "description": "List of all available devices known to the system.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "Devices": {
+          "description": "Array of device ids and names.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "DeviceName": { "$ref": "#/components/DeviceName" },
+              "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+              "DeviceMessages": {
+                "oneOf": [
+                  { "$ref": "#/components/DeviceMessages" },
+                  { "$ref": "#/components/DeviceMessagesEx" }
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "DeviceName",
+              "DeviceIndex",
+              "DeviceMessages"
+            ]
+
+          },
+          "minItems": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Devices"
+      ]
+    },
+    "DeviceAdded": {
+      "type": "object",
+      "description": "Notifies client that a device of a certain type has been added to the server.",
+      "properties": {
+        "Id": { "$ref": "#/components/SystemId" },
+        "DeviceName": { "$ref": "#/components/DeviceName" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "DeviceMessages": {
+          "oneOf": [
+            { "$ref": "#/components/DeviceMessages" },
+            { "$ref": "#/components/DeviceMessagesEx" }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceName",
+        "DeviceIndex",
+        "DeviceMessages"
+      ]
+    },
+    "DeviceRemoved": {
+      "type": "object",
+      "description": "Notifies client that a device of a certain type has been removed from the server.",
+      "anyOf": [ { "$ref": "#/components/DeviceIndexMessage" } ]
+    },
+    "RequestDeviceList": {
+      "type": "object",
+      "description": "Request for the server to send a list of devices to the client.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "StartScanning": {
+      "type": "object",
+      "description": "Request for the server to start scanning for new devices.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "StopScanning": {
+      "type": "object",
+      "description": "Request for the server to stop scanning for new devices.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "ScanningFinished": {
+      "type": "object",
+      "description": "Server notification to client that scanning has ended.",
+      "anyOf": [ { "$ref": "#/components/SystemIdMessage" } ]
+    },
+    "RequestLog": {
+      "type": "object",
+      "description": "Request for server to stream log messages of a certain level to client.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "LogLevel": {
+          "description": "Maximum level of log message to receive.",
+          "enum": [ "Off", "Fatal", "Error", "Warn", "Info", "Debug", "Trace" ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "LogLevel"
+      ]
+    },
+    "Log": {
+      "type": "object",
+      "description": "Log message from the server.",
+      "properties": {
+        "Id": { "$ref": "#/components/SystemId" },
+        "LogLevel": {
+          "description": "Log level of message.",
+          "enum": [ "Off", "Fatal", "Error", "Warn", "Info", "Debug", "Trace" ]
+        },
+        "LogMessage": {
+          "description": "Log message from server.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "LogLevel",
+        "LogMessage"
+      ]
+    },
+    "RequestServerInfo": {
+      "type": "object",
+      "description": "Request server version, and relay client name.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "ClientName": {
+          "description": "Name of the client software.",
+          "type": "string"
+        },
+        "MessageVersion": {
+          "description": "Message template version of the client software.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "ClientName"
+      ]
+    },
+    "ServerInfo": {
+      "type": "object",
+      "description": "Server version information, in Major.Minor.Build format.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "ServerName": {
+          "description": "Name of the server. Can be 0-length.",
+          "type": "string"
+        },
+        "MessageVersion": {
+          "description": "Message template version of the server software.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "MajorVersion": {
+          "description": "Major version of server.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "MinorVersion": {
+          "description": "Minor version of server.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "BuildVersion": {
+          "description": "Build version of server.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "MaxPingTime": {
+          "description": "Maximum time (in milliseconds) the server will wait between ping messages from client before shutting down.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "MessageVersion",
+        "MaxPingTime",
+        "ServerName"
+      ]
+    },
+    "FleshlightLaunchFW12Cmd": {
+      "type": "object",
+      "description": "Sends speed and position command to the Fleshlight Launch Device denoted by the device index.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Speed": {
+          "description": "Speed at which to move to designated position.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 99
+        },
+        "Position": {
+          "description": "Position to which to move Fleshlight.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 99
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Speed",
+        "Position"
+      ]
+    },
+    "LovenseCmd": {
+      "type": "object",
+      "description": "Sends a command string to a Lovense device. Command string will be verified by sender.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Command": {
+          "description": "Command to send to Lovense device.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Command"
+      ]
+    },
+    "SingleMotorVibrateCmd": {
+      "type": "object",
+      "description": "Sends a vibrate command to a device that supports vibration.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Speed": {
+          "description": "Device vibration speed (floating point, 0 < x < 1), stepping will be device specific.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Speed"
+      ]
+    },
+    "RawWriteCmd": {
+      "type": "object",
+      "description": "Sends a raw byte array to a device. Should only be used for testing/development.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Endpoint": {
+          "type": "string",
+          "description": "Endpoint (from device config file) to send command to."
+        },
+        "Data": {
+          "description": "Raw byte string to send to device.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "minItems": 1
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Endpoint",
+        "DeviceIndex",
+        "Data"
+      ]
+    },
+    "RawReadCmd": {
+      "type": "object",
+      "description": "Request a raw byte array from a device. Should only be used for testing/development.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Endpoint": {
+          "type": "string",
+          "description": "Endpoint (from device config file) from which the data was retrieved."
+        },
+        "Length": {
+          "type": "integer",
+          "description": "Amount of data to read from device, 0 to exhaust whatever is in immediate buffer",
+          "minimum": 0
+        },
+        "WaitForData": {
+          "type": "boolean",
+          "description": "If true, then wait until Length amount of data is available."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Endpoint",
+        "DeviceIndex",
+        "Length",
+        "WaitForData"
+      ]
+    },
+    "RawSubscribeCmd": {
+      "type": "object",
+      "description": "Subscribe to an endpoint on a device to receive raw info back.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Endpoint": {
+          "type": "string",
+          "description": "Endpoint (from device config file) from which the data was retrieved."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Endpoint",
+        "DeviceIndex"
+      ]
+    },
+    "RawUnsubscribeCmd": {
+      "type": "object",
+      "description": "Unsubscribe to an endpoint on a device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Endpoint": {
+          "type": "string",
+          "description": "Endpoint (from device config file) from which the data was retrieved."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Endpoint",
+        "DeviceIndex"
+      ]
+    },
+    "RawReading": {
+      "type": "object",
+      "description": "Raw byte array received from a device. Should only be used for testing/development.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Endpoint": {
+          "type": "string",
+          "description": "Endpoint (from device config file) from which the data was retrieved."
+        },
+        "Data": {
+          "description": "Raw byte string received from device.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255,
+            "minItems": 1
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "Endpoint",
+        "DeviceIndex",
+        "Data"
+      ]
+    },
+    "KiirooCmd": {
+      "type": "object",
+      "description": "Sends a raw byte string to a Kiiroo Onyx/Pearl device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Command": {
+          "description": "Command to send to Kiiroo device.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Command"
+      ]
+    },
+    "BatteryLevelCmd": {
+      "type": "object",
+      "description": "Requests that a BatteryLevel be retreived.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
+    "BatteryLevelReading": {
+      "type": "object",
+      "description": "Returns a BatteryLevel read from a device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "BatteryLevel": {
+          "description": "Battery Level",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "BatteryLevel"
+      ]
+    },
+    "RSSILevelCmd": {
+      "type": "object",
+      "description": "Requests that a RSSI level be retreived.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
+    "RSSILevelReading": {
+      "type": "object",
+      "description": "Returns a BatteryLevel read from a device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "RSSILevel": {
+          "description": "RSSI Level",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "RSSILevel"
+      ]
+    },
+    "VorzeA10CycloneCmd": {
+      "type": "object",
+      "description": "Sends a raw byte string to a Kiiroo Onyx/Pearl device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Speed": {
+          "description": "Rotation speed command for the Cyclone.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "Clockwise": {
+          "description": "True for clockwise rotation (in relation to device facing user), false for Counter-clockwise",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Speed",
+        "Clockwise"
+      ]
+    },
+    "StopDeviceCmd": {
+      "type": "object",
+      "description": "Stops the all actions currently being taken by a device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
+    "StopAllDevices": {
+      "type": "object",
+      "description": "Stops all actions currently being taken by all connected devices.",
+      "anyOf": [ { "$ref": "#/components/IdMessage" } ]
+    },
+    "VibrateCmd": {
+      "type": "object",
+      "description": "Sends a vibrate command to a device that supports vibration.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Speeds": {
+          "description": "Device vibration speeds (floating point, 0 < x < 1) keyed on vibrator number, stepping will be device specific.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Vibrator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Speed": {
+                "description": "Vibration speed (floating point, 0 < x < 1), stepping will be device specific.",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Speed"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Speeds"
+      ]
+    },
+    "RotateCmd": {
+      "type": "object",
+      "description": "Sends a rotate command to a device that supports rotation.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Rotations": {
+          "description": "Device rotation speeds (floating point, 0 < x < 1) keyed on rotator number, stepping will be device specific.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Rotator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Speed": {
+                "description": "Rotation speed (floating point, 0 < x < 1), stepping will be device specific.",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "Clockwise": {
+                "description": "Rotation direction (boolean). Not all devices have a concept of actual clockwise.",
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Speed",
+              "Clockwise"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Rotations"
+      ]
+    },
+    "LinearCmd": {
+      "type": "object",
+      "description": "Sends a linear movement command to a device that supports linear movements.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Vectors": {
+          "description": "Device linear movement times (milliseconds) and positions (floating point, 0 < x < 1) keyed on linear actuator number, stepping will be device specific.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Linear actuator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Duration": {
+                "description": "Linear movement time in milliseconds.",
+                "type": "number",
+                "minimum": 0
+              },
+              "Position": {
+                "description": "Linear movement position (floating point, 0 < x < 1), stepping will be device specific.",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Speed",
+              "Position"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Vectors"
+      ]
+    },
+    "PatternPlaybackCmd": {
+      "type": "object",
+      "description": "Sends a pattern command to a device that supports pattern playback.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Patterns": {
+          "description": "List of patterns to play across actuators",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "actuator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Pattern": {
+                "description": "Name of pattern of play.",
+                "type": "string"
+              },
+              "Strength": {
+                "description": "Strength/scaling to play pattern at.",
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Pattern",
+              "Strength"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Patterns"
+      ]
+    },
+    "ShockCmd": {
+      "type": "object",
+      "description": "Sends a shock to devices that support them (Shock collars/bracelets, possibly estim).",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Shocks": {
+          "description": "List of shocks to run across actuators",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Actuator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Strength": {
+                "description": "Strength of shock.",
+                "type": "number",
+                "minimum": 0
+              },
+              "Duration": {
+                "description": "Duration of shock (not to exceed MaxDuration defined in MessageAttributes).",
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Strength",
+              "Duration"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Shocks"
+      ]
+    },
+    "ToneEmitterCmd": {
+      "type": "object",
+      "description": "Make a device emit a tone (assuming it has a beeper/speaker)",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Tones": {
+          "description": "List of tones to run across beepers/speakers",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Actuator number.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Volume": {
+                "description": "Volume level (as denoted by StepCount in MessageAttributes).",
+                "type": "number",
+                "minimum": 0
+              },
+              "Duration": {
+                "description": "Duration of tone in milliseconds.",
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Volume",
+              "Duration"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Tones"
+      ]
+    }
+  },
+  "type": "array",
+  "items": {
+    "title": "Messages",
+    "type": "object",
+    "description": "One or more messages validated by the Buttplug Message schema list.",
+    "properties": {
+      "Ok": { "$ref": "#/messages/Ok" },
+      "Error": { "$ref": "#/messages/Error" },
+      "Ping": { "$ref": "#/messages/Ping" },
+      "Test": { "$ref": "#/messages/Test" },
+      "DeviceList": { "$ref": "#/messages/DeviceList" },
+      "DeviceAdded": { "$ref": "#/messages/DeviceAdded" },
+      "DeviceRemoved": { "$ref": "#/messages/DeviceRemoved" },
+      "RequestDeviceList": { "$ref": "#/messages/RequestDeviceList" },
+      "StopDeviceCmd": { "$ref": "#/messages/StopDeviceCmd" },
+      "StopAllDevices": { "$ref": "#/messages/StopAllDevices" },
+      "StartScanning": { "$ref": "#/messages/StartScanning" },
+      "StopScanning": { "$ref": "#/messages/StopScanning" },
+      "ScanningFinished": { "$ref": "#/messages/ScanningFinished" },
+      "RequestLog": { "$ref": "#/messages/RequestLog" },
+      "Log": { "$ref": "#/messages/Log" },
+      "RequestServerInfo": { "$ref": "#/messages/RequestServerInfo" },
+      "ServerInfo": { "$ref": "#/messages/ServerInfo" },
+      "FleshlightLaunchFW12Cmd": { "$ref": "#/messages/FleshlightLaunchFW12Cmd" },
+      "LovenseCmd": { "$ref": "#/messages/LovenseCmd" },
+      "SingleMotorVibrateCmd": { "$ref": "#/messages/SingleMotorVibrateCmd" },
+      "KiirooCmd": { "$ref": "#/messages/KiirooCmd" },
+      "RawReadCmd": { "$ref": "#/messages/RawReadCmd" },
+      "RawWriteCmd": { "$ref": "#/messages/RawWriteCmd" },
+      "RawSubscribeCmd": { "$ref": "#/messages/RawSubscribeCmd" },
+      "RawUnsubscribeCmd": { "$ref": "#/messages/RawUnsubscribeCmd" },
+      "RawReading": { "$ref": "#/messages/RawReading" },
+      "VorzeA10CycloneCmd": { "$ref": "#/messages/VorzeA10CycloneCmd" },
+      "VibrateCmd": { "$ref": "#/messages/VibrateCmd" },
+      "RotateCmd": { "$ref": "#/messages/RotateCmd" },
+      "LinearCmd": { "$ref": "#/messages/LinearCmd" },
+      "BatteryLevelCmd": { "$ref": "#/messages/BatteryLevelCmd" },
+      "BatteryLevelReading": { "$ref": "#/messages/BatteryLevelReading" },
+      "RSSILevelCmd": { "$ref": "#/messages/RSSILevelCmd" },
+      "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" },
+      "PatternPlaybackCmd": { "$ref": "#/messages/PatternPlaybackCmd" },
+      "ShockCmd": { "$ref": "#/messages/ShockCmd" },
+      "ToneEmitterCmd": { "$ref": "#/messages/ToneEmitterCmd" }
+    },
+    "additionalProperties": false,
+    "minProperties": 1,
+    "maxProperties": 1
+  },
+  "minItems": 1,
+  "additionalProperties": false
+}
