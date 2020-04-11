@@ -108,6 +108,13 @@ impl GenericCommandManager {
         // going to send.
         let mut changed_value = false;
         let mut result: Vec<Option<u32>> = vec![None; self.vibrations.len()];
+        // If we're in a match all situation, set up the array with all prior
+        // values before switching them out.
+        if match_all {
+            for i in 0..self.vibrations.len() {
+                result[i] = Some(self.vibrations[i]);
+            }
+        }
         for speed_command in &msg.speeds {
             let index = speed_command.index as usize;
             // Since we're going to iterate here anyways, we do our index check
