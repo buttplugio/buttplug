@@ -1013,11 +1013,11 @@ protocols:
               - 99
   erostek-et312:
     serial:
-      # Port names are defined in user configs
-      baud-rate: 19200
-      data-bits: 8
-      parity: N
-      stop-bits: 1
+      - port: default
+        baud-rate: 19200
+        data-bits: 8
+        parity: N
+        stop-bits: 1
     defaults:
       messages:
         LinearCmd:
@@ -1031,8 +1031,8 @@ protocols:
           en-us: Erostek ET312
   vorze-cyclone-x:
     hid:
-      vendor-id: 0x0483
-      product-id: 0x5750
+      - vendor-id: 0x0483
+        product-id: 0x5750
     defaults:
       messages:
         RotateCmd:
@@ -1046,8 +1046,8 @@ protocols:
           en-us: Rends Cyclone X10
   rez-trancevibrator:
     usb:
-      vendor-id: 0xb49
-      product-id: 0x064f
+      - vendor-id: 0xb49
+        product-id: 0x064f
     defaults:
       messages:
         VibrateCmd:
@@ -1160,8 +1160,8 @@ protocols:
           en-us: Youou Wand Vibrator
   realtouch:
     hid:
-      vendor-id: 0x1f54
-      product-id: 0x0001
+      - vendor-id: 0x1f54
+        product-id: 0x0001
     defaults:
       messages:
         LinearCmd:

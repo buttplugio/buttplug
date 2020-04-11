@@ -1402,12 +1402,15 @@
       ]
     },
     "erostek-et312": {
-      "serial": {
-        "baud-rate": 19200,
-        "data-bits": 8,
-        "parity": "N",
-        "stop-bits": 1
-      },
+      "serial": [
+        {
+          "port": "default",
+          "baud-rate": 19200,
+          "data-bits": 8,
+          "parity": "N",
+          "stop-bits": 1
+        }
+      ],
       "defaults": {
         "messages": {
           "LinearCmd": {
@@ -1430,10 +1433,12 @@
       ]
     },
     "vorze-cyclone-x": {
-      "hid": {
-        "vendor-id": 1155,
-        "product-id": 22352
-      },
+      "hid": [
+        {
+          "vendor-id": 1155,
+          "product-id": 22352
+        }
+      ],
       "defaults": {
         "messages": {
           "RotateCmd": {
@@ -1456,10 +1461,12 @@
       ]
     },
     "rez-trancevibrator": {
-      "usb": {
-        "vendor-id": 2889,
-        "product-id": 1615
-      },
+      "usb": [
+        {
+          "vendor-id": 2889,
+          "product-id": 1615
+        }
+      ],
       "defaults": {
         "messages": {
           "VibrateCmd": {
@@ -1641,10 +1648,12 @@
       ]
     },
     "realtouch": {
-      "hid": {
-        "vendor-id": 8020,
-        "product-id": 1
-      },
+      "hid": [
+        {
+          "vendor-id": 8020,
+          "product-id": 1
+        }
+      ],
       "defaults": {
         "messages": {
           "LinearCmd": {

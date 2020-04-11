@@ -42,28 +42,36 @@
       ]
     },
     "serial-definition": {
-      "type": "object",
-      "properties": {
-        "baud-rate": {
-          "type": "integer"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "string"
+          },
+          "baud-rate": {
+            "type": "integer"
+          },
+          "data-bits": {
+            "type": "integer"
+          },
+          "parity": {
+            "type": "string"
+          },
+          "stop-bits": {
+            "type": "integer"
+          }
         },
-        "data-bits": {
-          "type": "integer"
-        },
-        "parity": {
-          "type": "string"
-        },
-        "stop-bits": {
-          "type": "integer"
-        }
+        "required": [
+          "port",
+          "baud-rate",
+          "data-bits",
+          "parity",
+          "stop-bits"
+        ],
+        "additionalProperties": false
       },
-      "required": [
-        "baud-rate",
-        "data-bits",
-        "parity",
-        "stop-bits"
-      ],
-      "additionalProperties": false
+      "minItems": 1
     },
     "xinput-definition": {
       "type": "object",
@@ -74,24 +82,28 @@
       }
     },
     "usb-definition": {
-      "type": "object",
-      "properties": {
-        "vendor-id": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 65535
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vendor-id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          },
+          "product-id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535
+          }
         },
-        "product-id": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 65535
-        }
+        "required": [
+          "vendor-id",
+          "product-id"
+        ],
+        "additionalProperties": false
       },
-      "required": [
-        "vendor-id",
-        "product-id"
-      ],
-      "additionalProperties": false
+      "minItems": 1
     },
     "FeatureCount": {
       "description": "Number of features on device.",
@@ -127,9 +139,15 @@
       "description": "Attributes for device messages.",
       "type": "object",
       "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" },
-        "FeatureOrder": { "$ref": "#/components/FeatureOrder" }
+        "FeatureCount": {
+          "$ref": "#/components/FeatureCount"
+        },
+        "StepCount": {
+          "$ref": "#/components/StepCount"
+        },
+        "FeatureOrder": {
+          "$ref": "#/components/FeatureOrder"
+        }
       },
       "additionalProperties": false,
       "minProperties": 0
@@ -153,8 +171,12 @@
       "description": "Attributes for PatternPlaybackCmd.",
       "type": "object",
       "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" },
+        "FeatureCount": {
+          "$ref": "#/components/FeatureCount"
+        },
+        "StepCount": {
+          "$ref": "#/components/StepCount"
+        },
         "ActuatorType": {
           "description": "Types of actuators for pattern playback (Vibrate, Rotate, Linear)",
           "type": "array",
@@ -180,8 +202,12 @@
       "description": "Attributes for ShockCmd.",
       "type": "object",
       "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" },
+        "FeatureCount": {
+          "$ref": "#/components/FeatureCount"
+        },
+        "StepCount": {
+          "$ref": "#/components/StepCount"
+        },
         "MaxDuration": {
           "description": "Maximum duration of shock for each actuator",
           "type": "array",
@@ -198,23 +224,57 @@
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "object",
       "properties": {
-        "StopDeviceCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
-        "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
-        "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
-        "LovenseCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "VorzeA10CycloneCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "KiirooCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "SingleMotorVibrateCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "BatteryLevelCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "RSSILevelCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "PatternPlaybackCmd": { "$ref": "#/components/PatternMessageAttributes" },
-        "ShockCmd": { "$ref": "#/components/ShockMessageAttributes" },
-        "ToneEmitterCmd": { "$ref": "#/components/GenericMessageAttributes" }
+        "StopDeviceCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "VibrateCmd": {
+          "$ref": "#/components/GenericMessageAttributes"
+        },
+        "LinearCmd": {
+          "$ref": "#/components/GenericMessageAttributes"
+        },
+        "RotateCmd": {
+          "$ref": "#/components/GenericMessageAttributes"
+        },
+        "LovenseCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "VorzeA10CycloneCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "KiirooCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "SingleMotorVibrateCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "BatteryLevelCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "RSSILevelCmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
+        "RawReadCmd": {
+          "$ref": "#/components/RawMessageAttributes"
+        },
+        "RawWriteCmd": {
+          "$ref": "#/components/RawMessageAttributes"
+        },
+        "RawSubscribeCmd": {
+          "$ref": "#/components/RawMessageAttributes"
+        },
+        "RawUnsubscribeCmd": {
+          "$ref": "#/components/RawMessageAttributes"
+        },
+        "PatternPlaybackCmd": {
+          "$ref": "#/components/PatternMessageAttributes"
+        },
+        "ShockCmd": {
+          "$ref": "#/components/ShockMessageAttributes"
+        },
+        "ToneEmitterCmd": {
+          "$ref": "#/components/GenericMessageAttributes"
+        }
       },
       "additionalProperties": false
     },
