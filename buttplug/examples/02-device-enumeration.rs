@@ -8,6 +8,7 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask
 // servers which devices are available.
+#![type_length_limit="5000000"]
 #[allow(unused_imports)]
 use async_std::task;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]

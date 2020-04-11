@@ -16,6 +16,7 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
+#![type_length_limit="5000000"]
 use buttplug::client::{
     connectors::ButtplugEmbeddedClientConnector, ButtplugClient, ButtplugClientEvent,
 };
