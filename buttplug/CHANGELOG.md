@@ -1,3 +1,52 @@
+# 0.2.0 (2020-04-12)
+
+## Features
+
+- Added XInput support on windows
+- Added TestDeviceCommunicationManager and devices for testing/examples.
+- Add RequestLog/Log handling in server.
+- Create Server Wrappers concept, for handling message conversion into/out of
+  the server. Includes JSON implementation.
+- Make Server backward compatible to connections from all older message spec
+  versions (using server wrappers), along with ability to do message
+  up/downgrades (i.e. VibrateCmd <-> SingleMotorVibrateCmd for spec 0/1)
+- Add JSON schema verification of device config files and incoming messages on
+  client/server
+- Add simple user configuration loading, so users can specify serial ports once
+  we support them
+
+## Bugfixes
+
+- Ping timeouts now actually stop devices
+
+## Other
+
+- Divided out message classes into their own files
+- Broke ButtplugMessageUnion into smaller message unions, so we can do less type
+  checking manually.
+
+# 0.1.0 (2020-02-15)
+
+## Features
+
+- Added server, with Win/Linux/macOS/iOS access to Bluetooth
+- Added device support for the following brands:
+  - Lovense
+  - Picobong
+  - Aneros
+  - Lovehoney
+  - MaxPro
+  - PrettyLove
+  - Realov
+  - Svakom
+  - Vorze
+  - YouCups
+  - Youou
+- Server not yet feature complete, missing functionality present in
+  C#/Typescript servers. This is an intermediate release to allow
+  testing of the server code while work on features and parity with
+  other versions continues.
+
 # v0.0.2 - 2019/11/21
 
 ## Features

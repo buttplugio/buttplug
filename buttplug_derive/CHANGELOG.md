@@ -1,3 +1,9 @@
+# v0.2.0 - 2020/04/12
+
+## Features
+
+- Added derives for union generation and message conversion.
+
 # v0.1.0 - 2020/02/15
 
 ## Features
