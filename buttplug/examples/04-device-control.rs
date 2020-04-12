@@ -12,18 +12,24 @@
 
 #[allow(unused_imports)]
 use async_std::task;
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-use buttplug::client::{
-    connectors::websocket::ButtplugWebsocketClientConnector, device::VibrateCommand,
-    ButtplugClient, ButtplugClientEvent,
+
+use buttplug::{
+    client::{
+        connectors::ButtplugEmbeddedClientConnector, device::VibrateCommand, ButtplugClient,
+        ButtplugClientEvent,
+    },
+    core::messages::ButtplugDeviceMessageType,
 };
+
 #[allow(unused_imports)]
 use std::time::Duration;
 
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 async fn device_control_example() {
+    // Onto the final example! Controlling devices.
+
     // We're pretty familiar with connectors by now.
-    let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", true);
+    let connector = ButtplugEmbeddedClientConnector::new("Test Server", 0);
 
     // We'll mostly be doing the same thing we did in example #3, up until we
     // get a device.
@@ -110,7 +116,10 @@ async fn device_control_example() {
                 // indexes.
                 //
                 // For this example, we'll use the simple single value.
-                if dev.allowed_messages.contains_key("VibrateCmd") {
+                if dev
+                    .allowed_messages
+                    .contains_key(&ButtplugDeviceMessageType::VibrateCmd)
+                {
                     dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
                     println!("{} should start vibrating!", dev.name);
                     task::sleep(Duration::from_secs(1)).await;

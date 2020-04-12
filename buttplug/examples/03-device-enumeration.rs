@@ -8,58 +8,89 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask
 // servers which devices are available.
-#![type_length_limit="5000000"]
 #[allow(unused_imports)]
 use async_std::task;
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-use buttplug::client::{
-    connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient, ButtplugClientEvent,
+use buttplug::{
+    client::{ connectors::ButtplugEmbeddedClientConnector, ButtplugClient, ButtplugClientEvent },
+    test::{ TestDeviceCommunicationManager, TestDevice }
 };
 
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 async fn device_enumeration_example() {
-    // Since as of this writing we don't actually have devices in Rust yet,
-    // we'll have to use a websocket connector. You'll want to have Intiface
-    // Desktop running with insecure sockets when you try this example for now.
-    //
-    // (If you're reading this and we have devices in Rust, please file a bug to
-    // tell me to update this)
-    //
-    // Websocket connectors take a address, and whether they should ignore cert
-    // verification or not. Since we're not using SSL for this example, that
-    // doesn't really matter for now.
-    let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", true);
 
-    // Since we don't have a server implementation yet, I'll be skipping the
-    // explanation of how Device Subtype Managers work for this.
+    // Time to see what devices are available! In this example, we'll see how
+    // servers can access certain types of devices, and how clients can ask
+    // servers which devices are available.
 
-    // Let's talk about when and how you'll get events (in this case,
-    // DeviceAdded events) from the server.
+    // Since we're going to need to manage our server and client, this example
+    // will use an embedded connector.
+    let mut connector = ButtplugEmbeddedClientConnector::new("Example Server", 0);
+
+    // This example will also work with a WebsocketConnector if you want to
+    // connect to Intiface Desktop or an intiface-cli instance.
+
+    // We're to the new stuff. When we create a ButtplugEmbeddedConnector, it in
+    // turn creates a Buttplug Server to hold (unless we pass it one to use,
+    // which we won't be doing until later examples). If you're just interested
+    // in creating Buttplug Client applications that will access things like the
+    // Windows Buttplug Server, you won't have to set up the server like this,
+    // but this is good knowledge to have anyways, so it's recommended to at
+    // least read through this.
+    //
+    // When a Buttplug Server is created, it in turn creates a Device Manager.
+    // The Device Manager is basically the hub of all hardware communication for
+    // Buttplug. A Device Manager will hold multiple Device Communication
+    // Managers, which is where we get to specifics about hardware busses and
+    // communications. For instance, as of this writing, Buttplug currently
+    // ships with Device Communication Managers for
+    //
+    // - Bluetooth LE (Windows 10/Mac/Linux/iOS)
+    // - XInput/XBox Gamepads (Win >= 7)
+    // - Test/Simulator
+    //
+    // We can specify which device communication managers we want to use. For
+    // this example, we'll just add a TestDeviceManager so we don't have to deal
+    // with actual hardware. This requires a bit of manual setup.
+    //
+    // To do this, we'll add the device comm manager. For the test device comm
+    // manager, this gets a little complicated. We'll just be emulating a
+    // bluetooth device, the Aneros Vivi, by using its bluetooth name.
+    
+    let (_, test_device_impl_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+    TestDeviceCommunicationManager::add_test_device(test_device_impl_creator);
+    connector.add_comm_manager::<TestDeviceCommunicationManager>();
+
+    // If we wanted to add a real device manager, like the btleplug manager,
+    // we'd run something like this:
+    //
+    // connector.add_comm_manager::<BtlePlugCommunicationManager>()
+
+    // Anyways, now that we have a manager sorted, Let's talk about when and how
+    // you'll get events (in this case, DeviceAdded events) from the server.
     //
     // The server can fire device connection events at 2 points.
     //
     // - When a client first connects, if the server has a device connection it
-    // is already holding.
+    //   is already holding.
     //
     // - During device scanning.
     //
     // When the client connects as part of ButtplugClient::run(), it asks the
     // server for a list of already connected devices. The server will return
-    // these as DeviceAdded events, including a ButtplugDevice instance we can
-    // then use to control the device.
+    // these as DeviceAdded events, including a ButtplugClientDevice instance we
+    // can then use to control the device.
     //
     // A quick aside on why a server could hold devices. There are a few reasons
     // this could happen, some chosen, some forced.
     //
     // - On Windows 10, it is sometimes difficult to get bluetooth LE devices to
-    // disconnect, so some software (including the Windows Buttplug Server)
-    // leaves devices connected until either the device is powered off/taken out
-    // of bluetooth range, or the program terminates.
+    //   disconnect, so some software (including the Windows Buttplug Server)
+    //   leaves devices connected until either the device is powered off/taken
+    //   out of bluetooth range, or the program terminates.
     //
     // - Depending on how a server is being used, parts of it like a device
-    // manager may stay alive between client connections. This would mean that
-    // if a client disconnected from a server then reconnected quickly, setup
-    // steps wouldn't have to happen again.
+    //   manager may stay alive between client connections. This would mean that
+    //   if a client disconnected from a server then reconnected quickly, setup
+    //   steps wouldn't have to happen again.
     //
     // With that out of the way, let's build our client.
     let app_closure = |mut client: ButtplugClient| {
@@ -108,7 +139,6 @@ async fn device_enumeration_example() {
                             // The server disconnected, which means we're done
                             // here, so just break up to the top level.
                             println!("Server disconnected!");
-                            break;
                         }
                         _ => {
                             // Something else happened, like scanning finishing,
@@ -121,7 +151,6 @@ async fn device_enumeration_example() {
                     // wait_for_error, we'll get an error back.
                     Err(err) => {
                         println!("Error while waiting for client events: {}", err);
-                        break;
                     }
                 }
 
@@ -141,6 +170,7 @@ async fn device_enumeration_example() {
                     for dev in devices {
                         println!("- {}", dev.name);
                     }
+                    break;
                 }
             }
             // And now we're done!
@@ -153,7 +183,6 @@ async fn device_enumeration_example() {
 }
 
 fn main() {
-    #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
     task::block_on(async {
         device_enumeration_example().await;
     })
