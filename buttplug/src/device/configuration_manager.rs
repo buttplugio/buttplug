@@ -14,15 +14,14 @@ use crate::{
         messages::MessageAttributesMap,
     },
     device::Endpoint,
+    util::json::JSONValidator
 };
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 // TODO Use parking_lot? We don't really need extra speed for this though.
-use serde_json::Value;
 use std::sync::{Arc, RwLock};
-use valico::json_schema;
 use std::mem;
 
 static DEVICE_CONFIGURATION_JSON: &str =
@@ -115,7 +114,7 @@ impl Default for XInputSpecifier {
 }
 
 impl PartialEq for XInputSpecifier {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, _other: &Self) -> bool {
         true
     }
 }
@@ -315,54 +314,38 @@ impl DeviceConfigurationManager {
         let mut config: ProtocolConfiguration;
         // TODO We should already load the JSON into the file statics, and just
         // clone it out of our statics as needed.
-        let configuration_schema: Value =
-            serde_json::from_str(DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
-        let mut scope = json_schema::Scope::new();
-        let schema = scope
-            .compile_and_return(configuration_schema.clone(), false)
-            .unwrap();
+        let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
 
         if let Some(cfg) = *external_config {
-            let config_check = serde_json::from_str(cfg).unwrap();
-            let state = schema.validate(&config_check);
-            if !state.is_valid() {
-                panic!(
-                    "External configuration schema is invalid! Aborting! {:?}",
-                    state
-                );
-            }
-            config = serde_json::from_str(cfg).unwrap();
-        } else {
-            let config_check = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
-            let state = schema.validate(&config_check);
-            if !state.is_valid() {
-                panic!(
+            match config_validator.validate(cfg) {
+                Ok(_) => config = serde_json::from_str(cfg).unwrap(),
+                Err(e) => panic!(
                     "Built-in configuration schema is invalid! Aborting! {:?}",
-                    state
-                );
+                    e
+                )
             }
-            config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+        } else {
+            match config_validator.validate(DEVICE_CONFIGURATION_JSON) {
+                Ok(_) => config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap(),
+                Err(e) => panic!(
+                    "Built-in configuration schema is invalid! Aborting! {:?}",
+                    e
+                )
+            }
         }
 
         // TODO actually load user configuration and merge into maps
+        let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
         let user_config_guard = DEVICE_USER_CONFIGURATION_JSON.clone();
         let user_config_str = user_config_guard.read().unwrap();
         if let Some(user_cfg) = *user_config_str {
-            let user_configuration_schema: Value =
-            serde_json::from_str(USER_DEVICE_CONFIGURATION_JSON_SCHEMA).unwrap();
-            let mut user_scope = json_schema::Scope::new();
-            let user_schema = user_scope
-                .compile_and_return(user_configuration_schema.clone(), false)
-                .unwrap();
-            let config_check = serde_json::from_str(user_cfg).unwrap();
-            let state = user_schema.validate(&config_check);
-            if !state.is_valid() {
-                panic!(
+            match user_validator.validate(user_cfg) {
+                Ok(_) => config.merge_user_config(serde_json::from_str(user_cfg).unwrap()),
+                Err(e) => panic!(
                     "User configuration schema is invalid! Aborting! {:?}",
-                    state
-                );
+                    e
+                )
             }
-            config.merge_user_config(serde_json::from_str(user_cfg).unwrap());
         }
 
         // Do not try to use HashMap::new() here. We need the explicit typing,

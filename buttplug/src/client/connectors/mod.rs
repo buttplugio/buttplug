@@ -16,9 +16,14 @@ use crate::server::device_manager::{
 #[cfg(feature = "server")]
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
 use crate::{
-    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
-    util::future::{
-        ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared, ButtplugMessageStateShared,
+    core::{
+        messages::{ButtplugClientInMessage, ButtplugClientOutMessage, create_message_validator, ButtplugSpecV2OutMessage},
+        errors::{ButtplugError, ButtplugMessageError}
+    },
+    util::{
+        future::{
+            ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared, ButtplugMessageStateShared,
+        }
     },
 };
 use async_std::sync::{channel, Receiver};
@@ -203,6 +208,7 @@ impl ButtplugRemoteClientConnectorHelper {
         // Remove the receivers we need to move into the task.
         let mut remote_recv = self.remote_recv.take().unwrap();
         let mut internal_recv = self.internal_recv.take().unwrap();
+        let message_validator = create_message_validator();
         async move {
             let mut sorter = ClientConnectorMessageSorter::default();
             // Our in-task remote sender, which is a wrapped version of whatever
@@ -239,15 +245,25 @@ impl ButtplugRemoteClientConnectorHelper {
                                 remote_send = Some(s);
                             }
                             ButtplugRemoteClientConnectorMessage::Text(t) => {
-                                let array: Vec<ButtplugClientOutMessage> =
-                                    serde_json::from_str(&t.clone()).unwrap();
-                                for smsg in array {
-                                    if !sorter.maybe_resolve_message(&smsg) {
-                                        info!("Sending event!");
-                                        // Send notification through event channel
-                                        event_send.send(smsg).await;
+                                match message_validator.validate(&t.clone()) {
+                                    Ok(_) => {
+                                        let array: Vec<ButtplugClientOutMessage> =
+                                           serde_json::from_str(&t.clone()).unwrap();
+                                        for smsg in array {
+                                            if !sorter.maybe_resolve_message(&smsg) {
+                                                debug!("Sending event!");
+                                                // Send notification through event channel
+                                                event_send.send(smsg).await;
+                                            }
+                                        }
+                                    },
+                                    Err(e) => {
+                                        let error_str = format!("Got invalid messages from remote Buttplug Server: {:?}", e);
+                                        error!("{}", error_str);
+                                        event_send.send(ButtplugSpecV2OutMessage::Error(ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&error_str)).into())).await;
                                     }
                                 }
+
                             }
                             ButtplugRemoteClientConnectorMessage::ClientClose(s) => {
                                 info!("Client closing connection {}", s);

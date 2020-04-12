@@ -76,12 +76,22 @@ pub use unsubscribe_cmd::UnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
-use crate::core::errors::ButtplugMessageError;
+use crate::{
+    core::errors::ButtplugMessageError,
+    util::json::JSONValidator
+};
 use std::convert::TryFrom;
 #[cfg(feature = "serialize_json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
+
+static MESSAGE_JSON_SCHEMA: &str =
+    include_str!("../../../dependencies/buttplug-schema/schema/buttplug-schema.json");
+
+pub fn create_message_validator() -> JSONValidator {
+    JSONValidator::new(MESSAGE_JSON_SCHEMA)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]
 #[repr(u32)]

@@ -17,8 +17,8 @@ server=[]
 serialize_json=[]
 xinput=[]
 btleplug-manager=["btleplug"]
-client-ws=["client", "serialize_json", "ws", "url"]
-client-ws-ssl=["client", "serialize_json", "ws", "url", "ws/ssl", "openssl"]
+client-ws=["client", "serialize_json", "ws"]
+client-ws-ssl=["client", "serialize_json", "ws", "ws/ssl", "openssl"]
 
 [dependencies]
 log = "0.4.8"
@@ -34,7 +34,7 @@ serde_repr = "0.1.5"
 uuid = { version = "0.8.1", features = ["serde"] }
 ws = { version = "0.9.1", features = ["ssl"], optional = true }
 openssl = { version = "0.10.29", optional = true }
-url = { version = "2.1.1", optional = true }
+url = { version = "2.1.1"}
 btleplug = { version = "0.4.1", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
