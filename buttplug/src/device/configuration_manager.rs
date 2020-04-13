@@ -45,6 +45,7 @@ pub fn set_user_device_config(config: Option<&'static str>) {
     *c = config.clone();
 }
 
+#[allow(dead_code)]
 fn clear_user_device_config() {
     let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
     *c = None;
