@@ -18,10 +18,11 @@ use crate::{
         },
     },
     device::device::{ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceImplCreator},
+    test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
 };
 use async_std::{
     prelude::{FutureExt, StreamExt},
-    sync::{channel, Arc, Receiver, RwLock, Sender},
+    sync::{channel, Arc, Mutex, Receiver, RwLock, Sender},
     task,
 };
 use async_trait::async_trait;
@@ -321,6 +322,13 @@ impl DeviceManager {
     {
         self.comm_managers
             .push(Box::new(T::new(self.sender.clone())));
+    }
+
+    pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
+        let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
+        let devices = mgr.get_devices_clone();
+        self.comm_managers.push(Box::new(mgr));
+        devices
     }
 }
 

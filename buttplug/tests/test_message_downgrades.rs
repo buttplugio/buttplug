@@ -13,7 +13,7 @@ mod test {
             device::{DeviceImplCommand, DeviceWriteCmd},
         },
         server::wrapper::ButtplugJSONServerWrapper, server::ButtplugServerWrapper,
-        test::{TestDevice, TestDeviceCommunicationManager, check_recv_value}
+        test::{TestDevice, check_recv_value}
     };
 
     #[test]
@@ -54,12 +54,12 @@ mod test {
     fn test_version0_device_added_device_list() {
         let _ = env_logger::builder().is_test(true).try_init();
         let (mut server, mut recv) = ButtplugJSONServerWrapper::new("Test Server", 0);
-        let (device, device_creator) =
+        let (_, device_creator) =
         TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-        TestDeviceCommunicationManager::clear_test_devices();
-        TestDeviceCommunicationManager::add_test_device(device_creator);
-        server.server_ref().add_comm_manager::<TestDeviceCommunicationManager>();
+        
         task::block_on(async {
+            let devices = server.server_ref().add_test_comm_manager();
+            devices.lock().await.push(Box::new(device_creator));
             let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
             let mut output = server.parse_message(rsi.to_owned()).await;
             assert_eq!(
@@ -70,7 +70,7 @@ mod test {
                 )
             );
             // Skip JSON parsing here, we aren't converting versions.
-            let mut reply = server
+            let reply = server
                 .server_ref()
                 .parse_message(&messages::StartScanning::default().into())
                 .await;
@@ -91,12 +91,12 @@ mod test {
         let (mut server, mut recv) = ButtplugJSONServerWrapper::new("Test Server", 0);
         let (device, device_creator) =
         TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-        TestDeviceCommunicationManager::clear_test_devices();
-        TestDeviceCommunicationManager::add_test_device(device_creator);
-        server.server_ref().add_comm_manager::<TestDeviceCommunicationManager>();
         task::block_on(async {
+            let devices = server.server_ref().add_test_comm_manager();
+            devices.lock().await.push(Box::new(device_creator));
+            
             let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
-            let mut output = server.parse_message(rsi.to_owned()).await;
+            let output = server.parse_message(rsi.to_owned()).await;
             assert_eq!(
                 output,
                 format!(
@@ -105,7 +105,7 @@ mod test {
                 )
             );
             // Skip JSON parsing here, we aren't converting versions.
-            let mut reply = server
+            let reply = server
                 .server_ref()
                 .parse_message(&messages::StartScanning::default().into())
                 .await;

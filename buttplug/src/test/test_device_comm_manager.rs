@@ -1,60 +1,43 @@
 use super::TestDeviceImplCreator;
 use crate::{
     core::errors::ButtplugError,
-    device::device::ButtplugDeviceImplCreator,
     server::device_manager::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
 };
 use async_std::{
-    sync::{Arc, Mutex, Sender},
-    task,
+    sync::{Sender, Arc, Mutex}
 };
 use async_trait::async_trait;
-use lazy_static::lazy_static;
-
-lazy_static! {
-    // We create device comm manager instances within the buttplug server,
-    // meaning we can't actually store devices within an instance, because we
-    // may not be able to get it back out. The device list is kept as a module
-    // static, so we can add devices without worrying about when/where the comm
-    // manager exists.
-    static ref DEVICE_LIST: Arc<Mutex<Vec<Box<dyn ButtplugDeviceImplCreator>>>> = Arc::new(Mutex::new(vec!()));
-}
 
 pub struct TestDeviceCommunicationManager {
     device_sender: Sender<DeviceCommunicationEvent>,
+    devices: Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>>
 }
 
 impl TestDeviceCommunicationManager {
-    #[allow(dead_code)]
-    pub fn add_test_device(device_impl_creator: TestDeviceImplCreator) {
-        task::block_on(async {
-            DEVICE_LIST.lock().await.push(Box::new(device_impl_creator));
-        });
-    }
-
-    pub fn clear_test_devices() {
-        task::block_on(async {
-            DEVICE_LIST.lock().await.clear();
-        });
+    pub fn get_devices_clone(&self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
+        self.devices.clone()
     }
 }
 
 impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
     fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
-        Self { device_sender }
+        Self { 
+            device_sender,
+            devices: Arc::new(Mutex::new(vec!()))
+        }
     }
 }
 
 #[async_trait]
 impl DeviceCommunicationManager for TestDeviceCommunicationManager {
     async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
-        let mut dq = task::block_on(async { DEVICE_LIST.lock().await });
-        if dq.is_empty() {
+        let mut devices = self.devices.lock().await;
+        if devices.is_empty() {
             panic!("No devices for test device comm manager to emit!");
         }
-        while let Some(d) = dq.pop() {
+        while let Some(d) = devices.pop() {
             self.device_sender
                 .send(DeviceCommunicationEvent::DeviceFound(d))
                 .await;
@@ -79,7 +62,7 @@ mod test {
             core::messages::{self, ButtplugOutMessage, ButtplugMessageSpecVersion},
             device::device::DeviceImpl,
             server::ButtplugServer,
-            test::{TestDevice, TestDeviceCommunicationManager},
+            test::{TestDevice},
         };
         use async_std::{prelude::StreamExt, task};
 
@@ -89,9 +72,10 @@ mod test {
             let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
             let (device, device_creator) =
                 TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-            TestDeviceCommunicationManager::add_test_device(device_creator);
-            server.add_comm_manager::<TestDeviceCommunicationManager>();
+            
             task::block_on(async {
+                let devices = server.add_test_comm_manager();
+                devices.lock().await.push(Box::new(device_creator));
                 let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
                 let mut reply = server.parse_message(&msg.into()).await;
                 assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));

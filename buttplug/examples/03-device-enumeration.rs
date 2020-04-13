@@ -12,7 +12,7 @@
 use async_std::task;
 use buttplug::{
     client::{ connectors::ButtplugEmbeddedClientConnector, ButtplugClient, ButtplugClientEvent },
-    test::{ TestDeviceCommunicationManager, TestDevice }
+    test::{ TestDevice }
 };
 
 async fn device_enumeration_example() {
@@ -56,8 +56,9 @@ async fn device_enumeration_example() {
     // bluetooth device, the Aneros Vivi, by using its bluetooth name.
     
     let (_, test_device_impl_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-    TestDeviceCommunicationManager::add_test_device(test_device_impl_creator);
-    connector.add_comm_manager::<TestDeviceCommunicationManager>();
+    let devices = connector.server_ref().add_test_comm_manager();
+    devices.lock().await.push(Box::new(test_device_impl_creator));
+    
 
     // If we wanted to add a real device manager, like the btleplug manager,
     // we'd run something like this:

@@ -10,11 +10,8 @@ pub mod messagesorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
-use crate::server::device_manager::{
-    DeviceCommunicationManager, DeviceCommunicationManagerCreator,
-};
 #[cfg(feature = "server")]
-use crate::server::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
+use crate::server::{ButtplugInProcessServerWrapper, ButtplugServerWrapper, ButtplugServer};
 use crate::{
     core::{
         messages::{ButtplugClientInMessage, ButtplugClientOutMessage, create_message_validator, ButtplugSpecV2OutMessage},
@@ -91,7 +88,7 @@ pub struct ButtplugEmbeddedClientConnector {
 }
 
 #[cfg(feature = "server")]
-impl ButtplugEmbeddedClientConnector {
+impl<'a> ButtplugEmbeddedClientConnector{
     pub fn new(name: &str, max_ping_time: u128) -> Self {
         let (server, recv) = ButtplugInProcessServerWrapper::new(&name, max_ping_time);
         Self {
@@ -100,13 +97,9 @@ impl ButtplugEmbeddedClientConnector {
         }
     }
 
-    // TODO Is there some way to do this on the server then pass the server in,
-    // versus just adding through the connector? This feels a little weird.
-    pub fn add_comm_manager<T>(&mut self)
-    where
-        T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+    pub fn server_ref(&'a mut self) -> &'a mut ButtplugServer
     {
-        self.server.server_ref().add_comm_manager::<T>();
+        self.server.server_ref()
     }
 }
 
