@@ -1,5 +1,6 @@
 use crate::create_buttplug_protocol;
 use byteorder::{LittleEndian, WriteBytesExt};
+use crate::core::errors::ButtplugMessageError;
 
 create_buttplug_protocol!(
     // Protocol name
@@ -21,8 +22,10 @@ create_buttplug_protocol!(
                     // we'll just use the manager's return for command validity
                     // checking.
                     let mut cmd = vec![];
-                    cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16);
-                    cmd.write_u16::<LittleEndian>(cmds[1].unwrap() as u16);
+                    cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16)
+                        .map_err(|_| ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")))?;
+                    cmd.write_u16::<LittleEndian>(cmds[1].unwrap() as u16)
+                        .map_err(|_| ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")))?;
                     device
                     .write_value(DeviceWriteCmd::new(
                         Endpoint::Tx,
