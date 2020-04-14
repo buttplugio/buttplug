@@ -42,12 +42,15 @@ Repo](https://github.com/buttplugio/buttplug).
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
-The Rust code in this repo is currently being rebuilt and rewritten.
-It contains a implementation of the Buttplug Client, and a mostly
-functioning Server (hardware accessing) portion is still being worked
-on. Our [C#](https://github.com/metafetish/buttplug-csharp) and
-[Typescript/JS/Node](https://github.com/metafetish/buttplug-js)
-implementations are the most complete for the moment.
+Buttplug-rs is now a full fledged implementation of Buttplug, on par
+with our [C#](https://github.com/buttplugio/buttplug-csharp) and
+[Javascript/Typescript](https://github.com/buttplugio/buttplug-js)
+implementations. 
+
+Buttplug-rs is currently capable of controlling:
+
+- Some Bluetooth LE toys (See [IOSTIndex](https://iostindex.com) for more info)
+- XInput gamepads (Windows only)
 
 ## Introduction
 
@@ -82,8 +85,9 @@ The following crate features are available
 | `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers |
 | `client-ws-ssl` | `client`,`serialize_json` | Websocket client connector with SSL capabilities |
 | `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
+| `xinput` | None | XInput Gamepad support on windows |
 
-Default features are `client`, `server`, `serialize_json`, and `btleplug-manager`.
+Default features are `client`, `server`, `serialize_json`, `client-ws-ssl` and `btleplug-manager`.
 
 ## Building on Windows
 
@@ -106,10 +110,11 @@ issue](https://github.com/buttplugio/buttplug-rs/issues).
 
 ## Contributing
 
-Right now, we mostly need code/API style reviews and feedback. We don't
-really have any good bite-sized chunks to apportion out on the
-implementation yet, but one we do, those will be marked "Help Wanted" in our
-[github issues](https://github.com/buttplugio/buttplug-rs/issues).
+Right now, we mostly need code/API style reviews and feedback. We
+don't really have any good bite-sized chunks to mentor the
+implementation yet, but one we do, those will be marked "Help Wanted"
+in our [github
+issues](https://github.com/buttplugio/buttplug-rs/issues).
 
 ## License
 

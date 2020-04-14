@@ -1,3 +1,9 @@
+# 0.2.1 (2020-04-14)
+
+## Bugfixes
+
+- Update the README. Really. That's it. I just forgot. :(
+
 # 0.2.0 (2020-04-12)
 
 ## Features
