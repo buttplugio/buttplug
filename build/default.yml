@@ -38,6 +38,9 @@ jobs:
      - script: cargo clippy --all
        displayName: cargo clippy
  - job: main
+   variables:
+     VCPKGRS_DYNAMIC: 1
+     VCPKG_ROOT: "c:/vcpkg"
    displayName: Compile and test
    dependsOn: []
    ${{ if eq('true', parameters.cross) }}:
@@ -81,15 +84,26 @@ jobs:
          rust: $(rust)
      # Run any user-specific setup steps
      - ${{ parameters.setup }}
+     - task: Cache@2
+       displayName: Cache vcpkg
+       condition: eq(variables['Agent.OS'], 'Windows_NT')
+       inputs:
+         # As 'key' use the content of the response file, vcpkg's commit id and build agent name.
+         # The key must be one liner, each segment separated by pipe, non-path segments enclosed by
+         # double quotes.
+         key: $(Build.SourcesDirectory)/build/vcpkg_x64-windows.txt | "$(Agent.OS)"
+         path: 'c:/vcpkg'
      - script: |
-        vcpkg install openssl:x64-windows
+        vcpkg install @build/vcpkg_x64-windows.txt
+        echo ##vso[task.setvariable variable=VCPKGRS_DYNAMIC]1
        env:
          RUSTUP_TOOLCHAIN: ${{parameters.rust}}
-       displayName: "Install rust (windows)"
+       displayName: "vcpkg (openssl)"
        condition: eq(variables['Agent.OS'], 'Windows_NT')
      - script: cargo check --all --bins --examples
        displayName: cargo check
        env:
+         VCPKG_ROOT: "c:/vcpkg"
          VCPKGRS_DYNAMIC: 1
      # Can't do no features because we're in a workspace
      #
@@ -103,6 +117,7 @@ jobs:
      - script: cargo test --all
        displayName: cargo test
        env:
+         VCPKG_ROOT: "c:/vcpkg"
          VCPKGRS_DYNAMIC: 1
          ${{ insert }}: ${{ parameters.env }}
  - ${{ if ne('false', parameters.minrust) }}:
