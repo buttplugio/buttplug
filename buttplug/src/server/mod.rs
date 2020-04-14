@@ -330,10 +330,10 @@ mod test {
     #[test]
     fn test_ping_timeout() {
         let _ = env_logger::builder().is_test(true).try_init();
-        let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
+        let (mut server, mut recv) = ButtplugServer::new("Test Server", 300);
         task::block_on(async {
             let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
-            task::sleep(Duration::from_millis(150)).await;
+            task::sleep(Duration::from_millis(350)).await;
             let reply = server.parse_message(&msg.into()).await;
             assert!(
                 reply.is_ok(),
@@ -342,7 +342,7 @@ mod test {
                     reply
                 )
             );
-            task::sleep(Duration::from_millis(150)).await;
+            task::sleep(Duration::from_millis(400)).await;
             let pingmsg = messages::Ping::default();
             match server.parse_message(&pingmsg.into()).await {
                 Ok(_) => panic!("Should get a ping error back!"),
