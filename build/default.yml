@@ -81,8 +81,16 @@ jobs:
          rust: $(rust)
      # Run any user-specific setup steps
      - ${{ parameters.setup }}
+     - script: |
+        vcpkg install openssl:x64-windows
+       env:
+         RUSTUP_TOOLCHAIN: ${{parameters.rust}}
+       displayName: "Install rust (windows)"
+       condition: eq(variables['Agent.OS'], 'Windows_NT')
      - script: cargo check --all --bins --examples
        displayName: cargo check
+       env:
+         VCPKGRS_DYNAMIC: 1
      # Can't do no features because we're in a workspace
      #
      # - script: cargo check --all --bins --examples --no-default-features
@@ -95,6 +103,7 @@ jobs:
      - script: cargo test --all
        displayName: cargo test
        env:
+         VCPKGRS_DYNAMIC: 1
          ${{ insert }}: ${{ parameters.env }}
  - ${{ if ne('false', parameters.minrust) }}:
    - job: msrv
