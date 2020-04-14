@@ -23,7 +23,7 @@ jobs:
          rust: nightly
    pool:
      vmImage: ubuntu-16.04
-   continueOnError: $[eq(variables.rust, 'beta')]
+   continueOnError: true
    steps:
      - template: install-rust.yml@templates
        parameters:
