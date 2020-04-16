@@ -1,3 +1,12 @@
+# 0.2.2 (2020-04-15)
+
+## Features
+
+- XInput is now a default feature
+  - This needed to happen in order to make things like intiface-cli
+    easier to build. Doesn't affect any non-windows platforms, as
+    everything if cfg'd out.
+
 # 0.2.1 (2020-04-14)
 
 ## Bugfixes
