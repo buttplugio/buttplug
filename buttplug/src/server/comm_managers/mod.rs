@@ -1,4 +1,4 @@
 #[cfg(feature = "btleplug-manager")]
 pub mod btleplug;
-#[cfg(feature = "xinput")]
+#[cfg(all(feature = "xinput", target_os = "windows"))]
 pub mod xinput;

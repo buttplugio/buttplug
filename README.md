@@ -87,7 +87,9 @@ The following crate features are available
 | `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
 | `xinput` | None | XInput Gamepad support on windows |
 
-Default features are `client`, `server`, `serialize_json`, `client-ws-ssl` and `btleplug-manager`.
+Default features are `client`, `server`, `serialize_json`,
+`client-ws-ssl`, `btleplug-manager`, and `xinput` (feature is only
+relevant on windows, but builds as a noop on all other platforms).
 
 ## Building on Windows
 
