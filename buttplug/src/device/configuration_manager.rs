@@ -30,17 +30,17 @@ static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-device-config-schema.json");
 static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
     include_str!("../../dependencies/buttplug-device-config/buttplug-user-device-config-schema.json");
-static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
+static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
     Lazy::new(|| Arc::new(RwLock::new(None)));
-static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<&str>>>> =
+static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
     Lazy::new(|| Arc::new(RwLock::new(None)));
 
-pub fn set_external_device_config(config: Option<&'static str>) {
+pub fn set_external_device_config(config: Option<String>) {
     let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
     *c = config.clone();
 }
 
-pub fn set_user_device_config(config: Option<&'static str>) {
+pub fn set_user_device_config(config: Option<String>) {
     let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
     *c = config.clone();
 }
@@ -317,9 +317,9 @@ impl DeviceConfigurationManager {
         // clone it out of our statics as needed.
         let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
 
-        if let Some(cfg) = *external_config {
-            match config_validator.validate(cfg) {
-                Ok(_) => config = serde_json::from_str(cfg).unwrap(),
+        if let Some(ref cfg) = *external_config {
+            match config_validator.validate(&cfg) {
+                Ok(_) => config = serde_json::from_str(&cfg).unwrap(),
                 Err(e) => panic!(
                     "Built-in configuration schema is invalid! Aborting! {:?}",
                     e
@@ -339,9 +339,9 @@ impl DeviceConfigurationManager {
         let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
         let user_config_guard = DEVICE_USER_CONFIGURATION_JSON.clone();
         let user_config_str = user_config_guard.read().unwrap();
-        if let Some(user_cfg) = *user_config_str {
-            match user_validator.validate(user_cfg) {
-                Ok(_) => config.merge_user_config(serde_json::from_str(user_cfg).unwrap()),
+        if let Some(ref user_cfg) = *user_config_str {
+            match user_validator.validate(&user_cfg.to_string()) {
+                Ok(_) => config.merge_user_config(serde_json::from_str(&user_cfg.to_string()).unwrap()),
                 Err(e) => panic!(
                     "User configuration schema is invalid! Aborting! {:?}",
                     e
@@ -474,7 +474,7 @@ mod test {
                 }
             }
         }
-        "#));
+        "#.to_string()));
         config = DeviceConfigurationManager::new();
         assert!(config.config.protocols.contains_key("erostek-et312"));
         assert!(config.config.protocols.get("erostek-et312").unwrap().serial.as_ref().is_some());
