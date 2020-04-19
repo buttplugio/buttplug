@@ -35,6 +35,14 @@ impl ButtplugJSONServerWrapper {
         (Self { server, message_version: None, recv_server: Some(recv_server), event_sender: Some(send)}, recv)
     }
 
+    pub fn new_with_server(server: ButtplugServer,
+        recv_server: Receiver<ButtplugOutMessage>
+    ) -> (Self, Receiver<String>) {
+        let (send, recv) = channel(256);
+
+        (Self { server, message_version: None, recv_server: Some(recv_server), event_sender: Some(send)}, recv)
+    }
+
     pub(crate) fn deserialize<T>(msg: String) -> Result<T, ButtplugError>
         where T: serde::de::DeserializeOwned + Clone {
         serde_json::from_str::<Vec<T>>(&msg)
