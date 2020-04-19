@@ -1,3 +1,16 @@
+# 0.2.3 (2020-04-18)
+
+## Features
+
+- ButtplugServerJSONWrapper can now use injected servers instead of always
+  creating the server itself
+
+## Bugfixes
+
+- Fix global device config string types
+- Update to btleplug 0.4.2, which no longer prints to console on windows
+- XInput no longer prints everything to console
+
 # 0.2.2 (2020-04-15)
 
 ## Features
