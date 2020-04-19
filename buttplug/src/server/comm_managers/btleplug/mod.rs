@@ -33,7 +33,8 @@ pub struct BtlePlugCommunicationManager {
 #[cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))]
 impl BtlePlugCommunicationManager {
     fn get_central(&self) -> Adapter {
-        self.manager.adapters().unwrap()
+        let adapters = self.manager.adapters().unwrap();
+        adapters.into_iter().nth(0).unwrap()
     }
 }
 
