@@ -55,7 +55,6 @@ mod test {
     fn test_endpoint_serialize() {
         let union = ButtplugClientOutMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
         let js = serde_json::to_string(&union).unwrap();
-        println!("{}", js);
         let endpoint_str =
             "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
         assert_eq!(js, endpoint_str);

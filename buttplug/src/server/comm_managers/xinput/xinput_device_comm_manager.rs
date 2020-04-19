@@ -32,7 +32,7 @@ impl DeviceCommunicationManagerCreator for XInputDeviceCommunicationManager {
 #[async_trait]
 impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
     async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
-        println!("XInput manager scanning!");
+        info!("XInput manager scanning!");
         let handle = rusty_xinput::XInputHandle::load_default().unwrap();
         for i in &[
             XInputControllerIndex::XInputController0,
@@ -43,7 +43,6 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
             match handle.get_state(*i as u32) {
                 Ok(_) => {
                     info!("XInput manager found device {}", i);
-                    println!("XInput manager found device {}", i);
                     let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
                     self.sender
                         .send(DeviceCommunicationEvent::DeviceFound(device_creator))

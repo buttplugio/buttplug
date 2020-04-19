@@ -22,7 +22,7 @@ pub struct XInputDeviceImplCreator {
 
 impl XInputDeviceImplCreator {
     pub fn new(index: XInputControllerIndex) -> Self {
-        println!("Emitting a new xbox device impl creator!");
+        debug!("Emitting a new xbox device impl creator!");
         Self {
             index
         }
@@ -32,13 +32,13 @@ impl XInputDeviceImplCreator {
 #[async_trait]
 impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
     fn get_specifier(&self) -> DeviceSpecifier {
-        println!("Getting the specifier!");
+        debug!("Getting the specifier!");
         DeviceSpecifier::XInput(XInputSpecifier::default())
     }
 
     async fn try_create_device_impl(&mut self, protocol: ProtocolDefinition)
         -> Result<Box<dyn DeviceImpl>, ButtplugError> {
-            println!("Emitting a new xbox device impl!");
+            debug!("Emitting a new xbox device impl!");
             Ok(Box::new(XInputDeviceImpl::new(self.index)))
     }
 }
@@ -100,14 +100,11 @@ impl DeviceImpl for XInputDeviceImpl {
     }
 
     async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
-        println!("{:?}", msg.data);
         let mut cursor = Cursor::new(msg.data);
         let left_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
         let right_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
-        println!("{} {}", left_motor_speed, right_motor_speed);
         self.handle.set_state(self.index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-            println!("{:?}", e);
             ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("{:?}", e).to_owned()))
         })
     }
