@@ -12,7 +12,7 @@ edition = "2018"
 exclude = ["examples/**"]
 
 [features]
-default=["thread_pool_runtime", "client", "server", "serialize_json", "btleplug-manager", "client-ws", "xinput"]
+default=["thread_pool_runtime", "client", "server", "serialize_json", "btleplug-manager", "client-ws", "xinput", "serial-manager"]
 client=[]
 server=[]
 serialize_json=[]
@@ -23,6 +23,7 @@ tokio_runtime=[]
 dummy_runtime=[]
 btleplug-manager=["btleplug"]
 client-ws=["client", "serialize_json", "async-tungstenite", "async-tls", "webpki", "rustls"]
+serial-manager=["serialport"]
 
 [dependencies]
 buttplug_derive = { path = "../buttplug_derive" }
@@ -63,7 +64,9 @@ tracing-futures = "0.2.4"
 tracing-subscriber = "0.2.7"
 dashmap = "4.0.0-rc6"
 displaydoc = "0.1.6"
- 
+
+serialport = { version = "3.3.0", optional = true }
+
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
 

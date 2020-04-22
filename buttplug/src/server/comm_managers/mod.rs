@@ -6,6 +6,8 @@ pub mod xinput;
 use rusty_xinput::XInputUsageError;
 #[cfg(feature = "btleplug-manager")]
 use ::btleplug::Error as BtleplugError;
+#[cfg(feature = "serial-manager")]
+pub mod serialport;
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use async_channel::Sender;
 use thiserror::Error;
