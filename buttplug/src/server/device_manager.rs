@@ -17,7 +17,7 @@ use crate::{
             DeviceMessageInfo, DeviceRemoved, ScanningFinished,
         },
     },
-    device::device::{ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceImplCreator},
+    device::device::{ButtplugDevice, ButtplugDeviceEvent},
     test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
 };
 use async_std::{
@@ -25,29 +25,12 @@ use async_std::{
     sync::{channel, Arc, Mutex, Receiver, RwLock, Sender},
     task,
 };
-use async_trait::async_trait;
+use super::comm_managers::{
+    DeviceCommunicationManager, DeviceCommunicationEvent, 
+    DeviceCommunicationManagerCreator
+};
+
 use std::{collections::HashMap, convert::TryFrom};
-
-pub enum DeviceCommunicationEvent {
-    // This event only means that a device has been found. The work still needs
-    // to be done to make sure we can use it.
-    DeviceFound(Box<dyn ButtplugDeviceImplCreator>),
-    ScanningFinished,
-}
-
-// Storing this in a Vec<Box<dyn T>> causes a associated function issue due to
-// the lack of new. Just create an extra trait for defining comm managers.
-pub trait DeviceCommunicationManagerCreator: Sync + Send {
-    fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;
-}
-
-#[async_trait]
-pub trait DeviceCommunicationManager: Sync + Send {
-    async fn start_scanning(&mut self) -> Result<(), ButtplugError>;
-    async fn stop_scanning(&mut self) -> Result<(), ButtplugError>;
-    fn is_scanning(&mut self) -> bool;
-    // Events happen via channel senders passed to the comm manager.
-}
 
 pub struct DeviceManager {
     comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,

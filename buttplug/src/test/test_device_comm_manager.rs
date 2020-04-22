@@ -1,7 +1,7 @@
 use super::TestDeviceImplCreator;
 use crate::{
     core::errors::ButtplugError,
-    server::device_manager::{
+    server::comm_managers::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
 };

@@ -1,6 +1,6 @@
 use super::xinput_device_impl::XInputDeviceImplCreator;
 use crate::core::errors::{ButtplugError};
-use crate::server::device_manager::{
+use crate::server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
 };
 use async_std::sync::Sender;

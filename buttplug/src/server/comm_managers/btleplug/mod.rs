@@ -3,7 +3,7 @@ mod btleplug_internal;
 
 use crate::{
     core::errors::{ButtplugDeviceError, ButtplugError},
-    server::device_manager::{
+    server::comm_managers::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
 };
@@ -145,7 +145,7 @@ impl Drop for BtlePlugCommunicationManager {
 #[cfg(test)]
 mod test {
     use super::BtlePlugCommunicationManager;
-    use crate::server::device_manager::{
+    use crate::server::comm_managers::{
         DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     };
     use async_std::{prelude::StreamExt, sync::channel, task};

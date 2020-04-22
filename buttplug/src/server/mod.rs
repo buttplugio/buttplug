@@ -29,9 +29,10 @@ use async_std::{
     sync::{channel, Receiver, Sender, Arc, Mutex},
     task,
 };
-use device_manager::{
-    DeviceCommunicationManager, DeviceCommunicationManagerCreator, DeviceManager,
+use comm_managers::{
+    DeviceCommunicationManager, DeviceCommunicationManagerCreator,
 };
+use device_manager::DeviceManager;
 use log;
 use logger::ButtplugLogHandler;
 use std::{
