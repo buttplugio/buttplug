@@ -126,16 +126,24 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct SerialSpecifier {
   #[serde(rename = "baud-rate")]
-  baud_rate: u32,
+  pub baud_rate: u32,
   #[serde(rename = "data-bits")]
-  data_bits: u8,
+  pub data_bits: u8,
   #[serde(rename = "stop-bits")]
-  stop_bits: u8,
-  parity: char,
-  port: String,
+  pub stop_bits: u8,
+  pub parity: char,
+  pub port: String,
+}
+
+impl SerialSpecifier {
+    pub fn new_from_name(port: &str) -> Self {
+        let mut specifier = Self::default();
+        specifier.port = port.to_owned();
+        specifier
+    }
 }
 
 impl PartialEq for SerialSpecifier {
