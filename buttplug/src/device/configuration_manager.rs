@@ -139,11 +139,11 @@ pub struct SerialSpecifier {
 }
 
 impl SerialSpecifier {
-    pub fn new_from_name(port: &str) -> Self {
-        let mut specifier = Self::default();
-        specifier.port = port.to_owned();
-        specifier
-    }
+  pub fn new_from_name(port: &str) -> Self {
+    let mut specifier = Self::default();
+    specifier.port = port.to_owned();
+    specifier
+  }
 }
 
 impl PartialEq for SerialSpecifier {
