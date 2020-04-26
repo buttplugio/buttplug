@@ -149,7 +149,7 @@ impl DeviceImpl for TestDevice {
         self.endpoints.clone()
     }
 
-    async fn disconnect(&self) {
+    async fn disconnect(&mut self) {
         self.event_broadcaster
             .send(&ButtplugDeviceEvent::Removed)
             .await

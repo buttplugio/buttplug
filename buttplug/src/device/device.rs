@@ -204,7 +204,7 @@ pub trait DeviceImpl: Sync + Send {
     fn address(&self) -> &str;
     fn connected(&self) -> bool;
     fn endpoints(&self) -> Vec<Endpoint>;
-    async fn disconnect(&self);
+    async fn disconnect(&mut self);
     fn box_clone(&self) -> Box<dyn DeviceImpl>;
     fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 

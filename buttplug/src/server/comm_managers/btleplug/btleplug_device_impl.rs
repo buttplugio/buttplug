@@ -180,7 +180,7 @@ impl DeviceImpl for BtlePlugDeviceImpl {
         self.endpoints.clone()
     }
 
-    async fn disconnect(&self) {
+    async fn disconnect(&mut self) {
         if let Err(e) = self.send_to_device_task(
             ButtplugDeviceCommand::Disconnect,
             "Cannot disconnect device",
