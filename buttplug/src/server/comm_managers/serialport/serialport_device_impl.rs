@@ -1,29 +1,23 @@
 use crate::{
-  core::{errors::ButtplugError, messages::RawReading},
+  core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    device::{
-      BoundedDeviceEventBroadcaster,
-      ButtplugDeviceEvent,
-      ButtplugDeviceImplCreator,
-      DeviceImpl,
-      DeviceReadCmd,
-      DeviceSubscribeCmd,
-      DeviceUnsubscribeCmd,
-      DeviceWriteCmd,
-    },
-    Endpoint,
+    BoundedDeviceEventBroadcaster, ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl,
+    DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
+  util::async_manager,
 };
-use async_std::{
-  prelude::StreamExt,
-  sync::{channel, Arc, Mutex, Receiver, Sender},
-  task,
-};
+use async_channel::{Receiver, Sender};
+use async_mutex::Mutex;
 use async_trait::async_trait;
+use blocking::{block_on, unblock};
 use broadcaster::BroadcastChannel;
+use futures::{
+  future::{self, BoxFuture},
+  StreamExt,
+};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
-use std::{io::ErrorKind, thread, time::Duration};
+use std::{io::ErrorKind, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread, time::Duration};
 
 pub struct SerialPortDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -57,14 +51,11 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
 }
 
 fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Vec<u8>>) {
-  task::block_on(async move {
-    loop {
-      match receiver.next().await {
-        Some(v) => port.write_all(&v).unwrap(),
-        None => break,
-      }
-    }
-  });
+  let mut recv = receiver.clone();
+  while let Some(v) = block_on!(recv.next().await) {
+    port.write_all(&v).unwrap();
+    recv = receiver.clone();
+  }
 }
 
 fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
@@ -74,9 +65,8 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
     match port.read(&mut buf) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
-        task::block_on(async {
-          sender.send(buf[0..len].to_vec()).await;
-        });
+        let blocking_sender = sender.clone();
+        block_on!(blocking_sender.send(buf[0..len].to_vec()).await);
       }
       Err(e) => {
         if e.kind() == ErrorKind::TimedOut {
@@ -88,19 +78,15 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
   }
 }
 
-#[derive(Clone)]
 pub struct SerialPortDeviceImpl {
   name: String,
   address: String,
-  read_thread: Arc<Mutex<thread::JoinHandle<()>>>,
-  write_thread: Arc<Mutex<thread::JoinHandle<()>>>,
-  // We either have to make our receiver internally mutable, or make
-  // EVERYTHING mut across read/write on the trait. So we'll do internal
-  // mutability here for now since it already works everywhere else.
-  port_receiver: Arc<Mutex<Receiver<Vec<u8>>>>,
+  read_thread: thread::JoinHandle<()>,
+  write_thread: thread::JoinHandle<()>,
+  port_receiver: Receiver<Vec<u8>>,
   port_sender: Sender<Vec<u8>>,
   port: Arc<Mutex<Box<dyn SerialPort>>>,
-  connected: bool,
+  connected: Arc<AtomicBool>,
   event_receiver: BoundedDeviceEventBroadcaster,
 }
 
@@ -130,8 +116,8 @@ impl SerialPortDeviceImpl {
     */
     let port = open_with_settings(&port_info.port_name, &settings).unwrap();
 
-    let (writer_sender, writer_receiver) = channel::<Vec<u8>>(256);
-    let (reader_sender, reader_receiver) = channel::<Vec<u8>>(256);
+    let (writer_sender, writer_receiver) = async_channel::bounded(256);
+    let (reader_sender, reader_receiver) = async_channel::bounded(256);
 
     let read_port = (*port).try_clone().unwrap();
     let read_thread = thread::Builder::new()
@@ -151,18 +137,17 @@ impl SerialPortDeviceImpl {
     Ok(Self {
       name: port.name().unwrap().to_owned(),
       address: port.name().unwrap().to_owned(),
-      read_thread: Arc::new(Mutex::new(read_thread)),
-      write_thread: Arc::new(Mutex::new(write_thread)),
-      port_receiver: Arc::new(Mutex::new(reader_receiver)),
+      read_thread,
+      write_thread,
+      port_receiver: reader_receiver,
       port_sender: writer_sender,
       port: Arc::new(Mutex::new(port)),
-      connected: true,
+      connected: Arc::new(AtomicBool::new(true)),
       event_receiver: BroadcastChannel::with_cap(256),
     })
   }
 }
 
-#[async_trait]
 impl DeviceImpl for SerialPortDeviceImpl {
   fn name(&self) -> &str {
     &self.name
@@ -173,69 +158,80 @@ impl DeviceImpl for SerialPortDeviceImpl {
   }
 
   fn connected(&self) -> bool {
-    self.connected
+    self.connected.load(Ordering::SeqCst)
   }
 
   fn endpoints(&self) -> Vec<Endpoint> {
     vec![Endpoint::Rx, Endpoint::Tx]
   }
 
-  async fn disconnect(&mut self) {
-    self.connected = false;
-  }
-
-  fn box_clone(&self) -> Box<dyn DeviceImpl> {
-    Box::new((*self).clone())
+  fn disconnect(&self) -> ButtplugResultFuture {
+    let connected = self.connected.clone();
+    Box::pin(async move {
+      connected.store(false, Ordering::SeqCst);
+      Ok(())
+    })
   }
 
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.event_receiver.clone()
   }
 
-  async fn read_value(&self, _msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
+  fn read_value(
+    &self,
+    _msg: DeviceReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Should check endpoint validity and length requirements
-    let mut receiver = self.port_receiver.lock().await.clone();
-    if receiver.is_empty() {
-      Ok(RawReading::new(0, Endpoint::Rx, vec![]))
-    } else {
-      Ok(RawReading::new(
-        0,
-        Endpoint::Rx,
-        receiver.next().await.unwrap(),
-      ))
-    }
+    let mut receiver = self.port_receiver.clone();
+    Box::pin(async move {
+      if receiver.is_empty() {
+        Ok(RawReading::new(0, Endpoint::Rx, vec![]))
+      } else {
+        Ok(RawReading::new(
+          0,
+          Endpoint::Rx,
+          receiver.next().await.unwrap(),
+        ))
+      }
+    })
   }
 
-  async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+    let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
-    Ok(self.port_sender.send(msg.data).await)
+    Box::pin(async move { 
+      sender.send(msg.data).await;
+      Ok(())
+    })
   }
 
-  async fn subscribe(&self, _msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
+  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     // TODO Should check endpoint validity
-    let mut data_receiver = self.port_receiver.lock().await.clone();
+    let mut data_receiver = self.port_receiver.clone();
     let event_sender = self.event_receiver.clone();
-    task::spawn(async move {
-      loop {
-        match data_receiver.next().await {
-          Some(data) => {
-            info!("Got serial data! {:?}", data);
-            event_sender
-              .send(&ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
-              .await
-              .unwrap();
-          }
-          None => {
-            info!("Data channel closed, ending serial listener task");
-            break;
+    Box::pin(async move {
+      async_manager::spawn(async move {
+        loop {
+          match data_receiver.next().await {
+            Some(data) => {
+              info!("Got serial data! {:?}", data);
+              event_sender
+                .send(&ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
+                .await
+                .unwrap();
+            }
+            None => {
+              info!("Data channel closed, ending serial listener task");
+              break;
+            }
           }
         }
-      }
-    });
-    Ok(())
+      }).unwrap();
+      Ok(())
+    })
   }
 
-  async fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
+  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
     unimplemented!();
   }
 }

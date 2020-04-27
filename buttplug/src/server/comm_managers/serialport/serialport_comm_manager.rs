@@ -1,14 +1,12 @@
 use super::SerialPortDeviceImplCreator;
 use crate::{
-  core::errors::ButtplugError,
+  core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
-use async_std::sync::Sender;
-use async_trait::async_trait;
+use async_channel::Sender;
+use futures::future;
 use serialport::available_ports;
 
 pub struct SerialPortCommunicationManager {
@@ -22,36 +20,37 @@ impl DeviceCommunicationManagerCreator for SerialPortCommunicationManager {
   }
 }
 
-#[async_trait]
 impl DeviceCommunicationManager for SerialPortCommunicationManager {
-  async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+  fn name(&self) -> &'static str {
+    "SerialPortCommunicationManager"
+  }
+
+  fn start_scanning(&self) -> ButtplugResultFuture {
     info!("Scanning ports!");
     // TODO Does this block? Should it run in one of our threads?
-    match available_ports() {
-      Ok(ports) => {
-        info!("Got {} serial ports back", ports.len());
-        for p in ports {
-          info!("{:?}", p);
-          self
-            .sender
-            .send(DeviceCommunicationEvent::DeviceFound(Box::new(
-              SerialPortDeviceImplCreator::new(&p),
-            )))
-            .await;
+    let sender = self.sender.clone();
+    Box::pin(async move {
+      match available_ports() {
+        Ok(ports) => {
+          info!("Got {} serial ports back", ports.len());
+          for p in ports {
+            info!("{:?}", p);
+            sender
+              .send(DeviceCommunicationEvent::DeviceFound(Box::new(
+                SerialPortDeviceImplCreator::new(&p),
+              )))
+              .await;
+          }
+        }
+        Err(_) => {
+          info!("No serial ports found");
         }
       }
-      Err(_) => {
-        info!("No serial ports found");
-      }
-    }
-    Ok(())
+      Ok(())
+    })
   }
 
-  async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
-    Ok(())
-  }
-
-  fn is_scanning(&mut self) -> bool {
-    false
+  fn stop_scanning(&self) -> ButtplugResultFuture {
+    Box::pin(future::ready(Ok(())))
   }
 }
