@@ -12,6 +12,7 @@ use async_std::io;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::ButtplugInProcessClientConnector,
+  server::comm_managers::serialport::SerialPortCommunicationManager,
   util::async_manager
 };
 use futures::StreamExt;
@@ -62,6 +63,9 @@ async fn device_enumeration_example() {
 
   let helper = connector.server_ref().add_test_comm_manager();
   let _ = helper.add_ble_device("Massage Demo").await;
+  connector
+    .server_ref()
+    .add_comm_manager::<SerialPortCommunicationManager>();
 
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:
@@ -97,7 +101,6 @@ async fn device_enumeration_example() {
   //   steps wouldn't have to happen again.
   //
   // With that out of the way, let's build our client.
-
   let (client, mut event_stream) = ButtplugClient::connect("Example Client", connector)
     .await
     .unwrap();
