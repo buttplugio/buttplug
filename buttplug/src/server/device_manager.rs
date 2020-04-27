@@ -97,12 +97,16 @@ async fn wait_for_manager_events(
             DeviceEvent::DeviceCommunicationEvent(e) => match e {
                 Some(event) => match event {
                     DeviceCommunicationEvent::DeviceFound(device_creator) => {
+                        let device_event_sender_clone = device_event_sender.clone();
+                        let sender_sender_clone = sender.clone();
+                        let device_map_clone = device_map.clone();
+                        task::spawn(async move {
                         match ButtplugDevice::try_create_device(device_creator).await {
                             Ok(option_dev) => match option_dev {
                                 Some(device) => {
                                     info!("Assigning index {} to {}", device_index, device.name());
                                     let mut recv = device.get_event_receiver();
-                                    let sender_clone = device_event_sender.clone();
+                                    let sender_clone = device_event_sender_clone.clone();
                                     let idx_clone = device_index.clone();
                                     task::spawn(async move {
                                         loop {
@@ -112,7 +116,7 @@ async fn wait_for_manager_events(
                                             }
                                         }
                                     });
-                                    sender
+                                    sender_sender_clone
                                         .send(
                                             DeviceAdded::new(
                                                 device_index,
@@ -122,14 +126,15 @@ async fn wait_for_manager_events(
                                             .into(),
                                         )
                                         .await;
-                                    device_map.write().await.insert(device_index, device);
+                                    device_map_clone.write().await.insert(device_index, device);
                                     device_index += 1;
                                 }
                                 None => debug!("Device could not be matched to a protocol."),
                             },
                             Err(e) => error!("Device errored while trying to connect: {}", e),
                         }
-                    }
+                    });
+                }
                     DeviceCommunicationEvent::ScanningFinished => {
                         sender.send(ScanningFinished::default().into()).await;
                     }
