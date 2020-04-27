@@ -23,7 +23,7 @@ use async_std::{
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
-use std::{thread, time::Duration};
+use std::{io::ErrorKind, thread, time::Duration};
 
 pub struct SerialPortDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -75,12 +75,14 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
         task::block_on(async {
-          sender.send(buf.to_vec()).await;
+          sender.send(buf[0..len].to_vec()).await;
         });
       }
       Err(e) => {
+        if e.kind() == ErrorKind::TimedOut {
+          continue;
+        }
         error!("{:?}", e);
-        break;
       }
     }
   }
@@ -217,6 +219,7 @@ impl DeviceImpl for SerialPortDeviceImpl {
       loop {
         match data_receiver.next().await {
           Some(data) => {
+            info!("Got serial data! {:?}", data);
             event_sender
               .send(&ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
               .await
