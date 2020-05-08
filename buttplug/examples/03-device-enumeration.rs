@@ -12,11 +12,13 @@ use async_std::io;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::ButtplugInProcessClientConnector,
-  server::comm_managers::serialport::SerialPortCommunicationManager,
-  util::async_manager
+  server::comm_managers::{
+    lovense_dongle::LovenseDongleCommunicationManager, serialport::SerialPortCommunicationManager,
+  },
+  util::async_manager,
 };
 use futures::StreamExt;
-use tracing::{span, info, Level};
+use tracing::{info, span, Level};
 
 async fn device_enumeration_example() {
   tracing_subscriber::fmt::init();
@@ -66,6 +68,9 @@ async fn device_enumeration_example() {
   connector
     .server_ref()
     .add_comm_manager::<SerialPortCommunicationManager>();
+  connector
+    .server_ref()
+    .add_comm_manager::<LovenseDongleCommunicationManager>();
 
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:
@@ -154,11 +159,12 @@ async fn device_enumeration_example() {
         }
       }
     }
-  }).unwrap();
+  })
+  .unwrap();
 
   println!("Hit enter to continue...");
   let mut line = String::new();
-  io::stdin().read_line(&mut line).await.unwrap(); 
+  io::stdin().read_line(&mut line).await.unwrap();
 
   // Hypothetical situation: We've now exited our match block, and
   // realized that hey, we actually wanted that device object we
