@@ -1,3 +1,12 @@
+# 0.2.4 (2020-05-09)
+
+## Bugfixes
+
+- Fixed issue with ServerInfo not returning proper matching message ID
+  when communicating with clients of older spec versions
+- Fixed issue with in-process server wrappers not setting message ID
+  on return
+
 # 0.2.3 (2020-04-18)
 
 ## Features
