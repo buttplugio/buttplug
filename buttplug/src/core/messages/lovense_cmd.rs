@@ -12,20 +12,20 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
-    pub device_index: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Command"))]
-    pub command: String,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  pub device_index: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Command"))]
+  pub command: String,
 }
 
 impl LovenseCmd {
-    pub fn new(device_index: u32, command: &str) -> Self {
-        Self {
-            id: 1,
-            device_index,
-            command: command.to_owned(),
-        }
+  pub fn new(device_index: u32, command: &str) -> Self {
+    Self {
+      id: 1,
+      device_index,
+      command: command.to_owned(),
     }
+  }
 }

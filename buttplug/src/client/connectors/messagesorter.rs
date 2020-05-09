@@ -8,47 +8,47 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-    core::messages::{ButtplugMessage, ButtplugClientInMessage, ButtplugClientOutMessage},
-    util::future::ButtplugMessageStateShared,
+  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
+  util::future::ButtplugMessageStateShared,
 };
 use std::collections::HashMap;
 
 pub struct ClientConnectorMessageSorter {
-    future_map: HashMap<u32, ButtplugMessageStateShared>,
-    current_id: u32,
+  future_map: HashMap<u32, ButtplugMessageStateShared>,
+  current_id: u32,
 }
 
 impl ClientConnectorMessageSorter {
-    pub fn register_future(
-        &mut self,
-        msg: &mut ButtplugClientInMessage,
-        state: &ButtplugMessageStateShared,
-    ) {
-        msg.set_id(self.current_id);
-        self.future_map.insert(self.current_id, state.clone());
-        self.current_id += 1;
-    }
+  pub fn register_future(
+    &mut self,
+    msg: &mut ButtplugClientInMessage,
+    state: &ButtplugMessageStateShared,
+  ) {
+    msg.set_id(self.current_id);
+    self.future_map.insert(self.current_id, state.clone());
+    self.current_id += 1;
+  }
 
-    pub fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
-        match self.future_map.remove(&(msg.get_id())) {
-            Some(_state) => {
-                let mut waker_state = _state.lock().unwrap();
-                waker_state.set_reply(msg.clone());
-                true
-            }
-            None => {
-                info!("Not found, may be event.");
-                false
-            }
-        }
+  pub fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
+    match self.future_map.remove(&(msg.get_id())) {
+      Some(_state) => {
+        let mut waker_state = _state.lock().unwrap();
+        waker_state.set_reply(msg.clone());
+        true
+      }
+      None => {
+        info!("Not found, may be event.");
+        false
+      }
     }
+  }
 }
 
 impl Default for ClientConnectorMessageSorter {
-    fn default() -> Self {
-        Self {
-            future_map: HashMap::<u32, ButtplugMessageStateShared>::new(),
-            current_id: 1,
-        }
+  fn default() -> Self {
+    Self {
+      future_map: HashMap::<u32, ButtplugMessageStateShared>::new(),
+      current_id: 1,
     }
+  }
 }

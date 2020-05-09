@@ -14,49 +14,49 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, PartialEq, ButtplugMessage, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct Ok {
-    /// Message Id, used for matching message pairs in remote connection instances.
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
+  /// Message Id, used for matching message pairs in remote connection instances.
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
 }
 
 impl Ok {
-    /// Creates a new Ok message with the given Id.
-    pub fn new(id: u32) -> Self {
-        Self { id }
-    }
+  /// Creates a new Ok message with the given Id.
+  pub fn new(id: u32) -> Self {
+    Self { id }
+  }
 }
 
 impl Default for Ok {
-    fn default() -> Self {
-        Self{ id: 1 }
-    }
+  fn default() -> Self {
+    Self { id: 1 }
+  }
 }
 
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-    use crate::core::messages::{ButtplugMessage, ButtplugClientOutMessage, Ok};
+  use crate::core::messages::{ButtplugClientOutMessage, ButtplugMessage, Ok};
 
-    const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
-    
-    #[test]
-    fn test_ok_serialize() {
-        let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
-        let js = serde_json::to_string(&ok).unwrap();
-        assert_eq!(OK_STR, js);
-    }
+  const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 
-    #[test]
-    fn test_protocol_json() {
-        const PROTOCOL_STR: &str = "[{\"Ok\":{\"Id\":0}}]";
-        let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
-        let js = ok.as_protocol_json();
-        assert_eq!(PROTOCOL_STR, js);
-    }
+  #[test]
+  fn test_ok_serialize() {
+    let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
+    let js = serde_json::to_string(&ok).unwrap();
+    assert_eq!(OK_STR, js);
+  }
 
-    #[test]
-    fn test_ok_deserialize() {
-        let union: ButtplugClientOutMessage = serde_json::from_str(&OK_STR).unwrap();
-        assert_eq!(ButtplugClientOutMessage::Ok(Ok::new(0)), union);
-    }
+  #[test]
+  fn test_protocol_json() {
+    const PROTOCOL_STR: &str = "[{\"Ok\":{\"Id\":0}}]";
+    let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
+    let js = ok.as_protocol_json();
+    assert_eq!(PROTOCOL_STR, js);
+  }
+
+  #[test]
+  fn test_ok_deserialize() {
+    let union: ButtplugClientOutMessage = serde_json::from_str(&OK_STR).unwrap();
+    assert_eq!(ButtplugClientOutMessage::Ok(Ok::new(0)), union);
+  }
 }

@@ -2,14 +2,11 @@ mod generic_command_manager;
 
 use super::device::DeviceImpl;
 use crate::{
-    core::{
-        errors::ButtplugError,
-        messages::{
-            ButtplugDeviceCommandMessageUnion, ButtplugOutMessage,
-            MessageAttributesMap
-        },
-    },
-    device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
+  core::{
+    errors::ButtplugError,
+    messages::{ButtplugDeviceCommandMessageUnion, ButtplugOutMessage, MessageAttributesMap},
+  },
+  device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
 };
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -54,44 +51,44 @@ macro_rules! create_protocols(
 // - the name of the module
 // - the base name of the protocol, as used in create_buttplug_protocol!
 create_protocols!(
-    ("aneros", aneros, Aneros),
-    ("maxpro", maxpro, Maxpro),
-    ("lovense", lovense, Lovense),
-    ("picobong", picobong, Picobong),
-    ("realov", realov, Realov),
-    ("prettylove", prettylove, PrettyLove),
-    ("svakom", svakom, Svakom),
-    ("youcups", youcups, Youcups),
-    ("youou", youou, Youou),
-    ("lovehoney-desire", lovehoney_desire, LovehoneyDesire),
-    ("vorze-sa", vorze_sa, VorzeSA),
-    ("xinput", xinput, XInput)
+  ("aneros", aneros, Aneros),
+  ("maxpro", maxpro, Maxpro),
+  ("lovense", lovense, Lovense),
+  ("picobong", picobong, Picobong),
+  ("realov", realov, Realov),
+  ("prettylove", prettylove, PrettyLove),
+  ("svakom", svakom, Svakom),
+  ("youcups", youcups, Youcups),
+  ("youou", youou, Youou),
+  ("lovehoney-desire", lovehoney_desire, LovehoneyDesire),
+  ("vorze-sa", vorze_sa, VorzeSA),
+  ("xinput", xinput, XInput)
 );
 
 #[async_trait]
 pub trait ButtplugProtocolCreator: Sync + Send {
-    async fn try_create_protocol(
-        &self,
-        device_impl: &Box<dyn DeviceImpl>,
-    ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
+  async fn try_create_protocol(
+    &self,
+    device_impl: &Box<dyn DeviceImpl>,
+  ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
 
 #[async_trait]
 pub trait ButtplugProtocol: Sync + Send {
-    fn name(&self) -> &str;
-    fn message_attributes(&self) -> MessageAttributesMap;
-    fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
-    async fn parse_message(
-        &mut self,
-        device: &Box<dyn DeviceImpl>,
-        message: &ButtplugDeviceCommandMessageUnion,
-    ) -> Result<ButtplugOutMessage, ButtplugError>;
+  fn name(&self) -> &str;
+  fn message_attributes(&self) -> MessageAttributesMap;
+  fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
+  async fn parse_message(
+    &mut self,
+    device: &Box<dyn DeviceImpl>,
+    message: &ButtplugDeviceCommandMessageUnion,
+  ) -> Result<ButtplugOutMessage, ButtplugError>;
 }
 
 impl Clone for Box<dyn ButtplugProtocol> {
-    fn clone(&self) -> Box<dyn ButtplugProtocol> {
-        self.box_clone()
-    }
+  fn clone(&self) -> Box<dyn ButtplugProtocol> {
+    self.box_clone()
+  }
 }
 
 // TODO These macros could use some compilation tests to make sure we're

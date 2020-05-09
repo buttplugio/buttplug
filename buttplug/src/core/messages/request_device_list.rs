@@ -12,12 +12,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestDeviceList {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
 }
 
 impl Default for RequestDeviceList {
-    fn default() -> Self {
-        Self { id: 1 }
-    }
+  fn default() -> Self {
+    Self { id: 1 }
+  }
 }

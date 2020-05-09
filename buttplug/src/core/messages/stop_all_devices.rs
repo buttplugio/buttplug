@@ -12,6 +12,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopAllDevices {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
 }

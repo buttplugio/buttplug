@@ -12,14 +12,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RequestLog {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "LogLevel"))]
-    pub log_level: LogLevel,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "LogLevel"))]
+  pub log_level: LogLevel,
 }
 
 impl RequestLog {
-    pub fn new(log_level: LogLevel) -> Self {
-        Self { id: 1, log_level }
-    }
+  pub fn new(log_level: LogLevel) -> Self {
+    Self { id: 1, log_level }
+  }
 }

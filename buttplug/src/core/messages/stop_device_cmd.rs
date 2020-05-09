@@ -12,17 +12,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct StopDeviceCmd {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
-    pub device_index: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  pub device_index: u32,
 }
 
 impl StopDeviceCmd {
-    pub fn new(device_index: u32) -> Self {
-        Self {
-            id: 1,
-            device_index,
-        }
+  pub fn new(device_index: u32) -> Self {
+    Self {
+      id: 1,
+      device_index,
     }
+  }
 }

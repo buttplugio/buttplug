@@ -12,20 +12,20 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
-    pub device_index: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
-    pub speed: f64,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  pub device_index: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
+  pub speed: f64,
 }
 
 impl SingleMotorVibrateCmd {
-    pub fn new(device_index: u32, speed: f64) -> Self {
-        Self {
-            id: 1,
-            device_index,
-            speed,
-        }
+  pub fn new(device_index: u32, speed: f64) -> Self {
+    Self {
+      id: 1,
+      device_index,
+      speed,
     }
+  }
 }

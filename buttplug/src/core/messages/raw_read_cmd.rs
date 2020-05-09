@@ -13,26 +13,26 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawReadCmd {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
-    pub device_index: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
-    pub endpoint: Endpoint,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "ExpectedLength"))]
-    pub expected_length: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Timeout"))]
-    pub timeout: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  pub device_index: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+  pub endpoint: Endpoint,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "ExpectedLength"))]
+  pub expected_length: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Timeout"))]
+  pub timeout: u32,
 }
 
 impl RawReadCmd {
-    pub fn new(device_index: u32, endpoint: Endpoint, expected_length: u32, timeout: u32) -> Self {
-        Self {
-            id: 1,
-            device_index,
-            endpoint,
-            expected_length,
-            timeout,
-        }
+  pub fn new(device_index: u32, endpoint: Endpoint, expected_length: u32, timeout: u32) -> Self {
+    Self {
+      id: 1,
+      device_index,
+      endpoint,
+      expected_length,
+      timeout,
     }
+  }
 }

@@ -12,6 +12,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct ScanningFinished {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
 }

@@ -1,10 +1,10 @@
 use serde_json::Value;
-use valico::json_schema;
 use url;
+use valico::json_schema;
 
 pub struct JSONValidator {
   scope: json_schema::scope::Scope,
-  id: url::Url
+  id: url::Url,
 }
 
 impl JSONValidator {
@@ -28,5 +28,3 @@ impl JSONValidator {
     }
   }
 }
-
-

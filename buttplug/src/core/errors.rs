@@ -19,55 +19,55 @@ pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 /// [crate::client::connectors::ButtplugClientConnectorError].
 #[derive(Debug, Clone)]
 pub struct ButtplugHandshakeError {
-    /// Message for the handshake error.
-    pub message: String,
+  /// Message for the handshake error.
+  pub message: String,
 }
 
 impl ButtplugHandshakeError {
-    pub fn new(message: &str) -> Self {
-        Self {
-            message: message.to_owned(),
-        }
+  pub fn new(message: &str) -> Self {
+    Self {
+      message: message.to_owned(),
     }
+  }
 }
 
 impl fmt::Display for ButtplugHandshakeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Init Error: {}", self.message)
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Init Error: {}", self.message)
+  }
 }
 
 impl Error for ButtplugHandshakeError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 /// Message errors occur when a message is somehow malformed on creation, or
 /// received unexpectedly by a client or server.
 #[derive(Debug, Clone)]
 pub struct ButtplugMessageError {
-    pub message: String,
+  pub message: String,
 }
 
 impl ButtplugMessageError {
-    pub fn new(message: &str) -> Self {
-        Self {
-            message: message.to_owned(),
-        }
+  pub fn new(message: &str) -> Self {
+    Self {
+      message: message.to_owned(),
     }
+  }
 }
 
 impl fmt::Display for ButtplugMessageError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Message Error: {}", self.message)
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Message Error: {}", self.message)
+  }
 }
 
 impl Error for ButtplugMessageError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 /// Ping errors occur when a server requires a ping response (set up during
@@ -75,27 +75,27 @@ impl Error for ButtplugMessageError {
 /// alloted timeframe. This also signifies a server disconnect.
 #[derive(Debug, Clone)]
 pub struct ButtplugPingError {
-    pub message: String,
+  pub message: String,
 }
 
 impl ButtplugPingError {
-    pub fn new(message: &str) -> Self {
-        Self {
-            message: message.to_owned(),
-        }
+  pub fn new(message: &str) -> Self {
+    Self {
+      message: message.to_owned(),
     }
+  }
 }
 
 impl fmt::Display for ButtplugPingError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Ping Error: {}", self.message)
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Ping Error: {}", self.message)
+  }
 }
 
 impl Error for ButtplugPingError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 /// Device errors occur during device interactions, including sending
@@ -103,135 +103,133 @@ impl Error for ButtplugPingError {
 /// attributes, etc...
 #[derive(Debug, Clone)]
 pub struct ButtplugDeviceError {
-    pub message: String,
+  pub message: String,
 }
 
 impl ButtplugDeviceError {
-    pub fn new(message: &str) -> Self {
-        Self {
-            message: message.to_owned(),
-        }
+  pub fn new(message: &str) -> Self {
+    Self {
+      message: message.to_owned(),
     }
+  }
 }
 
 impl fmt::Display for ButtplugDeviceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Device Error: {}", self.message)
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Device Error: {}", self.message)
+  }
 }
 
 impl Error for ButtplugDeviceError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type
 /// will suffice. These are rare and usually fatal (disconnecting) errors.
 #[derive(Debug, Clone)]
 pub struct ButtplugUnknownError {
-    pub message: String,
+  pub message: String,
 }
 
 impl ButtplugUnknownError {
-    pub fn new(message: &str) -> Self {
-        Self {
-            message: message.to_owned(),
-        }
+  pub fn new(message: &str) -> Self {
+    Self {
+      message: message.to_owned(),
     }
+  }
 }
 
 impl fmt::Display for ButtplugUnknownError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Unknown Error: {}", self.message)
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "Unknown Error: {}", self.message)
+  }
 }
 
 impl Error for ButtplugUnknownError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 /// Aggregation enum for protocol error types.
 #[derive(Debug, Clone)]
 pub enum ButtplugError {
-    ButtplugHandshakeError(ButtplugHandshakeError),
-    ButtplugMessageError(ButtplugMessageError),
-    ButtplugPingError(ButtplugPingError),
-    ButtplugDeviceError(ButtplugDeviceError),
-    ButtplugUnknownError(ButtplugUnknownError),
+  ButtplugHandshakeError(ButtplugHandshakeError),
+  ButtplugMessageError(ButtplugMessageError),
+  ButtplugPingError(ButtplugPingError),
+  ButtplugDeviceError(ButtplugDeviceError),
+  ButtplugUnknownError(ButtplugUnknownError),
 }
 
 impl fmt::Display for ButtplugError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            ButtplugError::ButtplugDeviceError(ref e) => e.fmt(f),
-            ButtplugError::ButtplugMessageError(ref e) => e.fmt(f),
-            ButtplugError::ButtplugPingError(ref e) => e.fmt(f),
-            ButtplugError::ButtplugHandshakeError(ref e) => e.fmt(f),
-            ButtplugError::ButtplugUnknownError(ref e) => e.fmt(f),
-        }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    match *self {
+      ButtplugError::ButtplugDeviceError(ref e) => e.fmt(f),
+      ButtplugError::ButtplugMessageError(ref e) => e.fmt(f),
+      ButtplugError::ButtplugPingError(ref e) => e.fmt(f),
+      ButtplugError::ButtplugHandshakeError(ref e) => e.fmt(f),
+      ButtplugError::ButtplugUnknownError(ref e) => e.fmt(f),
     }
+  }
 }
 
 impl Error for ButtplugError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
+  fn source(&self) -> Option<&(dyn Error + 'static)> {
+    None
+  }
 }
 
 impl From<ButtplugDeviceError> for ButtplugError {
-    fn from(error: ButtplugDeviceError) -> Self {
-        ButtplugError::ButtplugDeviceError(error)
-    }
+  fn from(error: ButtplugDeviceError) -> Self {
+    ButtplugError::ButtplugDeviceError(error)
+  }
 }
 
 impl From<ButtplugMessageError> for ButtplugError {
-    fn from(error: ButtplugMessageError) -> Self {
-        ButtplugError::ButtplugMessageError(error)
-    }
+  fn from(error: ButtplugMessageError) -> Self {
+    ButtplugError::ButtplugMessageError(error)
+  }
 }
 
 impl From<ButtplugPingError> for ButtplugError {
-    fn from(error: ButtplugPingError) -> Self {
-        ButtplugError::ButtplugPingError(error)
-    }
+  fn from(error: ButtplugPingError) -> Self {
+    ButtplugError::ButtplugPingError(error)
+  }
 }
 
 impl From<ButtplugHandshakeError> for ButtplugError {
-    fn from(error: ButtplugHandshakeError) -> Self {
-        ButtplugError::ButtplugHandshakeError(error)
-    }
+  fn from(error: ButtplugHandshakeError) -> Self {
+    ButtplugError::ButtplugHandshakeError(error)
+  }
 }
 
 impl From<ButtplugUnknownError> for ButtplugError {
-    fn from(error: ButtplugUnknownError) -> Self {
-        ButtplugError::ButtplugUnknownError(error)
-    }
+  fn from(error: ButtplugUnknownError) -> Self {
+    ButtplugError::ButtplugUnknownError(error)
+  }
 }
 
 impl From<messages::Error> for ButtplugError {
-    /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
-    fn from(error: messages::Error) -> Self {
-        match error.error_code {
-            ErrorCode::ErrorDevice => ButtplugError::ButtplugDeviceError(ButtplugDeviceError {
-                message: error.error_message,
-            }),
-            ErrorCode::ErrorMessage => ButtplugError::ButtplugMessageError(ButtplugMessageError {
-                message: error.error_message,
-            }),
-            ErrorCode::ErrorHandshake => {
-                ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
-                    message: error.error_message,
-                })
-            }
-            ErrorCode::ErrorUnknown => ButtplugError::ButtplugUnknownError(ButtplugUnknownError {
-                message: error.error_message,
-            }),
-            ErrorCode::ErrorPing => ButtplugError::ButtplugPingError(ButtplugPingError {
-                message: error.error_message,
-            }),
-        }
+  /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
+  fn from(error: messages::Error) -> Self {
+    match error.error_code {
+      ErrorCode::ErrorDevice => ButtplugError::ButtplugDeviceError(ButtplugDeviceError {
+        message: error.error_message,
+      }),
+      ErrorCode::ErrorMessage => ButtplugError::ButtplugMessageError(ButtplugMessageError {
+        message: error.error_message,
+      }),
+      ErrorCode::ErrorHandshake => ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
+        message: error.error_message,
+      }),
+      ErrorCode::ErrorUnknown => ButtplugError::ButtplugUnknownError(ButtplugUnknownError {
+        message: error.error_message,
+      }),
+      ErrorCode::ErrorPing => ButtplugError::ButtplugPingError(ButtplugPingError {
+        message: error.error_message,
+      }),
     }
+  }
 }

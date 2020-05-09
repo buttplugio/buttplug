@@ -16,78 +16,76 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
-use buttplug::{
-    client::{
-        connectors::ButtplugEmbeddedClientConnector, ButtplugClient
-    },
-};
+use buttplug::client::{connectors::ButtplugEmbeddedClientConnector, ButtplugClient};
 
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
 use async_std::task;
 
 async fn embedded_connector_example() {
-    env_logger::init();
-    println!("Setting up the client! Run this with RUST_LOG if you'd like to see library log messages.");
-    
-    // We'll need a connector first, as creating a client requires a connector.
-    // Connectors are how clients connect to servers. Since we're just starting
-    // out and don't want to deal with networks or IPC yet, we'll create an
-    // embedded client. This means that the Connector holds a Buttplug Server
-    // itself, so everything happens locally and in-process. This is usually the
-    // easiest case to develop with.
-    //
-    // For now, we'll just give the server a name. We'll go over other server
-    // constructor arguments in later examples.
-    let connector = ButtplugEmbeddedClientConnector::new("Example Server", 0);
+  env_logger::init();
+  println!(
+    "Setting up the client! Run this with RUST_LOG if you'd like to see library log messages."
+  );
 
-    // Now that we've got a connector, we can use the ButtplugClient::run()
-    // function to spin up our client event loop. We pass this function three
-    // things:
-    //
-    // - The client name, which is sent to the server so we can identify what's
-    // connected on that end if the server has a GUI.
-    // - The connector we just made, used to connect to the Server
-    // - A closure that will run whatever we want to do with Buttplug.
-    //
-    // The run() function will take our connector, create a client, try to connect
-    // that client to the server (which, with an embedded connector, should
-    // always succeed), and then will run the closure, passing it the connected
-    // client instance.
-    //
-    // run() will block until we exit our closure. This could happen for
-    // multiple reasons, like the client or server disconnecting, or our
-    // application signalling that it's done doing whatever it wants to do with
-    // buttplug.
-    //
-    // run() can also return an error in certain situations, like not being able
-    // to connect to the server.
-    //
-    // For sake of clarity and indentation, we'll define our closure first, then
-    // pass it into run().
-    //
-    // Note that the closure is (ButtplugClient) -> impl Future. We'll explain
-    // why in the definition.
-    let app_closure = |client: ButtplugClient| {
-        async move {
-            println!("Is the client connected? {}", client.connected());
+  // We'll need a connector first, as creating a client requires a connector.
+  // Connectors are how clients connect to servers. Since we're just starting
+  // out and don't want to deal with networks or IPC yet, we'll create an
+  // embedded client. This means that the Connector holds a Buttplug Server
+  // itself, so everything happens locally and in-process. This is usually the
+  // easiest case to develop with.
+  //
+  // For now, we'll just give the server a name. We'll go over other server
+  // constructor arguments in later examples.
+  let connector = ButtplugEmbeddedClientConnector::new("Example Server", 0);
 
-            // We don't actually have anything to do here yet, since we're just
-            // showing off how to set up execution. We'll just fall out of our
-            // closure here.
-            println!("Exiting example");
-        }
-    };
-    ButtplugClient::run("Example Client", connector, app_closure)
-        .await
-        .unwrap();
+  // Now that we've got a connector, we can use the ButtplugClient::run()
+  // function to spin up our client event loop. We pass this function three
+  // things:
+  //
+  // - The client name, which is sent to the server so we can identify what's
+  // connected on that end if the server has a GUI.
+  // - The connector we just made, used to connect to the Server
+  // - A closure that will run whatever we want to do with Buttplug.
+  //
+  // The run() function will take our connector, create a client, try to connect
+  // that client to the server (which, with an embedded connector, should
+  // always succeed), and then will run the closure, passing it the connected
+  // client instance.
+  //
+  // run() will block until we exit our closure. This could happen for
+  // multiple reasons, like the client or server disconnecting, or our
+  // application signalling that it's done doing whatever it wants to do with
+  // buttplug.
+  //
+  // run() can also return an error in certain situations, like not being able
+  // to connect to the server.
+  //
+  // For sake of clarity and indentation, we'll define our closure first, then
+  // pass it into run().
+  //
+  // Note that the closure is (ButtplugClient) -> impl Future. We'll explain
+  // why in the definition.
+  let app_closure = |client: ButtplugClient| {
+    async move {
+      println!("Is the client connected? {}", client.connected());
 
-    // That's it for the basics of setting up, connecting, and disconnecting a client.
+      // We don't actually have anything to do here yet, since we're just
+      // showing off how to set up execution. We'll just fall out of our
+      // closure here.
+      println!("Exiting example");
+    }
+  };
+  ButtplugClient::run("Example Client", connector, app_closure)
+    .await
+    .unwrap();
+
+  // That's it for the basics of setting up, connecting, and disconnecting a client.
 }
 
 fn main() {
-    // Setup a client, and wait until everything is done before exiting.
-    task::block_on(async {
-        embedded_connector_example().await;
-    });
+  // Setup a client, and wait until everything is done before exiting.
+  task::block_on(async {
+    embedded_connector_example().await;
+  });
 }

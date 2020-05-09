@@ -13,50 +13,50 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub struct RawReading {
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
-    pub(super) id: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
-    pub device_index: u32,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
-    pub endpoint: Endpoint,
-    #[cfg_attr(feature = "serialize_json", serde(rename = "Data"))]
-    pub data: Vec<u8>,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  pub(super) id: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  pub device_index: u32,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+  pub endpoint: Endpoint,
+  #[cfg_attr(feature = "serialize_json", serde(rename = "Data"))]
+  pub data: Vec<u8>,
 }
 
 impl RawReading {
-    pub fn new(device_index: u32, endpoint: Endpoint, data: Vec<u8>) -> Self {
-        Self {
-            id: 1,
-            device_index,
-            endpoint,
-            data,
-        }
+  pub fn new(device_index: u32, endpoint: Endpoint, data: Vec<u8>) -> Self {
+    Self {
+      id: 1,
+      device_index,
+      endpoint,
+      data,
     }
+  }
 }
 
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-    use crate::core::messages::{ButtplugClientOutMessage, RawReading};
-    use crate::device::Endpoint;
+  use crate::core::messages::{ButtplugClientOutMessage, RawReading};
+  use crate::device::Endpoint;
 
-    #[test]
-    fn test_endpoint_deserialize() {
-        let endpoint_str =
-            "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
-        let union: ButtplugClientOutMessage = serde_json::from_str(&endpoint_str).unwrap();
-        assert_eq!(
-            ButtplugClientOutMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
-            union
-        );
-    }
+  #[test]
+  fn test_endpoint_deserialize() {
+    let endpoint_str =
+      "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
+    let union: ButtplugClientOutMessage = serde_json::from_str(&endpoint_str).unwrap();
+    assert_eq!(
+      ButtplugClientOutMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
+      union
+    );
+  }
 
-    #[test]
-    fn test_endpoint_serialize() {
-        let union = ButtplugClientOutMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
-        let js = serde_json::to_string(&union).unwrap();
-        let endpoint_str =
-            "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
-        assert_eq!(js, endpoint_str);
-    }
+  #[test]
+  fn test_endpoint_serialize() {
+    let union = ButtplugClientOutMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
+    let js = serde_json::to_string(&union).unwrap();
+    let endpoint_str =
+      "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
+    assert_eq!(js, endpoint_str);
+  }
 }
