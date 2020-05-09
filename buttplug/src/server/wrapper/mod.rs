@@ -6,6 +6,7 @@ use crate::core::messages::{
   ButtplugClientOutMessage,
   ButtplugInMessage,
   ButtplugOutMessage,
+  ButtplugMessage,
 };
 use async_std::{
   prelude::StreamExt,
@@ -60,7 +61,8 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugInProcessServerWrapper {
 
   async fn parse_message(&mut self, msg: Self::Input) -> Self::Output {
     let input = ButtplugInProcessServerWrapper::convert_incoming(msg.clone());
-    let output = self.server.parse_message(&input).await.unwrap();
+    let mut output = self.server.parse_message(&input).await.unwrap();
+    output.set_id(input.get_id());
     ButtplugInProcessServerWrapper::convert_outgoing(output)
   }
 
