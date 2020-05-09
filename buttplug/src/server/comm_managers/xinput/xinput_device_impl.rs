@@ -83,7 +83,7 @@ impl DeviceImpl for XInputDeviceImpl {
         vec![Endpoint::Tx]
     }
 
-    async fn disconnect(&self) {
+    async fn disconnect(&mut self) {
 
     }
 
