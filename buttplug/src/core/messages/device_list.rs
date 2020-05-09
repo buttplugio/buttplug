@@ -21,7 +21,7 @@ pub struct DeviceList {
 
 impl DeviceList {
   pub fn new(devices: Vec<DeviceMessageInfo>) -> Self {
-    Self { id: 0, devices }
+    Self { id: 1, devices }
   }
 }
 

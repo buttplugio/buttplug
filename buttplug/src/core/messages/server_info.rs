@@ -29,7 +29,7 @@ impl ServerInfo {
     max_ping_time: u32,
   ) -> Self {
     Self {
-      id: 0,
+      id: 1,
       message_version,
       max_ping_time,
       server_name: server_name.to_string(),
@@ -62,7 +62,7 @@ impl ServerInfoV0 {
     max_ping_time: u32,
   ) -> Self {
     Self {
-      id: 0,
+      id: 1,
       major_version: 0,
       minor_version: 0,
       build_version: 0,
@@ -75,6 +75,8 @@ impl ServerInfoV0 {
 
 impl From<ServerInfo> for ServerInfoV0 {
   fn from(msg: ServerInfo) -> Self {
-    Self::new(&msg.server_name, msg.message_version, msg.max_ping_time)
+    let mut out_msg = Self::new(&msg.server_name, msg.message_version, msg.max_ping_time);
+    out_msg.set_id(msg.get_id());
+    out_msg
   }
 }
