@@ -1,3 +1,13 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
+//! Buttplug futures utilities. Mostly used for building message futures in the
+//! client, used to wait on responses from the server.
+
 use crate::core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage};
 use async_std::{
   future::Future,
