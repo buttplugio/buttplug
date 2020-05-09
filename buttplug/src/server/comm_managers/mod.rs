@@ -4,6 +4,7 @@ pub mod btleplug;
 pub mod xinput;
 use crate::{core::errors::ButtplugError, device::device::ButtplugDeviceImplCreator};
 use async_std::sync::Sender;
+use async_trait::async_trait;
 
 pub enum DeviceCommunicationEvent {
   // This event only means that a device has been found. The work still needs
