@@ -154,6 +154,12 @@ impl BtlePlugDeviceImpl {
     self.thread_sender.send((cmd, waker)).await;
     match fut.await {
       ButtplugDeviceReturn::Ok(_) => Ok(()),
+      ButtplugDeviceReturn::Error(e) => {
+        error!("{:?}", e);
+        Err(ButtplugError::ButtplugDeviceError(
+          ButtplugDeviceError::new(&e.to_string()),
+        ))
+      },
       _ => Err(ButtplugError::ButtplugDeviceError(
         ButtplugDeviceError::new(err_msg),
       )),
