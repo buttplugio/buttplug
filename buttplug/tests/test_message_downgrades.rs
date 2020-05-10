@@ -24,7 +24,7 @@ mod test {
       assert_eq!(
         output,
         format!(
-          r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         )
       );
@@ -63,7 +63,7 @@ mod test {
       assert_eq!(
         output,
         format!(
-          r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         )
       );
@@ -105,7 +105,7 @@ mod test {
       assert_eq!(
         output,
         format!(
-          r#"[{{"ServerInfo":{{"Id":0,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         )
       );
