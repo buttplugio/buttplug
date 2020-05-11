@@ -5,8 +5,8 @@ use crate::core::messages::{
   ButtplugClientInMessage,
   ButtplugClientOutMessage,
   ButtplugInMessage,
-  ButtplugOutMessage,
   ButtplugMessage,
+  ButtplugOutMessage,
 };
 use async_std::{
   prelude::StreamExt,

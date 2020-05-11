@@ -159,7 +159,7 @@ impl BtlePlugDeviceImpl {
         Err(ButtplugError::ButtplugDeviceError(
           ButtplugDeviceError::new(&e.to_string()),
         ))
-      },
+      }
       _ => Err(ButtplugError::ButtplugDeviceError(
         ButtplugDeviceError::new(err_msg),
       )),

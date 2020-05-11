@@ -68,7 +68,7 @@ struct PingTimer {
   // device manager, so it can stop devices
   ping_channel: Sender<bool>,
   // TODO This should be an RwLock once that's in async-std
-  timer_running: Arc<Mutex<bool>>
+  timer_running: Arc<Mutex<bool>>,
 }
 
 impl PingTimer {
@@ -83,7 +83,7 @@ impl PingTimer {
         last_ping_time: Arc::new(RwLock::new(Instant::now())),
         pinged_out: Arc::new(RwLock::new(false)),
         ping_channel: sender,
-        timer_running: Arc::new(Mutex::new(false))
+        timer_running: Arc::new(Mutex::new(false)),
       },
       receiver,
     )
@@ -217,7 +217,10 @@ impl ButtplugServer {
     if let Some(ref mut ping_timer) = self.ping_timer {
       ping_timer.stop_ping_timer().await;
     }
-    self.parse_message(&ButtplugInMessage::StopAllDevices(StopAllDevices::default())).await.unwrap();
+    self
+      .parse_message(&ButtplugInMessage::StopAllDevices(StopAllDevices::default()))
+      .await
+      .unwrap();
     self.client_name = None;
     self.client_spec_version = None;
   }
@@ -236,7 +239,7 @@ impl ButtplugServer {
     {
       if !self.connected() {
         return Err(ButtplugHandshakeError::new("Server not connected.").into());
-      }  
+      }
       if let Some(ref mut dm) = self.device_manager {
         dm.parse_message(msg.clone()).await
       } else {
@@ -250,15 +253,15 @@ impl ButtplugServer {
         ButtplugInMessage::Ping(ref p) => {
           if !self.connected() {
             return Err(ButtplugHandshakeError::new("Server not connected.").into());
-          }      
+          }
           self.handle_ping(p).and_then(|m| Ok(m.into()))
-        },
+        }
         ButtplugInMessage::RequestLog(ref l) => {
           if !self.connected() {
             return Err(ButtplugHandshakeError::new("Server not connected.").into());
           }
           self.handle_log(l).and_then(|m| Ok(m.into()))
-        },
+        }
         _ => Err(
           ButtplugMessageError::new(
             &format!("Message {:?} not handled by server loop.", msg).to_owned(),
