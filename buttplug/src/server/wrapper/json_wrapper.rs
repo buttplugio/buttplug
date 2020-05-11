@@ -27,7 +27,7 @@ use async_trait::async_trait;
 use std::convert::TryFrom;
 
 pub struct ButtplugJSONServerWrapper {
-  server: ButtplugServer,
+  server: Option<ButtplugServer>,
   message_version: Option<messages::ButtplugMessageSpecVersion>,
   recv_server: Option<Receiver<ButtplugOutMessage>>,
   event_sender: Option<Sender<String>>,
@@ -42,7 +42,7 @@ impl ButtplugJSONServerWrapper {
 
     (
       Self {
-        server,
+        server: Some(server),
         message_version: None,
         recv_server: Some(recv_server),
         event_sender: Some(send),
@@ -59,13 +59,17 @@ impl ButtplugJSONServerWrapper {
 
     (
       Self {
-        server,
+        server: Some(server),
         message_version: None,
         recv_server: Some(recv_server),
         event_sender: Some(send),
       },
       recv,
     )
+  }
+
+  pub fn take_server(mut self) -> ButtplugServer {
+    self.server.take().unwrap()
   }
 
   pub(crate) fn deserialize<T>(msg: String) -> Result<T, ButtplugError>
@@ -196,7 +200,12 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
   async fn parse_message(&mut self, str_msg: Self::Input) -> Self::Output {
     match self.convert_incoming(str_msg) {
       Ok(msg) => {
-        let mut server_response = self.server.parse_message(&msg).await.unwrap();
+        let mut server_response;
+        if let Some(ref mut server) = self.server {
+          server_response = server.parse_message(&msg).await.unwrap();
+        } else {
+          panic!("Server has been taken!");
+        }
         // Make sure we set the response ID to match what is expected.
         server_response.set_id(msg.get_id());
         self.convert_outgoing(server_response)
@@ -206,7 +215,11 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
   }
 
   fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
-    &mut self.server
+    if let Some(ref mut server) = self.server {
+      server
+    } else {
+      panic!("Server has been taken!");
+    }
   }
 }
 

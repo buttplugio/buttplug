@@ -42,17 +42,6 @@ use async_std::{
 
 use std::{collections::HashMap, convert::TryFrom};
 
-pub struct DeviceManager {
-  comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
-  devices: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
-  sender: Sender<DeviceCommunicationEvent>,
-}
-
-unsafe impl Send for DeviceManager {
-}
-unsafe impl Sync for DeviceManager {
-}
-
 enum DeviceEvent {
   DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
   DeviceEvent(Option<(u32, ButtplugDeviceEvent)>),
@@ -151,7 +140,7 @@ async fn wait_for_manager_events(
       DeviceEvent::PingTimeout => {
         // TODO This should be done in parallel, versus waiting for every device
         // to stop in order.
-        error!("Pinged out, shutting down devices");
+        error!("Pinged out, stopping devices");
         for (_, ref mut device) in device_map.write().await.iter_mut() {
           // Device index doesn't matter here, since we're sending the
           // message directly to the device itself.
@@ -170,6 +159,18 @@ async fn wait_for_manager_events(
       }
     }
   }
+}
+
+pub struct DeviceManager {
+  comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
+  devices: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
+  sender: Sender<DeviceCommunicationEvent>,
+}
+
+unsafe impl Send for DeviceManager {
+}
+
+unsafe impl Sync for DeviceManager {
 }
 
 impl DeviceManager {

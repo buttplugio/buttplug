@@ -26,6 +26,7 @@ use crate::{
       ButtplugMessageSpecVersion,
       ButtplugOutMessage,
       DeviceMessageInfo,
+      StopAllDevices,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -66,6 +67,8 @@ struct PingTimer {
   // we'll just use a channel. The channel receiver will get passed to the
   // device manager, so it can stop devices
   ping_channel: Sender<bool>,
+  // TODO This should be an RwLock once that's in async-std
+  timer_running: Arc<Mutex<bool>>
 }
 
 impl PingTimer {
@@ -80,6 +83,7 @@ impl PingTimer {
         last_ping_time: Arc::new(RwLock::new(Instant::now())),
         pinged_out: Arc::new(RwLock::new(false)),
         ping_channel: sender,
+        timer_running: Arc::new(Mutex::new(false))
       },
       receiver,
     )
@@ -91,9 +95,17 @@ impl PingTimer {
     let last_ping_time = self.last_ping_time.clone();
     let pinged_out = self.pinged_out.clone();
     let ping_channel = self.ping_channel.clone();
+    let timer_running = self.timer_running.clone();
     task::spawn(async move {
       loop {
+        {
+          *timer_running.lock().await = true;
+        }
         task::sleep(Duration::from_millis(max_ping_time.try_into().unwrap())).await;
+        // If the timer is no longer supposed to be running, bail.
+        if !*timer_running.lock().await {
+          return;
+        }
         let last_ping = last_ping_time.read().unwrap().elapsed().as_millis();
         if last_ping > max_ping_time {
           error!("Pinged out.");
@@ -111,6 +123,11 @@ impl PingTimer {
         }
       }
     });
+  }
+
+  pub async fn stop_ping_timer(&mut self) {
+    *self.timer_running.lock().await = false;
+    *self.pinged_out.write().unwrap() = false;
   }
 
   pub fn max_ping_time(&self) -> u128 {
@@ -134,16 +151,17 @@ pub struct ButtplugServer {
   server_spec_version: ButtplugMessageSpecVersion,
   client_spec_version: Option<ButtplugMessageSpecVersion>,
   client_name: Option<String>,
-  device_manager: DeviceManager,
+  device_manager: Option<DeviceManager>,
   event_sender: Sender<ButtplugOutMessage>,
+  event_receiver: Receiver<ButtplugOutMessage>,
   ping_timer: Option<PingTimer>,
 }
 
 impl ButtplugServer {
   pub fn new(name: &str, max_ping_time: u128) -> (Self, Receiver<ButtplugOutMessage>) {
+    let (send, recv) = channel(256);
     let mut ping_timer = None;
     let mut ping_receiver = None;
-    let (send, recv) = channel(256);
     if max_ping_time > 0 {
       let (timer, receiver) = PingTimer::new(max_ping_time);
       ping_timer = Some(timer);
@@ -155,23 +173,53 @@ impl ButtplugServer {
         server_spec_version: BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
         client_name: None,
         client_spec_version: None,
-        device_manager: DeviceManager::new(send.clone(), ping_receiver),
+        device_manager: Some(DeviceManager::new(send.clone(), ping_receiver)),
         ping_timer,
         event_sender: send,
+        event_receiver: recv.clone(),
       },
       recv,
     )
+  }
+
+  pub fn take_device_manager(&mut self) -> Option<DeviceManager> {
+    self.device_manager.take()
   }
 
   pub fn add_comm_manager<T>(&mut self)
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
-    self.device_manager.add_comm_manager::<T>();
+    if let Some(ref mut dm) = self.device_manager {
+      dm.add_comm_manager::<T>();
+    } else {
+      panic!("Device Manager has been taken already!");
+    }
   }
 
   pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
-    self.device_manager.add_test_comm_manager()
+    if let Some(ref mut dm) = self.device_manager {
+      dm.add_test_comm_manager()
+    } else {
+      panic!("Device Manager has been taken already!");
+    }
+  }
+
+  pub fn get_event_receiver(&self) -> Receiver<ButtplugOutMessage> {
+    self.event_receiver.clone()
+  }
+
+  pub fn connected(&self) -> bool {
+    self.client_name.is_some() && self.client_spec_version.is_some()
+  }
+
+  pub async fn disconnect(&mut self) {
+    if let Some(ref mut ping_timer) = self.ping_timer {
+      ping_timer.stop_ping_timer().await;
+    }
+    self.parse_message(&ButtplugInMessage::StopAllDevices(StopAllDevices::default())).await.unwrap();
+    self.client_name = None;
+    self.client_spec_version = None;
   }
 
   pub async fn parse_message(
@@ -186,14 +234,31 @@ impl ButtplugServer {
     if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
-      self.device_manager.parse_message(msg.clone()).await
+      if !self.connected() {
+        return Err(ButtplugHandshakeError::new("Server not connected.").into());
+      }  
+      if let Some(ref mut dm) = self.device_manager {
+        dm.parse_message(msg.clone()).await
+      } else {
+        panic!("Device Manager has been taken already!");
+      }
     } else {
       match msg {
         ButtplugInMessage::RequestServerInfo(ref m) => {
           self.perform_handshake(m).and_then(|m| Ok(m.into()))
         }
-        ButtplugInMessage::Ping(ref p) => self.handle_ping(p).and_then(|m| Ok(m.into())),
-        ButtplugInMessage::RequestLog(ref l) => self.handle_log(l).and_then(|m| Ok(m.into())),
+        ButtplugInMessage::Ping(ref p) => {
+          if !self.connected() {
+            return Err(ButtplugHandshakeError::new("Server not connected.").into());
+          }      
+          self.handle_ping(p).and_then(|m| Ok(m.into()))
+        },
+        ButtplugInMessage::RequestLog(ref l) => {
+          if !self.connected() {
+            return Err(ButtplugHandshakeError::new("Server not connected.").into());
+          }
+          self.handle_log(l).and_then(|m| Ok(m.into()))
+        },
         _ => Err(
           ButtplugMessageError::new(
             &format!("Message {:?} not handled by server loop.", msg).to_owned(),
@@ -208,6 +273,9 @@ impl ButtplugServer {
     &mut self,
     msg: &messages::RequestServerInfo,
   ) -> Result<messages::ServerInfo, ButtplugError> {
+    if self.connected() {
+      return Err(ButtplugHandshakeError::new("Server already connected.").into());
+    }
     if self.server_spec_version < msg.message_version {
       return Err(
         ButtplugHandshakeError::new(
