@@ -1,3 +1,15 @@
+# 0.3.0 (2020-05-10)
+
+## Features
+
+- Servers can now be extracted from wrappers, meaning they can be
+  saved and reused between connections. This allows us to implement
+  the --stayopen argument in intiface-cli.
+  
+## Bugfixes
+
+- Make tests broken in 0.2.4 actually pass again.
+
 # 0.2.4 (2020-05-09)
 
 ## Bugfixes
