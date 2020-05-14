@@ -99,9 +99,21 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
   }
 
+  // TODO this should probably return Result and we should handle state filling in parent.
   async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
-    info!("Connecting to device!");
-    self.device.connect().unwrap();
+    info!("Connecting to BTLEPlug device");
+    if let Err(err) = self.device.connect() {
+      state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+          &format!(
+            "Btleplug device cannot connect: {}",
+            err
+          )
+          .to_owned(),
+        )),
+      ));
+      return;
+    }
     loop {
       let event = self.event_receiver.next().await;
       match event.unwrap() {
