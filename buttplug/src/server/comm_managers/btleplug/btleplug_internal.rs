@@ -105,11 +105,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     if let Err(err) = self.device.connect() {
       state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
         ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-          &format!(
-            "Btleplug device cannot connect: {}",
-            err
-          )
-          .to_owned(),
+          &format!("Btleplug device cannot connect: {}", err).to_owned(),
         )),
       ));
       return;
