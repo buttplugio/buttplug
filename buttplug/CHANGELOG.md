@@ -1,3 +1,10 @@
+# 0.3.1 (2020-05-13)
+
+## Bugfixes
+
+- Error instead of panic on btleplug connection failure
+- Explain issues with scanning failures in error message
+
 # 0.3.0 (2020-05-10)
 
 ## Features
