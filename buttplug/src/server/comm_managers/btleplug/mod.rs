@@ -68,22 +68,25 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     let device_sender = self.device_sender.clone();
     let (sender, mut receiver) = channel(256);
     self.scanning_sender = Some(sender.clone());
+    let on_event = move |event: CentralEvent| match event {
+      CentralEvent::DeviceDiscovered(_) => {
+        let s = sender.clone();
+        task::spawn(async move {
+          s.send(true).await;
+        });
+      }
+      _ => {}
+    };
+    // TODO There's no way to unsubscribe central event handlers. That
+    // needs to be fixed in rumble somehow, but for now we'll have to
+    // make our handlers exit early after dying or something?
+    central.on_event(Box::new(on_event));
+    info!("Starting scan.");
+    if let Err(err) = central.start_scan() {
+      // TODO Explain the setcap issue on linux here.
+      return Err(ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into());
+    }
     task::spawn(async move {
-      let on_event = move |event: CentralEvent| match event {
-        CentralEvent::DeviceDiscovered(_) => {
-          let s = sender.clone();
-          task::spawn(async move {
-            s.send(true).await;
-          });
-        }
-        _ => {}
-      };
-      // TODO There's no way to unsubscribe central event handlers. That
-      // needs to be fixed in rumble somehow, but for now we'll have to
-      // make our handlers exit early after dying or something?
-      central.on_event(Box::new(on_event));
-      info!("Starting scan.");
-      central.start_scan().unwrap();
       // TODO This should be "tried addresses" probably. Otherwise if we
       // want to connect, say, 2 launches, we're going to have a Bad Time.
       let mut tried_names: Vec<String> = vec![];
