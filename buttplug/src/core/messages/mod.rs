@@ -104,7 +104,7 @@ pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
-/// between message structs and [ButtplugMessageUnion] enums, serialization, etc...
+/// between message structs and various message enums, serialization, etc...
 pub trait ButtplugMessage: Send + Sync + Clone {
   /// Returns the id number of the message
   fn get_id(&self) -> u32;

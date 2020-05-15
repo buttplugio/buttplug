@@ -53,7 +53,7 @@ impl Error {
 }
 
 impl From<ButtplugError> for Error {
-  /// Converts a [super::errors::ButtplugError] object into a Buttplug Protocol
+  /// Converts a [ButtplugError] object into a Buttplug Protocol
   /// [Error] message.
   fn from(error: ButtplugError) -> Self {
     let code = match error {

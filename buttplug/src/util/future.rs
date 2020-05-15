@@ -71,14 +71,15 @@ impl<T> ButtplugFutureState<T> {
 /// unlock for calls to [ButtplugFutureState::set_reply].
 pub type ButtplugFutureStateShared<T> = Arc<Mutex<ButtplugFutureState<T>>>;
 
-/// [Future] implementation for [ButtplugMessageUnion] types send to the server.
+/// [Future] implementation for long operations in Buttplug.
 ///
-/// A [Future] implementation that we can always expect to return a
-/// [ButtplugMessageUnion]. Used to deal with getting server replies after
-/// sending [ButtplugMessageUnion] types via the client API.
+/// This is a convenience struct, mostly used for handling Buttplug's
+/// request/reply communications between the client and server. It allows us to
+/// say what type we expect back, then hold a waker that we can pass around as
+/// needed.
 #[derive(Debug)]
 pub struct ButtplugFuture<T> {
-  /// State that holds the waker for the future, and the [ButtplugMessageUnion] reply (once set).
+  /// State that holds the waker for the future, and the reply (once set).
   ///
   /// ## Notes
   ///
@@ -112,7 +113,7 @@ impl<T> ButtplugFuture<T> {
 impl<T> Future for ButtplugFuture<T> {
   type Output = T;
 
-  /// Returns when the [ButtplugMessageUnion] reply has been set in the
+  /// Returns when the Output type reply has been set in the
   /// [ButtplugFutureStateShared].
   fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
     let mut waker_state = self.waker_state.lock().unwrap();

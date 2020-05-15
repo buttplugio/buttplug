@@ -5,9 +5,10 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! JSON Schema validator structure, used by the [buttplug::device::configuration_manager::DeviceConfigurationManager]
-//! and buttplug message de/serializers in both the client and server. Uses the
-//! [Valico] library.
+//! JSON Schema validator structure, used by the
+//! [DeviceConfigurationManager][crate::device::configuration_manager::DeviceConfigurationManager] and
+//! buttplug message de/serializers in both the client and server. Uses the
+//! Valico library.
 
 use serde_json::Value;
 use url;
