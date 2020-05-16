@@ -46,30 +46,66 @@ use std::collections::HashMap;
 ///   message is dropped and an error is emitted.
 ///
 pub struct ClientConnectorMessageSorter {
+  /// Map of message Ids to their related future.
+  ///
+  /// This is where we store message Ids that are waiting for a return from the
+  /// server. Once we get back a response with a matching Id, we remove the
+  /// entry from this map, and use the waker to complete the future with the
+  /// received response.
   future_map: HashMap<u32, ButtplugClientMessageStateShared>,
+
+  /// Message Id counter
+  ///
+  /// Every time we add a message to the future_map, we need it to have a unique
+  /// Id. We assume that unsigned 2^32 will be enough (Buttplug isn't THAT
+  /// chatty), and use it as a monotonically increasing counter for setting Ids.
   current_id: u32,
 }
 
 impl ClientConnectorMessageSorter {
+  /// Registers a future to be resolved when we receive a response.
+  ///
+  /// Given a message and its related future, set the message's id, and match
+  /// that id with the future to be resolved when we get a response back.
+  ///
+  /// # Arguments
+  ///
+  /// `msg` - Message that needs a response from the server. We'll used the
+  /// message's Id to match to match to the response and complete the
+  /// appropriate future.
+  ///
+  /// `state` - Waker for the future we'll need to resolve when the message
+  /// response is received.
   pub fn register_future(
     &mut self,
     msg: &mut ButtplugClientInMessage,
     state: &ButtplugClientMessageStateShared,
   ) {
+    trace!("Setting message id to {}", self.current_id);
     msg.set_id(self.current_id);
     self.future_map.insert(self.current_id, state.clone());
     self.current_id += 1;
   }
 
+  /// Given a response message from the server, resolve related message if we have one.
+  ///
+  /// Returns true if the message was resolved to a future, otherwise returns false.
+  ///
+  /// # Arguments
+  ///
+  /// - `msg` - Message from the server, may or may not be a response.
   pub async fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
-    match self.future_map.remove(&(msg.get_id())) {
+    let id = msg.get_id();
+    trace!("Trying to resolve message future for id {}.", id);
+    match self.future_map.remove(&id) {
       Some(_state) => {
+        trace!("Resolved id {} to a future.", id);
         let mut waker_state = _state.try_lock().expect("Future locks should never be in contention");
         waker_state.set_reply(msg.clone());
         true
       }
       None => {
-        info!("Not found, may be event.");
+        trace!("Message id {} not found, considering it an event.", id);
         false
       }
     }
@@ -77,6 +113,10 @@ impl ClientConnectorMessageSorter {
 }
 
 impl Default for ClientConnectorMessageSorter {
+  /// Create a default implementation of the ClientConnectorMessageSorter
+  ///
+  /// Sets the current_id to 1, since we can't send message id of 0 (0 is
+  /// reserved for system incoming messages).
   fn default() -> Self {
     Self {
       future_map: HashMap::<u32, ButtplugClientMessageStateShared>::new(),
