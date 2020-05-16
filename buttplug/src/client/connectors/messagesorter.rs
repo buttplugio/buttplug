@@ -9,8 +9,8 @@
 
 use crate::{
   core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
-  util::future::ButtplugMessageStateShared,
 };
+use super::super::ButtplugClientMessageStateShared;
 use std::collections::HashMap;
 
 /// Handling of message sorting for client connectors.
@@ -46,7 +46,7 @@ use std::collections::HashMap;
 ///   message is dropped and an error is emitted.
 ///
 pub struct ClientConnectorMessageSorter {
-  future_map: HashMap<u32, ButtplugMessageStateShared>,
+  future_map: HashMap<u32, ButtplugClientMessageStateShared>,
   current_id: u32,
 }
 
@@ -54,17 +54,17 @@ impl ClientConnectorMessageSorter {
   pub fn register_future(
     &mut self,
     msg: &mut ButtplugClientInMessage,
-    state: &ButtplugMessageStateShared,
+    state: &ButtplugClientMessageStateShared,
   ) {
     msg.set_id(self.current_id);
     self.future_map.insert(self.current_id, state.clone());
     self.current_id += 1;
   }
 
-  pub fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
+  pub async fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
     match self.future_map.remove(&(msg.get_id())) {
       Some(_state) => {
-        let mut waker_state = _state.lock().unwrap();
+        let mut waker_state = _state.try_lock().expect("Future locks should never be in contention");
         waker_state.set_reply(msg.clone());
         true
       }
@@ -79,7 +79,7 @@ impl ClientConnectorMessageSorter {
 impl Default for ClientConnectorMessageSorter {
   fn default() -> Self {
     Self {
-      future_map: HashMap::<u32, ButtplugMessageStateShared>::new(),
+      future_map: HashMap::<u32, ButtplugClientMessageStateShared>::new(),
       current_id: 1,
     }
   }

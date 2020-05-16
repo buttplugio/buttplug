@@ -16,10 +16,11 @@ use super::{
   device::ButtplugClientDevice,
   ButtplugClientEvent,
   ButtplugClientResult,
+  ButtplugClientMessageFuturePair,
 };
 use crate::{
   core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
-  util::future::{ButtplugFutureStateShared, ButtplugMessageFuturePair},
+  util::future::{ButtplugFutureStateShared},
 };
 use async_std::{
   prelude::{FutureExt, StreamExt},
@@ -48,7 +49,7 @@ pub enum ButtplugClientMessage {
   ///
   /// Bundled future should have reply set and waker called when this is
   /// finished.
-  Message(ButtplugMessageFuturePair),
+  Message(ButtplugClientMessageFuturePair),
 }
 
 pub enum ButtplugClientDeviceEvent {
@@ -60,14 +61,14 @@ pub enum ButtplugClientDeviceEvent {
 enum StreamReturn {
   ConnectorMessage(ButtplugClientOutMessage),
   ClientMessage(ButtplugClientMessage),
-  DeviceMessage(ButtplugMessageFuturePair),
+  DeviceMessage(ButtplugClientMessageFuturePair),
   Disconnect,
 }
 
 struct ButtplugClientEventLoop {
   devices: HashMap<u32, DeviceMessageInfo>,
-  device_message_sender: Sender<ButtplugMessageFuturePair>,
-  device_message_receiver: Receiver<ButtplugMessageFuturePair>,
+  device_message_sender: Sender<ButtplugClientMessageFuturePair>,
+  device_message_receiver: Receiver<ButtplugClientMessageFuturePair>,
   device_event_senders: HashMap<u32, Vec<Sender<ButtplugClientDeviceEvent>>>,
   event_sender: Sender<ButtplugClientEvent>,
   client_receiver: Receiver<ButtplugClientMessage>,
@@ -91,7 +92,7 @@ impl ButtplugClientEventLoop {
         ButtplugClientMessage::Connect(mut connector, state) => match connector.connect().await {
           Err(err) => {
             error!("Cannot connect to server: {}", err.message);
-            let mut waker_state = state.lock().unwrap();
+            let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
             let reply = Err(ButtplugClientConnectorError::new(&format!(
               "Cannot connect to server: {}",
               err.message
@@ -103,10 +104,10 @@ impl ButtplugClientEventLoop {
           }
           Ok(_) => {
             info!("Connected!");
-            let mut waker_state = state.lock().unwrap();
+            let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
             waker_state.set_reply(Ok(()));
             let (device_message_sender, device_message_receiver) =
-              channel::<ButtplugMessageFuturePair>(256);
+              channel::<ButtplugClientMessageFuturePair>(256);
             Ok(ButtplugClientEventLoop {
               devices: HashMap::new(),
               device_event_senders: HashMap::new(),
@@ -183,7 +184,7 @@ impl ButtplugClientEventLoop {
       }
       ButtplugClientMessage::Disconnect(state) => {
         info!("Client requested disconnect");
-        let mut waker_state = state.lock().unwrap();
+        let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
         waker_state.set_reply(self.connector.disconnect().await);
         false
       }
@@ -197,7 +198,7 @@ impl ButtplugClientEventLoop {
           r.push(dev);
         }
         info!("Returning device list of {} items!", r.len());
-        let mut waker_state = fut.lock().unwrap();
+        let mut waker_state = fut.try_lock().expect("Future locks should never be in contention");
         waker_state.set_reply(r);
         info!("Finised setting waker!");
         true

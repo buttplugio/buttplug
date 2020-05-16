@@ -31,7 +31,7 @@ use crate::{
       VibrateSubcommand,
     },
   },
-  util::future::{ButtplugMessageFuture, ButtplugMessageFuturePair},
+  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
 };
 use async_std::{
   prelude::StreamExt,
@@ -61,7 +61,7 @@ pub struct ButtplugClientDevice {
   pub name: String,
   index: u32,
   pub allowed_messages: MessageAttributesMap,
-  message_sender: Sender<ButtplugMessageFuturePair>,
+  message_sender: Sender<ButtplugClientMessageFuturePair>,
   event_receiver: Receiver<ButtplugClientDeviceEvent>,
   events: Vec<ButtplugClientDeviceEvent>,
   device_connected: bool,
@@ -78,7 +78,7 @@ impl ButtplugClientDevice {
     name: &str,
     index: u32,
     allowed_messages: MessageAttributesMap,
-    message_sender: Sender<ButtplugMessageFuturePair>,
+    message_sender: Sender<ButtplugClientMessageFuturePair>,
     event_receiver: Receiver<ButtplugClientDeviceEvent>,
   ) -> Self {
     Self {
@@ -103,7 +103,7 @@ impl ButtplugClientDevice {
     // receiver to see if it's returned None. Always run connection/event
     // checks before sending messages to the event loop.
     self.check_for_events().await?;
-    let fut = ButtplugMessageFuture::default();
+    let fut = ButtplugClientMessageFuture::default();
     self
       .message_sender
       .send((msg.clone(), fut.get_state_clone()))
@@ -412,14 +412,14 @@ impl ButtplugClientDevice {
 impl
   From<(
     &DeviceMessageInfo,
-    Sender<ButtplugMessageFuturePair>,
+    Sender<ButtplugClientMessageFuturePair>,
     Receiver<ButtplugClientDeviceEvent>,
   )> for ButtplugClientDevice
 {
   fn from(
     msg_sender_tuple: (
       &DeviceMessageInfo,
-      Sender<ButtplugMessageFuturePair>,
+      Sender<ButtplugClientMessageFuturePair>,
       Receiver<ButtplugClientDeviceEvent>,
     ),
   ) -> Self {

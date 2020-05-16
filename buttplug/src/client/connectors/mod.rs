@@ -6,9 +6,12 @@
 // for full license information.
 
 //! Handling of communication with Buttplug Server.
-pub mod messagesorter;
+mod messagesorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
+
+#[cfg(feature = "serialize_json")]
+pub use messagesorter::ClientConnectorMessageSorter;
 
 #[cfg(feature = "server")]
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServer, ButtplugServerWrapper};
@@ -26,7 +29,9 @@ use crate::{
     ButtplugFuture,
     ButtplugFutureState,
     ButtplugFutureStateShared,
-    ButtplugMessageStateShared,
+  },
+  client::{
+    ButtplugClientMessageStateShared,
   },
 };
 use async_std::sync::{channel, Receiver};
@@ -38,8 +43,6 @@ use async_std::{
 use async_trait::async_trait;
 #[cfg(feature = "serialize_json")]
 use futures::future::Future;
-#[cfg(feature = "serialize_json")]
-use messagesorter::ClientConnectorMessageSorter;
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionState =
@@ -83,7 +86,7 @@ impl Error for ButtplugClientConnectorError {
 pub trait ButtplugClientConnector: Send {
   async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError>;
   async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError>;
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared);
+  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared);
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
 
@@ -119,9 +122,9 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     Ok(())
   }
 
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
     let ret_msg = self.server.parse_message(msg).await;
-    let mut waker_state = state.lock().unwrap();
+    let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
     waker_state.set_reply(ret_msg);
   }
 
@@ -152,8 +155,8 @@ pub enum ButtplugRemoteClientConnectorMessage {
 pub struct ButtplugRemoteClientConnectorHelper {
   // Channel send/recv pair for applications wanting to send out through the
   // remote connection. Receiver will be send to task on creation.
-  internal_send: Sender<(ButtplugClientInMessage, ButtplugMessageStateShared)>,
-  internal_recv: Option<Receiver<(ButtplugClientInMessage, ButtplugMessageStateShared)>>,
+  internal_send: Sender<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>,
+  internal_recv: Option<Receiver<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>>,
   // Channel send/recv pair for remote connection sending information to the
   // application. Receiver will be sent to task on creation.
   remote_send: Sender<ButtplugRemoteClientConnectorMessage>,
@@ -172,7 +175,7 @@ unsafe impl Sync for ButtplugRemoteClientConnectorHelper {
 impl ButtplugRemoteClientConnectorHelper {
   pub fn new(event_sender: Sender<ButtplugClientOutMessage>) -> Self {
     let (internal_send, internal_recv) =
-      channel::<(ButtplugClientInMessage, ButtplugMessageStateShared)>(256);
+      channel::<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>(256);
     let (remote_send, remote_recv) = channel(256);
     Self {
       event_send: Some(event_sender),
@@ -187,7 +190,7 @@ impl ButtplugRemoteClientConnectorHelper {
     self.remote_send.clone()
   }
 
-  pub async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+  pub async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
     self.internal_send.send((msg.clone(), state.clone())).await;
   }
 
@@ -220,7 +223,7 @@ impl ButtplugRemoteClientConnectorHelper {
       enum StreamValue {
         NoValue,
         Incoming(ButtplugRemoteClientConnectorMessage),
-        Outgoing((ButtplugClientInMessage, ButtplugMessageStateShared)),
+        Outgoing((ButtplugClientInMessage, ButtplugClientMessageStateShared)),
       }
 
       loop {
@@ -252,7 +255,7 @@ impl ButtplugRemoteClientConnectorHelper {
                     let array: Vec<ButtplugClientOutMessage> =
                       serde_json::from_str(&t.clone()).unwrap();
                     for smsg in array {
-                      if !sorter.maybe_resolve_message(&smsg) {
+                      if !sorter.maybe_resolve_message(&smsg).await {
                         debug!("Sending event!");
                         // Send notification through event channel
                         event_send.send(smsg).await;

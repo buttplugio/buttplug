@@ -25,7 +25,7 @@ use super::{
 };
 use crate::{
   core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
-  util::future::ButtplugMessageStateShared,
+  client::ButtplugClientMessageStateShared,
 };
 use async_std::{
   sync::{channel, Receiver, Sender},
@@ -214,7 +214,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     Ok(())
   }
 
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugMessageStateShared) {
+  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
     self.helper.send(&msg, state).await;
   }
 

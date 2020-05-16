@@ -103,7 +103,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
-      state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+      state.try_lock().expect("Future locks should never be in contention").set_reply(ButtplugDeviceReturn::Error(
         ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
           &format!("Btleplug device cannot connect: {}", err).to_owned(),
         )),
@@ -160,8 +160,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     };
     info!("Device connected!");
     state
-      .lock()
-      .unwrap()
+      .try_lock()
+      .expect("Future locks should never be in contention")
       .set_reply(ButtplugDeviceReturn::Connected(device_info));
   }
 
@@ -255,7 +255,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         DeviceImplCommand::Unsubscribe(sub_msg) => {
           self.handle_unsubscribe(sub_msg, state);
         }
-        _ => state.lock().unwrap().set_reply(ButtplugDeviceReturn::Error(
+        _ => state.try_lock().expect("Future locks should never be in contention").set_reply(ButtplugDeviceReturn::Error(
           ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
             "Buttplug-rs does not yet handle reads",
           )),
