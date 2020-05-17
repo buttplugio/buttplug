@@ -261,10 +261,8 @@ impl ButtplugServer {
           self.handle_log(l).and_then(|m| Ok(m.into()))
         }
         _ => Err(
-          ButtplugMessageError::new(
-            &format!("Message {:?} not handled by server loop.", msg),
-          )
-          .into(),
+          ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg))
+            .into(),
         ),
       }
     }
@@ -279,12 +277,10 @@ impl ButtplugServer {
     }
     if self.server_spec_version < msg.message_version {
       return Err(
-        ButtplugHandshakeError::new(
-          &format!(
-            "Server version ({}) must be equal to or greater than client version ({}).",
-            self.server_spec_version, msg.message_version
-          )
-        )
+        ButtplugHandshakeError::new(&format!(
+          "Server version ({}) must be equal to or greater than client version ({}).",
+          self.server_spec_version, msg.message_version
+        ))
         .into(),
       );
     }
@@ -330,10 +326,7 @@ mod test {
   #[cfg(any(feature = "linux-ble", feature = "winrt-ble"))]
   use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
   use crate::{
-    device::{
-      DeviceImplCommand, DeviceWriteCmd,
-      Endpoint,
-    },
+    device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     test::{check_recv_value, TestDevice},
   };
   use async_std::{prelude::StreamExt, sync::Receiver, task};
@@ -459,12 +452,10 @@ mod test {
       if let ButtplugOutMessage::DeviceAdded(da) = msg {
         assert_eq!(da.device_name, "Aneros Vivi");
       } else {
-        panic!(
-          format!(
-            "Returned message was not a DeviceAdded message or timed out: {:?}",
-            msg
-          )
-        );
+        panic!(format!(
+          "Returned message was not a DeviceAdded message or timed out: {:?}",
+          msg
+        ));
       }
       server
         .parse_message(

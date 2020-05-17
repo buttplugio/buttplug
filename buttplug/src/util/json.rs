@@ -17,7 +17,7 @@ pub struct JSONValidator {
   /// Valico's scope object, used for holding the schema.
   scope: json_schema::scope::Scope,
   /// Valico's id URL, used for accessing the schema.
-  id: url::Url
+  id: url::Url,
 }
 
 impl JSONValidator {
@@ -30,10 +30,7 @@ impl JSONValidator {
     let schema_json: Value = serde_json::from_str(schema).unwrap();
     let mut scope = json_schema::Scope::new();
     let id = scope.compile(schema_json, false).unwrap();
-    Self {
-      id,
-      scope,
-    }
+    Self { id, scope }
   }
 
   /// Validates a json string, based on the schema the validator was created

@@ -16,17 +16,17 @@
 
 use super::{
   ButtplugClientConnectionFuture,
+  ButtplugClientConnectionResult,
   ButtplugClientConnectionStateShared,
   ButtplugClientConnector,
-  ButtplugClientConnectionResult,
   ButtplugClientConnectorError,
   ButtplugRemoteClientConnectorHelper,
   ButtplugRemoteClientConnectorMessage,
   ButtplugRemoteClientConnectorSender,
 };
 use crate::{
-  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
   client::ButtplugInternalClientMessageResult,
+  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
 };
 use async_std::{
   sync::{channel, Receiver, Sender},

@@ -79,16 +79,18 @@ impl<T> ButtplugFutureState<T> {
 /// therefore we'll panic on the .expect().
 #[derive(Debug)]
 pub struct ButtplugFutureStateShared<T> {
-  state: Arc<Mutex<ButtplugFutureState<T>>>
+  state: Arc<Mutex<ButtplugFutureState<T>>>,
 }
 
-unsafe impl<T> Sync for ButtplugFutureStateShared<T> {}
-unsafe impl<T> Send for ButtplugFutureStateShared<T> {}
+unsafe impl<T> Sync for ButtplugFutureStateShared<T> {
+}
+unsafe impl<T> Send for ButtplugFutureStateShared<T> {
+}
 
 impl<T> ButtplugFutureStateShared<T> {
   pub fn new(state: ButtplugFutureState<T>) -> Self {
     Self {
-      state: Arc::new(Mutex::new(state))
+      state: Arc::new(Mutex::new(state)),
     }
   }
 
@@ -96,14 +98,17 @@ impl<T> ButtplugFutureStateShared<T> {
   ///
   /// See [ButtplugFutureStateShared] struct documentation for more info on locking.
   pub fn lock_now_or_panic(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
-    self.state.try_lock().expect("ButtplugFutureStateShared should never have lock contention")
+    self
+      .state
+      .try_lock()
+      .expect("ButtplugFutureStateShared should never have lock contention")
   }
 }
 
 impl<T> Default for ButtplugFutureStateShared<T> {
   fn default() -> Self {
     Self {
-      state: Arc::new(Mutex::new(ButtplugFutureState::<T>::default()))
+      state: Arc::new(Mutex::new(ButtplugFutureState::<T>::default())),
     }
   }
 }
@@ -111,7 +116,7 @@ impl<T> Default for ButtplugFutureStateShared<T> {
 impl<T> Clone for ButtplugFutureStateShared<T> {
   fn clone(&self) -> Self {
     Self {
-      state: self.state.clone()
+      state: self.state.clone(),
     }
   }
 }

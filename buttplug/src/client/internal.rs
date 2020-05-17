@@ -15,12 +15,12 @@ use super::{
   },
   device::ButtplugClientDevice,
   ButtplugClientEvent,
-  ButtplugClientResult,
   ButtplugClientMessageFuturePair,
+  ButtplugClientResult,
 };
 use crate::{
   core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
-  util::future::{ButtplugFutureStateShared},
+  util::future::ButtplugFutureStateShared,
 };
 use async_std::{
   prelude::{FutureExt, StreamExt},

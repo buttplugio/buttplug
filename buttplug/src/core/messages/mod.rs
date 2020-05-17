@@ -372,9 +372,7 @@ impl TryFrom<ButtplugOutMessage> for ButtplugSpecV1OutMessage {
       ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV1OutMessage::ServerInfo(msg.into())),
       ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV1OutMessage::DeviceList(msg.into())),
       ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV1OutMessage::DeviceAdded(msg.into())),
-      ButtplugOutMessage::DeviceRemoved(msg) => {
-        Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg))
-      }
+      ButtplugOutMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg)),
       ButtplugOutMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV1OutMessage::ScanningFinished(msg))
       }
@@ -437,9 +435,7 @@ impl TryFrom<ButtplugOutMessage> for ButtplugSpecV0OutMessage {
       ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV0OutMessage::ServerInfo(msg.into())),
       ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV0OutMessage::DeviceList(msg.into())),
       ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV0OutMessage::DeviceAdded(msg.into())),
-      ButtplugOutMessage::DeviceRemoved(msg) => {
-        Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg))
-      }
+      ButtplugOutMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg)),
       ButtplugOutMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV0OutMessage::ScanningFinished(msg))
       }

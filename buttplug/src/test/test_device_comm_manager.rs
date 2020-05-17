@@ -2,7 +2,9 @@ use super::TestDeviceImplCreator;
 use crate::{
   core::errors::ButtplugError,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
   },
 };
 use async_std::sync::{Arc, Mutex, Sender};
@@ -86,12 +88,10 @@ mod test {
       if let ButtplugOutMessage::DeviceAdded(da) = msg {
         assert_eq!(da.device_name, "Aneros Vivi");
       } else {
-        panic!(
-          format!(
-            "Returned message was not a DeviceAdded message or timed out: {:?}",
-            msg
-          )
-        );
+        panic!(format!(
+          "Returned message was not a DeviceAdded message or timed out: {:?}",
+          msg
+        ));
       }
       device.disconnect().await;
       // Check that we got an event back about a removed device.
@@ -99,12 +99,10 @@ mod test {
       if let ButtplugOutMessage::DeviceRemoved(da) = msg {
         assert_eq!(da.device_index, 0);
       } else {
-        panic!(
-          format!(
-            "Returned message was not a DeviceRemoved message or timed out: {:?}",
-            msg
-          )
-        );
+        panic!(format!(
+          "Returned message was not a DeviceRemoved message or timed out: {:?}",
+          msg
+        ));
       }
     });
   }

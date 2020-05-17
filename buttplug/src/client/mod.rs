@@ -47,22 +47,21 @@ type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientConnectorErr
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
 pub type ButtplugClientMessageResult = ButtplugClientResult<ButtplugClientOutMessage>;
-pub type ButtplugInternalClientMessageResult = ButtplugInternalClientResult<ButtplugClientOutMessage>;
+pub type ButtplugInternalClientMessageResult =
+  ButtplugInternalClientResult<ButtplugClientOutMessage>;
 pub type ButtplugClientMessageState = ButtplugFutureState<ButtplugInternalClientMessageResult>;
-pub type ButtplugClientMessageStateShared = ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
+pub type ButtplugClientMessageStateShared =
+  ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
 pub type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
 
 pub struct ButtplugClientMessageFuturePair {
-  pub msg: ButtplugClientInMessage, 
-  pub waker: ButtplugClientMessageStateShared
+  pub msg: ButtplugClientInMessage,
+  pub waker: ButtplugClientMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {
   pub fn new(msg: ButtplugClientInMessage, waker: ButtplugClientMessageStateShared) -> Self {
-    Self {
-      msg,
-      waker
-    }
+    Self { msg, waker }
   }
 }
 
@@ -412,7 +411,10 @@ impl ButtplugClient {
   ) -> ButtplugInternalClientMessageResult {
     // Create a future to pair with the message being resolved.
     let fut = ButtplugClientMessageFuture::default();
-    let internal_msg = ButtplugClientMessage::Message(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()));
+    let internal_msg = ButtplugClientMessage::Message(ButtplugClientMessageFuturePair::new(
+      msg.clone(),
+      fut.get_state_clone(),
+    ));
 
     // Send message to internal loop and wait for return.
     self.send_internal_message(internal_msg).await?;
@@ -511,20 +513,18 @@ impl ButtplugClient {
 
 #[cfg(all(test, feature = "server"))]
 mod test {
-  use super::{ButtplugClient};
+  use super::ButtplugClient;
   use crate::{
     client::{
-      ButtplugInternalClientMessageResult,
       connectors::{
-      ButtplugClientConnector,
-      ButtplugClientConnectionResult,
-      ButtplugClientConnectorError,
-      ButtplugEmbeddedClientConnector,
-    }
-  },
-    core::{
-      messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
-    }
+        ButtplugClientConnectionResult,
+        ButtplugClientConnector,
+        ButtplugClientConnectorError,
+        ButtplugEmbeddedClientConnector,
+      },
+      ButtplugInternalClientMessageResult,
+    },
+    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
   };
   use async_std::{
     future::Future,

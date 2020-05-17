@@ -13,9 +13,13 @@ pub mod websocket;
 #[cfg(feature = "serialize_json")]
 pub use messagesorter::ClientConnectorMessageSorter;
 
+use super::{
+  ButtplugClientMessageFuture,
+  ButtplugClientMessageFuturePair,
+  ButtplugInternalClientMessageResult,
+};
 #[cfg(feature = "server")]
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServer, ButtplugServerWrapper};
-use super::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair, ButtplugInternalClientMessageResult};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
@@ -26,11 +30,7 @@ use crate::{
       ButtplugSpecV2OutMessage,
     },
   },
-  util::future::{
-    ButtplugFuture,
-    ButtplugFutureState,
-    ButtplugFutureStateShared,
-  },
+  util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
 };
 use async_std::sync::{channel, Receiver};
 #[cfg(feature = "serialize_json")]
@@ -44,8 +44,7 @@ use futures::future::Future;
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectionResult = Result<(), ButtplugClientConnectorError>;
-pub type ButtplugClientConnectionState =
-  ButtplugFutureState<ButtplugClientConnectionResult>;
+pub type ButtplugClientConnectionState = ButtplugFutureState<ButtplugClientConnectionResult>;
 pub type ButtplugClientConnectionStateShared =
   ButtplugFutureStateShared<ButtplugClientConnectionResult>;
 pub type ButtplugClientConnectionFuture = ButtplugFuture<ButtplugClientConnectionResult>;
@@ -117,7 +116,7 @@ pub trait ButtplugClientConnector: Send {
   async fn disconnect(&mut self) -> ButtplugClientConnectionResult;
   /// Sends a
   /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage]
-  /// to the server. 
+  /// to the server.
   async fn send(&mut self, msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult;
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
@@ -154,7 +153,10 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     Ok(())
   }
 
-  async fn send(&mut self, msg: ButtplugClientInMessage) -> Result<ButtplugClientOutMessage, ButtplugClientConnectorError> {
+  async fn send(
+    &mut self,
+    msg: ButtplugClientInMessage,
+  ) -> Result<ButtplugClientOutMessage, ButtplugClientConnectorError> {
     Ok(self.server.parse_message(msg).await)
   }
 
@@ -204,8 +206,7 @@ unsafe impl Sync for ButtplugRemoteClientConnectorHelper {
 #[cfg(feature = "serialize_json")]
 impl ButtplugRemoteClientConnectorHelper {
   pub fn new(event_sender: Sender<ButtplugClientOutMessage>) -> Self {
-    let (internal_send, internal_recv) =
-      channel(256);
+    let (internal_send, internal_recv) = channel(256);
     let (remote_send, remote_recv) = channel(256);
     Self {
       event_send: Some(event_sender),
@@ -220,12 +221,18 @@ impl ButtplugRemoteClientConnectorHelper {
     self.remote_send.clone()
   }
 
-  pub async fn send(&mut self, msg: &ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
+  pub async fn send(
+    &mut self,
+    msg: &ButtplugClientInMessage,
+  ) -> ButtplugInternalClientMessageResult {
     // between tasks.
     let fut = ButtplugClientMessageFuture::default();
     self
       .internal_send
-      .send(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()))
+      .send(ButtplugClientMessageFuturePair::new(
+        msg.clone(),
+        fut.get_state_clone(),
+      ))
       .await;
     fut.await
   }
@@ -331,7 +338,7 @@ impl ButtplugRemoteClientConnectorHelper {
           StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            sorter.register_future( buttplug_fut_msg);
+            sorter.register_future(buttplug_fut_msg);
             if let Some(ref mut remote_sender) = remote_send {
               remote_sender.send(buttplug_fut_msg.msg.clone());
             } else {

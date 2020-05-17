@@ -59,7 +59,8 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
   }
 }
 
-type EndpointChannels = Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>;
+type EndpointChannels =
+  Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>;
 
 #[derive(Clone)]
 pub struct TestDevice {

@@ -101,8 +101,7 @@ impl GenericCommandManager {
     // subcommand.
     if msg.speeds.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&"VibrateCmd has 0 commands, will not do anything.")
-          .into(),
+        ButtplugDeviceError::new(&"VibrateCmd has 0 commands, will not do anything.").into(),
       );
     }
 
@@ -174,8 +173,7 @@ impl GenericCommandManager {
     // command.
     if msg.rotations.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&"RotateCmd has 0 commands, will not do anything.")
-          .into(),
+        ButtplugDeviceError::new(&"RotateCmd has 0 commands, will not do anything.").into(),
       );
     }
 

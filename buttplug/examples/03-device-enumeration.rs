@@ -57,10 +57,7 @@ async fn device_enumeration_example() {
   let (_, test_device_impl_creator) =
     TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
   let devices = connector.server_ref().add_test_comm_manager();
-  devices
-    .lock()
-    .await
-    .push(test_device_impl_creator);
+  devices.lock().await.push(test_device_impl_creator);
 
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:

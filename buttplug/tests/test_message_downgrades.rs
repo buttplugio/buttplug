@@ -5,10 +5,7 @@ mod test {
   use async_std::{prelude::StreamExt, task};
   use buttplug::{
     core::messages::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
-    device::{
-      DeviceImplCommand, DeviceWriteCmd,
-      Endpoint,
-    },
+    device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::wrapper::ButtplugJSONServerWrapper,
     server::ButtplugServerWrapper,
     test::{check_recv_value, TestDevice},

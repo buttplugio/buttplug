@@ -7,17 +7,15 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use crate::{
-  core::messages::{ButtplugClientOutMessage, ButtplugMessage},
-};
-use super::super::{ButtplugClientMessageStateShared, ButtplugClientMessageFuturePair};
+use super::super::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared};
+use crate::core::messages::{ButtplugClientOutMessage, ButtplugMessage};
 use std::collections::HashMap;
 
 /// Message sorting and pairing for remote client connectors.
 ///
 /// In order to create connections to remote systems, we need a way to maintain
 /// message coherence. We expect that whenever a client sends the server a
-/// request message, the server will always send back a response message. 
+/// request message, the server will always send back a response message.
 ///
 /// In the [embedded][super::ButtplugEmbeddedClientConnector] case, where the
 /// client and server are in the same process, we can simply use execution flow
@@ -71,14 +69,13 @@ impl ClientConnectorMessageSorter {
   ///
   /// Given a message and its related future, set the message's `id`, and match
   /// that id with the future to be resolved when we get a response back.
-  pub fn register_future(
-    &mut self,
-    msg_fut: &mut ButtplugClientMessageFuturePair
-  ) {
+  pub fn register_future(&mut self, msg_fut: &mut ButtplugClientMessageFuturePair) {
     trace!("Setting message id to {}", self.current_id);
     let mut msg = msg_fut.msg.clone();
     msg.set_id(self.current_id);
-    self.future_map.insert(self.current_id, msg_fut.waker.clone());
+    self
+      .future_map
+      .insert(self.current_id, msg_fut.waker.clone());
     self.current_id += 1;
   }
 

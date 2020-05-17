@@ -219,13 +219,7 @@ impl DeviceManager {
   }
 
   async fn stop_all_devices(&mut self) -> Result<(), ButtplugError> {
-    let devices_ids: Vec<u32> = self
-      .devices
-      .read()
-      .await
-      .keys()
-      .cloned()
-      .collect();
+    let devices_ids: Vec<u32> = self.devices.read().await.keys().cloned().collect();
     // TODO This should be done in parallel, versus waiting for every device
     // to stop in order.
     for id in devices_ids {

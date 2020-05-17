@@ -15,6 +15,7 @@ use super::{
   ButtplugClientResult,
 };
 use crate::{
+  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
@@ -32,7 +33,6 @@ use crate::{
       VibrateSubcommand,
     },
   },
-  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
 };
 use async_std::{
   prelude::StreamExt,
@@ -94,10 +94,7 @@ impl ButtplugClientDevice {
     }
   }
 
-  async fn send_message(
-    &mut self,
-    msg: ButtplugClientInMessage,
-  ) -> ButtplugClientMessageResult {
+  async fn send_message(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientMessageResult {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
@@ -107,19 +104,22 @@ impl ButtplugClientDevice {
     let fut = ButtplugClientMessageFuture::default();
     self
       .message_sender
-      .send(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()))
+      .send(ButtplugClientMessageFuturePair::new(
+        msg.clone(),
+        fut.get_state_clone(),
+      ))
       .await;
     match fut.await {
       Ok(msg) => {
         if let ButtplugClientOutMessage::Error(_err) = msg {
-           Err(ButtplugClientError::ButtplugError(
-             ButtplugError::from(_err),
-           ))
+          Err(ButtplugClientError::ButtplugError(ButtplugError::from(
+            _err,
+          )))
         } else {
           Ok(msg)
         }
       }
-      Err(e) => Err(ButtplugClientError::ButtplugClientConnectorError(e))
+      Err(e) => Err(ButtplugClientError::ButtplugClientConnectorError(e)),
     }
   }
 
