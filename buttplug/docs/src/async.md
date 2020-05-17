@@ -48,9 +48,9 @@ All previously shipping implementations of Buttplug were in languages that had f
 
 As hardware can disconnect, or send data unprovoked, or do other things we don't request it to, events need to exist. To handle this, we create async _wait_for_event_ functions on our clients, devices, and servers. These wrap our internal channel implementations (see prior section for more info on that), and block on receive. The idea is that users of the library can create a task that, say, holds a device, and races 2 futures, one that waits for a message from outside to the command the device, and one that calls the devices _wait_for_event_ function. 
 
-## Future Queuing
+## Futures, Tasks, and Channels
 
-_TODO: Talk about how we shuttle futures around inside the library_
+_TODO: Talk about how we shuttle futures around inside the library. This should include talking about ButtplugFuture, ButtplugFutureState/Shared, etc... Basically, describe why we break down futures into their wakers into order to resolve between thread/task contexts_
 
 ## Getting Around Associated Functions Like new()
 

@@ -92,9 +92,9 @@ impl ClientConnectorMessageSorter {
     let id = msg.get_id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
-      Some(_state) => {
+      Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
-        let mut waker_state = _state.try_lock().expect("Future locks should never be in contention");
+        let mut waker_state = _state.lock_now_or_panic();
         waker_state.set_reply(Ok(msg.clone()));
         true
       }

@@ -13,16 +13,14 @@ use async_std::{
   task::{Context, Poll, Waker},
 };
 use core::pin::Pin;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 
-/// Struct used for facilitating passing futures across channels.
+/// Struct used for facilitating resolving futures across contexts.
 ///
-/// There are quite a few times within Buttplug where we will need to pass a
-/// future between tasks. For instance, when a ButtplugMessage is sent to the
-/// server, it may take an indeterminate amount of time to get a reply, and we
-/// may have to traverse 2-3 tasks to make this happen. This struct holds the
-/// reply, as well as a [Waker] for the related future. Once the reply is
-/// filled, the waker will be called to finish the future polling.
+/// Since ButtplugFuture is [Pinned][Pin], we can't just go passing it around
+/// tasks or threads. This struct is therefore used to get replies from other
+/// contexts while letting the future stay pinned. It holds the reply to the
+/// future, as well as a [Waker] for waking up the future when the reply is set.
 #[derive(Debug, Clone)]
 pub struct ButtplugFutureState<T> {
   reply: Option<T>,
@@ -46,6 +44,12 @@ impl<T> ButtplugFutureState<T> {
   /// When a response is received from whatever we're waiting on, this function
   /// takes the response, updates the state struct, and calls [Waker::wake] so
   /// that the corresponding future can finish.
+  ///
+  /// # Panics
+  ///
+  /// If the reply is set twice, the library will panic. We have no way of
+  /// resolving two replies to the same future, so this is considered a
+  /// catastrophic error.
   pub fn set_reply(&mut self, reply: T) {
     if self.reply.is_some() {
       panic!("set_reply_msg called multiple times on the same future.");
@@ -61,10 +65,56 @@ impl<T> ButtplugFutureState<T> {
 
 /// Shared [ButtplugFutureState] type.
 ///
-/// [ButtplugFutureState] is made to be shared across futures, and we'll
-/// never know if those futures are single or multithreaded. Only needs to
-/// unlock for calls to [ButtplugFutureState::set_reply].
-pub type ButtplugFutureStateShared<T> = Arc<Mutex<ButtplugFutureState<T>>>;
+/// [ButtplugFutureState] is made to be shared across tasks, and we'll never
+/// know if those tasks are running on single or multithreaded executors. This
+/// only needs to unlock for calls to [ButtplugFutureState::set_reply].
+///
+/// # Panics and notes on unlocking
+///
+/// The lock for a [ButtplugFutureState] should only ever be taken when the
+/// reply is being set, and there should never be a point where the reply is set
+/// twice (See the panic documentation for [ButtplugFutureState]). In order to
+/// make sure we never block, we always lock using try_lock with .expect(). If
+/// try_lock fails, this means we're already in a double reply situation, and
+/// therefore we'll panic on the .expect().
+#[derive(Debug)]
+pub struct ButtplugFutureStateShared<T> {
+  state: Arc<Mutex<ButtplugFutureState<T>>>
+}
+
+unsafe impl<T> Sync for ButtplugFutureStateShared<T> {}
+unsafe impl<T> Send for ButtplugFutureStateShared<T> {}
+
+impl<T> ButtplugFutureStateShared<T> {
+  pub fn new(state: ButtplugFutureState<T>) -> Self {
+    Self {
+      state: Arc::new(Mutex::new(state))
+    }
+  }
+
+  /// Locks immediately and returns a [MutexGuard], or panics
+  ///
+  /// See [ButtplugFutureStateShared] struct documentation for more info on locking.
+  pub fn lock_now_or_panic(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
+    self.state.try_lock().expect("ButtplugFutureStateShared should never have lock contention")
+  }
+}
+
+impl<T> Default for ButtplugFutureStateShared<T> {
+  fn default() -> Self {
+    Self {
+      state: Arc::new(Mutex::new(ButtplugFutureState::<T>::default()))
+    }
+  }
+}
+
+impl<T> Clone for ButtplugFutureStateShared<T> {
+  fn clone(&self) -> Self {
+    Self {
+      state: self.state.clone()
+    }
+  }
+}
 
 /// [Future] implementation for long operations in Buttplug.
 ///
@@ -112,7 +162,7 @@ impl<T> Future for ButtplugFuture<T> {
   /// Wakes up when the Output type reply has been set in the
   /// [ButtplugFutureStateShared].
   fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
-    let mut waker_state = self.waker_state.lock().unwrap();
+    let mut waker_state = self.waker_state.lock_now_or_panic();
     if waker_state.reply.is_some() {
       let msg = waker_state.reply.take().unwrap();
       Poll::Ready(msg)

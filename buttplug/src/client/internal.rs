@@ -92,10 +92,10 @@ impl ButtplugClientEventLoop {
         ))
       }
       Some(msg) => match msg {
-        ButtplugClientMessage::Connect(mut connector, state) => match connector.connect().await {
+        ButtplugClientMessage::Connect(mut connector, mut state) => match connector.connect().await {
           Err(err) => {
             error!("Cannot connect to server: {}", err.message);
-            let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
+            let mut waker_state = state.lock_now_or_panic();
             let reply = Err(ButtplugClientConnectorError::new(&format!(
               "Cannot connect to server: {}",
               err.message
@@ -107,7 +107,7 @@ impl ButtplugClientEventLoop {
           }
           Ok(_) => {
             info!("Connected!");
-            let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
+            let mut waker_state = state.lock_now_or_panic();
             waker_state.set_reply(Ok(()));
             let (device_message_sender, device_message_receiver) =
               channel::<ButtplugClientMessageFuturePair>(256);
@@ -178,7 +178,7 @@ impl ButtplugClientEventLoop {
   }
 
   async fn send_message(&mut self, msg_fut: ButtplugClientMessageFuturePair) {
-    let mut waker = msg_fut.waker.try_lock().expect("Future locks should never be in contention");
+    let mut waker = msg_fut.waker.lock_now_or_panic();
     waker.set_reply(self.connector.send(msg_fut.msg).await);
   }
 
@@ -191,9 +191,9 @@ impl ButtplugClientEventLoop {
         self.send_message(msg_fut).await;
         true
       }
-      ButtplugClientMessage::Disconnect(state) => {
+      ButtplugClientMessage::Disconnect(mut state) => {
         info!("Client requested disconnect");
-        let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
+        let mut waker_state = state.lock_now_or_panic();
         waker_state.set_reply(self.connector.disconnect().await);
         false
       }
@@ -207,7 +207,7 @@ impl ButtplugClientEventLoop {
           r.push(dev);
         }
         info!("Returning device list of {} items!", r.len());
-        let mut waker_state = fut.try_lock().expect("Future locks should never be in contention");
+        let mut waker_state = fut.lock_now_or_panic();
         waker_state.set_reply(r);
         info!("Finised setting waker!");
         true
