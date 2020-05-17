@@ -38,7 +38,6 @@ use async_std::{
 };
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
-use log;
 use logger::ButtplugLogHandler;
 use std::{
   convert::{TryFrom, TryInto},
@@ -91,7 +90,7 @@ impl PingTimer {
 
   pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugOutMessage>) {
     // Since we've received the handshake, start the ping timer if needed.
-    let max_ping_time = self.max_ping_time.clone();
+    let max_ping_time = self.max_ping_time;
     let last_ping_time = self.last_ping_time.clone();
     let pinged_out = self.pinged_out.clone();
     let ping_channel = self.ping_channel.clone();
@@ -160,13 +159,12 @@ pub struct ButtplugServer {
 impl ButtplugServer {
   pub fn new(name: &str, max_ping_time: u128) -> (Self, Receiver<ButtplugOutMessage>) {
     let (send, recv) = channel(256);
-    let mut ping_timer = None;
-    let mut ping_receiver = None;
-    if max_ping_time > 0 {
+    let (ping_timer, ping_receiver) = if max_ping_time > 0 {
       let (timer, receiver) = PingTimer::new(max_ping_time);
-      ping_timer = Some(timer);
-      ping_receiver = Some(receiver);
-    }
+      (Some(timer), Some(receiver))
+    } else {
+      (None, None)
+    };
     (
       Self {
         server_name: name.to_string(),
@@ -197,7 +195,7 @@ impl ButtplugServer {
     }
   }
 
-  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
+  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
     if let Some(ref mut dm) = self.device_manager {
       dm.add_test_comm_manager()
     } else {
@@ -264,7 +262,7 @@ impl ButtplugServer {
         }
         _ => Err(
           ButtplugMessageError::new(
-            &format!("Message {:?} not handled by server loop.", msg).to_owned(),
+            &format!("Message {:?} not handled by server loop.", msg),
           )
           .into(),
         ),
@@ -286,7 +284,6 @@ impl ButtplugServer {
             "Server version ({}) must be equal to or greater than client version ({}).",
             self.server_spec_version, msg.message_version
           )
-          .to_owned(),
         )
         .into(),
       );
@@ -334,7 +331,7 @@ mod test {
   use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
   use crate::{
     device::{
-      device::{DeviceImplCommand, DeviceWriteCmd},
+      DeviceImplCommand, DeviceWriteCmd,
       Endpoint,
     },
     test::{check_recv_value, TestDevice},
@@ -353,7 +350,7 @@ mod test {
         _s,
         messages::ServerInfo::new("Test Server", ButtplugMessageSpecVersion::Version2, 0)
       ),
-      _ => assert!(false, "Should've received ok"),
+      _ => panic!("Should've received ok"),
     }
     (server, recv)
   }
@@ -448,7 +445,7 @@ mod test {
       // TODO This should probably use a test protocol we control, not the aneros protocol
       let (device, device_creator) =
         TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-      devices.lock().await.push(Box::new(device_creator));
+      devices.lock().await.push(device_creator);
 
       let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
       let mut reply = server.parse_message(&msg.into()).await;
@@ -462,8 +459,7 @@ mod test {
       if let ButtplugOutMessage::DeviceAdded(da) = msg {
         assert_eq!(da.device_name, "Aneros Vivi");
       } else {
-        assert!(
-          false,
+        panic!(
           format!(
             "Returned message was not a DeviceAdded message or timed out: {:?}",
             msg
@@ -476,7 +472,7 @@ mod test {
         )
         .await
         .unwrap();
-      let (_, command_receiver) = device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+      let (_, command_receiver) = device.get_endpoint_channel_clone(Endpoint::Tx).await;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),

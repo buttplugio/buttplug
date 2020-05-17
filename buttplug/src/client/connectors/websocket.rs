@@ -229,7 +229,6 @@ mod test {
   use super::ButtplugWebsocketClientConnector;
   use crate::client::connectors::ButtplugClientConnector;
   use async_std::task;
-  use env_logger;
 
   // Only run these tests when we know there's an external server up to reply
 

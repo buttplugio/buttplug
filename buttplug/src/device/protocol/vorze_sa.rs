@@ -85,7 +85,7 @@ mod test {
             RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
         },
         device::{
-            device::{DeviceImplCommand, DeviceWriteCmd},
+            DeviceImplCommand, DeviceWriteCmd,
             Endpoint,
         },
         test::{check_recv_value, TestDevice},
@@ -98,7 +98,7 @@ mod test {
             let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart")
                 .await
                 .unwrap();
-            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
             device
                 .parse_message(&VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
                 .await
@@ -137,7 +137,7 @@ mod test {
             let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA")
                 .await
                 .unwrap();
-            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
             device
                 .parse_message(
                     &RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into(),

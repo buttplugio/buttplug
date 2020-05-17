@@ -27,7 +27,7 @@ pub struct DeviceAdded {
 impl DeviceAdded {
   pub fn new(
     device_index: u32,
-    device_name: &String,
+    device_name: &str,
     device_messages: &MessageAttributesMap,
   ) -> Self {
     Self {

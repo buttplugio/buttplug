@@ -37,12 +37,12 @@ static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
 
 pub fn set_external_device_config(config: Option<String>) {
   let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
-  *c = config.clone();
+  *c = config;
 }
 
 pub fn set_user_device_config(config: Option<String>) {
   let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
-  *c = config.clone();
+  *c = config;
 }
 
 #[allow(dead_code)]
@@ -72,10 +72,10 @@ impl PartialEq for BluetoothLESpecifier {
       for other_name in &other.names {
         let compare_name: &String;
         let mut wildcard: String;
-        if name.ends_with("*") {
+        if name.ends_with('*') {
           wildcard = name.clone();
           compare_name = &other_name;
-        } else if other_name.ends_with("*") {
+        } else if other_name.ends_with('*') {
           wildcard = other_name.clone();
           compare_name = &name;
         } else {
@@ -310,8 +310,8 @@ unsafe impl Send for DeviceConfigurationManager {
 unsafe impl Sync for DeviceConfigurationManager {
 }
 
-impl DeviceConfigurationManager {
-  pub fn new() -> Self {
+impl Default for DeviceConfigurationManager {
+  fn default() -> Self {
     let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
     let external_config = external_config_guard.read().unwrap();
     let mut config: ProtocolConfiguration;
@@ -355,7 +355,9 @@ impl DeviceConfigurationManager {
     let protocols = protocol::create_protocol_creator_map();
     DeviceConfigurationManager { config, protocols }
   }
+}
 
+impl DeviceConfigurationManager {
   pub fn find_configuration(
     &self,
     specifier: &DeviceSpecifier,
@@ -371,7 +373,7 @@ impl DeviceConfigurationManager {
     None
   }
 
-  pub fn get_protocol_creator(&self, name: &String) -> Option<Box<dyn ButtplugProtocolCreator>> {
+  pub fn get_protocol_creator(&self, name: &str) -> Option<Box<dyn ButtplugProtocolCreator>> {
     info!("Looking for protocol {}", name);
     // TODO It feels like maybe there should be a cleaner way to do this,
     // but I'm not really sure what it is?
@@ -408,14 +410,14 @@ mod test {
   #[test]
   fn test_load_config() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let config = DeviceConfigurationManager::new();
+    let config = DeviceConfigurationManager::default();
     debug!("{:?}", config.config);
   }
 
   #[test]
   fn test_config_equals() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let config = DeviceConfigurationManager::new();
+    let config = DeviceConfigurationManager::default();
     let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
     assert!(config.find_configuration(&launch).is_some());
   }
@@ -423,7 +425,7 @@ mod test {
   #[test]
   fn test_config_wildcard_equals() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let config = DeviceConfigurationManager::new();
+    let config = DeviceConfigurationManager::default();
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
     assert!(config.find_configuration(&lovense).is_some());
@@ -432,12 +434,12 @@ mod test {
   #[test]
   fn test_specific_device_config_creation() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let config = DeviceConfigurationManager::new();
+    let config = DeviceConfigurationManager::default();
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
-      DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations.clone());
+      DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations);
     let (name_map, message_map) = proto_config.get_attributes("P").unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
@@ -455,7 +457,7 @@ mod test {
   #[test]
   fn test_user_config_loading() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let mut config = DeviceConfigurationManager::new();
+    let mut config = DeviceConfigurationManager::default();
     assert!(config.config.protocols.contains_key("erostek-et312"));
     assert!(config
       .config
@@ -497,7 +499,7 @@ mod test {
         "#
       .to_string(),
     ));
-    config = DeviceConfigurationManager::new();
+    config = DeviceConfigurationManager::default();
     assert!(config.config.protocols.contains_key("erostek-et312"));
     assert!(config
       .config

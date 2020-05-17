@@ -188,7 +188,7 @@ impl ButtplugJSONServerWrapper {
 }
 
 #[async_trait]
-impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
+impl ButtplugServerWrapper for ButtplugJSONServerWrapper {
   // This was the only way I could figure out how to get a string in here
   // without ended up in lifetime hell. Trying to take a reference here is
   // really difficult because we do our message preparation in an async
@@ -214,7 +214,7 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugJSONServerWrapper {
     }
   }
 
-  fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
+  fn server_ref(&mut self) -> &mut ButtplugServer {
     if let Some(ref mut server) = self.server {
       server
     } else {
@@ -243,9 +243,9 @@ mod test {
       let err_msg =
         ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2OutMessage>(msg).unwrap();
       if let ButtplugSpecV2OutMessage::ServerInfo(e) = err_msg {
-        assert!(true, format!("Correct message! {:?}", e));
+        info!("Correct message! {:?}", e);
       } else {
-        assert!(false, format!("Wrong message! {:?}", err_msg));
+        panic!(format!("Wrong message! {:?}", err_msg));
       }
     });
   }
@@ -265,9 +265,9 @@ mod test {
       let err_msg =
         ButtplugJSONServerWrapper::deserialize::<ButtplugSpecV2OutMessage>(msg).unwrap();
       if let ButtplugSpecV2OutMessage::Error(e) = err_msg {
-        assert!(true, "Correct message! {:?}", e);
+        info!("Correct message! {:?}", e);
       } else {
-        assert!(false, "Wrong message!");
+        panic!("Wrong message!");
       }
     });
   }

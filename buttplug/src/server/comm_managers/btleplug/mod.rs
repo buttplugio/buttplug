@@ -44,7 +44,7 @@ impl BtlePlugCommunicationManager {
 impl BtlePlugCommunicationManager {
   fn get_central(&self) -> ConnectedAdapter {
     let adapters = self.manager.adapters().unwrap();
-    let adapter = adapters.into_iter().nth(0).unwrap();
+    let adapter = adapters.into_iter().next().unwrap();
     adapter.connect().unwrap()
   }
 }
@@ -68,14 +68,13 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     let device_sender = self.device_sender.clone();
     let (sender, mut receiver) = channel(256);
     self.scanning_sender = Some(sender.clone());
-    let on_event = move |event: CentralEvent| match event {
-      CentralEvent::DeviceDiscovered(_) => {
+    let on_event = move |event: CentralEvent| {
+      if let CentralEvent::DeviceDiscovered(_) = event {
         let s = sender.clone();
         task::spawn(async move {
           s.send(true).await;
         });
       }
-      _ => {}
     };
     // TODO There's no way to unsubscribe central event handlers. That
     // needs to be fixed in rumble somehow, but for now we'll have to
@@ -104,7 +103,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             // Names are the only way we really have to test devices
             // at the moment. Most devices don't send services on
             // advertisement.
-            if name.len() > 0 && !tried_names.contains(&name) {
+            if !name.is_empty() && !tried_names.contains(&name) {
               tried_names.push(name.clone());
               let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
               device_sender
@@ -155,7 +154,6 @@ mod test {
     DeviceCommunicationManagerCreator,
   };
   use async_std::{prelude::StreamExt, sync::channel, task};
-  use env_logger;
 
   #[test]
   #[ignore]
@@ -188,7 +186,7 @@ mod test {
             //     }
             // }
           }
-          _ => assert!(false, "Shouldn't get other message types!"),
+          _ => unreachable!("Shouldn't get other message types!"),
         }
       }
     });

@@ -10,17 +10,15 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    device::{
-      BoundedDeviceEventBroadcaster,
-      ButtplugDeviceCommand,
-      ButtplugDeviceImplCreator,
-      ButtplugDeviceReturn,
-      DeviceImpl,
-      DeviceReadCmd,
-      DeviceSubscribeCmd,
-      DeviceUnsubscribeCmd,
-      DeviceWriteCmd,
-    },
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceCommand,
+    ButtplugDeviceImplCreator,
+    ButtplugDeviceReturn,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
     Endpoint,
   },
 };
@@ -129,8 +127,8 @@ unsafe impl Sync for BtlePlugDeviceImpl {
 
 impl BtlePlugDeviceImpl {
   pub fn new(
-    name: &String,
-    address: &String,
+    name: &str,
+    address: &str,
     endpoints: Vec<Endpoint>,
     thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     event_receiver: BoundedDeviceEventBroadcaster,

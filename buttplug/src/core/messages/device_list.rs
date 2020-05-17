@@ -42,7 +42,7 @@ impl From<DeviceList> for DeviceListV1 {
     }
     Self {
       id: msg.id,
-      devices: devices,
+      devices,
     }
   }
 }
@@ -65,7 +65,7 @@ impl From<DeviceList> for DeviceListV0 {
     }
     Self {
       id: msg.id,
-      devices: devices,
+      devices,
     }
   }
 }

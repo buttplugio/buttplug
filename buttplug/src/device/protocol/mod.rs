@@ -1,6 +1,6 @@
 mod generic_command_manager;
 
-use super::device::DeviceImpl;
+use super::DeviceImpl;
 use crate::{
   core::{
     errors::ButtplugError,
@@ -69,7 +69,7 @@ create_protocols!(
 pub trait ButtplugProtocolCreator: Sync + Send {
   async fn try_create_protocol(
     &self,
-    device_impl: &Box<dyn DeviceImpl>,
+    device_impl: &dyn DeviceImpl,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
 
@@ -80,7 +80,7 @@ pub trait ButtplugProtocol: Sync + Send {
   fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
   async fn parse_message(
     &mut self,
-    device: &Box<dyn DeviceImpl>,
+    device: &dyn DeviceImpl,
     message: &ButtplugDeviceCommandMessageUnion,
   ) -> Result<ButtplugOutMessage, ButtplugError>;
 }
@@ -125,7 +125,7 @@ macro_rules! create_protocol_creator_impl (
             impl ButtplugProtocolCreator for [<$protocol_name Creator>] {
                 async fn try_create_protocol(
                     &self,
-                    device_impl: &Box<dyn DeviceImpl>,
+                    device_impl: &dyn DeviceImpl,
                 ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
                     let (names, attrs) = self.config.get_attributes(device_impl.name()).unwrap();
                     let name = names.get("en-us").unwrap();
@@ -160,8 +160,7 @@ macro_rules! create_buttplug_protocol (
         use crate::{
             create_protocol_creator_impl,
             device::{
-                Endpoint,
-                device::{DeviceWriteCmd, DeviceImpl},
+                Endpoint, DeviceWriteCmd, DeviceImpl,
                 protocol::generic_command_manager::GenericCommandManager,
             },
             core::{
@@ -214,7 +213,7 @@ macro_rules! create_buttplug_protocol (
 
                 async fn handle_stop_device_cmd(
                     &mut self,
-                    device: &Box<dyn DeviceImpl>,
+                    device: &dyn DeviceImpl,
                     stop_msg: &StopDeviceCmd,
                 ) -> Result<ButtplugOutMessage, ButtplugError> {
                     // TODO This clone definitely shouldn't be needed but I'm tired. GOOD FIRST BUG.
@@ -228,7 +227,7 @@ macro_rules! create_buttplug_protocol (
                 $(
                     #[allow(non_snake_case)]
                     pub async fn [<$message_name _handler>](&mut self,
-                        device: &Box<dyn DeviceImpl>,
+                        device: &dyn DeviceImpl,
                         msg: &$message_name,) -> Result<ButtplugOutMessage, ButtplugError>
                         $message_handler_body
                     )*
@@ -251,7 +250,7 @@ macro_rules! create_buttplug_protocol (
 
                     async fn parse_message(
                         &mut self,
-                        device: &Box<dyn DeviceImpl>,
+                        device: &dyn DeviceImpl,
                         message: &ButtplugDeviceCommandMessageUnion,
                     ) -> Result<ButtplugOutMessage, ButtplugError> {
                         match message {

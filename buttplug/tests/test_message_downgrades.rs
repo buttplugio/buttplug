@@ -6,7 +6,7 @@ mod test {
   use buttplug::{
     core::messages::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     device::{
-      device::{DeviceImplCommand, DeviceWriteCmd},
+      DeviceImplCommand, DeviceWriteCmd,
       Endpoint,
     },
     server::wrapper::ButtplugJSONServerWrapper,
@@ -57,7 +57,7 @@ mod test {
 
     task::block_on(async {
       let devices = server.server_ref().add_test_comm_manager();
-      devices.lock().await.push(Box::new(device_creator));
+      devices.lock().await.push(device_creator);
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server.parse_message(rsi.to_owned()).await;
       assert_eq!(
@@ -98,7 +98,7 @@ mod test {
       TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
     task::block_on(async {
       let devices = server.server_ref().add_test_comm_manager();
-      devices.lock().await.push(Box::new(device_creator));
+      devices.lock().await.push(device_creator);
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let output = server.parse_message(rsi.to_owned()).await;
@@ -128,7 +128,7 @@ mod test {
         )
         .await;
       assert_eq!(r#"[{"Ok":{"Id":2}}]"#, output2);
-      let (_, command_receiver) = device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+      let (_, command_receiver) = device.get_endpoint_channel_clone(Endpoint::Tx).await;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),

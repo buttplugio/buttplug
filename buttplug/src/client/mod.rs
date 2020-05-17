@@ -532,7 +532,6 @@ mod test {
     task,
   };
   use async_trait::async_trait;
-  use env_logger;
 
   async fn connect_test_client<F, T>(func: F)
   where

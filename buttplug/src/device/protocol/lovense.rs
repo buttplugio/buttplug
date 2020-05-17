@@ -3,7 +3,7 @@ use crate::{
     create_buttplug_protocol,
     device::{
         configuration_manager::DeviceProtocolConfiguration,
-        device::{ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd},
+        ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd
     },
 };
 use async_std::prelude::StreamExt;
@@ -23,13 +23,13 @@ impl LovenseCreator {
 impl ButtplugProtocolCreator for LovenseCreator {
     async fn try_create_protocol(
         &self,
-        device_impl: &Box<dyn DeviceImpl>,
+        device_impl: &dyn DeviceImpl,
     ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
         device_impl
-            .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx).into())
+            .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx))
             .await?;
-        let msg = DeviceWriteCmd::new(Endpoint::Tx, "DeviceType;".as_bytes().to_vec(), false);
-        device_impl.write_value(msg.into()).await?;
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+        device_impl.write_value(msg).await?;
         // TODO Put some sort of very quick timeout here, we should just fail if
         // we don't get something back quickly.
         let identifier;
@@ -53,7 +53,7 @@ impl ButtplugProtocolCreator for LovenseCreator {
             }
         };
         device_impl
-            .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx).into())
+            .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx))
             .await?;
 
         let (names, attrs) = self.config.get_attributes(&identifier).unwrap();

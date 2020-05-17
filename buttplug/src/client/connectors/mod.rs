@@ -15,7 +15,7 @@ pub use messagesorter::ClientConnectorMessageSorter;
 
 #[cfg(feature = "server")]
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServer, ButtplugServerWrapper};
-use super::{ButtplugClientError, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair, ButtplugInternalClientMessageResult};
+use super::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair, ButtplugInternalClientMessageResult};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
@@ -30,9 +30,6 @@ use crate::{
     ButtplugFuture,
     ButtplugFutureState,
     ButtplugFutureStateShared,
-  },
-  client::{
-    ButtplugClientMessageStateShared,
   },
 };
 use async_std::sync::{channel, Receiver};

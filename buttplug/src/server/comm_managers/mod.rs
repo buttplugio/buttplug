@@ -2,7 +2,7 @@
 pub mod btleplug;
 #[cfg(all(feature = "xinput", target_os = "windows"))]
 pub mod xinput;
-use crate::{core::errors::ButtplugError, device::device::ButtplugDeviceImplCreator};
+use crate::{core::errors::ButtplugError, device::ButtplugDeviceImplCreator};
 use async_std::sync::Sender;
 use async_trait::async_trait;
 

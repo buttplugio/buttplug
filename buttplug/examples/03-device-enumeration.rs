@@ -60,7 +60,7 @@ async fn device_enumeration_example() {
   devices
     .lock()
     .await
-    .push(Box::new(test_device_impl_creator));
+    .push(test_device_impl_creator);
 
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:

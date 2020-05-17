@@ -1,7 +1,7 @@
 mod test_device;
 mod test_device_comm_manager;
 
-use crate::device::device::DeviceImplCommand;
+use crate::device::DeviceImplCommand;
 use async_std::sync::Receiver;
 pub use test_device::{TestDevice, TestDeviceImplCreator};
 pub use test_device_comm_manager::TestDeviceCommunicationManager;

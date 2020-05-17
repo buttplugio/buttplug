@@ -33,7 +33,7 @@ create_buttplug_protocol!(
 
             // Simple XOR of everything up to the 9th byte for CRC.
             for b in data.clone() {
-                crc = b ^ crc;
+                crc ^= b;
             }
 
             let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
@@ -52,8 +52,7 @@ mod test {
         core::messages::{VibrateCmd, VibrateSubcommand, StopDeviceCmd},
         test::{check_recv_value, TestDevice},
         device::{
-            Endpoint,
-            device::{DeviceImplCommand, DeviceWriteCmd},
+            Endpoint, DeviceImplCommand, DeviceWriteCmd,
         }
     };
     use async_std::task;
@@ -63,7 +62,7 @@ mod test {
         task::block_on(async move {
             let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_").await.unwrap();
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
-            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
             check_recv_value(&command_receiver,
                 DeviceImplCommand::Write(
                         DeviceWriteCmd::new(Endpoint::Tx,

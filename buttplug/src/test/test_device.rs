@@ -5,18 +5,16 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    device::{
-      BoundedDeviceEventBroadcaster,
-      ButtplugDevice,
-      ButtplugDeviceEvent,
-      ButtplugDeviceImplCreator,
-      DeviceImpl,
-      DeviceImplCommand,
-      DeviceReadCmd,
-      DeviceSubscribeCmd,
-      DeviceUnsubscribeCmd,
-      DeviceWriteCmd,
-    },
+    BoundedDeviceEventBroadcaster,
+    ButtplugDevice,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplCommand,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
     Endpoint,
   },
 };
@@ -53,13 +51,15 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
     if let Some(btle) = &protocol.btle {
       for endpoint_map in btle.services.values() {
         for endpoint in endpoint_map.keys() {
-          device.add_endpoint(endpoint).await;
+          device.add_endpoint(*endpoint).await;
         }
       }
     }
     Ok(Box::new(device))
   }
 }
+
+type EndpointChannels = Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>;
 
 #[derive(Clone)]
 pub struct TestDevice {
@@ -70,8 +70,7 @@ pub struct TestDevice {
   // However, it means we can only store off the device after we send it off
   // for creation in ButtplugDevice, so initialization and cloning order
   // matters here.
-  pub endpoint_channels:
-    Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>,
+  pub endpoint_channels: EndpointChannels,
   pub event_broadcaster: BoundedDeviceEventBroadcaster,
 }
 
@@ -93,9 +92,9 @@ impl TestDevice {
     }
   }
 
-  pub async fn add_endpoint(&mut self, endpoint: &Endpoint) {
+  pub async fn add_endpoint(&mut self, endpoint: Endpoint) {
     let mut endpoint_channels = self.endpoint_channels.write().await;
-    if !endpoint_channels.contains_key(endpoint) {
+    if !endpoint_channels.contains_key(&endpoint) {
       let (sender, receiver) = channel(256);
       endpoint_channels.insert(endpoint.clone(), (sender, receiver));
     }
@@ -129,10 +128,10 @@ impl TestDevice {
   #[allow(dead_code)]
   pub async fn get_endpoint_channel_clone(
     &self,
-    endpoint: &Endpoint,
+    endpoint: Endpoint,
   ) -> (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>) {
     let endpoint_channels = self.endpoint_channels.read().await;
-    let (sender, receiver) = endpoint_channels.get(endpoint).unwrap();
+    let (sender, receiver) = endpoint_channels.get(&endpoint).unwrap();
     (sender.clone(), receiver.clone())
   }
 }

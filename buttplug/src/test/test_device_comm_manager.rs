@@ -2,9 +2,7 @@ use super::TestDeviceImplCreator;
 use crate::{
   core::errors::ButtplugError,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
 use async_std::sync::{Arc, Mutex, Sender};
@@ -12,11 +10,11 @@ use async_trait::async_trait;
 
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
-  devices: Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>>,
+  devices: Arc<Mutex<Vec<TestDeviceImplCreator>>>,
 }
 
 impl TestDeviceCommunicationManager {
-  pub fn get_devices_clone(&self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
+  pub fn get_devices_clone(&self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
     self.devices.clone()
   }
 }
@@ -40,7 +38,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
     while let Some(d) = devices.pop() {
       self
         .device_sender
-        .send(DeviceCommunicationEvent::DeviceFound(d))
+        .send(DeviceCommunicationEvent::DeviceFound(Box::new(d)))
         .await;
     }
     Ok(())
@@ -57,62 +55,57 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 
 #[cfg(test)]
 mod test {
-  #[cfg(test)]
-  mod test {
-    use crate::{
-      core::messages::{self, ButtplugMessageSpecVersion, ButtplugOutMessage},
-      device::device::DeviceImpl,
-      server::ButtplugServer,
-      test::TestDevice,
-    };
-    use async_std::{prelude::StreamExt, task};
+  use crate::{
+    core::messages::{self, ButtplugMessageSpecVersion, ButtplugOutMessage},
+    device::DeviceImpl,
+    server::ButtplugServer,
+    test::TestDevice,
+  };
+  use async_std::{prelude::StreamExt, task};
 
-    #[test]
-    fn test_test_device_comm_manager() {
-      let _ = env_logger::builder().is_test(true).try_init();
-      let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
-      let (mut device, device_creator) =
-        TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+  #[test]
+  fn test_test_device_comm_manager() {
+    let _ = env_logger::builder().is_test(true).try_init();
+    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (mut device, device_creator) =
+      TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
 
-      task::block_on(async {
-        let devices = server.add_test_comm_manager();
-        devices.lock().await.push(Box::new(device_creator));
-        let msg =
-          messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
-        let mut reply = server.parse_message(&msg.into()).await;
-        assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-        reply = server
-          .parse_message(&messages::StartScanning::default().into())
-          .await;
-        assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-        // Check that we got an event back about a new device.
-        let msg = recv.next().await.unwrap();
-        if let ButtplugOutMessage::DeviceAdded(da) = msg {
-          assert_eq!(da.device_name, "Aneros Vivi");
-        } else {
-          assert!(
-            false,
-            format!(
-              "Returned message was not a DeviceAdded message or timed out: {:?}",
-              msg
-            )
-          );
-        }
-        device.disconnect().await;
-        // Check that we got an event back about a removed device.
-        let msg = recv.next().await.unwrap();
-        if let ButtplugOutMessage::DeviceRemoved(da) = msg {
-          assert_eq!(da.device_index, 0);
-        } else {
-          assert!(
-            false,
-            format!(
-              "Returned message was not a DeviceRemoved message or timed out: {:?}",
-              msg
-            )
-          );
-        }
-      });
-    }
+    task::block_on(async {
+      let devices = server.add_test_comm_manager();
+      devices.lock().await.push(device_creator);
+      let msg =
+        messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
+      let mut reply = server.parse_message(&msg.into()).await;
+      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      reply = server
+        .parse_message(&messages::StartScanning::default().into())
+        .await;
+      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      // Check that we got an event back about a new device.
+      let msg = recv.next().await.unwrap();
+      if let ButtplugOutMessage::DeviceAdded(da) = msg {
+        assert_eq!(da.device_name, "Aneros Vivi");
+      } else {
+        panic!(
+          format!(
+            "Returned message was not a DeviceAdded message or timed out: {:?}",
+            msg
+          )
+        );
+      }
+      device.disconnect().await;
+      // Check that we got an event back about a removed device.
+      let msg = recv.next().await.unwrap();
+      if let ButtplugOutMessage::DeviceRemoved(da) = msg {
+        assert_eq!(da.device_index, 0);
+      } else {
+        panic!(
+          format!(
+            "Returned message was not a DeviceRemoved message or timed out: {:?}",
+            msg
+          )
+        );
+      }
+    });
   }
 }

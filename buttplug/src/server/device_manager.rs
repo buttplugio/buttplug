@@ -31,7 +31,7 @@ use crate::{
       ScanningFinished,
     },
   },
-  device::device::{ButtplugDevice, ButtplugDeviceEvent},
+  device::{ButtplugDevice, ButtplugDeviceEvent},
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
 };
 use async_std::{
@@ -89,13 +89,10 @@ async fn wait_for_manager_events(
                     info!("Assigning index {} to {}", device_index, device.name());
                     let mut recv = device.get_event_receiver();
                     let sender_clone = device_event_sender_clone.clone();
-                    let idx_clone = device_index.clone();
+                    let idx_clone = device_index;
                     task::spawn(async move {
-                      loop {
-                        match recv.next().await {
-                          Some(e) => sender_clone.send((idx_clone, e)).await,
-                          None => break,
-                        }
+                      while let Some(e) = recv.next().await {
+                        sender_clone.send((idx_clone, e)).await;
                       }
                     });
                     sender_sender_clone
@@ -125,13 +122,10 @@ async fn wait_for_manager_events(
       },
       DeviceEvent::DeviceEvent(e) => match e {
         Some((idx, event)) => {
-          match event {
-            ButtplugDeviceEvent::Removed => {
-              let mut map = device_map.write().await;
-              map.remove(&idx);
-              sender.send(DeviceRemoved::new(idx).into()).await;
-            }
-            _ => {}
+          if let ButtplugDeviceEvent::Removed = event {
+            let mut map = device_map.write().await;
+            map.remove(&idx);
+            sender.send(DeviceRemoved::new(idx).into()).await;
           }
           info!("Got device event: {:?}", event);
         }
@@ -181,7 +175,7 @@ impl DeviceManager {
     let (sender, receiver) = channel(256);
     let map = Arc::new(RwLock::new(HashMap::new()));
     let map_clone = map.clone();
-    let thread_sender = event_sender.clone();
+    let thread_sender = event_sender;
     task::spawn(async move {
       wait_for_manager_events(receiver, ping_receiver, thread_sender, map_clone).await;
     });
@@ -230,7 +224,7 @@ impl DeviceManager {
       .read()
       .await
       .keys()
-      .map(|id| id.clone())
+      .cloned()
       .collect();
     // TODO This should be done in parallel, versus waiting for every device
     // to stop in order.
@@ -337,7 +331,7 @@ impl DeviceManager {
       .push(Box::new(T::new(self.sender.clone())));
   }
 
-  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<Box<TestDeviceImplCreator>>>> {
+  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
     let devices = mgr.get_devices_clone();
     self.comm_managers.push(Box::new(mgr));

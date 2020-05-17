@@ -5,17 +5,9 @@ use crate::{
   },
   device::{
     configuration_manager::BluetoothLESpecifier,
-    device::{
-      BoundedDeviceEventBroadcaster,
-      ButtplugDeviceCommand,
-      ButtplugDeviceEvent,
-      ButtplugDeviceImplInfo,
-      ButtplugDeviceReturn,
-      DeviceImplCommand,
-      DeviceSubscribeCmd,
-      DeviceUnsubscribeCmd,
-      DeviceWriteCmd,
-    },
+    BoundedDeviceEventBroadcaster, ButtplugDeviceCommand, ButtplugDeviceEvent,
+    ButtplugDeviceImplInfo, ButtplugDeviceReturn, DeviceImplCommand, DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd, DeviceWriteCmd,
     Endpoint,
   },
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
@@ -27,7 +19,6 @@ use async_std::{
 };
 use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use std::collections::HashMap;
-use uuid;
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
@@ -48,7 +39,7 @@ pub struct BtlePlugInternalEventLoop<T: Peripheral> {
 }
 
 fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
-  let mut rumble_uuid = uuid.as_bytes().clone();
+  let mut rumble_uuid = *uuid.as_bytes();
   rumble_uuid.reverse();
   UUID::B128(rumble_uuid)
 }
@@ -71,14 +62,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     let on_event = move |event: CentralEvent| match event {
       CentralEvent::DeviceConnected(_) => {
         let s = event_sender.clone();
-        let e = event.clone();
+        let e = event;
         task::spawn(async move {
           s.send(e).await;
         });
       }
       CentralEvent::DeviceDisconnected(_) => {
         let s = event_sender.clone();
-        let e = event.clone();
+        let e = event;
         task::spawn(async move {
           s.send(e).await;
         });
@@ -103,11 +94,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
-      state.lock_now_or_panic().set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-          &format!("Btleplug device cannot connect: {}", err).to_owned(),
-        )),
-      ));
+      state
+        .lock_now_or_panic()
+        .set_reply(ButtplugDeviceReturn::Error(
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
+            "Btleplug device cannot connect: {}",
+            err
+          ))),
+        ));
       return;
     }
     loop {
@@ -129,7 +123,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     let mut uuid_map = HashMap::<UUID, Endpoint>::new();
     let chars = self.device.discover_characteristics().unwrap();
     for proto_service in self.protocol.services.values() {
-      for (chr_name, chr_uuid) in proto_service.into_iter() {
+      for (chr_name, chr_uuid) in proto_service.iter() {
         let maybe_chr = chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
         if let Some(chr) = maybe_chr {
           self.endpoints.insert(*chr_name, chr.clone());
@@ -141,7 +135,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     self
       .device
       .on_notification(Box::new(move |notification: ValueNotification| {
-        let endpoint = uuid_map.get(&notification.uuid).unwrap().clone();
+        let endpoint = *uuid_map.get(&notification.uuid).unwrap();
         let sender = os.clone();
         task::spawn(async move {
           sender
@@ -172,15 +166,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           .lock_now_or_panic()
           .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.lock_now_or_panic().set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-          &format!(
+      None => state
+        .lock_now_or_panic()
+        .set_reply(ButtplugDeviceReturn::Error(
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
             "Device does not contain an endpoint named {}",
             write_msg.endpoint
-          )
-          .to_owned(),
+          ))),
         )),
-      )),
     }
   }
 
@@ -196,15 +189,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           .lock_now_or_panic()
           .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.lock_now_or_panic().set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-          &format!(
+      None => state
+        .lock_now_or_panic()
+        .set_reply(ButtplugDeviceReturn::Error(
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
             "Device does not contain an endpoint named {}",
             sub_msg.endpoint
-          )
-          .to_owned(),
+          ))),
         )),
-      )),
     }
   }
 
@@ -220,15 +212,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           .lock_now_or_panic()
           .set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.lock_now_or_panic().set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-          &format!(
+      None => state
+        .lock_now_or_panic()
+        .set_reply(ButtplugDeviceReturn::Error(
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
             "Device does not contain an endpoint named {}",
             sub_msg.endpoint
-          )
-          .to_owned(),
+          ))),
         )),
-      )),
     }
   }
 
@@ -251,11 +242,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         DeviceImplCommand::Unsubscribe(sub_msg) => {
           self.handle_unsubscribe(sub_msg, state);
         }
-        _ => state.lock_now_or_panic().set_reply(ButtplugDeviceReturn::Error(
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-            "Buttplug-rs does not yet handle reads",
+        _ => state
+          .lock_now_or_panic()
+          .set_reply(ButtplugDeviceReturn::Error(
+            ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+              "Buttplug-rs does not yet handle reads",
+            )),
           )),
-        )),
       },
       ButtplugDeviceCommand::Disconnect => {
         if let Err(e) = self.device.disconnect() {
@@ -269,8 +262,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
   }
 
-  pub async fn handle_device_event(&mut self, event: &CentralEvent) {
-    match event {
+  pub async fn handle_device_event(&mut self, event: CentralEvent) {
+    if let CentralEvent::DeviceDisconnected(addr) = event {
       // TODO Ok. Great. We can disconnect, but output_sender doesn't
       // really *go* anywhere right now. We're just using it in the
       // Lovense protocol and that's it. We need to be watching for this
@@ -279,21 +272,18 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       // where we disconnect while waiting in a protocol (for instance, if
       // the device disconnects while we're doing Lovense init). I may
       // need to rethink this.
-      CentralEvent::DeviceDisconnected(addr) => {
-        if self.device.address() == *addr {
-          info!(
-            "Device {:?} disconnected",
-            self.device.properties().local_name
-          );
-          // This should always succeed
-          self
-            .output_sender
-            .send(&ButtplugDeviceEvent::Removed)
-            .await
-            .unwrap();
-        }
+      if self.device.address() == addr {
+        info!(
+          "Device {:?} disconnected",
+          self.device.properties().local_name
+        );
+        // This should always succeed
+        self
+          .output_sender
+          .send(&ButtplugDeviceEvent::Removed)
+          .await
+          .unwrap();
       }
-      _ => {}
     }
   }
 
@@ -318,7 +308,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => {
           self.handle_device_command(command, state).await
         }
-        BtlePlugCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(&event).await,
+        BtlePlugCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(event).await,
         BtlePlugCommLoopChannelValue::ChannelClosed => {
           info!("CHANNEL CLOSED");
           return;

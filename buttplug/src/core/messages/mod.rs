@@ -366,17 +366,17 @@ impl TryFrom<ButtplugOutMessage> for ButtplugSpecV1OutMessage {
   type Error = ButtplugMessageError;
   fn try_from(msg: ButtplugOutMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
-      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV1OutMessage::Ok(msg.into())),
-      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV1OutMessage::Error(msg.into())),
-      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV1OutMessage::Log(msg.into())),
+      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV1OutMessage::Ok(msg)),
+      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV1OutMessage::Error(msg)),
+      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV1OutMessage::Log(msg)),
       ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV1OutMessage::ServerInfo(msg.into())),
       ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV1OutMessage::DeviceList(msg.into())),
       ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV1OutMessage::DeviceAdded(msg.into())),
       ButtplugOutMessage::DeviceRemoved(msg) => {
-        Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg.into()))
+        Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg))
       }
       ButtplugOutMessage::ScanningFinished(msg) => {
-        Ok(ButtplugSpecV1OutMessage::ScanningFinished(msg.into()))
+        Ok(ButtplugSpecV1OutMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::new(
         "ButtplugOutMessage cannot be converted to #name",
@@ -431,17 +431,17 @@ impl TryFrom<ButtplugOutMessage> for ButtplugSpecV0OutMessage {
   type Error = ButtplugMessageError;
   fn try_from(msg: ButtplugOutMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
-      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV0OutMessage::Ok(msg.into())),
-      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV0OutMessage::Error(msg.into())),
-      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV0OutMessage::Log(msg.into())),
+      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV0OutMessage::Ok(msg)),
+      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV0OutMessage::Error(msg)),
+      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV0OutMessage::Log(msg)),
       ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV0OutMessage::ServerInfo(msg.into())),
       ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV0OutMessage::DeviceList(msg.into())),
       ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV0OutMessage::DeviceAdded(msg.into())),
       ButtplugOutMessage::DeviceRemoved(msg) => {
-        Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg.into()))
+        Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg))
       }
       ButtplugOutMessage::ScanningFinished(msg) => {
-        Ok(ButtplugSpecV0OutMessage::ScanningFinished(msg.into()))
+        Ok(ButtplugSpecV0OutMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::new(
         "ButtplugOutMessage cannot be converted to ButtplugSepcV0OutMessage",

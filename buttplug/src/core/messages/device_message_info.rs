@@ -91,7 +91,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
 
     // The only attribute in v1 was feature count, so that's all we should
     // preserve.
-    for (_, mut attributes) in &mut dmi_v1.device_messages {
+    for mut attributes in &mut dmi_v1.device_messages.values_mut() {
       let fc = attributes.feature_count;
       *attributes = MessageAttributes::default();
       attributes.feature_count = fc;

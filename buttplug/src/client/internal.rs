@@ -19,10 +19,7 @@ use super::{
   ButtplugClientMessageFuturePair,
 };
 use crate::{
-  core::{
-    errors::ButtplugError,
-    messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo}
-  },
+  core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
   util::future::{ButtplugFutureStateShared},
 };
 use async_std::{
@@ -92,7 +89,7 @@ impl ButtplugClientEventLoop {
         ))
       }
       Some(msg) => match msg {
-        ButtplugClientMessage::Connect(mut connector, mut state) => match connector.connect().await {
+        ButtplugClientMessage::Connect(mut connector, state) => match connector.connect().await {
           Err(err) => {
             error!("Cannot connect to server: {}", err.message);
             let mut waker_state = state.lock_now_or_panic();
@@ -191,7 +188,7 @@ impl ButtplugClientEventLoop {
         self.send_message(msg_fut).await;
         true
       }
-      ButtplugClientMessage::Disconnect(mut state) => {
+      ButtplugClientMessage::Disconnect(state) => {
         info!("Client requested disconnect");
         let mut waker_state = state.lock_now_or_panic();
         waker_state.set_reply(self.connector.disconnect().await);

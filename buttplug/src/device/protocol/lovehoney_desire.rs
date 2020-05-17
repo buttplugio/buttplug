@@ -61,8 +61,7 @@ mod test {
     use crate::{
         core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
         device::{
-            device::{DeviceImplCommand, DeviceWriteCmd},
-            Endpoint,
+            DeviceImplCommand, DeviceWriteCmd, Endpoint
         },
         test::{check_recv_value, TestDevice},
     };
@@ -75,7 +74,7 @@ mod test {
                 TestDevice::new_bluetoothle_test_device("PROSTATE VIBE")
                     .await
                     .unwrap();
-            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
 
             // If we send one speed to one motor, we should only see one output.
             device

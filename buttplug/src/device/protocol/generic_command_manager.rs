@@ -47,7 +47,7 @@ impl GenericCommandManager {
 
       let mut subcommands = vec![];
       for i in 0..vibrations.len() {
-        subcommands.push(VibrateSubcommand::new(i as u32, 0.0).into());
+        subcommands.push(VibrateSubcommand::new(i as u32, 0.0));
       }
       stop_commands.push(VibrateCmd::new(0, subcommands).into());
     }
@@ -99,9 +99,9 @@ impl GenericCommandManager {
   ) -> Result<Option<Vec<Option<u32>>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
-    if msg.speeds.len() == 0 {
+    if msg.speeds.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&format!("VibrateCmd has 0 commands, will not do anything."))
+        ButtplugDeviceError::new(&"VibrateCmd has 0 commands, will not do anything.")
           .into(),
       );
     }
@@ -117,8 +117,8 @@ impl GenericCommandManager {
     // If we're in a match all situation, set up the array with all prior
     // values before switching them out.
     if match_all {
-      for i in 0..self.vibrations.len() {
-        result[i] = Some(self.vibrations[i]);
+      for speed in &self.vibrations {
+        result.push(Some(*speed));
       }
     }
     for speed_command in &msg.speeds {
@@ -172,9 +172,9 @@ impl GenericCommandManager {
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // command.
-    if msg.rotations.len() == 0 {
+    if msg.rotations.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&format!("RotateCmd has 0 commands, will not do anything."))
+        ButtplugDeviceError::new(&"RotateCmd has 0 commands, will not do anything.")
           .into(),
       );
     }

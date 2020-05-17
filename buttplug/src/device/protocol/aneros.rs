@@ -40,10 +40,7 @@ create_buttplug_protocol!(
 mod test {
     use crate::{
         core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
-        device::{
-            device::{DeviceImplCommand, DeviceWriteCmd},
-            Endpoint,
-        },
+        device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
         test::{check_recv_value, TestDevice},
     };
     use async_std::task;
@@ -58,7 +55,7 @@ mod test {
                 .parse_message(&VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
                 .await
                 .unwrap();
-            let (_, command_receiver) = test_device.get_endpoint_channel_clone(&Endpoint::Tx).await;
+            let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
             check_recv_value(
                 &command_receiver,
                 DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),

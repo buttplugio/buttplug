@@ -18,12 +18,12 @@ pub use json_wrapper::ButtplugJSONServerWrapper;
 use std::convert::TryInto;
 
 #[async_trait]
-pub trait ButtplugServerWrapper<'a> {
+pub trait ButtplugServerWrapper {
   type Input;
   type Output;
 
   async fn parse_message(&mut self, msg: Self::Input) -> Self::Output;
-  fn server_ref(&'a mut self) -> &'a mut ButtplugServer;
+  fn server_ref(&mut self) -> &mut ButtplugServer;
 }
 
 pub struct ButtplugInProcessServerWrapper {
@@ -55,7 +55,7 @@ impl ButtplugInProcessServerWrapper {
 }
 
 #[async_trait]
-impl<'a> ButtplugServerWrapper<'a> for ButtplugInProcessServerWrapper {
+impl ButtplugServerWrapper for ButtplugInProcessServerWrapper {
   type Input = ButtplugClientInMessage;
   type Output = ButtplugClientOutMessage;
 
@@ -66,7 +66,7 @@ impl<'a> ButtplugServerWrapper<'a> for ButtplugInProcessServerWrapper {
     ButtplugInProcessServerWrapper::convert_outgoing(output)
   }
 
-  fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
+  fn server_ref(&mut self) -> &mut ButtplugServer {
     &mut self.server
   }
 }

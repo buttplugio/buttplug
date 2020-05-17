@@ -11,7 +11,6 @@
 //! Valico library.
 
 use serde_json::Value;
-use url;
 use valico::json_schema;
 
 pub struct JSONValidator {
@@ -30,7 +29,7 @@ impl JSONValidator {
   pub fn new(schema: &str) -> Self {
     let schema_json: Value = serde_json::from_str(schema).unwrap();
     let mut scope = json_schema::Scope::new();
-    let id = scope.compile(schema_json.clone(), false).unwrap();
+    let id = scope.compile(schema_json, false).unwrap();
     Self {
       id,
       scope,
