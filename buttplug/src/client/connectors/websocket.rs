@@ -18,6 +18,7 @@ use super::{
   ButtplugClientConnectionFuture,
   ButtplugClientConnectionStateShared,
   ButtplugClientConnector,
+  ButtplugClientConnectionResult,
   ButtplugClientConnectorError,
   ButtplugRemoteClientConnectorHelper,
   ButtplugRemoteClientConnectorMessage,
@@ -25,7 +26,7 @@ use super::{
 };
 use crate::{
   core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
-  client::ButtplugClientMessageStateShared,
+  client::ButtplugInternalClientMessageResult,
 };
 use async_std::{
   sync::{channel, Receiver, Sender},
@@ -209,13 +210,13 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
     fut.await
   }
 
-  async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+  async fn disconnect(&mut self) -> ButtplugClientConnectionResult {
     self.helper.close().await;
     Ok(())
   }
 
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
-    self.helper.send(&msg, state).await;
+  async fn send(&mut self, msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
+    self.helper.send(&msg).await
   }
 
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {

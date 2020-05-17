@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Handling of communication with Buttplug Server.
+//! Methods for communicating with Buttplug Servers
 mod messagesorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
@@ -15,6 +15,7 @@ pub use messagesorter::ClientConnectorMessageSorter;
 
 #[cfg(feature = "server")]
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServer, ButtplugServerWrapper};
+use super::{ButtplugClientError, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair, ButtplugInternalClientMessageResult};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugMessageError},
@@ -45,18 +46,25 @@ use async_trait::async_trait;
 use futures::future::Future;
 use std::{error::Error, fmt};
 
+pub type ButtplugClientConnectionResult = Result<(), ButtplugClientConnectorError>;
 pub type ButtplugClientConnectionState =
-  ButtplugFutureState<Result<(), ButtplugClientConnectorError>>;
+  ButtplugFutureState<ButtplugClientConnectionResult>;
 pub type ButtplugClientConnectionStateShared =
-  ButtplugFutureStateShared<Result<(), ButtplugClientConnectorError>>;
-pub type ButtplugClientConnectionFuture = ButtplugFuture<Result<(), ButtplugClientConnectorError>>;
+  ButtplugFutureStateShared<ButtplugClientConnectionResult>;
+pub type ButtplugClientConnectionFuture = ButtplugFuture<ButtplugClientConnectionResult>;
 
+/// Errors specific to client connector structs.
+///
+/// Errors that relate to the communication method of the client connector. Can
+/// include network/IPC protocol specific errors.
 #[derive(Debug, Clone)]
 pub struct ButtplugClientConnectorError {
+  /// Error description
   pub message: String,
 }
 
 impl ButtplugClientConnectorError {
+  /// Creates a new ButtplugClientConnectorError with a description.
   pub fn new(msg: &str) -> Self {
     Self {
       message: msg.to_owned(),
@@ -80,13 +88,40 @@ impl Error for ButtplugClientConnectorError {
   }
 }
 
+/// Trait for client connectors.
+///
+/// Connectors are how Buttplug Clients talk to Buttplug Servers. Whether
+/// embedded, meaning the client and server exist in the same process space, or
+/// remote, where the client and server are separated by some boundary, the
+/// connector trait makes it so that the client does not need to be aware of the
+/// specifics of where the server is.
+///
 // Not real sure if this is sync, since there may be state that could get weird
 // in connectors implementing this trait, but Send should be ok.
 #[async_trait]
 pub trait ButtplugClientConnector: Send {
-  async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError>;
-  async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError>;
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared);
+  /// Connects the client to the server.
+  ///
+  /// Returns a [ButtplugClientConnectorError] if there is a problem with the
+  /// connection process. It is assumed that all information needed to create
+  /// the connection will be passed as part of the Trait implementors creation
+  /// methods.
+  ///
+  /// As connection may involve blocking operations (like network connections),
+  /// this trait method is marked async.
+  async fn connect(&mut self) -> ButtplugClientConnectionResult;
+  /// Disconnects the client from the server.
+  ///
+  /// Returns a [ButtplugClientConnectorError] if there is a problem with the
+  /// disconnection process.
+  ///
+  /// As disconnection may involve blocking operations (like network closing and
+  /// cleanup), this trait method is marked async.
+  async fn disconnect(&mut self) -> ButtplugClientConnectionResult;
+  /// Sends a
+  /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage]
+  /// to the server. 
+  async fn send(&mut self, msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult;
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
 
@@ -122,10 +157,8 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
     Ok(())
   }
 
-  async fn send(&mut self, msg: ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
-    let ret_msg = self.server.parse_message(msg).await;
-    let mut waker_state = state.try_lock().expect("Future locks should never be in contention");
-    waker_state.set_reply(ret_msg);
+  async fn send(&mut self, msg: ButtplugClientInMessage) -> Result<ButtplugClientOutMessage, ButtplugClientConnectorError> {
+    Ok(self.server.parse_message(msg).await)
   }
 
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
@@ -155,8 +188,8 @@ pub enum ButtplugRemoteClientConnectorMessage {
 pub struct ButtplugRemoteClientConnectorHelper {
   // Channel send/recv pair for applications wanting to send out through the
   // remote connection. Receiver will be send to task on creation.
-  internal_send: Sender<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>,
-  internal_recv: Option<Receiver<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>>,
+  internal_send: Sender<ButtplugClientMessageFuturePair>,
+  internal_recv: Option<Receiver<ButtplugClientMessageFuturePair>>,
   // Channel send/recv pair for remote connection sending information to the
   // application. Receiver will be sent to task on creation.
   remote_send: Sender<ButtplugRemoteClientConnectorMessage>,
@@ -175,7 +208,7 @@ unsafe impl Sync for ButtplugRemoteClientConnectorHelper {
 impl ButtplugRemoteClientConnectorHelper {
   pub fn new(event_sender: Sender<ButtplugClientOutMessage>) -> Self {
     let (internal_send, internal_recv) =
-      channel::<(ButtplugClientInMessage, ButtplugClientMessageStateShared)>(256);
+      channel(256);
     let (remote_send, remote_recv) = channel(256);
     Self {
       event_send: Some(event_sender),
@@ -190,8 +223,14 @@ impl ButtplugRemoteClientConnectorHelper {
     self.remote_send.clone()
   }
 
-  pub async fn send(&mut self, msg: &ButtplugClientInMessage, state: &ButtplugClientMessageStateShared) {
-    self.internal_send.send((msg.clone(), state.clone())).await;
+  pub async fn send(&mut self, msg: &ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
+    // between tasks.
+    let fut = ButtplugClientMessageFuture::default();
+    self
+      .internal_send
+      .send(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()))
+      .await;
+    fut.await
   }
 
   pub async fn close(&self) {
@@ -223,7 +262,7 @@ impl ButtplugRemoteClientConnectorHelper {
       enum StreamValue {
         NoValue,
         Incoming(ButtplugRemoteClientConnectorMessage),
-        Outgoing((ButtplugClientInMessage, ButtplugClientMessageStateShared)),
+        Outgoing(ButtplugClientMessageFuturePair),
       }
 
       loop {
@@ -295,9 +334,9 @@ impl ButtplugRemoteClientConnectorHelper {
           StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            sorter.register_future(&mut buttplug_fut_msg.0, &buttplug_fut_msg.1);
+            sorter.register_future( buttplug_fut_msg);
             if let Some(ref mut remote_sender) = remote_send {
-              remote_sender.send(buttplug_fut_msg.0.clone());
+              remote_sender.send(buttplug_fut_msg.msg.clone());
             } else {
               panic!("Can't send message yet!");
             }

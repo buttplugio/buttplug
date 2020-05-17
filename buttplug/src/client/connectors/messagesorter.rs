@@ -8,92 +8,86 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
+  core::messages::{ButtplugClientOutMessage, ButtplugMessage},
 };
-use super::super::ButtplugClientMessageStateShared;
+use super::super::{ButtplugClientMessageStateShared, ButtplugClientMessageFuturePair};
 use std::collections::HashMap;
 
-/// Handling of message sorting for client connectors.
+/// Message sorting and pairing for remote client connectors.
 ///
 /// In order to create connections to remote systems, we need a way to maintain
 /// message coherence. We expect that whenever a client sends the server a
-/// message, the server will always respond. 
+/// request message, the server will always send back a response message. 
 ///
-/// In the embedded case, where the client and server are in the same process,
-/// we can simply use execution flow to match the client message and server
-/// response. However, when going over IPC or network, we have to wait to hear
-/// back from the server. To match the outgoing client message with the incoming
-/// server message in the remote case, we use the Id field of
-/// [ButtplugMessage]. The client's message will have a server response with a
-/// matching index. Any message that comes from the server without an
-/// originating client message (DeviceAdded, Log, etc...) will have an index of
-/// 0.
+/// In the [embedded][super::ButtplugEmbeddedClientConnector] case, where the
+/// client and server are in the same process, we can simply use execution flow
+/// to match the client message and server response. However, when going over
+/// IPC or network, we have to wait to hear back from the server. To match the
+/// outgoing client request message with the incoming server response message in
+/// the remote case, we use the `id` field of [ButtplugMessage]. The client's
+/// request message will have a server response with a matching index. Any
+/// message that comes from the server without an originating client message
+/// ([DeviceAdded][crate::core::messages::DeviceAdded],
+/// [Log][crate::core::messages::Log], etc...) will have an `id` of 0 and is
+/// considered an *event*, meaning something happened on the server that was not
+/// directly tied to a client request.
 ///
 /// The ClientConnectionMessageSorter does two things to facilitate this
 /// matching:
 ///
-/// - Keeps track of the current message index, as a u32
-/// - Manages a map of indexes to resolvable futures.
+/// - Creates and keeps track of the current message `id`, as a [u32]
+/// - Manages a [HashMap] of indexes to resolvable futures.
 ///
-/// Whenever a remote connector sends a message, it first puts it through its
-/// ClientConnectorMessageSorter to fill in the message index. Similarly, when a
-/// message is received, it comes through the sorter, with one of 3 outcomes:
+/// Whenever a remote connector sends a [ButtplugMessage], it first puts it
+/// through its [ClientConnectorMessageSorter] to fill in the message `id`.
+/// Similarly, when a [ButtplugMessage] is received, it comes through the
+/// sorter, with one of 3 outcomes:
 ///
-/// - If there is a future with matching index waiting on a response, it
-///   resolves that future using the incoming message
-/// - If the message index is 0, the message is emitted as an event.
-/// - If the message index is not zero but there is no future waiting, the
+/// - If there is a future with matching `id` waiting on a response, it resolves
+///   that future using the incoming message
+/// - If the message `id` is 0, the message is emitted as an *event*.
+/// - If the message `id` is not zero but there is no future waiting, the
 ///   message is dropped and an error is emitted.
 ///
 pub struct ClientConnectorMessageSorter {
-  /// Map of message Ids to their related future.
+  /// Map of message `id`s to their related future.
   ///
-  /// This is where we store message Ids that are waiting for a return from the
-  /// server. Once we get back a response with a matching Id, we remove the
-  /// entry from this map, and use the waker to complete the future with the
-  /// received response.
+  /// This is where we store message `id`s that are waiting for a return from
+  /// the server. Once we get back a response with a matching `id`, we remove
+  /// the entry from this map, and use the waker to complete the future with the
+  /// received response message.
   future_map: HashMap<u32, ButtplugClientMessageStateShared>,
 
-  /// Message Id counter
+  /// Message `id` counter
   ///
   /// Every time we add a message to the future_map, we need it to have a unique
-  /// Id. We assume that unsigned 2^32 will be enough (Buttplug isn't THAT
-  /// chatty), and use it as a monotonically increasing counter for setting Ids.
+  /// `id`. We assume that unsigned 2^32 will be enough (Buttplug isn't THAT
+  /// chatty), and use it as a monotonically increasing counter for setting `id`s.
   current_id: u32,
 }
 
 impl ClientConnectorMessageSorter {
   /// Registers a future to be resolved when we receive a response.
   ///
-  /// Given a message and its related future, set the message's id, and match
+  /// Given a message and its related future, set the message's `id`, and match
   /// that id with the future to be resolved when we get a response back.
-  ///
-  /// # Arguments
-  ///
-  /// `msg` - Message that needs a response from the server. We'll used the
-  /// message's Id to match to match to the response and complete the
-  /// appropriate future.
-  ///
-  /// `state` - Waker for the future we'll need to resolve when the message
-  /// response is received.
   pub fn register_future(
     &mut self,
-    msg: &mut ButtplugClientInMessage,
-    state: &ButtplugClientMessageStateShared,
+    msg_fut: &mut ButtplugClientMessageFuturePair
   ) {
     trace!("Setting message id to {}", self.current_id);
+    let mut msg = msg_fut.msg.clone();
     msg.set_id(self.current_id);
-    self.future_map.insert(self.current_id, state.clone());
+    self.future_map.insert(self.current_id, msg_fut.waker.clone());
     self.current_id += 1;
   }
 
-  /// Given a response message from the server, resolve related message if we have one.
+  /// Given a response message from the server, resolve related future if we
+  /// have one.
   ///
-  /// Returns true if the message was resolved to a future, otherwise returns false.
-  ///
-  /// # Arguments
-  ///
-  /// - `msg` - Message from the server, may or may not be a response.
+  /// Returns true if the response message was resolved to a future via matching
+  /// `id`, otherwise returns false. False returns mean the message should be
+  /// considered as an *event*.
   pub async fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
     let id = msg.get_id();
     trace!("Trying to resolve message future for id {}.", id);
@@ -101,7 +95,7 @@ impl ClientConnectorMessageSorter {
       Some(_state) => {
         trace!("Resolved id {} to a future.", id);
         let mut waker_state = _state.try_lock().expect("Future locks should never be in contention");
-        waker_state.set_reply(msg.clone());
+        waker_state.set_reply(Ok(msg.clone()));
         true
       }
       None => {
@@ -115,8 +109,8 @@ impl ClientConnectorMessageSorter {
 impl Default for ClientConnectorMessageSorter {
   /// Create a default implementation of the ClientConnectorMessageSorter
   ///
-  /// Sets the current_id to 1, since we can't send message id of 0 (0 is
-  /// reserved for system incoming messages).
+  /// Sets the current_id to 1, since as a client we can't send message `id` of
+  /// 0 (0 is reserved for system incoming messages).
   fn default() -> Self {
     Self {
       future_map: HashMap::<u32, ButtplugClientMessageStateShared>::new(),

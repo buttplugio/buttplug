@@ -19,7 +19,10 @@ use super::{
   ButtplugClientMessageFuturePair,
 };
 use crate::{
-  core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
+  core::{
+    errors::ButtplugError,
+    messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo}
+  },
   util::future::{ButtplugFutureStateShared},
 };
 use async_std::{
@@ -174,12 +177,18 @@ impl ButtplugClientEventLoop {
     }
   }
 
+  async fn send_message(&mut self, msg_fut: ButtplugClientMessageFuturePair) {
+    let mut waker = msg_fut.waker.try_lock().expect("Future locks should never be in contention");
+    waker.set_reply(self.connector.send(msg_fut.msg).await);
+  }
+
+  // TODO Why does this return bool and not something more informative?
   async fn parse_client_message(&mut self, msg: ButtplugClientMessage) -> bool {
     debug!("Parsing a client message.");
     match msg {
       ButtplugClientMessage::Message(msg_fut) => {
         debug!("Sending message through connector.");
-        self.connector.send(msg_fut.0, &msg_fut.1).await;
+        self.send_message(msg_fut).await;
         true
       }
       ButtplugClientMessage::Disconnect(state) => {
@@ -269,7 +278,7 @@ impl ButtplugClientEventLoop {
         StreamReturn::DeviceMessage(msg_fut) => {
           // TODO Check whether we actually are still connected to
           // this device.
-          self.connector.send(msg_fut.0, &msg_fut.1).await;
+          self.send_message(msg_fut).await;
         }
         StreamReturn::Disconnect => {
           info!("Disconnected!");

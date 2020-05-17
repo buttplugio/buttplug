@@ -43,12 +43,28 @@ use async_std::{
 use futures::{Future, StreamExt};
 use std::{error::Error, fmt};
 
+type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientConnectorError>;
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
-pub type ButtplugClientMessageState = ButtplugFutureState<ButtplugClientOutMessage>;
-pub type ButtplugClientMessageStateShared = ButtplugFutureStateShared<ButtplugClientOutMessage>;
-pub type ButtplugClientMessageFuture = ButtplugFuture<ButtplugClientOutMessage>;
-pub type ButtplugClientMessageFuturePair = (ButtplugClientInMessage, ButtplugClientMessageStateShared);
+pub type ButtplugClientMessageResult = ButtplugClientResult<ButtplugClientOutMessage>;
+pub type ButtplugInternalClientMessageResult = ButtplugInternalClientResult<ButtplugClientOutMessage>;
+pub type ButtplugClientMessageState = ButtplugFutureState<ButtplugInternalClientMessageResult>;
+pub type ButtplugClientMessageStateShared = ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
+pub type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
+
+pub struct ButtplugClientMessageFuturePair {
+  pub msg: ButtplugClientInMessage, 
+  pub waker: ButtplugClientMessageStateShared
+}
+
+impl ButtplugClientMessageFuturePair {
+  pub fn new(msg: ButtplugClientInMessage, waker: ButtplugClientMessageStateShared) -> Self {
+    Self {
+      msg,
+      waker
+    }
+  }
+}
 
 /// Represents all of the different types of errors a ButtplugClient can return.
 ///
@@ -325,7 +341,7 @@ impl ButtplugClient {
       }
       // TODO Error message case may need to be implemented here when
       // we aren't only using embedded connectors.
-      Err(e) => Err(e),
+      Err(e) => Err(e.into()),
     }
   }
 
@@ -393,14 +409,14 @@ impl ButtplugClient {
   async fn send_message(
     &mut self,
     msg: &ButtplugClientInMessage,
-  ) -> Result<ButtplugClientOutMessage, ButtplugClientError> {
+  ) -> ButtplugInternalClientMessageResult {
     // Create a future to pair with the message being resolved.
     let fut = ButtplugClientMessageFuture::default();
-    let internal_msg = ButtplugClientMessage::Message((msg.clone(), fut.get_state_clone()));
+    let internal_msg = ButtplugClientMessage::Message(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()));
 
     // Send message to internal loop and wait for return.
     self.send_internal_message(internal_msg).await?;
-    Ok(fut.await)
+    fut.await
   }
 
   // Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
@@ -495,14 +511,20 @@ impl ButtplugClient {
 
 #[cfg(all(test, feature = "server"))]
 mod test {
-  use super::{ButtplugClient, ButtplugClientMessageStateShared};
+  use super::{ButtplugClient};
   use crate::{
-    client::connectors::{
+    client::{
+      ButtplugInternalClientMessageResult,
+      connectors::{
       ButtplugClientConnector,
+      ButtplugClientConnectionResult,
       ButtplugClientConnectorError,
       ButtplugEmbeddedClientConnector,
-    },
-    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
+    }
+  },
+    core::{
+      messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
+    }
   };
   use async_std::{
     future::Future,
@@ -532,15 +554,16 @@ mod test {
 
   #[async_trait]
   impl ButtplugClientConnector for ButtplugFailingConnector {
-    async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+    async fn connect(&mut self) -> ButtplugClientConnectionResult {
       Err(ButtplugClientConnectorError::new("Always fails"))
     }
 
-    async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+    async fn disconnect(&mut self) -> ButtplugClientConnectionResult {
       Err(ButtplugClientConnectorError::new("Always fails"))
     }
 
-    async fn send(&mut self, _msg: ButtplugClientInMessage, _state: &ButtplugClientMessageStateShared) {
+    async fn send(&mut self, _msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
+      panic!("Should never be called")
     }
 
     fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {

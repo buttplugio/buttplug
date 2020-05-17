@@ -11,6 +11,7 @@ use super::{
   connectors::ButtplugClientConnectorError,
   internal::ButtplugClientDeviceEvent,
   ButtplugClientError,
+  ButtplugClientMessageResult,
   ButtplugClientResult,
 };
 use crate::{
@@ -96,7 +97,7 @@ impl ButtplugClientDevice {
   async fn send_message(
     &mut self,
     msg: ButtplugClientInMessage,
-  ) -> Result<ButtplugClientOutMessage, ButtplugClientError> {
+  ) -> ButtplugClientMessageResult {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
@@ -106,9 +107,20 @@ impl ButtplugClientDevice {
     let fut = ButtplugClientMessageFuture::default();
     self
       .message_sender
-      .send((msg.clone(), fut.get_state_clone()))
+      .send(ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()))
       .await;
-    Ok(fut.await)
+    match fut.await {
+      Ok(msg) => {
+        if let ButtplugClientOutMessage::Error(_err) = msg {
+           Err(ButtplugClientError::ButtplugError(
+             ButtplugError::from(_err),
+           ))
+        } else {
+          Ok(msg)
+        }
+      }
+      Err(e) => Err(ButtplugClientError::ButtplugClientConnectorError(e))
+    }
   }
 
   async fn send_message_expect_ok(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult {
