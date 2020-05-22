@@ -71,8 +71,7 @@ impl ClientConnectorMessageSorter {
   /// that id with the future to be resolved when we get a response back.
   pub fn register_future(&mut self, msg_fut: &mut ButtplugClientMessageFuturePair) {
     trace!("Setting message id to {}", self.current_id);
-    let mut msg = msg_fut.msg.clone();
-    msg.set_id(self.current_id);
+    msg_fut.msg.set_id(self.current_id);
     self
       .future_map
       .insert(self.current_id, msg_fut.waker.clone());
