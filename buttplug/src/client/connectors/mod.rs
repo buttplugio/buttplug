@@ -10,7 +10,7 @@ mod message_sorter;
 #[cfg(feature = "serialize_json")]
 mod remote_connector_helper;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-pub mod websocket;
+pub mod async_tungstenite_websocket;
 
 #[cfg(feature = "serialize_json")]
 pub use message_sorter::ClientConnectorMessageSorter;
@@ -34,8 +34,6 @@ use crate::{
   util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
 };
 use async_std::sync::Receiver;
-#[cfg(feature = "serialize_json")]
-use async_std::prelude::StreamExt;
 use async_trait::async_trait;
 use std::{error::Error, fmt};
 

@@ -39,13 +39,13 @@ enum StreamValue {
 
 async fn remote_connector_helper_loop(
   // Takes messages from the client
-  client_recv: Receiver<ButtplugClientMessageFuturePair>,
+  mut client_recv: Receiver<ButtplugClientMessageFuturePair>,
   // Sends messages not matched in the sorter to the client.
   client_event_sender: Sender<ButtplugClientOutMessage>,
   // Sends sorter processed messages to the connector.
   connector_input_sender: Sender<ButtplugClientInMessage>,
   // Takes data coming in from the connector.
-  connector_output_recv: Receiver<ButtplugRemoteClientConnectorMessage>,
+  mut connector_output_recv: Receiver<ButtplugRemoteClientConnectorMessage>,
 ) {
   // Message sorter that receives messages that come in from the client, then is
   // used to match responses as they return from the server.
@@ -112,7 +112,7 @@ async fn remote_connector_helper_loop(
         // Create future sets our message ID, so make sure this
         // happens before we send out the message.
         sorter.register_future(buttplug_fut_msg);
-        connector_input_sender.send(buttplug_fut_msg.msg.clone());
+        connector_input_sender.send(buttplug_fut_msg.msg.clone()).await;
       }
     }
   }
@@ -177,7 +177,7 @@ impl ButtplugRemoteClientConnectorHelper {
     client_event_sender: Sender<ButtplugClientOutMessage>,
   ) -> (impl Future, Receiver<ButtplugClientInMessage>, Sender<ButtplugRemoteClientConnectorMessage>) {
     let (client_send, client_recv) = channel(256);
-    self.internal_send = client_send;
+    self.internal_send = Some(client_send);
     let (connector_input_sender, connector_input_recv) = channel(256);
     let (connector_output_sender, connector_output_recv) = channel(256);
     let fut = remote_connector_helper_loop(client_recv, client_event_sender, connector_input_sender, connector_output_recv);

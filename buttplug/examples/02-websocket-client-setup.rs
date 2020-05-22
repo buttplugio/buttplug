@@ -6,7 +6,7 @@
 // for full license information.
 
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-use buttplug::client::{connectors::websocket::ButtplugWebsocketClientConnector, ButtplugClient};
+use buttplug::client::{connectors::async_tungstenite_websocket::AsyncTungsteniteWebsocketClientConnector, ButtplugClient};
 
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
@@ -46,7 +46,8 @@ async fn embedded_connector_example() {
   // to that machine. The second argument specifies whether we should ignore
   // secure cert validity, but we're not connecting to a secure server so it
   // doesn't really matter here.
-  let connector = ButtplugWebsocketClientConnector::new("ws://localhost:12345", false);
+  let connector = 
+    AsyncTungsteniteWebsocketClientConnector::new("wss://localhost:12346", false);
 
   // ButtplugClient creation is the same as the last example. From here on
   // out, things look basically the same, EXCEPT for the fact that, unlike the
