@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -71,7 +71,12 @@ async fn remote_connector_helper_loop(
     })
     .await;
     match stream_return {
+      // If we get NoValue back, it means one side closed, so the other should
+      // too.
       StreamValue::NoValue => break,
+      // If we get incoming back, it means we've received something from the
+      // server. See if we have a matching future, else send whatever we got as
+      // an event.
       StreamValue::Incoming(remote_msg) => {
         match remote_msg {
           ButtplugRemoteClientConnectorMessage::Text(t) => {
@@ -84,6 +89,8 @@ async fn remote_connector_helper_loop(
                     debug!("Sending event!");
                     // Send notification through event channel
                     client_event_sender.send(smsg).await;
+                  } else {
+                    debug!("future resolved!");
                   }
                 }
               }
@@ -104,10 +111,14 @@ async fn remote_connector_helper_loop(
             info!("Connector closing connection {}", s);
             break;
           }
+          // TODO We should probably make connecting an event?
           ButtplugRemoteClientConnectorMessage::Connected => {}
+          // TODO We should probably figure out what this even does?
           ButtplugRemoteClientConnectorMessage::Error(_) => {}
         }
       }
+      // If we receive something from the client, register it with our sorter
+      // then let the connector figure out what to do with it.
       StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
         // Create future sets our message ID, so make sure this
         // happens before we send out the message.
@@ -171,11 +182,26 @@ unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
 
 #[cfg(feature = "serialize_json")]
 impl ButtplugRemoteClientConnectorHelper {
+  /// Returns the helper event loop future and corresponding channels.
+  ///
+  /// After the connector that owns this helper is actually connected, it should
+  /// use this method to retreive the helper event loop future, as well as the
+  /// channels required to interact with the helper event loop. The following
+  /// values are returned in a tuple:
+  ///
+  /// - The Future itself, which needs to be run (.await'd) in the same scope
+  ///   it's received in as not to violate [Pinning][std::pin].
+  /// - The connector input receiver, which is where messages from the client
+  ///   will arrive from, to be sent to the remote connector.
+  /// - The connector output sender, which is where messages from the remote
+  ///   connector should be sent for processing.
   pub fn get_event_loop_future(
     &mut self,
     // Sends messages not matched in the sorter to the client.
     client_event_sender: Sender<ButtplugClientOutMessage>,
   ) -> (impl Future, Receiver<ButtplugClientInMessage>, Sender<ButtplugRemoteClientConnectorMessage>) {
+    // TODO Should have this check for self.internal_send and return a result,
+    // as we should not allow this to be called twice.
     let (client_send, client_recv) = channel(256);
     self.internal_send = Some(client_send);
     let (connector_input_sender, connector_input_recv) = channel(256);
@@ -184,6 +210,11 @@ impl ButtplugRemoteClientConnectorHelper {
     (fut, connector_input_recv, connector_output_sender)
   }
 
+  /// Sends a message to the remote connector, via the helper's event loop
+  ///
+  /// After the event loop is spun up, this method will take an outgoing
+  /// buttplug message and send it to the event loop, which will then forward it
+  /// onto the remote connector.
   pub async fn send(
     &mut self,
     msg: &ButtplugClientInMessage,
@@ -206,6 +237,7 @@ impl ButtplugRemoteClientConnectorHelper {
   }
 
   pub async fn close(&self) {
+    // TODO We should probably be able to like, close connections, huh.
     /*
     self
       .remote_send
