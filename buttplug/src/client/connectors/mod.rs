@@ -122,19 +122,21 @@ pub trait ButtplugClientConnector: Send + Sync {
 /// In-process Buttplug Server Connector
 ///
 /// The Embedded Server contains a [ButtplugServer], meaning that both the
-/// [ButtplugClient] and [ButtplugServer] will exist in the same process. This
-/// is useful for developing applications, or for distributing an applications
-/// without requiring access to an outside [ButtplugServer].
+/// [ButtplugClient][super::ButtplugClient] and [ButtplugServer] will exist in
+/// the same process. This is useful for developing applications, or for
+/// distributing an applications without requiring access to an outside
+/// [ButtplugServer].
 ///
 /// # Notes
 ///
 /// Buttplug, as a project, is built in a way that tries to make sure all
 /// programs will work with new versions of the library. This is why we have
-/// [ButtplugClient] for applications, and Connectors to access out-of-process
-/// [ButtplugServer]s over IPC, network, etc. It means that the out-of-process
-/// server can be upgraded by the user at any time, even if the [ButtplugClient]
-/// using application hasn't been upgraded. This allows the program to support
-/// hardware that may not have even been released when it was published.
+/// [ButtplugClient][super::ButtplugClient] for applications, and Connectors to
+/// access out-of-process [ButtplugServer]s over IPC, network, etc. It means
+/// that the out-of-process server can be upgraded by the user at any time, even
+/// if the [ButtplugClient][super::ButtplugClient] using application hasn't been
+/// upgraded. This allows the program to support hardware that may not have even
+/// been released when it was published.
 ///
 /// While including an EmbeddedConnector in your application is the quickest and
 /// easiest way to develop (and we highly recommend developing that way), and

@@ -131,17 +131,19 @@ async fn remote_connector_helper_loop(
 
 /// Buttplug communication helper for remote connectors
 ///
-/// Maintaining a remote connection for a [ButtplugClient] is a complicated job.
+/// Maintaining a remote connection for a
+/// [ButtplugClient][crate::client::ButtplugClient] is a complicated job.
 /// Regardless of the communication type (IPC, Network, etc) used, the following
 /// things are all the job of a remote connector:
 ///
-/// - It needs to take messages from a [ButtplugClient], hand them to a
+/// - It needs to take messages from a
+///   [ButtplugClient][crate::client::ButtplugClient], hand them to a
 ///   [ClientConnectorMessageSorter] for id setting and future resolution
 ///   management, then send them on to the server.
 /// - It needs to take messages coming off the wire, validate and deserialize
 ///   them, possibly match them to waiting futures in the
-///   [ClientConnectorMessageSorter], or else send them to the [ButtplugClient]
-///   as events.
+///   [ClientConnectorMessageSorter], or else send them to the
+///   [ButtplugClient][crate::client::ButtplugClient] as events.
 /// - It needs to handle either side closing the connection at any time.
 ///
 /// A lot of this code will look the same between all remote connectors, which
@@ -155,20 +157,22 @@ async fn remote_connector_helper_loop(
 /// # Using the Remote Client Connector Helper
 ///
 /// The Remote Client Connector Helper is made to sit in between the
-/// [ButtplugClient]'s connector access and the actual communication library
-/// being used. It has 2 channels that it maintains:
+/// [ButtplugClient][crate::client::ButtplugClient]'s connector access and the
+/// actual communication library being used. It has 2 channels that it
+/// maintains:
 ///
-/// - Message I/O with the [ButtplugClient]
+/// - Message I/O with the [ButtplugClient][crate::client::ButtplugClient]
 /// - Message I/O with whatever communication library is used.
 ///
 /// It listens on both of these channels (using select/race), and routes
 /// messages accordingly.
 ///
 /// When building a connector that uses the helper, it's usually best to wire
-/// the [ButtplugClientConnector] trait methods directly to the helper. For
-/// sending/receiving, the `get_remote_send()` method can be used for retreiving
-/// the channel sender, which can be used by the communication library of choice
-/// to pipe its input into the helper.
+/// the [ButtplugClientConnector][crate::client::ButtplugClientConnector] trait
+/// methods directly to the helper. For sending/receiving, the
+/// `get_remote_send()` method can be used for retreiving the channel sender,
+/// which can be used by the communication library of choice to pipe its input
+/// into the helper.
 #[cfg(feature = "serialize_json")]
 #[derive(Default)]
 pub struct ButtplugRemoteClientConnectorHelper {
