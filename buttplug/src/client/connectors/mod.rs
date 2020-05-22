@@ -5,13 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Methods for communicating with Buttplug Servers
-mod messagesorter;
+//! Buttplug Client Connectors, for communicating with Buttplug Servers
+mod message_sorter;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
 #[cfg(feature = "serialize_json")]
-pub use messagesorter::ClientConnectorMessageSorter;
+pub use message_sorter::ClientConnectorMessageSorter;
 
 use super::{
   ButtplugClientMessageFuture,
