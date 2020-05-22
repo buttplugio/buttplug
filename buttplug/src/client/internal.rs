@@ -175,8 +175,9 @@ impl ButtplugClientEventLoop {
   }
 
   async fn send_message(&mut self, msg_fut: ButtplugClientMessageFuturePair) {
+    let reply = self.connector.send(msg_fut.msg).await;
     let mut waker = msg_fut.waker.lock_now_or_panic();
-    waker.set_reply(self.connector.send(msg_fut.msg).await);
+    waker.set_reply(reply);
   }
 
   // TODO Why does this return bool and not something more informative?
