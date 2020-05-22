@@ -9,7 +9,7 @@
 
 use super::{
   connectors::{
-    ButtplugClientConnectionStateShared,
+    ButtplugClientConnectorStateShared,
     ButtplugClientConnector,
     ButtplugClientConnectorError,
   },
@@ -35,10 +35,10 @@ pub enum ButtplugClientMessage {
   /// Once connection is finished, use the bundled future to resolve.
   Connect(
     Box<dyn ButtplugClientConnector>,
-    ButtplugClientConnectionStateShared,
+    ButtplugClientConnectorStateShared,
   ),
   /// Client request to disconnect, via already sent connector instance.
-  Disconnect(ButtplugClientConnectionStateShared),
+  Disconnect(ButtplugClientConnectorStateShared),
   /// Given a DeviceList message, update the inner loop values and create
   /// events for additions.
   HandleDeviceList(DeviceList),

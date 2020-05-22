@@ -12,7 +12,7 @@ pub mod device;
 pub mod internal;
 
 use connectors::{
-  ButtplugClientConnectionFuture,
+  ButtplugClientConnectorFuture,
   ButtplugClientConnector,
   ButtplugClientConnectorError,
 };
@@ -285,7 +285,7 @@ impl ButtplugClient {
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
     // further communications with the server, if connection is successful.
-    let fut = ButtplugClientConnectionFuture::default();
+    let fut = ButtplugClientConnectorFuture::default();
     let msg = ButtplugClientMessage::Connect(Box::new(connector), fut.get_state_clone());
     self.send_internal_message(msg).await?;
 
@@ -363,7 +363,7 @@ impl ButtplugClient {
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
     // further communications with the server, if connection is successful.
-    let fut = ButtplugClientConnectionFuture::default();
+    let fut = ButtplugClientConnectorFuture::default();
     let msg = ButtplugClientMessage::Disconnect(fut.get_state_clone());
     self.send_internal_message(msg).await?;
     self.connected = false;
@@ -517,7 +517,7 @@ mod test {
   use crate::{
     client::{
       connectors::{
-        ButtplugClientConnectionResult,
+        ButtplugClientConnectorResult,
         ButtplugClientConnector,
         ButtplugClientConnectorError,
         ButtplugEmbeddedClientConnector,
@@ -553,11 +553,11 @@ mod test {
 
   #[async_trait]
   impl ButtplugClientConnector for ButtplugFailingConnector {
-    async fn connect(&mut self) -> ButtplugClientConnectionResult {
+    async fn connect(&mut self) -> ButtplugClientConnectorResult {
       Err(ButtplugClientConnectorError::new("Always fails"))
     }
 
-    async fn disconnect(&mut self) -> ButtplugClientConnectionResult {
+    async fn disconnect(&mut self) -> ButtplugClientConnectorResult {
       Err(ButtplugClientConnectorError::new("Always fails"))
     }
 

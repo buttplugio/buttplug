@@ -43,11 +43,11 @@ use async_trait::async_trait;
 use futures::future::Future;
 use std::{error::Error, fmt};
 
-pub type ButtplugClientConnectionResult = Result<(), ButtplugClientConnectorError>;
-pub type ButtplugClientConnectionState = ButtplugFutureState<ButtplugClientConnectionResult>;
-pub type ButtplugClientConnectionStateShared =
-  ButtplugFutureStateShared<ButtplugClientConnectionResult>;
-pub type ButtplugClientConnectionFuture = ButtplugFuture<ButtplugClientConnectionResult>;
+pub type ButtplugClientConnectorResult = Result<(), ButtplugClientConnectorError>;
+pub type ButtplugClientConnectorState = ButtplugFutureState<ButtplugClientConnectorResult>;
+pub type ButtplugClientConnectorStateShared =
+  ButtplugFutureStateShared<ButtplugClientConnectorResult>;
+pub type ButtplugClientConnectorFuture = ButtplugFuture<ButtplugClientConnectorResult>;
 
 /// Errors specific to client connector structs.
 ///
@@ -105,7 +105,7 @@ pub trait ButtplugClientConnector: Send {
   ///
   /// As connection may involve blocking operations (like network connections),
   /// this trait method is marked async.
-  async fn connect(&mut self) -> ButtplugClientConnectionResult;
+  async fn connect(&mut self) -> ButtplugClientConnectorResult;
   /// Disconnects the client from the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the
@@ -113,7 +113,7 @@ pub trait ButtplugClientConnector: Send {
   ///
   /// As disconnection may involve blocking operations (like network closing and
   /// cleanup), this trait method is marked async.
-  async fn disconnect(&mut self) -> ButtplugClientConnectionResult;
+  async fn disconnect(&mut self) -> ButtplugClientConnectorResult;
   /// Sends a
   /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage]
   /// to the server.
