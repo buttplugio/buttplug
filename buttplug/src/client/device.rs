@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -40,32 +40,93 @@ use async_std::{
 };
 use std::collections::HashMap;
 
+/// Convenience enum for forming [VibrateCmd] commands.
+///
+/// Allows users to easily specify speeds across different vibration features in
+/// a device. Units are in absolute speed values (0.0-1.0).
 pub enum VibrateCommand {
+  /// Sets all vibration features of a device to the same speed.
   Speed(f64),
+  /// Sets vibration features to speed based on the index of the speed in the
+  /// vec (i.e. motor 0 is set to `SpeedVec[0]`, motor 1 is set to
+  /// `SpeedVec[1]`, etc...)
   SpeedVec(Vec<f64>),
+  /// Sets vibration features indicated by index to requested speed. For
+  /// instance, if the map has an entry of (1, 0.5), it will set motor 1 to a
+  /// speed of 0.5.
   SpeedMap(HashMap<u32, f64>),
 }
 
+/// Convenience enum for forming [RotateCmd] commands.
+///
+/// Allows users to easily specify speeds/directions across different rotation
+/// features in a device. Units are in absolute speed (0.0-1.0), and clockwise
+/// direction (clockwise if true, counterclockwise if false)
 pub enum RotateCommand {
+  /// Sets all rotation features of a device to the same speed/direction.
   Rotate(f64, bool),
+  /// Sets rotation features to speed/direction based on the index of the
+  /// speed/rotation pair in the vec (i.e. motor 0 speed/direction is set to
+  /// `RotateVec[0]`, motor 1 is set to `RotateVec[1]`, etc...)
   RotateVec(Vec<(f64, bool)>),
+  /// Sets rotation features indicated by index to requested speed/direction.
+  /// For instance, if the map has an entry of (1, (0.5, true)), it will set
+  /// motor 1 to rotate at a speed of 0.5, in the clockwise direction.
   RotateMap(HashMap<u32, (f64, bool)>),
 }
 
+/// Convenience enum for forming [LinearCmd] commands.
+///
+/// Allows users to easily specify position/durations across different rotation
+/// features in a device. Units are in absolute position (0.0-1.0) and
+/// millliseconds of movement duration.
 pub enum LinearCommand {
+  /// Sets all linear features of a device to the same position/duration.
   Linear(u32, f64),
+  /// Sets linear features to position/duration based on the index of the
+  /// position/duration pair in the vec (i.e. motor 0 position/duration is set to
+  /// `LinearVec[0]`, motor 1 is set to `LinearVec[1]`, etc...)
   LinearVec(Vec<(u32, f64)>),
+  /// Sets linear features indicated by index to requested position/duration.
+  /// For instance, if the map has an entry of (1, (0.5, 500)), it will set
+  /// motor 1 to move to position 0.5 over the course of 500ms.
   LinearMap(HashMap<u32, (u32, f64)>),
 }
 
+/// Client-usable representation of device connected to the corresponding
+/// [ButtplugServer][crate::server::ButtplugServer]
+///
+/// [ButtplugClientDevice] instances are obtained from the
+/// [ButtplugClient][super::ButtplugClient], and allow the user to send commands
+/// to a device connected to the server. 
 pub struct ButtplugClientDevice {
+  /// Name of the device
   pub name: String,
+  /// Index of the device, matching the index in the
+  /// [ButtplugServer][crate::server::ButtplugServer]'s
+  /// [DeviceManager][crate::server::device_manager::DeviceManager].
   index: u32,
+  /// Map of messages the device can take, along with the attributes of those
+  /// messages.
   pub allowed_messages: MessageAttributesMap,
+  /// Sends commands from the [ButtplugClientDevice] instance to the
+  /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
+  /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
+  /// through the connector.
   message_sender: Sender<ButtplugClientMessageFuturePair>,
+  /// Receives device specific events from the
+  /// [ButtplugClient][super::ButtplugClient]'s event loop. Used for device
+  /// connection updates, sensor input, etc...
   event_receiver: Receiver<ButtplugClientDeviceEvent>,
+  /// Internal storage for events received from the
+  /// [ButtplugClient][super::ButtplugClient].
   events: Vec<ButtplugClientDeviceEvent>,
+  /// True if this [ButtplugClientDevice] is currently connected to the
+  /// [ButtplugServer][crate::server::ButtplugServer].
   device_connected: bool,
+  /// True if the [ButtplugClient][super::ButtplugClient] that generated this
+  /// [ButtplugClientDevice] instance is still connected to the
+  /// [ButtplugServer][crate::server::ButtplugServer].
   client_connected: bool,
 }
 
@@ -75,6 +136,19 @@ unsafe impl Sync for ButtplugClientDevice {
 }
 
 impl ButtplugClientDevice {
+  /// Creates a new [ButtplugClientDevice] instance
+  ///
+  /// Fills out the struct members for [ButtplugClientDevice].
+  /// `device_connected` and `client_connected` are automatically set to true
+  /// because we assume we're only created connected devices.
+  ///
+  /// # Why is this pub(crate)?
+  ///
+  /// There's really no reason for anyone but a
+  /// [ButtplugClient][super::ButtplugClient] to create a
+  /// [ButtplugClientDevice]. A [ButtplugClientDevice] is mostly a shim around
+  /// the [ButtplugClient] that generated it, with some added convenience
+  /// functions for forming device control messages.
   pub(crate) fn new(
     name: &str,
     index: u32,
@@ -94,6 +168,11 @@ impl ButtplugClientDevice {
     }
   }
 
+  /// Sends a message through the owning
+  /// [ButtplugClient][super::ButtplugClient].
+  ///
+  /// Performs the send/receive flow for send a device command and receiving the
+  /// response from the server.
   async fn send_message(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientMessageResult {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
@@ -123,6 +202,8 @@ impl ButtplugClientDevice {
     }
   }
 
+  /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
+  /// message, otherwise returns a [ButtplugError]
   async fn send_message_expect_ok(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult {
     match self.send_message(msg).await? {
       ButtplugClientOutMessage::Ok(_) => Ok(()),
@@ -138,6 +219,11 @@ impl ButtplugClientDevice {
     }
   }
 
+  /// Checks to see if any events have been received since the last device call.
+  ///
+  /// As we don't have a way of emitted events in the way that we did in C#/JS,
+  /// we need to explicitly check for values coming from the server, either
+  /// input from devices or notifications that they've disconnected.
   async fn check_for_events(&mut self) -> ButtplugClientResult {
     if !self.client_connected {
       return Err(ButtplugClientConnectorError::new("Client not connected.").into());
@@ -172,6 +258,8 @@ impl ButtplugClientDevice {
   /// Produces a future that will wait for a set of events from the
   /// internal loop. Returns once any number of events is received.
   ///
+  /// # Notes
+  ///
   /// This should be called whenever the client isn't doing anything
   /// otherwise, so we can respond to unexpected updates from the server, such
   /// as devices connections/disconnections, log messages, etc... This is
@@ -203,6 +291,7 @@ impl ButtplugClientDevice {
     })
   }
 
+  /// Commands device to vibrate, assuming it has the features to do so.
   pub async fn vibrate(&mut self, speed_cmd: VibrateCommand) -> ButtplugClientResult {
     if !self
       .allowed_messages
@@ -273,6 +362,7 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg).await
   }
 
+  /// Commands device to move linearly, assuming it has the features to do so.
   pub async fn linear(&mut self, linear_cmd: LinearCommand) -> ButtplugClientResult {
     if !self
       .allowed_messages
@@ -343,6 +433,7 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg).await
   }
 
+  /// Commands device to rotate, assuming it has the features to do so.
   pub async fn rotate(&mut self, rotate_cmd: RotateCommand) -> ButtplugClientResult {
     if !self
       .allowed_messages
@@ -413,6 +504,7 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg).await
   }
 
+  /// Commands device to stop all movement.
   pub async fn stop(&mut self) -> ButtplugClientResult {
     // All devices accept StopDeviceCmd
     self

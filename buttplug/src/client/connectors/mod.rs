@@ -169,7 +169,7 @@ impl<'a> ButtplugEmbeddedClientConnector {
   /// Get a reference to the internal server.
   ///
   /// Allows the owner to manipulate the internal server instance. Useful for
-  /// setting up [DeviceCommunicationManager]s before connection.
+  /// setting up [DeviceCommunicationManager][crate::server::comm_managers::DeviceCommunicationManager]s before connection.
   pub fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
     self.server.server_ref()
   }
