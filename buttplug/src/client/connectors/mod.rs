@@ -92,10 +92,8 @@ impl Error for ButtplugClientConnectorError {
 /// connector trait makes it so that the client does not need to be aware of the
 /// specifics of where the server is.
 ///
-// Not real sure if this is sync, since there may be state that could get weird
-// in connectors implementing this trait, but Send should be ok.
 #[async_trait]
-pub trait ButtplugClientConnector: Send {
+pub trait ButtplugClientConnector: Send + Sync {
   /// Connects the client to the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the
@@ -118,17 +116,52 @@ pub trait ButtplugClientConnector: Send {
   /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage]
   /// to the server.
   async fn send(&mut self, msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult;
+  /// Takes the event receiver from the connector.
+  ///
+  /// # Panics
+  ///
+  /// Will panic if called twice.
+  // TODO Should probably just return a result that has an error, versus panicing? This is recoverable.
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
 
+/// In-process Buttplug Server Connector
+///
+/// The Embedded Server contains a [ButtplugServer], meaning that both the
+/// [ButtplugClient] and [ButtplugServer] will exist in the same process. This
+/// is useful for developing applications, or for distributing an applications
+/// without requiring access to an outside [ButtplugServer].
+///
+/// # Notes
+///
+/// Buttplug, as a project, is built in a way that tries to make sure all
+/// programs will work with new versions of the library. This is why we have
+/// [ButtplugClient] for applications, and Connectors to access out-of-process
+/// [ButtplugServer]s over IPC, network, etc. It means that the out-of-process
+/// server can be upgraded by the user at any time, even if the [ButtplugClient]
+/// using application hasn't been upgraded. This allows the program to support
+/// hardware that may not have even been released when it was published.
+///
+/// While including an EmbeddedConnector in your application is the quickest and
+/// easiest way to develop (and we highly recommend developing that way), and
+/// also an easy way to get users up and running as quickly as possible, we
+/// recommend also including some sort of IPC Connector in order for your
+/// application to connect to newer servers when they come out.
 #[cfg(feature = "server")]
 pub struct ButtplugEmbeddedClientConnector {
+  /// Internal server object for the embedded connector.
   server: ButtplugInProcessServerWrapper,
+  /// Event receiver for the internal server.
   recv: Option<Receiver<ButtplugClientOutMessage>>,
 }
 
 #[cfg(feature = "server")]
 impl<'a> ButtplugEmbeddedClientConnector {
+  /// Creates a new embedded connector, with a server instance.
+  ///
+  /// Sets up a server, using the basic [ButtplugServer] construction arguments.
+  /// Takes the server's name and the ping time it should use, with a ping time
+  /// of 0 meaning infinite ping.
   pub fn new(name: &str, max_ping_time: u128) -> Self {
     let (server, recv) = ButtplugInProcessServerWrapper::new(&name, max_ping_time);
     Self {
@@ -137,6 +170,10 @@ impl<'a> ButtplugEmbeddedClientConnector {
     }
   }
 
+  /// Get a reference to the internal server.
+  ///
+  /// Allows the owner to manipulate the internal server instance. Useful for
+  /// setting up [DeviceCommunicationManager]s before connection.
   pub fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
     self.server.server_ref()
   }
