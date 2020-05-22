@@ -47,7 +47,7 @@ async fn embedded_connector_example() {
   // secure cert validity, but we're not connecting to a secure server so it
   // doesn't really matter here.
   let connector = 
-    AsyncTungsteniteWebsocketClientConnector::new("wss://localhost:12346", false);
+    AsyncTungsteniteWebsocketClientConnector::new_insecure_connector("ws://localhost:12345");
 
   // ButtplugClient creation is the same as the last example. From here on
   // out, things look basically the same, EXCEPT for the fact that, unlike the

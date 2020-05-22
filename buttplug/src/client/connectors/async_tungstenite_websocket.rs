@@ -1,18 +1,21 @@
-use crate::{
-  core::messages::{ButtplugMessage, ButtplugClientInMessage, ButtplugClientOutMessage},
-  client::ButtplugInternalClientMessageResult
+use super::{
+  ButtplugClientConnector, ButtplugClientConnectorError, ButtplugClientConnectorResult,
+  ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage,
 };
-use super::{ButtplugClientConnector, ButtplugClientConnectorResult, ButtplugRemoteClientConnectorHelper, ButtplugClientConnectorError, ButtplugRemoteClientConnectorMessage};
-use async_trait::async_trait;
-use futures_util::{StreamExt, SinkExt};
+use crate::{
+  client::ButtplugInternalClientMessageResult,
+  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
+};
 use async_std::{
   sync::{channel, Receiver},
   task,
 };
+use async_trait::async_trait;
 use async_tungstenite::{
+  async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
-  async_std::connect_async,
 };
+use futures_util::{SinkExt, StreamExt};
 
 pub struct AsyncTungsteniteWebsocketClientConnector {
   helper: ButtplugRemoteClientConnectorHelper,
@@ -22,7 +25,16 @@ pub struct AsyncTungsteniteWebsocketClientConnector {
 }
 
 impl AsyncTungsteniteWebsocketClientConnector {
-  pub fn new(address: &str, bypass_cert_verify: bool) -> Self {
+  pub fn new_insecure_connector(address: &str) -> Self {
+    Self {
+      helper: ButtplugRemoteClientConnectorHelper::default(),
+      recv: None,
+      address: address.to_owned(),
+      bypass_cert_verify: false,
+    }
+  }
+
+  pub fn new_secure_connector(address: &str, bypass_cert_verify: bool) -> Self {
     Self {
       helper: ButtplugRemoteClientConnectorHelper::default(),
       recv: None,
@@ -37,22 +49,57 @@ impl ButtplugClientConnector for AsyncTungsteniteWebsocketClientConnector {
   async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
     let (client_sender, client_receiver) = channel(256);
     self.recv = Some(client_receiver);
-    let (read_future, 
-      connector_input_recv, 
-      connector_output_sender) = self.helper.get_event_loop_future(client_sender);
-    let verify = self.bypass_cert_verify;
+    let (read_future, connector_input_recv, connector_output_sender) =
+      self.helper.get_event_loop_future(client_sender);
+    let tls_connector = if self.address.contains("wss://") {
+      use async_tls::TlsConnector;
+      if self.bypass_cert_verify {
+        use rustls::ClientConfig;
+        use std::sync::Arc;
 
-    match connect_async(&self.address).await {
+        mod danger {
+
+          pub struct NoCertificateVerification {}
+
+          impl rustls::ServerCertVerifier for NoCertificateVerification {
+            fn verify_server_cert(
+              &self,
+              _roots: &rustls::RootCertStore,
+              _presented_certs: &[rustls::Certificate],
+              _dns_name: webpki::DNSNameRef<'_>,
+              _ocsp: &[u8],
+            ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
+              Ok(rustls::ServerCertVerified::assertion())
+            }
+          }
+        }
+
+        let mut config = ClientConfig::new();
+        config
+          .dangerous()
+          .set_certificate_verifier(Arc::new(danger::NoCertificateVerification {}));
+        Some(TlsConnector::from(Arc::new(config)))
+      } else {
+        Some(TlsConnector::new())
+      }
+    } else {
+      None
+    };
+
+    match connect_async_with_tls_connector(&self.address, tls_connector).await {
       Ok((stream, _)) => {
         let (mut writer, mut reader) = stream.split();
         task::spawn(async move {
           while let Some(msg) = connector_input_recv.recv().await {
             let json = msg.as_protocol_json();
             debug!("Sending: {}", json);
-            writer.send(Message::text(json)).await.expect("This should never fail?");
+            writer
+              .send(Message::text(json))
+              .await
+              .expect("This should never fail?");
           }
         });
-        task::spawn( async move {
+        task::spawn(async move {
           while let Some(response) = reader.next().await {
             debug!("Receiving: {:?}", response);
             match response.unwrap() {
@@ -72,8 +119,8 @@ impl ButtplugClientConnector for AsyncTungsteniteWebsocketClientConnector {
           read_future.await;
         });
         Ok(())
-      } 
-      Err(e) => Err(ButtplugClientConnectorError::new(&format!("{:?}", e)))
+      }
+      Err(e) => Err(ButtplugClientConnectorError::new(&format!("{:?}", e))),
     }
   }
 
