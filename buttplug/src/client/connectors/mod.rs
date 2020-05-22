@@ -7,11 +7,15 @@
 
 //! Buttplug Client Connectors, for communicating with Buttplug Servers
 mod message_sorter;
+#[cfg(feature = "serialize_json")]
+mod remote_connector_helper;
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 pub mod websocket;
 
 #[cfg(feature = "serialize_json")]
 pub use message_sorter::ClientConnectorMessageSorter;
+#[cfg(feature = "serialize_json")]
+pub use remote_connector_helper::{ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage};
 
 use super::{
   ButtplugClientMessageFuture,
@@ -22,25 +26,17 @@ use super::{
 use crate::server::{ButtplugInProcessServerWrapper, ButtplugServer, ButtplugServerWrapper};
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugMessageError},
     messages::{
-      create_message_validator,
       ButtplugClientInMessage,
       ButtplugClientOutMessage,
-      ButtplugSpecV2OutMessage,
     },
   },
   util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
 };
-use async_std::sync::{channel, Receiver};
+use async_std::sync::Receiver;
 #[cfg(feature = "serialize_json")]
-use async_std::{
-  prelude::{FutureExt, StreamExt},
-  sync::Sender,
-};
+use async_std::prelude::StreamExt;
 use async_trait::async_trait;
-#[cfg(feature = "serialize_json")]
-use futures::future::Future;
 use std::{error::Error, fmt};
 
 pub type ButtplugClientConnectorResult = Result<(), ButtplugClientConnectorError>;
@@ -205,185 +201,3 @@ impl ButtplugClientConnector for ButtplugEmbeddedClientConnector {
 
 // The embedded connector is used heavily in the client unit tests, so we can
 // assume code coverage there and omit specific tests here.
-
-pub trait ButtplugRemoteClientConnectorSender: Sync + Send {
-  fn send(&self, msg: ButtplugClientInMessage);
-  fn close(&self);
-}
-
-pub enum ButtplugRemoteClientConnectorMessage {
-  Sender(Box<dyn ButtplugRemoteClientConnectorSender>),
-  Connected(),
-  Text(String),
-  Error(String),
-  ClientClose(String),
-  Close(String),
-}
-
-#[cfg(feature = "serialize_json")]
-pub struct ButtplugRemoteClientConnectorHelper {
-  // Channel send/recv pair for applications wanting to send out through the
-  // remote connection. Receiver will be send to task on creation.
-  internal_send: Sender<ButtplugClientMessageFuturePair>,
-  internal_recv: Option<Receiver<ButtplugClientMessageFuturePair>>,
-  // Channel send/recv pair for remote connection sending information to the
-  // application. Receiver will be sent to task on creation.
-  remote_send: Sender<ButtplugRemoteClientConnectorMessage>,
-  remote_recv: Option<Receiver<ButtplugRemoteClientConnectorMessage>>,
-  event_send: Option<Sender<ButtplugClientOutMessage>>,
-}
-
-#[cfg(feature = "serialize_json")]
-unsafe impl Send for ButtplugRemoteClientConnectorHelper {
-}
-#[cfg(feature = "serialize_json")]
-unsafe impl Sync for ButtplugRemoteClientConnectorHelper {
-}
-
-#[cfg(feature = "serialize_json")]
-impl ButtplugRemoteClientConnectorHelper {
-  pub fn new(event_sender: Sender<ButtplugClientOutMessage>) -> Self {
-    let (internal_send, internal_recv) = channel(256);
-    let (remote_send, remote_recv) = channel(256);
-    Self {
-      event_send: Some(event_sender),
-      remote_send,
-      remote_recv: Some(remote_recv),
-      internal_send,
-      internal_recv: Some(internal_recv),
-    }
-  }
-
-  pub fn get_remote_send(&self) -> Sender<ButtplugRemoteClientConnectorMessage> {
-    self.remote_send.clone()
-  }
-
-  pub async fn send(
-    &mut self,
-    msg: &ButtplugClientInMessage,
-  ) -> ButtplugInternalClientMessageResult {
-    // between tasks.
-    let fut = ButtplugClientMessageFuture::default();
-    self
-      .internal_send
-      .send(ButtplugClientMessageFuturePair::new(
-        msg.clone(),
-        fut.get_state_clone(),
-      ))
-      .await;
-    fut.await
-  }
-
-  pub async fn close(&self) {
-    // Emulate a close from the connector side, which will cause us to
-    // close.
-    self
-      .remote_send
-      .send(ButtplugRemoteClientConnectorMessage::Close(
-        "Client requested close.".to_owned(),
-      ))
-      .await;
-  }
-
-  pub fn get_recv_future(&mut self) -> impl Future {
-    // Set up a way to get futures in and out of the sorter, which will live
-    // in our connector task.
-    let event_send = self.event_send.take().unwrap();
-
-    // Remove the receivers we need to move into the task.
-    let mut remote_recv = self.remote_recv.take().unwrap();
-    let mut internal_recv = self.internal_recv.take().unwrap();
-    let message_validator = create_message_validator();
-    async move {
-      let mut sorter = ClientConnectorMessageSorter::default();
-      // Our in-task remote sender, which is a wrapped version of whatever
-      // bus specific sender (websocket, tcp, etc) we'll be using.
-      let mut remote_send: Option<Box<dyn ButtplugRemoteClientConnectorSender>> = None;
-
-      enum StreamValue {
-        NoValue,
-        Incoming(ButtplugRemoteClientConnectorMessage),
-        Outgoing(ButtplugClientMessageFuturePair),
-      }
-
-      loop {
-        // We use two Options instead of an enum because we may never
-        // get anything.
-        let mut stream_return: StreamValue = async {
-          match remote_recv.next().await {
-            Some(msg) => StreamValue::Incoming(msg),
-            None => StreamValue::NoValue,
-          }
-        }
-        .race(async {
-          match internal_recv.next().await {
-            Some(msg) => StreamValue::Outgoing(msg),
-            None => StreamValue::NoValue,
-          }
-        })
-        .await;
-        match stream_return {
-          StreamValue::NoValue => break,
-          StreamValue::Incoming(remote_msg) => {
-            match remote_msg {
-              ButtplugRemoteClientConnectorMessage::Sender(s) => {
-                remote_send = Some(s);
-              }
-              ButtplugRemoteClientConnectorMessage::Text(t) => {
-                match message_validator.validate(&t.clone()) {
-                  Ok(_) => {
-                    let array: Vec<ButtplugClientOutMessage> =
-                      serde_json::from_str(&t.clone()).unwrap();
-                    for smsg in array {
-                      if !sorter.maybe_resolve_message(&smsg).await {
-                        debug!("Sending event!");
-                        // Send notification through event channel
-                        event_send.send(smsg).await;
-                      }
-                    }
-                  }
-                  Err(e) => {
-                    let error_str =
-                      format!("Got invalid messages from remote Buttplug Server: {:?}", e);
-                    error!("{}", error_str);
-                    event_send
-                      .send(ButtplugSpecV2OutMessage::Error(
-                        ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&error_str))
-                          .into(),
-                      ))
-                      .await;
-                  }
-                }
-              }
-              ButtplugRemoteClientConnectorMessage::ClientClose(s) => {
-                info!("Client closing connection {}", s);
-                if let Some(ref mut remote_sender) = remote_send {
-                  remote_sender.close();
-                } else {
-                  panic!("Can't send message yet!");
-                }
-              }
-              ButtplugRemoteClientConnectorMessage::Close(s) => {
-                info!("Connector closing connection {}", s);
-                break;
-              }
-              _ => {
-                panic!("UNHANDLED BRANCH");
-              }
-            }
-          }
-          StreamValue::Outgoing(ref mut buttplug_fut_msg) => {
-            // Create future sets our message ID, so make sure this
-            // happens before we send out the message.
-            sorter.register_future(buttplug_fut_msg);
-            if let Some(ref mut remote_sender) = remote_send {
-              remote_sender.send(buttplug_fut_msg.msg.clone());
-            } else {
-              panic!("Can't send message yet!");
-            }
-          }
-        }
-      }
-    }
-  }
-}
