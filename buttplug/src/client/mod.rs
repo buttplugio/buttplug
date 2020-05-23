@@ -220,11 +220,11 @@ impl ButtplugClient {
   ///     }).await;
   /// });
   /// ```
-  pub fn run<F, T>(
+  pub async fn run<F, T>(
     name: &str,
-    connector: impl ButtplugClientConnector + 'static,
+    mut connector: impl ButtplugClientConnector + 'static,
     func: F,
-  ) -> impl Future<Output = ButtplugClientResult>
+  ) -> ButtplugClientResult
   where
     F: FnOnce(ButtplugClient) -> T,
     T: Future<Output = ()>,
@@ -240,62 +240,17 @@ impl ButtplugClient {
       connected: true,
       events: vec![],
     };
+
+    connector.connect().await?;
+
     let app_future = async move {
-      client.connect(connector).await?;
+      client.handshake().await?;
       func(client).await;
       Ok(())
     };
-    async move {
-      let internal_loop_future = client_event_loop(event_sender, message_receiver);
-      app_future.race(internal_loop_future).await
-    }
-  }
 
-  /// Connects and runs handshake flow with
-  /// [crate::server::server::ButtplugServer], either local or remote.
-  ///
-  /// Called by run() while spinning up the event loop. Tries to connect to a
-  /// server via the given [ButtplugClientConnector] struct. If connection is
-  /// successful, also runs the handshake flow and retrieves a list of
-  /// currently connected devices. These devices will be emitted as
-  /// [ButtplugClientEvent::DeviceAdded] events next time
-  /// [ButtplugClient::wait_for_event] is run.
-  ///
-  /// # Parameters
-  ///
-  /// - `connector`: A connector of some type that will handle the connection
-  /// to the server. The core library ships with an "embedded" connector
-  /// ([connector::ButtplugEmbeddedClientConnector]) that will run a server
-  /// in-process with the client, or there are add-on libraries like
-  /// buttplug-ws-connector that will handle other communication methods like
-  /// websockets, TCP/UDP, etc...
-  ///
-  /// # Returns
-  ///
-  /// An `Option` which is:
-  ///
-  /// - None if connection succeeded
-  /// - Some containing a [ButtplugClientError] on connection failure.
-  pub(self) async fn connect(
-    &mut self,
-    connector: impl ButtplugClientConnector + 'static,
-  ) -> ButtplugClientResult {
-    debug!("Running client connection.");
-
-    // Send the connector to the internal loop for management. Once we throw
-    // the connector over, the internal loop will handle connecting and any
-    // further communications with the server, if connection is successful.
-    let fut = ButtplugClientConnectorFuture::default();
-    let msg = ButtplugClientMessage::Connect(Box::new(connector), fut.get_state_clone());
-    self.send_internal_message(msg).await?;
-
-    debug!("Waiting on internal loop to connect");
-    if let Err(e) = fut.await {
-      return Err(ButtplugClientError::from(e));
-    }
-
-    info!("Client connected to server, running handshake.");
-    self.handshake().await
+    let internal_loop_future = client_event_loop(connector, event_sender, message_receiver);
+    app_future.race(internal_loop_future).await
   }
 
   // Runs the handshake flow with the server.

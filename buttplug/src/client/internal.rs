@@ -11,7 +11,6 @@ use super::{
   connectors::{
     ButtplugClientConnectorStateShared,
     ButtplugClientConnector,
-    ButtplugClientConnectorError,
   },
   device::ButtplugClientDevice,
   ButtplugClientEvent,
@@ -112,38 +111,19 @@ struct ButtplugClientEventLoop {
 }
 
 impl ButtplugClientEventLoop {
-  pub async fn wait_for_connector(
+
+  /// Returns a [ButtplugClientEventLoop] instance once the loop is ready to
+  /// run.
+  ///
+  /// We let the internal 
+  pub fn new(
+    mut connector: impl ButtplugClientConnector + 'static,
     event_sender: Sender<ButtplugClientEvent>,
-    mut client_receiver: Receiver<ButtplugClientMessage>,
-  ) -> Result<Self, ButtplugClientConnectorError> {
-    match client_receiver.next().await {
-      None => {
-        debug!("Client disconnected.");
-        Err(ButtplugClientConnectorError::new(
-          "Client was dropped during connect.",
-        ))
-      }
-      Some(msg) => match msg {
-        ButtplugClientMessage::Connect(mut connector, state) => match connector.connect().await {
-          Err(err) => {
-            error!("Cannot connect to server: {}", err.message);
-            let mut waker_state = state.lock_now_or_panic();
-            let reply = Err(ButtplugClientConnectorError::new(&format!(
-              "Cannot connect to server: {}",
-              err.message
-            )));
-            waker_state.set_reply(reply);
-            Err(ButtplugClientConnectorError::new(
-              "Client couldn't connect to server.",
-            ))
-          }
-          Ok(_) => {
-            info!("Connected!");
-            let mut waker_state = state.lock_now_or_panic();
-            waker_state.set_reply(Ok(()));
+    client_receiver: Receiver<ButtplugClientMessage>,
+  ) -> Self {    
             let (device_message_sender, device_message_receiver) =
               channel::<ButtplugClientMessageFuturePair>(256);
-            Ok(ButtplugClientEventLoop {
+            Self {
               devices: HashMap::new(),
               device_event_senders: HashMap::new(),
               device_message_sender,
@@ -151,18 +131,8 @@ impl ButtplugClientEventLoop {
               event_sender,
               client_receiver,
               connector_receiver: connector.get_event_receiver(),
-              connector,
-            })
-          }
-        },
-        _ => {
-          error!("Received non-connector message before connector message.");
-          Err(ButtplugClientConnectorError::new(
-            "Event Loop did not receive Connect message first.",
-          ))
-        }
-      },
-    }
+              connector: Box::new(connector),
+            }
   }
 
   fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
@@ -343,14 +313,12 @@ impl ButtplugClientEventLoop {
 ///   clients and devices associated with the loop will be invalidated, and a
 ///   new [super::ButtplugClient] must be created.
 pub async fn client_event_loop(
+  connector: impl ButtplugClientConnector + 'static,
   event_sender: Sender<ButtplugClientEvent>,
   client_receiver: Receiver<ButtplugClientMessage>,
 ) -> ButtplugClientResult {
   info!("Starting client event loop.");
-  ButtplugClientEventLoop::wait_for_connector(event_sender, client_receiver)
-    .await?
-    .run()
-    .await;
+  ButtplugClientEventLoop::new(connector, event_sender, client_receiver).run().await;
   info!("Exiting client event loop");
   Ok(())
 }
