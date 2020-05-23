@@ -181,8 +181,7 @@ impl ButtplugClientEventLoop {
 
   async fn send_message(&mut self, msg_fut: ButtplugClientMessageFuturePair) {
     let reply = self.connector.send(msg_fut.msg).await;
-    let mut waker = msg_fut.waker.lock_now_or_panic();
-    waker.set_reply(reply);
+    msg_fut.waker.set_reply(reply);
   }
 
   // TODO Why does this return bool and not something more informative?
@@ -195,28 +194,24 @@ impl ButtplugClientEventLoop {
         true
       }
       ButtplugClientMessage::Disconnect(state) => {
-        info!("Client requested disconnect");
-        let mut waker_state = state.lock_now_or_panic();
-        waker_state.set_reply(self.connector.disconnect().await);
+        debug!("Client requested disconnect");
+        state.set_reply(self.connector.disconnect().await);
         false
       }
       ButtplugClientMessage::RequestDeviceList(fut) => {
-        info!("Building device list!");
-        let mut r = vec![];
-        // TODO There's probably a better way to do this.
-        let devices = self.devices.clone();
-        for d in devices.values() {
-          let dev = self.create_client_device(d);
-          r.push(dev);
+        debug!("Building device list!");
+        let mut device_return = vec![];
+        // TODO There has to be a way to do this without the clone()
+        for device in self.devices.clone().values() {
+          let client_device = self.create_client_device(device);
+          device_return.push(client_device);
         }
-        info!("Returning device list of {} items!", r.len());
-        let mut waker_state = fut.lock_now_or_panic();
-        waker_state.set_reply(r);
-        info!("Finised setting waker!");
+        debug!("Returning device list of {} items!", device_return.len());
+        fut.set_reply(device_return);
         true
       }
       ButtplugClientMessage::HandleDeviceList(device_list) => {
-        info!("Handling device list!");
+        debug!("Handling device list!");
         for d in &device_list.devices {
           let device = self.create_client_device(&d);
           self.devices.insert(d.device_index, d.clone());

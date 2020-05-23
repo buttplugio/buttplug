@@ -96,12 +96,28 @@ impl<T> ButtplugFutureStateShared<T> {
 
   /// Locks immediately and returns a [MutexGuard], or panics
   ///
-  /// See [ButtplugFutureStateShared] struct documentation for more info on locking.
-  pub fn lock_now_or_panic(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
+  /// See [ButtplugFutureStateShared] struct documentation for more info on
+  /// locking.
+  ///
+  /// # Visibility
+  ///
+  /// The only thing that needs to read the reply from a future is our poll
+  /// method, in this module. Everything else should just be setting replies,
+  /// and can use set_reply accordingly.
+  pub(super) fn lock_now_or_panic(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
     self
       .state
       .try_lock()
       .expect("ButtplugFutureStateShared should never have lock contention")
+  }
+
+  /// Locks immediately and sets the reply for the internal waker, or panics if
+  /// lock is held.
+  ///
+  /// See [ButtplugFutureStateShared] struct documentation for more info on
+  /// locking.
+  pub fn set_reply(&self, reply: T) {
+    self.lock_now_or_panic().set_reply(reply);
   }
 }
 
