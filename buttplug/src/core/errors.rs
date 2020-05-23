@@ -16,7 +16,7 @@ pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 /// Handshake errors occur while a client is connecting to a server. This
 /// usually involves protocol handshake errors. For connector errors (i.e. when
 /// a remote network connection cannot be established), see
-/// [crate::client::connectors::ButtplugClientConnectorError].
+/// [crate::connector::ButtplugClientConnectorError].
 #[derive(Debug, Clone)]
 pub struct ButtplugHandshakeError {
   /// Message for the handshake error.

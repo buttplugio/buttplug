@@ -7,11 +7,8 @@
 
 //! Handling of websockets using async-tungstenite
 
-use super::{
-  ButtplugClientConnector, ButtplugClientConnectorError, ButtplugClientConnectorResult,
-  ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage,
-};
 use crate::{
+  connector::{ButtplugClientConnector, ButtplugClientConnectorError, ButtplugClientConnectorResult, ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage},
   client::ButtplugInternalClientMessageResult,
   core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
 };
@@ -26,7 +23,7 @@ use async_tungstenite::{
 use futures_util::{SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
-pub struct AsyncTungsteniteWebsocketClientConnector {
+pub struct ButtplugWebsocketClientConnector {
   /// Remote connector helper, for setting message indexes and resolving futures
   helper: ButtplugRemoteClientConnectorHelper,
   /// Receiver of messages from the server, for sending to the client.
@@ -40,7 +37,7 @@ pub struct AsyncTungsteniteWebsocketClientConnector {
   bypass_cert_verify: bool,
 }
 
-impl AsyncTungsteniteWebsocketClientConnector {
+impl ButtplugWebsocketClientConnector {
   /// Creates a new connector for "ws://" addresses
   ///
   /// Returns a websocket connector for connecting over insecure websockets to a
@@ -75,7 +72,7 @@ impl AsyncTungsteniteWebsocketClientConnector {
 }
 
 #[async_trait]
-impl ButtplugClientConnector for AsyncTungsteniteWebsocketClientConnector {
+impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
   async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
     let (client_sender, client_receiver) = channel(256);
     self.recv = Some(client_receiver);

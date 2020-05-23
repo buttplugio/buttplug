@@ -8,11 +8,11 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  connectors::{ButtplugClientConnector, ButtplugClientConnectorStateShared},
   device::ButtplugClientDevice,
   ButtplugClientEvent, ButtplugClientMessageFuturePair, ButtplugClientResult,
 };
 use crate::{
+  connector::{ButtplugClientConnector, ButtplugClientConnectorStateShared},
   core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
   util::future::ButtplugFutureStateShared,
 };

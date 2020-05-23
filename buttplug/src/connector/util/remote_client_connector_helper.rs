@@ -5,13 +5,16 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  ButtplugClientConnectorError, ButtplugClientMessageFuture, ButtplugClientMessageFuturePair,
-  ButtplugInternalClientMessageResult, ClientConnectorMessageSorter,
+use super::super::{
+  ButtplugClientConnectorError,  ClientConnectorMessageSorter,
 };
-use crate::core::{
+use crate::{
+  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair,
+    ButtplugInternalClientMessageResult},
+    core::{
   errors::{ButtplugError, ButtplugMessageError},
   messages::{create_message_validator, ButtplugClientInMessage, ButtplugClientOutMessage},
+    },
 };
 use async_std::{
   prelude::{FutureExt, StreamExt},

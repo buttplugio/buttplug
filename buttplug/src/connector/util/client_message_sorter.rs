@@ -7,8 +7,10 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use super::super::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared};
-use crate::core::messages::{ButtplugClientOutMessage, ButtplugMessage};
+use crate::{
+  core::messages::{ButtplugClientOutMessage, ButtplugMessage},
+  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared}
+};
 use std::collections::HashMap;
 
 /// Message sorting and pairing for remote client connectors.
@@ -17,14 +19,15 @@ use std::collections::HashMap;
 /// message coherence. We expect that whenever a client sends the server a
 /// request message, the server will always send back a response message.
 ///
-/// In the [embedded][super::ButtplugEmbeddedClientConnector] case, where the
-/// client and server are in the same process, we can simply use execution flow
-/// to match the client message and server response. However, when going over
-/// IPC or network, we have to wait to hear back from the server. To match the
-/// outgoing client request message with the incoming server response message in
-/// the remote case, we use the `id` field of [ButtplugMessage]. The client's
-/// request message will have a server response with a matching index. Any
-/// message that comes from the server without an originating client message
+/// In the [embedded][crate::connector::ButtplugInProcessClientConnector] case,
+/// where the client and server are in the same process, we can simply use
+/// execution flow to match the client message and server response. However,
+/// when going over IPC or network, we have to wait to hear back from the
+/// server. To match the outgoing client request message with the incoming
+/// server response message in the remote case, we use the `id` field of
+/// [ButtplugMessage]. The client's request message will have a server response
+/// with a matching index. Any message that comes from the server without an
+/// originating client message
 /// ([DeviceAdded][crate::core::messages::DeviceAdded],
 /// [Log][crate::core::messages::Log], etc...) will have an `id` of 0 and is
 /// considered an *event*, meaning something happened on the server that was not

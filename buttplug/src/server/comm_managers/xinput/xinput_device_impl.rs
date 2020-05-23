@@ -6,15 +6,13 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    device::{
-      BoundedDeviceEventBroadcaster,
-      ButtplugDeviceImplCreator,
-      DeviceImpl,
-      DeviceReadCmd,
-      DeviceSubscribeCmd,
-      DeviceUnsubscribeCmd,
-      DeviceWriteCmd,
-    },
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
     Endpoint,
   },
 };

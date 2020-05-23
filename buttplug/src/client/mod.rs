@@ -6,16 +6,9 @@
 // for full license information.
 
 //! Communications API for accessing Buttplug Servers
-
-pub mod connectors;
 pub mod device;
 pub mod internal;
 
-use connectors::{
-  ButtplugClientConnectorFuture,
-  ButtplugClientConnector,
-  ButtplugClientConnectorError,
-};
 use device::ButtplugClientDevice;
 use internal::{client_event_loop, ButtplugClientMessage};
 
@@ -33,6 +26,11 @@ use crate::{
       StartScanning,
     },
   },
+  connector::{
+  ButtplugClientConnectorFuture,
+  ButtplugClientConnector,
+  ButtplugClientConnectorError,
+},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 
@@ -58,13 +56,13 @@ type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientConnectorErr
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
 /// Result type used for passing server responses.
-type ButtplugInternalClientMessageResult =
+pub type ButtplugInternalClientMessageResult =
   ButtplugInternalClientResult<ButtplugClientOutMessage>;
 /// Future state type for returning server responses across futures.
-type ButtplugClientMessageStateShared =
+pub(crate) type ButtplugClientMessageStateShared =
   ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
 /// Future type that expects server responses.
-type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
+pub(crate) type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
 
 /// Future state for messages sent from the client that expect a server
 /// response.
@@ -79,7 +77,7 @@ type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageR
 /// [ButtplugClientMessageFuturePair] type. We can then expect the connector to
 /// get the response from the server, match it with our message (using something
 /// like the
-/// [ClientConnectorMessageSorter][crate::client::connectors::ClientConnectorMessageSorter]),
+/// [ClientConnectorMessageSorter][crate::connector::ClientConnectorMessageSorter]),
 /// and set the reply in the waker we've sent along. This will resolve the
 /// future we're waiting on and allow us to continue execution.
 pub struct ButtplugClientMessageFuturePair {
@@ -226,11 +224,14 @@ impl ButtplugClient {
   ///
   /// ```
   /// #[cfg(feature = "server")]
-  /// use buttplug::client::{ButtplugClient, connectors::ButtplugEmbeddedClientConnector};
+  /// use buttplug::{
+  ///   client::ButtplugClient, 
+  ///   connector::ButtplugInProcessClientConnector
+  /// };
   ///
   /// #[cfg(feature = "server")]
   /// futures::executor::block_on(async {
-  ///     ButtplugClient::run("Test Client", ButtplugEmbeddedClientConnector::new("Test Server", 0), |mut client| {
+  ///     ButtplugClient::run("Test Client", ButtplugInProcessClientConnector::new("Test Server", 0), |mut client| {
   ///         async move {
   ///             println!("Are we connected? {}", client.connected());
   ///         }
@@ -268,6 +269,68 @@ impl ButtplugClient {
 
     let internal_loop_future = client_event_loop(connector, event_sender, message_receiver);
     app_future.race(internal_loop_future).await
+  }
+
+  /// Convenience function for creating in-process connectors.
+  ///
+  /// Creates a [ButtplugClient] event loop, with an in-process connector with
+  /// all device managers that ship with the library and work on the current
+  /// platform added to it already. Takes a maximum ping time to build the
+  /// server with, other parameters match `run()`.
+  ///
+  /// # When To Use This Instead of `run()`
+  ///
+  /// If you just want to build a quick example and save yourself a few use
+  /// statements and setup, this will get you going. For anything *production*,
+  /// we recommend using `run()` as you will have more control over what
+  /// happens. This method may gain/lose device comm managers at any time.
+  ///
+  /// # The Device I Want To Use Doesn't Show Up
+  ///
+  /// If you are trying to use this method to create your client, and do not see
+  /// the devices you want, there are a couple of things to check:
+  ///
+  /// - Are you on a platform that the device communication manager supports?
+  ///   For instance, we only support XInput on windows.
+  /// - Did the developers add a new Device CommunicationManager type and forget
+  ///   to add it to this method? _It's more likely than you think!_ [File a
+  ///   bug](https://github.com/buttplugio/buttplug-rs/issues).
+  ///
+  /// # Panics
+  ///
+  /// If the library was compiled without any device managers, the
+  /// [ButtplugClient] will have nothing to do. This is considered a
+  /// catastrophic failure and the library will panic.
+  ///
+  /// If the library is using outside device managers, it is recommended to
+  /// build your own connector, add your device manager to those, and use the
+  /// `run()` method to pass it in.
+  pub async fn run_with_in_process_connector<F, T>(
+    name: &str,
+    max_ping_time: u128,
+    func: F,
+  ) -> ButtplugClientResult
+  where
+    F: FnOnce(ButtplugClient) -> T,
+    T: Future<Output = ()>,
+  {
+    #[cfg(not(any(feature="btleplug-manager", feature="xinput")))]
+    panic!("Must compile library using at least one device communication manager features (btleplug, xinput, etc) to use run_with_in_process_connector.");
+    #[cfg(any(feature="btleplug-manager", feature="xinput"))]
+    use crate::connector::ButtplugInProcessClientConnector;
+
+    let mut connector = ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
+    #[cfg(feature="btleplug-manager")]
+    {
+      use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
+      connector.server_ref().add_comm_manager::<BtlePlugCommunicationManager>();
+    }
+    #[cfg(all(feature="xinput", target_os="windows"))]
+    {
+      use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;
+      connector.server_ref().add_comm_manager::<XInputDeviceCommunicationManager>();
+    }
+    ButtplugClient::run(name, connector, func).await
   }
 
   // Runs the handshake flow with the server.
@@ -469,13 +532,13 @@ impl ButtplugClient {
 mod test {
   use super::ButtplugClient;
   use crate::{
-    client::{
-      connectors::{
+      connector::{
         ButtplugClientConnectorResult,
         ButtplugClientConnector,
         ButtplugClientConnectorError,
-        ButtplugEmbeddedClientConnector,
+        ButtplugInProcessClientConnector,
       },
+      client::{
       ButtplugInternalClientMessageResult,
     },
     core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
@@ -495,7 +558,7 @@ mod test {
     let _ = env_logger::builder().is_test(true).try_init();
     assert!(ButtplugClient::run(
       "Test Client",
-      ButtplugEmbeddedClientConnector::new("Test Server", 0),
+      ButtplugInProcessClientConnector::new("Test Server", 0),
       func
     )
     .await

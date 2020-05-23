@@ -11,7 +11,8 @@
 #[allow(unused_imports)]
 use async_std::task;
 use buttplug::{
-  client::{connectors::ButtplugEmbeddedClientConnector, ButtplugClient, ButtplugClientEvent},
+  client::{ButtplugClient, ButtplugClientEvent},
+  connector::ButtplugInProcessClientConnector, 
   test::TestDevice,
 };
 
@@ -22,7 +23,7 @@ async fn device_enumeration_example() {
 
   // Since we're going to need to manage our server and client, this example
   // will use an embedded connector.
-  let mut connector = ButtplugEmbeddedClientConnector::new("Example Server", 0);
+  let mut connector = ButtplugInProcessClientConnector::new("Example Server", 0);
 
   // This example will also work with a WebsocketConnector if you want to
   // connect to Intiface Desktop or an intiface-cli instance.
@@ -62,7 +63,7 @@ async fn device_enumeration_example() {
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:
   //
-  // connector.add_comm_manager::<BtlePlugCommunicationManager>()
+  // connector.server_ref().add_comm_manager::<BtlePlugCommunicationManager>()
 
   // Anyways, now that we have a manager sorted, Let's talk about when and how
   // you'll get events (in this case, DeviceAdded events) from the server.

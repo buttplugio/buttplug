@@ -16,7 +16,10 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
-use buttplug::client::{connectors::ButtplugEmbeddedClientConnector, ButtplugClient};
+use buttplug::{
+  client::ButtplugClient,
+  connector::ButtplugInProcessClientConnector,
+};
 
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.
@@ -37,7 +40,7 @@ async fn embedded_connector_example() {
   //
   // For now, we'll just give the server a name. We'll go over other server
   // constructor arguments in later examples.
-  let connector = ButtplugEmbeddedClientConnector::new("Example Server", 0);
+  let connector = ButtplugInProcessClientConnector::new("Example Server", 0);
 
   // Now that we've got a connector, we can use the ButtplugClient::run()
   // function to spin up our client event loop. We pass this function three

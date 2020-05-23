@@ -1,4 +1,4 @@
-use super::ButtplugServerWrapper;
+
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
@@ -16,6 +16,7 @@ use crate::{
       ButtplugSpecV2OutMessage,
     },
   },
+  connector::ButtplugServerConnector,
   server::ButtplugServer,
 };
 use async_std::{
@@ -188,7 +189,7 @@ impl ButtplugJSONServerWrapper {
 }
 
 #[async_trait]
-impl ButtplugServerWrapper for ButtplugJSONServerWrapper {
+impl ButtplugServerConnector for ButtplugJSONServerWrapper {
   // This was the only way I could figure out how to get a string in here
   // without ended up in lifetime hell. Trying to take a reference here is
   // really difficult because we do our message preparation in an async

@@ -12,8 +12,6 @@ pub mod device_manager;
 mod logger;
 pub mod wrapper;
 
-pub use wrapper::{ButtplugInProcessServerWrapper, ButtplugServerWrapper};
-
 use crate::{
   core::{
     errors::*,
