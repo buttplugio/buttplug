@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -52,27 +52,62 @@ pub enum ButtplugClientMessage {
   Message(ButtplugClientMessageFuturePair),
 }
 
+/// Enum for messages going to a [ButtplugClientDevice] instance.
 pub enum ButtplugClientDeviceEvent {
+  /// Device has disconnected from server.
   DeviceDisconnect,
+  /// Client has disconnected from server.
   ClientDisconnect,
+  /// Message was received from server for that specific device.
   Message(ButtplugClientOutMessage),
 }
 
+/// Set of possible responses from the different inputs to the client inner
+/// loop.
 enum StreamReturn {
+  /// Response from the [ButtplugServer].
   ConnectorMessage(ButtplugClientOutMessage),
+  /// Incoming message from the [ButtplugClient].
   ClientMessage(ButtplugClientMessage),
+  /// Incoming message from a [ButtplugClientDevice].
   DeviceMessage(ButtplugClientMessageFuturePair),
+  /// Disconnection from the [ButtplugServer].
   Disconnect,
 }
 
+/// Event loop for running [ButtplugClient] connections.
+///
+/// Acts as a hub for communication between the connector and [ButtplugClient]
+/// instances.
+///
+/// # Why an event loop?
+///
+/// Due to the async nature of Buttplug, we many channels routed to many
+/// different tasks. However, all of those tasks will refer to the same event
+/// loop. This allows us to coordinate and centralize our information while
+/// keeping the API async.
 struct ButtplugClientEventLoop {
+  /// List of currently connected devices.
   devices: HashMap<u32, DeviceMessageInfo>,
+  /// Sender to pass to new [ButtplugClientDevice] instances.
   device_message_sender: Sender<ButtplugClientMessageFuturePair>,
+  /// Receiver for incoming [ButtplugClientDevice] messages.
   device_message_receiver: Receiver<ButtplugClientMessageFuturePair>,
+  // TODO this should be a broadcaster
+
+  /// Event sender for specific devices.
+  ///
+  /// We can have many instances of the same [ButtplugClientDevice]. This map
+  /// allows us to send messages to all device instances that refer to the same
+  /// device index on the server.
   device_event_senders: HashMap<u32, Vec<Sender<ButtplugClientDeviceEvent>>>,
+  /// Sends events to the [ButtplugClient] instance.
   event_sender: Sender<ButtplugClientEvent>,
+  /// Receives incoming messages from client instances.
   client_receiver: Receiver<ButtplugClientMessage>,
+  /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: Box<dyn ButtplugClientConnector>,
+  /// Receiver for messages send from the [ButtplugServer] via the connector.
   connector_receiver: Receiver<ButtplugClientOutMessage>,
 }
 
@@ -291,28 +326,22 @@ impl ButtplugClientEventLoop {
 /// communication
 ///
 /// Created whenever a new [super::ButtplugClient] is created, the internal loop
-/// handles connection and communication with the server, and creation of events
-/// received from the server.
+/// handles connection and communication with the server through the connector,
+/// and creation of events received from the server.
 ///
 /// The event_loop does a few different things during its lifetime.
 ///
-/// - The first thing it will do is wait for a Connect message from a
-/// client. This message contains a [ButtplugClientConnector] that will be
-/// used to connect and communicate with a [crate::server::ButtplugServer].
+/// - The first thing it will do is wait for a Connect message from a client.
+///   This message contains a [ButtplugClientConnector] that will be used to
+///   connect and communicate with a [crate::server::ButtplugServer].
 ///
 /// - After a connection is established, it will listen for events from the
-/// connector, or messages from the client, until either server/client
-/// disconnects.
+///   connector, or messages from the client, until either server/client
+///   disconnects.
 ///
-/// - Finally, on disconnect, it will tear down, and cannot be used again.
-/// All clients and devices associated with the loop will be invalidated,
-/// and a new [super::ButtplugClient] must be created.
-///
-/// # Parameters
-///
-/// - `event_sender`: Used when sending server updates to clients.
-/// - `client_receiver`: Used when receiving commands from clients to
-/// send to server.
+/// - Finally, on disconnect, it will tear down, and cannot be used again. All
+///   clients and devices associated with the loop will be invalidated, and a
+///   new [super::ButtplugClient] must be created.
 pub async fn client_event_loop(
   event_sender: Sender<ButtplugClientEvent>,
   client_receiver: Receiver<ButtplugClientMessage>,
