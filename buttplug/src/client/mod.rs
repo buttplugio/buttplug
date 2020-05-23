@@ -33,7 +33,7 @@ use crate::{
       StartScanning,
     },
   },
-  util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
+  util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 
 use async_std::{
