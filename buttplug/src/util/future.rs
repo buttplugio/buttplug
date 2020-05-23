@@ -66,19 +66,22 @@ impl<T> ButtplugFutureState<T> {
 /// Shared [ButtplugFutureState] type.
 ///
 /// [ButtplugFutureState] is made to be shared across tasks, and we'll never
-/// know if those tasks are running on single or multithreaded executors. This
-/// only needs to unlock for calls to [ButtplugFutureState::set_reply].
+/// know if those tasks are running on single or multithreaded executors.
 ///
-/// # Panics and notes on unlocking
+/// # Panics and notes on setting replies
 ///
 /// The lock for a [ButtplugFutureState] should only ever be taken when the
-/// reply is being set, and there should never be a point where the reply is set
-/// twice (See the panic documentation for [ButtplugFutureState]). In order to
-/// make sure we never block, we always lock using try_lock with .expect(). If
-/// try_lock fails, this means we're already in a double reply situation, and
-/// therefore we'll panic on the .expect().
+/// reply is being set (which the `set_reply` method does internally), and there
+/// should never be a point where the reply is set twice (See the panic
+/// documentation for [ButtplugFutureState]). In order to make sure we never
+/// block, we always lock using try_lock with .expect(). If try_lock fails, this
+/// means we're already in a double reply situation, and therefore we'll panic
+/// on the .expect(). Any panic from this should be considered a library error
+/// and reported as a bug.
 #[derive(Debug)]
 pub struct ButtplugFutureStateShared<T> {
+  /// The internal state of the future. When `set_reply` is run, we fill this in
+  /// with the value we want the related future to resolve with.
   state: Arc<Mutex<ButtplugFutureState<T>>>,
 }
 
@@ -183,6 +186,8 @@ impl<T> Future for ButtplugFuture<T> {
   /// Wakes up when the Output type reply has been set in the
   /// [ButtplugFutureStateShared].
   fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    // This is the only place lock_now_or_panic should be called, since we're
+    // reading the value.
     let mut waker_state = self.waker_state.lock_now_or_panic();
     if waker_state.reply.is_some() {
       let msg = waker_state.reply.take().unwrap();

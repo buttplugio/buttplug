@@ -43,17 +43,45 @@ use async_std::{
 use futures::{Future, StreamExt};
 use std::{error::Error, fmt};
 
+/// Result type used inside the client module.
+///
+/// When communicating inside the client module, we'll usually only receive
+/// errors related to the connector. Buttplug
+/// [Error][crate::core::messages::Error] messages will still be valid, because
+/// they're coming from the server.
 type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientConnectorError>;
+/// Result type used for public APIs.
+///
+/// Allows us to differentiate between an issue with the connector (as a
+/// [ButtplugClientConnectorError]) and an issue within Buttplug (as a
+/// [ButtplugError]).
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
-pub type ButtplugClientMessageResult = ButtplugClientResult<ButtplugClientOutMessage>;
-pub type ButtplugInternalClientMessageResult =
+/// Result type used for passing server responses.
+type ButtplugInternalClientMessageResult =
   ButtplugInternalClientResult<ButtplugClientOutMessage>;
-pub type ButtplugClientMessageState = ButtplugFutureState<ButtplugInternalClientMessageResult>;
-pub type ButtplugClientMessageStateShared =
+/// Future state type for returning server responses across futures.
+type ButtplugClientMessageStateShared =
   ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
-pub type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
+/// Future type that expects server responses.
+type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
 
+/// Future state for messages sent from the client that expect a server
+/// response.
+///
+/// When a message is sent from the client and expects a response from the
+/// server, we'd like to know when that response arrives, and usually we'll want
+/// to wait for it. We can do so by creating a future that will be resolved when
+/// a response is received from the server.
+///
+/// To do this, we build a [ButtplugFuture], then take its waker and pass it
+/// along with the message we send to the connector, using the
+/// [ButtplugClientMessageFuturePair] type. We can then expect the connector to
+/// get the response from the server, match it with our message (using something
+/// like the
+/// [ClientConnectorMessageSorter][crate::client::connectors::ClientConnectorMessageSorter]),
+/// and set the reply in the waker we've sent along. This will resolve the
+/// future we're waiting on and allow us to continue execution.
 pub struct ButtplugClientMessageFuturePair {
   pub msg: ButtplugClientInMessage,
   pub waker: ButtplugClientMessageStateShared,

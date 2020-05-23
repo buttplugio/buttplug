@@ -11,7 +11,6 @@ use super::{
   connectors::ButtplugClientConnectorError,
   internal::ButtplugClientDeviceEvent,
   ButtplugClientError,
-  ButtplugClientMessageResult,
   ButtplugClientResult,
 };
 use crate::{
@@ -173,7 +172,7 @@ impl ButtplugClientDevice {
   ///
   /// Performs the send/receive flow for send a device command and receiving the
   /// response from the server.
-  async fn send_message(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientMessageResult {
+  async fn send_message(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult<ButtplugClientOutMessage> {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
