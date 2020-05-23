@@ -192,18 +192,7 @@ impl ButtplugClient {
   /// - returns a [Future] that joins the client event loop future and
   /// the client application future.
   ///
-  /// # Parameters
-  ///
-  /// - `name`: Name of the client, see [ButtplugClient::client_name]
-  /// - `connector`: Connector instance for handling connection and communication
-  /// with the Buttplug Server
-  /// - `func`: Function that takes the client instance, and returns a future
-  /// for what the application will be doing with the client instance.
-  ///
-  /// # Returns
-  ///
-  /// Ok(()) if connection is successful and closure executes correctly,
-  /// Err(ButtplugClientError) if connection with the server fails.
+  /// Will return Err([ButtplugClientError]) if connection with the server fails.
   ///
   /// # Examples
   ///
@@ -299,21 +288,15 @@ impl ButtplugClient {
     }
   }
 
-  /// Status of the client connection.
-  ///
-  /// # Returns
-  /// Returns true if client is currently connected to server, false otherwise.
+  /// Returns true if client is currently connected.
   pub fn connected(&self) -> bool {
     self.connected
   }
 
   /// Disconnects from server, if connected.
   ///
-  /// # Returns
-  ///
-  /// Ok(()) if disconnection is successful, Err(ButtplugClientError) if
-  /// disconnection fails. It can be assumed that even on failure, the client
-  /// will be disconnected.
+  /// Returns Err(ButtplugClientError) if disconnection fails. It can be assumed
+  /// that even on failure, the client will be disconnected.
   pub async fn disconnect(&mut self) -> ButtplugClientResult {
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
@@ -327,11 +310,8 @@ impl ButtplugClient {
 
   /// Tells server to start scanning for devices.
   ///
-  /// # Returns
-  ///
-  /// Ok(()) if request is successful, Err([ButtplugClientError]) if request
-  /// fails due to issues with DeviceManagers on the server, disconnection,
-  /// etc.
+  /// Returns Err([ButtplugClientError]) if request fails due to issues with
+  /// DeviceManagers on the server, disconnection, etc.
   pub async fn start_scanning(&mut self) -> ButtplugClientResult {
     self
       .send_message_expect_ok(&StartScanning::default().into())
@@ -407,21 +387,15 @@ impl ButtplugClient {
     Ok(())
   }
 
-  /// Produces a future that will wait for a set of events from the
-  /// internal loop. Returns every time an event is received.
+  /// Produces a future that will wait for events from the internal loop.
   ///
-  /// This should be called whenever the client isn't doing anything
-  /// otherwise, so we can respond to unexpected updates from the server, such
-  /// as devices connections/disconnections, log messages, etc... This is
-  /// basically what event handlers in C# and JS would deal with, but we're in
-  /// Rust so this requires us to be slightly more explicit.
-  ///
-  /// # Returns
-  ///
-  /// Ok([ButtplugClientEvent]) if event is received successfully,
+  /// This should be called whenever the client isn't doing anything otherwise,
+  /// so we can respond to unexpected updates from the server, such as devices
+  /// connections/disconnections, log messages, etc... This is basically what
+  /// event handlers in C# and JS would deal with, but we're in Rust so this
+  /// requires us to be slightly more explicit. It will return
   /// Err([ButtplugClientConnectorError]) if waiting fails due to server/client
   /// disconnection.
-
   pub async fn wait_for_event(
     &mut self,
   ) -> Result<ButtplugClientEvent, ButtplugClientConnectorError> {
@@ -446,13 +420,10 @@ impl ButtplugClient {
     })
   }
 
-  /// Retreives a list of devices. This requires communication with the Event
-  /// Loop, which is why it is an asynchronous function.
+  /// Retreives a list of currently connected devices. 
   ///
-  /// # Returns
-  ///
-  /// Ok(Vec<[ButtplugClientDevice]>) if successful,
-  /// Err([ButtplugClientConnectorError]) if the server has disconnected.
+  /// As the device list is maintained in the event loop structure, retreiving
+  /// the list requires an asynchronous call to retreive the list from the task.
   pub async fn devices(
     &mut self,
   ) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {
