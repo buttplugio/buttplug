@@ -8,14 +8,9 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  connectors::{
-    ButtplugClientConnectorStateShared,
-    ButtplugClientConnector,
-  },
+  connectors::{ButtplugClientConnector, ButtplugClientConnectorStateShared},
   device::ButtplugClientDevice,
-  ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientResult,
+  ButtplugClientEvent, ButtplugClientMessageFuturePair, ButtplugClientResult,
 };
 use crate::{
   core::messages::{ButtplugClientOutMessage, DeviceList, DeviceMessageInfo},
@@ -29,13 +24,6 @@ use std::collections::HashMap;
 
 /// Enum used for communication from the client to the event loop.
 pub enum ButtplugClientMessage {
-  /// Client request to connect, via the included connector instance.
-  ///
-  /// Once connection is finished, use the bundled future to resolve.
-  Connect(
-    Box<dyn ButtplugClientConnector>,
-    ButtplugClientConnectorStateShared,
-  ),
   /// Client request to disconnect, via already sent connector instance.
   Disconnect(ButtplugClientConnectorStateShared),
   /// Given a DeviceList message, update the inner loop values and create
@@ -93,7 +81,6 @@ struct ButtplugClientEventLoop {
   /// Receiver for incoming [ButtplugClientDevice] messages.
   device_message_receiver: Receiver<ButtplugClientMessageFuturePair>,
   // TODO this should be a broadcaster
-
   /// Event sender for specific devices.
   ///
   /// We can have many instances of the same [ButtplugClientDevice]. This map
@@ -111,32 +98,41 @@ struct ButtplugClientEventLoop {
 }
 
 impl ButtplugClientEventLoop {
-
-  /// Returns a [ButtplugClientEventLoop] instance once the loop is ready to
-  /// run.
+  /// Creates a new [ButtplugClientEventLoop].
   ///
-  /// We let the internal 
+  /// Given the [ButtplugClientConnector] object, as well as the channels used
+  /// for communicating with the client, creates an event loop structure and
+  /// returns it.
   pub fn new(
     mut connector: impl ButtplugClientConnector + 'static,
     event_sender: Sender<ButtplugClientEvent>,
     client_receiver: Receiver<ButtplugClientMessage>,
-  ) -> Self {    
-            let (device_message_sender, device_message_receiver) =
-              channel::<ButtplugClientMessageFuturePair>(256);
-            Self {
-              devices: HashMap::new(),
-              device_event_senders: HashMap::new(),
-              device_message_sender,
-              device_message_receiver,
-              event_sender,
-              client_receiver,
-              connector_receiver: connector.get_event_receiver(),
-              connector: Box::new(connector),
-            }
+  ) -> Self {
+    let (device_message_sender, device_message_receiver) =
+      channel::<ButtplugClientMessageFuturePair>(256);
+    Self {
+      devices: HashMap::new(),
+      device_event_senders: HashMap::new(),
+      device_message_sender,
+      device_message_receiver,
+      event_sender,
+      client_receiver,
+      connector_receiver: connector.get_event_receiver(),
+      connector: Box::new(connector),
+    }
   }
 
+  /// Creates a [ButtplugClientDevice] from [DeviceMessageInfo].
+  ///
+  /// Given a [DeviceMessageInfo] from a [DeviceAdded] or [DeviceList] message,
+  /// creates a ButtplugClientDevice and adds it the internal device map, then
+  /// returns the instance.
   fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
     let (event_sender, event_receiver) = channel(256);
+    // If we don't have an entry in the map for the channel, add it. Otherwise,
+    // push it on the vector.
+    //
+    // TODO USE A GOD DAMN BROADCASTER THIS IS SILLY
     self
       .device_event_senders
       .entry(info.device_index)
@@ -145,6 +141,12 @@ impl ButtplugClientEventLoop {
     ButtplugClientDevice::from((info, self.device_message_sender.clone(), event_receiver))
   }
 
+  /// Parse device messages from the connector.
+  ///
+  /// Since the event loop maintains the state of all devices reported from the
+  /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
+  /// and update its map accordingly. After that, it will pass the information
+  /// on as a [ButtplugClientEvent] to the [ButtplugClient].
   async fn parse_connector_message(&mut self, msg: ButtplugClientOutMessage) {
     info!("Sending message to clients.");
     match &msg {
@@ -179,14 +181,22 @@ impl ButtplugClientEventLoop {
     }
   }
 
+  /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
   async fn send_message(&mut self, msg_fut: ButtplugClientMessageFuturePair) {
     let reply = self.connector.send(msg_fut.msg).await;
     msg_fut.waker.set_reply(reply);
   }
 
-  // TODO Why does this return bool and not something more informative?
+  /// Parses message types from the client, returning false when disconnect
+  /// happens.
+  ///
+  /// Takes different messages from the client and handles them:
+  ///
+  /// - For outbound messages to the server, sends them to the connector/server.
+  /// - For disconnections, requests connector disconnect
+  /// - For RequestDeviceList, builds a reply out of its own 
   async fn parse_client_message(&mut self, msg: ButtplugClientMessage) -> bool {
-    debug!("Parsing a client message.");
+    trace!("Parsing a client message.");
     match msg {
       ButtplugClientMessage::Message(msg_fut) => {
         debug!("Sending message through connector.");
@@ -222,15 +232,14 @@ impl ButtplugClientEventLoop {
         }
         true
       }
-      // TODO Do something other than panic if someone does
-      // something like trying to connect twice..
-      _ => panic!("Client message not handled!"),
     }
   }
 
+  /// Runs the event loop, returning once either the client or connector drops.
   pub async fn run(&mut self) {
-    // Once connected, wait for messages from either the client or the
-    // connector, and send them the direction they're supposed to go.
+    // Once connected, wait for messages from either the client, the generated
+    // client devices, or the connector, and send them the direction they're
+    // supposed to go.
     let mut client_receiver = self.client_receiver.clone();
     let mut connector_receiver = self.connector_receiver.clone();
     let mut device_receiver = self.device_message_receiver.clone();
@@ -313,7 +322,9 @@ pub async fn client_event_loop(
   client_receiver: Receiver<ButtplugClientMessage>,
 ) -> ButtplugClientResult {
   info!("Starting client event loop.");
-  ButtplugClientEventLoop::new(connector, event_sender, client_receiver).run().await;
+  ButtplugClientEventLoop::new(connector, event_sender, client_receiver)
+    .run()
+    .await;
   info!("Exiting client event loop");
   Ok(())
 }
