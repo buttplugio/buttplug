@@ -35,7 +35,7 @@ impl Default for Ok {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugClientOutMessage, ButtplugMessage, Ok};
+  use crate::core::messages::{ButtplugClientOutMessage, Ok};
 
   const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 
@@ -44,14 +44,6 @@ mod test {
     let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
     let js = serde_json::to_string(&ok).unwrap();
     assert_eq!(OK_STR, js);
-  }
-
-  #[test]
-  fn test_protocol_json() {
-    const PROTOCOL_STR: &str = "[{\"Ok\":{\"Id\":0}}]";
-    let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
-    let js = ok.as_protocol_json();
-    assert_eq!(PROTOCOL_STR, js);
   }
 
   #[test]

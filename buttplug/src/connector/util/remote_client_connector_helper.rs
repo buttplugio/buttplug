@@ -13,7 +13,7 @@ use crate::{
     ButtplugInternalClientMessageResult},
     core::{
   errors::{ButtplugError, ButtplugMessageError},
-  messages::{create_message_validator, ButtplugClientInMessage, ButtplugClientOutMessage},
+  messages::{ButtplugClientInMessage, ButtplugClientOutMessage, serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}},
     },
 };
 use async_std::{
@@ -21,13 +21,14 @@ use async_std::{
   sync::{channel, Receiver, Sender},
 };
 use futures::future::Future;
+use std::marker::PhantomData;
 
 /// Enum of messages we can receive from a remote client connector.
 pub enum ButtplugRemoteClientConnectorMessage {
   /// Send when connection is established.
   Connected,
   /// Text version of message we received from remote server.
-  Text(String),
+  Message(ButtplugSerializedMessage),
   /// Error received from remote server.
   Error(String),
   /// Connector (or remote server) itself closed the connection.
@@ -40,23 +41,20 @@ enum StreamValue {
   Outgoing(ButtplugClientMessageFuturePair),
 }
 
-async fn remote_connector_helper_loop(
+async fn remote_connector_helper_loop<T>(
   // Takes messages from the client
   mut client_recv: Receiver<ButtplugClientMessageFuturePair>,
   // Sends messages not matched in the sorter to the client.
   client_event_sender: Sender<ButtplugClientOutMessage>,
   // Sends sorter processed messages to the connector.
-  connector_input_sender: Sender<ButtplugClientInMessage>,
+  connector_input_sender: Sender<ButtplugSerializedMessage>,
   // Takes data coming in from the connector.
   mut connector_output_recv: Receiver<ButtplugRemoteClientConnectorMessage>,
-) {
+) where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
   // Message sorter that receives messages that come in from the client, then is
   // used to match responses as they return from the server.
   let mut sorter = ClientConnectorMessageSorter::default();
-
-  // JSON validator for checking messages that come in from the server.
-  let message_validator = create_message_validator();
-
+  let mut serializer = T::default();
   loop {
     // We use two Options instead of an enum because we may never
     // get anything.
@@ -82,11 +80,9 @@ async fn remote_connector_helper_loop(
       // an event.
       StreamValue::Incoming(remote_msg) => {
         match remote_msg {
-          ButtplugRemoteClientConnectorMessage::Text(t) => {
-            match message_validator.validate(&t.clone()) {
-              Ok(_) => {
-                let array: Vec<ButtplugClientOutMessage> =
-                  serde_json::from_str(&t.clone()).unwrap();
+          ButtplugRemoteClientConnectorMessage::Message(serialized_msg) => {
+            match serializer.deserialize(serialized_msg) {
+              Ok(array) => {
                 for smsg in array {
                   if !sorter.maybe_resolve_message(&smsg).await {
                     debug!("Sending event!");
@@ -126,7 +122,8 @@ async fn remote_connector_helper_loop(
         // Create future sets our message ID, so make sure this
         // happens before we send out the message.
         sorter.register_future(buttplug_fut_msg);
-        connector_input_sender.send(buttplug_fut_msg.msg.clone()).await;
+        let serialized_msg = serializer.serialize(vec!(buttplug_fut_msg.msg.clone()));
+        connector_input_sender.send(serialized_msg).await;
       }
     }
   }
@@ -178,17 +175,20 @@ async fn remote_connector_helper_loop(
 /// into the helper.
 #[cfg(feature = "serialize_json")]
 #[derive(Default)]
-pub struct ButtplugRemoteClientConnectorHelper {
+pub struct ButtplugRemoteClientConnectorHelper<T> {
   internal_send: Option<Sender<ButtplugClientMessageFuturePair>>,
+  unused: PhantomData<T>,
 }
 
 #[cfg(feature = "serialize_json")]
-unsafe impl Send for ButtplugRemoteClientConnectorHelper {}
+unsafe impl<T> Send for ButtplugRemoteClientConnectorHelper<T> {}
 #[cfg(feature = "serialize_json")]
-unsafe impl Sync for ButtplugRemoteClientConnectorHelper {}
+unsafe impl<T> Sync for ButtplugRemoteClientConnectorHelper<T> {}
 
 #[cfg(feature = "serialize_json")]
-impl ButtplugRemoteClientConnectorHelper {
+impl<T> ButtplugRemoteClientConnectorHelper<T>
+  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static 
+{
   /// Returns the helper event loop future and corresponding channels.
   ///
   /// After the connector that owns this helper is actually connected, it should
@@ -206,14 +206,15 @@ impl ButtplugRemoteClientConnectorHelper {
     &mut self,
     // Sends messages not matched in the sorter to the client.
     client_event_sender: Sender<ButtplugClientOutMessage>,
-  ) -> (impl Future, Receiver<ButtplugClientInMessage>, Sender<ButtplugRemoteClientConnectorMessage>) {
+  ) -> (impl Future, Receiver<ButtplugSerializedMessage>, Sender<ButtplugRemoteClientConnectorMessage>) 
+  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
     // TODO Should have this check for self.internal_send and return a result,
     // as we should not allow this to be called twice.
     let (client_send, client_recv) = channel(256);
     self.internal_send = Some(client_send);
     let (connector_input_sender, connector_input_recv) = channel(256);
     let (connector_output_sender, connector_output_recv) = channel(256);
-    let fut = remote_connector_helper_loop(client_recv, client_event_sender, connector_input_sender, connector_output_recv);
+    let fut = remote_connector_helper_loop::<T>(client_recv, client_event_sender, connector_input_sender, connector_output_recv);
     (fut, connector_input_recv, connector_output_sender)
   }
 

@@ -12,6 +12,7 @@
 
 use serde_json::Value;
 use valico::json_schema;
+use crate::core::errors::{ButtplugError, ButtplugMessageError};
 
 pub struct JSONValidator {
   /// Valico's scope object, used for holding the schema.
@@ -48,5 +49,13 @@ impl JSONValidator {
     } else {
       Err(state)
     }
+  }
+}
+
+impl From<json_schema::ValidationState> for ButtplugError {
+  fn from(validation_error: json_schema::ValidationState) -> ButtplugError {
+    let mut validation_error_msg = "JSON Validation Errors:".to_owned();
+    validation_error.errors.iter().for_each(|err| validation_error_msg.push_str(&err.to_string()));
+    ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&validation_error_msg))
   }
 }

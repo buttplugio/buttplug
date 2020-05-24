@@ -10,7 +10,7 @@
 use crate::{
   connector::{ButtplugClientConnector, ButtplugClientConnectorError, ButtplugClientConnectorResult, ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage},
   client::ButtplugInternalClientMessageResult,
-  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, ButtplugMessage},
+  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}},
 };
 use async_std::{
   sync::{channel, Receiver},
@@ -23,9 +23,10 @@ use async_tungstenite::{
 use futures_util::{SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
-pub struct ButtplugWebsocketClientConnector {
+pub struct ButtplugWebsocketClientConnector<T> 
+  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
   /// Remote connector helper, for setting message indexes and resolving futures
-  helper: ButtplugRemoteClientConnectorHelper,
+  helper: ButtplugRemoteClientConnectorHelper<T>,
   /// Receiver of messages from the server, for sending to the client.
   recv: Option<Receiver<ButtplugClientOutMessage>>,
   /// Address of the server we'll connect to.
@@ -37,7 +38,8 @@ pub struct ButtplugWebsocketClientConnector {
   bypass_cert_verify: bool,
 }
 
-impl ButtplugWebsocketClientConnector {
+impl<T> ButtplugWebsocketClientConnector<T>
+  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
   /// Creates a new connector for "ws://" addresses
   ///
   /// Returns a websocket connector for connecting over insecure websockets to a
@@ -72,7 +74,8 @@ impl ButtplugWebsocketClientConnector {
 }
 
 #[async_trait]
-impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
+impl<T> ButtplugClientConnector for ButtplugWebsocketClientConnector<T>
+  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage>  + 'static {
   async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
     let (client_sender, client_receiver) = channel(256);
     self.recv = Some(client_receiver);
@@ -125,11 +128,13 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
         // TODO Do we want to store/join these tasks anywhere?
         task::spawn(async move {
           while let Some(msg) = connector_input_recv.recv().await {
-            let json = msg.as_protocol_json();
-            trace!("Websocket sending: {}", json);
+            let out_msg = match msg {
+              ButtplugSerializedMessage::Text(text) => Message::Text(text),
+              ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),  
+            };
             // TODO see what happens when we try to send to a remote that's closed connection.
             writer
-              .send(Message::text(json))
+              .send(out_msg)
               .await
               .expect("This should never fail?");
           }
@@ -140,7 +145,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
             match response.unwrap() {
               Message::Text(t) => {
                 connector_output_sender
-                  .send(ButtplugRemoteClientConnectorMessage::Text(t.to_string()))
+                  .send(ButtplugRemoteClientConnectorMessage::Message(ButtplugSerializedMessage::Text(t.to_string())))
                   .await;
               }
               // TODO Do we need to handle anything else?
@@ -161,7 +166,7 @@ impl ButtplugClientConnector for ButtplugWebsocketClientConnector {
   }
 
   async fn disconnect(&mut self) -> ButtplugClientConnectorResult {
-    self.helper.close().await;
+    // self.helper.close().await;
     Ok(())
   }
 

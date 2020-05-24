@@ -10,7 +10,6 @@
 pub mod comm_managers;
 pub mod device_manager;
 mod logger;
-pub mod wrapper;
 
 use crate::{
   core::{
@@ -230,7 +229,7 @@ impl ButtplugServer {
         return Err(ButtplugPingError::new("Server has pinged out.").into());
       }
     }
-    if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
+    let ret_msg = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
       if !self.connected() {
@@ -263,7 +262,12 @@ impl ButtplugServer {
             .into(),
         ),
       }
-    }
+    };
+    // Set the Id on the way out.
+    ret_msg.and_then(|mut m| {
+      m.set_id(msg.get_id());
+      Ok(m)
+    })
   }
 
   fn perform_handshake(

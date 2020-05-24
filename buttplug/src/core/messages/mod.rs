@@ -14,6 +14,7 @@
 //! also enum types that are used to classify messages into categories, for
 //! instance, messages that only should be sent by a client or server.
 
+pub mod serializer;
 mod device_added;
 mod device_list;
 mod device_message_info;
@@ -82,20 +83,12 @@ pub use unsubscribe_cmd::UnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
-use crate::{core::errors::ButtplugMessageError, util::json::JSONValidator};
-#[cfg(feature = "serialize_json")]
-use serde::{Deserialize, Serialize};
+use crate::{core::errors::ButtplugMessageError};
 #[cfg(feature = "serialize_json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
+#[cfg(feature = "serialize_json")]
+use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
-
-static MESSAGE_JSON_SCHEMA: &str =
-  include_str!("../../../dependencies/buttplug-schema/schema/buttplug-schema.json");
-
-/// Creates a [Valico][valico] validator using the built in buttplug message schema.
-pub fn create_message_validator() -> JSONValidator {
-  JSONValidator::new(MESSAGE_JSON_SCHEMA)
-}
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
@@ -120,14 +113,6 @@ pub trait ButtplugMessage: Send + Sync + Clone {
   fn get_id(&self) -> u32;
   /// Sets the id number of the message.
   fn set_id(&mut self, id: u32);
-  /// Returns the message as a string in Buttplug JSON Protocol format.
-  #[cfg(feature = "serialize_json")]
-  fn as_protocol_json(self) -> String
-  where
-    Self: ButtplugMessage + Serialize + Deserialize<'static>,
-  {
-    serde_json::to_string(&[&self]).unwrap()
-  }
 }
 
 /// Adds device index handling to the [ButtplugMessage] trait.

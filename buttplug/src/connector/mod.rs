@@ -96,6 +96,7 @@ pub trait ButtplugClientConnector: Send + Sync {
   ///
   /// Will panic if called twice.
   // TODO Should probably just return a result that has an error, versus panicing? This is recoverable.
+  // TODO Return receiver on connect?
   fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage>;
 }
 
