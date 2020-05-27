@@ -21,9 +21,9 @@ use crate::{
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion,
       ButtplugDeviceMessage,
-      ButtplugInMessage,
+      ButtplugClientMessage,
       ButtplugMessage,
-      ButtplugOutMessage,
+      ButtplugServerMessage,
       DeviceAdded,
       DeviceList,
       DeviceMessageInfo,
@@ -51,7 +51,7 @@ enum DeviceEvent {
 async fn wait_for_manager_events(
   mut device_comm_receiver: Receiver<DeviceCommunicationEvent>,
   ping_receiver: Option<Receiver<bool>>,
-  sender: Sender<ButtplugOutMessage>,
+  sender: Sender<ButtplugServerMessage>,
   device_map: Arc<RwLock<HashMap<u32, ButtplugDevice>>>,
 ) {
   let mut device_index: u32 = 0;
@@ -169,7 +169,7 @@ unsafe impl Sync for DeviceManager {
 
 impl DeviceManager {
   pub fn new(
-    event_sender: Sender<ButtplugOutMessage>,
+    event_sender: Sender<ButtplugServerMessage>,
     ping_receiver: Option<Receiver<bool>>,
   ) -> Self {
     let (sender, receiver) = channel(256);
@@ -233,7 +233,7 @@ impl DeviceManager {
   async fn parse_device_message(
     &self,
     device_msg: ButtplugDeviceCommandMessageUnion,
-  ) -> Result<ButtplugOutMessage, ButtplugError> {
+  ) -> Result<ButtplugServerMessage, ButtplugError> {
     let mut dev;
     match self
       .devices
@@ -266,7 +266,7 @@ impl DeviceManager {
   async fn parse_device_manager_message(
     &mut self,
     manager_msg: ButtplugDeviceManagerMessageUnion,
-  ) -> Result<ButtplugOutMessage, ButtplugError> {
+  ) -> Result<ButtplugServerMessage, ButtplugError> {
     match manager_msg {
       ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
         let devices = self
@@ -301,8 +301,8 @@ impl DeviceManager {
 
   pub async fn parse_message(
     &mut self,
-    msg: ButtplugInMessage,
-  ) -> Result<ButtplugOutMessage, ButtplugError> {
+    msg: ButtplugClientMessage,
+  ) -> Result<ButtplugServerMessage, ButtplugError> {
     // If this is a device command message, just route it directly to the
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {

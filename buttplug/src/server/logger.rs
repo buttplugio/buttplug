@@ -1,14 +1,14 @@
-use crate::core::messages::{self, ButtplugOutMessage};
+use crate::core::messages::{self, ButtplugServerMessage};
 use async_std::{sync::Sender, task};
 use log::{Level, Log, Metadata, Record};
 
 pub struct ButtplugLogHandler {
   level: Level,
-  message_sender: Sender<ButtplugOutMessage>,
+  message_sender: Sender<ButtplugServerMessage>,
 }
 
 impl ButtplugLogHandler {
-  pub fn new(level: &messages::LogLevel, message_sender: Sender<ButtplugOutMessage>) -> Self {
+  pub fn new(level: &messages::LogLevel, message_sender: Sender<ButtplugServerMessage>) -> Self {
     Self {
       level: level.clone().into(),
       message_sender,

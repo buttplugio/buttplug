@@ -78,23 +78,23 @@ impl From<ButtplugError> for Error {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugClientOutMessage, Error, ErrorCode};
+  use crate::core::messages::{ButtplugCurrentSpecServerMessage, Error, ErrorCode};
 
   const ERROR_STR: &str = "{\"Error\":{\"Id\":0,\"ErrorCode\":1,\"ErrorMessage\":\"Test Error\"}}";
 
   #[test]
   fn test_error_serialize() {
     let error =
-      ButtplugClientOutMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error"));
+      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error"));
     let js = serde_json::to_string(&error).unwrap();
     assert_eq!(ERROR_STR, js);
   }
 
   #[test]
   fn test_error_deserialize() {
-    let union: ButtplugClientOutMessage = serde_json::from_str(&ERROR_STR).unwrap();
+    let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&ERROR_STR).unwrap();
     assert_eq!(
-      ButtplugClientOutMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error")),
+      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error")),
       union
     );
   }

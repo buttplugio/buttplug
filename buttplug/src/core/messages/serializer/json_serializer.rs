@@ -4,18 +4,18 @@ use crate::{
     errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
     messages::{
       self,
-      ButtplugInMessage,
+      ButtplugClientMessage,
       ButtplugMessage,
       ButtplugMessageSpecVersion,
-      ButtplugOutMessage,
-      ButtplugSpecV0InMessage,
-      ButtplugSpecV0OutMessage,
-      ButtplugSpecV1InMessage,
-      ButtplugSpecV1OutMessage,
-      ButtplugSpecV2InMessage,
-      ButtplugSpecV2OutMessage,
-      ButtplugClientOutMessage,
-      ButtplugClientInMessage,
+      ButtplugServerMessage,
+      ButtplugSpecV0ClientMessage,
+      ButtplugSpecV0ServerMessage,
+      ButtplugSpecV1ClientMessage,
+      ButtplugSpecV1ServerMessage,
+      ButtplugSpecV2ClientMessage,
+      ButtplugSpecV2ServerMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugCurrentSpecClientMessage,
     },
   },
   util::json::JSONValidator,
@@ -68,31 +68,31 @@ where
 
 fn serialize_to_version(
   version: ButtplugMessageSpecVersion,
-  msgs: Vec<ButtplugOutMessage>,
+  msgs: Vec<ButtplugServerMessage>,
 ) -> ButtplugSerializedMessage {
   ButtplugSerializedMessage::Text(
   match version {
     ButtplugMessageSpecVersion::Version0 => {
-      let msg_vec: Vec<ButtplugSpecV0OutMessage> = 
-        msgs.iter().cloned().map(|msg| match ButtplugSpecV0OutMessage::try_from(msg) {
+      let msg_vec: Vec<ButtplugSpecV0ServerMessage> = 
+        msgs.iter().cloned().map(|msg| match ButtplugSpecV0ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
-          Err(err) => ButtplugSpecV0OutMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+          Err(err) => ButtplugSpecV0ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
         }).collect();
       vec_to_protocol_json(msg_vec)
       },
 ButtplugMessageSpecVersion::Version1 => {
-      let msg_vec: Vec<ButtplugSpecV1OutMessage> = 
-        msgs.iter().cloned().map(|msg| match ButtplugSpecV1OutMessage::try_from(msg) {
+      let msg_vec: Vec<ButtplugSpecV1ServerMessage> = 
+        msgs.iter().cloned().map(|msg| match ButtplugSpecV1ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
-          Err(err) => ButtplugSpecV1OutMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+          Err(err) => ButtplugSpecV1ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
         }).collect();
       vec_to_protocol_json(msg_vec)
       },
       ButtplugMessageSpecVersion::Version2 => {
-        let msg_vec: Vec<ButtplugSpecV2OutMessage> = 
-          msgs.iter().cloned().map(|msg| match ButtplugSpecV2OutMessage::try_from(msg) {
+        let msg_vec: Vec<ButtplugSpecV2ServerMessage> = 
+          msgs.iter().cloned().map(|msg| match ButtplugSpecV2ServerMessage::try_from(msg) {
             Ok(msgv0) => msgv0,
-            Err(err) => ButtplugSpecV2OutMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+            Err(err) => ButtplugSpecV2ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
           }).collect();
         vec_to_protocol_json(msg_vec)
         },
@@ -103,10 +103,10 @@ unsafe impl Sync for ButtplugServerJSONSerializer {}
 unsafe impl Send for ButtplugServerJSONSerializer {}
 
 impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
-  type Inbound = ButtplugInMessage;
-  type Outbound = ButtplugOutMessage;
+  type Inbound = ButtplugClientMessage;
+  type Outbound = ButtplugServerMessage;
 
-  fn deserialize(&mut self, serialized_msg: ButtplugSerializedMessage) -> Result<Vec<ButtplugInMessage>, ButtplugError> {
+  fn deserialize(&mut self, serialized_msg: ButtplugSerializedMessage) -> Result<Vec<ButtplugClientMessage>, ButtplugError> {
     let msg  = if let ButtplugSerializedMessage::Text(text_msg) = serialized_msg {
       text_msg
     } else {
@@ -119,15 +119,15 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     if let Some(version) = self.message_version {
       Ok(match version {
         ButtplugMessageSpecVersion::Version0 => 
-          deserialize_to_message::<ButtplugSpecV0InMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
+          deserialize_to_message::<ButtplugSpecV0ClientMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
         ButtplugMessageSpecVersion::Version1 => 
-          deserialize_to_message::<ButtplugSpecV1InMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
+          deserialize_to_message::<ButtplugSpecV1ClientMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
         ButtplugMessageSpecVersion::Version2 => 
-          deserialize_to_message::<ButtplugSpecV2InMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
+          deserialize_to_message::<ButtplugSpecV2ClientMessage>(&self.validator, msg)?.iter().cloned().map(|m| m.into()).collect(),
       })
     } else {
-      let msg_union = deserialize_to_message::<ButtplugSpecV2InMessage>(&self.validator, msg)?;
-      if let ButtplugSpecV2InMessage::RequestServerInfo(rsi) = &msg_union[0] {
+      let msg_union = deserialize_to_message::<ButtplugSpecV2ClientMessage>(&self.validator, msg)?;
+      if let ButtplugSpecV2ClientMessage::RequestServerInfo(rsi) = &msg_union[0] {
         info!(
           "Setting JSON Wrapper message version to {}",
           rsi.message_version
@@ -144,14 +144,14 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     }
   }
 
-  fn serialize(&mut self, msgs: Vec<ButtplugOutMessage>) -> ButtplugSerializedMessage {
+  fn serialize(&mut self, msgs: Vec<ButtplugServerMessage>) -> ButtplugSerializedMessage {
     if let Some(version) = self.message_version {
       serialize_to_version(version, msgs)
     } else {
       // In the rare event that there is a problem with the
       // RequestServerInfo message (so we can't set up our known spec
       // version), just encode to the latest and return.
-      if let ButtplugOutMessage::Error(_) = &msgs[0] {
+      if let ButtplugServerMessage::Error(_) = &msgs[0] {
         serialize_to_version(
           ButtplugMessageSpecVersion::Version2,
           msgs,
@@ -159,7 +159,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
       } else {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
-        ButtplugSerializedMessage::Text(msg_to_protocol_json(ButtplugOutMessage::Error(
+        ButtplugSerializedMessage::Text(msg_to_protocol_json(ButtplugServerMessage::Error(
           ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::new(
             "Got outgoing message before version was set.",
           ))
@@ -186,10 +186,10 @@ unsafe impl Sync for ButtplugClientJSONSerializer {}
 unsafe impl Send for ButtplugClientJSONSerializer {}
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
-  type Inbound = ButtplugClientOutMessage;
-  type Outbound = ButtplugClientInMessage;
+  type Inbound = ButtplugCurrentSpecServerMessage;
+  type Outbound = ButtplugCurrentSpecClientMessage;
 
-  fn deserialize(&mut self, msg: ButtplugSerializedMessage) -> Result<Vec<ButtplugClientOutMessage>, ButtplugError> {
+  fn deserialize(&mut self, msg: ButtplugSerializedMessage) -> Result<Vec<ButtplugCurrentSpecServerMessage>, ButtplugError> {
     if let ButtplugSerializedMessage::Text(text_msg) = msg {
       deserialize_to_message::<Self::Inbound>(&self.validator, text_msg)
     } else {
@@ -197,7 +197,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
     }
   }
 
-  fn serialize(&mut self, msg: Vec<ButtplugClientInMessage>) -> ButtplugSerializedMessage {
+  fn serialize(&mut self, msg: Vec<ButtplugCurrentSpecClientMessage>) -> ButtplugSerializedMessage {
     ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
   }
 }

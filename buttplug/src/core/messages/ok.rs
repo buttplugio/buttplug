@@ -35,20 +35,20 @@ impl Default for Ok {
 #[cfg(feature = "serialize_json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugClientOutMessage, Ok};
+  use crate::core::messages::{ButtplugCurrentSpecServerMessage, Ok};
 
   const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 
   #[test]
   fn test_ok_serialize() {
-    let ok = ButtplugClientOutMessage::Ok(Ok::new(0));
+    let ok = ButtplugCurrentSpecServerMessage::Ok(Ok::new(0));
     let js = serde_json::to_string(&ok).unwrap();
     assert_eq!(OK_STR, js);
   }
 
   #[test]
   fn test_ok_deserialize() {
-    let union: ButtplugClientOutMessage = serde_json::from_str(&OK_STR).unwrap();
-    assert_eq!(ButtplugClientOutMessage::Ok(Ok::new(0)), union);
+    let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&OK_STR).unwrap();
+    assert_eq!(ButtplugCurrentSpecServerMessage::Ok(Ok::new(0)), union);
   }
 }

@@ -157,7 +157,7 @@ pub enum ButtplugDeviceMessageType {
 /// [ButtplugServer][crate::server::ButtplugServer].
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))] // TODO Remove this after testing!
-pub enum ButtplugInMessage {
+pub enum ButtplugClientMessage {
   Ping(Ping),
   RequestLog(RequestLog),
   // Handshake messages
@@ -196,7 +196,7 @@ pub enum ButtplugInMessage {
 /// [ButtplugClient][crate::client::ButtplugClient].
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))] // TODO Remove this after testing!
-pub enum ButtplugOutMessage {
+pub enum ButtplugServerMessage {
   // Status messages
   Ok(Ok),
   Error(Error),
@@ -217,16 +217,16 @@ pub enum ButtplugOutMessage {
 }
 
 /// Type alias for the latest version of client-to-server messages.
-pub type ButtplugClientInMessage = ButtplugSpecV2InMessage;
+pub type ButtplugCurrentSpecClientMessage = ButtplugSpecV2ClientMessage;
 /// Type alias for the latest version of server-to-client messages.
-pub type ButtplugClientOutMessage = ButtplugSpecV2OutMessage;
+pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugInMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub enum ButtplugSpecV2InMessage {
+pub enum ButtplugSpecV2ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
@@ -254,10 +254,10 @@ pub enum ButtplugSpecV2InMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugOutMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugServerMessage,
 )]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub enum ButtplugSpecV2OutMessage {
+pub enum ButtplugSpecV2ServerMessage {
   // Status messages
   Ok(Ok),
   Error(Error),
@@ -277,9 +277,9 @@ pub enum ButtplugSpecV2OutMessage {
 }
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugInMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugClientMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV1InMessage {
+pub(crate) enum ButtplugSpecV1ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
@@ -305,7 +305,7 @@ pub(crate) enum ButtplugSpecV1InMessage {
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(Debug, Clone, PartialEq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV1OutMessage {
+pub(crate) enum ButtplugSpecV1ServerMessage {
   // Status messages
   Ok(Ok),
   Error(Error),
@@ -323,31 +323,31 @@ pub(crate) enum ButtplugSpecV1OutMessage {
 // calls wouldn't work correctly when used as a device. If the actual
 // implementation is here, things work fine. Luckily it won't ever be changed
 // much.
-impl TryFrom<ButtplugOutMessage> for ButtplugSpecV1OutMessage {
+impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
   type Error = ButtplugMessageError;
-  fn try_from(msg: ButtplugOutMessage) -> Result<Self, ButtplugMessageError> {
+  fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
-      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV1OutMessage::Ok(msg)),
-      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV1OutMessage::Error(msg)),
-      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV1OutMessage::Log(msg)),
-      ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV1OutMessage::ServerInfo(msg.into())),
-      ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV1OutMessage::DeviceList(msg.into())),
-      ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV1OutMessage::DeviceAdded(msg.into())),
-      ButtplugOutMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV1OutMessage::DeviceRemoved(msg)),
-      ButtplugOutMessage::ScanningFinished(msg) => {
-        Ok(ButtplugSpecV1OutMessage::ScanningFinished(msg))
+      ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV1ServerMessage::Ok(msg)),
+      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV1ServerMessage::Error(msg)),
+      ButtplugServerMessage::Log(msg) => Ok(ButtplugSpecV1ServerMessage::Log(msg)),
+      ButtplugServerMessage::ServerInfo(msg) => Ok(ButtplugSpecV1ServerMessage::ServerInfo(msg.into())),
+      ButtplugServerMessage::DeviceList(msg) => Ok(ButtplugSpecV1ServerMessage::DeviceList(msg.into())),
+      ButtplugServerMessage::DeviceAdded(msg) => Ok(ButtplugSpecV1ServerMessage::DeviceAdded(msg.into())),
+      ButtplugServerMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV1ServerMessage::DeviceRemoved(msg)),
+      ButtplugServerMessage::ScanningFinished(msg) => {
+        Ok(ButtplugSpecV1ServerMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::new(
-        "ButtplugOutMessage cannot be converted to #name",
+        "ButtplugServerMessage cannot be converted to #name",
       )),
     }
   }
 }
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugInMessage)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, TryFromButtplugClientMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV0InMessage {
+pub(crate) enum ButtplugSpecV0ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
@@ -370,7 +370,7 @@ pub(crate) enum ButtplugSpecV0InMessage {
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(Debug, Clone, PartialEq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV0OutMessage {
+pub(crate) enum ButtplugSpecV0ServerMessage {
   // Status messages
   Ok(Ok),
   Error(Error),
@@ -388,22 +388,22 @@ pub(crate) enum ButtplugSpecV0OutMessage {
 // calls wouldn't work correctly when used as a device. If the actual
 // implementation is here, things work fine. Luckily it won't ever be changed
 // much.
-impl TryFrom<ButtplugOutMessage> for ButtplugSpecV0OutMessage {
+impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
   type Error = ButtplugMessageError;
-  fn try_from(msg: ButtplugOutMessage) -> Result<Self, ButtplugMessageError> {
+  fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
-      ButtplugOutMessage::Ok(msg) => Ok(ButtplugSpecV0OutMessage::Ok(msg)),
-      ButtplugOutMessage::Error(msg) => Ok(ButtplugSpecV0OutMessage::Error(msg)),
-      ButtplugOutMessage::Log(msg) => Ok(ButtplugSpecV0OutMessage::Log(msg)),
-      ButtplugOutMessage::ServerInfo(msg) => Ok(ButtplugSpecV0OutMessage::ServerInfo(msg.into())),
-      ButtplugOutMessage::DeviceList(msg) => Ok(ButtplugSpecV0OutMessage::DeviceList(msg.into())),
-      ButtplugOutMessage::DeviceAdded(msg) => Ok(ButtplugSpecV0OutMessage::DeviceAdded(msg.into())),
-      ButtplugOutMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV0OutMessage::DeviceRemoved(msg)),
-      ButtplugOutMessage::ScanningFinished(msg) => {
-        Ok(ButtplugSpecV0OutMessage::ScanningFinished(msg))
+      ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV0ServerMessage::Ok(msg)),
+      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV0ServerMessage::Error(msg)),
+      ButtplugServerMessage::Log(msg) => Ok(ButtplugSpecV0ServerMessage::Log(msg)),
+      ButtplugServerMessage::ServerInfo(msg) => Ok(ButtplugSpecV0ServerMessage::ServerInfo(msg.into())),
+      ButtplugServerMessage::DeviceList(msg) => Ok(ButtplugSpecV0ServerMessage::DeviceList(msg.into())),
+      ButtplugServerMessage::DeviceAdded(msg) => Ok(ButtplugSpecV0ServerMessage::DeviceAdded(msg.into())),
+      ButtplugServerMessage::DeviceRemoved(msg) => Ok(ButtplugSpecV0ServerMessage::DeviceRemoved(msg)),
+      ButtplugServerMessage::ScanningFinished(msg) => {
+        Ok(ButtplugSpecV0ServerMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::new(
-        "ButtplugOutMessage cannot be converted to ButtplugSepcV0OutMessage",
+        "ButtplugServerMessage cannot be converted to ButtplugSepcV0OutMessage",
       )),
     }
   }
@@ -412,7 +412,7 @@ impl TryFrom<ButtplugOutMessage> for ButtplugSpecV0OutMessage {
 /// [DeviceManager][crate::server::device_manager::DeviceManager] of a
 /// [ButtplugServer](crate::server::ButtplugServer)
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugInMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, FromSpecificButtplugMessage, TryFromButtplugClientMessage,
 )]
 pub enum ButtplugDeviceManagerMessageUnion {
   RequestDeviceList(RequestDeviceList),
@@ -428,7 +428,7 @@ pub enum ButtplugDeviceManagerMessageUnion {
   PartialEq,
   ButtplugDeviceMessage,
   FromSpecificButtplugMessage,
-  TryFromButtplugInMessage,
+  TryFromButtplugClientMessage,
 )]
 pub enum ButtplugDeviceCommandMessageUnion {
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
