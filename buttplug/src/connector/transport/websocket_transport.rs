@@ -8,12 +8,11 @@
 //! Handling of websockets using async-tungstenite
 
 use crate::{
-  connector::{ButtplugClientConnector, ButtplugClientConnectorError, ButtplugClientConnectorResult, ButtplugRemoteClientConnectorHelper, ButtplugRemoteClientConnectorMessage},
-  client::ButtplugInternalClientMessageResult,
-  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage, serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage}},
+  core::messages::serializer::ButtplugSerializedMessage,
+  connector::{ButtplugConnectorError, ButtplugConnectorResult, ButtplugTransportMessage, ButtplugConnectorTransport},
 };
 use async_std::{
-  sync::{channel, Receiver},
+  sync::{channel, Receiver, Sender},
   task,
 };
 use async_trait::async_trait;
@@ -23,12 +22,7 @@ use async_tungstenite::{
 use futures_util::{SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
-pub struct ButtplugWebsocketClientConnector<T> 
-  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
-  /// Remote connector helper, for setting message indexes and resolving futures
-  helper: ButtplugRemoteClientConnectorHelper<T>,
-  /// Receiver of messages from the server, for sending to the client.
-  recv: Option<Receiver<ButtplugClientOutMessage>>,
+pub struct ButtplugWebsocketClientTransport {
   /// Address of the server we'll connect to.
   address: String,
   /// If true, use a TLS wrapper on our connection.
@@ -38,8 +32,7 @@ pub struct ButtplugWebsocketClientConnector<T>
   bypass_cert_verify: bool,
 }
 
-impl<T> ButtplugWebsocketClientConnector<T>
-  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage> + 'static {
+impl ButtplugWebsocketClientTransport {
   /// Creates a new connector for "ws://" addresses
   ///
   /// Returns a websocket connector for connecting over insecure websockets to a
@@ -47,8 +40,6 @@ impl<T> ButtplugWebsocketClientConnector<T>
   /// "ws://127.0.0.1:12345"
   pub fn new_insecure_connector(address: &str) -> Self {
     Self {
-      helper: ButtplugRemoteClientConnectorHelper::default(),
-      recv: None,
       should_use_tls: false,
       address: address.to_owned(),
       bypass_cert_verify: false,
@@ -64,8 +55,6 @@ impl<T> ButtplugWebsocketClientConnector<T>
   /// self-signed certs).
   pub fn new_secure_connector(address: &str, bypass_cert_verify: bool) -> Self {
     Self {
-      helper: ButtplugRemoteClientConnectorHelper::default(),
-      recv: None,
       should_use_tls: true,
       address: address.to_owned(),
       bypass_cert_verify,
@@ -74,13 +63,10 @@ impl<T> ButtplugWebsocketClientConnector<T>
 }
 
 #[async_trait]
-impl<T> ButtplugClientConnector for ButtplugWebsocketClientConnector<T>
-  where T: ButtplugMessageSerializer<Inbound = ButtplugClientOutMessage, Outbound = ButtplugClientInMessage>  + 'static {
-  async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
-    let (client_sender, client_receiver) = channel(256);
-    self.recv = Some(client_receiver);
-    let (read_future, connector_input_recv, connector_output_sender) =
-      self.helper.get_event_loop_future(client_sender);
+impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
+  async fn connect(&mut self) -> Result<(Sender<ButtplugSerializedMessage>, Receiver<ButtplugTransportMessage>), ButtplugConnectorError> {
+    let (request_sender, request_receiver) = channel(256);
+    let (response_sender, response_receiver) = channel(256);
 
     // If we're supposed to be a secure connection, generate a TLS connector
     // based on our certificate verfication needs. Otherwise, just pass None in
@@ -127,7 +113,7 @@ impl<T> ButtplugClientConnector for ButtplugWebsocketClientConnector<T>
         let (mut writer, mut reader) = stream.split();
         // TODO Do we want to store/join these tasks anywhere?
         task::spawn(async move {
-          while let Some(msg) = connector_input_recv.recv().await {
+          while let Some(msg) = request_receiver.recv().await {
             let out_msg = match msg {
               ButtplugSerializedMessage::Text(text) => Message::Text(text),
               ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),  
@@ -144,38 +130,29 @@ impl<T> ButtplugClientConnector for ButtplugWebsocketClientConnector<T>
             trace!("Websocket receiving: {:?}", response);
             match response.unwrap() {
               Message::Text(t) => {
-                connector_output_sender
-                  .send(ButtplugRemoteClientConnectorMessage::Message(ButtplugSerializedMessage::Text(t.to_string())))
+                response_sender
+                  .send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(t.to_string())))
                   .await;
               }
               // TODO Do we need to handle anything else?
-              Message::Binary(_) => {}
+              Message::Binary(v) => {
+                response_sender
+                  .send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Binary(v)))
+                  .await;
+              }
               Message::Ping(_) => {}
               Message::Pong(_) => {}
               Message::Close(_) => {}
             }
           }
         });
-        task::spawn(async move {
-          read_future.await;
-        });
-        Ok(())
+        Ok((request_sender, response_receiver))
       }
-      Err(e) => Err(ButtplugClientConnectorError::new(&format!("{:?}", e))),
+      Err(e) => Err(ButtplugConnectorError::new(&format!("{:?}", e))),
     }
   }
 
-  async fn disconnect(&mut self) -> ButtplugClientConnectorResult {
-    // self.helper.close().await;
+  async fn disconnect(self) -> ButtplugConnectorResult {
     Ok(())
-  }
-
-  async fn send(&mut self, msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
-    self.helper.send(&msg).await
-  }
-
-  fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
-    // This will panic if we've already taken the receiver.
-    self.recv.take().unwrap()
   }
 }

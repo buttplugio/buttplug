@@ -1,11 +1,15 @@
-use super::ButtplugInProcessServerConnector;
 use crate::{
-  core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
+  core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   server::ButtplugServer,
-  connector::{ButtplugClientConnector, ButtplugServerConnector, ButtplugClientConnectorError}
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult}
 };
-use async_std::{sync::Receiver};
 use async_trait::async_trait;
+use async_std::{
+  prelude::StreamExt,
+  sync::{channel, Receiver, Sender},
+  task,
+};
+use std::convert::TryInto;
 
 /// In-process Buttplug Server Connector
 ///
@@ -34,9 +38,10 @@ use async_trait::async_trait;
 #[cfg(feature = "server")]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
-  server: ButtplugInProcessServerConnector,
+  server: ButtplugServer,
+  server_outbound_sender: Sender<ButtplugCurrentSpecServerMessage>,
   /// Event receiver for the internal server.
-  recv: Option<Receiver<ButtplugClientOutMessage>>,
+  connector_outbound_recv: Option<Receiver<ButtplugCurrentSpecServerMessage>>,
 }
 
 #[cfg(feature = "server")]
@@ -47,9 +52,18 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
   pub fn new(name: &str, max_ping_time: u128) -> Self {
-    let (server, recv) = ButtplugInProcessServerConnector::new(&name, max_ping_time);
+    let (server, mut server_recv) = ButtplugServer::new(&name, max_ping_time);
+    let (send, recv) = channel(256);
+    let server_outbound_sender = send.clone();
+    task::spawn(async move {
+      while let Some(event) = server_recv.next().await {
+        send.send(event.try_into().unwrap()).await;
+      }
+    });
+
     Self {
-      recv: Some(recv),
+      connector_outbound_recv: Some(recv),
+      server_outbound_sender,
       server,
     }
   }
@@ -61,33 +75,32 @@ impl<'a> ButtplugInProcessClientConnector {
   /// [DeviceCommunicationManager][crate::server::comm_managers::DeviceCommunicationManager]s
   /// before connection.
   pub fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
-    self.server.server_ref()
+    &mut self.server
   }
 }
 
 #[cfg(feature = "server")]
 #[async_trait]
-impl ButtplugClientConnector for ButtplugInProcessClientConnector {
-  async fn connect(&mut self) -> Result<(), ButtplugClientConnectorError> {
-    Ok(())
+impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> for ButtplugInProcessClientConnector {
+  async fn connect(&mut self) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
+    if self.connector_outbound_recv.is_some() {
+      Ok(self.connector_outbound_recv.take().unwrap())
+    } else {
+      Err(ButtplugConnectorError::new("Connector already connected."))
+    }
   }
 
-  async fn disconnect(&mut self) -> Result<(), ButtplugClientConnectorError> {
+  async fn disconnect(&mut self) -> ButtplugConnectorResult {
     Ok(())
   }
 
   async fn send(
     &mut self,
-    msg: ButtplugClientInMessage,
-  ) -> Result<ButtplugClientOutMessage, ButtplugClientConnectorError> {
-    Ok(self.server.parse_message(msg).await)
-  }
-
-  fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
-    // This will panic if we've already taken the receiver.
-    self.recv.take().unwrap()
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugConnectorResult {
+    let input = msg.try_into().unwrap();
+    let output = self.server.parse_message(&input).await.unwrap();
+    self.server_outbound_sender.send(output.try_into().unwrap()).await;
+    Ok(())
   }
 }
-
-// The in-process connector is used heavily in the client unit tests, so we can
-// assume code coverage there and omit specific tests here.

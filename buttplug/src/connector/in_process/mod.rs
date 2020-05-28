@@ -1,5 +1,0 @@
-mod in_process_client_connector;
-mod in_process_server_connector;
-
-pub use in_process_client_connector::ButtplugInProcessClientConnector;
-pub use in_process_server_connector::ButtplugInProcessServerConnector;

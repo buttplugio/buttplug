@@ -9,6 +9,7 @@ repository = "https://github.com/buttplugio/buttplug-rs.git"
 readme = "../README.md"
 keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2018"
+exclude = ["examples/**"]
 
 [features]
 default=["client", "server", "serialize_json", "btleplug-manager", "client-ws-ssl", "xinput"]
@@ -22,8 +23,8 @@ client-ws-ssl=["client", "serialize_json", "ws", "ws/ssl", "openssl"]
 
 [dependencies]
 log = "0.4.8"
-# buttplug_derive = { path = "../buttplug_derive" }
-buttplug_derive = "0.2.0"
+buttplug_derive = { path = "../buttplug_derive" }
+# buttplug_derive = "0.2.0"
 futures = "0.3.5"
 futures-util = "0.3.5"
 async-std = { version = "1.5.0", features = ["unstable"] }

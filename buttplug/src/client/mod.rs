@@ -8,29 +8,22 @@
 //! Communications API for accessing Buttplug Servers
 pub mod device;
 pub mod internal;
+mod client_message_sorter;
 
 use device::ButtplugClientDevice;
-use internal::{client_event_loop, ButtplugClientMessage};
+use internal::{client_event_loop, ButtplugClientRequest};
 
 use crate::{
+  connector::{
+    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture,
+  },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
     messages::{
-      ButtplugClientInMessage,
-      ButtplugClientOutMessage,
-      ButtplugMessageSpecVersion,
-      DeviceMessageInfo,
-      LogLevel,
-      RequestDeviceList,
-      RequestServerInfo,
-      StartScanning,
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessageSpecVersion,
+      DeviceMessageInfo, LogLevel, RequestDeviceList, RequestServerInfo, StartScanning,
     },
   },
-  connector::{
-  ButtplugClientConnectorFuture,
-  ButtplugClientConnector,
-  ButtplugClientConnectorError,
-},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 
@@ -47,17 +40,17 @@ use std::{error::Error, fmt};
 /// errors related to the connector. Buttplug
 /// [Error][crate::core::messages::Error] messages will still be valid, because
 /// they're coming from the server.
-type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientConnectorError>;
+type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugConnectorError>;
 /// Result type used for public APIs.
 ///
 /// Allows us to differentiate between an issue with the connector (as a
-/// [ButtplugClientConnectorError]) and an issue within Buttplug (as a
+/// [ButtplugConnectorError]) and an issue within Buttplug (as a
 /// [ButtplugError]).
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 
 /// Result type used for passing server responses.
 pub type ButtplugInternalClientMessageResult =
-  ButtplugInternalClientResult<ButtplugClientOutMessage>;
+  ButtplugInternalClientResult<ButtplugCurrentSpecServerMessage>;
 /// Future state type for returning server responses across futures.
 pub(crate) type ButtplugClientMessageStateShared =
   ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
@@ -81,12 +74,12 @@ pub(crate) type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalCli
 /// and set the reply in the waker we've sent along. This will resolve the
 /// future we're waiting on and allow us to continue execution.
 pub struct ButtplugClientMessageFuturePair {
-  pub msg: ButtplugClientInMessage,
+  pub msg: ButtplugCurrentSpecClientMessage,
   pub waker: ButtplugClientMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {
-  pub fn new(msg: ButtplugClientInMessage, waker: ButtplugClientMessageStateShared) -> Self {
+  pub fn new(msg: ButtplugCurrentSpecClientMessage, waker: ButtplugClientMessageStateShared) -> Self {
     Self { msg, waker }
   }
 }
@@ -95,14 +88,14 @@ impl ButtplugClientMessageFuturePair {
 ///
 /// Clients can return two types of errors:
 ///
-/// - [ButtplugClientConnectorError], which means there was a problem with the
+/// - [ButtplugConnectorError], which means there was a problem with the
 /// connection between the client and the server, like a network connection
 /// issue.
 /// - [ButtplugError], which is an error specific to the Buttplug Protocol.
 #[derive(Debug, Clone)]
 pub enum ButtplugClientError {
   /// Connector error
-  ButtplugClientConnectorError(ButtplugClientConnectorError),
+  ButtplugConnectorError(ButtplugConnectorError),
   /// Protocol error
   ButtplugError(ButtplugError),
 }
@@ -111,7 +104,7 @@ impl fmt::Display for ButtplugClientError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match *self {
       ButtplugClientError::ButtplugError(ref e) => e.fmt(f),
-      ButtplugClientError::ButtplugClientConnectorError(ref e) => e.fmt(f),
+      ButtplugClientError::ButtplugConnectorError(ref e) => e.fmt(f),
     }
   }
 }
@@ -122,9 +115,9 @@ impl Error for ButtplugClientError {
   }
 }
 
-impl From<ButtplugClientConnectorError> for ButtplugClientError {
-  fn from(error: ButtplugClientConnectorError) -> Self {
-    ButtplugClientError::ButtplugClientConnectorError(error)
+impl From<ButtplugConnectorError> for ButtplugClientError {
+  fn from(error: ButtplugConnectorError) -> Self {
+    ButtplugClientError::ButtplugConnectorError(error)
   }
 }
 
@@ -189,7 +182,7 @@ pub struct ButtplugClient {
   /// so we can know what we're connected to.
   pub server_name: Option<String>,
   // Sender to relay messages to the internal client loop
-  message_sender: Sender<ButtplugClientMessage>,
+  message_sender: Sender<ButtplugClientRequest>,
   // Receives event notifications from the ButtplugClientLoop
   event_receiver: Receiver<ButtplugClientEvent>,
   // True if the connector is currently connected, and handshake was
@@ -200,10 +193,8 @@ pub struct ButtplugClient {
   events: Vec<ButtplugClientEvent>,
 }
 
-unsafe impl Sync for ButtplugClient {
-}
-unsafe impl Send for ButtplugClient {
-}
+unsafe impl Sync for ButtplugClient {}
+unsafe impl Send for ButtplugClient {}
 
 impl ButtplugClient {
   /// Runs the client event loop.
@@ -225,7 +216,7 @@ impl ButtplugClient {
   /// ```
   /// #[cfg(feature = "server")]
   /// use buttplug::{
-  ///   client::ButtplugClient, 
+  ///   client::ButtplugClient,
   ///   connector::ButtplugInProcessClientConnector
   /// };
   ///
@@ -238,14 +229,14 @@ impl ButtplugClient {
   ///     }).await;
   /// });
   /// ```
-  pub async fn run<F, T>(
+  pub async fn run<ApplicationFunctionType, ApplicationFunctionReturnType>(
     name: &str,
-    mut connector: impl ButtplugClientConnector + 'static,
-    func: F,
+    mut connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+    func: ApplicationFunctionType,
   ) -> ButtplugClientResult
   where
-    F: FnOnce(ButtplugClient) -> T,
-    T: Future<Output = ()>,
+    ApplicationFunctionType: FnOnce(ButtplugClient) -> ApplicationFunctionReturnType,
+    ApplicationFunctionReturnType: Future<Output = ()>,
   {
     debug!("Run called!");
     let (event_sender, event_receiver) = channel(256);
@@ -259,7 +250,7 @@ impl ButtplugClient {
       events: vec![],
     };
 
-    connector.connect().await?;
+    let connector_receiver = connector.connect().await.map_err(|e| { let err: ButtplugClientError = e.into(); err })?;
 
     let app_future = async move {
       client.handshake().await?;
@@ -267,7 +258,7 @@ impl ButtplugClient {
       Ok(())
     };
 
-    let internal_loop_future = client_event_loop(connector, event_sender, message_receiver);
+    let internal_loop_future = client_event_loop(connector, connector_receiver, event_sender, message_receiver);
     app_future.race(internal_loop_future).await
   }
 
@@ -314,21 +305,26 @@ impl ButtplugClient {
     F: FnOnce(ButtplugClient) -> T,
     T: Future<Output = ()>,
   {
-    #[cfg(not(any(feature="btleplug-manager", feature="xinput")))]
+    #[cfg(not(any(feature = "btleplug-manager", feature = "xinput")))]
     panic!("Must compile library using at least one device communication manager features (btleplug, xinput, etc) to use run_with_in_process_connector.");
-    #[cfg(any(feature="btleplug-manager", feature="xinput"))]
+    #[cfg(any(feature = "btleplug-manager", feature = "xinput"))]
     use crate::connector::ButtplugInProcessClientConnector;
 
-    let mut connector = ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
-    #[cfg(feature="btleplug-manager")]
+    let mut connector =
+      ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
+    #[cfg(feature = "btleplug-manager")]
     {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
-      connector.server_ref().add_comm_manager::<BtlePlugCommunicationManager>();
+      connector
+        .server_ref()
+        .add_comm_manager::<BtlePlugCommunicationManager>();
     }
-    #[cfg(all(feature="xinput", target_os="windows"))]
+    #[cfg(all(feature = "xinput", target_os = "windows"))]
     {
       use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;
-      connector.server_ref().add_comm_manager::<XInputDeviceCommunicationManager>();
+      connector
+        .server_ref()
+        .add_comm_manager::<XInputDeviceCommunicationManager>();
     }
     ButtplugClient::run(name, connector, func).await
   }
@@ -347,7 +343,7 @@ impl ButtplugClient {
     {
       Ok(msg) => {
         debug!("Got ServerInfo return.");
-        if let ButtplugClientOutMessage::ServerInfo(server_info) = msg {
+        if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
           info!("Connected to {}", server_info.server_name);
           self.server_name = Option::Some(server_info.server_name);
           // TODO Handle ping time in the internal event loop
@@ -358,9 +354,9 @@ impl ButtplugClient {
           let msg = self
             .send_message(&RequestDeviceList::default().into())
             .await?;
-          if let ButtplugClientOutMessage::DeviceList(m) = msg {
+          if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
             self
-              .send_internal_message(ButtplugClientMessage::HandleDeviceList(m))
+              .send_internal_message(ButtplugClientRequest::HandleDeviceList(m))
               .await?;
           }
           Ok(())
@@ -392,8 +388,8 @@ impl ButtplugClient {
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
     // further communications with the server, if connection is successful.
-    let fut = ButtplugClientConnectorFuture::default();
-    let msg = ButtplugClientMessage::Disconnect(fut.get_state_clone());
+    let fut = ButtplugConnectorFuture::default();
+    let msg = ButtplugClientRequest::Disconnect(fut.get_state_clone());
     self.send_internal_message(msg).await?;
     self.connected = false;
     Ok(())
@@ -413,8 +409,8 @@ impl ButtplugClient {
   // around possible send errors.
   async fn send_internal_message(
     &mut self,
-    msg: ButtplugClientMessage,
-  ) -> Result<(), ButtplugClientConnectorError> {
+    msg: ButtplugClientRequest,
+  ) -> Result<(), ButtplugConnectorError> {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
@@ -433,11 +429,11 @@ impl ButtplugClient {
   // ButtplugMessage back from the server.
   async fn send_message(
     &mut self,
-    msg: &ButtplugClientInMessage,
+    msg: &ButtplugCurrentSpecClientMessage,
   ) -> ButtplugInternalClientMessageResult {
     // Create a future to pair with the message being resolved.
     let fut = ButtplugClientMessageFuture::default();
-    let internal_msg = ButtplugClientMessage::Message(ButtplugClientMessageFuturePair::new(
+    let internal_msg = ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
       msg.clone(),
       fut.get_state_clone(),
     ));
@@ -451,17 +447,17 @@ impl ButtplugClient {
   // type ButtplugMessage back from the server.
   async fn send_message_expect_ok(
     &mut self,
-    msg: &ButtplugClientInMessage,
+    msg: &ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResult {
     match self.send_message(msg).await? {
-      ButtplugClientOutMessage::Ok(_) => Ok(()),
+      ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
       _ => Err(ButtplugMessageError::new("Got non-Ok message back").into()),
     }
   }
 
-  async fn check_for_events(&mut self) -> Result<(), ButtplugClientConnectorError> {
+  async fn check_for_events(&mut self) -> Result<(), ButtplugConnectorError> {
     if !self.connected {
-      return Err(ButtplugClientConnectorError::new("Client not connected."));
+      return Err(ButtplugConnectorError::new("Client not connected."));
     }
     while !self.event_receiver.is_empty() {
       match self.event_receiver.next().await {
@@ -471,7 +467,7 @@ impl ButtplugClient {
           // If we got None, this means the internal loop stopped and our
           // sender was dropped. We should consider this a disconnect.
           self.events.push(ButtplugClientEvent::ServerDisconnect);
-          return Err(ButtplugClientConnectorError::new("Client not connected."));
+          return Err(ButtplugConnectorError::new("Client not connected."));
         }
       }
     }
@@ -485,14 +481,14 @@ impl ButtplugClient {
   /// connections/disconnections, log messages, etc... This is basically what
   /// event handlers in C# and JS would deal with, but we're in Rust so this
   /// requires us to be slightly more explicit. It will return
-  /// Err([ButtplugClientConnectorError]) if waiting fails due to server/client
+  /// Err([ButtplugConnectorError]) if waiting fails due to server/client
   /// disconnection.
   pub async fn wait_for_event(
     &mut self,
-  ) -> Result<ButtplugClientEvent, ButtplugClientConnectorError> {
+  ) -> Result<ButtplugClientEvent, ButtplugConnectorError> {
     debug!("Client waiting for event.");
     if !self.connected {
-      return Err(ButtplugClientConnectorError::new("Client not connected."));
+      return Err(ButtplugConnectorError::new("Client not connected."));
     }
     Ok({
       if !self.events.is_empty() {
@@ -511,16 +507,16 @@ impl ButtplugClient {
     })
   }
 
-  /// Retreives a list of currently connected devices. 
+  /// Retreives a list of currently connected devices.
   ///
   /// As the device list is maintained in the event loop structure, retreiving
   /// the list requires an asynchronous call to retreive the list from the task.
   pub async fn devices(
     &mut self,
-  ) -> Result<Vec<ButtplugClientDevice>, ButtplugClientConnectorError> {
+  ) -> Result<Vec<ButtplugClientDevice>, ButtplugConnectorError> {
     info!("Request devices from inner loop!");
     let fut = ButtplugFuture::<Vec<ButtplugClientDevice>>::default();
-    let msg = ButtplugClientMessage::RequestDeviceList(fut.get_state_clone());
+    let msg = ButtplugClientRequest::RequestDeviceList(fut.get_state_clone());
     info!("Sending device request to inner loop!");
     self.send_internal_message(msg).await?;
     info!("Waiting for device list return!");
@@ -532,20 +528,15 @@ impl ButtplugClient {
 mod test {
   use super::ButtplugClient;
   use crate::{
-      connector::{
-        ButtplugClientConnectorResult,
-        ButtplugClientConnector,
-        ButtplugClientConnectorError,
-        ButtplugInProcessClientConnector,
-      },
-      client::{
-      ButtplugInternalClientMessageResult,
+    connector::{
+      ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult,
+      ButtplugInProcessClientConnector,
     },
-    core::messages::{ButtplugClientInMessage, ButtplugClientOutMessage},
+    core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   };
   use async_std::{
     future::Future,
-    sync::{channel, Receiver},
+    sync::Receiver,
     task,
   };
   use async_trait::async_trait;
@@ -569,23 +560,17 @@ mod test {
   struct ButtplugFailingConnector {}
 
   #[async_trait]
-  impl ButtplugClientConnector for ButtplugFailingConnector {
-    async fn connect(&mut self) -> ButtplugClientConnectorResult {
-      Err(ButtplugClientConnectorError::new("Always fails"))
+  impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> for ButtplugFailingConnector {
+    async fn connect(&mut self) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
+      Err(ButtplugConnectorError::new("Always fails"))
     }
 
-    async fn disconnect(&mut self) -> ButtplugClientConnectorResult {
-      Err(ButtplugClientConnectorError::new("Always fails"))
+    async fn disconnect(&mut self) -> ButtplugConnectorResult {
+      Err(ButtplugConnectorError::new("Always fails"))
     }
 
-    async fn send(&mut self, _msg: ButtplugClientInMessage) -> ButtplugInternalClientMessageResult {
+    async fn send(&mut self, _msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResult {
       panic!("Should never be called")
-    }
-
-    fn get_event_receiver(&mut self) -> Receiver<ButtplugClientOutMessage> {
-      // This will panic if we've already taken the receiver.
-      let (_send, recv) = channel(256);
-      recv
     }
   }
 

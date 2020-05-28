@@ -9,7 +9,7 @@
 use buttplug::{
   core::messages::serializer::ButtplugClientJSONSerializer,
   client::ButtplugClient,
-  connector::ButtplugWebsocketClientConnector,
+  connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport}
 };
 
 // We're gonna use async_std as our runtime for the examples, but you should be
@@ -51,7 +51,7 @@ async fn embedded_connector_example() {
   // secure cert validity, but we're not connecting to a secure server so it
   // doesn't really matter here.
   let connector = 
-    ButtplugWebsocketClientConnector::<ButtplugClientJSONSerializer>::new_insecure_connector("ws://localhost:12345");
+    ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
 
   // ButtplugClient creation is the same as the last example. From here on
   // out, things look basically the same, EXCEPT for the fact that, unlike the

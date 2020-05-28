@@ -1,3 +1,0 @@
-mod websocket_client_connector;
-
-pub use websocket_client_connector::ButtplugWebsocketClientConnector;

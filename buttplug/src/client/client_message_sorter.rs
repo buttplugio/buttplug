@@ -8,7 +8,7 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-  core::messages::{ButtplugClientOutMessage, ButtplugMessage},
+  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
   client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared}
 };
 use std::collections::HashMap;
@@ -50,7 +50,7 @@ use std::collections::HashMap;
 /// - If the message `id` is not zero but there is no future waiting, the
 ///   message is dropped and an error is emitted.
 ///
-pub struct ClientConnectorMessageSorter {
+pub struct ClientMessageSorter {
   /// Map of message `id`s to their related future.
   ///
   /// This is where we store message `id`s that are waiting for a return from
@@ -67,7 +67,7 @@ pub struct ClientConnectorMessageSorter {
   current_id: u32,
 }
 
-impl ClientConnectorMessageSorter {
+impl ClientMessageSorter {
   /// Registers a future to be resolved when we receive a response.
   ///
   /// Given a message and its related future, set the message's `id`, and match
@@ -87,7 +87,7 @@ impl ClientConnectorMessageSorter {
   /// Returns true if the response message was resolved to a future via matching
   /// `id`, otherwise returns false. False returns mean the message should be
   /// considered as an *event*.
-  pub async fn maybe_resolve_message(&mut self, msg: &ButtplugClientOutMessage) -> bool {
+  pub async fn maybe_resolve_message(&mut self, msg: &ButtplugCurrentSpecServerMessage) -> bool {
     let id = msg.get_id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
@@ -104,7 +104,7 @@ impl ClientConnectorMessageSorter {
   }
 }
 
-impl Default for ClientConnectorMessageSorter {
+impl Default for ClientMessageSorter {
   /// Create a default implementation of the ClientConnectorMessageSorter
   ///
   /// Sets the current_id to 1, since as a client we can't send message `id` of

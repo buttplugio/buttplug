@@ -13,13 +13,13 @@ use super::{
   ButtplugClientResult,
 };
 use crate::{
-  connector::ButtplugClientConnectorError,
+  connector::ButtplugConnectorError,
   client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      ButtplugClientInMessage,
-      ButtplugClientOutMessage,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
       DeviceMessageInfo,
       LinearCmd,
@@ -172,7 +172,7 @@ impl ButtplugClientDevice {
   ///
   /// Performs the send/receive flow for send a device command and receiving the
   /// response from the server.
-  async fn send_message(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult<ButtplugClientOutMessage> {
+  async fn send_message(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugClientResult<ButtplugCurrentSpecServerMessage> {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
@@ -189,7 +189,7 @@ impl ButtplugClientDevice {
       .await;
     match fut.await {
       Ok(msg) => {
-        if let ButtplugClientOutMessage::Error(_err) = msg {
+         if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
           Err(ButtplugClientError::ButtplugError(ButtplugError::from(
             _err,
           )))
@@ -197,16 +197,16 @@ impl ButtplugClientDevice {
           Ok(msg)
         }
       }
-      Err(e) => Err(ButtplugClientError::ButtplugClientConnectorError(e)),
+      Err(e) => Err(ButtplugClientError::ButtplugConnectorError(e)),
     }
   }
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
   /// message, otherwise returns a [ButtplugError]
-  async fn send_message_expect_ok(&mut self, msg: ButtplugClientInMessage) -> ButtplugClientResult {
+  async fn send_message_expect_ok(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugClientResult {
     match self.send_message(msg).await? {
-      ButtplugClientOutMessage::Ok(_) => Ok(()),
-      ButtplugClientOutMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(
+      ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
+      ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(
         ButtplugError::from(_err),
       )),
       _ => Err(ButtplugClientError::ButtplugError(
@@ -225,7 +225,7 @@ impl ButtplugClientDevice {
   /// input from devices or notifications that they've disconnected.
   async fn check_for_events(&mut self) -> ButtplugClientResult {
     if !self.client_connected {
-      return Err(ButtplugClientConnectorError::new("Client not connected.").into());
+      return Err(ButtplugConnectorError::new("Client not connected.").into());
     }
     if !self.device_connected {
       return Err(ButtplugDeviceError::new("Device not connected.").into());
@@ -247,7 +247,7 @@ impl ButtplugClientDevice {
           self
             .events
             .push(ButtplugClientDeviceEvent::ClientDisconnect);
-          return Err(ButtplugClientConnectorError::new("Client not connected.").into());
+          return Err(ButtplugConnectorError::new("Client not connected.").into());
         }
       }
     }
@@ -267,7 +267,7 @@ impl ButtplugClientDevice {
   pub async fn wait_for_event(&mut self) -> Result<ButtplugClientDeviceEvent, ButtplugClientError> {
     debug!("Device waiting for event.");
     if !self.client_connected {
-      return Err(ButtplugClientConnectorError::new("Client not connected.").into());
+      return Err(ButtplugConnectorError::new("Client not connected.").into());
     }
     if !self.device_connected {
       return Err(ButtplugDeviceError::new("Device not connected.").into());

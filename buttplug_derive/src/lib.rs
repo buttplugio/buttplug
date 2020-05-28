@@ -201,3 +201,39 @@ fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> T
         panic!("FromButtplugMessageUnion only works on structs");
     }
 }
+
+#[proc_macro_derive(ButtplugClientMessageType)]
+pub fn buttplug_client_message_type_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_client_message_type_macro(&ast)
+}
+
+fn impl_buttplug_client_message_type_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ButtplugClientMessageType for #name {}
+    };
+    gen.into()
+}
+
+#[proc_macro_derive(ButtplugServerMessageType)]
+pub fn buttplug_server_message_type_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_server_message_type_macro(&ast)
+}
+
+fn impl_buttplug_server_message_type_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ButtplugServerMessageType for #name {}
+    };
+    gen.into()
+}
