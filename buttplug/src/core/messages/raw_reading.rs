@@ -53,7 +53,8 @@ mod test {
 
   #[test]
   fn test_endpoint_serialize() {
-    let union = ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
+    let union =
+      ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec![0]));
     let js = serde_json::to_string(&union).unwrap();
     let endpoint_str =
       "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";

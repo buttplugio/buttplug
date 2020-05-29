@@ -39,7 +39,7 @@
 //! live in the same process, which is useful for multiple reasons (see
 //! [ButtplugInProcessClientConnector] documentation for more info). As
 //! in-process connectors can just send message objects back and forth, there is
-//! no need for message serialization. 
+//! no need for message serialization.
 //!
 //! Remote connectors refer to any connector that connects to something outside
 //! of the current process, be it still on the same machine (IPC) or somewhere
@@ -75,24 +75,23 @@
 //! originally came from.
 
 mod in_process_connector;
-mod transport;
 mod remote_connector;
+mod transport;
 
 pub use in_process_connector::ButtplugInProcessClientConnector;
-pub use remote_connector::{ButtplugRemoteConnector, ButtplugRemoteClientConnector};
+pub use remote_connector::{ButtplugRemoteClientConnector, ButtplugRemoteConnector};
 pub use transport::ButtplugWebsocketClientTransport;
 
-use async_trait::async_trait;
-use async_std::sync::{Sender, Receiver};
-use std::{fmt, error::Error};
 use crate::{
-  core::messages::{ButtplugMessage, serializer::ButtplugSerializedMessage},
-  util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared}, 
+  core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
+  util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
 };
+use async_std::sync::{Receiver, Sender};
+use async_trait::async_trait;
+use std::{error::Error, fmt};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
-pub type ButtplugConnectorState =
-  ButtplugFutureState<Result<(), ButtplugConnectorError>>;
+pub type ButtplugConnectorState = ButtplugFutureState<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorStateShared =
   ButtplugFutureStateShared<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorFuture = ButtplugFuture<Result<(), ButtplugConnectorError>>;
@@ -147,10 +146,11 @@ impl Error for ButtplugConnectorError {
 /// message enum. For instance, in a client connector, this would usually be
 /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage].
 #[async_trait]
-pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync 
-where 
-OutboundMessageType: ButtplugMessage + 'static, 
-InboundMessageType: ButtplugMessage + 'static {
+pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync
+where
+  OutboundMessageType: ButtplugMessage + 'static,
+  InboundMessageType: ButtplugMessage + 'static,
+{
   /// Connects the client to the server.
   ///
   /// Tries to connect to another connector, returning an event stream of
@@ -201,6 +201,14 @@ pub enum ButtplugTransportMessage {
 
 #[async_trait]
 pub trait ButtplugConnectorTransport: Send + Sync {
-  async fn connect(&mut self) -> Result<(Sender<ButtplugSerializedMessage>, Receiver<ButtplugTransportMessage>), ButtplugConnectorError>;
-  async fn disconnect(self)-> ButtplugConnectorResult;
+  async fn connect(
+    &mut self,
+  ) -> Result<
+    (
+      Sender<ButtplugSerializedMessage>,
+      Receiver<ButtplugTransportMessage>,
+    ),
+    ButtplugConnectorError,
+  >;
+  async fn disconnect(self) -> ButtplugConnectorResult;
 }

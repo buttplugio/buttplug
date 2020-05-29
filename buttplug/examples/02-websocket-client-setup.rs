@@ -7,9 +7,9 @@
 
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 use buttplug::{
-  core::messages::serializer::ButtplugClientJSONSerializer,
   client::ButtplugClient,
-  connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport}
+  connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
+  core::messages::serializer::ButtplugClientJSONSerializer,
 };
 
 // We're gonna use async_std as our runtime for the examples, but you should be
@@ -50,8 +50,12 @@ async fn embedded_connector_example() {
   // to that machine. The second argument specifies whether we should ignore
   // secure cert validity, but we're not connecting to a secure server so it
   // doesn't really matter here.
-  let connector = 
-    ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
+  let connector = ButtplugRemoteClientConnector::<
+    ButtplugWebsocketClientTransport,
+    ButtplugClientJSONSerializer,
+  >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
+    "ws://localhost:12345",
+  ));
 
   // ButtplugClient creation is the same as the last example. From here on
   // out, things look basically the same, EXCEPT for the fact that, unlike the

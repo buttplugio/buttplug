@@ -7,14 +7,10 @@
 
 //! Representation and management of devices connected to the server.
 
-use super::{
-  internal::ButtplugClientDeviceEvent,
-  ButtplugClientError,
-  ButtplugClientResult,
-};
+use super::{internal::ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientResult};
 use crate::{
-  connector::ButtplugConnectorError,
   client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
+  connector::ButtplugConnectorError,
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
@@ -97,7 +93,7 @@ pub enum LinearCommand {
 ///
 /// [ButtplugClientDevice] instances are obtained from the
 /// [ButtplugClient][super::ButtplugClient], and allow the user to send commands
-/// to a device connected to the server. 
+/// to a device connected to the server.
 pub struct ButtplugClientDevice {
   /// Name of the device
   pub name: String,
@@ -172,7 +168,10 @@ impl ButtplugClientDevice {
   ///
   /// Performs the send/receive flow for send a device command and receiving the
   /// response from the server.
-  async fn send_message(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugClientResult<ButtplugCurrentSpecServerMessage> {
+  async fn send_message(
+    &mut self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugClientResult<ButtplugCurrentSpecServerMessage> {
     // Since we're using async_std channels, if we send a message and the
     // event loop has shut down, we may never know (and therefore possibly
     // block infinitely) if we don't check the status of an event loop
@@ -189,7 +188,7 @@ impl ButtplugClientDevice {
       .await;
     match fut.await {
       Ok(msg) => {
-         if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
+        if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
           Err(ButtplugClientError::ButtplugError(ButtplugError::from(
             _err,
           )))
@@ -203,7 +202,10 @@ impl ButtplugClientDevice {
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
   /// message, otherwise returns a [ButtplugError]
-  async fn send_message_expect_ok(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugClientResult {
+  async fn send_message_expect_ok(
+    &mut self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugClientResult {
     match self.send_message(msg).await? {
       ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
       ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(

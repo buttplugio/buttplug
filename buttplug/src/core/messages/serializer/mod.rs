@@ -2,16 +2,14 @@ mod json_serializer;
 
 pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
 
-use crate::core::{
-  errors::ButtplugError,
-};
+use crate::core::errors::ButtplugError;
 
 pub type ButtplugSerializerResult<T> = Result<T, ButtplugError>;
 
 #[derive(Debug, PartialEq)]
 pub enum ButtplugSerializedMessage {
   Text(String),
-  Binary(Vec<u8>)
+  Binary(Vec<u8>),
 }
 
 impl From<String> for ButtplugSerializedMessage {
@@ -29,6 +27,9 @@ impl From<Vec<u8>> for ButtplugSerializedMessage {
 pub trait ButtplugMessageSerializer: Default + Sync + Send {
   type Inbound;
   type Outbound;
-  fn deserialize(&mut self, msg: ButtplugSerializedMessage) -> ButtplugSerializerResult<Vec<Self::Inbound>>;
+  fn deserialize(
+    &mut self,
+    msg: ButtplugSerializedMessage,
+  ) -> ButtplugSerializerResult<Vec<Self::Inbound>>;
   fn serialize(&mut self, msg: Vec<Self::Outbound>) -> ButtplugSerializedMessage;
 }

@@ -8,8 +8,13 @@
 //! Handling of websockets using async-tungstenite
 
 use crate::{
+  connector::{
+    ButtplugConnectorError,
+    ButtplugConnectorResult,
+    ButtplugConnectorTransport,
+    ButtplugTransportMessage,
+  },
   core::messages::serializer::ButtplugSerializedMessage,
-  connector::{ButtplugConnectorError, ButtplugConnectorResult, ButtplugTransportMessage, ButtplugConnectorTransport},
 };
 use async_std::{
   sync::{channel, Receiver, Sender},
@@ -17,7 +22,8 @@ use async_std::{
 };
 use async_trait::async_trait;
 use async_tungstenite::{
-  async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
+  async_std::connect_async_with_tls_connector,
+  tungstenite::protocol::Message,
 };
 use futures_util::{SinkExt, StreamExt};
 
@@ -64,7 +70,15 @@ impl ButtplugWebsocketClientTransport {
 
 #[async_trait]
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
-  async fn connect(&mut self) -> Result<(Sender<ButtplugSerializedMessage>, Receiver<ButtplugTransportMessage>), ButtplugConnectorError> {
+  async fn connect(
+    &mut self,
+  ) -> Result<
+    (
+      Sender<ButtplugSerializedMessage>,
+      Receiver<ButtplugTransportMessage>,
+    ),
+    ButtplugConnectorError,
+  > {
     let (request_sender, request_receiver) = channel(256);
     let (response_sender, response_receiver) = channel(256);
 
@@ -116,13 +130,10 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           while let Some(msg) = request_receiver.recv().await {
             let out_msg = match msg {
               ButtplugSerializedMessage::Text(text) => Message::Text(text),
-              ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),  
+              ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
             };
             // TODO see what happens when we try to send to a remote that's closed connection.
-            writer
-              .send(out_msg)
-              .await
-              .expect("This should never fail?");
+            writer.send(out_msg).await.expect("This should never fail?");
           }
         });
         task::spawn(async move {
@@ -131,13 +142,17 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
             match response.unwrap() {
               Message::Text(t) => {
                 response_sender
-                  .send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(t.to_string())))
+                  .send(ButtplugTransportMessage::Message(
+                    ButtplugSerializedMessage::Text(t.to_string()),
+                  ))
                   .await;
               }
               // TODO Do we need to handle anything else?
               Message::Binary(v) => {
                 response_sender
-                  .send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Binary(v)))
+                  .send(ButtplugTransportMessage::Message(
+                    ButtplugSerializedMessage::Binary(v),
+                  ))
                   .await;
               }
               Message::Ping(_) => {}

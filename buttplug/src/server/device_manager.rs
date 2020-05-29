@@ -18,10 +18,10 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
       self,
+      ButtplugClientMessage,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion,
       ButtplugDeviceMessage,
-      ButtplugClientMessage,
       ButtplugMessage,
       ButtplugServerMessage,
       DeviceAdded,

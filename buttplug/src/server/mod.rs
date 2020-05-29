@@ -16,9 +16,9 @@ use crate::{
     errors::*,
     messages::{
       self,
+      ButtplugClientMessage,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion,
-      ButtplugClientMessage,
       ButtplugMessage,
       ButtplugMessageSpecVersion,
       ButtplugServerMessage,
@@ -213,7 +213,9 @@ impl ButtplugServer {
       ping_timer.stop_ping_timer().await;
     }
     self
-      .parse_message(&ButtplugClientMessage::StopAllDevices(StopAllDevices::default()))
+      .parse_message(&ButtplugClientMessage::StopAllDevices(
+        StopAllDevices::default(),
+      ))
       .await
       .unwrap();
     self.client_name = None;

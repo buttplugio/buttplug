@@ -16,10 +16,7 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
-use buttplug::{
-  client::ButtplugClient,
-  connector::ButtplugInProcessClientConnector,
-};
+use buttplug::{client::ButtplugClient, connector::ButtplugInProcessClientConnector};
 
 // We're gonna use async_std as our runtime for the examples, but you should be
 // able to use futures, tokio, or whatever else.

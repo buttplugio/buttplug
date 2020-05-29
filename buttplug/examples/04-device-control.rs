@@ -14,11 +14,7 @@
 use async_std::task;
 
 use buttplug::{
-  client::{
-    device::VibrateCommand,
-    ButtplugClient,
-    ButtplugClientEvent,
-  },
+  client::{device::VibrateCommand, ButtplugClient, ButtplugClientEvent},
   core::messages::ButtplugDeviceMessageType,
 };
 

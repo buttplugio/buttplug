@@ -8,14 +8,21 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
+  client_message_sorter::ClientMessageSorter,
   device::ButtplugClientDevice,
-  ButtplugClientEvent, ButtplugClientMessageFuturePair, ButtplugClientResult,
-  client_message_sorter::ClientMessageSorter
+  ButtplugClientEvent,
+  ButtplugClientMessageFuturePair,
+  ButtplugClientResult,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugCurrentSpecClientMessage, DeviceList, 
-    DeviceMessageInfo, ButtplugMessage},
+  core::messages::{
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
+    DeviceList,
+    DeviceMessageInfo,
+  },
   util::future::ButtplugFutureStateShared,
 };
 use async_std::{
@@ -75,9 +82,11 @@ enum StreamReturn {
 /// different tasks. However, all of those tasks will refer to the same event
 /// loop. This allows us to coordinate and centralize our information while
 /// keeping the API async.
-struct ButtplugClientEventLoop<ConnectorType> 
-where 
-  ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static {
+struct ButtplugClientEventLoop<ConnectorType>
+where
+  ConnectorType:
+    ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+{
   /// List of currently connected devices.
   devices: HashMap<u32, DeviceMessageInfo>,
   /// Sender to pass to new [ButtplugClientDevice] instances.
@@ -102,9 +111,11 @@ where
   sorter: ClientMessageSorter,
 }
 
-impl<ConnectorType> ButtplugClientEventLoop<ConnectorType> 
-where 
-ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static  {
+impl<ConnectorType> ButtplugClientEventLoop<ConnectorType>
+where
+  ConnectorType:
+    ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+{
   /// Creates a new [ButtplugClientEventLoop].
   ///
   /// Given the [ButtplugClientConnector] object, as well as the channels used
@@ -159,7 +170,7 @@ ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurre
   async fn parse_connector_message(&mut self, msg: ButtplugCurrentSpecServerMessage) {
     info!("Sending message to clients.");
     if self.sorter.maybe_resolve_message(&msg).await {
-      return
+      return;
     } else if msg.is_server_event() {
       // TODO Return some sort of event error here.
       panic!("Unmatched message ID!")
@@ -191,22 +202,23 @@ ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurre
           .event_sender
           .send(ButtplugClientEvent::DeviceRemoved(info.unwrap()))
           .await;
-      },
+      }
       ButtplugCurrentSpecServerMessage::Log(log) => {
         self
           .event_sender
-          .send(ButtplugClientEvent::Log(log.log_level.clone(), log.log_message.clone()))
+          .send(ButtplugClientEvent::Log(
+            log.log_level.clone(),
+            log.log_message.clone(),
+          ))
           .await;
-      },
+      }
       ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
         self
-        .event_sender
-        .send(ButtplugClientEvent::ScanningFinished)
-        .await;
-      },
-      _ => {
-        panic!("Cannot process message: {:?}", msg)
+          .event_sender
+          .send(ButtplugClientEvent::ScanningFinished)
+          .await;
       }
+      _ => panic!("Cannot process message: {:?}", msg),
     }
   }
 
@@ -224,7 +236,7 @@ ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurre
   ///
   /// - For outbound messages to the server, sends them to the connector/server.
   /// - For disconnections, requests connector disconnect
-  /// - For RequestDeviceList, builds a reply out of its own 
+  /// - For RequestDeviceList, builds a reply out of its own
   async fn parse_client_message(&mut self, msg: ButtplugClientRequest) -> bool {
     trace!("Parsing a client message.");
     match msg {
@@ -346,8 +358,9 @@ ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurre
 /// - Finally, on disconnect, it will tear down, and cannot be used again. All
 ///   clients and devices associated with the loop will be invalidated, and a
 ///   new [super::ButtplugClient] must be created.
-pub(super) async fn client_event_loop (
-  connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
+pub(super) async fn client_event_loop(
+  connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+    + 'static,
   connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
   event_sender: Sender<ButtplugClientEvent>,
   client_receiver: Receiver<ButtplugClientRequest>,

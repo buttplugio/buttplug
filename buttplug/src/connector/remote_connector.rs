@@ -10,13 +10,16 @@
 use super::ButtplugConnectorTransport;
 use crate::{
   connector::{
-    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult, ButtplugTransportMessage,
+    ButtplugConnector,
+    ButtplugConnectorError,
+    ButtplugConnectorResult,
+    ButtplugTransportMessage,
   },
-  core::{
-    messages::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage
-    },
+  core::messages::{
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
   },
 };
 use async_std::{
@@ -45,7 +48,12 @@ where
   Outgoing(ButtplugRemoteConnectorMessage<T>),
 }
 
-async fn remote_connector_event_loop<TransportType, SerializerType, OutboundMessageType, InboundMessageType>(
+async fn remote_connector_event_loop<
+  TransportType,
+  SerializerType,
+  OutboundMessageType,
+  InboundMessageType,
+>(
   // Takes messages from the client
   mut connector_outgoing_recv: Receiver<ButtplugRemoteConnectorMessage<OutboundMessageType>>,
   // Sends messages not matched in the sorter to the client.
@@ -57,7 +65,8 @@ async fn remote_connector_event_loop<TransportType, SerializerType, OutboundMess
   mut transport_incoming_recv: Receiver<ButtplugTransportMessage>,
 ) where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType> + 'static,
+  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+    + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
@@ -132,7 +141,7 @@ async fn remote_connector_event_loop<TransportType, SerializerType, OutboundMess
             // happens before we send out the message.
             let serialized_msg = serializer.serialize(vec![msg.clone()]);
             transport_outgoing_sender.send(serialized_msg).await;
-          },
+          }
           ButtplugRemoteConnectorMessage::Close => {
             transport.disconnect().await;
             break;
@@ -143,12 +152,22 @@ async fn remote_connector_event_loop<TransportType, SerializerType, OutboundMess
   }
 }
 
-pub type ButtplugRemoteClientConnector<TransportType, SerializerType> = ButtplugRemoteConnector<TransportType, SerializerType, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>;
+pub type ButtplugRemoteClientConnector<TransportType, SerializerType> = ButtplugRemoteConnector<
+  TransportType,
+  SerializerType,
+  ButtplugCurrentSpecClientMessage,
+  ButtplugCurrentSpecServerMessage,
+>;
 
-pub struct ButtplugRemoteConnector<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
-where
+pub struct ButtplugRemoteConnector<
+  TransportType,
+  SerializerType,
+  OutboundMessageType,
+  InboundMessageType,
+> where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType> + 'static,
+  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+    + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
@@ -167,10 +186,12 @@ where
   dummy_serializer: PhantomData<SerializerType>,
 }
 
-impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType> ButtplugRemoteConnector<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
+impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
+  ButtplugRemoteConnector<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
 where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType> + 'static,
+  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+    + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
@@ -184,12 +205,20 @@ where
 }
 
 #[async_trait]
-impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType> ButtplugConnector<OutboundMessageType, InboundMessageType> for ButtplugRemoteConnector<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
+impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
+  ButtplugConnector<OutboundMessageType, InboundMessageType>
+  for ButtplugRemoteConnector<
+    TransportType,
+    SerializerType,
+    OutboundMessageType,
+    InboundMessageType,
+  >
 where
-TransportType: ButtplugConnectorTransport + 'static,
-SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType> + 'static,
-OutboundMessageType: ButtplugMessage + 'static,
-InboundMessageType: ButtplugMessage + 'static,
+  TransportType: ButtplugConnectorTransport + 'static,
+  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+    + 'static,
+  OutboundMessageType: ButtplugMessage + 'static,
+  InboundMessageType: ButtplugMessage + 'static,
 {
   async fn connect(&mut self) -> Result<Receiver<InboundMessageType>, ButtplugConnectorError> {
     if self.transport.is_some() {
@@ -203,7 +232,12 @@ InboundMessageType: ButtplugMessage + 'static,
           let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
           let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
           task::spawn(async move {
-            remote_connector_event_loop::<TransportType, SerializerType, OutboundMessageType, InboundMessageType>(
+            remote_connector_event_loop::<
+              TransportType,
+              SerializerType,
+              OutboundMessageType,
+              InboundMessageType,
+            >(
               connector_outgoing_receiver,
               connector_incoming_sender,
               transport,

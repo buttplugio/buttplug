@@ -1,14 +1,14 @@
 use crate::{
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult},
   core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   server::ButtplugServer,
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult}
 };
-use async_trait::async_trait;
 use async_std::{
   prelude::StreamExt,
   sync::{channel, Receiver, Sender},
   task,
 };
+use async_trait::async_trait;
 use std::convert::TryInto;
 
 /// In-process Buttplug Server Connector
@@ -81,8 +81,12 @@ impl<'a> ButtplugInProcessClientConnector {
 
 #[cfg(feature = "server")]
 #[async_trait]
-impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> for ButtplugInProcessClientConnector {
-  async fn connect(&mut self) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
+impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+  for ButtplugInProcessClientConnector
+{
+  async fn connect(
+    &mut self,
+  ) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
     if self.connector_outbound_recv.is_some() {
       Ok(self.connector_outbound_recv.take().unwrap())
     } else {
@@ -94,13 +98,13 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     Ok(())
   }
 
-  async fn send(
-    &mut self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugConnectorResult {
+  async fn send(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResult {
     let input = msg.try_into().unwrap();
     let output = self.server.parse_message(&input).await.unwrap();
-    self.server_outbound_sender.send(output.try_into().unwrap()).await;
+    self
+      .server_outbound_sender
+      .send(output.try_into().unwrap())
+      .await;
     Ok(())
   }
 }

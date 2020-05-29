@@ -12,7 +12,7 @@
 use async_std::task;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
-  connector::ButtplugInProcessClientConnector, 
+  connector::ButtplugInProcessClientConnector,
   test::TestDevice,
 };
 

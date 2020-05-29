@@ -6,7 +6,11 @@ mod test {
   use buttplug::{
     core::messages::{
       self,
-      serializer::{ButtplugMessageSerializer, ButtplugServerJSONSerializer, ButtplugSerializedMessage},
+      serializer::{
+        ButtplugMessageSerializer,
+        ButtplugSerializedMessage,
+        ButtplugServerJSONSerializer,
+      },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
@@ -23,7 +27,7 @@ mod test {
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
     task::block_on(async {
       let incoming = server.parse_message(&output[0]).await.unwrap();
-      let incoming_json = serializer.serialize(vec!(incoming));
+      let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
         format!(
@@ -44,7 +48,7 @@ mod test {
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
     task::block_on(async {
       let incoming = server.parse_message(&output[0]).await.unwrap();
-      let incoming_json = serializer.serialize(vec!(incoming));
+      let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
         format!(
@@ -91,7 +95,9 @@ mod test {
         r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#.to_owned().into()
       );
       let rdl = serializer
-        .deserialize(ButtplugSerializedMessage::Text(r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned()))
+        .deserialize(ButtplugSerializedMessage::Text(
+          r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
+        ))
         .unwrap();
       output = server.parse_message(&rdl[0]).await.unwrap();
       assert_eq!(
@@ -141,13 +147,17 @@ mod test {
           &serializer
             .deserialize(
               r#"[{"SingleMotorVibrateCmd": { "Id": 2, "DeviceIndex": 0, "Speed": 0.5}}]"#
-                .to_owned().into(),
+                .to_owned()
+                .into(),
             )
             .unwrap()[0],
         )
         .await
         .unwrap();
-      assert_eq!(serializer.serialize(vec!(output2)), r#"[{"Ok":{"Id":2}}]"#.to_owned().into());
+      assert_eq!(
+        serializer.serialize(vec!(output2)),
+        r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
+      );
       let (_, command_receiver) = device.get_endpoint_channel_clone(Endpoint::Tx).await;
       check_recv_value(
         &command_receiver,

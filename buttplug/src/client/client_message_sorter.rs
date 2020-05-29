@@ -8,8 +8,8 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
+  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared},
   core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
-  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared}
 };
 use std::collections::HashMap;
 
