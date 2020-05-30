@@ -1,25 +1,18 @@
 use super::btleplug_internal::{
-  BtlePlugInternalEventLoop,
-  DeviceReturnFuture,
-  DeviceReturnStateShared,
+  BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared,
 };
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
+    ButtplugReturnResultFuture,
+    ButtplugReturnValueResultFuture
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster,
-    ButtplugDeviceCommand,
-    ButtplugDeviceImplCreator,
-    ButtplugDeviceReturn,
-    DeviceImpl,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    BoundedDeviceEventBroadcaster, ButtplugDeviceCommand, ButtplugDeviceImplCreator,
+    ButtplugDeviceReturn, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
+    DeviceWriteCmd, Endpoint,
   },
 };
 use async_std::{
@@ -29,6 +22,8 @@ use async_std::{
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, Peripheral};
+use futures::future::BoxFuture;
+use std::pin::Pin;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
   device: Option<T>,
@@ -120,10 +115,8 @@ pub struct BtlePlugDeviceImpl {
   event_receiver: BoundedDeviceEventBroadcaster,
 }
 
-unsafe impl Send for BtlePlugDeviceImpl {
-}
-unsafe impl Sync for BtlePlugDeviceImpl {
-}
+unsafe impl Send for BtlePlugDeviceImpl {}
+unsafe impl Sync for BtlePlugDeviceImpl {}
 
 impl BtlePlugDeviceImpl {
   pub fn new(
@@ -142,30 +135,33 @@ impl BtlePlugDeviceImpl {
     }
   }
 
-  async fn send_to_device_task(
+  fn send_to_device_task(
     &self,
     cmd: ButtplugDeviceCommand,
     err_msg: &str,
-  ) -> Result<(), ButtplugError> {
-    let fut = DeviceReturnFuture::default();
-    let waker = fut.get_state_clone();
-    self.thread_sender.send((cmd, waker)).await;
-    match fut.await {
-      ButtplugDeviceReturn::Ok(_) => Ok(()),
-      ButtplugDeviceReturn::Error(e) => {
-        error!("{:?}", e);
-        Err(ButtplugError::ButtplugDeviceError(
-          ButtplugDeviceError::new(&e.to_string()),
-        ))
+  ) -> ButtplugReturnResultFuture {
+    let sender = self.thread_sender.clone();
+    let msg = err_msg.to_owned();
+    Box::pin(async move {
+      let fut = DeviceReturnFuture::default();
+      let waker = fut.get_state_clone();
+      sender.send((cmd, waker)).await;
+      match fut.await {
+        ButtplugDeviceReturn::Ok(_) => Ok(()),
+        ButtplugDeviceReturn::Error(e) => {
+          error!("{:?}", e);
+          Err(ButtplugError::ButtplugDeviceError(
+            ButtplugDeviceError::new(&e.to_string()),
+          ))
+        }
+        _ => Err(ButtplugError::ButtplugDeviceError(
+          ButtplugDeviceError::new(&msg),
+        )),
       }
-      _ => Err(ButtplugError::ButtplugDeviceError(
-        ButtplugDeviceError::new(err_msg),
-      )),
-    }
+    })
   }
 }
 
-#[async_trait]
 impl DeviceImpl for BtlePlugDeviceImpl {
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.event_receiver.clone()
@@ -189,51 +185,43 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     self.endpoints.clone()
   }
 
-  async fn disconnect(&mut self) {
-    if let Err(e) = self
-      .send_to_device_task(
+  fn disconnect(&self) -> ButtplugReturnResultFuture {
+      self.send_to_device_task(
         ButtplugDeviceCommand::Disconnect,
         "Cannot disconnect device",
       )
-      .await
-    {
-      error!("Error disconnecting BtlePlug device {}: {:?}", self.name, e);
-    }
   }
 
-  fn box_clone(&self) -> Box<dyn DeviceImpl> {
-    Box::new((*self).clone())
-  }
-
-  async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugReturnResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),
         "Cannot write to endpoint",
       )
-      .await
   }
 
-  async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
+  fn read_value(&self, msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>> {
     // TODO Actually implement value reading
-    Ok(RawReading::new(0, msg.endpoint, vec![]))
+    unimplemented!("Shouldn't get here!")
   }
 
-  async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
+  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugReturnResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),
         "Cannot subscribe",
       )
-      .await
   }
 
-  async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
+  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugReturnResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),
         "Cannot unsubscribe",
       )
-      .await
   }
+
+  fn box_clone(&self) -> Box<dyn DeviceImpl> {
+    Box::new((*self).clone())
+  }  
 }

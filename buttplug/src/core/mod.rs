@@ -9,3 +9,9 @@
 
 pub mod errors;
 pub mod messages;
+
+use futures::future::BoxFuture;
+
+pub type ButtplugResult = Result<(), errors::ButtplugError>;
+pub type ButtplugReturnValueResultFuture<'a, T> = BoxFuture<'a, T>;
+pub type ButtplugReturnResultFuture<'a> = ButtplugReturnValueResultFuture<'a, ButtplugResult>;

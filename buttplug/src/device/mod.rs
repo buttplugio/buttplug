@@ -1,5 +1,6 @@
 pub mod configuration_manager;
 pub mod protocol;
+use futures::Future;
 #[cfg(feature = "serialize_json")]
 use serde::{
   de::{self, Visitor},
@@ -8,10 +9,13 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{fmt, str::FromStr, string::ToString};
+use std::{fmt, str::FromStr, string::ToString, pin::Pin};
 
 use crate::{
   core::{
+    ButtplugResult,
+    ButtplugReturnValueResultFuture,
+    ButtplugReturnResultFuture,
     errors::ButtplugError,
     messages::{
       self,
@@ -267,20 +271,20 @@ pub enum ButtplugDeviceEvent {
   Removed,
 }
 
-#[async_trait]
 pub trait DeviceImpl: Sync + Send {
   fn name(&self) -> &str;
   fn address(&self) -> &str;
   fn connected(&self) -> bool;
   fn endpoints(&self) -> Vec<Endpoint>;
-  async fn disconnect(&mut self);
-  fn box_clone(&self) -> Box<dyn DeviceImpl>;
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 
-  async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError>;
-  async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError>;
-  async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError>;
-  async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError>;
+  fn disconnect(&self) -> ButtplugReturnResultFuture;
+  fn box_clone(&self) -> Box<dyn DeviceImpl>;
+
+  fn read_value(&self, msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>>;
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugReturnResultFuture;
+  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugReturnResultFuture;
+  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugReturnResultFuture;
 }
 
 impl Clone for Box<dyn DeviceImpl> {
