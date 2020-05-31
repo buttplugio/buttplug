@@ -1,6 +1,5 @@
 pub mod configuration_manager;
 pub mod protocol;
-use futures::Future;
 #[cfg(feature = "serialize_json")]
 use serde::{
   de::{self, Visitor},
@@ -9,11 +8,10 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{fmt, str::FromStr, string::ToString, pin::Pin};
+use std::{fmt, str::FromStr, string::ToString};
 
 use crate::{
   core::{
-    ButtplugResult,
     ButtplugReturnValueResultFuture,
     ButtplugReturnResultFuture,
     errors::ButtplugError,

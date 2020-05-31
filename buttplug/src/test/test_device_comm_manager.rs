@@ -69,7 +69,7 @@ mod test {
   fn test_test_device_comm_manager() {
     let _ = env_logger::builder().is_test(true).try_init();
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
-    let (mut device, device_creator) =
+    let (device, device_creator) =
       TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
 
     task::block_on(async {

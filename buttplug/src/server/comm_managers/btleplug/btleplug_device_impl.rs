@@ -22,8 +22,6 @@ use async_std::{
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, Peripheral};
-use futures::future::BoxFuture;
-use std::pin::Pin;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
   device: Option<T>,
@@ -200,7 +198,7 @@ impl DeviceImpl for BtlePlugDeviceImpl {
       )
   }
 
-  fn read_value(&self, msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>> {
+  fn read_value(&self, _msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>> {
     // TODO Actually implement value reading
     unimplemented!("Shouldn't get here!")
   }

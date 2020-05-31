@@ -2,24 +2,18 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
+    ButtplugResult, ButtplugReturnResultFuture,
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster,
-    ButtplugDevice,
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplCommand,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    BoundedDeviceEventBroadcaster, ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
+    DeviceImpl, DeviceImplCommand, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
+    DeviceWriteCmd, Endpoint,
   },
 };
 use async_std::sync::{channel, Arc, Receiver, RwLock, Sender};
 use async_trait::async_trait;
+use futures::future::{self, BoxFuture};
 use std::collections::HashMap;
 
 pub struct TestDeviceImplCreator {
@@ -137,7 +131,6 @@ impl TestDevice {
   }
 }
 
-#[async_trait]
 impl DeviceImpl for TestDevice {
   fn name(&self) -> &str {
     &self.name
@@ -155,12 +148,15 @@ impl DeviceImpl for TestDevice {
     self.endpoints.clone()
   }
 
-  async fn disconnect(&mut self) {
-    self
-      .event_broadcaster
-      .send(&ButtplugDeviceEvent::Removed)
-      .await
-      .unwrap();
+  fn disconnect(&self) -> ButtplugReturnResultFuture {
+    let broadcaster = self.event_broadcaster.clone();
+    Box::pin(async move {
+      broadcaster
+        .send(&ButtplugDeviceEvent::Removed)
+        .await
+        .unwrap();
+      Ok(())
+    })
   }
 
   fn box_clone(&self) -> Box<dyn DeviceImpl> {
@@ -171,33 +167,35 @@ impl DeviceImpl for TestDevice {
     self.event_broadcaster.clone()
   }
 
-  async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
-    Ok(RawReading::new(0, msg.endpoint, vec![]))
+  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'_, Result<RawReading, ButtplugError>> {
+    Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
-    // Since we're only accessing a channel, we can use a read lock here.
-    let endpoint_channels = self.endpoint_channels.read().await;
-    match endpoint_channels.get(&msg.endpoint) {
-      Some((sender, _)) => {
-        sender.send(msg.into()).await;
-        Ok(())
+  fn write_value(&self, msg: DeviceWriteCmd) -> BoxFuture<'_, ButtplugResult> {
+    let channels = self.endpoint_channels.clone();
+    Box::pin(async move {
+      // Since we're only accessing a channel, we can use a read lock here.
+      match channels.read().await.get(&msg.endpoint) {
+        Some((sender, _)) => {
+          sender.send(msg.into()).await;
+          Ok(())
+        }
+        None => Err(
+          ButtplugDeviceError::new(&format!(
+            "Endpoint {} does not exist for {}",
+            msg.endpoint, self.name
+          ))
+          .into(),
+        ),
       }
-      None => Err(
-        ButtplugDeviceError::new(&format!(
-          "Endpoint {} does not exist for {}",
-          msg.endpoint, self.name
-        ))
-        .into(),
-      ),
-    }
+    })
   }
 
-  async fn subscribe(&self, _msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
-    Ok(())
+  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> BoxFuture<'_, ButtplugResult> {
+    Box::pin(future::ready(Ok(())))
   }
 
-  async fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
-    Ok(())
+  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> BoxFuture<'_, ButtplugResult> {
+    Box::pin(future::ready(Ok(())))
   }
 }
