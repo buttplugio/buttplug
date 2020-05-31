@@ -7,7 +7,7 @@ create_buttplug_protocol!(
     true,
     // Protocol members
     (
-        (packet_id: Arc<Mutex<u8>> = Arc::new(Mutex::new(0)))
+        (packet_id: RefCell<u8> = RefCell::new(0))
     ),
     (
         (VibrateCmd, {
@@ -25,9 +25,9 @@ create_buttplug_protocol!(
             let mut data;
             // Scope the packet id set so we can unlock ASAP.
             {
-                let mut packet_id = self.packet_id.lock().await;
-                data = vec![0xaa, 0x55, *packet_id, 0x02, 0x03, 0x01, speed, state];
-                *packet_id = packet_id.wrapping_add(1);
+                data = vec![0xaa, 0x55, *self.packet_id.borrow(), 0x02, 0x03, 0x01, speed, state];
+                let new_val = self.packet_id.borrow().wrapping_add(1);
+                *self.packet_id.borrow_mut() = new_val;
             }
             let mut crc: u8 = 0;
 
@@ -40,8 +40,11 @@ create_buttplug_protocol!(
             data.append(&mut data2);
 
             let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
-            device.write_value(msg.into()).await?;
-            Ok(messages::Ok::default().into())
+            let fut = device.write_value(msg.into());
+            Box::pin(async {
+                fut.await?;
+                Ok(messages::Ok::default().into())
+            })
         })
     )
 );
@@ -60,7 +63,7 @@ mod test {
     #[test]
     pub fn test_youou_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_").await.unwrap();
+            let (device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_").await.unwrap();
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
             check_recv_value(&command_receiver,
@@ -68,9 +71,8 @@ mod test {
                         DeviceWriteCmd::new(Endpoint::Tx,
                                             vec![0xaa, 0x55, 0x00, 0x02, 0x03, 0x01, (247.0f32 / 2.0f32) as u8, 0x01, 0x85, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
                                             false))).await;
-            // Test a cloned device to make sure we handle packet IDs across protocol clones correctly.
-            let mut device2 = device.clone();
-            device2.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
+            // Test to make sure we handle packet IDs across protocol clones correctly.
+            device.parse_message(&StopDeviceCmd::new(0).into()).await.unwrap();
             check_recv_value(&command_receiver,
                 DeviceImplCommand::Write(
                         DeviceWriteCmd::new(Endpoint::Tx,

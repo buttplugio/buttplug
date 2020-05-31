@@ -22,12 +22,13 @@ create_buttplug_protocol!(
     (),
     (
         (VibrateCmd, {
-            let result = self.manager.lock().await.update_vibration(msg, false);
+            let result = self.manager.borrow_mut().update_vibration(msg, false);
+            let mut fut_vec = vec!();
             match result {
                 Ok(cmds_option) => {
                     if let Some(cmds) = cmds_option {
                         if let Some(speed) = cmds[0] {
-                            device
+                            fut_vec.push(device
                                 .write_value(
                                     DeviceWriteCmd::new(
                                         Endpoint::Tx,
@@ -39,17 +40,23 @@ create_buttplug_protocol!(
                                         false,
                                     )
                                     .into(),
-                                )
-                                .await?;
+                                ));
                         }
                     }
-                    Ok(messages::Ok::default().into())
+                    Box::pin(async{
+                        for fut in fut_vec {
+                            fut.await?;
+                        }
+                        Ok(messages::Ok::default().into())
+                    })
+                    
                 }
-                Err(e) => Err(e),
+                Err(e) => e.into(),
             }
         }),
         (RotateCmd, {
-            let result = self.manager.lock().await.update_rotation(msg);
+            let result = self.manager.borrow_mut().update_rotation(msg);
+            let mut fut_vec = vec!();
             match result {
                 Ok(cmds) => {
                     if let Some((speed, clockwise)) = cmds[0] {
@@ -59,7 +66,7 @@ create_buttplug_protocol!(
                             VorzeDevices::Cyclone
                         };
                         let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-                        device
+                        fut_vec.push(device
                             .write_value(
                                 DeviceWriteCmd::new(
                                     Endpoint::Tx,
@@ -67,12 +74,17 @@ create_buttplug_protocol!(
                                     false,
                                 )
                                 .into(),
-                            )
-                            .await?;
+                            ));
                     }
-                    Ok(messages::Ok::default().into())
+                    Box::pin(async {
+                        for fut in fut_vec {
+                            fut.await?;
+                        }
+                        Ok(messages::Ok::default().into())
+                    })
+                    
                 }
-                Err(e) => Err(e),
+                Err(e) => e.into(),
             }
         })
     )
@@ -95,7 +107,7 @@ mod test {
     #[test]
     pub fn test_vorze_sa_vibration_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart")
+            let (device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart")
                 .await
                 .unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
@@ -134,7 +146,7 @@ mod test {
     #[test]
     pub fn test_vorze_sa_rotation_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA")
+            let (device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA")
                 .await
                 .unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;

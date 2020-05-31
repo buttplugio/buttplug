@@ -27,8 +27,12 @@ create_buttplug_protocol!(
             data[9] = crc;
 
             let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
-            device.write_value(msg.into()).await?;
-            Ok(messages::Ok::default().into())
+            // device.write_value(msg.into()).await?;
+            let fut = device.write_value(msg.into());
+            Box::pin(async move {
+              fut.await;
+              Ok(messages::Ok::default().into())
+            })
         })
     )
 );

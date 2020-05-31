@@ -87,6 +87,8 @@
 //! [github issues](https://github.com/buttplugio/buttplug-rs/issues).
 
 #[macro_use]
+extern crate evmap_derive;
+#[macro_use]
 extern crate buttplug_derive;
 #[macro_use]
 extern crate log;

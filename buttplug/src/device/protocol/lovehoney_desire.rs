@@ -6,10 +6,10 @@ create_buttplug_protocol!(
     (),
     ((VibrateCmd, {
         // Store off result before the match, so we drop the lock ASAP.
-        let result = self.manager.lock().await.update_vibration(msg, false);
-
+        let result = self.manager.borrow_mut().update_vibration(msg, false);
         match result {
             Ok(cmds_option) => {
+                let mut fut_vec = vec!();
                 if let Some(cmds) = cmds_option {
                     // The Lovehoney Desire has 2 types of commands
                     //
@@ -25,33 +25,40 @@ create_buttplug_protocol!(
                     // Just make sure we're not matching on None, 'cause if
                     // that's the case we ain't got shit to do.
                     if !cmds[0].is_none() && cmds.windows(2).all(|w| w[0] == w[1]) {
-                        device
+                        let fut = device
                             .write_value(DeviceWriteCmd::new(
                                 Endpoint::Tx,
                                 vec![0xF3, 0, cmds[0].unwrap() as u8],
                                 false,
-                            ))
-                            .await?;
-                        return Ok(messages::Ok::default().into());
+                            ));
+                        return Box::pin(async move {
+                          fut.await?;
+                          Ok(messages::Ok::default().into())
+                        })
                     }
                     // We have differening values. Set each motor separately.
                     let mut i = 1;
+
                     for cmd in cmds {
                         if let Some(speed) = cmd {
-                            device
+                            fut_vec.push(device
                                 .write_value(DeviceWriteCmd::new(
                                     Endpoint::Tx,
                                     vec![0xF3, i, speed as u8],
                                     false,
-                                ))
-                                .await?;
+                                )));
                         }
                         i += 1;
                     }
                 }
-                Ok(messages::Ok::default().into())
+                Box::pin(async move {
+                    for fut in fut_vec {
+                        fut.await;
+                    }
+                    Ok(messages::Ok::default().into())
+                })
             }
-            Err(e) => Err(e),
+            Err(e) => e.into(),
         }
     }))
 );

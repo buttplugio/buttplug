@@ -1,6 +1,6 @@
 mod generic_command_manager;
 
-use super::DeviceImpl;
+use super::{DeviceImpl, ButtplugDeviceResultFuture};
 use crate::{
   core::{
     errors::ButtplugError,
@@ -74,21 +74,14 @@ pub trait ButtplugProtocolCreator: Sync + Send {
 }
 
 #[async_trait]
-pub trait ButtplugProtocol: Sync + Send {
+pub trait ButtplugProtocol: Send {
   fn name(&self) -> &str;
   fn message_attributes(&self) -> MessageAttributesMap;
-  fn box_clone(&self) -> Box<dyn ButtplugProtocol>;
-  async fn parse_message(
-    &mut self,
+  fn parse_message(
+    &self,
     device: &dyn DeviceImpl,
     message: &ButtplugDeviceCommandMessageUnion,
-  ) -> Result<ButtplugServerMessage, ButtplugError>;
-}
-
-impl Clone for Box<dyn ButtplugProtocol> {
-  fn clone(&self) -> Box<dyn ButtplugProtocol> {
-    self.box_clone()
-  }
+  ) -> ButtplugDeviceResultFuture;
 }
 
 // TODO These macros could use some compilation tests to make sure we're
@@ -160,6 +153,7 @@ macro_rules! create_buttplug_protocol (
         use crate::{
             create_protocol_creator_impl,
             device::{
+                ButtplugDeviceResultFuture,
                 Endpoint, DeviceWriteCmd, DeviceImpl,
                 protocol::generic_command_manager::GenericCommandManager,
             },
@@ -170,7 +164,6 @@ macro_rules! create_buttplug_protocol (
                     ButtplugMessage,
                     StopDeviceCmd,
                     MessageAttributesMap,
-                    ButtplugServerMessage,
                     VibrateSubcommand,
                     ButtplugDeviceMessageType,
                     ButtplugDeviceCommandMessageUnion,
@@ -180,15 +173,17 @@ macro_rules! create_buttplug_protocol (
                 },
             },
         };
-        use async_std::sync::{Arc, Mutex};
+        use std::cell::RefCell;
+        #[allow(unused_imports)]
+        use futures::future;
 
         create_protocol_creator_impl!($create_protocol_creator_impl, $protocol_name);
 
-        #[derive(Clone)]
         pub struct $protocol_name {
             name: String,
             attributes: MessageAttributesMap,
-            manager: Arc<Mutex<GenericCommandManager>>,
+            #[allow(dead_code)]
+            manager: RefCell<GenericCommandManager>,
             stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
             $(
                 $member_name: $member_type
@@ -204,31 +199,37 @@ macro_rules! create_buttplug_protocol (
                         name: name.to_owned(),
                         attributes,
                         stop_commands: manager.get_stop_commands(),
-                        manager: Arc::new(Mutex::new(manager)),
+                        manager: RefCell::new(manager),
                         $(
                             $member_name: $member_initial_value
                         ),*
                     }
                 }
 
-                async fn handle_stop_device_cmd(
-                    &mut self,
+                fn handle_stop_device_cmd(
+                    &self,
                     device: &dyn DeviceImpl,
                     stop_msg: &StopDeviceCmd,
-                ) -> Result<ButtplugServerMessage, ButtplugError> {
-                    // TODO This clone definitely shouldn't be needed but I'm tired. GOOD FIRST BUG.
-                    let cmds = self.stop_commands.clone();
-                    for msg in cmds {
-                        self.parse_message(device, &msg).await?;
-                    }
-                    Ok(messages::Ok::new(stop_msg.get_id()).into())
+                ) -> ButtplugDeviceResultFuture {
+                    let ok_return = messages::Ok::new(stop_msg.get_id());
+                    let fut_vec: Vec<ButtplugDeviceResultFuture> = self.stop_commands.iter().map(|cmd| self.parse_message(device, &cmd)).collect();
+                    Box::pin(async move {
+                        // TODO We should be able to run these concurrently, and should return any error we get.
+                        for fut in fut_vec {
+                            if let Err(e) = fut.await {
+                                error!("{:?}", e);
+                            }
+                        }
+                        Ok(ok_return.into())
+                    })
                 }
 
                 $(
                     #[allow(non_snake_case)]
-                    pub async fn [<$message_name _handler>](&mut self,
+                    pub fn [<$message_name _handler>](
+                        &self,
                         device: &dyn DeviceImpl,
-                        msg: &$message_name,) -> Result<ButtplugServerMessage, ButtplugError>
+                        msg: &$message_name,) -> ButtplugDeviceResultFuture
                         $message_handler_body
                     )*
                 }
@@ -244,19 +245,15 @@ macro_rules! create_buttplug_protocol (
                         self.attributes.clone()
                     }
 
-                    fn box_clone(&self) -> Box<dyn ButtplugProtocol> {
-                        Box::new((*self).clone())
-                    }
-
-                    async fn parse_message(
-                        &mut self,
+                    fn parse_message(
+                        &self,
                         device: &dyn DeviceImpl,
                         message: &ButtplugDeviceCommandMessageUnion,
-                    ) -> Result<ButtplugServerMessage, ButtplugError> {
+                    ) -> ButtplugDeviceResultFuture {
                         match message {
                             $(
                                 ButtplugDeviceCommandMessageUnion::$message_name(msg) => {
-                                    self.[<$message_name _handler>](device, msg).await
+                                    self.[<$message_name _handler>](device, msg)
                                 }
                             ),*,
                             ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => {
@@ -275,10 +272,10 @@ macro_rules! create_buttplug_protocol (
                                     if let Some(count) = attr.feature_count {
                                         vibrator_count = count as usize;
                                     } else {
-                                        return Err(ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.").into());
+                                        return ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.").into();
                                     }
                                 } else {
-                                    return Err(ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd to use SingleMotorVibrateCmd.").into());
+                                    return ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd to use SingleMotorVibrateCmd.").into();
                                 }
                                 let speed = msg.speed;
                                 let mut cmds = vec!();
@@ -287,14 +284,12 @@ macro_rules! create_buttplug_protocol (
                                 }
                                 let mut vibrate_cmd = VibrateCmd::new(msg.device_index, cmds);
                                 vibrate_cmd.set_id(msg.get_id());
-                                self.parse_message(device, &vibrate_cmd.into()).await
+                                Box::pin(self.parse_message(device, &vibrate_cmd.into()))
                             },
                             ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
-                                self.handle_stop_device_cmd(device, msg).await
+                                self.handle_stop_device_cmd(device, msg)
                             },
-                            _ => Err(ButtplugError::ButtplugDeviceError(
-                                ButtplugDeviceError::new("$protocol_name does not accept this message type."),
-                            )),
+                            _ => ButtplugDeviceError::new("$protocol_name does not accept this message type.").into(),
                         }
                     }
                 }

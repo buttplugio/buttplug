@@ -3,10 +3,9 @@ use super::btleplug_internal::{
 };
 use crate::{
   core::{
+    ButtplugResultFuture,
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
-    ButtplugReturnResultFuture,
-    ButtplugReturnValueResultFuture
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
@@ -22,6 +21,7 @@ use async_std::{
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, Peripheral};
+use futures::future::BoxFuture;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
   device: Option<T>,
@@ -137,7 +137,7 @@ impl BtlePlugDeviceImpl {
     &self,
     cmd: ButtplugDeviceCommand,
     err_msg: &str,
-  ) -> ButtplugReturnResultFuture {
+  ) -> ButtplugResultFuture {
     let sender = self.thread_sender.clone();
     let msg = err_msg.to_owned();
     Box::pin(async move {
@@ -183,14 +183,14 @@ impl DeviceImpl for BtlePlugDeviceImpl {
     self.endpoints.clone()
   }
 
-  fn disconnect(&self) -> ButtplugReturnResultFuture {
+  fn disconnect(&self) -> ButtplugResultFuture {
       self.send_to_device_task(
         ButtplugDeviceCommand::Disconnect,
         "Cannot disconnect device",
       )
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugReturnResultFuture {
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),
@@ -198,12 +198,12 @@ impl DeviceImpl for BtlePlugDeviceImpl {
       )
   }
 
-  fn read_value(&self, _msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>> {
+  fn read_value(&self, _msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Actually implement value reading
     unimplemented!("Shouldn't get here!")
   }
 
-  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugReturnResultFuture {
+  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),
@@ -211,7 +211,7 @@ impl DeviceImpl for BtlePlugDeviceImpl {
       )
   }
 
-  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugReturnResultFuture {
+  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
     self
       .send_to_device_task(
         ButtplugDeviceCommand::Message(msg.into()),

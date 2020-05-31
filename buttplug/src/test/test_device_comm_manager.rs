@@ -1,14 +1,12 @@
 use super::TestDeviceImplCreator;
 use crate::{
-  core::errors::ButtplugError,
+  core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
 use async_std::sync::{Arc, Mutex, Sender};
-use async_trait::async_trait;
+use futures::future;
 
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
@@ -30,27 +28,29 @@ impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
   }
 }
 
-#[async_trait]
 impl DeviceCommunicationManager for TestDeviceCommunicationManager {
-  async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
-    let mut devices = self.devices.lock().await;
-    if devices.is_empty() {
-      panic!("No devices for test device comm manager to emit!");
-    }
-    while let Some(d) = devices.pop() {
-      self
-        .device_sender
-        .send(DeviceCommunicationEvent::DeviceFound(Box::new(d)))
-        .await;
-    }
-    Ok(())
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
+    let devices_vec = self.devices.clone();
+    let device_sender = self.device_sender.clone();
+    Box::pin(async move {
+      let mut devices = devices_vec.lock().await;
+      if devices.is_empty() {
+        panic!("No devices for test device comm manager to emit!");
+      }
+      while let Some(d) = devices.pop() {
+        device_sender
+          .send(DeviceCommunicationEvent::DeviceFound(Box::new(d)))
+          .await;
+      }
+      Ok(())
+    })
   }
 
-  async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
-    Ok(())
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
+    Box::pin(future::ready(Ok(())))
   }
 
-  fn is_scanning(&mut self) -> bool {
+  fn is_scanning(&self) -> bool {
     false
   }
 }

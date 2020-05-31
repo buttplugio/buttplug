@@ -12,8 +12,7 @@ use std::{fmt, str::FromStr, string::ToString};
 
 use crate::{
   core::{
-    ButtplugReturnValueResultFuture,
-    ButtplugReturnResultFuture,
+    ButtplugResultFuture,
     errors::ButtplugError,
     messages::{
       self,
@@ -34,6 +33,11 @@ use crate::{
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
+use futures::future::BoxFuture;
+use core::hash::{Hash, Hasher};
+
+pub type ButtplugDeviceResult = Result<ButtplugServerMessage, ButtplugError>;
+pub type ButtplugDeviceResultFuture = BoxFuture<'static, ButtplugDeviceResult>;
 
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
@@ -276,13 +280,13 @@ pub trait DeviceImpl: Sync + Send {
   fn endpoints(&self) -> Vec<Endpoint>;
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 
-  fn disconnect(&self) -> ButtplugReturnResultFuture;
+  fn disconnect(&self) -> ButtplugResultFuture;
   fn box_clone(&self) -> Box<dyn DeviceImpl>;
 
-  fn read_value(&self, msg: DeviceReadCmd) -> ButtplugReturnValueResultFuture<Result<RawReading, ButtplugError>>;
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugReturnResultFuture;
-  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugReturnResultFuture;
-  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugReturnResultFuture;
+  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture;
+  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture;
+  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture;
 }
 
 impl Clone for Box<dyn DeviceImpl> {
@@ -300,10 +304,24 @@ pub trait ButtplugDeviceImplCreator: Sync + Send {
   ) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
 }
 
-#[derive(Clone)]
+#[derive(ShallowCopy)]
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Box<dyn DeviceImpl>,
+}
+
+impl Hash for ButtplugDevice {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+      self.device.address().hash(state);
+  }
+}
+
+impl Eq for ButtplugDevice {}
+
+impl PartialEq for ButtplugDevice {
+  fn eq(&self, other: &Self) -> bool {
+    self.device.address() == other.device.address()
+  }
 }
 
 impl ButtplugDevice {
@@ -361,11 +379,11 @@ impl ButtplugDevice {
     self.protocol.message_attributes()
   }
 
-  pub async fn parse_message(
-    &mut self,
+  pub fn parse_message(
+    &self,
     message: &ButtplugDeviceCommandMessageUnion,
-  ) -> Result<ButtplugServerMessage, ButtplugError> {
-    self.protocol.parse_message(&*self.device, message).await
+  ) -> ButtplugDeviceResultFuture {
+    self.protocol.parse_message(&*self.device, message)
   }
 
   pub fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {

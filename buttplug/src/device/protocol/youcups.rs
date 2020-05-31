@@ -17,8 +17,11 @@ create_buttplug_protocol!(
                 .to_vec(),
                 false,
             );
-            device.write_value(msg.into()).await?;
-            Ok(messages::Ok::default().into())
+            let fut = device.write_value(msg.into());
+            Box::pin(async {
+                fut.await?;
+                Ok(messages::Ok::default().into())
+            })
         })
     )
 );

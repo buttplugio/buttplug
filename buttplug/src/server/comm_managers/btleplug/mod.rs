@@ -2,7 +2,10 @@ mod btleplug_device_impl;
 mod btleplug_internal;
 
 use crate::{
-  core::errors::{ButtplugDeviceError, ButtplugError},
+  core::{
+    ButtplugResultFuture,
+    errors::ButtplugDeviceError,
+  },
   server::comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
@@ -14,7 +17,6 @@ use async_std::{
   sync::{channel, Sender},
   task,
 };
-use async_trait::async_trait;
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
@@ -59,9 +61,8 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   }
 }
 
-#[async_trait]
 impl DeviceCommunicationManager for BtlePlugCommunicationManager {
-  async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     // get the first bluetooth adapter
     debug!("Bringing up adapter.");
     let central = self.get_central();
@@ -83,8 +84,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     info!("Starting scan.");
     if let Err(err) = central.start_scan() {
       // TODO Explain the setcap issue on linux here.
-      return Err(ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into());
+      return ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
     }
+    Box::pin(async {
     task::spawn(async move {
       // TODO This should be "tried addresses" probably. Otherwise if we
       // want to connect, say, 2 launches, we're going to have a Bad Time.
@@ -117,19 +119,23 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       info!("Exiting rumble scanning");
     });
     Ok(())
+  })
   }
 
-  async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
+    // TODO This changes struct state and isn't consistent with expectations
     if self.scanning_sender.is_some() {
       let sender = self.scanning_sender.take().unwrap();
-      sender.send(false).await;
-      Ok(())
+      Box::pin(async move {
+        sender.send(false).await;
+        Ok(())
+      })
     } else {
-      Err(ButtplugDeviceError::new("Scanning not currently happening.").into())
+      ButtplugDeviceError::new("Scanning not currently happening.").into()
     }
   }
 
-  fn is_scanning(&mut self) -> bool {
+  fn is_scanning(&self) -> bool {
     false
   }
 }

@@ -10,6 +10,7 @@
 use super::messages::{self, ErrorCode};
 use std::error::Error;
 use std::fmt;
+use futures::future::BoxFuture;
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 
@@ -43,6 +44,12 @@ impl Error for ButtplugHandshakeError {
   }
 }
 
+impl<T> From<ButtplugHandshakeError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+  fn from(err: ButtplugHandshakeError) -> BoxFuture<'static, Result<T, ButtplugError>> {
+    ButtplugError::from(err).into()
+  }
+}
+
 /// Message errors occur when a message is somehow malformed on creation, or
 /// received unexpectedly by a client or server.
 #[derive(Debug, Clone)]
@@ -67,6 +74,12 @@ impl fmt::Display for ButtplugMessageError {
 impl Error for ButtplugMessageError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     None
+  }
+}
+
+impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+  fn from(err: ButtplugMessageError) -> BoxFuture<'static, Result<T, ButtplugError>> {
+    ButtplugError::from(err).into()
   }
 }
 
@@ -98,6 +111,12 @@ impl Error for ButtplugPingError {
   }
 }
 
+impl<T> From<ButtplugPingError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+  fn from(err: ButtplugPingError) -> BoxFuture<'static, Result<T, ButtplugError>> {
+    ButtplugError::from(err).into()
+  }
+}
+
 /// Device errors occur during device interactions, including sending
 /// unsupported message commands, addressing the wrong number of device
 /// attributes, etc...
@@ -126,6 +145,12 @@ impl Error for ButtplugDeviceError {
   }
 }
 
+impl<T> From<ButtplugDeviceError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+  fn from(err: ButtplugDeviceError) -> BoxFuture<'static, Result<T, ButtplugError>> {
+    ButtplugError::from(err).into()
+  }
+}
+
 /// Unknown errors occur in exceptional circumstances where no other error type
 /// will suffice. These are rare and usually fatal (disconnecting) errors.
 #[derive(Debug, Clone)]
@@ -150,6 +175,12 @@ impl fmt::Display for ButtplugUnknownError {
 impl Error for ButtplugUnknownError {
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     None
+  }
+}
+
+impl<T> From<ButtplugUnknownError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+  fn from(err: ButtplugUnknownError) -> BoxFuture<'static, Result<T, ButtplugError>> {
+    ButtplugError::from(err).into()
   }
 }
 

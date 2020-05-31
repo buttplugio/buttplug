@@ -2,7 +2,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
-    ButtplugResult, ButtplugReturnResultFuture,
+    ButtplugResultFuture,
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
@@ -148,7 +148,7 @@ impl DeviceImpl for TestDevice {
     self.endpoints.clone()
   }
 
-  fn disconnect(&self) -> ButtplugReturnResultFuture {
+  fn disconnect(&self) -> ButtplugResultFuture {
     let broadcaster = self.event_broadcaster.clone();
     Box::pin(async move {
       broadcaster
@@ -167,12 +167,13 @@ impl DeviceImpl for TestDevice {
     self.event_broadcaster.clone()
   }
 
-  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'_, Result<RawReading, ButtplugError>> {
+  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> BoxFuture<'_, ButtplugResult> {
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
     let channels = self.endpoint_channels.clone();
+    let name = self.name.to_owned();
     Box::pin(async move {
       // Since we're only accessing a channel, we can use a read lock here.
       match channels.read().await.get(&msg.endpoint) {
@@ -183,7 +184,7 @@ impl DeviceImpl for TestDevice {
         None => Err(
           ButtplugDeviceError::new(&format!(
             "Endpoint {} does not exist for {}",
-            msg.endpoint, self.name
+            msg.endpoint, name
           ))
           .into(),
         ),
@@ -191,11 +192,11 @@ impl DeviceImpl for TestDevice {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> BoxFuture<'_, ButtplugResult> {
+  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> BoxFuture<'_, ButtplugResult> {
+  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 }

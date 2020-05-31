@@ -10,7 +10,8 @@ create_buttplug_protocol!(
     // Only implements VibrateCmd
     ((VibrateCmd, {
         // Store off result before the match, so we drop the lock ASAP.
-        let result = self.manager.lock().await.update_vibration(msg, false);
+        let result = self.manager.borrow_mut().update_vibration(msg, false);
+        let mut fut_vec = vec!();
         // My life for an async closure so I could just do this via and_then(). :(
         match result {
             Ok(cmds_option) => {
@@ -18,20 +19,25 @@ create_buttplug_protocol!(
                     let mut index = 0u8;
                     for cmd in cmds {
                         if let Some(speed) = cmd {
-                            device
+                            fut_vec.push(device
                                 .write_value(DeviceWriteCmd::new(
                                     Endpoint::Tx,
                                     vec![0xF1 + index, speed as u8],
                                     false,
-                                ))
-                                .await?;
+                                )));
                         }
                         index += 1;
                     }
                 }
-                Ok(messages::Ok::default().into())
+                Box::pin(async move {
+                    for fut in fut_vec {
+                        // TODO: Do something about possible errors here
+                        fut.await;
+                    }
+                    Ok(messages::Ok::default().into())
+                })
             }
-            Err(e) => Err(e),
+            Err(e) => e.into(),
         }
     }))
 );
