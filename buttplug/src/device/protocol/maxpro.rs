@@ -30,7 +30,7 @@ create_buttplug_protocol!(
             // device.write_value(msg.into()).await?;
             let fut = device.write_value(msg.into());
             Box::pin(async move {
-              fut.await;
+              fut.await?;
               Ok(messages::Ok::default().into())
             })
         })

@@ -53,7 +53,7 @@ create_buttplug_protocol!(
                 }
                 Box::pin(async move {
                     for fut in fut_vec {
-                        fut.await;
+                        fut.await?;
                     }
                     Ok(messages::Ok::default().into())
                 })
@@ -77,7 +77,7 @@ mod test {
     #[test]
     pub fn test_lovehoney_desire_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) =
+            let (device, test_device) =
                 TestDevice::new_bluetoothle_test_device("PROSTATE VIBE")
                     .await
                     .unwrap();

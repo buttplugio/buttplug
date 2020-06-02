@@ -10,16 +10,13 @@
 use super::ButtplugConnectorTransport;
 use crate::{
   connector::{
-    ButtplugConnector,
-    ButtplugConnectorError,
-    ButtplugConnectorResult,
-    ButtplugTransportMessage,
+    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult, ButtplugTransportMessage,
   },
-  core::messages::{
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
-    ButtplugMessage,
+  core::{
+    messages::{
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
+    },
   },
 };
 use async_std::{
@@ -110,15 +107,16 @@ async fn remote_connector_event_loop<
                 }
               }
               Err(e) => {
-                /*
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                let err_msg = messages::Error::from(ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&error_str)).into());
-                outgoing_sender
-                  .send(I::from(err_msg))
-                  .await;
-                  */
+                // TODO Implement error type to send back to connector
+                /*
+                let err_msg = messages::Error::from(
+                  ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&error_str)).into(),
+                );
+                connector_incoming_sender.send(err_msg.into()).await;
+                */
               }
             }
           }
@@ -143,7 +141,9 @@ async fn remote_connector_event_loop<
             transport_outgoing_sender.send(serialized_msg).await;
           }
           ButtplugRemoteConnectorMessage::Close => {
-            transport.disconnect().await;
+            if let Err(e) = transport.disconnect().await {
+              error!("Error disconnecting transport: {:?}", e);
+            }
             break;
           }
         }

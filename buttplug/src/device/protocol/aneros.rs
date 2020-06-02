@@ -32,7 +32,7 @@ create_buttplug_protocol!(
                 Box::pin(async move {
                     for fut in fut_vec {
                         // TODO: Do something about possible errors here
-                        fut.await;
+                        fut.await?;
                     }
                     Ok(messages::Ok::default().into())
                 })
@@ -54,7 +54,7 @@ mod test {
     #[test]
     pub fn test_aneros_protocol() {
         task::block_on(async move {
-            let (mut device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo")
+            let (device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo")
                 .await
                 .unwrap();
             device
