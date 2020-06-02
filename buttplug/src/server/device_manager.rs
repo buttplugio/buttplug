@@ -13,14 +13,13 @@ use super::comm_managers::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError, ButtplugUnknownError},
+    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
       self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
       ButtplugServerMessage, DeviceAdded, DeviceList, DeviceMessageInfo, DeviceRemoved,
       ScanningFinished,
     },
-    ButtplugResultFuture,
   },
   device::{ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceResultFuture},
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
@@ -31,7 +30,7 @@ use async_std::{
   task,
 };
 use evmap::{self, ReadHandle};
-use futures::future::Future;
+use futures::future::{self, Future};
 use std::convert::TryFrom;
 
 enum DeviceEvent {
@@ -196,47 +195,37 @@ impl DeviceManager {
     }
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
       )
       .into()
     } else {
-      let mut fut_vec = vec![];
-      for mgr in self.comm_managers.iter() {
-        fut_vec.push(mgr.start_scanning());
-      }
-      Box::pin(async {
-        for fut in fut_vec {
-          fut.await?;
-        }
-        Ok(())
+      let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.start_scanning()).collect();
+      Box::pin(async move {
+        future::join_all(fut_vec).await;
+        Ok(messages::Ok::new(msg_id).into())
       })
     }
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
       )
       .into()
     } else {
-      let mut fut_vec = vec![];
-      for mgr in self.comm_managers.iter() {
-        fut_vec.push(mgr.stop_scanning());
-      }
-      Box::pin(async {
-        for fut in fut_vec {
-          fut.await?;
-        }
-        Ok(())
+      let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.stop_scanning()).collect();
+      Box::pin(async move {
+        future::join_all(fut_vec).await;
+        Ok(messages::Ok::new(msg_id).into())
       })
     }
   }
 
-  fn stop_all_devices(&self) -> ButtplugResultFuture {
+  fn stop_all_devices(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
     let fut_vec: Vec<_> = self
       .devices
       .read()
@@ -248,13 +237,9 @@ impl DeviceManager {
       })
       .collect();
     // TODO This could use some error reporting.
-    Box::pin(async {
-      for fut in fut_vec {
-        if let Err(e) = fut.await {
-          error!("{:?}", e);
-        }
-      }
-      Ok(())
+    Box::pin(async move {
+      future::join_all(fut_vec).await;
+      Ok(messages::Ok::new(msg_id).into())
     })
   }
 
@@ -271,10 +256,10 @@ impl DeviceManager {
     }
   }
 
-  async fn parse_device_manager_message(
-    &mut self,
+  fn parse_device_manager_message(
+    &self,
     manager_msg: ButtplugDeviceManagerMessageUnion,
-  ) -> Result<ButtplugServerMessage, ButtplugError> {
+  ) -> ButtplugDeviceResultFuture {
     match manager_msg {
       ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
         let devices = self
@@ -293,35 +278,32 @@ impl DeviceManager {
           .collect();
         let mut device_list = DeviceList::new(devices);
         device_list.set_id(msg.get_id());
-        Ok(device_list.into())
+        Box::pin(future::ready(Ok(device_list.into())))
       }
       ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
-        self.stop_all_devices().await?;
-        Ok(messages::Ok::new(msg.get_id()).into())
+        self.stop_all_devices(msg.get_id())
       }
       ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
-        self.start_scanning().await?;
-        Ok(messages::Ok::new(msg.get_id()).into())
+        self.start_scanning(msg.get_id())
       }
       ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
-        self.stop_scanning().await?;
-        Ok(messages::Ok::new(msg.get_id()).into())
+        self.stop_scanning(msg.get_id())
       }
     }
   }
 
-  pub async fn parse_message(
-    &mut self,
+  pub fn parse_message(
+    &self,
     msg: ButtplugClientMessage,
-  ) -> Result<ButtplugServerMessage, ButtplugError> {
+  ) -> ButtplugDeviceResultFuture {
     // If this is a device command message, just route it directly to the
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
-      Ok(device_msg) => self.parse_device_message(device_msg).await,
-      Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
-        Ok(manager_msg) => self.parse_device_manager_message(manager_msg).await,
+      Ok(device_msg) => self.parse_device_message(device_msg),
+      Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg) {
+        Ok(manager_msg) => self.parse_device_manager_message(manager_msg),
         Err(_) => {
-          Err(ButtplugMessageError::new("Message type not handled by Device Manager").into())
+          ButtplugMessageError::new("Message type not handled by Device Manager").into()
         }
       },
     }
