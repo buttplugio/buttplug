@@ -2,21 +2,18 @@ mod btleplug_device_impl;
 mod btleplug_internal;
 
 use crate::{
-  core::{
-    ButtplugResultFuture,
-    errors::ButtplugDeviceError,
-  },
+  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Sender},
+  sync::{channel, Arc, Mutex, Receiver, Sender},
   task,
 };
+use std::cell::RefCell;
+
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
@@ -31,7 +28,10 @@ pub struct BtlePlugCommunicationManager {
   // manager hold it.
   manager: Manager,
   device_sender: Sender<DeviceCommunicationEvent>,
-  scanning_sender: Option<Sender<bool>>,
+  scanning_sender: Sender<()>,
+  scanning_receiver: Receiver<()>,
+  is_scanning: Arc<Mutex<bool>>,
+  set_handler: RefCell<bool>,
 }
 
 #[cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))]
@@ -53,86 +53,99 @@ impl BtlePlugCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
+    let (scanning_sender, scanning_receiver) = channel(256);
     Self {
       manager: Manager::new().unwrap(),
       device_sender,
-      scanning_sender: None,
+      scanning_sender,
+      scanning_receiver,
+      is_scanning: Arc::new(Mutex::new(false)),
+      set_handler: RefCell::new(false),
     }
   }
 }
 
 impl DeviceCommunicationManager for BtlePlugCommunicationManager {
-  fn start_scanning(&mut self) -> ButtplugResultFuture {
+  fn start_scanning(&self) -> ButtplugResultFuture {
     // get the first bluetooth adapter
     debug!("Bringing up adapter.");
+    // TODO What happens if we don't have a radio?
     let central = self.get_central();
     let device_sender = self.device_sender.clone();
-    let (sender, mut receiver) = channel(256);
-    self.scanning_sender = Some(sender.clone());
-    let on_event = move |event: CentralEvent| {
-      if let CentralEvent::DeviceDiscovered(_) = event {
-        let s = sender.clone();
-        task::spawn(async move {
-          s.send(true).await;
-        });
-      }
-    };
-    // TODO There's no way to unsubscribe central event handlers. That
-    // needs to be fixed in rumble somehow, but for now we'll have to
-    // make our handlers exit early after dying or something?
-    central.on_event(Box::new(on_event));
+    let sender = self.scanning_sender.clone();
+    let mut receiver = self.scanning_receiver.clone();
+    let is_scanning = self.is_scanning.clone();
+    if !*self.set_handler.borrow() {
+      info!("Setting bluetooth device event handler.");
+      *self.set_handler.borrow_mut() = true;
+      let on_event = move |event: CentralEvent| {
+        if let CentralEvent::DeviceDiscovered(_) = event {
+          let s = sender.clone();
+          task::spawn(async move {
+            s.send(()).await;
+          });
+        }
+      };
+      // TODO There's no way to unsubscribe central event handlers. That
+      // needs to be fixed in rumble somehow, but for now we'll have to
+      // make our handlers exit early after dying or something?
+      central.on_event(Box::new(on_event));
+    }
     info!("Starting scan.");
     if let Err(err) = central.start_scan() {
       // TODO Explain the setcap issue on linux here.
       return ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
     }
     Box::pin(async {
-    task::spawn(async move {
-      // TODO This should be "tried addresses" probably. Otherwise if we
-      // want to connect, say, 2 launches, we're going to have a Bad Time.
-      let mut tried_names: Vec<String> = vec![];
-      // When stop_scanning is called, this will get false and stop the
-      // task.
-      while receiver.next().await.unwrap() {
-        for p in central.peripherals() {
-          // If a device has no discernable name, we can't do anything
-          // with it, just ignore it.
-          //
-          // TODO Should probably at least log this and add it to the
-          // tried_addresses thing, once that exists.
-          if let Some(name) = p.properties().local_name {
-            debug!("Found device {}", name);
-            // Names are the only way we really have to test devices
-            // at the moment. Most devices don't send services on
-            // advertisement.
-            if !name.is_empty() && !tried_names.contains(&name) {
-              tried_names.push(name.clone());
-              let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
-              device_sender
-                .send(DeviceCommunicationEvent::DeviceFound(device_creator))
-                .await;
+      task::spawn(async move {
+        // TODO This should be "tried addresses" probably. Otherwise if we
+        // want to connect, say, 2 launches, we're going to have a Bad Time.
+        let mut tried_names: Vec<String> = vec![];
+        // When stop_scanning is called, this will get false and stop the
+        // task.
+        while *is_scanning.lock().await {
+          for p in central.peripherals() {
+            // If a device has no discernable name, we can't do anything
+            // with it, just ignore it.
+            //
+            // TODO Should probably at least log this and add it to the
+            // tried_addresses thing, once that exists.
+            if let Some(name) = p.properties().local_name {
+              debug!("Found device {}", name);
+              // Names are the only way we really have to test devices
+              // at the moment. Most devices don't send services on
+              // advertisement.
+              if !name.is_empty() && !tried_names.contains(&name) {
+                tried_names.push(name.clone());
+                let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
+                device_sender
+                  .send(DeviceCommunicationEvent::DeviceFound(device_creator))
+                  .await;
+              }
             }
           }
+          receiver.next().await.unwrap();
         }
-      }
-      central.stop_scan().unwrap();
-      info!("Exiting rumble scanning");
-    });
-    Ok(())
-  })
+        central.stop_scan().unwrap();
+        info!("Exiting rumble scanning");
+      });
+      Ok(())
+    })
   }
 
-  fn stop_scanning(&mut self) -> ButtplugResultFuture {
-    // TODO This changes struct state and isn't consistent with expectations
-    if self.scanning_sender.is_some() {
-      let sender = self.scanning_sender.take().unwrap();
-      Box::pin(async move {
-        sender.send(false).await;
+  fn stop_scanning(&self) -> ButtplugResultFuture {
+    let is_scanning = self.is_scanning.clone();
+    let sender = self.scanning_sender.clone();
+    Box::pin(async move {
+      let mut scanning = is_scanning.lock().await;
+      if *scanning {
+        *scanning = false;
+        sender.send(()).await;
         Ok(())
-      })
-    } else {
-      ButtplugDeviceError::new("Scanning not currently happening.").into()
-    }
+      } else {
+        Err(ButtplugDeviceError::new("Scanning not currently happening.").into())
+      }
+    })
   }
 
   fn is_scanning(&self) -> bool {
@@ -143,11 +156,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 impl Drop for BtlePlugCommunicationManager {
   fn drop(&mut self) {
     info!("Dropping Comm Manager!");
-    task::block_on(async {
-      if let Err(e) = self.stop_scanning().await {
-        error!("Error stopping scanning during comm manager drop: {:?}", e);
-      }
-    });
+    let central = self.get_central();
+    if let Err(e) = central.stop_scan() {
+      info!("Error on scanning shutdown for rumble bluetooth: {:?}", e);
+    }
   }
 }
 
@@ -155,9 +167,7 @@ impl Drop for BtlePlugCommunicationManager {
 mod test {
   use super::BtlePlugCommunicationManager;
   use crate::server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   };
   use async_std::{prelude::StreamExt, sync::channel, task};
 
@@ -167,7 +177,7 @@ mod test {
     let _ = env_logger::builder().is_test(true).try_init();
     task::block_on(async move {
       let (sender, mut receiver) = channel(256);
-      let mut mgr = BtlePlugCommunicationManager::new(sender);
+      let mgr = BtlePlugCommunicationManager::new(sender);
       mgr.start_scanning().await.unwrap();
       loop {
         match receiver.next().await.unwrap() {

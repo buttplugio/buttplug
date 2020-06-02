@@ -29,7 +29,7 @@ impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
 }
 
 impl DeviceCommunicationManager for TestDeviceCommunicationManager {
-  fn start_scanning(&mut self) -> ButtplugResultFuture {
+  fn start_scanning(&self) -> ButtplugResultFuture {
     let devices_vec = self.devices.clone();
     let device_sender = self.device_sender.clone();
     Box::pin(async move {
@@ -46,7 +46,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
     })
   }
 
-  fn stop_scanning(&mut self) -> ButtplugResultFuture {
+  fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
@@ -93,7 +93,7 @@ mod test {
           msg
         ));
       }
-      device.disconnect().await;
+      device.disconnect().await.unwrap();
       // Check that we got an event back about a removed device.
       let msg = recv.next().await.unwrap();
       if let ButtplugServerMessage::DeviceRemoved(da) = msg {

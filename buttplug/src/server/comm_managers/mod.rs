@@ -15,13 +15,13 @@ pub enum DeviceCommunicationEvent {
 
 // Storing this in a Vec<Box<dyn T>> causes a associated function issue due to
 // the lack of new. Just create an extra trait for defining comm managers.
-pub trait DeviceCommunicationManagerCreator: Sync + Send {
+pub trait DeviceCommunicationManagerCreator: Send {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;
 }
 
-pub trait DeviceCommunicationManager: Sync + Send {
-  fn start_scanning(&mut self) -> ButtplugResultFuture;
-  fn stop_scanning(&mut self) -> ButtplugResultFuture;
+pub trait DeviceCommunicationManager: Send {
+  fn start_scanning(&self) -> ButtplugResultFuture;
+  fn stop_scanning(&self) -> ButtplugResultFuture;
   fn is_scanning(&self) -> bool;
   // Events happen via channel senders passed to the comm manager.
 }

@@ -196,7 +196,7 @@ impl DeviceManager {
     }
   }
 
-  fn start_scanning(&mut self) -> ButtplugResultFuture {
+  fn start_scanning(&self) -> ButtplugResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
@@ -204,7 +204,7 @@ impl DeviceManager {
       .into()
     } else {
       let mut fut_vec = vec![];
-      for mgr in self.comm_managers.iter_mut() {
+      for mgr in self.comm_managers.iter() {
         fut_vec.push(mgr.start_scanning());
       }
       Box::pin(async {
@@ -216,7 +216,7 @@ impl DeviceManager {
     }
   }
 
-  fn stop_scanning(&mut self) -> ButtplugResultFuture {
+  fn stop_scanning(&self) -> ButtplugResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
@@ -224,7 +224,7 @@ impl DeviceManager {
       .into()
     } else {
       let mut fut_vec = vec![];
-      for mgr in self.comm_managers.iter_mut() {
+      for mgr in self.comm_managers.iter() {
         fut_vec.push(mgr.stop_scanning());
       }
       Box::pin(async {
