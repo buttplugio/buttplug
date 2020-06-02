@@ -144,12 +144,10 @@ impl PingTimer {
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
-  server_spec_version: ButtplugMessageSpecVersion,
   client_spec_version: Option<ButtplugMessageSpecVersion>,
   client_name: Option<String>,
   device_manager: Option<DeviceManager>,
   event_sender: Sender<ButtplugServerMessage>,
-  event_receiver: Receiver<ButtplugServerMessage>,
   ping_timer: Option<PingTimer>,
 }
 
@@ -165,13 +163,11 @@ impl ButtplugServer {
     (
       Self {
         server_name: name.to_string(),
-        server_spec_version: BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
         client_name: None,
         client_spec_version: None,
         device_manager: Some(DeviceManager::new(send.clone(), ping_receiver)),
         ping_timer,
         event_sender: send,
-        event_receiver: recv.clone(),
       },
       recv,
     )
@@ -198,10 +194,6 @@ impl ButtplugServer {
     } else {
       panic!("Device Manager has been taken already!");
     }
-  }
-
-  pub fn get_event_receiver(&self) -> Receiver<ButtplugServerMessage> {
-    self.event_receiver.clone()
   }
 
   pub fn connected(&self) -> bool {
@@ -279,11 +271,11 @@ impl ButtplugServer {
     if self.connected() {
       return Err(ButtplugHandshakeError::new("Server already connected.").into());
     }
-    if self.server_spec_version < msg.message_version {
+    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
       return Err(
         ButtplugHandshakeError::new(&format!(
           "Server version ({}) must be equal to or greater than client version ({}).",
-          self.server_spec_version, msg.message_version
+          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version
         ))
         .into(),
       );
@@ -298,7 +290,7 @@ impl ButtplugServer {
     }
     Result::Ok(messages::ServerInfo::new(
       &self.server_name,
-      self.server_spec_version,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
       max_ping_time.try_into().unwrap(),
     ))
   }
@@ -396,7 +388,7 @@ mod test {
     let _ = env_logger::builder().is_test(true).try_init();
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
     task::block_on(async {
-      let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
+      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       task::sleep(Duration::from_millis(150)).await;
       let reply = server.parse_message(&msg.into()).await;
       assert!(
@@ -444,7 +436,7 @@ mod test {
         TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
       devices.lock().await.push(device_creator);
 
-      let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
+      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(&msg.into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server
@@ -503,7 +495,7 @@ mod test {
     // let _ = env_logger::builder().is_test(true).try_init();
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     task::block_on(async {
-      let msg = messages::RequestServerInfo::new("Test Client", server.server_spec_version);
+      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(&msg.into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server
