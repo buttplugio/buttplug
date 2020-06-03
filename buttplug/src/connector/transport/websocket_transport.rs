@@ -9,9 +9,7 @@
 
 use crate::{
   connector::{
-    ButtplugConnectorError,
-    ButtplugConnectorResult,
-    ButtplugConnectorTransport,
+    ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugConnectorTransport,
     ButtplugTransportMessage,
   },
   core::messages::serializer::ButtplugSerializedMessage,
@@ -20,11 +18,10 @@ use async_std::{
   sync::{channel, Receiver, Sender},
   task,
 };
-use async_trait::async_trait;
 use async_tungstenite::{
-  async_std::connect_async_with_tls_connector,
-  tungstenite::protocol::Message,
+  async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
 };
+use futures::future::{self, BoxFuture};
 use futures_util::{SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -68,16 +65,18 @@ impl ButtplugWebsocketClientTransport {
   }
 }
 
-#[async_trait]
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
-  async fn connect(
-    &mut self,
-  ) -> Result<
-    (
-      Sender<ButtplugSerializedMessage>,
-      Receiver<ButtplugTransportMessage>,
-    ),
-    ButtplugConnectorError,
+  fn connect(
+    &self,
+  ) -> BoxFuture<
+    'static,
+    Result<
+      (
+        Sender<ButtplugSerializedMessage>,
+        Receiver<ButtplugTransportMessage>,
+      ),
+      ButtplugConnectorError,
+    >,
   > {
     let (request_sender, request_receiver) = channel(256);
     let (response_sender, response_receiver) = channel(256);
@@ -121,53 +120,57 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
       // point async_tungstenite won't use a wrapper.
       None
     };
+    let address = self.address.clone();
 
-    match connect_async_with_tls_connector(&self.address, tls_connector).await {
-      Ok((stream, _)) => {
-        let (mut writer, mut reader) = stream.split();
-        // TODO Do we want to store/join these tasks anywhere?
-        task::spawn(async move {
-          while let Some(msg) = request_receiver.recv().await {
-            let out_msg = match msg {
-              ButtplugSerializedMessage::Text(text) => Message::Text(text),
-              ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
-            };
-            // TODO see what happens when we try to send to a remote that's closed connection.
-            writer.send(out_msg).await.expect("This should never fail?");
-          }
-        });
-        task::spawn(async move {
-          while let Some(response) = reader.next().await {
-            trace!("Websocket receiving: {:?}", response);
-            match response.unwrap() {
-              Message::Text(t) => {
-                response_sender
-                  .send(ButtplugTransportMessage::Message(
-                    ButtplugSerializedMessage::Text(t.to_string()),
-                  ))
-                  .await;
-              }
-              // TODO Do we need to handle anything else?
-              Message::Binary(v) => {
-                response_sender
-                  .send(ButtplugTransportMessage::Message(
-                    ButtplugSerializedMessage::Binary(v),
-                  ))
-                  .await;
-              }
-              Message::Ping(_) => {}
-              Message::Pong(_) => {}
-              Message::Close(_) => {}
+    Box::pin(async move {
+      match connect_async_with_tls_connector(&address, tls_connector).await {
+        Ok((stream, _)) => {
+          let (mut writer, mut reader) = stream.split();
+          // TODO Do we want to store/join these tasks anywhere?
+          task::spawn(async move {
+            while let Some(msg) = request_receiver.recv().await {
+              let out_msg = match msg {
+                ButtplugSerializedMessage::Text(text) => Message::Text(text),
+                ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
+              };
+              // TODO see what happens when we try to send to a remote that's closed connection.
+              writer.send(out_msg).await.expect("This should never fail?");
             }
-          }
-        });
-        Ok((request_sender, response_receiver))
+          });
+          task::spawn(async move {
+            while let Some(response) = reader.next().await {
+              trace!("Websocket receiving: {:?}", response);
+              match response.unwrap() {
+                Message::Text(t) => {
+                  response_sender
+                    .send(ButtplugTransportMessage::Message(
+                      ButtplugSerializedMessage::Text(t.to_string()),
+                    ))
+                    .await;
+                }
+                // TODO Do we need to handle anything else?
+                Message::Binary(v) => {
+                  response_sender
+                    .send(ButtplugTransportMessage::Message(
+                      ButtplugSerializedMessage::Binary(v),
+                    ))
+                    .await;
+                }
+                Message::Ping(_) => {}
+                Message::Pong(_) => {}
+                Message::Close(_) => {}
+              }
+            }
+          });
+          Ok((request_sender, response_receiver))
+        }
+        Err(e) => Err(ButtplugConnectorError::new(&format!("{:?}", e))),
       }
-      Err(e) => Err(ButtplugConnectorError::new(&format!("{:?}", e))),
-    }
+    })
   }
 
-  async fn disconnect(self) -> ButtplugConnectorResult {
-    Ok(())
+  fn disconnect(self) -> ButtplugConnectorResultFuture {
+    // TODO We should definitely allow people to disconnect. That would be a good thing.
+    Box::pin(future::ready(Ok(())))
   }
 }

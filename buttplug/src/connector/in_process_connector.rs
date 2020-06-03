@@ -1,5 +1,5 @@
 use crate::{
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult},
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   server::ButtplugServer,
 };
@@ -8,8 +8,8 @@ use async_std::{
   sync::{channel, Receiver, Sender},
   task,
 };
-use async_trait::async_trait;
 use std::convert::TryInto;
+use futures::future::{self, BoxFuture};
 
 /// In-process Buttplug Server Connector
 ///
@@ -80,31 +80,35 @@ impl<'a> ButtplugInProcessClientConnector {
 }
 
 #[cfg(feature = "server")]
-#[async_trait]
 impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
   for ButtplugInProcessClientConnector
 {
-  async fn connect(
+  fn connect(
     &mut self,
-  ) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
+  ) -> BoxFuture<'static, Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError>> {
     if self.connector_outbound_recv.is_some() {
-      Ok(self.connector_outbound_recv.take().unwrap())
+      let recv = self.connector_outbound_recv.take().unwrap();
+      Box::pin(future::ready(Ok(recv)))
     } else {
-      Err(ButtplugConnectorError::new("Connector already connected."))
+      ButtplugConnectorError::new("Connector already connected.").into()
     }
   }
 
-  async fn disconnect(&mut self) -> ButtplugConnectorResult {
-    Ok(())
+  fn disconnect(&self) -> ButtplugConnectorResultFuture {
+    Box::pin(future::ready(Ok(())))
   }
 
-  async fn send(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResult {
+  fn send(&self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
     let input = msg.try_into().unwrap();
-    let output = self.server.parse_message(input).await.unwrap();
-    self
-      .server_outbound_sender
-      .send(output.try_into().unwrap())
-      .await;
-    Ok(())
+    let output_fut = self.server.parse_message(input);
+    let sender = self.server_outbound_sender.clone();
+    Box::pin(async move {
+      // TODO We should definitely do something different than just unwrapping errors here.
+      let output = output_fut.await;
+      sender 
+        .send(output.unwrap().try_into().unwrap())
+        .await;
+        Ok(())
+    })
   }
 }

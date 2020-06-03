@@ -89,12 +89,14 @@ use crate::{
 use async_std::sync::{Receiver, Sender};
 use async_trait::async_trait;
 use std::{error::Error, fmt};
+use futures::future::{self, BoxFuture};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorState = ButtplugFutureState<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorStateShared =
   ButtplugFutureStateShared<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorFuture = ButtplugFuture<Result<(), ButtplugConnectorError>>;
+pub type ButtplugConnectorResultFuture = BoxFuture<'static, ButtplugConnectorResult>;
 
 /// Errors specific to client connector structs.
 ///
@@ -128,6 +130,12 @@ impl Error for ButtplugConnectorError {
 
   fn source(&self) -> Option<&(dyn Error + 'static)> {
     None
+  }
+}
+
+impl<T> From<ButtplugConnectorError> for BoxFuture<'static, Result<T, ButtplugConnectorError>> where T: Send + 'static {
+  fn from(err: ButtplugConnectorError) -> BoxFuture<'static, Result<T, ButtplugConnectorError>> {
+    Box::pin(future::ready(Err(err)))
   }
 }
 
@@ -167,7 +175,7 @@ where
   ///
   /// As connection may involve blocking operations like establishing network
   /// connections, this trait method is marked async.
-  async fn connect(&mut self) -> Result<Receiver<InboundMessageType>, ButtplugConnectorError>;
+  fn connect(&mut self) -> BoxFuture<'static, Result<Receiver<InboundMessageType>, ButtplugConnectorError>>;
   /// Disconnects the client from the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the
@@ -177,14 +185,14 @@ where
   ///
   /// As disconnection may involve blocking operations like network closing and
   /// cleanup, this trait method is marked async.
-  async fn disconnect(&mut self) -> ButtplugConnectorResult;
+  fn disconnect(&self) -> ButtplugConnectorResultFuture;
   /// Sends a message of outbound message type `O` to the other connector.
   ///
   /// # Errors
   ///
   /// If the connector is not currently connected, or an error happens during
   /// the send operation, this will return a [ButtplugConnectorError]
-  async fn send(&mut self, msg: OutboundMessageType) -> ButtplugConnectorResult;
+  fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture;
 }
 
 /// Enum of messages we can receive from a connector.
@@ -201,14 +209,14 @@ pub enum ButtplugTransportMessage {
 
 #[async_trait]
 pub trait ButtplugConnectorTransport: Send + Sync {
-  async fn connect(
-    &mut self,
-  ) -> Result<
+  fn connect(
+    &self,
+  ) -> BoxFuture<'static, Result<
     (
       Sender<ButtplugSerializedMessage>,
       Receiver<ButtplugTransportMessage>,
     ),
     ButtplugConnectorError,
-  >;
-  async fn disconnect(self) -> ButtplugConnectorResult;
+  >>;
+  fn disconnect(self) -> ButtplugConnectorResultFuture;
 }

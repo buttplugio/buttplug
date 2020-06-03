@@ -545,13 +545,13 @@ mod test {
     connector::{
       ButtplugConnector,
       ButtplugConnectorError,
-      ButtplugConnectorResult,
+      ButtplugConnectorResultFuture,
       ButtplugInProcessClientConnector,
     },
     core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   };
+  use futures::future::BoxFuture;
   use async_std::{future::Future, sync::Receiver, task};
-  use async_trait::async_trait;
 
   async fn connect_test_client<F, T>(func: F)
   where
@@ -571,21 +571,20 @@ mod test {
   #[derive(Default)]
   struct ButtplugFailingConnector {}
 
-  #[async_trait]
   impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
     for ButtplugFailingConnector
   {
-    async fn connect(
+    fn connect(
       &mut self,
-    ) -> Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError> {
-      Err(ButtplugConnectorError::new("Always fails"))
+    ) -> BoxFuture<'static, Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError>> {
+      ButtplugConnectorError::new("Always fails").into()
     }
 
-    async fn disconnect(&mut self) -> ButtplugConnectorResult {
-      Err(ButtplugConnectorError::new("Always fails"))
+    fn disconnect(&self) -> ButtplugConnectorResultFuture {
+      ButtplugConnectorError::new("Always fails").into()
     }
 
-    async fn send(&mut self, _msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResult {
+    fn send(&self, _msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
       panic!("Should never be called")
     }
   }

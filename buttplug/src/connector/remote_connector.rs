@@ -10,13 +10,12 @@
 use super::ButtplugConnectorTransport;
 use crate::{
   connector::{
-    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResult, ButtplugTransportMessage,
+    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugTransportMessage,
   },
-  core::{
-    messages::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
-    },
+  core::messages::{
+    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
   },
 };
 use async_std::{
@@ -24,7 +23,7 @@ use async_std::{
   sync::{channel, Receiver, Sender},
   task,
 };
-use async_trait::async_trait;
+use futures::future::BoxFuture;
 use futures_util::StreamExt;
 use std::marker::PhantomData;
 
@@ -204,7 +203,6 @@ where
   }
 }
 
-#[async_trait]
 impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
   ButtplugConnector<OutboundMessageType, InboundMessageType>
   for ButtplugRemoteConnector<
@@ -220,58 +218,69 @@ where
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
-  async fn connect(&mut self) -> Result<Receiver<InboundMessageType>, ButtplugConnectorError> {
+  fn connect(
+    &mut self,
+  ) -> BoxFuture<'static, Result<Receiver<InboundMessageType>, ButtplugConnectorError>> {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
-      let mut transport = self.transport.take().unwrap();
-      match transport.connect().await {
-        // If we connect successfully, we get back the channel from the transport
-        // to send outgoing messages and receieve incoming events, all serialized.
-        Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
-          // So we
-          let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
-          let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
-          task::spawn(async move {
-            remote_connector_event_loop::<
-              TransportType,
-              SerializerType,
-              OutboundMessageType,
-              InboundMessageType,
-            >(
-              connector_outgoing_receiver,
-              connector_incoming_sender,
-              transport,
-              transport_outgoing_sender,
-              transport_incoming_receiver,
-            )
-          });
-          self.event_loop_sender = Some(connector_outgoing_sender);
-          Ok(connector_incoming_receiver)
+      let transport = self.transport.take().unwrap();
+      let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
+      self.event_loop_sender = Some(connector_outgoing_sender);
+      Box::pin(async move {
+        match transport.connect().await {
+          // If we connect successfully, we get back the channel from the transport
+          // to send outgoing messages and receieve incoming events, all serialized.
+          Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
+            let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
+            task::spawn(async move {
+              remote_connector_event_loop::<
+                TransportType,
+                SerializerType,
+                OutboundMessageType,
+                InboundMessageType,
+              >(
+                connector_outgoing_receiver,
+                connector_incoming_sender,
+                transport,
+                transport_outgoing_sender,
+                transport_incoming_receiver,
+              )
+            });
+            Ok(connector_incoming_receiver)
+          }
+          Err(e) => Err(e),
         }
-        Err(e) => Err(e),
-      }
+      })
     } else {
-      Err(ButtplugConnectorError::new("Connector already connected."))
+      ButtplugConnectorError::new("Connector already connected.").into()
     }
   }
 
-  async fn disconnect(&mut self) -> ButtplugConnectorResult {
-    if let Some(ref mut sender) = self.event_loop_sender {
-      sender.send(ButtplugRemoteConnectorMessage::Close).await;
-      Ok(())
+  fn disconnect(&self) -> ButtplugConnectorResultFuture {
+    if let Some(ref sender) = self.event_loop_sender {
+      let sender_clone = sender.clone();
+      Box::pin(async move {
+        sender_clone
+          .send(ButtplugRemoteConnectorMessage::Close)
+          .await;
+        Ok(())
+      })
     } else {
-      Err(ButtplugConnectorError::new("Connector not connected."))
+      ButtplugConnectorError::new("Connector not connected.").into()
     }
   }
 
-  async fn send(&mut self, msg: OutboundMessageType) -> ButtplugConnectorResult {
-    if let Some(ref mut sender) = self.event_loop_sender {
-      sender
-        .send(ButtplugRemoteConnectorMessage::Message(msg))
-        .await;
-      Ok(())
+  fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture {
+    if let Some(ref sender) = self.event_loop_sender {
+      let sender_clone = sender.clone();
+      Box::pin(async move {
+        sender_clone
+          .send(ButtplugRemoteConnectorMessage::Message(msg))
+          .await;
+        Ok(())
+      })
     } else {
-      Err(ButtplugConnectorError::new("Connector not connected."))
+      ButtplugConnectorError::new("Connector not connected.").into()
     }
   }
 }
