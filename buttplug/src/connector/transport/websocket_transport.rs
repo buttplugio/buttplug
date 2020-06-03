@@ -9,19 +9,19 @@
 
 use crate::{
   connector::{
-    ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugConnectorTransport,
-    ButtplugTransportMessage,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
 };
+use super::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage};
 use async_std::{
-  sync::{channel, Receiver, Sender},
+  sync::channel,
   task,
 };
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
 };
-use futures::future::{self, BoxFuture};
+use futures::future;
 use futures_util::{SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -68,16 +68,7 @@ impl ButtplugWebsocketClientTransport {
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   fn connect(
     &self,
-  ) -> BoxFuture<
-    'static,
-    Result<
-      (
-        Sender<ButtplugSerializedMessage>,
-        Receiver<ButtplugTransportMessage>,
-      ),
-      ButtplugConnectorError,
-    >,
-  > {
+  ) -> ButtplugConnectorTransportConnectResult {
     let (request_sender, request_receiver) = channel(256);
     let (response_sender, response_receiver) = channel(256);
 

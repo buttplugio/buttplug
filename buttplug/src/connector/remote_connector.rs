@@ -7,11 +7,10 @@
 
 //! Handling of websockets using async-tungstenite
 
-use super::ButtplugConnectorTransport;
+use super::transport::{ButtplugConnectorTransport, ButtplugTransportMessage};
 use crate::{
   connector::{
     ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
-    ButtplugTransportMessage,
   },
   core::messages::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},

@@ -84,15 +84,14 @@ pub use transport::ButtplugWebsocketClientTransport;
 
 use crate::{
   core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
-  util::future::{ButtplugFuture, ButtplugFutureState, ButtplugFutureStateShared},
+  util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
-use async_std::sync::{Receiver, Sender};
+use async_std::sync::{Receiver};
 use async_trait::async_trait;
 use std::{error::Error, fmt};
 use futures::future::{self, BoxFuture};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
-pub type ButtplugConnectorState = ButtplugFutureState<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorStateShared =
   ButtplugFutureStateShared<Result<(), ButtplugConnectorError>>;
 pub type ButtplugConnectorFuture = ButtplugFuture<Result<(), ButtplugConnectorError>>;
@@ -193,30 +192,4 @@ where
   /// If the connector is not currently connected, or an error happens during
   /// the send operation, this will return a [ButtplugConnectorError]
   fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture;
-}
-
-/// Enum of messages we can receive from a connector.
-pub enum ButtplugTransportMessage {
-  /// Send when connection is established.
-  Connected,
-  /// Text version of message we received from remote server.
-  Message(ButtplugSerializedMessage),
-  /// Error received from remote server.
-  Error(String),
-  /// Connector (or remote server) itself closed the connection.
-  Close(String),
-}
-
-#[async_trait]
-pub trait ButtplugConnectorTransport: Send + Sync {
-  fn connect(
-    &self,
-  ) -> BoxFuture<'static, Result<
-    (
-      Sender<ButtplugSerializedMessage>,
-      Receiver<ButtplugTransportMessage>,
-    ),
-    ButtplugConnectorError,
-  >>;
-  fn disconnect(self) -> ButtplugConnectorResultFuture;
 }
