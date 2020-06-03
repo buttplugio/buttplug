@@ -1,12 +1,13 @@
 mod generic_command_manager;
 
-use super::{DeviceImpl, ButtplugDeviceResultFuture};
+use super::DeviceImpl;
 use crate::{
   core::{
     errors::ButtplugError,
     messages::{ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   },
   device::configuration_manager::{DeviceProtocolConfiguration, ProtocolConstructor},
+  server::ButtplugServerResultFuture,
 };
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -81,7 +82,7 @@ pub trait ButtplugProtocol: Send {
     &self,
     device: &dyn DeviceImpl,
     message: &ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture;
+  ) -> ButtplugServerResultFuture;
 }
 
 // TODO These macros could use some compilation tests to make sure we're
@@ -153,7 +154,6 @@ macro_rules! create_buttplug_protocol (
         use crate::{
             create_protocol_creator_impl,
             device::{
-                ButtplugDeviceResultFuture,
                 Endpoint, DeviceWriteCmd, DeviceImpl,
                 protocol::generic_command_manager::GenericCommandManager,
             },
@@ -172,6 +172,7 @@ macro_rules! create_buttplug_protocol (
                     ),*
                 },
             },
+            server::ButtplugServerResultFuture
         };
         use std::cell::RefCell;
         #[allow(unused_imports)]
@@ -210,9 +211,9 @@ macro_rules! create_buttplug_protocol (
                     &self,
                     device: &dyn DeviceImpl,
                     stop_msg: &StopDeviceCmd,
-                ) -> ButtplugDeviceResultFuture {
+                ) -> ButtplugServerResultFuture {
                     let ok_return = messages::Ok::new(stop_msg.get_id());
-                    let fut_vec: Vec<ButtplugDeviceResultFuture> = self.stop_commands.iter().map(|cmd| self.parse_message(device, &cmd)).collect();
+                    let fut_vec: Vec<ButtplugServerResultFuture> = self.stop_commands.iter().map(|cmd| self.parse_message(device, &cmd)).collect();
                     Box::pin(async move {
                         // TODO We should be able to run these concurrently, and should return any error we get.
                         for fut in fut_vec {
@@ -229,7 +230,7 @@ macro_rules! create_buttplug_protocol (
                     pub fn [<$message_name _handler>](
                         &self,
                         device: &dyn DeviceImpl,
-                        msg: &$message_name,) -> ButtplugDeviceResultFuture
+                        msg: &$message_name,) -> ButtplugServerResultFuture
                         $message_handler_body
                     )*
                 }
@@ -249,7 +250,7 @@ macro_rules! create_buttplug_protocol (
                         &self,
                         device: &dyn DeviceImpl,
                         message: &ButtplugDeviceCommandMessageUnion,
-                    ) -> ButtplugDeviceResultFuture {
+                    ) -> ButtplugServerResultFuture {
                         match message {
                             $(
                                 ButtplugDeviceCommandMessageUnion::$message_name(msg) => {

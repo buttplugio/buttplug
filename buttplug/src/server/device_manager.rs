@@ -21,7 +21,8 @@ use crate::{
       ScanningFinished,
     },
   },
-  device::{ButtplugDevice, ButtplugDeviceEvent, ButtplugDeviceResultFuture},
+  device::{ButtplugDevice, ButtplugDeviceEvent},
+  server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
 };
 use async_std::{
@@ -195,7 +196,7 @@ impl DeviceManager {
     }
   }
 
-  fn start_scanning(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
+  fn start_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
@@ -210,7 +211,7 @@ impl DeviceManager {
     }
   }
 
-  fn stop_scanning(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
+  fn stop_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::new(
         "Cannot start scanning. Server has no device communication managers to scan with.",
@@ -225,7 +226,7 @@ impl DeviceManager {
     }
   }
 
-  fn stop_all_devices(&self, msg_id: u32) -> ButtplugDeviceResultFuture {
+  fn stop_all_devices(&self, msg_id: u32) -> ButtplugServerResultFuture {
     let fut_vec: Vec<_> = self
       .devices
       .read()
@@ -246,7 +247,7 @@ impl DeviceManager {
   fn parse_device_message(
     &self,
     device_msg: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     match self.devices.get_one(&device_msg.get_device_index()) {
       Some(device) => device.parse_message(&device_msg),
       None => ButtplugDeviceError::new(&format!(
@@ -259,7 +260,7 @@ impl DeviceManager {
   fn parse_device_manager_message(
     &self,
     manager_msg: ButtplugDeviceManagerMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     match manager_msg {
       ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
         let devices = self
@@ -295,7 +296,7 @@ impl DeviceManager {
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessage,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     // If this is a device command message, just route it directly to the
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {

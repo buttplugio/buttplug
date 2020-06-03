@@ -31,6 +31,10 @@ use crate::{
   test::TestDeviceImplCreator,
 };
 use ping_timer::PingTimer;
+use futures::future::BoxFuture;
+
+pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
+pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
 use async_std::{
   prelude::StreamExt,
@@ -195,7 +199,7 @@ impl ButtplugServer {
     })
   }
 
-  fn perform_handshake(
+  async fn perform_handshake(
     &mut self,
     msg: &messages::RequestServerInfo,
   ) -> Result<messages::ServerInfo, ButtplugError> {
@@ -226,7 +230,7 @@ impl ButtplugServer {
 
   fn handle_ping(&mut self, msg: &messages::Ping) -> Result<messages::Ok, ButtplugError> {
     if let Some(timer) = &mut self.ping_timer {
-      timer.update_ping_time().await;
+      timer.update_ping_time();
       Result::Ok(messages::Ok::new(msg.get_id()))
     } else {
       Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())
@@ -234,6 +238,7 @@ impl ButtplugServer {
   }
 
   fn handle_log(&mut self, msg: &messages::RequestLog) -> Result<messages::Ok, ButtplugError> {
+    // TODO Work with a logger that doesn't fucking panic on have 2 registrations.
     let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
     log::set_boxed_logger(Box::new(handler))
       .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())

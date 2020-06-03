@@ -17,7 +17,6 @@ use crate::{
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
-      ButtplugServerMessage,
       MessageAttributesMap,
       RawReadCmd,
       RawReading,
@@ -30,14 +29,12 @@ use crate::{
     configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
     protocol::ButtplugProtocol,
   },
+  server::ButtplugServerResultFuture,
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use futures::future::BoxFuture;
 use core::hash::{Hash, Hasher};
-
-pub type ButtplugDeviceResult = Result<ButtplugServerMessage, ButtplugError>;
-pub type ButtplugDeviceResultFuture = BoxFuture<'static, ButtplugDeviceResult>;
 
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
@@ -197,12 +194,6 @@ pub enum DeviceImplCommand {
   Read(DeviceReadCmd),
   Subscribe(DeviceSubscribeCmd),
   Unsubscribe(DeviceUnsubscribeCmd),
-}
-
-impl From<RawReadCmd> for DeviceImplCommand {
-  fn from(msg: RawReadCmd) -> Self {
-    DeviceImplCommand::Read(msg.into())
-  }
 }
 
 impl From<RawWriteCmd> for DeviceImplCommand {
@@ -382,7 +373,7 @@ impl ButtplugDevice {
   pub fn parse_message(
     &self,
     message: &ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     self.protocol.parse_message(&*self.device, message)
   }
 
