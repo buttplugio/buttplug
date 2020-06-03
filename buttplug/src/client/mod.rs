@@ -316,7 +316,7 @@ impl ButtplugClient {
   /// `run()` method to pass it in.
   pub async fn run_with_in_process_connector<F, T>(
     name: &str,
-    max_ping_time: u128,
+    max_ping_time: u64,
     func: F,
   ) -> ButtplugClientResult
   where

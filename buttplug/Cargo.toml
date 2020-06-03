@@ -57,6 +57,7 @@ rustls = { version = "0.16.0", features = ["dangerous_configuration"] }
 webpki = "0.21.2"
 evmap = "10.0.2"
 evmap-derive = "0.1.0"
+futures-timer = "3.0.2"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

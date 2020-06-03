@@ -10,6 +10,7 @@
 pub mod comm_managers;
 pub mod device_manager;
 mod logger;
+mod ping_timer;
 
 use crate::{
   core::{
@@ -29,17 +30,19 @@ use crate::{
   },
   test::TestDeviceImplCreator,
 };
+use ping_timer::PingTimer;
+
 use async_std::{
-  sync::{channel, Arc, Mutex, Receiver, Sender},
+  prelude::StreamExt,
   task,
+  sync::{channel, Arc, Mutex, Receiver, Sender},
 };
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
 use logger::ButtplugLogHandler;
 use std::{
   convert::{TryFrom, TryInto},
-  sync::{self, RwLock},
-  time::{Duration, Instant},
+  sync::atomic::{AtomicBool, Ordering},
 };
 
 pub enum ButtplugServerEvent {
@@ -52,121 +55,51 @@ pub enum ButtplugServerEvent {
   Log(messages::Log),
 }
 
-struct PingTimer {
-  // Needs to be a u128 to compare with Instant, otherwise we have to cast up.
-  // This is painful either direction. See
-  // https://github.com/rust-lang/rust/issues/58580
-  max_ping_time: u128,
-  last_ping_time: sync::Arc<RwLock<Instant>>,
-  pinged_out: sync::Arc<RwLock<bool>>,
-  // This should really be a Condvar but async_std::Condvar isn't done yet, so
-  // we'll just use a channel. The channel receiver will get passed to the
-  // device manager, so it can stop devices
-  ping_channel: Sender<bool>,
-  // TODO This should be an RwLock once that's in async-std
-  timer_running: Arc<Mutex<bool>>,
-}
-
-impl PingTimer {
-  pub fn new(max_ping_time: u128) -> (Self, Receiver<bool>) {
-    if max_ping_time == 0 {
-      panic!("Can't create ping timer with no max ping time.");
-    }
-    let (sender, receiver) = channel(1);
-    (
-      Self {
-        max_ping_time,
-        last_ping_time: Arc::new(RwLock::new(Instant::now())),
-        pinged_out: Arc::new(RwLock::new(false)),
-        ping_channel: sender,
-        timer_running: Arc::new(Mutex::new(false)),
-      },
-      receiver,
-    )
-  }
-
-  pub fn start_ping_timer(&mut self, event_sender: Sender<ButtplugServerMessage>) {
-    // Since we've received the handshake, start the ping timer if needed.
-    let max_ping_time = self.max_ping_time;
-    let last_ping_time = self.last_ping_time.clone();
-    let pinged_out = self.pinged_out.clone();
-    let ping_channel = self.ping_channel.clone();
-    let timer_running = self.timer_running.clone();
-    task::spawn(async move {
-      loop {
-        {
-          *timer_running.lock().await = true;
-        }
-        task::sleep(Duration::from_millis(max_ping_time.try_into().unwrap())).await;
-        // If the timer is no longer supposed to be running, bail.
-        if !*timer_running.lock().await {
-          return;
-        }
-        let last_ping = last_ping_time.read().unwrap().elapsed().as_millis();
-        if last_ping > max_ping_time {
-          error!("Pinged out.");
-          *pinged_out.write().unwrap() = true;
-          ping_channel.send(true).await;
-          let err: ButtplugError = ButtplugPingError::new(&format!(
-            "Pinged out. Ping took {} but max ping time is {}.",
-            last_ping, max_ping_time
-          ))
-          .into();
-          event_sender
-            .send(ButtplugServerMessage::Error(err.into()))
-            .await;
-          break;
-        }
-      }
-    });
-  }
-
-  pub async fn stop_ping_timer(&mut self) {
-    *self.timer_running.lock().await = false;
-    *self.pinged_out.write().unwrap() = false;
-  }
-
-  pub fn max_ping_time(&self) -> u128 {
-    self.max_ping_time
-  }
-
-  pub fn update_ping_time(&mut self) {
-    *self.last_ping_time.write().unwrap() = Instant::now();
-  }
-
-  pub fn pinged_out(&self) -> bool {
-    *self.pinged_out.read().unwrap()
-  }
-}
-
-// TODO Impl Drop for ping timer that stops the internal async task
-
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
+  max_ping_time: u64,
   client_spec_version: Option<ButtplugMessageSpecVersion>,
   client_name: Option<String>,
   device_manager: Option<DeviceManager>,
   event_sender: Sender<ButtplugServerMessage>,
   ping_timer: Option<PingTimer>,
+  pinged_out: Arc<AtomicBool>,
 }
 
 impl ButtplugServer {
-  pub fn new(name: &str, max_ping_time: u128) -> (Self, Receiver<ButtplugServerMessage>) {
+  pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugServerMessage>) {
     let (send, recv) = channel(256);
+    let pinged_out = Arc::new(AtomicBool::new(false));
     let (ping_timer, ping_receiver) = if max_ping_time > 0 {
-      let (timer, receiver) = PingTimer::new(max_ping_time);
-      (Some(timer), Some(receiver))
+      let (timer, mut receiver) = PingTimer::new(max_ping_time);
+      // This is super dumb, but: we have a chain of channels to make sure we
+      // notify both the server and the device manager. Should probably just use
+      // a broadcaster here too.
+      // 
+      // TODO Use a broadcaster here. Or just come up with a better solution.
+      let (device_manager_sender, device_manager_receiver) = channel(1);
+      let pinged_out_clone = pinged_out.clone();
+      task::spawn(async move {
+        // TODO This doesn't actually disconnect the server or emit events on ping out.
+        receiver.next().await;
+        pinged_out_clone.store(true, Ordering::SeqCst);
+        device_manager_sender.send(()).await;
+        error!("Ping out signal received, stopping server");
+      });
+      (Some(timer), Some(device_manager_receiver))
     } else {
       (None, None)
     };
     (
       Self {
         server_name: name.to_string(),
+        max_ping_time,
         client_name: None,
         client_spec_version: None,
         device_manager: Some(DeviceManager::new(send.clone(), ping_receiver)),
         ping_timer,
+        pinged_out,
         event_sender: send,
       },
       recv,
@@ -218,10 +151,8 @@ impl ButtplugServer {
     &mut self,
     msg: &ButtplugClientMessage,
   ) -> Result<ButtplugServerMessage, ButtplugError> {
-    if let Some(timer) = &self.ping_timer {
-      if timer.pinged_out() {
-        return Err(ButtplugPingError::new("Server has pinged out.").into());
-      }
+    if self.pinged_out.load(Ordering::SeqCst) {
+      return Err(ButtplugPingError::new("Server has pinged out.").into());
     }
     let ret_msg = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
@@ -283,21 +214,19 @@ impl ButtplugServer {
     self.client_name = Some(msg.client_name.clone());
     self.client_spec_version = Some(msg.message_version);
     // Only start the ping timer after we've received the handshake.
-    let mut max_ping_time = 0u128;
     if let Some(timer) = &mut self.ping_timer {
-      max_ping_time = timer.max_ping_time();
-      timer.start_ping_timer(self.event_sender.clone());
+      timer.start_ping_timer().await;
     }
     Result::Ok(messages::ServerInfo::new(
       &self.server_name,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-      max_ping_time.try_into().unwrap(),
+      self.max_ping_time.try_into().unwrap(),
     ))
   }
 
   fn handle_ping(&mut self, msg: &messages::Ping) -> Result<messages::Ok, ButtplugError> {
     if let Some(timer) = &mut self.ping_timer {
-      timer.update_ping_time();
+      timer.update_ping_time().await;
       Result::Ok(messages::Ok::new(msg.get_id()))
     } else {
       Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())

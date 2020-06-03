@@ -51,7 +51,7 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
-  pub fn new(name: &str, max_ping_time: u128) -> Self {
+  pub fn new(name: &str, max_ping_time: u64) -> Self {
     let (server, mut server_recv) = ButtplugServer::new(&name, max_ping_time);
     let (send, recv) = channel(256);
     let server_outbound_sender = send.clone();

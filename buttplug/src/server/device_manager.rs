@@ -40,7 +40,7 @@ enum DeviceEvent {
 }
 
 fn wait_for_manager_events(
-  ping_receiver: Option<Receiver<bool>>,
+  ping_receiver: Option<Receiver<()>>,
   server_sender: Sender<ButtplugServerMessage>,
 ) -> (
   impl Future<Output = ()>,
@@ -181,7 +181,7 @@ unsafe impl Sync for DeviceManager {}
 impl DeviceManager {
   pub fn new(
     event_sender: Sender<ButtplugServerMessage>,
-    ping_receiver: Option<Receiver<bool>>,
+    ping_receiver: Option<Receiver<()>>,
   ) -> Self {
     let (event_loop_fut, device_map_reader, device_event_sender) =
       wait_for_manager_events(ping_receiver, event_sender);
