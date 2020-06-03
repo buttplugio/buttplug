@@ -285,7 +285,7 @@ macro_rules! create_buttplug_protocol (
                                 }
                                 let mut vibrate_cmd = VibrateCmd::new(msg.device_index, cmds);
                                 vibrate_cmd.set_id(msg.get_id());
-                                Box::pin(self.parse_message(device, &vibrate_cmd.into()))
+                                self.parse_message(device, &vibrate_cmd.into())
                             },
                             ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
                                 self.handle_stop_device_cmd(device, msg)

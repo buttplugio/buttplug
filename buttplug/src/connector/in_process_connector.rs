@@ -100,7 +100,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 
   async fn send(&mut self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResult {
     let input = msg.try_into().unwrap();
-    let output = self.server.parse_message(&input).await.unwrap();
+    let output = self.server.parse_message(input).await.unwrap();
     self
       .server_outbound_sender
       .send(output.try_into().unwrap())

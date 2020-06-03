@@ -16,30 +16,23 @@ use crate::{
   core::{
     errors::*,
     messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugMessage,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessage,
-      DeviceMessageInfo,
-      StopAllDevices,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, DeviceMessageInfo,
+      StopAllDevices, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   test::TestDeviceImplCreator,
 };
-use ping_timer::PingTimer;
 use futures::future::BoxFuture;
+use ping_timer::PingTimer;
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
 use async_std::{
   prelude::StreamExt,
-  task,
   sync::{channel, Arc, Mutex, Receiver, Sender},
+  task,
 };
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
@@ -63,31 +56,37 @@ pub enum ButtplugServerEvent {
 pub struct ButtplugServer {
   server_name: String,
   max_ping_time: u64,
-  client_spec_version: Option<ButtplugMessageSpecVersion>,
-  client_name: Option<String>,
   device_manager: Option<DeviceManager>,
   event_sender: Sender<ButtplugServerMessage>,
   ping_timer: Option<PingTimer>,
   pinged_out: Arc<AtomicBool>,
+  connected: Arc<AtomicBool>,
 }
 
 impl ButtplugServer {
   pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugServerMessage>) {
     let (send, recv) = channel(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
+    let connected = Arc::new(AtomicBool::new(false));
     let (ping_timer, ping_receiver) = if max_ping_time > 0 {
       let (timer, mut receiver) = PingTimer::new(max_ping_time);
       // This is super dumb, but: we have a chain of channels to make sure we
       // notify both the server and the device manager. Should probably just use
       // a broadcaster here too.
-      // 
+      //
       // TODO Use a broadcaster here. Or just come up with a better solution.
       let (device_manager_sender, device_manager_receiver) = channel(1);
       let pinged_out_clone = pinged_out.clone();
+      let connected_clone = connected.clone();
+      let event_sender_clone = send.clone();
       task::spawn(async move {
-        // TODO This doesn't actually disconnect the server or emit events on ping out.
         receiver.next().await;
         pinged_out_clone.store(true, Ordering::SeqCst);
+        connected_clone.store(false, Ordering::SeqCst);
+        // TODO Should the event sender return a result instead of an error message?
+        event_sender_clone
+          .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
+          .await;
         device_manager_sender.send(()).await;
         error!("Ping out signal received, stopping server");
       });
@@ -99,19 +98,14 @@ impl ButtplugServer {
       Self {
         server_name: name.to_string(),
         max_ping_time,
-        client_name: None,
-        client_spec_version: None,
         device_manager: Some(DeviceManager::new(send.clone(), ping_receiver)),
         ping_timer,
         pinged_out,
+        connected,
         event_sender: send,
       },
       recv,
     )
-  }
-
-  pub fn take_device_manager(&mut self) -> Option<DeviceManager> {
-    self.device_manager.take()
   }
 
   pub fn add_comm_manager<T>(&mut self)
@@ -134,128 +128,139 @@ impl ButtplugServer {
   }
 
   pub fn connected(&self) -> bool {
-    self.client_name.is_some() && self.client_spec_version.is_some()
+    self.connected.load(Ordering::SeqCst)
   }
 
-  pub async fn disconnect(&mut self) {
-    if let Some(ref mut ping_timer) = self.ping_timer {
-      ping_timer.stop_ping_timer().await;
+  pub fn disconnect(&self) -> BoxFuture<Result<(), ButtplugError>> {
+    let mut ping_fut = None;
+    if let Some(ping_timer) = &self.ping_timer {
+      ping_fut = Some(ping_timer.stop_ping_timer());
     }
-    self
-      .parse_message(&ButtplugClientMessage::StopAllDevices(
-        StopAllDevices::default(),
-      ))
-      .await
-      .unwrap();
-    self.client_name = None;
-    self.client_spec_version = None;
+    let stop_fut = self.parse_message(ButtplugClientMessage::StopAllDevices(
+      StopAllDevices::default(),
+    ));
+    let connected = self.connected.clone();
+    Box::pin(async move {
+      connected.store(false, Ordering::SeqCst);
+      if let Some(pfut) = ping_fut {
+        pfut.await;
+      }
+      // TODO This can possibly error out.
+      stop_fut.await.and_then(|_| Ok(()))
+    })
   }
 
-  pub async fn parse_message(
-    &mut self,
-    msg: &ButtplugClientMessage,
-  ) -> Result<ButtplugServerMessage, ButtplugError> {
-    if self.pinged_out.load(Ordering::SeqCst) {
-      return Err(ButtplugPingError::new("Server has pinged out.").into());
-    }
-    let ret_msg = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
+  pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
+    let id = msg.get_id();
+    let out_fut = if self.pinged_out.load(Ordering::SeqCst) {
+      ButtplugPingError::new("Server has pinged out.").into()
+    } else if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
       if !self.connected() {
-        return Err(ButtplugHandshakeError::new("Server not connected.").into());
-      }
-      if let Some(ref mut dm) = self.device_manager {
-        dm.parse_message(msg.clone()).await
+        ButtplugHandshakeError::new("Server not connected.").into()
+      } else if let Some(ref dm) = self.device_manager {
+        dm.parse_message(msg.clone())
       } else {
         panic!("Device Manager has been taken already!");
       }
     } else {
       match msg {
-        ButtplugClientMessage::RequestServerInfo(ref m) => {
-          self.perform_handshake(m).and_then(|m| Ok(m.into()))
-        }
-        ButtplugClientMessage::Ping(ref p) => {
+        ButtplugClientMessage::RequestServerInfo(m) => self.perform_handshake(m),
+        ButtplugClientMessage::Ping(p) => {
           if !self.connected() {
-            return Err(ButtplugHandshakeError::new("Server not connected.").into());
+            ButtplugHandshakeError::new("Server not connected.").into()
+          } else {
+            self.handle_ping(p)
           }
-          self.handle_ping(p).and_then(|m| Ok(m.into()))
         }
-        ButtplugClientMessage::RequestLog(ref l) => {
+        ButtplugClientMessage::RequestLog(l) => {
           if !self.connected() {
-            return Err(ButtplugHandshakeError::new("Server not connected.").into());
+            ButtplugHandshakeError::new("Server not connected.").into()
+          } else {
+            self.handle_log(l)
           }
-          self.handle_log(l).and_then(|m| Ok(m.into()))
         }
-        _ => Err(
-          ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg))
-            .into(),
-        ),
+        _ => ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg))
+          .into(),
       }
     };
-    // Set the Id on the way out.
-    ret_msg.and_then(|mut m| {
-      m.set_id(msg.get_id());
-      Ok(m)
+    // Simple way to set the ID on the way out. Just rewrap
+    // the returned future to make sure it happens.
+    Box::pin(async move {
+      out_fut.await.and_then(|mut ok_msg| {
+        ok_msg.set_id(id);
+        Ok(ok_msg)
+      })
     })
   }
 
-  async fn perform_handshake(
-    &mut self,
-    msg: &messages::RequestServerInfo,
-  ) -> Result<messages::ServerInfo, ButtplugError> {
+  fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
     if self.connected() {
-      return Err(ButtplugHandshakeError::new("Server already connected.").into());
+      return ButtplugHandshakeError::new("Server already connected.").into();
     }
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
-      return Err(
-        ButtplugHandshakeError::new(&format!(
-          "Server version ({}) must be equal to or greater than client version ({}).",
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version
-        ))
-        .into(),
-      );
+      return ButtplugHandshakeError::new(&format!(
+        "Server version ({}) must be equal to or greater than client version ({}).",
+        BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version
+      ))
+      .into();
     }
-    self.client_name = Some(msg.client_name.clone());
-    self.client_spec_version = Some(msg.message_version);
+    // self.client_name = Some(msg.client_name.clone());
+    // self.client_spec_version = Some(msg.message_version);
+    let mut ping_timer_fut = None;
     // Only start the ping timer after we've received the handshake.
-    if let Some(timer) = &mut self.ping_timer {
-      timer.start_ping_timer().await;
+    if let Some(timer) = &self.ping_timer {
+      ping_timer_fut = Some(timer.start_ping_timer());
     }
-    Result::Ok(messages::ServerInfo::new(
+    let out_msg = messages::ServerInfo::new(
       &self.server_name,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
       self.max_ping_time.try_into().unwrap(),
-    ))
+    );
+    let connected = self.connected.clone();
+    Box::pin(async move {
+      if let Some(fut) = ping_timer_fut {
+        fut.await;
+      }
+      connected.store(true, Ordering::SeqCst);
+      Result::Ok(out_msg.into())
+    })
   }
 
-  fn handle_ping(&mut self, msg: &messages::Ping) -> Result<messages::Ok, ButtplugError> {
-    if let Some(timer) = &mut self.ping_timer {
-      timer.update_ping_time();
-      Result::Ok(messages::Ok::new(msg.get_id()))
+  fn handle_ping(&self, msg: messages::Ping) -> ButtplugServerResultFuture {
+    if let Some(timer) = &self.ping_timer {
+      let fut = timer.update_ping_time();
+      Box::pin(async move {
+        fut.await;
+        Result::Ok(messages::Ok::new(msg.get_id()).into())
+      })
     } else {
-      Err(ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into())
+      ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into()
     }
   }
 
-  fn handle_log(&mut self, msg: &messages::RequestLog) -> Result<messages::Ok, ButtplugError> {
-    // TODO Work with a logger that doesn't fucking panic on have 2 registrations.
-    let handler = ButtplugLogHandler::new(&msg.log_level, self.event_sender.clone());
-    log::set_boxed_logger(Box::new(handler))
-      .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
-      .and_then(|_| {
-        let level: log::LevelFilter = msg.log_level.clone().into();
-        log::set_max_level(level);
-        Result::Ok(messages::Ok::new(msg.get_id()))
-      })
+  fn handle_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
+    let sender = self.event_sender.clone();
+    Box::pin(async move {
+      // TODO Work with a logger that doesn't fucking panic on have 2 registrations.
+      let handler = ButtplugLogHandler::new(&msg.log_level, sender);
+      log::set_boxed_logger(Box::new(handler))
+        .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
+        .and_then(|_| {
+          let level: log::LevelFilter = msg.log_level.clone().into();
+          log::set_max_level(level);
+          Result::Ok(messages::Ok::new(msg.get_id()).into())
+        })
+    })
   }
 }
 
 #[cfg(test)]
 mod test {
   use super::*;
-  #[cfg(any(feature = "linux-ble", feature = "winrt-ble"))]
-  use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
   use crate::{
+    core::messages::ButtplugMessageSpecVersion,
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     test::{check_recv_value, TestDevice},
   };
@@ -263,12 +268,12 @@ mod test {
   use std::time::Duration;
 
   async fn test_server_setup(
-    msg_union: &messages::ButtplugClientMessage,
+    msg_union: messages::ButtplugClientMessage,
   ) -> (ButtplugServer, Receiver<ButtplugServerMessage>) {
     let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, recv) = ButtplugServer::new("Test Server", 0);
+    let (server, recv) = ButtplugServer::new("Test Server", 0);
     assert_eq!(server.server_name, "Test Server");
-    match server.parse_message(&msg_union).await.unwrap() {
+    match server.parse_message(msg_union).await.unwrap() {
       ButtplugServerMessage::ServerInfo(_s) => assert_eq!(
         _s,
         messages::ServerInfo::new("Test Server", ButtplugMessageSpecVersion::Version2, 0)
@@ -284,8 +289,8 @@ mod test {
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
     task::block_on(async {
-      let (server, _recv) = test_server_setup(&msg).await;
-      assert_eq!(server.client_name.unwrap(), "Test Client");
+      let (server, _recv) = test_server_setup(msg).await;
+      assert!(server.connected());
     });
   }
 
@@ -295,7 +300,7 @@ mod test {
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
     task::block_on(async {
-      test_server_setup(&msg).await;
+      test_server_setup(msg).await;
     });
   }
 
@@ -306,12 +311,12 @@ mod test {
   #[ignore]
   fn test_server_version_gt() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new("Test Server", 0);
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
     task::block_on(async {
       assert!(
-        server.parse_message(&msg).await.is_err(),
+        server.parse_message(msg).await.is_err(),
         "Client having higher version than server should fail"
       );
     });
@@ -320,11 +325,12 @@ mod test {
   #[test]
   fn test_ping_timeout() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
+    let (server, mut recv) = ButtplugServer::new("Test Server", 100);
     task::block_on(async {
-      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+      let msg =
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       task::sleep(Duration::from_millis(150)).await;
-      let reply = server.parse_message(&msg.into()).await;
+      let reply = server.parse_message(msg.into()).await;
       assert!(
         reply.is_ok(),
         format!(
@@ -334,7 +340,7 @@ mod test {
       );
       task::sleep(Duration::from_millis(300)).await;
       let pingmsg = messages::Ping::default();
-      match server.parse_message(&pingmsg.into()).await {
+      match server.parse_message(pingmsg.into()).await {
         Ok(_) => panic!("Should get a ping error back!"),
         Err(e) => {
           if let ButtplugError::ButtplugPingError(_) = e {
@@ -370,11 +376,12 @@ mod test {
         TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
       devices.lock().await.push(device_creator);
 
-      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      let mut reply = server.parse_message(&msg.into()).await;
+      let msg =
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+      let mut reply = server.parse_message(msg.into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server
-        .parse_message(&messages::StartScanning::default().into())
+        .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
@@ -389,7 +396,7 @@ mod test {
       }
       server
         .parse_message(
-          &messages::VibrateCmd::new(0, vec![messages::VibrateSubcommand::new(0, 0.5)]).into(),
+          messages::VibrateCmd::new(0, vec![messages::VibrateSubcommand::new(0, 0.5)]).into(),
         )
         .await
         .unwrap();
@@ -427,13 +434,14 @@ mod test {
     // see output.
     //
     // let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
     task::block_on(async {
-      let msg = messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      let mut reply = server.parse_message(&msg.into()).await;
+      let msg =
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+      let mut reply = server.parse_message(msg.into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server
-        .parse_message(&messages::RequestLog::new(messages::LogLevel::Debug).into())
+        .parse_message(messages::RequestLog::new(messages::LogLevel::Debug).into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       debug!("Test log message");

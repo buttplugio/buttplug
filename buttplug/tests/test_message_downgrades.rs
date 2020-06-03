@@ -21,12 +21,12 @@ mod test {
   #[test]
   fn test_version0_connection() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
     task::block_on(async {
-      let incoming = server.parse_message(&output[0]).await.unwrap();
+      let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -41,13 +41,13 @@ mod test {
   #[test]
   fn test_version2_connection() {
     let _ = env_logger::builder().is_test(true).try_init();
-    let (mut server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi =
       r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
     task::block_on(async {
-      let incoming = server.parse_message(&output[0]).await.unwrap();
+      let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -72,7 +72,7 @@ mod test {
       devices.lock().await.push(device_creator);
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
-        .parse_message(&serializer.deserialize(rsi.to_owned().into()).unwrap()[0])
+        .parse_message(serializer.deserialize(rsi.to_owned().into()).unwrap()[0].clone())
         .await
         .unwrap();
       assert_eq!(
@@ -84,7 +84,7 @@ mod test {
       );
       // Skip JSON parsing here, we aren't converting versions.
       let reply = server
-        .parse_message(&messages::StartScanning::default().into())
+        .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
@@ -99,7 +99,7 @@ mod test {
           r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
         ))
         .unwrap();
-      output = server.parse_message(&rdl[0]).await.unwrap();
+      output = server.parse_message(rdl[0].clone()).await.unwrap();
       assert_eq!(
         serializer.serialize(vec!(output)),
         r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}]}}]"#.to_owned().into()
@@ -120,7 +120,7 @@ mod test {
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let output = server
-        .parse_message(&serializer.deserialize(rsi.to_owned().into()).unwrap()[0])
+        .parse_message(serializer.deserialize(rsi.to_owned().into()).unwrap()[0].clone())
         .await
         .unwrap();
       assert_eq!(
@@ -132,7 +132,7 @@ mod test {
       );
       // Skip JSON parsing here, we aren't converting versions.
       let reply = server
-        .parse_message(&messages::StartScanning::default().into())
+        .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
@@ -144,13 +144,13 @@ mod test {
       );
       let output2 = server
         .parse_message(
-          &serializer
+          serializer
             .deserialize(
               r#"[{"SingleMotorVibrateCmd": { "Id": 2, "DeviceIndex": 0, "Speed": 0.5}}]"#
                 .to_owned()
                 .into(),
             )
-            .unwrap()[0],
+            .unwrap()[0].clone(),
         )
         .await
         .unwrap();

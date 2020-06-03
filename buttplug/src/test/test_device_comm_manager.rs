@@ -77,10 +77,10 @@ mod test {
       devices.lock().await.push(device_creator);
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
-      let mut reply = server.parse_message(&msg.into()).await;
+      let mut reply = server.parse_message(msg.into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server
-        .parse_message(&messages::StartScanning::default().into())
+        .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.

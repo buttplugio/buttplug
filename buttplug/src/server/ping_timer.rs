@@ -1,7 +1,7 @@
 use async_std::{
   prelude::StreamExt,
   sync::{channel, Arc, Receiver, Sender},
-  task::{self, JoinHandle},
+  task, // ::{self, JoinHandle},
 };
 use futures::future::Future;
 use futures_timer::Delay;
@@ -11,6 +11,7 @@ pub enum PingMessage {
   Ping,
   StartTimer,
   StopTimer,
+  End,
 }
 
 fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessage>, Receiver<()>) {
@@ -19,7 +20,6 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
 
   let ping_msg_sender_clone = ping_msg_sender.clone();
   let fut = async move {
-    let started = false;
     let pinged = Arc::new(AtomicBool::new(false));
     let mut handle = None;
     loop {
@@ -49,7 +49,8 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
           PingMessage::StopTimer => {
             handle.take();
           }
-          PingMessage::Ping => pinged.store(true, Ordering::SeqCst)
+          PingMessage::Ping => pinged.store(true, Ordering::SeqCst),
+          PingMessage::End => break
         }
       }
     }
@@ -60,7 +61,16 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
 
 pub struct PingTimer {
   ping_msg_sender: Sender<PingMessage>,
-  timer_task: JoinHandle<()>,
+  // timer_task: JoinHandle<()>,
+}
+
+impl Drop for PingTimer {
+  fn drop(&mut self) {
+    task::block_on(async{
+      self.ping_msg_sender.send(PingMessage::End).await;
+      // TODO Could use some way to cancel the task here. Maybe update to async_std 1.6?
+    });
+  }
 }
 
 impl PingTimer {
@@ -69,8 +79,10 @@ impl PingTimer {
       panic!("Can't create ping timer with no max ping time.");
     }
     let (fut, sender, receiver) = ping_timer(max_ping_time);
+    task::spawn(fut);
     (Self {
-      timer_task: task::spawn(fut),
+      // TODO Store this once we can cancel it.
+      // timer_task: task::spawn(fut),
       ping_msg_sender: sender
     }, receiver)
   }
@@ -78,7 +90,7 @@ impl PingTimer {
   fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> {
     let ping_msg_sender = self.ping_msg_sender.clone();
     async move {
-      ping_msg_sender.send(msg);
+      ping_msg_sender.send(msg).await;
     }
   }
 
