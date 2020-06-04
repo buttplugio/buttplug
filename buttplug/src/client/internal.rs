@@ -8,28 +8,24 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  client_message_sorter::ClientMessageSorter,
-  device::ButtplugClientDevice,
-  ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientResult,
+  client_message_sorter::ClientMessageSorter, device::ButtplugClientDevice, ButtplugClientError,
+  ButtplugClientEvent, ButtplugClientMessageFuturePair,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::messages::{
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
-    ButtplugMessage,
-    DeviceList,
-    DeviceMessageInfo,
+    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
+    DeviceList, DeviceMessageInfo,
   },
   util::future::ButtplugFutureStateShared,
 };
 use async_std::{
-  prelude::{FutureExt, StreamExt},
+  prelude::FutureExt,
   sync::{channel, Receiver, Sender},
 };
+use futures::{future::BoxFuture, StreamExt};
 use std::collections::HashMap;
+use broadcaster::BroadcastChannel;
 
 /// Enum used for communication from the client to the event loop.
 pub(super) enum ButtplugClientRequest {
@@ -49,6 +45,7 @@ pub(super) enum ButtplugClientRequest {
 }
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
+#[derive(Clone)]
 pub enum ButtplugClientDeviceEvent {
   /// Device has disconnected from server.
   DeviceDisconnect,
@@ -82,6 +79,9 @@ enum StreamReturn {
 /// different tasks. However, all of those tasks will refer to the same event
 /// loop. This allows us to coordinate and centralize our information while
 /// keeping the API async.
+///
+/// Note that no async call here should block. Any .await should only be on
+/// async channels, and those channels should never have backpressure. We hope.
 struct ButtplugClientEventLoop<ConnectorType>
 where
   ConnectorType:
@@ -93,15 +93,14 @@ where
   device_message_sender: Sender<ButtplugClientMessageFuturePair>,
   /// Receiver for incoming [ButtplugClientDevice] messages.
   device_message_receiver: Receiver<ButtplugClientMessageFuturePair>,
-  // TODO this should be a broadcaster
   /// Event sender for specific devices.
   ///
   /// We can have many instances of the same [ButtplugClientDevice]. This map
   /// allows us to send messages to all device instances that refer to the same
   /// device index on the server.
-  device_event_senders: HashMap<u32, Vec<Sender<ButtplugClientDeviceEvent>>>,
+  device_event_senders: HashMap<u32, BroadcastChannel<ButtplugClientDeviceEvent>>,
   /// Sends events to the [ButtplugClient] instance.
-  event_sender: Sender<ButtplugClientEvent>,
+  event_sender: BroadcastChannel<ButtplugClientEvent>,
   /// Receives incoming messages from client instances.
   client_receiver: Receiver<ButtplugClientRequest>,
   /// Connector the event loop will use to communicate with the [ButtplugServer]
@@ -124,7 +123,7 @@ where
   pub fn new(
     connector: ConnectorType,
     connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
-    event_sender: Sender<ButtplugClientEvent>,
+    event_sender: BroadcastChannel<ButtplugClientEvent>,
     client_receiver: Receiver<ButtplugClientRequest>,
   ) -> Self {
     let (device_message_sender, device_message_receiver) =
@@ -148,17 +147,23 @@ where
   /// creates a ButtplugClientDevice and adds it the internal device map, then
   /// returns the instance.
   fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
-    let (event_sender, event_receiver) = channel(256);
     // If we don't have an entry in the map for the channel, add it. Otherwise,
     // push it on the vector.
     //
-    // TODO USE A GOD DAMN BROADCASTER THIS IS SILLY
-    self
+    let event_receiver = self
       .device_event_senders
       .entry(info.device_index)
-      .or_insert_with(|| vec![])
-      .push(event_sender);
+      .or_insert_with(BroadcastChannel::new)
+      .clone();
     ButtplugClientDevice::from((info, self.device_message_sender.clone(), event_receiver))
+  }
+
+  async fn send_client_event(&mut self, event: &ButtplugClientEvent) {
+    self.event_sender.send(event).await.unwrap();
+    // Due to how broadcaster works, it will always send messages to ALL copies
+    // of itself, including this one. This means that many time we send a value,
+    // we also have to read it out here. Sucks, but not gonna kill us.
+    self.event_sender.recv().await.unwrap();
   }
 
   /// Parse device messages from the connector.
@@ -181,8 +186,7 @@ where
         let device = self.create_client_device(&info);
         self.devices.insert(dev.device_index, info);
         self
-          .event_sender
-          .send(ButtplugClientEvent::DeviceAdded(device))
+          .send_client_event(&ButtplugClientEvent::DeviceAdded(device))
           .await;
       }
       ButtplugCurrentSpecServerMessage::DeviceList(dev) => {
@@ -190,8 +194,7 @@ where
           let device = self.create_client_device(&d);
           self.devices.insert(d.device_index, d.clone());
           self
-            .event_sender
-            .send(ButtplugClientEvent::DeviceAdded(device))
+            .send_client_event(&ButtplugClientEvent::DeviceAdded(device))
             .await;
         }
       }
@@ -199,14 +202,12 @@ where
         let info = self.devices.remove(&dev.device_index);
         self.device_event_senders.remove(&dev.device_index);
         self
-          .event_sender
-          .send(ButtplugClientEvent::DeviceRemoved(info.unwrap()))
+          .send_client_event(&ButtplugClientEvent::DeviceRemoved(info.unwrap()))
           .await;
       }
       ButtplugCurrentSpecServerMessage::Log(log) => {
         self
-          .event_sender
-          .send(ButtplugClientEvent::Log(
+          .send_client_event(&ButtplugClientEvent::Log(
             log.log_level.clone(),
             log.log_message.clone(),
           ))
@@ -214,8 +215,7 @@ where
       }
       ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
         self
-          .event_sender
-          .send(ButtplugClientEvent::ScanningFinished)
+          .send_client_event(&ButtplugClientEvent::ScanningFinished)
           .await;
       }
       _ => panic!("Cannot process message: {:?}", msg),
@@ -268,9 +268,8 @@ where
           let device = self.create_client_device(&d);
           self.devices.insert(d.device_index, d.clone());
           self
-            .event_sender
-            .send(ButtplugClientEvent::DeviceAdded(device))
-            .await;
+          .send_client_event(&ButtplugClientEvent::DeviceAdded(device))
+          .await;
         }
         true
       }
@@ -358,17 +357,31 @@ where
 /// - Finally, on disconnect, it will tear down, and cannot be used again. All
 ///   clients and devices associated with the loop will be invalidated, and a
 ///   new [super::ButtplugClient] must be created.
-pub(super) async fn client_event_loop(
+pub(super) fn client_event_loop(
   connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
     + 'static,
   connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
-  event_sender: Sender<ButtplugClientEvent>,
   client_receiver: Receiver<ButtplugClientRequest>,
-) -> ButtplugClientResult {
-  info!("Starting client event loop.");
-  ButtplugClientEventLoop::new(connector, connector_receiver, event_sender, client_receiver)
-    .run()
-    .await;
-  info!("Exiting client event loop");
-  Ok(())
+) -> (
+  BoxFuture<'static, Result<(), ButtplugClientError>>,
+  impl StreamExt<Item = ButtplugClientEvent> + Clone,
+) {
+  let event_sender = broadcaster::BroadcastChannel::new();
+  let event_loop_sender = event_sender.clone();
+  (
+    Box::pin(async {
+      info!("Starting client event loop.");
+      ButtplugClientEventLoop::new(
+        connector,
+        connector_receiver,
+        event_loop_sender,
+        client_receiver,
+      )
+      .run()
+      .await;
+      info!("Stopping client event loop.");
+      Ok(())
+    }),
+    event_sender,
+  )
 }

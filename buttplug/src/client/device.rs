@@ -7,33 +7,32 @@
 
 //! Representation and management of devices connected to the server.
 
-use super::{internal::ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientResult};
+use super::{
+  internal::ButtplugClientDeviceEvent, ButtplugClientError,
+  ButtplugClientResultFuture,
+};
 use crate::{
   client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
   connector::ButtplugConnectorError,
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugDeviceMessageType,
-      DeviceMessageInfo,
-      LinearCmd,
-      MessageAttributesMap,
-      RotateCmd,
-      RotationSubcommand,
-      StopDeviceCmd,
-      VectorSubcommand,
-      VibrateCmd,
-      VibrateSubcommand,
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+      ButtplugDeviceMessageType, DeviceMessageInfo, LinearCmd, MessageAttributesMap, RotateCmd,
+      RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd, VibrateSubcommand,
     },
   },
 };
-use async_std::{
-  prelude::StreamExt,
-  sync::{Receiver, Sender},
+use async_std::{sync::Sender, task};
+use broadcaster::BroadcastChannel;
+use futures::{channel::mpsc::SendError, future, sink::SinkExt};
+use std::{
+  collections::HashMap,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
-use std::collections::HashMap;
 
 /// Convenience enum for forming [VibrateCmd] commands.
 ///
@@ -94,6 +93,7 @@ pub enum LinearCommand {
 /// [ButtplugClientDevice] instances are obtained from the
 /// [ButtplugClient][super::ButtplugClient], and allow the user to send commands
 /// to a device connected to the server.
+#[derive(Clone)]
 pub struct ButtplugClientDevice {
   /// Name of the device
   pub name: String,
@@ -112,23 +112,21 @@ pub struct ButtplugClientDevice {
   /// Receives device specific events from the
   /// [ButtplugClient][super::ButtplugClient]'s event loop. Used for device
   /// connection updates, sensor input, etc...
-  event_receiver: Receiver<ButtplugClientDeviceEvent>,
+  event_receiver: BroadcastChannel<ButtplugClientDeviceEvent>,
   /// Internal storage for events received from the
   /// [ButtplugClient][super::ButtplugClient].
-  events: Vec<ButtplugClientDeviceEvent>,
+  // events: Vec<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
-  device_connected: bool,
+  device_connected: Arc<AtomicBool>,
   /// True if the [ButtplugClient][super::ButtplugClient] that generated this
   /// [ButtplugClientDevice] instance is still connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
-  client_connected: bool,
+  client_connected: Arc<AtomicBool>,
 }
 
-unsafe impl Send for ButtplugClientDevice {
-}
-unsafe impl Sync for ButtplugClientDevice {
-}
+unsafe impl Send for ButtplugClientDevice {}
+unsafe impl Sync for ButtplugClientDevice {}
 
 impl ButtplugClientDevice {
   /// Creates a new [ButtplugClientDevice] instance
@@ -149,17 +147,53 @@ impl ButtplugClientDevice {
     index: u32,
     allowed_messages: MessageAttributesMap,
     message_sender: Sender<ButtplugClientMessageFuturePair>,
-    event_receiver: Receiver<ButtplugClientDeviceEvent>,
+    event_receiver: BroadcastChannel<ButtplugClientDeviceEvent>,
   ) -> Self {
+    let mut disconnect_receiver = event_receiver.clone();
+    let device_connected = Arc::new(AtomicBool::new(true));
+    let client_connected = Arc::new(AtomicBool::new(true));
+    let device_connected_clone = device_connected.clone();
+    let client_connected_clone = client_connected.clone();
+
+    task::spawn(async move {
+      loop {
+        match disconnect_receiver.recv().await.unwrap() {
+          ButtplugClientDeviceEvent::ClientDisconnect => {
+            device_connected_clone.store(false, Ordering::SeqCst);
+            client_connected_clone.store(false, Ordering::SeqCst);
+          }
+          ButtplugClientDeviceEvent::DeviceDisconnect => {
+            device_connected_clone.store(false, Ordering::SeqCst);
+          }
+          ButtplugClientDeviceEvent::Message(_) => {
+            continue;
+          }
+        }
+      }
+    });
+
     Self {
       name: name.to_owned(),
       index,
       allowed_messages,
       message_sender,
       event_receiver,
-      device_connected: true,
-      client_connected: true,
-      events: vec![],
+      device_connected,
+      client_connected,
+    }
+  }
+
+  fn check_connection(&self) -> Result<(), ButtplugClientError> {
+    if !self.client_connected.load(Ordering::SeqCst) {
+      Err(ButtplugClientError::ButtplugConnectorError(
+        ButtplugConnectorError::new(&"Client not Connected"),
+      ))
+    } else if !self.device_connected.load(Ordering::SeqCst) {
+      Err(ButtplugClientError::ButtplugError(
+        ButtplugDeviceError::new(&"Device not Connected").into(),
+      ))
+    } else {
+      Ok(())
     }
   }
 
@@ -168,137 +202,71 @@ impl ButtplugClientDevice {
   ///
   /// Performs the send/receive flow for send a device command and receiving the
   /// response from the server.
-  async fn send_message(
-    &mut self,
+  fn send_message(
+    &self,
     msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugClientResult<ButtplugCurrentSpecServerMessage> {
-    // Since we're using async_std channels, if we send a message and the
-    // event loop has shut down, we may never know (and therefore possibly
-    // block infinitely) if we don't check the status of an event loop
-    // receiver to see if it's returned None. Always run connection/event
-    // checks before sending messages to the event loop.
-    self.check_for_events().await?;
-    let fut = ButtplugClientMessageFuture::default();
-    self
-      .message_sender
-      .send(ButtplugClientMessageFuturePair::new(
-        msg.clone(),
-        fut.get_state_clone(),
-      ))
-      .await;
-    match fut.await {
-      Ok(msg) => {
-        if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
-          Err(ButtplugClientError::ButtplugError(ButtplugError::from(
-            _err,
-          )))
-        } else {
-          Ok(msg)
-        }
-      }
-      Err(e) => Err(ButtplugClientError::ButtplugConnectorError(e)),
+  ) -> ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage> {
+    if let Err(e) = self.check_connection() {
+      return Box::pin(future::ready(Err(e)));
     }
+    let message_sender = self.message_sender.clone();
+    Box::pin(async move {
+      let fut = ButtplugClientMessageFuture::default();
+      message_sender
+        .send(ButtplugClientMessageFuturePair::new(
+          msg.clone(),
+          fut.get_state_clone(),
+        ))
+        .await;
+      match fut.await {
+        Ok(msg) => {
+          if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
+            Err(ButtplugClientError::ButtplugError(_err.into()))
+          } else {
+            Ok(msg)
+          }
+        }
+        Err(e) => Err(ButtplugClientError::ButtplugConnectorError(e)),
+      }
+    })
+  }
+
+  pub fn event_receiver(
+    &self,
+  ) -> impl SinkExt<ButtplugClientDeviceEvent, Error = SendError> + Sync + Send {
+    self.event_receiver.clone()
   }
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
   /// message, otherwise returns a [ButtplugError]
-  async fn send_message_expect_ok(
-    &mut self,
+  fn send_message_expect_ok(
+    &self,
     msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugClientResult {
-    match self.send_message(msg).await? {
-      ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
-      ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(
-        ButtplugError::from(_err),
-      )),
-      _ => Err(ButtplugClientError::ButtplugError(
-        ButtplugMessageError {
-          message: "Got unexpected message type.".to_owned(),
-        }
-        .into(),
-      )),
-    }
-  }
-
-  /// Checks to see if any events have been received since the last device call.
-  ///
-  /// As we don't have a way of emitted events in the way that we did in C#/JS,
-  /// we need to explicitly check for values coming from the server, either
-  /// input from devices or notifications that they've disconnected.
-  async fn check_for_events(&mut self) -> ButtplugClientResult {
-    if !self.client_connected {
-      return Err(ButtplugConnectorError::new("Client not connected.").into());
-    }
-    if !self.device_connected {
-      return Err(ButtplugDeviceError::new("Device not connected.").into());
-    }
-    while !self.event_receiver.is_empty() {
-      match self.event_receiver.next().await {
-        Some(msg) => {
-          // If this is a disconnect, relay as such.
-          if let ButtplugClientDeviceEvent::DeviceDisconnect = msg {
-            self.device_connected = false;
+  ) -> ButtplugClientResultFuture {
+    let send_fut = self.send_message(msg);
+    Box::pin(async move {
+      match send_fut.await? {
+        ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
+        ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugClientError::ButtplugError(
+          ButtplugError::from(_err),
+        )),
+        _ => Err(ButtplugClientError::ButtplugError(
+          ButtplugMessageError {
+            message: "Got unexpected message type.".to_owned(),
           }
-          self.events.push(msg)
-        }
-        None => {
-          self.client_connected = false;
-          self.device_connected = false;
-          // If we got None, this means the internal loop stopped and our
-          // sender was dropped. We should consider this a disconnect.
-          self
-            .events
-            .push(ButtplugClientDeviceEvent::ClientDisconnect);
-          return Err(ButtplugConnectorError::new("Client not connected.").into());
-        }
-      }
-    }
-    Ok(())
-  }
-
-  /// Produces a future that will wait for a set of events from the
-  /// internal loop. Returns once any number of events is received.
-  ///
-  /// # Notes
-  ///
-  /// This should be called whenever the client isn't doing anything
-  /// otherwise, so we can respond to unexpected updates from the server, such
-  /// as devices connections/disconnections, log messages, etc... This is
-  /// basically what event handlers in C# and JS would deal with, but we're in
-  /// Rust so this requires us to be slightly more explicit.
-  pub async fn wait_for_event(&mut self) -> Result<ButtplugClientDeviceEvent, ButtplugClientError> {
-    debug!("Device waiting for event.");
-    if !self.client_connected {
-      return Err(ButtplugConnectorError::new("Client not connected.").into());
-    }
-    if !self.device_connected {
-      return Err(ButtplugDeviceError::new("Device not connected.").into());
-    }
-    Ok({
-      if !self.events.is_empty() {
-        self.events.pop().unwrap()
-      } else {
-        match self.event_receiver.next().await {
-          Some(msg) => msg,
-          None => {
-            // If we got None, this means the internal loop stopped and our
-            // sender was dropped. We should consider this a disconnect.
-            self.client_connected = false;
-            self.device_connected = false;
-            ButtplugClientDeviceEvent::ClientDisconnect
-          }
-        }
+          .into(),
+        )),
       }
     })
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
-  pub async fn vibrate(&mut self, speed_cmd: VibrateCommand) -> ButtplugClientResult {
+  pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
     if !self
       .allowed_messages
       .contains_key(&ButtplugDeviceMessageType::VibrateCmd)
     {
-      return Err(ButtplugDeviceError::new("Device does not support vibration.").into());
+      return Box::pin(future::ready(Err(ButtplugDeviceError::new("Device does not support vibration.").into())));
     }
     let mut vibrator_count: u32 = 0;
     if let Some(features) = self
@@ -319,39 +287,38 @@ impl ButtplugClientDevice {
       }
       VibrateCommand::SpeedMap(map) => {
         if map.len() as u32 > vibrator_count {
-          return Err(
-            ButtplugDeviceError::new(&format!(
+          return 
+          Box::pin(future::ready(Err(ButtplugDeviceError::new(&format!(
               "Device only has {} vibrators, but {} commands were sent.",
               vibrator_count,
               map.len()
             ))
-            .into(),
-          );
+            .into())));
         }
         speed_vec = Vec::with_capacity(map.len() as usize);
         for (idx, speed) in map {
           if idx > vibrator_count - 1 {
-            return Err(
+            return Box::pin(future::ready(Err(
               ButtplugDeviceError::new(&format!(
                 "Max vibrator index is {}, command referenced {}.",
                 vibrator_count, idx
               ))
               .into(),
-            );
+            )));
           }
           speed_vec.push(VibrateSubcommand::new(idx, speed));
         }
       }
       VibrateCommand::SpeedVec(vec) => {
         if vec.len() as u32 > vibrator_count {
-          return Err(
+          return Box::pin(future::ready(Err(
             ButtplugDeviceError::new(&format!(
               "Device only has {} vibrators, but {} commands were sent.",
               vibrator_count,
               vec.len()
             ))
             .into(),
-          );
+          )));
         }
         speed_vec = Vec::with_capacity(vec.len() as usize);
         for (i, v) in vec.iter().enumerate() {
@@ -360,16 +327,16 @@ impl ButtplugClientDevice {
       }
     }
     let msg = VibrateCmd::new(self.index, speed_vec).into();
-    self.send_message_expect_ok(msg).await
+    self.send_message_expect_ok(msg)
   }
 
   /// Commands device to move linearly, assuming it has the features to do so.
-  pub async fn linear(&mut self, linear_cmd: LinearCommand) -> ButtplugClientResult {
+  pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
     if !self
       .allowed_messages
       .contains_key(&ButtplugDeviceMessageType::LinearCmd)
     {
-      return Err(ButtplugDeviceError::new("Device does not support linear movement.").into());
+      return Box::pin(future::ready(Err(ButtplugDeviceError::new("Device does not support linear movement.").into())));
     }
     let mut linear_count: u32 = 0;
     if let Some(features) = self
@@ -390,39 +357,39 @@ impl ButtplugClientDevice {
       }
       LinearCommand::LinearMap(map) => {
         if map.len() as u32 > linear_count {
-          return Err(
+          return Box::pin(future::ready(Err(
             ButtplugDeviceError::new(&format!(
               "Device only has {} linear actuators, but {} commands were sent.",
               linear_count,
               map.len()
             ))
             .into(),
-          );
+          )));
         }
         linear_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (dur, pos)) in map {
           if idx > linear_count - 1 {
-            return Err(
+            return Box::pin(future::ready(Err(
               ButtplugDeviceError::new(&format!(
                 "Max linear index is {}, command referenced {}.",
                 linear_count, idx
               ))
               .into(),
-            );
+            )));
           }
           linear_vec.push(VectorSubcommand::new(idx, dur, pos));
         }
       }
       LinearCommand::LinearVec(vec) => {
         if vec.len() as u32 > linear_count {
-          return Err(
+          return Box::pin(future::ready(Err(
             ButtplugDeviceError::new(&format!(
               "Device only has {} linear actuators, but {} commands were sent.",
               linear_count,
               vec.len()
             ))
             .into(),
-          );
+          )));
         }
         linear_vec = Vec::with_capacity(vec.len() as usize);
         for (i, v) in vec.iter().enumerate() {
@@ -431,16 +398,16 @@ impl ButtplugClientDevice {
       }
     }
     let msg = LinearCmd::new(self.index, linear_vec).into();
-    self.send_message_expect_ok(msg).await
+    self.send_message_expect_ok(msg)
   }
 
   /// Commands device to rotate, assuming it has the features to do so.
-  pub async fn rotate(&mut self, rotate_cmd: RotateCommand) -> ButtplugClientResult {
+  pub fn rotate(&self, rotate_cmd: RotateCommand) -> ButtplugClientResultFuture {
     if !self
       .allowed_messages
       .contains_key(&ButtplugDeviceMessageType::RotateCmd)
     {
-      return Err(ButtplugDeviceError::new("Device does not support rotation.").into());
+      return Box::pin(future::ready(Err(ButtplugDeviceError::new("Device does not support rotation.").into())));
     }
     let mut rotate_count: u32 = 0;
     if let Some(features) = self
@@ -461,39 +428,39 @@ impl ButtplugClientDevice {
       }
       RotateCommand::RotateMap(map) => {
         if map.len() as u32 > rotate_count {
-          return Err(
+          return Box::pin(future::ready(Err(
             ButtplugDeviceError::new(&format!(
               "Device only has {} rotators, but {} commands were sent.",
               rotate_count,
               map.len()
             ))
             .into(),
-          );
+          )));
         }
         rotate_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (speed, clockwise)) in map {
           if idx > rotate_count - 1 {
-            return Err(
+            return Box::pin(future::ready(Err(
               ButtplugDeviceError::new(&format!(
                 "Max rotate index is {}, command referenced {}.",
                 rotate_count, idx
               ))
               .into(),
-            );
+            )));
           }
           rotate_vec.push(RotationSubcommand::new(idx, speed, clockwise));
         }
       }
       RotateCommand::RotateVec(vec) => {
         if vec.len() as u32 > rotate_count {
-          return Err(
+          return Box::pin(future::ready(Err(
             ButtplugDeviceError::new(&format!(
               "Device only has {} rotators, but {} commands were sent.",
               rotate_count,
               vec.len()
             ))
             .into(),
-          );
+          )));
         }
         rotate_vec = Vec::with_capacity(vec.len() as usize);
         for (i, v) in vec.iter().enumerate() {
@@ -502,15 +469,14 @@ impl ButtplugClientDevice {
       }
     }
     let msg = RotateCmd::new(self.index, rotate_vec).into();
-    self.send_message_expect_ok(msg).await
+    self.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.
-  pub async fn stop(&mut self) -> ButtplugClientResult {
+  pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
     self
       .send_message_expect_ok(StopDeviceCmd::default().into())
-      .await
   }
 }
 
@@ -518,14 +484,14 @@ impl
   From<(
     &DeviceMessageInfo,
     Sender<ButtplugClientMessageFuturePair>,
-    Receiver<ButtplugClientDeviceEvent>,
+    BroadcastChannel<ButtplugClientDeviceEvent>,
   )> for ButtplugClientDevice
 {
   fn from(
     msg_sender_tuple: (
       &DeviceMessageInfo,
       Sender<ButtplugClientMessageFuturePair>,
-      Receiver<ButtplugClientDeviceEvent>,
+      BroadcastChannel<ButtplugClientDeviceEvent>,
     ),
   ) -> Self {
     let msg = msg_sender_tuple.0.clone();
