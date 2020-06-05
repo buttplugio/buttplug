@@ -39,46 +39,31 @@ async fn embedded_connector_example() {
   // constructor arguments in later examples.
   let connector = ButtplugInProcessClientConnector::new("Example Server", 0);
 
-  // Now that we've got a connector, we can use the ButtplugClient::run()
+  // Now that we've got a connector, we can use the ButtplugClient::connect()
   // function to spin up our client event loop. We pass this function three
   // things:
   //
   // - The client name, which is sent to the server so we can identify what's
-  // connected on that end if the server has a GUI.
+  //   connected on that end if the server has a GUI.
   // - The connector we just made, used to connect to the Server
-  // - A closure that will run whatever we want to do with Buttplug.
   //
-  // The run() function will take our connector, create a client, try to connect
-  // that client to the server (which, with an embedded connector, should
-  // always succeed), and then will run the closure, passing it the connected
-  // client instance.
+  // The connect() function will take our connector, create a client, and try to
+  // connect that client to the server (which, with an embedded connector,
+  // should always succeed). It will return the client itself, as well as an
+  // event receiver for listening for things like device connection and
+  // disconnection, log messages, and other events.
   //
-  // run() will block until we exit our closure. This could happen for
-  // multiple reasons, like the client or server disconnecting, or our
-  // application signalling that it's done doing whatever it wants to do with
-  // buttplug.
-  //
-  // run() can also return an error in certain situations, like not being able
-  // to connect to the server.
-  //
-  // For sake of clarity and indentation, we'll define our closure first, then
-  // pass it into run().
-  //
-  // Note that the closure is (ButtplugClient) -> impl Future. We'll explain
-  // why in the definition.
-  let app_closure = |client: ButtplugClient| {
-    async move {
-      println!("Is the client connected? {}", client.connected());
-
-      // We don't actually have anything to do here yet, since we're just
-      // showing off how to set up execution. We'll just fall out of our
-      // closure here.
-      println!("Exiting example");
-    }
-  };
-  ButtplugClient::run("Example Client", connector, app_closure)
+  // connect() can also return an error in certain situations, like not being
+  // able to connect to the server.
+  let (client, _) = ButtplugClient::connect("Example Client", connector)
     .await
     .unwrap();
+  println!("Is the client connected? {}", client.connected());
+
+  // We don't actually have anything to do here yet, since we're just
+  // showing off how to set up execution. We'll just fall out of our
+  // closure here.
+  println!("Exiting example");
 
   // That's it for the basics of setting up, connecting, and disconnecting a client.
 }

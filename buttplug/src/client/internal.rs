@@ -176,9 +176,6 @@ where
     info!("Sending message to clients.");
     if self.sorter.maybe_resolve_message(&msg).await {
       return;
-    } else if msg.is_server_event() {
-      // TODO Return some sort of event error here.
-      panic!("Unmatched message ID!")
     }
     match &msg {
       ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {

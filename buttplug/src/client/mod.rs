@@ -300,10 +300,10 @@ impl ButtplugClient {
   /// If the library is using outside device managers, it is recommended to
   /// build your own connector, add your device manager to those, and use the
   /// `run()` method to pass it in.
-  pub async fn connect_in_process(
+  pub fn connect_in_process(
     name: &str,
     max_ping_time: u64,
-  ) -> BoxFuture<'static, Result<(Self, impl StreamExt), ButtplugClientError>> {
+  ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
     #[cfg(not(any(feature = "btleplug-manager", feature = "xinput")))]
     panic!("Must compile library using at least one device communication manager features (btleplug, xinput, etc) to use run_with_in_process_connector.");
     #[cfg(any(feature = "btleplug-manager", feature = "xinput"))]

@@ -61,19 +61,15 @@ async fn embedded_connector_example() {
   // out, things look basically the same, EXCEPT for the fact that, unlike the
   // mebedded connector, this can fail! If it does, the unwrap on run() will
   // panic and you'll get an error message about not being able to connect.
-  let app_closure = |client: ButtplugClient| {
-    async move {
-      println!("Is the client connected? {}", client.connected());
-
-      // We don't actually have anything to do here yet, since we're just
-      // showing off how to set up execution. We'll just fall out of our
-      // closure here.
-      println!("Exiting example");
-    }
-  };
-  ButtplugClient::run("Example Client", connector, app_closure)
+  let (client, _) = ButtplugClient::connect("Example Client", connector)
     .await
     .unwrap();
+  println!("Is the client connected? {}", client.connected());
+
+  // We don't actually have anything to do here yet, since we're just
+  // showing off how to set up execution. We'll just fall out of our
+  // closure here.
+  println!("Exiting example");
 
   // That's it for remote settings. Congrats, you've vaguely sorta teledildonicsed! At
   // least with two processes on the same machine, but hey, that's remote, right?
