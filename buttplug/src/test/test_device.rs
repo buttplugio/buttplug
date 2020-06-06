@@ -75,7 +75,7 @@ impl TestDevice {
     let mut endpoint_channels = HashMap::new();
     for endpoint in &endpoints {
       let (sender, receiver) = channel(256);
-      endpoint_channels.insert(endpoint.clone(), (sender, receiver));
+      endpoint_channels.insert(*endpoint, (sender, receiver));
     }
     let event_broadcaster = BoundedDeviceEventBroadcaster::with_cap(256);
     Self {
@@ -91,7 +91,7 @@ impl TestDevice {
     let mut endpoint_channels = self.endpoint_channels.write().await;
     if !endpoint_channels.contains_key(&endpoint) {
       let (sender, receiver) = channel(256);
-      endpoint_channels.insert(endpoint.clone(), (sender, receiver));
+      endpoint_channels.insert(endpoint, (sender, receiver));
     }
   }
 

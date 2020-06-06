@@ -14,7 +14,7 @@ use super::{
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::messages::{
-    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
+    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
     DeviceList, DeviceMessageInfo,
   },
   util::future::ButtplugFutureStateShared,
