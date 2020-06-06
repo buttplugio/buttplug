@@ -32,7 +32,7 @@ use async_std::{
 };
 use evmap::{self, ReadHandle};
 use futures::future::{self, Future};
-use std::convert::TryFrom;
+use std::{convert::TryFrom, sync::atomic::{AtomicU32, Ordering}};
 
 enum DeviceEvent {
   DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
@@ -48,7 +48,7 @@ fn wait_for_manager_events(
   ReadHandle<u32, ButtplugDevice>,
   Sender<DeviceCommunicationEvent>,
 ) {
-  let mut device_index: u32 = 0;
+  let main_device_index = Arc::new(AtomicU32::new(0));
   let (device_event_sender, mut device_event_receiver) = channel::<(u32, ButtplugDeviceEvent)>(256);
   let (device_map_reader, mut device_map_writer) = evmap::new::<u32, ButtplugDevice>();
   // Refresh ASAP just in case we ping out before getting any devices.
@@ -81,9 +81,14 @@ fn wait_for_manager_events(
         DeviceEvent::DeviceCommunicationEvent(e) => match e {
           Some(event) => match event {
             DeviceCommunicationEvent::DeviceFound(device_creator) => {
+              // Pull and increment the device index now. If connection fails,
+              // we'll just iterate to the next one.
+              let device_index = main_device_index.load(Ordering::SeqCst);
+              main_device_index.store(main_device_index.load(Ordering::SeqCst) + 1, Ordering::SeqCst);
               let device_event_sender_clone = device_event_sender.clone();
               let server_sender_clone = server_sender.clone();
               let device_comm_sender_internal_clone = device_comm_sender_internal.clone();
+              
               task::spawn(async move {
                 match ButtplugDevice::try_create_device(device_creator).await {
                   Ok(option_dev) => match option_dev {
@@ -111,7 +116,6 @@ fn wait_for_manager_events(
                           device,
                         )))
                         .await;
-                      device_index += 1;
                     }
                     None => debug!("Device could not be matched to a protocol."),
                   },
