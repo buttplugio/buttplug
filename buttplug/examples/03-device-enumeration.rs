@@ -13,6 +13,7 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::ButtplugInProcessClientConnector,
   test::TestDevice,
+  util::async_manager
 };
 use futures::StreamExt;
 
@@ -121,7 +122,7 @@ async fn device_enumeration_example() {
   //
   // For our purposes for the moment, all we care about is receiving new
   // devices, so we'll just loop and wait. We'll do so in another task.
-  task::spawn(async move {
+  async_manager::spawn(async move {
     loop {
       match event_stream.next().await.unwrap() {
         // Yay we got an event!
@@ -148,7 +149,7 @@ async fn device_enumeration_example() {
         }
       }
     }
-  });
+  }).unwrap();
 
   println!("Hit enter to continue...");
   let mut line = String::new();
@@ -176,7 +177,7 @@ async fn device_enumeration_example() {
 }
 
 fn main() {
-  task::block_on(async {
+  async_manager::block_on(async {
     device_enumeration_example().await;
   })
 }

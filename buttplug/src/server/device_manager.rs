@@ -24,15 +24,14 @@ use crate::{
   device::{ButtplugDevice, ButtplugDeviceEvent},
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
+  util::async_manager,
 };
 use async_std::{
-  prelude::{FutureExt, StreamExt},
   sync::{Arc, Mutex},
-  task,
 };
 use async_channel::{Receiver, Sender, bounded};
 use evmap::{self, ReadHandle};
-use futures::future::{self, Future};
+use futures::{FutureExt, StreamExt, future::{self, Future}};
 use std::{convert::TryFrom, sync::atomic::{AtomicU32, Ordering}};
 
 enum DeviceEvent {
@@ -60,11 +59,6 @@ fn wait_for_manager_events(
   let device_map_reader_internal = device_map_reader.clone();
   let event_loop = async move {
     loop {
-      let recv_fut =
-        async { DeviceEvent::DeviceCommunicationEvent(device_comm_receiver.next().await) };
-
-      let device_event_fut = async { DeviceEvent::DeviceEvent(device_event_receiver.next().await) };
-
       let ping_fut = async {
         if let Some(recv) = &ping_receiver {
           recv.recv().await;
@@ -76,9 +70,13 @@ fn wait_for_manager_events(
         DeviceEvent::PingTimeout
       };
 
-      let race_fut = recv_fut.race(device_event_fut).race(ping_fut);
+      let manager_event = select! {
+        device_comm = device_comm_receiver.next().fuse() => DeviceEvent::DeviceCommunicationEvent(device_comm),
+        device_event = device_event_receiver.next().fuse() => DeviceEvent::DeviceEvent(device_event),
+        ping = ping_fut.fuse() => ping
+      };
 
-      match race_fut.await {
+      match manager_event {
         DeviceEvent::DeviceCommunicationEvent(e) => match e {
           Some(event) => match event {
             DeviceCommunicationEvent::DeviceFound(device_creator) => {
@@ -90,7 +88,7 @@ fn wait_for_manager_events(
               let server_sender_clone = server_sender.clone();
               let device_comm_sender_internal_clone = device_comm_sender_internal.clone();
               
-              task::spawn(async move {
+              async_manager::spawn(async move {
                 match ButtplugDevice::try_create_device(device_creator).await {
                   Ok(option_dev) => match option_dev {
                     Some(device) => {
@@ -98,7 +96,7 @@ fn wait_for_manager_events(
                       let mut recv = device.get_event_receiver();
                       let sender_clone = device_event_sender_clone.clone();
                       let idx_clone = device_index;
-                      task::spawn(async move {
+                      async_manager::spawn(async move {
                         while let Some(e) = recv.next().await {
                           sender_clone.send((idx_clone, e)).await;
                         }
@@ -191,9 +189,7 @@ impl DeviceManager {
   ) -> Self {
     let (event_loop_fut, device_map_reader, device_event_sender) =
       wait_for_manager_events(ping_receiver, event_sender);
-    task::spawn(async move {
-      event_loop_fut.await;
-    });
+    async_manager::spawn(event_loop_fut);
     Self {
       sender: device_event_sender,
       devices: device_map_reader,
@@ -353,15 +349,16 @@ mod test {
       ButtplugMessage, ButtplugMessageUnion, RequestDeviceList, VibrateCmd, VibrateSubcommand,
     },
     server::comm_managers::btleplug::BtlePlugCommunicationManager,
+    util::async_manager
   };
-  use async_std::{prelude::StreamExt, task};
+  use futures::StreamExt;
   use async_channel::bounded;
   use std::time::Duration;
 
   #[test]
   pub fn test_device_manager_creation() {
     let _ = env_logger::builder().is_test(true).try_init();
-    task::block_on(async {
+    async_manager::block_on(async {
       let (sender, mut receiver) = bounded(256);
       let mut dm = DeviceManager::new(sender);
       dm.add_comm_manager::<BtlePlugCommunicationManager>();

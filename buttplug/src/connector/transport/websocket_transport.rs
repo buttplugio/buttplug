@@ -12,15 +12,14 @@ use crate::{
     ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
+  util::async_manager
 };
 use super::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage};
-use async_std::task;
 use async_channel::bounded;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
 };
-use futures::future;
-use futures_util::{SinkExt, StreamExt};
+use futures::{SinkExt, StreamExt, future};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
@@ -116,7 +115,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
           // TODO Do we want to store/join these tasks anywhere?
-          task::spawn(async move {
+          async_manager::spawn(async move {
             while let Ok(msg) = request_receiver.recv().await {
               let out_msg = match msg {
                 ButtplugSerializedMessage::Text(text) => Message::Text(text),
@@ -126,7 +125,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
               writer.send(out_msg).await.expect("This should never fail?");
             }
           });
-          task::spawn(async move {
+          async_manager::spawn(async move {
             while let Some(response) = reader.next().await {
               trace!("Websocket receiving: {:?}", response);
               match response.unwrap() {

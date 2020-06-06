@@ -48,12 +48,12 @@ mod test {
         core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
         device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
         test::{check_recv_value, TestDevice},
+        util::async_manager
     };
-    use async_std::task;
 
     #[test]
     pub fn test_aneros_protocol() {
-        task::block_on(async move {
+        async_manager::block_on(async move {
             let (device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo")
                 .await
                 .unwrap();

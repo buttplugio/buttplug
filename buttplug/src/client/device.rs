@@ -22,8 +22,8 @@ use crate::{
       RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd, VibrateSubcommand,
     },
   },
+  util::async_manager
 };
-use async_std::{task};
 use async_channel::Sender;
 use broadcaster::BroadcastChannel;
 use futures::{channel::mpsc::SendError, future, sink::SinkExt};
@@ -156,7 +156,7 @@ impl ButtplugClientDevice {
     let device_connected_clone = device_connected.clone();
     let client_connected_clone = client_connected.clone();
 
-    task::spawn(async move {
+    async_manager::spawn(async move {
       loop {
         match disconnect_receiver.recv().await.unwrap() {
           ButtplugClientDeviceEvent::ClientDisconnect => {

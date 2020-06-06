@@ -8,7 +8,7 @@
 //! Buttplug futures utilities. Mostly used for building message futures in the
 //! client, used to wait on responses from the server.
 
-use async_std::{
+use futures::{
   future::Future,
   task::{Context, Poll, Waker},
 };

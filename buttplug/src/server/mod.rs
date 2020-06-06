@@ -22,18 +22,11 @@ use crate::{
     },
   },
   test::TestDeviceImplCreator,
+  util::async_manager,
 };
-use futures::future::BoxFuture;
+use futures::{StreamExt, future::BoxFuture};
 use ping_timer::PingTimer;
-
-pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
-pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
-
-use async_std::{
-  prelude::StreamExt,
-  sync::{Arc, Mutex},
-  task,
-};
+use async_std::sync::{Arc, Mutex};
 use async_channel::{bounded, Sender, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
@@ -42,6 +35,9 @@ use std::{
   convert::{TryFrom, TryInto},
   sync::atomic::{AtomicBool, Ordering},
 };
+
+pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
+pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
 pub enum ButtplugServerEvent {
   DeviceAdded(DeviceMessageInfo),
@@ -80,7 +76,7 @@ impl ButtplugServer {
       let pinged_out_clone = pinged_out.clone();
       let connected_clone = connected.clone();
       let event_sender_clone = send.clone();
-      task::spawn(async move {
+      async_manager::spawn(async move {
         receiver.next().await;
         pinged_out_clone.store(true, Ordering::SeqCst);
         connected_clone.store(false, Ordering::SeqCst);
@@ -264,8 +260,10 @@ mod test {
     core::messages::ButtplugMessageSpecVersion,
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     test::{check_recv_value, TestDevice},
+    util::async_manager,
   };
-  use async_std::{prelude::StreamExt, task};
+  use futures::StreamExt;
+  use futures_timer::Delay;
   use async_channel::Receiver;
   use std::time::Duration;
 
@@ -290,7 +288,7 @@ mod test {
     let _ = env_logger::builder().is_test(true).try_init();
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
-    task::block_on(async {
+    async_manager::block_on(async {
       let (server, _recv) = test_server_setup(msg).await;
       assert!(server.connected());
     });
@@ -301,7 +299,7 @@ mod test {
     let _ = env_logger::builder().is_test(true).try_init();
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
-    task::block_on(async {
+      async_manager::block_on(async {
       test_server_setup(msg).await;
     });
   }
@@ -316,7 +314,7 @@ mod test {
     let (server, _) = ButtplugServer::new("Test Server", 0);
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
-    task::block_on(async {
+      async_manager::block_on(async {
       assert!(
         server.parse_message(msg).await.is_err(),
         "Client having higher version than server should fail"
@@ -328,10 +326,10 @@ mod test {
   fn test_ping_timeout() {
     let _ = env_logger::builder().is_test(true).try_init();
     let (server, mut recv) = ButtplugServer::new("Test Server", 100);
-    task::block_on(async {
+    async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      task::sleep(Duration::from_millis(150)).await;
+      Delay::new(Duration::from_millis(150)).await;
       let reply = server.parse_message(msg.into()).await;
       assert!(
         reply.is_ok(),
@@ -340,7 +338,7 @@ mod test {
           reply
         )
       );
-      task::sleep(Duration::from_millis(300)).await;
+      Delay::new(Duration::from_millis(300)).await;
       let pingmsg = messages::Ping::default();
       match server.parse_message(pingmsg.into()).await {
         Ok(_) => panic!("Should get a ping error back!"),
@@ -370,7 +368,7 @@ mod test {
   fn test_device_stop_on_ping_timeout() {
     let _ = env_logger::builder().is_test(true).try_init();
 
-    task::block_on(async {
+    async_manager::block_on(async {
       let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
       let devices = server.add_test_comm_manager();
       // TODO This should probably use a test protocol we control, not the aneros protocol
@@ -411,7 +409,7 @@ mod test {
       // Wait out the ping, we should get a stop message.
       let mut i = 0u32;
       while command_receiver.is_empty() {
-        task::sleep(Duration::from_millis(150)).await;
+        Delay::new(Duration::from_millis(150)).await;
         // Breaks out of loop if we wait for too long.
         i += 1;
         assert!(i < 10, "Slept for too long while waiting for stop command!");
@@ -437,7 +435,7 @@ mod test {
     //
     // let _ = env_logger::builder().is_test(true).try_init();
     let (server, mut recv) = ButtplugServer::new("Test Server", 0);
-    task::block_on(async {
+    async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(msg.into()).await;

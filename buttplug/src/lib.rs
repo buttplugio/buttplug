@@ -94,6 +94,11 @@ extern crate buttplug_derive;
 extern crate log;
 #[macro_use]
 extern crate strum_macros;
+#[cfg(all(not(feature="async_std"), not(feature="tokio")))]
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate futures;
 
 #[cfg(feature = "client")]
 pub mod client;

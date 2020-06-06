@@ -16,14 +16,10 @@ use crate::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
     ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
   },
-};
-use async_std::{
-  prelude::FutureExt,
-  task,
+  util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use futures::future::BoxFuture;
-use futures_util::StreamExt;
+use futures::{StreamExt, FutureExt, future::BoxFuture};
 use std::marker::PhantomData;
 
 enum ButtplugRemoteConnectorMessage<T>
@@ -73,21 +69,20 @@ async fn remote_connector_event_loop<
     // For the type, we will get back one of two things: Either a serialized
     // incoming message from the transport for the connector, or an outgoing
     // message from the connector to go to the transport.
-    let mut stream_return = async {
+    let mut stream_return = select! {
       // Catch messages coming in from the transport.
-      match transport_incoming_recv.next().await {
+      transport = transport_incoming_recv.next().fuse() => 
+      match transport {
         Some(msg) => StreamValue::Incoming(msg),
         None => StreamValue::NoValue,
-      }
-    }
-    .race(async {
-      match connector_outgoing_recv.next().await {
+      },
+      connector = connector_outgoing_recv.next().fuse() => 
+      match connector {
         // Catch messages that need to be sent out through the connector.
         Some(msg) => StreamValue::Outgoing(msg),
         None => StreamValue::NoValue,
       }
-    })
-    .await;
+    };
     match stream_return {
       // If we get NoValue back, it means one side closed, so the other should
       // too.
@@ -231,7 +226,7 @@ where
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
             let (connector_incoming_sender, connector_incoming_receiver) = bounded(256);
-            task::spawn(async move {
+            async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
                 SerializerType,
@@ -243,7 +238,7 @@ where
                 transport,
                 transport_outgoing_sender,
                 transport_incoming_receiver,
-              )
+              ).await
             });
             Ok(connector_incoming_receiver)
           }

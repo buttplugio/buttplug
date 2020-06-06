@@ -25,17 +25,18 @@ use crate::{
       RequestServerInfo, StartScanning,
     },
   },
-  util::future::{ButtplugFuture, ButtplugFutureStateShared},
+  test::TestDevice,
+  util::{
+    future::{ButtplugFuture, ButtplugFutureStateShared},
+    async_manager,
+  }
 };
 
-use async_std::{
-  prelude::FutureExt,
-  task,
-};
 use async_channel::{bounded, Sender};
 use futures::{
   future::{self, BoxFuture},
   StreamExt,
+  FutureExt,
 };
 use std::{
   error::Error,
@@ -244,7 +245,7 @@ impl ButtplugClient {
       let mut disconnect_event_receiver = event_channel.clone();
       let disconnect_status = client.connected.clone();
       // Start the event loop before we run the handshake.
-      task::spawn(async move {
+      async_manager::spawn(async move {
         let disconnect_fut = async move {
           loop {
             if let Some(ButtplugClientEvent::ServerDisconnect) = disconnect_event_receiver.next().await {
@@ -252,15 +253,18 @@ impl ButtplugClient {
               break;
             }
           }
-          Ok(())
+          Result::<(), ButtplugClientError>::Ok(())
         };
         // If we disconnect, we'll also stop the client event loop. If the
         // client event loop stops, we don't care about listening for disconnect
         // anymore.
         //
         // TODO We're dropping our result here, but acting like it's a return.
-        client_event_loop_fut.race(disconnect_fut).await
-      });
+        select! {
+          _ = client_event_loop_fut.fuse() => (),
+          _ = disconnect_fut.fuse() => (),
+        };
+      }).unwrap();
       client.handshake().await?;
       Ok((client, client_event_receiver))
     })
@@ -303,14 +307,20 @@ impl ButtplugClient {
   pub fn connect_in_process(
     name: &str,
     max_ping_time: u64,
+    use_test_manager: bool,
   ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
-    #[cfg(not(any(feature = "btleplug-manager", feature = "xinput")))]
-    panic!("Must compile library using at least one device communication manager features (btleplug, xinput, etc) to use run_with_in_process_connector.");
-    #[cfg(any(feature = "btleplug-manager", feature = "xinput"))]
     use crate::connector::ButtplugInProcessClientConnector;
 
     let mut connector =
       ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
+    if use_test_manager {
+      let (_, test_device_impl_creator) =
+      TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
+      let devices = connector.server_ref().add_test_comm_manager();
+      async_manager::block_on(async {
+        devices.lock().await.push(test_device_impl_creator);
+      });
+    }
     #[cfg(feature = "btleplug-manager")]
     {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
@@ -487,8 +497,8 @@ mod test {
       ButtplugInProcessClientConnector,
     },
     core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    util::async_manager
   };
-  use async_std::task;
   use async_channel::Receiver;
   use futures::future::BoxFuture;
 
@@ -519,7 +529,7 @@ mod test {
   #[test]
   fn test_failing_connection() {
     let _ = env_logger::builder().is_test(true).try_init();
-    task::block_on(async {
+    async_manager::block_on(async {
       assert!(
         ButtplugClient::connect("Test Client", ButtplugFailingConnector::default())
         .await
@@ -530,7 +540,7 @@ mod test {
 
   #[test]
   fn test_disconnect_status() {
-    task::block_on(async {
+    async_manager::block_on(async {
       let (client, _) = ButtplugClient::connect(
         "Test Client",
         ButtplugInProcessClientConnector::new("Test Server", 0),
@@ -543,7 +553,7 @@ mod test {
 
   #[test]
   fn test_double_disconnect() {
-    task::block_on(async {
+    async_manager::block_on(async {
       let (client, _) = ButtplugClient::connect(
         "Test Client",
         ButtplugInProcessClientConnector::new("Test Server", 0),
@@ -556,7 +566,8 @@ mod test {
 
   #[test]
   fn test_connect_init() {
-    task::block_on(async {
+    let _ = env_logger::builder().is_test(true).try_init();
+    async_manager::block_on(async {
       let (client, _) = ButtplugClient::connect(
         "Test Client",
         ButtplugInProcessClientConnector::new("Test Server", 0),
@@ -570,7 +581,7 @@ mod test {
   #[test]
   #[ignore]
   fn test_start_scanning() {
-    task::block_on(async {
+    async_manager::block_on(async {
       let (client, _) = ButtplugClient::connect(
         "Test Client",
         ButtplugInProcessClientConnector::new("Test Server", 0),

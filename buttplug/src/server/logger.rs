@@ -1,5 +1,7 @@
-use crate::core::messages::{self, ButtplugServerMessage};
-use async_std::task;
+use crate::{
+  core::messages::{self, ButtplugServerMessage},
+  util::async_manager,
+};
 use async_channel::Sender;
 use log::{Level, Log, Metadata, Record};
 
@@ -33,7 +35,7 @@ impl Log for ButtplugLogHandler {
       let sender_clone = self.message_sender.clone();
       let level: messages::LogLevel = record.level().into();
       let log_msg = format!("[{}] {}", target, record.args());
-      task::spawn(async move {
+      async_manager::spawn(async move {
         sender_clone
           .send(messages::Log::new(level, log_msg).into())
           .await;

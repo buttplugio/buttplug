@@ -2,7 +2,6 @@ extern crate buttplug;
 
 #[cfg(test)]
 mod test {
-  use async_std::{prelude::StreamExt, task};
   use buttplug::{
     core::messages::{
       self,
@@ -16,7 +15,9 @@ mod test {
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::ButtplugServer,
     test::{check_recv_value, TestDevice},
+    util::async_manager,
   };
+  use futures::StreamExt;
 
   #[test]
   fn test_version0_connection() {
@@ -25,7 +26,7 @@ mod test {
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
-    task::block_on(async {
+    async_manager::block_on(async {
       let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
@@ -46,7 +47,7 @@ mod test {
     let rsi =
       r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
-    task::block_on(async {
+    async_manager::block_on(async {
       let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
@@ -67,7 +68,7 @@ mod test {
 
     let (_, device_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
 
-    task::block_on(async {
+    async_manager::block_on(async {
       let devices = server.add_test_comm_manager();
       devices.lock().await.push(device_creator);
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -114,7 +115,7 @@ mod test {
     let mut serializer = ButtplugServerJSONSerializer::default();
     let (device, device_creator) =
       TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-    task::block_on(async {
+    async_manager::block_on(async {
       let devices = server.add_test_comm_manager();
       devices.lock().await.push(device_creator);
 

@@ -56,13 +56,13 @@ mod test {
         test::{check_recv_value, TestDevice},
         device::{
             Endpoint, DeviceImplCommand, DeviceWriteCmd,
-        }
+        },
+        util::async_manager
     };
-    use async_std::task;
 
     #[test]
     pub fn test_youou_protocol() {
-        task::block_on(async move {
+        async_manager::block_on(async move {
             let (device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_").await.unwrap();
             device.parse_message(&VibrateCmd::new(0, vec!(VibrateSubcommand::new(0, 0.5))).into()).await.unwrap();
             let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;

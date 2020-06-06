@@ -1,10 +1,7 @@
-use async_std::{
-  prelude::StreamExt,
-  sync::Arc,
-  task, // ::{self, JoinHandle},
-};
+use crate::util::async_manager;
+use async_std::sync::Arc;
 use async_channel::{bounded, Receiver, Sender};
-use futures::future::Future;
+use futures::{StreamExt, future::Future};
 use futures_timer::Delay;
 use std::{time::Duration, sync::atomic::{AtomicBool, Ordering}};
 
@@ -33,7 +30,7 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
             let sender_clone = ping_msg_sender_clone.clone();
             let pinged_out_sender_clone = pinged_out_sender.clone();
             let pinged_clone = pinged.clone();
-            handle = Some(task::spawn(async move{
+            handle = Some(async_manager::spawn(async move{
               loop {
                 Delay::new(Duration::from_millis(max_ping_time)).await;
                 if pinged_clone.load(Ordering::SeqCst) {
@@ -67,7 +64,7 @@ pub struct PingTimer {
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    task::block_on(async{
+    async_manager::block_on(async{
       self.ping_msg_sender.send(PingMessage::End).await;
       // TODO Could use some way to cancel the task here. Maybe update to async_std 1.6?
     });
@@ -80,7 +77,7 @@ impl PingTimer {
       panic!("Can't create ping timer with no max ping time.");
     }
     let (fut, sender, receiver) = ping_timer(max_ping_time);
-    task::spawn(fut);
+    async_manager::spawn(fut);
     (Self {
       // TODO Store this once we can cancel it.
       // timer_task: task::spawn(fut),

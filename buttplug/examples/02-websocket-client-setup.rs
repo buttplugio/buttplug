@@ -10,6 +10,7 @@ use buttplug::{
   client::ButtplugClient,
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
   core::messages::serializer::ButtplugClientJSONSerializer,
+  util::async_manager
 };
 
 // We're gonna use async_std as our runtime for the examples, but you should be
@@ -78,7 +79,7 @@ async fn embedded_connector_example() {
 fn main() {
   // Setup a client, and wait until everything is done before exiting.
   #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-  task::block_on(async {
+  async_manager::block_on(async {
     embedded_connector_example().await;
   });
 }

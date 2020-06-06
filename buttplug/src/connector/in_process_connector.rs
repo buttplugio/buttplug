@@ -2,14 +2,14 @@ use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   server::ButtplugServer,
-};
-use async_std::{
-  prelude::StreamExt,
-  task,
+  util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
 use std::convert::TryInto;
-use futures::future::{self, BoxFuture};
+use futures::{
+  StreamExt,
+  future::{self, BoxFuture}
+};
 
 /// In-process Buttplug Server Connector
 ///
@@ -55,7 +55,7 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server, mut server_recv) = ButtplugServer::new(&name, max_ping_time);
     let (send, recv) = bounded(256);
     let server_outbound_sender = send.clone();
-    task::spawn(async move {
+    async_manager::spawn(async move {
       while let Some(event) = server_recv.next().await {
         send.send(event.try_into().unwrap()).await;
       }

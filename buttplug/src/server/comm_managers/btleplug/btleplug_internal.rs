@@ -16,12 +16,9 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::future::{ButtplugFuture, ButtplugFutureStateShared},
+  util::{async_manager, future::{ButtplugFuture, ButtplugFutureStateShared}},
 };
-use async_std::{
-  prelude::{FutureExt, StreamExt},
-  task,
-};
+use futures::{StreamExt, FutureExt};
 use async_channel::{bounded, Receiver};
 use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use std::collections::HashMap;
@@ -69,14 +66,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       CentralEvent::DeviceConnected(_) => {
         let s = event_sender.clone();
         let e = event;
-        task::spawn(async move {
+        async_manager::spawn(async move {
           s.send(e).await;
         });
       }
       CentralEvent::DeviceDisconnected(_) => {
         let s = event_sender.clone();
         let e = event;
-        task::spawn(async move {
+        async_manager::spawn(async move {
           s.send(e).await;
         });
       }
@@ -141,13 +138,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       .on_notification(Box::new(move |notification: ValueNotification| {
         let endpoint = *uuid_map.get(&notification.uuid).unwrap();
         let sender = os.clone();
-        task::spawn(async move {
+        async_manager::spawn(async move {
           sender
             .send(&ButtplugDeviceEvent::Notification(
               endpoint,
               notification.value,
             ))
             .await
+            .unwrap()
         });
       }));
     let device_info = ButtplugDeviceImplInfo {
@@ -278,21 +276,18 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   pub async fn run(&mut self) {
     loop {
       let mut wr = self.write_receiver.clone();
-      let receiver = async {
-        match wr.next().await {
+      let mut er = self.event_receiver.clone();
+
+      // Race our device input (from the client side) and any subscribed
+      // notifications.
+      let mut event = select! {
+        ev = er.next().fuse() => BtlePlugCommLoopChannelValue::DeviceEvent(ev.unwrap()),
+        recv = wr.next().fuse() => match recv {
           Some((command, state)) => BtlePlugCommLoopChannelValue::DeviceCommand(command, state),
           None => BtlePlugCommLoopChannelValue::ChannelClosed,
         }
       };
-      let mut er = self.event_receiver.clone();
-      let event = async {
-        // We own both sides of this so it'll never actually die. Unwrap
-        // with impunity.
-        BtlePlugCommLoopChannelValue::DeviceEvent(er.next().await.unwrap())
-      };
-      // Race our device input (from the client side) and any subscribed
-      // notifications.
-      match receiver.race(event).await {
+      match event {
         BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => {
           self.handle_device_command(command, state).await
         }

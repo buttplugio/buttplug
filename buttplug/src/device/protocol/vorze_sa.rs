@@ -101,12 +101,12 @@ mod test {
             Endpoint,
         },
         test::{check_recv_value, TestDevice},
+        util::async_manager
     };
-    use async_std::task;
 
     #[test]
     pub fn test_vorze_sa_vibration_protocol() {
-        task::block_on(async move {
+        async_manager::block_on(async move {
             let (device, test_device) = TestDevice::new_bluetoothle_test_device("Bach smart")
                 .await
                 .unwrap();
@@ -145,7 +145,7 @@ mod test {
 
     #[test]
     pub fn test_vorze_sa_rotation_protocol() {
-        task::block_on(async move {
+        async_manager::block_on(async move {
             let (device, test_device) = TestDevice::new_bluetoothle_test_device("CycSA")
                 .await
                 .unwrap();

@@ -13,8 +13,8 @@ use crate::{
     ButtplugDeviceReturn, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
     DeviceWriteCmd, Endpoint,
   },
+  util::async_manager,
 };
-use async_std::task;
 use async_channel::{bounded, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
@@ -74,11 +74,9 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       // its own thread in time, but I'm not sure when that's landing.
       let central = self.central.clone();
       let broadcaster_clone = output_broadcaster.clone();
-      task::spawn(async move {
-        let mut event_loop =
-          BtlePlugInternalEventLoop::new(central, device, p, device_receiver, broadcaster_clone);
-        event_loop.run().await;
-      });
+      let mut event_loop =
+        BtlePlugInternalEventLoop::new(central, device, p, device_receiver, broadcaster_clone);
+      async_manager::spawn(async move { event_loop.run().await });
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       device_sender

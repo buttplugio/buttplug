@@ -19,11 +19,8 @@ use crate::{
   },
   util::future::ButtplugFutureStateShared,
 };
-use async_std::{
-  prelude::FutureExt,
-};
 use async_channel::{bounded, Sender, Receiver};
-use futures::{future::BoxFuture, StreamExt};
+use futures::{future::{BoxFuture, select}, StreamExt, FutureExt};
 use std::collections::HashMap;
 use broadcaster::BroadcastChannel;
 
@@ -282,26 +279,22 @@ where
     let mut connector_receiver = self.connector_receiver.clone();
     let mut device_receiver = self.device_message_receiver.clone();
     loop {
-      let client_future = async {
-        match client_receiver.next().await {
-          None => {
-            debug!("Client disconnected.");
-            StreamReturn::Disconnect
-          }
-          Some(msg) => StreamReturn::ClientRequest(msg),
-        }
-      };
-      let event_future = async {
-        match connector_receiver.next().await {
+      let stream_return = select! {
+        event = connector_receiver.next().fuse() => match event {
           None => {
             debug!("Connector disconnected.");
             StreamReturn::Disconnect
           }
           Some(msg) => StreamReturn::ConnectorMessage(msg),
-        }
-      };
-      let device_future = async {
-        match device_receiver.next().await {
+        },
+        client = client_receiver.next().fuse() => match client {
+          None => {
+            debug!("Client disconnected.");
+            StreamReturn::Disconnect
+          }
+          Some(msg) => StreamReturn::ClientRequest(msg),
+        },
+        device = device_receiver.next().fuse() => match device {
           None => {
             // Since we hold a reference to the sender so we can
             // redistribute it when creating devices, we'll never
@@ -311,9 +304,7 @@ where
           Some(msg) => StreamReturn::DeviceMessage(msg),
         }
       };
-
-      let stream_fut = event_future.race(client_future).race(device_future);
-      match stream_fut.await {
+      match stream_return {
         StreamReturn::ConnectorMessage(msg) => self.parse_connector_message(msg).await,
         StreamReturn::ClientRequest(msg) => {
           if !self.parse_client_message(msg).await {

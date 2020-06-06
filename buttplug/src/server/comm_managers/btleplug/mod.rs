@@ -6,12 +6,10 @@ use crate::{
   server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
+  util::async_manager,
 };
-use async_std::{
-  prelude::StreamExt,
-  sync::Arc,
-  task,
-}; 
+use async_std::sync::Arc;
+use futures::StreamExt;
 use async_channel::{bounded, Receiver, Sender};
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -82,7 +80,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       let on_event = move |event: CentralEvent| {
         if let CentralEvent::DeviceDiscovered(_) = event {
           let s = sender.clone();
-          task::spawn(async move {
+          async_manager::spawn(async move {
             s.send(()).await;
           });
         }
@@ -99,7 +97,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     }
     is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async {
-      task::spawn(async move {
+      async_manager::spawn(async move {
         // TODO This should be "tried addresses" probably. Otherwise if we
         // want to connect, say, 2 launches, we're going to have a Bad Time.
         let mut tried_names: Vec<String> = vec![];
@@ -167,17 +165,20 @@ impl Drop for BtlePlugCommunicationManager {
 #[cfg(test)]
 mod test {
   use super::BtlePlugCommunicationManager;
-  use crate::server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+  use crate::{
+    server::comm_managers::{
+      DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    },
+    util::async_manager,
   };
   use async_channel::bounded;
-  use async_std::{prelude::StreamExt, task};
+  use futures::StreamExt;
 
   #[test]
   #[ignore]
   pub fn test_rumble() {
     let _ = env_logger::builder().is_test(true).try_init();
-    task::block_on(async move {
+    async_manager::block_on(async move {
       let (sender, mut receiver) = bounded(256);
       let mgr = BtlePlugCommunicationManager::new(sender);
       mgr.start_scanning().await.unwrap();

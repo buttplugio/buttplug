@@ -8,17 +8,15 @@
 // Let's make something move! In this example, we'll see how to tell what a
 // device can do, then send it a command (assuming it vibrates)!
 
-#![type_length_limit = "5500000"]
-
-use async_std::task;
-
 use buttplug::{
   client::{
     device::ButtplugClientDevice, device::VibrateCommand, ButtplugClient, ButtplugClientEvent,
   },
   core::messages::ButtplugDeviceMessageType,
+  util::async_manager
 };
 use futures::StreamExt;
+use futures_timer::Delay;
 use std::time::Duration;
 
 async fn device_control_example() {
@@ -29,7 +27,7 @@ async fn device_control_example() {
   // connect_in_process convenience method. This creates an in process connector
   // for us, and also adds all of the device managers built into the library to
   // the server it uses. Handy!
-  let (client, mut event_stream) = ButtplugClient::connect_in_process("Example Client", 0)
+  let (client, mut event_stream) = ButtplugClient::connect_in_process("Example Client", 0, true)
     .await
     .unwrap();
 
@@ -91,12 +89,12 @@ async fn device_control_example() {
       {
         dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
         println!("{} should start vibrating!", dev.name);
-        task::sleep(Duration::from_secs(1)).await;
+        Delay::new(Duration::from_secs(1)).await;
         // All devices also have a "stop" command that will make
         // them stop whatever they're doing.
         dev.stop().await.unwrap();
         println!("{} should stop vibrating!", dev.name);
-        task::sleep(Duration::from_secs(1)).await;
+        Delay::new(Duration::from_secs(1)).await;
       } else {
         println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
       }
@@ -108,9 +106,9 @@ async fn device_control_example() {
       ButtplugClientEvent::DeviceAdded(dev) => {
         println!("We got a device: {}", dev.name);
         let fut = vibrate_device(dev);
-        task::spawn(async move {
+        async_manager::spawn(async move {
           fut.await;
-        });
+        }).unwrap();
         // break;
       }
       ButtplugClientEvent::ServerDisconnect => {
@@ -132,8 +130,7 @@ async fn device_control_example() {
 }
 
 fn main() {
-  #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-  task::block_on(async {
+  async_manager::block_on(async {
     device_control_example().await;
   });
 }

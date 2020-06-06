@@ -16,11 +16,7 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
-use buttplug::{client::ButtplugClient, connector::ButtplugInProcessClientConnector};
-
-// We're gonna use async_std as our runtime for the examples, but you should be
-// able to use futures, tokio, or whatever else.
-use async_std::task;
+use buttplug::{client::ButtplugClient, connector::ButtplugInProcessClientConnector, util::async_manager};
 
 async fn embedded_connector_example() {
   env_logger::init();
@@ -70,7 +66,7 @@ async fn embedded_connector_example() {
 
 fn main() {
   // Setup a client, and wait until everything is done before exiting.
-  task::block_on(async {
+  async_manager::block_on(async {
     embedded_connector_example().await;
   });
 }

@@ -63,8 +63,9 @@ mod test {
     device::DeviceImpl,
     server::ButtplugServer,
     test::TestDevice,
+    util::async_manager
   };
-  use async_std::{prelude::StreamExt, task};
+  use futures::StreamExt;
 
   #[test]
   fn test_test_device_comm_manager() {
@@ -73,7 +74,7 @@ mod test {
     let (device, device_creator) =
       TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
 
-    task::block_on(async {
+    async_manager::block_on(async {
       let devices = server.add_test_comm_manager();
       devices.lock().await.push(device_creator);
       let msg =
