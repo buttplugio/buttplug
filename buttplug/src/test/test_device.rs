@@ -11,7 +11,8 @@ use crate::{
     DeviceWriteCmd, Endpoint,
   },
 };
-use async_std::sync::{channel, Arc, Receiver, RwLock, Sender};
+use async_std::sync::{Arc, RwLock};
+use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
 use std::collections::HashMap;
@@ -74,7 +75,7 @@ impl TestDevice {
   pub fn new(name: &str, endpoints: Vec<Endpoint>) -> Self {
     let mut endpoint_channels = HashMap::new();
     for endpoint in &endpoints {
-      let (sender, receiver) = channel(256);
+      let (sender, receiver) = bounded(256);
       endpoint_channels.insert(*endpoint, (sender, receiver));
     }
     let event_broadcaster = BoundedDeviceEventBroadcaster::with_cap(256);
@@ -90,7 +91,7 @@ impl TestDevice {
   pub async fn add_endpoint(&mut self, endpoint: Endpoint) {
     let mut endpoint_channels = self.endpoint_channels.write().await;
     if !endpoint_channels.contains_key(&endpoint) {
-      let (sender, receiver) = channel(256);
+      let (sender, receiver) = bounded(256);
       endpoint_channels.insert(endpoint, (sender, receiver));
     }
   }

@@ -5,7 +5,8 @@ use crate::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
-use async_std::sync::{Arc, Mutex, Sender};
+use async_std::sync::{Arc, Mutex};
+use async_channel::Sender;
 use futures::future;
 
 pub struct TestDeviceCommunicationManager {

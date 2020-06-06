@@ -31,9 +31,10 @@ pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Arc, Mutex, Receiver, Sender},
+  sync::{Arc, Mutex},
   task,
 };
+use async_channel::{bounded, Sender, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
 use logger::ButtplugLogHandler;
@@ -65,7 +66,7 @@ pub struct ButtplugServer {
 
 impl ButtplugServer {
   pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugServerMessage>) {
-    let (send, recv) = channel(256);
+    let (send, recv) = bounded(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
     let (ping_timer, ping_receiver) = if max_ping_time > 0 {
@@ -75,7 +76,7 @@ impl ButtplugServer {
       // a broadcaster here too.
       //
       // TODO Use a broadcaster here. Or just come up with a better solution.
-      let (device_manager_sender, device_manager_receiver) = channel(1);
+      let (device_manager_sender, device_manager_receiver) = bounded(1);
       let pinged_out_clone = pinged_out.clone();
       let connected_clone = connected.clone();
       let event_sender_clone = send.clone();
@@ -264,7 +265,8 @@ mod test {
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     test::{check_recv_value, TestDevice},
   };
-  use async_std::{prelude::StreamExt, sync::Receiver, task};
+  use async_std::{prelude::StreamExt, task};
+  use async_channel::Receiver;
   use std::time::Duration;
 
   async fn test_server_setup(

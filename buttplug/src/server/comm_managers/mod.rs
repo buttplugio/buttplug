@@ -3,7 +3,7 @@ pub mod btleplug;
 #[cfg(all(feature = "xinput", target_os = "windows"))]
 pub mod xinput;
 use crate::{core::ButtplugResultFuture, device::{ButtplugDevice, ButtplugDeviceImplCreator}};
-use async_std::sync::Sender;
+use async_channel::Sender;
 
 pub enum DeviceCommunicationEvent {
   // This event only means that a device has been found. The work still needs

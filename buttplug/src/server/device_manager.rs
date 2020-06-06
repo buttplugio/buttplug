@@ -27,9 +27,10 @@ use crate::{
 };
 use async_std::{
   prelude::{FutureExt, StreamExt},
-  sync::{channel, Receiver, Sender, Arc, Mutex},
+  sync::{Arc, Mutex},
   task,
 };
+use async_channel::{Receiver, Sender, bounded};
 use evmap::{self, ReadHandle};
 use futures::future::{self, Future};
 use std::{convert::TryFrom, sync::atomic::{AtomicU32, Ordering}};
@@ -49,11 +50,11 @@ fn wait_for_manager_events(
   Sender<DeviceCommunicationEvent>,
 ) {
   let main_device_index = Arc::new(AtomicU32::new(0));
-  let (device_event_sender, mut device_event_receiver) = channel::<(u32, ButtplugDeviceEvent)>(256);
+  let (device_event_sender, mut device_event_receiver) = bounded::<(u32, ButtplugDeviceEvent)>(256);
   let (device_map_reader, mut device_map_writer) = evmap::new::<u32, ButtplugDevice>();
   // Refresh ASAP just in case we ping out before getting any devices.
   device_map_writer.refresh();
-  let (device_comm_sender, mut device_comm_receiver) = channel(256);
+  let (device_comm_sender, mut device_comm_receiver) = bounded(256);
   // Used for feeding devices back to ourselves in the loop.
   let device_comm_sender_internal = device_comm_sender.clone();
   let device_map_reader_internal = device_map_reader.clone();
@@ -353,14 +354,15 @@ mod test {
     },
     server::comm_managers::btleplug::BtlePlugCommunicationManager,
   };
-  use async_std::{prelude::StreamExt, sync::channel, task};
+  use async_std::{prelude::StreamExt, task};
+  use async_channel::bounded;
   use std::time::Duration;
 
   #[test]
   pub fn test_device_manager_creation() {
     let _ = env_logger::builder().is_test(true).try_init();
     task::block_on(async {
-      let (sender, mut receiver) = channel(256);
+      let (sender, mut receiver) = bounded(256);
       let mut dm = DeviceManager::new(sender);
       dm.add_comm_manager::<BtlePlugCommunicationManager>();
       dm.start_scanning().await;

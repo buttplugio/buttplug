@@ -1,8 +1,9 @@
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Arc, Receiver, Sender},
+  sync::Arc,
   task, // ::{self, JoinHandle},
 };
+use async_channel::{bounded, Receiver, Sender};
 use futures::future::Future;
 use futures_timer::Delay;
 use std::{time::Duration, sync::atomic::{AtomicBool, Ordering}};
@@ -15,8 +16,8 @@ pub enum PingMessage {
 }
 
 fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessage>, Receiver<()>) {
-  let (ping_msg_sender, mut ping_msg_receiver) = channel(256);
-  let (pinged_out_sender, pinged_out_receiver) = channel(1);
+  let (ping_msg_sender, mut ping_msg_receiver) = bounded(256);
+  let (pinged_out_sender, pinged_out_receiver) = bounded(1);
 
   let ping_msg_sender_clone = ping_msg_sender.clone();
   let fut = async move {

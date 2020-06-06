@@ -9,9 +9,10 @@ use crate::{
 };
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Arc, Receiver, Sender},
+  sync::Arc,
   task,
-};
+}; 
+use async_channel::{bounded, Receiver, Sender};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use btleplug::api::{Central, CentralEvent, Peripheral};
@@ -53,7 +54,7 @@ impl BtlePlugCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    let (scanning_sender, scanning_receiver) = channel(256);
+    let (scanning_sender, scanning_receiver) = bounded(256);
     Self {
       manager: Manager::new().unwrap(),
       device_sender,
@@ -169,14 +170,15 @@ mod test {
   use crate::server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   };
-  use async_std::{prelude::StreamExt, sync::channel, task};
+  use async_channel::bounded;
+  use async_std::{prelude::StreamExt, task};
 
   #[test]
   #[ignore]
   pub fn test_rumble() {
     let _ = env_logger::builder().is_test(true).try_init();
     task::block_on(async move {
-      let (sender, mut receiver) = channel(256);
+      let (sender, mut receiver) = bounded(256);
       let mgr = BtlePlugCommunicationManager::new(sender);
       mgr.start_scanning().await.unwrap();
       loop {

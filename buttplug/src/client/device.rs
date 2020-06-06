@@ -23,7 +23,8 @@ use crate::{
     },
   },
 };
-use async_std::{sync::Sender, task};
+use async_std::{task};
+use async_channel::Sender;
 use broadcaster::BroadcastChannel;
 use futures::{channel::mpsc::SendError, future, sink::SinkExt};
 use std::{
@@ -217,7 +218,8 @@ impl ButtplugClientDevice {
           msg.clone(),
           fut.get_state_clone(),
         ))
-        .await;
+        .await
+        .map_err(|err| ButtplugClientError::ButtplugConnectorError(ButtplugConnectorError::new(&format!("Error with connector channel: {}", err))))?;
       match fut.await {
         Ok(msg) => {
           if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {

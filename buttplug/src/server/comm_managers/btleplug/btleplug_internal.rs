@@ -20,9 +20,9 @@ use crate::{
 };
 use async_std::{
   prelude::{FutureExt, StreamExt},
-  sync::{channel, Receiver},
   task,
 };
+use async_channel::{bounded, Receiver};
 use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use std::collections::HashMap;
 
@@ -61,7 +61,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   where
     C: Central<T>,
   {
-    let (event_sender, event_receiver) = channel(256);
+    let (event_sender, event_receiver) = bounded(256);
     // Add ourselves to the central event handler output now, so we don't
     // have to carry around the Central object. We'll be using this in
     // connect anyways.

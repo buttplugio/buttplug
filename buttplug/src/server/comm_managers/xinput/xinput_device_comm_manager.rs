@@ -5,7 +5,7 @@ use crate::server::comm_managers::{
   DeviceCommunicationManager,
   DeviceCommunicationManagerCreator,
 };
-use async_std::sync::Sender;
+use async_channel::Sender;
 use async_trait::async_trait;
 
 #[derive(Debug, Display, Clone, Copy)]

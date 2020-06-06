@@ -14,10 +14,8 @@ use crate::{
     DeviceWriteCmd, Endpoint,
   },
 };
-use async_std::{
-  sync::{channel, Sender},
-  task,
-};
+use async_std::task;
+use async_channel::{bounded, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, Peripheral};
@@ -63,7 +61,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
     }
     let device = self.device.take().unwrap();
     if let Some(ref proto) = protocol.btle {
-      let (device_sender, device_receiver) = channel(256);
+      let (device_sender, device_receiver) = bounded(256);
       let output_broadcaster = BroadcastChannel::with_cap(256);
       let p = proto.clone();
       let name = device.properties().local_name.unwrap();

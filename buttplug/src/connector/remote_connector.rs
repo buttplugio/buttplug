@@ -19,9 +19,9 @@ use crate::{
 };
 use async_std::{
   prelude::FutureExt,
-  sync::{channel, Receiver, Sender},
   task,
 };
+use async_channel::{bounded, Receiver, Sender};
 use futures::future::BoxFuture;
 use futures_util::StreamExt;
 use std::marker::PhantomData;
@@ -223,14 +223,14 @@ where
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();
-      let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
+      let (connector_outgoing_sender, connector_outgoing_receiver) = bounded(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       Box::pin(async move {
         match transport.connect().await {
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
-            let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
+            let (connector_incoming_sender, connector_incoming_receiver) = bounded(256);
             task::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,

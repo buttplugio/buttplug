@@ -21,8 +21,8 @@ use crate::{
 };
 use async_std::{
   prelude::FutureExt,
-  sync::{channel, Receiver, Sender},
 };
+use async_channel::{bounded, Sender, Receiver};
 use futures::{future::BoxFuture, StreamExt};
 use std::collections::HashMap;
 use broadcaster::BroadcastChannel;
@@ -127,7 +127,7 @@ where
     client_receiver: Receiver<ButtplugClientRequest>,
   ) -> Self {
     let (device_message_sender, device_message_receiver) =
-      channel::<ButtplugClientMessageFuturePair>(256);
+      bounded::<ButtplugClientMessageFuturePair>(256);
     Self {
       devices: HashMap::new(),
       device_event_senders: HashMap::new(),

@@ -1,5 +1,6 @@
 use crate::core::messages::{self, ButtplugServerMessage};
-use async_std::{sync::Sender, task};
+use async_std::task;
+use async_channel::Sender;
 use log::{Level, Log, Metadata, Record};
 
 pub struct ButtplugLogHandler {

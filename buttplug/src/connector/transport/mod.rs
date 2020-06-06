@@ -3,7 +3,7 @@ mod websocket_transport;
 use crate::connector::{
   ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
 };
-use async_std::sync::{Receiver, Sender};
+use async_channel::{Receiver, Sender};
 use futures::future::BoxFuture;
 pub use websocket_transport::ButtplugWebsocketClientTransport;
 

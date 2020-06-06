@@ -30,9 +30,9 @@ use crate::{
 
 use async_std::{
   prelude::FutureExt,
-  sync::{channel, Sender},
   task,
 };
+use async_channel::{bounded, Sender};
 use futures::{
   future::{self, BoxFuture},
   StreamExt,
@@ -216,7 +216,7 @@ impl ButtplugClient {
     debug!("Run called!");
     let client_name = name.to_string();
     Box::pin(async move {
-      let (message_sender, message_receiver) = channel(256);
+      let (message_sender, message_receiver) = bounded(256);
       let mut client = ButtplugClient {
         client_name,
         server_name: None,
@@ -419,7 +419,7 @@ impl ButtplugClient {
     // this function in order to connect also.
     let message_sender = self.message_sender.clone();
     Box::pin(async move {
-      message_sender.send(msg).await;
+      message_sender.send(msg).await.map_err(|err| ButtplugConnectorError::new(&format!("Error with connector channel: {}", err)))?;
       Ok(())
     })
   }
@@ -488,7 +488,8 @@ mod test {
     },
     core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   };
-  use async_std::{sync::Receiver, task};
+  use async_std::task;
+  use async_channel::Receiver;
   use futures::future::BoxFuture;
 
   #[derive(Default)]

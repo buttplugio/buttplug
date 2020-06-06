@@ -14,10 +14,8 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
 };
 use super::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage};
-use async_std::{
-  sync::channel,
-  task,
-};
+use async_std::task;
+use async_channel::bounded;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
 };
@@ -69,8 +67,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   fn connect(
     &self,
   ) -> ButtplugConnectorTransportConnectResult {
-    let (request_sender, request_receiver) = channel(256);
-    let (response_sender, response_receiver) = channel(256);
+    let (request_sender, request_receiver) = bounded(256);
+    let (response_sender, response_receiver) = bounded(256);
 
     // If we're supposed to be a secure connection, generate a TLS connector
     // based on our certificate verfication needs. Otherwise, just pass None in
@@ -119,7 +117,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           let (mut writer, mut reader) = stream.split();
           // TODO Do we want to store/join these tasks anywhere?
           task::spawn(async move {
-            while let Some(msg) = request_receiver.recv().await {
+            while let Ok(msg) = request_receiver.recv().await {
               let out_msg = match msg {
                 ButtplugSerializedMessage::Text(text) => Message::Text(text),
                 ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),

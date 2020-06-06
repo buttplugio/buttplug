@@ -86,7 +86,7 @@ use crate::{
   core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
-use async_std::sync::{Receiver};
+use async_channel::Receiver;
 use async_trait::async_trait;
 use std::{error::Error, fmt};
 use futures::future::{self, BoxFuture};

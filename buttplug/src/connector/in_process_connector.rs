@@ -5,9 +5,9 @@ use crate::{
 };
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Receiver, Sender},
   task,
 };
+use async_channel::{bounded, Receiver, Sender};
 use std::convert::TryInto;
 use futures::future::{self, BoxFuture};
 
@@ -53,7 +53,7 @@ impl<'a> ButtplugInProcessClientConnector {
   /// of 0 meaning infinite ping.
   pub fn new(name: &str, max_ping_time: u64) -> Self {
     let (server, mut server_recv) = ButtplugServer::new(&name, max_ping_time);
-    let (send, recv) = channel(256);
+    let (send, recv) = bounded(256);
     let server_outbound_sender = send.clone();
     task::spawn(async move {
       while let Some(event) = server_recv.next().await {
