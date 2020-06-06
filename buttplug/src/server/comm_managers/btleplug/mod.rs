@@ -9,10 +9,10 @@ use crate::{
 };
 use async_std::{
   prelude::StreamExt,
-  sync::{channel, Arc, Mutex, Receiver, Sender},
+  sync::{channel, Arc, Receiver, Sender},
   task,
 };
-use std::cell::RefCell;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
@@ -30,8 +30,8 @@ pub struct BtlePlugCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
   scanning_sender: Sender<()>,
   scanning_receiver: Receiver<()>,
-  is_scanning: Arc<Mutex<bool>>,
-  set_handler: RefCell<bool>,
+  is_scanning: Arc<AtomicBool>,
+  set_handler: Arc<AtomicBool>,
 }
 
 #[cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))]
@@ -59,8 +59,8 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
       device_sender,
       scanning_sender,
       scanning_receiver,
-      is_scanning: Arc::new(Mutex::new(false)),
-      set_handler: RefCell::new(false),
+      is_scanning: Arc::new(AtomicBool::new(false)),
+      set_handler: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -75,9 +75,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     let sender = self.scanning_sender.clone();
     let mut receiver = self.scanning_receiver.clone();
     let is_scanning = self.is_scanning.clone();
-    if !*self.set_handler.borrow() {
+    if !self.set_handler.load(Ordering::SeqCst) {
       info!("Setting bluetooth device event handler.");
-      *self.set_handler.borrow_mut() = true;
+      self.set_handler.store(true, Ordering::SeqCst);
       let on_event = move |event: CentralEvent| {
         if let CentralEvent::DeviceDiscovered(_) = event {
           let s = sender.clone();
@@ -96,6 +96,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       // TODO Explain the setcap issue on linux here.
       return ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
     }
+    is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async {
       task::spawn(async move {
         // TODO This should be "tried addresses" probably. Otherwise if we
@@ -103,7 +104,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         let mut tried_names: Vec<String> = vec![];
         // When stop_scanning is called, this will get false and stop the
         // task.
-        while *is_scanning.lock().await {
+        while is_scanning.load(Ordering::SeqCst) {
           for p in central.peripherals() {
             // If a device has no discernable name, we can't do anything
             // with it, just ignore it.
@@ -137,9 +138,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     let is_scanning = self.is_scanning.clone();
     let sender = self.scanning_sender.clone();
     Box::pin(async move {
-      let mut scanning = is_scanning.lock().await;
-      if *scanning {
-        *scanning = false;
+      if is_scanning.load(Ordering::SeqCst) {
+        is_scanning.store(false, Ordering::SeqCst);
         sender.send(()).await;
         Ok(())
       } else {
