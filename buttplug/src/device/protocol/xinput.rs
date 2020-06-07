@@ -1,4 +1,5 @@
 use crate::create_buttplug_protocol;
+use crate::core::errors::ButtplugMessageError;
 use byteorder::{LittleEndian, WriteBytesExt};
 
 create_buttplug_protocol!(
@@ -23,10 +24,11 @@ create_buttplug_protocol!(
                     // checking.
                     let mut cmd = vec![];
                     // TODO Reinstate error handling here, just pass it into the future we hand back.
-                    cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16).unwrap();
-                        //.map_err(|_| ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")))?;
-                    cmd.write_u16::<LittleEndian>(cmds[1].unwrap() as u16).unwrap();
-                        //.map_err(|_| ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")))?;
+//                    cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16).unwrap()
+  //                      .map_err(|_| Box::pin(future:;ready(Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing"))))))?;
+                    if cmd.write_u16::<LittleEndian>(cmds[1].unwrap() as u16).is_err() || cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16).is_err() {
+                        return ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")).into();
+                    }
                     fut_vec.push(device
                     .write_value(DeviceWriteCmd::new(
                         Endpoint::Tx,

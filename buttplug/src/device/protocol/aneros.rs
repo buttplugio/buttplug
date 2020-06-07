@@ -30,8 +30,9 @@ create_buttplug_protocol!(
                     }
                 }
                 Box::pin(async move {
+                    // TODO Just use join_all here
                     for fut in fut_vec {
-                        // TODO: Do something about possible errors here
+                        // TODO Do something about possible errors here
                         fut.await?;
                     }
                     Ok(messages::Ok::default().into())

@@ -10,8 +10,6 @@ use super::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-// TODO This should be keyed on a struct with message name variants, not a
-// string.
 pub type MessageAttributesMap = HashMap<ButtplugDeviceMessageType, MessageAttributes>;
 
 #[derive(Clone, Debug, PartialEq)]

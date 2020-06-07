@@ -169,7 +169,6 @@ pub enum ButtplugDeviceMessageType {
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, FromSpecificButtplugMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))] // TODO Remove this after testing!
 pub enum ButtplugClientMessage {
   Ping(Ping),
   RequestLog(RequestLog),
@@ -210,7 +209,6 @@ pub enum ButtplugClientMessage {
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType, FromSpecificButtplugMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))] // TODO Remove this after testing!
 pub enum ButtplugServerMessage {
   // Status messages
   Ok(Ok),

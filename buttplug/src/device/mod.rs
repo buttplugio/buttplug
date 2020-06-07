@@ -376,9 +376,11 @@ impl ButtplugDevice {
   ) -> ButtplugServerResultFuture {
     self.protocol.parse_message(&*self.device, message)
   }
-
+  
+  // TODO Just return the receiver as part of the constructor
   pub fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.device.get_event_receiver()
   }
+  
   // TODO Handle raw messages here.
 }

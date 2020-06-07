@@ -20,7 +20,6 @@ use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
-// TODO Use parking_lot? We don't really need extra speed for this though.
 use std::mem;
 use std::sync::{Arc, RwLock};
 
@@ -337,7 +336,6 @@ impl Default for DeviceConfigurationManager {
       }
     }
 
-    // TODO actually load user configuration and merge into maps
     let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
     let user_config_guard = DEVICE_USER_CONFIGURATION_JSON.clone();
     let user_config_str = user_config_guard.read().unwrap();

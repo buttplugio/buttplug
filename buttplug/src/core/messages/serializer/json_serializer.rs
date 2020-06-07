@@ -199,7 +199,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
       } else {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
-        ButtplugSerializedMessage::Text(msg_to_protocol_json(ButtplugServerMessage::Error(
+        ButtplugSerializedMessage::Text(msg_to_protocol_json(ButtplugCurrentSpecServerMessage::Error(
           ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::new(
             "Got outgoing message before version was set.",
           ))

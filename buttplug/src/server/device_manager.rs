@@ -221,6 +221,7 @@ impl DeviceManager {
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.stop_scanning()).collect();
       Box::pin(async move {
+        // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
         future::join_all(fut_vec).await;
         Ok(messages::Ok::new(msg_id).into())
       })

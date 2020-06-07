@@ -254,8 +254,6 @@ impl ButtplugClient {
         // If we disconnect, we'll also stop the client event loop. If the
         // client event loop stops, we don't care about listening for disconnect
         // anymore.
-        //
-        // TODO We're dropping our result here, but acting like it's a return.
         select! {
           _ = client_event_loop_fut.fuse() => (),
           _ = disconnect_fut.fuse() => (),
