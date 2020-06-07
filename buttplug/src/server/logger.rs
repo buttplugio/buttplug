@@ -39,7 +39,7 @@ impl Log for ButtplugLogHandler {
         sender_clone
           .send(messages::Log::new(level, log_msg).into())
           .await;
-      });
+      }).unwrap();
     }
   }
 

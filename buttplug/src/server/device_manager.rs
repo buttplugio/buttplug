@@ -100,7 +100,7 @@ fn wait_for_manager_events(
                         while let Some(e) = recv.next().await {
                           sender_clone.send((idx_clone, e)).await;
                         }
-                      });
+                      }).unwrap();
                       let device_added_message = DeviceAdded::new(
                         device_index,
                         device.name(),
@@ -120,7 +120,7 @@ fn wait_for_manager_events(
                   },
                   Err(e) => error!("Device errored while trying to connect: {}", e),
                 }
-              });
+              }).unwrap();
             }
             DeviceCommunicationEvent::DeviceConnected((id, device)) => {
               device_map_writer.insert(id, device);
@@ -189,7 +189,7 @@ impl DeviceManager {
   ) -> Self {
     let (event_loop_fut, device_map_reader, device_event_sender) =
       wait_for_manager_events(ping_receiver, event_sender);
-    async_manager::spawn(event_loop_fut);
+    async_manager::spawn(event_loop_fut).unwrap();
     Self {
       sender: device_event_sender,
       devices: device_map_reader,

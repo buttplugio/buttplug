@@ -239,7 +239,7 @@ where
                 transport_outgoing_sender,
                 transport_incoming_receiver,
               ).await
-            });
+            }).unwrap();
             Ok(connector_incoming_receiver)
           }
           Err(e) => Err(e),

@@ -166,11 +166,9 @@ async fn device_enumeration_example() {
   // As with everything else, since the event loop may have shut
   // down due to server disconnect, this returns a result that
   // will error if that has happened.
-  if let Ok(devices) = client.devices().await {
-    println!("Devices currently connected:");
-    for dev in devices {
-      println!("- {}", dev.name);
-    }
+  println!("Devices currently connected:");
+  for dev in client.devices() {
+    println!("- {}", dev.name);
   }
   // And now we're done!
   println!("Exiting example");

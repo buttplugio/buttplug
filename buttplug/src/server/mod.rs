@@ -86,7 +86,7 @@ impl ButtplugServer {
           .await;
         device_manager_sender.send(()).await;
         error!("Ping out signal received, stopping server");
-      });
+      }).unwrap();
       (Some(timer), Some(device_manager_receiver))
     } else {
       (None, None)
@@ -242,13 +242,15 @@ impl ButtplugServer {
     Box::pin(async move {
       // TODO Work with a logger that doesn't fucking panic on have 2 registrations.
       let handler = ButtplugLogHandler::new(&msg.log_level, sender);
+      /*
       log::set_boxed_logger(Box::new(handler))
         .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
         .and_then(|_| {
           let level: log::LevelFilter = msg.log_level.clone().into();
           log::set_max_level(level);
+          */
           Result::Ok(messages::Ok::new(msg.get_id()).into())
-        })
+        //})
     })
   }
 }

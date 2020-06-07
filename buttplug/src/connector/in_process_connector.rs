@@ -59,7 +59,7 @@ impl<'a> ButtplugInProcessClientConnector {
       while let Some(event) = server_recv.next().await {
         send.send(event.try_into().unwrap()).await;
       }
-    });
+    }).unwrap();
 
     Self {
       connector_outbound_recv: Some(recv),

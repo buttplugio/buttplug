@@ -67,7 +67,7 @@ impl Drop for PingTimer {
     let ping_msg_sender = self.ping_msg_sender.clone();
     async_manager::spawn(async move {
       ping_msg_sender.send(PingMessage::End).await;
-    });
+    }).unwrap();
   }
 }
 
@@ -77,7 +77,7 @@ impl PingTimer {
       panic!("Can't create ping timer with no max ping time.");
     }
     let (fut, sender, receiver) = ping_timer(max_ping_time);
-    async_manager::spawn(fut);
+    async_manager::spawn(fut).unwrap();
     (Self {
       // TODO Store this once we can cancel it.
       // timer_task: task::spawn(fut),

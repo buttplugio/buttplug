@@ -8,8 +8,9 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  internal::ButtplugClientDeviceEvent, ButtplugClientError,
+  ButtplugClientError,
   ButtplugClientResultFuture,
+  ButtplugClientRequest,
 };
 use crate::{
   client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
@@ -34,6 +35,17 @@ use std::{
     Arc,
   },
 };
+
+/// Enum for messages going to a [ButtplugClientDevice] instance.
+#[derive(Clone)]
+pub enum ButtplugClientDeviceEvent {
+  /// Device has disconnected from server.
+  DeviceDisconnect,
+  /// Client has disconnected from server.
+  ClientDisconnect,
+  /// Message was received from server for that specific device.
+  Message(ButtplugCurrentSpecServerMessage),
+}
 
 /// Convenience enum for forming [VibrateCmd] commands.
 ///
@@ -101,7 +113,7 @@ pub struct ButtplugClientDevice {
   /// Index of the device, matching the index in the
   /// [ButtplugServer][crate::server::ButtplugServer]'s
   /// [DeviceManager][crate::server::device_manager::DeviceManager].
-  index: u32,
+  pub(super) index: u32,
   /// Map of messages the device can take, along with the attributes of those
   /// messages.
   pub allowed_messages: MessageAttributesMap,
@@ -109,7 +121,7 @@ pub struct ButtplugClientDevice {
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
-  message_sender: Sender<ButtplugClientMessageFuturePair>,
+  message_sender: Sender<ButtplugClientRequest>,
   /// Receives device specific events from the
   /// [ButtplugClient][super::ButtplugClient]'s event loop. Used for device
   /// connection updates, sensor input, etc...
@@ -143,11 +155,11 @@ impl ButtplugClientDevice {
   /// [ButtplugClientDevice]. A [ButtplugClientDevice] is mostly a shim around
   /// the [ButtplugClient] that generated it, with some added convenience
   /// functions for forming device control messages.
-  pub(crate) fn new(
+  pub(super) fn new(
     name: &str,
     index: u32,
     allowed_messages: MessageAttributesMap,
-    message_sender: Sender<ButtplugClientMessageFuturePair>,
+    message_sender: Sender<ButtplugClientRequest>,
     event_receiver: BroadcastChannel<ButtplugClientDeviceEvent>,
   ) -> Self {
     let mut disconnect_receiver = event_receiver.clone();
@@ -171,7 +183,7 @@ impl ButtplugClientDevice {
           }
         }
       }
-    });
+    }).unwrap();
 
     Self {
       name: name.to_owned(),
@@ -214,10 +226,10 @@ impl ButtplugClientDevice {
     Box::pin(async move {
       let fut = ButtplugClientMessageFuture::default();
       message_sender
-        .send(ButtplugClientMessageFuturePair::new(
+        .send(ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
           msg.clone(),
           fut.get_state_clone(),
-        ))
+        )))
         .await
         .map_err(|err| ButtplugClientError::ButtplugConnectorError(ButtplugConnectorError::new(&format!("Error with connector channel: {}", err))))?;
       match fut.await {
@@ -485,14 +497,14 @@ impl ButtplugClientDevice {
 impl
   From<(
     &DeviceMessageInfo,
-    Sender<ButtplugClientMessageFuturePair>,
+    Sender<ButtplugClientRequest>,
     BroadcastChannel<ButtplugClientDeviceEvent>,
   )> for ButtplugClientDevice
 {
   fn from(
     msg_sender_tuple: (
       &DeviceMessageInfo,
-      Sender<ButtplugClientMessageFuturePair>,
+      Sender<ButtplugClientRequest>,
       BroadcastChannel<ButtplugClientDeviceEvent>,
     ),
   ) -> Self {
