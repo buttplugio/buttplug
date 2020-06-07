@@ -8,7 +8,7 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask servers
 // which devices are available.
-use async_std::{task, io};
+use async_std::io;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::ButtplugInProcessClientConnector,
