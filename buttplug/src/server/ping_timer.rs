@@ -64,9 +64,9 @@ pub struct PingTimer {
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    async_manager::block_on(async{
-      self.ping_msg_sender.send(PingMessage::End).await;
-      // TODO Could use some way to cancel the task here. Maybe update to async_std 1.6?
+    let ping_msg_sender = self.ping_msg_sender.clone();
+    async_manager::spawn(async move {
+      ping_msg_sender.send(PingMessage::End).await;
     });
   }
 }

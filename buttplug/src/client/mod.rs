@@ -317,7 +317,7 @@ impl ButtplugClient {
       let (_, test_device_impl_creator) =
       TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
       let devices = connector.server_ref().add_test_comm_manager();
-      async_manager::block_on(async {
+      async_manager::spawn(async move {
         devices.lock().await.push(test_device_impl_creator);
       });
     }
