@@ -1,3 +1,4 @@
+#[cfg(feature="client-ws")]
 mod websocket_transport;
 
 use crate::connector::{
@@ -5,6 +6,7 @@ use crate::connector::{
 };
 use async_channel::{Receiver, Sender};
 use futures::future::BoxFuture;
+#[cfg(feature="client-ws")]
 pub use websocket_transport::ButtplugWebsocketClientTransport;
 
 /// Enum of messages we can receive from a connector.

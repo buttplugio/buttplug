@@ -80,6 +80,7 @@ mod transport;
 
 pub use in_process_connector::ButtplugInProcessClientConnector;
 pub use remote_connector::{ButtplugRemoteClientConnector, ButtplugRemoteConnector};
+#[cfg(feature="client-ws")]
 pub use transport::ButtplugWebsocketClientTransport;
 
 use crate::{
