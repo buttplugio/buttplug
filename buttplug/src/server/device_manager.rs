@@ -26,7 +26,7 @@ use crate::{
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
   util::async_manager,
 };
-use async_std::sync::Mutex;
+use async_mutex::Mutex;
 use async_channel::{Receiver, Sender, bounded};
 use evmap::{self, ReadHandle};
 use futures::{FutureExt, StreamExt, future::{self, Future}};

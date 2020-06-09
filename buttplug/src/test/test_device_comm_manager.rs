@@ -6,7 +6,7 @@ use crate::{
   },
 };
 use std::sync::Arc;
-use async_std::sync::Mutex;
+use async_mutex::Mutex;
 use async_channel::Sender;
 use futures::future;
 

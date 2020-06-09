@@ -26,7 +26,7 @@ use crate::{
 };
 use futures::{StreamExt, future::BoxFuture};
 use ping_timer::PingTimer;
-use async_std::sync::Mutex;
+use async_mutex::Mutex;
 use async_channel::{bounded, Sender, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;

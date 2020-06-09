@@ -11,7 +11,7 @@ use crate::{
     DeviceWriteCmd, Endpoint,
   },
 };
-use async_std::sync::RwLock;
+use async_mutex::Mutex;
 use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
@@ -58,7 +58,7 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
 }
 
 type EndpointChannels =
-  Arc<RwLock<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>;
+  Arc<Mutex<HashMap<Endpoint, (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>)>>>;
 
 #[derive(Clone)]
 pub struct TestDevice {
@@ -86,13 +86,13 @@ impl TestDevice {
       name: name.to_string(),
       address: "".to_string(),
       endpoints,
-      endpoint_channels: Arc::new(RwLock::new(endpoint_channels)),
+      endpoint_channels: Arc::new(Mutex::new(endpoint_channels)),
       event_broadcaster,
     }
   }
 
   pub async fn add_endpoint(&mut self, endpoint: Endpoint) {
-    let mut endpoint_channels = self.endpoint_channels.write().await;
+    let mut endpoint_channels = self.endpoint_channels.lock().await;
     if !endpoint_channels.contains_key(&endpoint) {
       let (sender, receiver) = bounded(256);
       endpoint_channels.insert(endpoint, (sender, receiver));
@@ -129,7 +129,7 @@ impl TestDevice {
     &self,
     endpoint: Endpoint,
   ) -> (Sender<DeviceImplCommand>, Receiver<DeviceImplCommand>) {
-    let endpoint_channels = self.endpoint_channels.read().await;
+    let endpoint_channels = self.endpoint_channels.lock().await;
     let (sender, receiver) = endpoint_channels.get(&endpoint).unwrap();
     (sender.clone(), receiver.clone())
   }
@@ -180,7 +180,7 @@ impl DeviceImpl for TestDevice {
     let name = self.name.to_owned();
     Box::pin(async move {
       // Since we're only accessing a channel, we can use a read lock here.
-      match channels.read().await.get(&msg.endpoint) {
+      match channels.lock().await.get(&msg.endpoint) {
         Some((sender, _)) => {
           sender.send(msg.into()).await;
           Ok(())

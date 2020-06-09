@@ -57,6 +57,7 @@ evmap = "10.0.2"
 evmap-derive = "0.1.0"
 futures-timer = "3.0.2"
 async-channel = "1.1.0"
+async-mutex = "1.1.3"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
