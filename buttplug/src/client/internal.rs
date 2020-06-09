@@ -330,7 +330,9 @@ pub(super) fn client_event_loop(
   impl StreamExt<Item = ButtplugClientEvent> + Clone,
 ) {
   let event_channel = BroadcastChannel::new();
-  let (device_map_reader, device_map_writer) = evmap::new();
+  let (device_map_reader, mut device_map_writer) = evmap::new();
+  // Make sure we update the map, otherwise it won't exist.
+  device_map_writer.refresh();
   let device_map_reader_clone = device_map_reader.clone();
   let (client_sender, client_receiver) = bounded(256);
   let client_sender_clone = client_sender.clone();
