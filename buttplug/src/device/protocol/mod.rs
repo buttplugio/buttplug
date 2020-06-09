@@ -74,7 +74,6 @@ pub trait ButtplugProtocolCreator: Sync + Send {
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError>;
 }
 
-#[async_trait]
 pub trait ButtplugProtocol: Send {
   fn name(&self) -> &str;
   fn message_attributes(&self) -> MessageAttributesMap;
@@ -236,7 +235,6 @@ macro_rules! create_buttplug_protocol (
                 }
             }
             paste::item! {
-                #[async_trait]
                 impl ButtplugProtocol for $protocol_name {
                     fn name(&self) -> &str {
                         &self.name

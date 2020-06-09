@@ -88,7 +88,6 @@ use crate::{
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_channel::Receiver;
-use async_trait::async_trait;
 use std::{error::Error, fmt};
 use futures::future::{self, BoxFuture};
 
@@ -153,7 +152,6 @@ impl<T> From<ButtplugConnectorError> for BoxFuture<'static, Result<T, ButtplugCo
 /// The `I` type specifies the inbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
 /// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage].
-#[async_trait]
 pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync
 where
   OutboundMessageType: ButtplugMessage + 'static,
