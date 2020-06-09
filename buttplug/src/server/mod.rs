@@ -26,14 +26,17 @@ use crate::{
 };
 use futures::{StreamExt, future::BoxFuture};
 use ping_timer::PingTimer;
-use async_std::sync::{Arc, Mutex};
+use async_std::sync::Mutex;
 use async_channel::{bounded, Sender, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
 use logger::ButtplugLogHandler;
 use std::{
   convert::{TryFrom, TryInto},
-  sync::atomic::{AtomicBool, Ordering},
+  sync::{
+    Arc,
+    atomic::{AtomicBool, Ordering},
+  }
 };
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;

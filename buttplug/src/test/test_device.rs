@@ -11,11 +11,14 @@ use crate::{
     DeviceWriteCmd, Endpoint,
   },
 };
-use async_std::sync::{Arc, RwLock};
+use async_std::sync::RwLock;
 use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
-use std::collections::HashMap;
+use std::{
+  collections::HashMap,
+  sync::Arc,
+};
 
 pub struct TestDeviceImplCreator {
   specifier: DeviceSpecifier,

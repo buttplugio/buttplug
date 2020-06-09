@@ -26,13 +26,11 @@ use crate::{
   test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
   util::async_manager,
 };
-use async_std::{
-  sync::{Arc, Mutex},
-};
+use async_std::sync::Mutex;
 use async_channel::{Receiver, Sender, bounded};
 use evmap::{self, ReadHandle};
 use futures::{FutureExt, StreamExt, future::{self, Future}};
-use std::{convert::TryFrom, sync::atomic::{AtomicU32, Ordering}};
+use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicU32, Ordering}}};
 
 enum DeviceEvent {
   DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),

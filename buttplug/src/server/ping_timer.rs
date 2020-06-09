@@ -1,9 +1,8 @@
 use crate::util::async_manager;
-use async_std::sync::Arc;
 use async_channel::{bounded, Receiver, Sender};
 use futures::{StreamExt, future::Future};
 use futures_timer::Delay;
-use std::{time::Duration, sync::atomic::{AtomicBool, Ordering}};
+use std::{time::Duration, sync::{Arc, atomic::{AtomicBool, Ordering}}};
 
 pub enum PingMessage {
   Ping,

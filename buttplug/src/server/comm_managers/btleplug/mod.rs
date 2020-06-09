@@ -8,10 +8,9 @@ use crate::{
   },
   util::async_manager,
 };
-use async_std::sync::Arc;
 use futures::StreamExt;
 use async_channel::{bounded, Receiver, Sender};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
