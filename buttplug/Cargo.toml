@@ -12,17 +12,17 @@ edition = "2018"
 exclude = ["examples/**"]
 
 [features]
-default=["thread_pool_runtime", "client", "server", "serialize_json", "btleplug-manager", "client-ws-ssl", "xinput"]
+default=["thread_pool_runtime", "client", "server", "serialize_json", "btleplug-manager", "client-ws", "xinput"]
 client=[]
 server=[]
 serialize_json=[]
 xinput=[]
 thread_pool_runtime=[]
-async_std_runtime=[]
+async_std_runtime=["async-std/default"]
 tokio_runtime=[]
 dummy_runtime=[]
 btleplug-manager=["btleplug"]
-client-ws=["client", "serialize_json", "async-tungstenite"]
+client-ws=["client", "serialize_json", "async-tungstenite", "async-tls", "webpki", "rustls"]
 
 [dependencies]
 log = "0.4.8"
@@ -43,21 +43,24 @@ strum_macros = "0.18.0"
 strum = "0.18.0"
 once_cell = "1.4.0"
 paste = "0.1.16"
+# Can't use async-channel here because it's Sender isn't Sink. We'll just use futures-channel.
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
+# Broadcaster uses an older channel implementation, we can have it use a newer one.
 futures-channel = "0.3.5"
 lazy_static = "1.4.0"
 byteorder = "1.3.4"
 valico = "3.4.0"
 thiserror = "1.0.19"
 async-tungstenite = { version = "0.5.0", features = ["async-std-runtime", "async-tls"], optional = true }
-async-tls = "0.7.0"
-rustls = { version = "0.17.0", features = ["dangerous_configuration"] }
-webpki = "0.21.3"
+async-tls = { version = "0.7.0", optional = true }
+rustls = { version = "0.17.0", features = ["dangerous_configuration"], optional = true }
+webpki = { version = "0.21.3", optional = true }
 evmap = "10.0.2"
 evmap-derive = "0.1.0"
 futures-timer = "3.0.2"
 async-channel = "1.1.0"
 async-mutex = "1.1.3"
+cfg-if = "0.1.10"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
@@ -66,6 +69,7 @@ rusty-xinput = "1.2.0"
 version = "1.6.0"
 default-features = false
 features = ["std"]
+optional = true
 
 [dev-dependencies]
 env_logger = "0.7.1"
