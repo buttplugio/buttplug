@@ -68,14 +68,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         let e = event;
         async_manager::spawn(async move {
           s.send(e).await;
-        });
+        }).unwrap();
       }
       CentralEvent::DeviceDisconnected(_) => {
         let s = event_sender.clone();
         let e = event;
         async_manager::spawn(async move {
           s.send(e).await;
-        });
+        }).unwrap();
       }
       _ => {}
     };
@@ -146,7 +146,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
             ))
             .await
             .unwrap()
-        });
+        }).unwrap();
       }));
     let device_info = ButtplugDeviceImplInfo {
       endpoints: self.endpoints.keys().cloned().collect(),

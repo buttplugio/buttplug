@@ -81,7 +81,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           let s = sender.clone();
           async_manager::spawn(async move {
             s.send(()).await;
-          });
+          }).unwrap();
         }
       };
       // TODO There's no way to unsubscribe central event handlers. That
@@ -127,7 +127,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         }
         central.stop_scan().unwrap();
         info!("Exiting rumble scanning");
-      });
+      }).unwrap();
       Ok(())
     })
   }

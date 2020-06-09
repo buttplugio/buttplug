@@ -72,7 +72,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       let broadcaster_clone = output_broadcaster.clone();
       let mut event_loop =
         BtlePlugInternalEventLoop::new(central, device, p, device_receiver, broadcaster_clone);
-      async_manager::spawn(async move { event_loop.run().await });
+      async_manager::spawn(async move { event_loop.run().await }).unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       device_sender
