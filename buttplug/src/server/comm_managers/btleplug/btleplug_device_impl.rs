@@ -67,12 +67,8 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
       // TODO This is not actually async. We're currently using blocking
-      // rumble calls, so this will block whatever thread it's spawned to. We
-      // should probably switch to using async rumble calls w/ callbacks.
-      //
-      // The new watchdog async-std executor will at least leave this task on
-      // its own thread in time, but I'm not sure when that's landing.
       let central = self.central.clone();
+      // rumble calls, so this will block whatever thread it's spawned to.
       let broadcaster_clone = output_broadcaster.clone();
       let mut event_loop =
         BtlePlugInternalEventLoop::new(central, device, p, device_receiver, broadcaster_clone);

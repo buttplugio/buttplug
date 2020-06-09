@@ -23,9 +23,6 @@ create_buttplug_protocol!(
                     // we'll just use the manager's return for command validity
                     // checking.
                     let mut cmd = vec![];
-                    // TODO Reinstate error handling here, just pass it into the future we hand back.
-//                    cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16).unwrap()
-  //                      .map_err(|_| Box::pin(future:;ready(Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing"))))))?;
                     if cmd.write_u16::<LittleEndian>(cmds[1].unwrap() as u16).is_err() || cmd.write_u16::<LittleEndian>(cmds[0].unwrap() as u16).is_err() {
                         return ButtplugError::ButtplugMessageError(ButtplugMessageError::new("Cannot convert XInput value for processing")).into();
                     }

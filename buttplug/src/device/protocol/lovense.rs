@@ -6,7 +6,7 @@ use crate::{
         ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd
     },
 };
-use async_std::prelude::StreamExt;
+use futures::StreamExt;
 use async_trait::async_trait;
 
 pub struct LovenseCreator {

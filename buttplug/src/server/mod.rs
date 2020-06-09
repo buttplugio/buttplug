@@ -145,7 +145,6 @@ impl ButtplugServer {
       if let Some(pfut) = ping_fut {
         pfut.await;
       }
-      // TODO This can possibly error out.
       stop_fut.await.and_then(|_| Ok(()))
     })
   }
