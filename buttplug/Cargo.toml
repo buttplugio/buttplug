@@ -29,6 +29,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 thread-pool-runtime=[]
 async-std-runtime=["async-std/default"]
 tokio-runtime=[]
+wasm-bindgen-runtime=["wasm-bindgen-futures"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -67,6 +68,7 @@ webpki = { version = "0.21.3", optional = true }
 futures-timer = "3.0.2"
 async-channel = "1.4.2"
 async-mutex = "1.3.0"
+wasm-bindgen-futures = {version = "0.4.13", optional = true }
 cfg-if = "0.1.10"
 tracing = "0.1.19"
 tracing-futures = "0.2.4"
