@@ -15,9 +15,10 @@ use std::collections::HashMap;
 
 /// Message sorting and pairing for remote client connectors.
 ///
-/// In order to create connections to remote systems, we need a way to maintain
-/// message coherence. We expect that whenever a client sends the server a
-/// request message, the server will always send back a response message.
+/// In order to create reliable connections to remote systems, we need a way to
+/// maintain message coherence. We expect that whenever a client sends the
+/// server a request message, the server will always send back a response
+/// message.
 ///
 /// In the [embedded][crate::connector::ButtplugInProcessClientConnector] case,
 /// where the client and server are in the same process, we can simply use

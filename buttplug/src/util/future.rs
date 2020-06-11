@@ -193,7 +193,7 @@ impl<T> Future for ButtplugFuture<T> {
       let msg = waker_state.reply.take().unwrap();
       Poll::Ready(msg)
     } else {
-      debug!("Waker set.");
+      trace!("Waker set.");
       waker_state.waker = Some(cx.waker().clone());
       Poll::Pending
     }

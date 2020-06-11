@@ -10,6 +10,8 @@ use futures::{
   StreamExt,
   future::{self, BoxFuture}
 };
+use tracing::Level;
+use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector
 ///
@@ -56,10 +58,15 @@ impl<'a> ButtplugInProcessClientConnector {
     let (send, recv) = bounded(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {
+      info!("Starting In Process Client Connector Event Sender Loop");
       while let Some(event) = server_recv.next().await {
-        send.send(event.try_into().unwrap()).await;
+        // If we get an error back, it means the client dropped our event handler, so just stop trying.
+        if send.send(event.try_into().unwrap()).await.is_err() {
+          break;
+        }
       }
-    }).unwrap();
+      info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
+    }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();
 
     Self {
       connector_outbound_recv: Some(recv),

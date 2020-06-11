@@ -18,7 +18,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
       ButtplugDeviceMessageType, DeviceMessageInfo, LinearCmd, MessageAttributesMap, RotateCmd,
       RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd, VibrateSubcommand,
     },
@@ -35,6 +35,7 @@ use std::{
     Arc,
   },
 };
+use tracing_futures::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone)]
@@ -162,6 +163,7 @@ impl ButtplugClientDevice {
     message_sender: Sender<ButtplugClientRequest>,
     event_receiver: BroadcastChannel<ButtplugClientDeviceEvent>,
   ) -> Self {
+    info!("Creating client device {} with index {} and messages {:?}.", name, index, allowed_messages);
     let mut disconnect_receiver = event_receiver.clone();
     let device_connected = Arc::new(AtomicBool::new(true));
     let client_connected = Arc::new(AtomicBool::new(true));
@@ -169,21 +171,28 @@ impl ButtplugClientDevice {
     let client_connected_clone = client_connected.clone();
 
     async_manager::spawn(async move {
+      debug!("Entering client device disconnection loop.");
       loop {
         match disconnect_receiver.recv().await.unwrap() {
           ButtplugClientDeviceEvent::ClientDisconnect => {
+            debug!("Client disconnected.");
             device_connected_clone.store(false, Ordering::SeqCst);
             client_connected_clone.store(false, Ordering::SeqCst);
+            break;
           }
           ButtplugClientDeviceEvent::DeviceDisconnect => {
+            debug!("Device disconnected.");
             device_connected_clone.store(false, Ordering::SeqCst);
+            break;
           }
           ButtplugClientDeviceEvent::Message(_) => {
+            // To be used once we actually get unrequested info from devices.
             continue;
           }
         }
       }
-    }).unwrap();
+      debug!("Exiting client device disconnection loop.");
+    }.instrument(tracing::info_span!("Client Device {} Disconnect Loop", index))).unwrap();
 
     Self {
       name: name.to_owned(),
@@ -196,20 +205,6 @@ impl ButtplugClientDevice {
     }
   }
 
-  fn check_connection(&self) -> Result<(), ButtplugClientError> {
-    if !self.client_connected.load(Ordering::SeqCst) {
-      Err(ButtplugClientError::ButtplugConnectorError(
-        ButtplugConnectorError::new(&"Client not Connected"),
-      ))
-    } else if !self.device_connected.load(Ordering::SeqCst) {
-      Err(ButtplugClientError::ButtplugError(
-        ButtplugDeviceError::new(&"Device not Connected").into(),
-      ))
-    } else {
-      Ok(())
-    }
-  }
-
   /// Sends a message through the owning
   /// [ButtplugClient][super::ButtplugClient].
   ///
@@ -219,11 +214,22 @@ impl ButtplugClientDevice {
     &self,
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage> {
-    if let Err(e) = self.check_connection() {
-      return Box::pin(future::ready(Err(e)));
-    }
     let message_sender = self.message_sender.clone();
+    let client_connected = self.client_connected.clone();
+    let device_connected = self.device_connected.clone();
+    let id = msg.get_id();
     Box::pin(async move {
+      if !client_connected.load(Ordering::SeqCst) {
+        error!("Client not connected, cannot run device command");
+         return Err(ButtplugClientError::ButtplugConnectorError(
+           ButtplugConnectorError::new(&"Client not Connected"),
+         ));
+       } else if !device_connected.load(Ordering::SeqCst) {
+         error!("Device not connected, cannot run device command");
+         return Err(ButtplugClientError::ButtplugError(
+           ButtplugDeviceError::new(&"Device not Connected").into(),
+         ));
+      }   
       let fut = ButtplugClientMessageFuture::default();
       message_sender
         .send(ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
@@ -242,7 +248,7 @@ impl ButtplugClientDevice {
         }
         Err(e) => Err(ButtplugClientError::ButtplugConnectorError(e)),
       }
-    })
+    }.instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id)))
   }
 
   pub fn event_receiver(

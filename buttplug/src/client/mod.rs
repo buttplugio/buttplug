@@ -46,7 +46,7 @@ use std::{
   },
 };
 
-use tracing::{span::{self, Span}, Level};
+use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
 /// Result type used inside the client module.
@@ -207,7 +207,7 @@ pub struct ButtplugClient {
   // True if the connector is currently connected, and handshake was
   // successful.
   connected: Arc<AtomicBool>,
-  client_span: Span,
+  _client_span: Span,
   device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
 }
 
@@ -223,16 +223,18 @@ impl ButtplugClient {
   ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item=ButtplugClientEvent>), ButtplugClientError>>
   where
   ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static {
-    debug!("Run called!");
+    trace!("run() called, creating client future.");
     let client_name = name.to_string();
     Box::pin(async move {
       let span = span!(Level::INFO, "Client");
       let _client_span = span.enter();
+      info!("Connecting to server.");
       let connector_receiver = connector.connect().await.map_err(|e| {
+        error!("Connection to server failed: {:?}", e);
         let err: ButtplugClientError = e.into();
         err
       })?;
-
+      info!("Connection to server succeeded.");
       let (client_event_loop_fut, 
         device_map_reader, 
         message_sender,
@@ -361,7 +363,7 @@ impl ButtplugClient {
       // function.
       connected: connected_status,
       device_map_reader,
-      client_span: span
+      _client_span: span
     };
 
     // Run our handshake
