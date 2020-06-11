@@ -62,7 +62,7 @@ type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugConnectorError>;
 /// [ButtplugConnectorError]) and an issue within Buttplug (as a
 /// [ButtplugError]).
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
-type ButtplugClientResultFuture<T = ()> = impl Future<'static, ButtplugClientResult<T>>;
+type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
 pub type ButtplugInternalClientMessageResult =
