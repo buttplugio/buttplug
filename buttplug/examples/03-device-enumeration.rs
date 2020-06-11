@@ -16,8 +16,13 @@ use buttplug::{
   util::async_manager
 };
 use futures::StreamExt;
+use tracing::{span, info, Level};
 
 async fn device_enumeration_example() {
+  tracing_subscriber::fmt::init();
+  let example = span!(Level::INFO, "Device Enumeration Example");
+  let _enter = example.enter();
+  info!("Starting Device Enumeration Example");
   // Time to see what devices are available! In this example, we'll see how
   // servers can access certain types of devices, and how clients can ask
   // servers which devices are available.

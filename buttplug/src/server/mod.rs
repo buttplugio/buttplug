@@ -61,6 +61,7 @@ pub struct ButtplugServer {
   ping_timer: Option<PingTimer>,
   pinged_out: Arc<AtomicBool>,
   connected: Arc<AtomicBool>,
+  log_handler: Option<ButtplugLogHandler>,
 }
 
 impl ButtplugServer {
@@ -103,6 +104,7 @@ impl ButtplugServer {
         pinged_out,
         connected,
         event_sender: send,
+        log_handler: None,
       },
       recv,
     )
@@ -242,18 +244,13 @@ impl ButtplugServer {
   fn handle_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
     let sender = self.event_sender.clone();
     Box::pin(async move {
-      // TODO Work with a logger that doesn't fucking panic on have 2 registrations.
-      let handler = ButtplugLogHandler::new(&msg.log_level, sender);
-      /*
-      log::set_boxed_logger(Box::new(handler))
-        .map_err(|e| ButtplugUnknownError::new(&format!("Cannot set up log handler: {}", e)).into())
-        .and_then(|_| {
-          let level: log::LevelFilter = msg.log_level.clone().into();
-          log::set_max_level(level);
-          */
-          Result::Ok(messages::Ok::new(msg.get_id()).into())
-        //})
+      // let handler = ButtplugLogHandler::new(&msg.log_level, sender);
+      Result::Ok(messages::Ok::new(msg.get_id()).into())
     })
+  }
+
+  pub fn create_tracing_layer(&self) -> ButtplugLogHandler {
+    ButtplugLogHandler::new(&messages::LogLevel::Off, self.event_sender.clone())
   }
 }
 

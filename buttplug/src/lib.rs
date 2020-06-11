@@ -91,14 +91,14 @@ extern crate evmap_derive;
 #[macro_use]
 extern crate buttplug_derive;
 #[macro_use]
-extern crate log;
-#[macro_use]
 extern crate strum_macros;
 #[cfg(feature = "thread_pool_runtime")]
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate futures;
+#[macro_use]
+extern crate tracing;
 
 #[cfg(feature = "client")]
 pub mod client;

@@ -21,11 +21,11 @@ pub struct Log {
 }
 
 impl Log {
-  pub fn new(log_level: LogLevel, log_message: String) -> Self {
+  pub fn new(log_level: LogLevel, log_message: &str) -> Self {
     Self {
       id: 0,
       log_level,
-      log_message,
+      log_message: log_message.to_owned(),
     }
   }
 }

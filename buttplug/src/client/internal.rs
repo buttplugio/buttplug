@@ -20,9 +20,11 @@ use crate::{
   },
 };
 use async_channel::{bounded, Sender, Receiver};
-use futures::{future::BoxFuture, StreamExt, FutureExt};
+use futures::{Future, StreamExt, FutureExt};
 use std::{sync::Arc, hash::{Hash, Hasher}};
 use broadcaster::BroadcastChannel;
+use tracing;
+use tracing_futures::Instrument;
 
 /// Enum used for communication from the client to the event loop.
 pub(super) enum ButtplugClientRequest {
@@ -323,7 +325,7 @@ pub(super) fn client_event_loop(
     + 'static,
   connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
 ) -> (
-  BoxFuture<'static, Result<(), ButtplugClientError>>,
+  impl Future<Output = Result<(), ButtplugClientError>>,
   evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
   Sender<ButtplugClientRequest>,
   // This needs clone internally, as the client will make multiple copies.
@@ -351,6 +353,7 @@ pub(super) fn client_event_loop(
       info!("Starting client event loop.");
       event_loop
       .run()
+      .instrument(tracing::info_span!("Client Event Loop"))
       .await;
       info!("Stopping client event loop.");
       Ok(())

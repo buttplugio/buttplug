@@ -31,10 +31,9 @@ use crate::{
     async_manager,
   }
 };
-
 use async_channel::Sender;
 use futures::{
-  future::{self, BoxFuture},
+  future::{self, BoxFuture, Future},
   StreamExt,
   FutureExt,
 };
@@ -46,6 +45,9 @@ use std::{
     Arc,
   },
 };
+
+use tracing::{span::{self, Span}, Level};
+use tracing_futures::Instrument;
 
 /// Result type used inside the client module.
 ///
@@ -60,7 +62,7 @@ type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugConnectorError>;
 /// [ButtplugConnectorError]) and an issue within Buttplug (as a
 /// [ButtplugError]).
 type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
-type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
+type ButtplugClientResultFuture<T = ()> = impl Future<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
 pub type ButtplugInternalClientMessageResult =
@@ -205,6 +207,7 @@ pub struct ButtplugClient {
   // True if the connector is currently connected, and handshake was
   // successful.
   connected: Arc<AtomicBool>,
+  client_span: Span,
   device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
 }
 
@@ -223,6 +226,8 @@ impl ButtplugClient {
     debug!("Run called!");
     let client_name = name.to_string();
     Box::pin(async move {
+      let span = span!(Level::INFO, "Client");
+      let _client_span = span.enter();
       let connector_receiver = connector.connect().await.map_err(|e| {
         let err: ButtplugClientError = e.into();
         err
@@ -240,6 +245,7 @@ impl ButtplugClient {
       let mut disconnect_event_receiver = event_channel.clone();
       let connected_status = Arc::new(AtomicBool::new(true));
       let connected_status_clone = connected_status.clone();
+
       // Start the event loop before we run the handshake.
       async_manager::spawn(async move {
         let disconnect_fut = async move {
@@ -250,7 +256,7 @@ impl ButtplugClient {
             }
           }
           Result::<(), ButtplugClientError>::Ok(())
-        };
+        }.instrument(tracing::info_span!("Client Disconnect Loop"));
         // If we disconnect, we'll also stop the client event loop. If the
         // client event loop stops, we don't care about listening for disconnect
         // anymore.
@@ -258,12 +264,13 @@ impl ButtplugClient {
           _ = client_event_loop_fut.fuse() => (),
           _ = disconnect_fut.fuse() => (),
         };
-      }).unwrap();
+      }.instrument(tracing::info_span!("Client Loop Span"))).unwrap();
       let client = ButtplugClient::create_client(
         &client_name,
         connected_status_clone,
         message_sender,
         device_map_reader,
+        span.clone(),
       ).await?;
       Ok((client, client_event_receiver))
     })
@@ -307,7 +314,7 @@ impl ButtplugClient {
     name: &str,
     max_ping_time: u64,
     use_test_manager: bool,
-  ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
+  ) -> impl Future<Output = Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
     use crate::connector::ButtplugInProcessClientConnector;
 
     let mut connector =
@@ -337,7 +344,12 @@ impl ButtplugClient {
     ButtplugClient::connect(name, connector)
   }
 
-  async fn create_client(client_name: &str, connected_status: Arc<AtomicBool>, message_sender: Sender<ButtplugClientRequest>, device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>) -> Result<Self, ButtplugClientError> {
+  async fn create_client(client_name: &str, 
+    connected_status: Arc<AtomicBool>, 
+    message_sender: Sender<ButtplugClientRequest>, 
+    device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+    span: Span) 
+    -> Result<Self, ButtplugClientError> {
     // Create the client
     let mut client = ButtplugClient {
       client_name: client_name.to_string(),
@@ -349,6 +361,7 @@ impl ButtplugClient {
       // function.
       connected: connected_status,
       device_map_reader,
+      client_span: span
     };
 
     // Run our handshake
@@ -535,7 +548,6 @@ mod test {
 
   #[test]
   fn test_failing_connection() {
-    let _ = env_logger::builder().is_test(true).try_init();
     async_manager::block_on(async {
       assert!(
         ButtplugClient::connect("Test Client", ButtplugFailingConnector::default())
@@ -573,7 +585,6 @@ mod test {
 
   #[test]
   fn test_connect_init() {
-    let _ = env_logger::builder().is_test(true).try_init();
     async_manager::block_on(async {
       let (client, _) = ButtplugClient::connect(
         "Test Client",
