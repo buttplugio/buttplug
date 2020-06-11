@@ -163,10 +163,6 @@ impl DeviceImpl for TestDevice {
     })
   }
 
-  fn box_clone(&self) -> Box<dyn DeviceImpl> {
-    Box::new((*self).clone())
-  }
-
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.event_broadcaster.clone()
   }

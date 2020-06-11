@@ -210,8 +210,4 @@ impl DeviceImpl for BtlePlugDeviceImpl {
         "Cannot unsubscribe",
       )
   }
-
-  fn box_clone(&self) -> Box<dyn DeviceImpl> {
-    Box::new((*self).clone())
-  }  
 }

@@ -272,18 +272,10 @@ pub trait DeviceImpl: Sync + Send {
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 
   fn disconnect(&self) -> ButtplugResultFuture;
-  fn box_clone(&self) -> Box<dyn DeviceImpl>;
-
   fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture;
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture;
   fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture;
-}
-
-impl Clone for Box<dyn DeviceImpl> {
-  fn clone(&self) -> Box<dyn DeviceImpl> {
-    self.box_clone()
-  }
 }
 
 #[async_trait]
