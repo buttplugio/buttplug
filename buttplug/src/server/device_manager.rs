@@ -356,7 +356,6 @@ mod test {
 
   #[test]
   pub fn test_device_manager_creation() {
-    let _ = env_logger::builder().is_test(true).try_init();
     async_manager::block_on(async {
       let (sender, mut receiver) = bounded(256);
       let mut dm = DeviceManager::new(sender);

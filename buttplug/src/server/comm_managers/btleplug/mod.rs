@@ -176,7 +176,6 @@ mod test {
   #[test]
   #[ignore]
   pub fn test_rumble() {
-    let _ = env_logger::builder().is_test(true).try_init();
     async_manager::block_on(async move {
       let (sender, mut receiver) = bounded(256);
       let mgr = BtlePlugCommunicationManager::new(sender);

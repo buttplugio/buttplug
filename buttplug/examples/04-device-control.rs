@@ -20,7 +20,6 @@ use futures_timer::Delay;
 use std::time::Duration;
 
 async fn device_control_example() {
-  env_logger::init();
   // Onto the final example! Controlling devices.
 
   // Instead of setting up our own connector for this example, we'll use the

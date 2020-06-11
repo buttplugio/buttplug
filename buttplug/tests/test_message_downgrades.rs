@@ -21,7 +21,6 @@ mod test {
 
   #[test]
   fn test_version0_connection() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (server, _) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -41,7 +40,6 @@ mod test {
 
   #[test]
   fn test_version2_connection() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (server, _) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi =
@@ -62,7 +60,6 @@ mod test {
 
   #[test]
   fn test_version0_device_added_device_list() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
 
@@ -110,7 +107,6 @@ mod test {
 
   #[test]
   fn test_version0_singlemotorvibratecmd() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     let (device, device_creator) =

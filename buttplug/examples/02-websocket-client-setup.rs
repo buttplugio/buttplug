@@ -13,14 +13,8 @@ use buttplug::{
   util::async_manager
 };
 
-// We're gonna use async_std as our runtime for the examples, but you should be
-// able to use futures, tokio, or whatever else.
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
-use async_std::task;
-
 #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
 async fn embedded_connector_example() {
-  env_logger::init();
   println!(
     "Setting up the client! Run this with RUST_LOG if you'd like to see library log messages."
   );

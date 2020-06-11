@@ -274,7 +274,6 @@ mod test {
   async fn test_server_setup(
     msg_union: messages::ButtplugClientMessage,
   ) -> (ButtplugServer, Receiver<ButtplugServerMessage>) {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (server, recv) = ButtplugServer::new("Test Server", 0);
     assert_eq!(server.server_name, "Test Server");
     match server.parse_message(msg_union).await.unwrap() {
@@ -289,7 +288,6 @@ mod test {
 
   #[test]
   fn test_server_handshake() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
     async_manager::block_on(async {
@@ -300,7 +298,6 @@ mod test {
 
   #[test]
   fn test_server_version_lt() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
       async_manager::block_on(async {
@@ -314,7 +311,6 @@ mod test {
   #[test]
   #[ignore]
   fn test_server_version_gt() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (server, _) = ButtplugServer::new("Test Server", 0);
     let msg =
       messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
@@ -328,7 +324,6 @@ mod test {
 
   #[test]
   fn test_ping_timeout() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let (server, mut recv) = ButtplugServer::new("Test Server", 100);
     async_manager::block_on(async {
       let msg =
@@ -370,8 +365,6 @@ mod test {
   #[test]
   #[ignore]
   fn test_device_stop_on_ping_timeout() {
-    let _ = env_logger::builder().is_test(true).try_init();
-
     async_manager::block_on(async {
       let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
       let devices = server.add_test_comm_manager();

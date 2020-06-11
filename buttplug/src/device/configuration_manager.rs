@@ -407,14 +407,12 @@ mod test {
 
   #[test]
   fn test_load_config() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let config = DeviceConfigurationManager::default();
     debug!("{:?}", config.config);
   }
 
   #[test]
   fn test_config_equals() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let config = DeviceConfigurationManager::default();
     let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
     assert!(config.find_configuration(&launch).is_some());
@@ -422,7 +420,6 @@ mod test {
 
   #[test]
   fn test_config_wildcard_equals() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let config = DeviceConfigurationManager::default();
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
@@ -431,7 +428,6 @@ mod test {
 
   #[test]
   fn test_specific_device_config_creation() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let config = DeviceConfigurationManager::default();
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
@@ -454,7 +450,6 @@ mod test {
 
   #[test]
   fn test_user_config_loading() {
-    let _ = env_logger::builder().is_test(true).try_init();
     let mut config = DeviceConfigurationManager::default();
     assert!(config.config.protocols.contains_key("erostek-et312"));
     assert!(config

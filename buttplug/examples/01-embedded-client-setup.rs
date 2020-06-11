@@ -19,7 +19,6 @@
 use buttplug::{client::ButtplugClient, connector::ButtplugInProcessClientConnector, util::async_manager};
 
 async fn embedded_connector_example() {
-  env_logger::init();
   println!(
     "Setting up the client! Run this with RUST_LOG if you'd like to see library log messages."
   );
