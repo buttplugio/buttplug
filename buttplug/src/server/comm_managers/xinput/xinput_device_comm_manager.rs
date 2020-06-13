@@ -1,12 +1,12 @@
 use super::xinput_device_impl::XInputDeviceImplCreator;
-use crate::core::errors::ButtplugError;
+use crate::core::ButtplugResultFuture;
 use crate::server::comm_managers::{
   DeviceCommunicationEvent,
   DeviceCommunicationManager,
   DeviceCommunicationManagerCreator,
 };
 use async_channel::Sender;
-use async_trait::async_trait;
+use futures::future;
 
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]
@@ -19,22 +19,23 @@ pub enum XInputControllerIndex {
 
 pub struct XInputDeviceCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,
-  attached_controllers: Vec<XInputControllerIndex>,
+  _attached_controllers: Vec<XInputControllerIndex>,
 }
 
 impl DeviceCommunicationManagerCreator for XInputDeviceCommunicationManager {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,
-      attached_controllers: vec![],
+      _attached_controllers: vec![],
     }
   }
 }
 
-#[async_trait]
 impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
-  async fn start_scanning(&mut self) -> Result<(), ButtplugError> {
+  fn start_scanning(&self) -> ButtplugResultFuture {
     info!("XInput manager scanning!");
+    let sender = self.sender.clone();
+    Box::pin(async move {
     let handle = rusty_xinput::XInputHandle::load_default().unwrap();
     for i in &[
       XInputControllerIndex::XInputController0,
@@ -46,22 +47,25 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
         Ok(_) => {
           info!("XInput manager found device {}", i);
           let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
-          self
-            .sender
+          if sender
             .send(DeviceCommunicationEvent::DeviceFound(device_creator))
-            .await;
+            .await
+            .is_err() {
+
+            }
         }
         Err(_) => continue,
       }
     }
     Ok(())
+  })
   }
 
-  async fn stop_scanning(&mut self) -> Result<(), ButtplugError> {
-    Ok(())
+  fn stop_scanning(&self) -> ButtplugResultFuture {
+    Box::pin(future::ready(Ok(())))
   }
 
-  fn is_scanning(&mut self) -> bool {
+  fn is_scanning(&self) -> bool {
     false
   }
 }

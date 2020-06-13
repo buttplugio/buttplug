@@ -3,22 +3,18 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
+    ButtplugResultFuture,
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    BoundedDeviceEventBroadcaster,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    BoundedDeviceEventBroadcaster, ButtplugDeviceImplCreator, DeviceImpl, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use byteorder::{LittleEndian, ReadBytesExt};
+use futures::future::{self, BoxFuture};
 use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::io::Cursor;
 
@@ -42,7 +38,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
 
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    _protocol: ProtocolDefinition,
   ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
     debug!("Emitting a new xbox device impl!");
     Ok(Box::new(XInputDeviceImpl::new(self.index)))
@@ -69,7 +65,6 @@ impl XInputDeviceImpl {
   }
 }
 
-#[async_trait]
 impl DeviceImpl for XInputDeviceImpl {
   fn name(&self) -> &str {
     // This has to match the xinput identifier entry in the configuration
@@ -89,34 +84,40 @@ impl DeviceImpl for XInputDeviceImpl {
     vec![Endpoint::Tx]
   }
 
-  async fn disconnect(&mut self) {
+  fn disconnect(&self) -> ButtplugResultFuture {
+    Box::pin(future::ready(Ok(())))
   }
 
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.event_receiver.clone()
   }
 
-  async fn read_value(&self, msg: DeviceReadCmd) -> Result<RawReading, ButtplugError> {
+  fn read_value(&self, _msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     panic!("We should never get here!");
   }
 
-  async fn write_value(&self, msg: DeviceWriteCmd) -> Result<(), ButtplugError> {
-    let mut cursor = Cursor::new(msg.data);
-    let left_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
-    let right_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
-    self
-      .handle
-      .set_state(self.index as u32, left_motor_speed, right_motor_speed)
-      .map_err(|e: XInputUsageError| {
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!("{:?}", e).to_owned()))
-      })
+  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+    let handle = self.handle.clone();
+    let index = self.index;
+    Box::pin(async move {
+      let mut cursor = Cursor::new(msg.data);
+      let left_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
+      let right_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
+      handle
+        .set_state(index as u32, left_motor_speed, right_motor_speed)
+        .map_err(|e: XInputUsageError| {
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
+            &format!("{:?}", e).to_owned(),
+          ))
+        })
+    })
   }
 
-  async fn subscribe(&self, msg: DeviceSubscribeCmd) -> Result<(), ButtplugError> {
+  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 
-  async fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> Result<(), ButtplugError> {
+  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 }
