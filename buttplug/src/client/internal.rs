@@ -43,11 +43,8 @@ pub(super) enum ButtplugClientRequest {
 #[derive(ShallowCopy)]
 pub(super) struct ButtplugClientDeviceInternal {
   // We do not want to store a full ButtplugClientDevice here, as it will
-  // contain event channels that are never handled. Instead, we should create
-  // new client devices when they are requested. Ideally, client devices should
-  // just be Arc<T>'s at some point so we don't have to worry about clones either.
-  //
-  // TODO Make devices Arc<T>, store here.
+  // contain event channels that are never handled. Instead, we create new
+  // client devices when they are requested.
   pub device: Arc<DeviceMessageInfo>,
   pub channel: Arc<BroadcastChannel<ButtplugClientDeviceEvent>>
 }
@@ -320,19 +317,15 @@ where
 /// handles connection and communication with the server through the connector,
 /// and creation of events received from the server.
 ///
-/// The event_loop does a few different things during its lifetime.
+/// The event_loop does a few different things during its lifetime:
 ///
-/// - The first thing it will do is wait for a Connect message from a client.
-///   This message contains a [ButtplugClientConnector] that will be used to
-///   connect and communicate with a [crate::server::ButtplugServer].
-///
-/// - After a connection is established, it will listen for events from the
-///   connector, or messages from the client, until either server/client
+/// - It will listen for events from the connector, or messages from the client,
+///   routing them to their proper receivers until either server/client
 ///   disconnects.
 ///
-/// - Finally, on disconnect, it will tear down, and cannot be used again. All
-///   clients and devices associated with the loop will be invalidated, and a
-///   new [super::ButtplugClient] must be created.
+/// - On disconnect, it will tear down, and cannot be used again. All clients
+///   and devices associated with the loop will be invalidated, and a new
+///   [super::ButtplugClient] must be created.
 pub(super) fn client_event_loop(
   connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
     + 'static,

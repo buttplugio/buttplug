@@ -303,11 +303,11 @@ impl ButtplugClient {
   ///   to add it to this method? _It's more likely than you think!_ [File a
   ///   bug](https://github.com/buttplugio/buttplug-rs/issues).
   ///
-  /// # Panics
+  /// # Errors
   ///
   /// If the library was compiled without any device managers, the
   /// [ButtplugClient] will have nothing to do. This is considered a
-  /// catastrophic failure and the library will panic.
+  /// catastrophic failure and the library will return an error.
   ///
   /// If the library is using outside device managers, it is recommended to
   /// build your own connector, add your device manager to those, and use the
@@ -346,7 +346,13 @@ impl ButtplugClient {
     ButtplugClient::connect(name, connector)
   }
 
-  async fn create_client(client_name: &str, 
+  /// Creates the ButtplugClient instance and tries to establish a connection.
+  ///
+  /// Takes all of the components needed to build a [ButtplugClient], creates
+  /// the struct, then tries to run connect and execute the Buttplug protocol
+  /// handshake. Will return a connected and ready to use ButtplugClient is all
+  /// goes well.
+  async fn create_client(client_name: &str,
     connected_status: Arc<AtomicBool>, 
     message_sender: Sender<ButtplugClientRequest>, 
     device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
@@ -439,8 +445,9 @@ impl ButtplugClient {
     self.send_message_expect_ok(StartScanning::default().into())
   }
 
-  // Send message to the internal event loop. Mostly for handling boilerplate
-  // around possible send errors.
+  /// Send message to the internal event loop. 
+  ///
+  /// Mostly for handling boilerplate around possible send errors.
   fn send_internal_message(&self, msg: ButtplugClientRequest) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Err(
@@ -457,8 +464,8 @@ impl ButtplugClient {
     })
   }
 
-  // Sends a ButtplugMessage from client to server. Expects to receive a
-  // ButtplugMessage back from the server.
+  /// Sends a ButtplugMessage from client to server. Expects to receive a
+  /// ButtplugMessage back from the server.
   fn send_message(
     &self,
     msg: ButtplugCurrentSpecClientMessage,
@@ -478,8 +485,8 @@ impl ButtplugClient {
     })
   }
 
-  // Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
-  // type ButtplugMessage back from the server.
+  /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
+  /// type ButtplugMessage back from the server.
   fn send_message_expect_ok(
     &self,
     msg: ButtplugCurrentSpecClientMessage,
