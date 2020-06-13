@@ -178,7 +178,8 @@ impl DeviceImpl for TestDevice {
       // Since we're only accessing a channel, we can use a read lock here.
       match channels.lock().await.get(&msg.endpoint) {
         Some((sender, _)) => {
-          sender.send(msg.into()).await;
+          // We hold both ends, can unwrap.
+          sender.send(msg.into()).await.unwrap();
           Ok(())
         }
         None => Err(

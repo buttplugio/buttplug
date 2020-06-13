@@ -81,15 +81,21 @@ impl ButtplugServer {
       let connected_clone = connected.clone();
       let event_sender_clone = send.clone();
       async_manager::spawn(async move {
+        // If we receive anything here, it means we've pinged out.
         receiver.next().await;
+        error!("Ping out signal received, stopping server");
         pinged_out_clone.store(true, Ordering::SeqCst);
         connected_clone.store(false, Ordering::SeqCst);
         // TODO Should the event sender return a result instead of an error message?
-        event_sender_clone
+        if event_sender_clone
           .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
-          .await;
-        device_manager_sender.send(()).await;
-        error!("Ping out signal received, stopping server");
+          .await
+          .is_err() {
+          error!("Server disappeared, cannot update about ping out.");
+        };
+        if device_manager_sender.send(()).await.is_err() {
+          error!("Device Manager disappeared, cannot update about ping out.");
+        }
       }).unwrap();
       (Some(timer), Some(device_manager_receiver))
     } else {

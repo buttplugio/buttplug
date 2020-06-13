@@ -124,32 +124,43 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
               // TODO see what happens when we try to send to a remote that's closed connection.
               writer.send(out_msg).await.expect("This should never fail?");
             }
-          });
+          }).unwrap();
           async_manager::spawn(async move {
             while let Some(response) = reader.next().await {
               trace!("Websocket receiving: {:?}", response);
               match response.unwrap() {
                 Message::Text(t) => {
-                  response_sender
+                  if response_sender
                     .send(ButtplugTransportMessage::Message(
                       ButtplugSerializedMessage::Text(t.to_string()),
                     ))
-                    .await;
+                    .await
+                    .is_err() {
+                      error!("Websocket holder has closed, exiting websocket loop.");
+                      return;
+                  }
                 }
                 // TODO Do we need to handle anything else?
                 Message::Binary(v) => {
-                  response_sender
+                  if response_sender
                     .send(ButtplugTransportMessage::Message(
                       ButtplugSerializedMessage::Binary(v),
                     ))
-                    .await;
+                    .await
+                    .is_err() {
+                      error!("Websocket holder has closed, exiting websocket loop.");
+                      return;
+                  }
                 }
                 Message::Ping(_) => {}
                 Message::Pong(_) => {}
-                Message::Close(_) => {}
+                Message::Close(_) => {
+                  info!("Websocket has requested close.");
+                  return;
+                }
               }
             }
-          });
+          }).unwrap();
           Ok((request_sender, response_receiver))
         }
         Err(e) => Err(ButtplugConnectorError::new(&format!("{:?}", e))),

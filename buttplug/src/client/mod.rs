@@ -369,11 +369,10 @@ impl ButtplugClient {
     // Run our handshake
     info!("Running handshake with server.");
     match client
-      .send_message(
-        RequestServerInfo::new(&client.client_name, ButtplugMessageSpecVersion::Version2).into(),
-      )
-      .await
-    {
+    .send_message(
+      RequestServerInfo::new(&client.client_name, ButtplugMessageSpecVersion::Version2).into(),
+    )
+    .await {
       Ok(msg) => {
         debug!("Got ServerInfo return.");
         if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {

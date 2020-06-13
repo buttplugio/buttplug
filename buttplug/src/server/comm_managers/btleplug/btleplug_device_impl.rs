@@ -75,9 +75,11 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       async_manager::spawn(async move { event_loop.run().await }).unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
-      device_sender
+      if device_sender
         .send((ButtplugDeviceCommand::Connect, waker))
-        .await;
+        .await.is_err() {
+          return Err(ButtplugDeviceError::new("Event loop exited before we could connect.").into());
+      };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl::new(
           &name,
@@ -135,7 +137,12 @@ impl BtlePlugDeviceImpl {
     Box::pin(async move {
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
-      sender.send((cmd, waker)).await;
+      if sender.send((cmd, waker)).await.is_err() {
+        error!("Device event loop shut down, cannot send command.");
+        return Err(ButtplugError::ButtplugDeviceError(
+          ButtplugDeviceError::new("Device event loop shut down, cannot send command.")
+        ));
+      }
       match fut.await {
         ButtplugDeviceReturn::Ok(_) => Ok(()),
         ButtplugDeviceReturn::Error(e) => {

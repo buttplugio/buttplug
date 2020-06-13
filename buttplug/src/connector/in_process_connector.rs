@@ -10,7 +10,6 @@ use futures::{
   StreamExt,
   future::{self, BoxFuture}
 };
-use tracing::Level;
 use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector
@@ -114,8 +113,8 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       let output = output_fut.await;
       sender 
         .send(output.unwrap().try_into().unwrap())
-        .await;
-        Ok(())
+        .await
+        .map_err(|_| ButtplugConnectorError::new("Connector is not connected."))
     })
   }
 }

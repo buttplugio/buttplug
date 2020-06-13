@@ -36,8 +36,12 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
                   pinged_clone.store(false, Ordering::SeqCst);
                   continue;
                 } else {
-                  pinged_out_sender_clone.send(()).await;
-                  sender_clone.send(PingMessage::StopTimer).await;
+                  error!("Pinged out.");
+                  if pinged_out_sender_clone.send(()).await.is_err() {
+                    error!("Ping out receiver disappeared, cannot update.");
+                  }
+                  // This is our own loop, we can unwrap.
+                  sender_clone.send(PingMessage::StopTimer).await.unwrap();
                   break;
                 }
               }
@@ -65,7 +69,9 @@ impl Drop for PingTimer {
   fn drop(&mut self) {
     let ping_msg_sender = self.ping_msg_sender.clone();
     async_manager::spawn(async move {
-      ping_msg_sender.send(PingMessage::End).await;
+      if ping_msg_sender.send(PingMessage::End).await.is_err() {
+        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
+      }
     }).unwrap();
   }
 }
@@ -87,7 +93,9 @@ impl PingTimer {
   fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> {
     let ping_msg_sender = self.ping_msg_sender.clone();
     async move {
-      ping_msg_sender.send(msg).await;
+      if ping_msg_sender.send(msg).await.is_err() {
+        error!("Cannot ping, no event loop available.");
+      }
     }
   }
 

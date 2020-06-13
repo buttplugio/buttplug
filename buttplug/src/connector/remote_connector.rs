@@ -96,7 +96,10 @@ async fn remote_connector_event_loop<
             match serializer.deserialize(serialized_msg) {
               Ok(array) => {
                 for smsg in array {
-                  connector_incoming_sender.send(smsg).await;
+                  if connector_incoming_sender.send(smsg).await.is_err() {
+                    error!("Connector has disconnected, ending remote connector loop.");
+                    return;
+                  }
                 }
               }
               Err(e) => {
@@ -131,7 +134,10 @@ async fn remote_connector_event_loop<
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
             let serialized_msg = serializer.serialize(vec![msg.clone()]);
-            transport_outgoing_sender.send(serialized_msg).await;
+            if transport_outgoing_sender.send(serialized_msg).await.is_err() {
+              error!("Transport has disconnected, exiting remote connector loop.");
+              return;
+            }
           }
           ButtplugRemoteConnectorMessage::Close => {
             if let Err(e) = transport.disconnect().await {
@@ -256,8 +262,8 @@ where
       Box::pin(async move {
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Close)
-          .await;
-        Ok(())
+          .await
+          .map_err(|_| ButtplugConnectorError::new("Connector has already disconnected"))
       })
     } else {
       ButtplugConnectorError::new("Connector not connected.").into()
@@ -270,8 +276,8 @@ where
       Box::pin(async move {
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Message(msg))
-          .await;
-        Ok(())
+          .await
+          .map_err(|_| ButtplugConnectorError::new("Connector has disconnected."))
       })
     } else {
       ButtplugConnectorError::new("Connector not connected.").into()

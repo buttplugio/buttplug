@@ -80,7 +80,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         if let CentralEvent::DeviceDiscovered(_) = event {
           let s = sender.clone();
           async_manager::spawn(async move {
-            s.send(()).await;
+            if s.send(()).await.is_err() {
+              error!("Device scanning receiver dropped!");
+            }
           }).unwrap();
         }
       };
@@ -117,9 +119,13 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
               if !name.is_empty() && !tried_names.contains(&name) {
                 tried_names.push(name.clone());
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
-                device_sender
+                if device_sender
                   .send(DeviceCommunicationEvent::DeviceFound(device_creator))
-                  .await;
+                  .await
+                  .is_err() {
+                    error!("Device manager receiver dropped, cannot send device found message.");
+                    return;
+                  }
               }
             }
           }
@@ -138,8 +144,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     Box::pin(async move {
       if is_scanning.load(Ordering::SeqCst) {
         is_scanning.store(false, Ordering::SeqCst);
-        sender.send(()).await;
-        Ok(())
+        sender.send(()).await.map_err(|_| {
+          error!("Scanning event loop already shut down");
+          ButtplugDeviceError::new("Scanning event loop already shut down.").into()
+        })
       } else {
         Err(ButtplugDeviceError::new("Scanning not currently happening.").into())
       }

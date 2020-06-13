@@ -67,14 +67,16 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         let s = event_sender.clone();
         let e = event;
         async_manager::spawn(async move {
-          s.send(e).await;
+          // Can be unwrapped because we own both sides.
+          s.send(e).await.unwrap();
         }).unwrap();
       }
       CentralEvent::DeviceDisconnected(_) => {
         let s = event_sender.clone();
         let e = event;
         async_manager::spawn(async move {
-          s.send(e).await;
+          // Can be unwrapped because we own both sides.
+          s.send(e).await.unwrap();
         }).unwrap();
       }
       _ => {}

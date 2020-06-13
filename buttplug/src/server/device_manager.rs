@@ -59,9 +59,11 @@ fn wait_for_manager_events(
     loop {
       let ping_fut = async {
         if let Some(recv) = &ping_receiver {
-          recv.recv().await;
+          if recv.recv().await.is_err() {
+            error!("Ping sender disappeared, meaning server has died. Exiting.");
+          }
         } else {
-          futures::future::pending::<bool>().await;
+          futures::future::pending::<()>().await;
         }
         // If the ping receiver ever gets anything, we've pinged out, so
         // just stop everything and exit.
@@ -96,7 +98,10 @@ fn wait_for_manager_events(
                       let idx_clone = device_index;
                       async_manager::spawn(async move {
                         while let Some(e) = recv.next().await {
-                          sender_clone.send((idx_clone, e)).await;
+                          if sender_clone.send((idx_clone, e)).await.is_err() {
+                            error!("Device event receiver disappeared, exiting loop.");
+                            return;
+                          }
                         }
                       }).unwrap();
                       let device_added_message = DeviceAdded::new(
@@ -104,15 +109,22 @@ fn wait_for_manager_events(
                         device.name(),
                         &device.message_attributes(),
                       );
-                      server_sender_clone
+                      if server_sender_clone
                         .send(device_added_message.into())
-                        .await;
-                      device_comm_sender_internal_clone
+                        .await
+                        .is_err() {
+                          error!("Server disappeared, exiting loop.");
+                          return;
+                        }
+                      if device_comm_sender_internal_clone
                         .send(DeviceCommunicationEvent::DeviceConnected((
                           device_index,
                           device,
                         )))
-                        .await;
+                        .await
+                        .is_err() {
+                          error!("Device communication event receiver disappeared, exiting loop.");
+                        }
                     }
                     None => debug!("Device could not be matched to a protocol."),
                   },
@@ -125,7 +137,10 @@ fn wait_for_manager_events(
               device_map_writer.refresh();
             }
             DeviceCommunicationEvent::ScanningFinished => {
-              server_sender.send(ScanningFinished::default().into()).await;
+              if server_sender.send(ScanningFinished::default().into()).await.is_err() {
+                error!("Server disappeared, exiting loop.");
+                return;
+              }
             }
           },
           None => break,
@@ -134,7 +149,10 @@ fn wait_for_manager_events(
           Some((idx, event)) => {
             if let ButtplugDeviceEvent::Removed = event {
               device_map_writer.empty(idx);
-              server_sender.send(DeviceRemoved::new(idx).into()).await;
+              if server_sender.send(DeviceRemoved::new(idx).into()).await.is_err() {
+                error!("Server disappeared, exiting loop.");
+                return;
+              }
             }
             info!("Got device event: {:?}", event);
           }

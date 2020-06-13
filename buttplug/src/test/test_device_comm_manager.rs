@@ -40,9 +40,12 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
         panic!("No devices for test device comm manager to emit!");
       }
       while let Some(d) = devices.pop() {
-        device_sender
+        if device_sender
           .send(DeviceCommunicationEvent::DeviceFound(Box::new(d)))
-          .await;
+          .await
+          .is_err() {
+            error!("Device channel no longer open.");
+          }
       }
       Ok(())
     })
