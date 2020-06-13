@@ -364,9 +364,9 @@ impl ButtplugDevice {
 
   pub fn parse_message(
     &self,
-    message: &ButtplugDeviceCommandMessageUnion,
+    message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
-    self.protocol.parse_message(&*self.device, message)
+    self.protocol.handle_command(&*self.device, message)
   }
   
   // TODO Just return the receiver as part of the constructor

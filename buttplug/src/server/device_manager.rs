@@ -169,7 +169,7 @@ fn wait_for_manager_events(
             .iter()
             .map(|(_, dev)| {
               let device = dev.get_one().unwrap();
-              device.parse_message(&messages::StopDeviceCmd::new(1).into())
+              device.parse_message(messages::StopDeviceCmd::new(1).into())
             })
             .collect();
           // TODO Should probably spawn this instead of blocking the loop.
@@ -252,7 +252,7 @@ impl DeviceManager {
       .iter()
       .map(|(_, dev)| {
         let device = dev.get_one().unwrap();
-        device.parse_message(&messages::StopDeviceCmd::new(1).into())
+        device.parse_message(messages::StopDeviceCmd::new(1).into())
       })
       .collect();
     // TODO This could use some error reporting.
@@ -267,7 +267,7 @@ impl DeviceManager {
     device_msg: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
     match self.devices.get_one(&device_msg.get_device_index()) {
-      Some(device) => device.parse_message(&device_msg),
+      Some(device) => device.parse_message(device_msg),
       None => ButtplugDeviceError::new(&format!(
         "No device with index {} available",
         device_msg.get_device_index()
