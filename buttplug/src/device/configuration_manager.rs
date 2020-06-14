@@ -7,7 +7,6 @@
 
 //! Device specific identification and protocol implementations.
 
-use super::protocol::{self, ButtplugProtocolCreator};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -19,9 +18,9 @@ use crate::{
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
-use uuid::Uuid;
 use std::mem;
 use std::sync::{Arc, RwLock};
+use uuid::Uuid;
 
 static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
@@ -296,18 +295,12 @@ impl DeviceProtocolConfiguration {
   }
 }
 
-pub type ProtocolConstructor =
-  Box<dyn Fn(DeviceProtocolConfiguration) -> Box<dyn ButtplugProtocolCreator>>;
-
 pub struct DeviceConfigurationManager {
   pub(self) config: ProtocolConfiguration,
-  pub(self) protocols: HashMap<String, ProtocolConstructor>,
 }
 
-unsafe impl Send for DeviceConfigurationManager {
-}
-unsafe impl Sync for DeviceConfigurationManager {
-}
+unsafe impl Send for DeviceConfigurationManager {}
+unsafe impl Sync for DeviceConfigurationManager {}
 
 impl Default for DeviceConfigurationManager {
   fn default() -> Self {
@@ -346,12 +339,7 @@ impl Default for DeviceConfigurationManager {
       }
     }
 
-    // Do not try to use HashMap::new() here. We need the explicit typing,
-    // otherwise we'll just get an anonymous closure type during insert that
-    // won't match.
-
-    let protocols = protocol::create_protocol_creator_map();
-    DeviceConfigurationManager { config, protocols }
+    DeviceConfigurationManager { config }
   }
 }
 
@@ -371,23 +359,18 @@ impl DeviceConfigurationManager {
     None
   }
 
-  pub fn get_protocol_creator(&self, name: &str) -> Option<Box<dyn ButtplugProtocolCreator>> {
+  pub fn get_protocol_config(&self, name: &str) -> Option<DeviceProtocolConfiguration> {
     info!("Looking for protocol {}", name);
     // TODO It feels like maybe there should be a cleaner way to do this,
     // but I'm not really sure what it is?
     if let Some(proto) = self.config.protocols.get(name) {
       info!("Found a protocol definition for {}", name);
-      if let Some(constructor) = self.protocols.get(name) {
-        info!("Found a protocol implementation for {}", name);
-        Option::from(constructor(DeviceProtocolConfiguration::new(
-          proto.defaults.clone(),
-          proto.configurations.clone(),
-        )))
-      } else {
-        None
-      }
+      Some(DeviceProtocolConfiguration::new(
+        proto.defaults.clone(),
+        proto.configurations.clone(),
+      ))
     } else {
-      debug!("None found");
+      debug!("No matching protocol definition found.");
       None
     }
   }
@@ -396,12 +379,8 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    clear_user_device_config,
-    set_user_device_config,
-    BluetoothLESpecifier,
-    DeviceConfigurationManager,
-    DeviceProtocolConfiguration,
-    DeviceSpecifier,
+    clear_user_device_config, set_user_device_config, BluetoothLESpecifier,
+    DeviceConfigurationManager, DeviceProtocolConfiguration, DeviceSpecifier,
   };
   use crate::core::messages::ButtplugDeviceMessageType;
 

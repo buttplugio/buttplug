@@ -1,69 +1,94 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
 use crate::{
   core::errors::ButtplugDeviceError,
-  create_buttplug_protocol,
   device::{
     configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceEvent, DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
   },
 };
-use async_trait::async_trait;
+use futures::future::BoxFuture;
 use futures::StreamExt;
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use crate::{
+  core::{
+    errors::ButtplugError,
+    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  },
+  device::{
+    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    DeviceImpl, DeviceWriteCmd, Endpoint,
+  },
+  server::ButtplugServerResultFuture,
+};
+use std::cell::RefCell;
 
-pub struct LovenseCreator {
-  config: DeviceProtocolConfiguration,
+#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+pub struct Lovense {
+  name: String,
+  message_attributes: MessageAttributesMap,
+  manager: RefCell<GenericCommandManager>,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl LovenseCreator {
-  pub fn new(config: DeviceProtocolConfiguration) -> Self {
-    Self { config }
+impl Lovense {
+  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+    let manager = GenericCommandManager::new(&message_attributes);
+
+    Self {
+      name: name.to_owned(),
+      message_attributes,
+      stop_commands: manager.get_stop_commands(),
+      manager: RefCell::new(manager),
+    }
   }
 }
 
-#[async_trait]
-impl ButtplugProtocolCreator for LovenseCreator {
-  async fn try_create_protocol(
-    &self,
+impl ButtplugProtocolCreator for Lovense {
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
+  }
+
+  fn try_create(
     device_impl: &dyn DeviceImpl,
-  ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
-    device_impl
-      .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx))
-      .await?;
+    configuration: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
+  {
+    let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
     let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
-    device_impl.write_value(msg).await?;
-    // TODO Put some sort of very quick timeout here, we should just fail if
-    // we don't get something back quickly.
-    let identifier;
-    match device_impl.get_event_receiver().next().await {
-      Some(ButtplugDeviceEvent::Notification(_, n)) => {
-        let type_response = std::str::from_utf8(&n).unwrap().to_owned();
-        info!("Lovense Device Type Response: {}", type_response);
-        identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-      }
-      Some(ButtplugDeviceEvent::Removed) => {
-        return Err(
-          ButtplugDeviceError::new("Lovense Device disconnected while getting DeviceType info.")
-            .into(),
-        );
-      }
-      None => {
-        return Err(
-          ButtplugDeviceError::new("Did not get DeviceType return from Lovense device in time")
-            .into(),
-        );
-      }
-    };
-    device_impl
-      .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx))
-      .await?;
-
-    let (names, attrs) = self.config.get_attributes(&identifier).unwrap();
-    let name = names.get("en-us").unwrap();
-    Ok(Box::new(Lovense::new(name, attrs)))
+    let info_fut = device_impl.write_value(msg);
+    let mut event_receiver = device_impl.get_event_receiver();
+    let unsubscribe_fut = device_impl.unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Rx));
+    Box::pin(async move {
+      let identifier;
+      subscribe_fut.await?;
+      info_fut.await?;
+      // TODO Put some sort of very quick timeout here, we should just fail if
+      // we don't get something back quickly.
+      match event_receiver.next().await {
+        Some(ButtplugDeviceEvent::Notification(_, n)) => {
+          let type_response = std::str::from_utf8(&n).unwrap().to_owned();
+          info!("Lovense Device Type Response: {}", type_response);
+          identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
+        }
+        Some(ButtplugDeviceEvent::Removed) => {
+          return Err(
+            ButtplugDeviceError::new("Lovense Device disconnected while getting DeviceType info.")
+              .into(),
+          );
+        }
+        None => {
+          return Err(
+            ButtplugDeviceError::new("Did not get DeviceType return from Lovense device in time")
+              .into(),
+          );
+        }
+      };
+      unsubscribe_fut.await?;
+      let (names, attrs) = configuration.get_attributes(&identifier).unwrap();
+      let name = names.get("en-us").unwrap();
+      Ok(Self::new_protocol(name, attrs))
+    })
   }
 }
-
-create_buttplug_protocol!(Lovense, false, ());
 
 impl ButtplugProtocolCommandHandler for Lovense {
   fn handle_vibrate_cmd(

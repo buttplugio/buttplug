@@ -1,7 +1,36 @@
-use super::ButtplugProtocolCommandHandler;
-use crate::create_buttplug_protocol;
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use crate::{
+  core::{
+    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  },
+  device::{
+    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    DeviceImpl, DeviceWriteCmd, Endpoint,
+  },
+  server::ButtplugServerResultFuture,
+};
+use std::cell::RefCell;
 
-create_buttplug_protocol!(LovehoneyDesire, true, ());
+#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+pub struct LovehoneyDesire {
+  name: String,
+  message_attributes: MessageAttributesMap,
+  manager: RefCell<GenericCommandManager>,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+}
+
+impl LovehoneyDesire {
+  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+    let manager = GenericCommandManager::new(&message_attributes);
+
+    Self {
+      name: name.to_owned(),
+      message_attributes,
+      stop_commands: manager.get_stop_commands(),
+      manager: RefCell::new(manager),
+    }
+  }
+}
 
 impl ButtplugProtocolCommandHandler for LovehoneyDesire {
   fn handle_vibrate_cmd(

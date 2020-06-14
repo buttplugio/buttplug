@@ -1,14 +1,33 @@
-use crate::create_buttplug_protocol;
-use super::ButtplugProtocolCommandHandler;
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use crate::{
+  core::{
+    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  },
+  device::{
+    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    DeviceImpl, DeviceWriteCmd, Endpoint,
+  },
+  server::ButtplugServerResultFuture,
+};
 
-create_buttplug_protocol!(
-  // Protocol name
-  Realov,
-  // Use the default protocol creator implementation. No special init needed.
-  true,
-  // No extra members
-  ()
-);
+#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+pub struct Realov {
+  name: String,
+  message_attributes: MessageAttributesMap,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+}
+
+impl Realov {
+  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+    let manager = GenericCommandManager::new(&message_attributes);
+
+    Self {
+      name: name.to_owned(),
+      message_attributes,
+      stop_commands: manager.get_stop_commands(),
+    }
+  }
+}
 
 impl ButtplugProtocolCommandHandler for Realov {
   fn handle_vibrate_cmd(

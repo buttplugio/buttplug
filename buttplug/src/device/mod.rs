@@ -8,7 +8,7 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{fmt, str::FromStr, string::ToString};
+use std::{fmt, str::FromStr, string::ToString, convert::TryFrom};
 
 use crate::{
   core::{
@@ -27,7 +27,7 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
-    protocol::ButtplugProtocol,
+    protocol::{ButtplugProtocol, ProtocolTypes}
   },
   server::ButtplugServerResultFuture,
 };
@@ -35,6 +35,7 @@ use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use futures::future::BoxFuture;
 use core::hash::{Hash, Hasher};
+use configuration_manager::DeviceProtocolConfiguration;
 
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
@@ -315,20 +316,24 @@ impl ButtplugDevice {
   pub async fn try_create_device(
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
-    let device_mgr = DeviceConfigurationManager::default();
+    let device_cfg_mgr = DeviceConfigurationManager::default();
     // First off, we need to see if we even have a configuration available
     // for the device we're trying to create. If we don't, return Ok(None),
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
 
-    match device_mgr.find_configuration(&device_creator.get_specifier()) {
+    match device_cfg_mgr.find_configuration(&device_creator.get_specifier()) {
       Some((config_name, config)) => {
         // Now that we have both a possible device implementation and a
         // configuration for that device, try to initialize the implementation.
         // This usually means trying to connect to whatever the device is,
         // finding endpoints, etc.
-        if let Some(proto_creator) = device_mgr.get_protocol_creator(&config_name) {
+        let device_protocol_config = DeviceProtocolConfiguration::new(
+          config.defaults.clone(),
+          config.configurations.clone(),
+        );
+        if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
               info!("Found Buttplug Device {}", device_impl.name());
@@ -339,7 +344,7 @@ impl ButtplugDevice {
               // whatever it needs. For most protocols, this is a no-op. However, for
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
-              match proto_creator.try_create_protocol(&*device_impl).await {
+              match protocol::try_create_protocol(&proto_type, &*device_impl, device_protocol_config).await {
                 Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, device_impl))),
                 Err(e) => Err(e),
               }

@@ -1,14 +1,36 @@
-use super::ButtplugProtocolCommandHandler;
-use crate::create_buttplug_protocol;
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use crate::{
+  core::{
+    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  },
+  device::{
+    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    DeviceImpl, DeviceWriteCmd, Endpoint,
+  },
+  server::ButtplugServerResultFuture,
+};
+use std::sync::atomic::{AtomicU8, Ordering};
 
-create_buttplug_protocol!(
-  // Protocol name,
-  Youou,
-  // Use the default protocol creator implementation. No special init needed.
-  true,
-  // Protocol members
-  ((packet_id: RefCell<u8> = RefCell::new(0)))
-);
+#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+pub struct Youou {
+  name: String,
+  message_attributes: MessageAttributesMap,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  packet_id: AtomicU8,
+}
+
+impl Youou {
+  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+    let manager = GenericCommandManager::new(&message_attributes);
+
+    Self {
+      name: name.to_owned(),
+      message_attributes,
+      stop_commands: manager.get_stop_commands(),
+      packet_id: AtomicU8::new(0),
+    }
+  }
+}
 
 impl ButtplugProtocolCommandHandler for Youou {
   fn handle_vibrate_cmd(
@@ -29,20 +51,19 @@ impl ButtplugProtocolCommandHandler for Youou {
 
     let mut data;
     // Scope the packet id set so we can unlock ASAP.
-    {
-      data = vec![
-        0xaa,
-        0x55,
-        *self.packet_id.borrow(),
-        0x02,
-        0x03,
-        0x01,
-        speed,
-        state,
-      ];
-      let new_val = self.packet_id.borrow().wrapping_add(1);
-      *self.packet_id.borrow_mut() = new_val;
-    }
+    data = vec![
+      0xaa,
+      0x55,
+      self.packet_id.load(Ordering::SeqCst),
+      0x02,
+      0x03,
+      0x01,
+      speed,
+      state,
+    ];
+    self
+      .packet_id
+      .store(self.packet_id.load(Ordering::SeqCst).wrapping_add(1), Ordering::SeqCst);
     let mut crc: u8 = 0;
 
     // Simple XOR of everything up to the 9th byte for CRC.

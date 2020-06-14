@@ -237,3 +237,73 @@ fn impl_buttplug_server_message_type_macro(ast: &syn::DeriveInput) -> TokenStrea
     };
     gen.into()
 }
+
+#[proc_macro_derive(ButtplugProtocol)]
+pub fn buttplug_protocol_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_protocol_macro(&ast)
+}
+
+fn impl_buttplug_protocol_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ButtplugProtocol for #name {}
+    };
+    gen.into()
+}
+
+#[proc_macro_derive(ButtplugProtocolProperties)]
+pub fn buttplug_protocol_properties_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_protocol_properties_macro(&ast)
+}
+
+fn impl_buttplug_protocol_properties_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ButtplugProtocolProperties for #name {
+            fn name(&self) -> &str {
+              &self.name
+            }
+
+            fn message_attributes(&self) -> MessageAttributesMap {
+              self.message_attributes.clone()
+            }
+
+            fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
+              self.stop_commands.clone()
+            }
+          }
+    };
+    gen.into()
+}
+
+#[proc_macro_derive(ButtplugProtocolCreator)]
+pub fn buttplug_protocol_creator_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_buttplug_protocol_creator_macro(&ast)
+}
+
+fn impl_buttplug_protocol_creator_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+         impl ButtplugProtocolCreator for #name {
+          fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+            Box::new(Self::new(name, attrs))
+          }
+        }
+    };
+    gen.into()
+}
