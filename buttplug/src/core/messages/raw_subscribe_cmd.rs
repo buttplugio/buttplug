@@ -12,24 +12,21 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
-pub struct SubscribeCmd {
+pub struct RawSubscribeCmd {
   #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
   pub(super) id: u32,
   #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
   pub device_index: u32,
   #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
   pub endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MessageType"))]
-  pub message_type: String,
 }
 
-impl SubscribeCmd {
+impl RawSubscribeCmd {
   pub fn new(device_index: u32, endpoint: Endpoint, message_type: &str) -> Self {
     Self {
       id: 1,
       device_index,
       endpoint,
-      message_type: message_type.to_owned(),
     }
   }
 }

@@ -43,9 +43,9 @@ mod start_scanning;
 mod stop_all_devices;
 mod stop_device_cmd;
 mod stop_scanning;
-mod subscribe_cmd;
+mod raw_subscribe_cmd;
 mod test;
-mod unsubscribe_cmd;
+mod raw_unsubscribe_cmd;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
@@ -77,9 +77,9 @@ pub use start_scanning::StartScanning;
 pub use stop_all_devices::StopAllDevices;
 pub use stop_device_cmd::StopDeviceCmd;
 pub use stop_scanning::StopScanning;
-pub use subscribe_cmd::SubscribeCmd;
+pub use raw_subscribe_cmd::RawSubscribeCmd;
 pub use test::Test;
-pub use unsubscribe_cmd::UnsubscribeCmd;
+pub use raw_unsubscribe_cmd::RawUnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
@@ -144,8 +144,8 @@ pub enum ButtplugDeviceMessageType {
   RawWriteCmd,
   RawReadCmd,
   StopDeviceCmd,
-  SubscribeCmd,
-  UnsubscribeCmd,
+  RawSubscribeCmd,
+  RawUnsubscribeCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -186,8 +186,8 @@ pub enum ButtplugClientMessage {
   RawWriteCmd(RawWriteCmd),
   RawReadCmd(RawReadCmd),
   StopDeviceCmd(StopDeviceCmd),
-  SubscribeCmd(SubscribeCmd),
-  UnsubscribeCmd(UnsubscribeCmd),
+  RawSubscribeCmd(RawSubscribeCmd),
+  RawUnsubscribeCmd(RawUnsubscribeCmd),
   // Deprecated generic commands
   SingleMotorVibrateCmd(SingleMotorVibrateCmd),
   // Deprecated device specific commands
@@ -261,8 +261,8 @@ pub enum ButtplugSpecV2ClientMessage {
   RawWriteCmd(RawWriteCmd),
   RawReadCmd(RawReadCmd),
   StopDeviceCmd(StopDeviceCmd),
-  SubscribeCmd(SubscribeCmd),
-  UnsubscribeCmd(UnsubscribeCmd),
+  RawSubscribeCmd(RawSubscribeCmd),
+  RawUnsubscribeCmd(RawUnsubscribeCmd),
   // To Add:
   // PatternCmd
   // BatteryLevelCmd
@@ -494,6 +494,6 @@ pub enum ButtplugDeviceCommandMessageUnion {
   RawWriteCmd(RawWriteCmd),
   RawReadCmd(RawReadCmd),
   StopDeviceCmd(StopDeviceCmd),
-  SubscribeCmd(SubscribeCmd),
-  UnsubscribeCmd(UnsubscribeCmd),
+  RawSubscribeCmd(RawSubscribeCmd),
+  RawUnsubscribeCmd(RawUnsubscribeCmd),
 }

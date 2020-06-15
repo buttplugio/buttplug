@@ -73,8 +73,8 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
     let v2_message_types = [
       ButtplugDeviceMessageType::RawReadCmd,
       ButtplugDeviceMessageType::RawWriteCmd,
-      ButtplugDeviceMessageType::SubscribeCmd,
-      ButtplugDeviceMessageType::UnsubscribeCmd,
+      ButtplugDeviceMessageType::RawSubscribeCmd,
+      ButtplugDeviceMessageType::RawUnsubscribeCmd,
       ButtplugDeviceMessageType::BatteryLevelCmd,
       ButtplugDeviceMessageType::RSSILevelCmd,
       // PatternCmd

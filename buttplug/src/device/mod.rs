@@ -21,8 +21,8 @@ use crate::{
       RawReadCmd,
       RawReading,
       RawWriteCmd,
-      SubscribeCmd,
-      UnsubscribeCmd,
+      RawSubscribeCmd,
+      RawUnsubscribeCmd,
     },
   },
   device::{
@@ -160,8 +160,8 @@ impl DeviceSubscribeCmd {
   }
 }
 
-impl From<SubscribeCmd> for DeviceSubscribeCmd {
-  fn from(msg: SubscribeCmd) -> Self {
+impl From<RawSubscribeCmd> for DeviceSubscribeCmd {
+  fn from(msg: RawSubscribeCmd) -> Self {
     Self {
       endpoint: msg.endpoint,
     }
@@ -179,8 +179,8 @@ impl DeviceUnsubscribeCmd {
   }
 }
 
-impl From<UnsubscribeCmd> for DeviceUnsubscribeCmd {
-  fn from(msg: UnsubscribeCmd) -> Self {
+impl From<RawUnsubscribeCmd> for DeviceUnsubscribeCmd {
+  fn from(msg: RawUnsubscribeCmd) -> Self {
     Self {
       endpoint: msg.endpoint,
     }
@@ -203,14 +203,14 @@ impl From<RawWriteCmd> for DeviceImplCommand {
   }
 }
 
-impl From<SubscribeCmd> for DeviceImplCommand {
-  fn from(msg: SubscribeCmd) -> Self {
+impl From<RawSubscribeCmd> for DeviceImplCommand {
+  fn from(msg: RawSubscribeCmd) -> Self {
     DeviceImplCommand::Subscribe(msg.into())
   }
 }
 
-impl From<UnsubscribeCmd> for DeviceImplCommand {
-  fn from(msg: UnsubscribeCmd) -> Self {
+impl From<RawUnsubscribeCmd> for DeviceImplCommand {
+  fn from(msg: RawUnsubscribeCmd) -> Self {
     DeviceImplCommand::Unsubscribe(msg.into())
   }
 }

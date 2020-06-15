@@ -5,6 +5,7 @@ mod lovense;
 mod maxpro;
 mod picobong;
 mod prettylove;
+mod raw_protocol;
 mod realov;
 mod svakom;
 mod vorze_sa;
@@ -18,7 +19,7 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, MessageAttributesMap, ButtplugDeviceMessageType, VibrateCmd, VibrateSubcommand},
   },
-  device::configuration_manager::{DeviceProtocolConfiguration},
+  device::{configuration_manager::{DeviceProtocolConfiguration}},
   server::ButtplugServerResultFuture,
 };
 use futures::future::{self, BoxFuture};
@@ -37,6 +38,7 @@ pub enum ProtocolTypes {
   VorzeSA,
   XInput,
   Youou,
+  RawProtocol,
 }
 
 impl TryFrom<&str> for ProtocolTypes {
@@ -56,6 +58,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
       "xinput" => Ok(ProtocolTypes::XInput),
       "youou" => Ok(ProtocolTypes::Youou),
+      "raw" => Ok(ProtocolTypes::RawProtocol),
       _ => {
         error!("Protocol {} not implemented.", protocol_name);
         Err(ButtplugDeviceError::new(&format!("Protocol {} not implemented.", protocol_name)).into())
@@ -79,6 +82,7 @@ pub fn try_create_protocol(protocol_type: &ProtocolTypes, device: &dyn DeviceImp
     ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
     ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
     ProtocolTypes::Youou => youou::Youou::try_create(device, config),
+    ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
   }
 }
 
@@ -97,8 +101,6 @@ pub trait ButtplugProtocolCreator: ButtplugProtocol {
   fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> where Self: Sized;
 }
 
-// These properties are divided up so we can spread between macro generated and
-// hand written implementations.
 pub trait ButtplugProtocol: ButtplugProtocolCommandHandler {
 }
 
@@ -129,11 +131,11 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => {
         self.handle_stop_device_cmd(device, msg)
       }
-      ButtplugDeviceCommandMessageUnion::SubscribeCmd(msg) => {
-        self.handle_subscribe_cmd(device, msg)
+      ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(msg) => {
+        self.handle_raw_subscribe_cmd(device, msg)
       }
-      ButtplugDeviceCommandMessageUnion::UnsubscribeCmd(msg) => {
-        self.handle_unsubscribe_cmd(device, msg)
+      ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(msg) => {
+        self.handle_raw_unsubscribe_cmd(device, msg)
       }
       ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handle_vibrate_cmd(device, msg),
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => {
@@ -195,18 +197,53 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_raw_write_cmd(
     &self,
-    _device: &dyn DeviceImpl,
-    _message: messages::RawWriteCmd,
+    device: &dyn DeviceImpl,
+    message: messages::RawWriteCmd,
   ) -> ButtplugServerResultFuture {
-    self.command_unimplemented()
+    let id = message.get_id();
+    let fut = device.write_value(message.into());
+    Box::pin(async move {
+      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+    })
   }
 
   fn handle_raw_read_cmd(
     &self,
-    _device: &dyn DeviceImpl,
-    _message: messages::RawReadCmd,
+    device: &dyn DeviceImpl,
+    message: messages::RawReadCmd,
   ) -> ButtplugServerResultFuture {
-    self.command_unimplemented()
+    let id = message.get_id();
+    let fut = device.read_value(message.into());
+    Box::pin(async move {
+      fut.await.and_then(|mut msg| {
+        msg.set_id(id);
+        Ok(msg.into())
+      })
+    })
+  }
+
+  fn handle_raw_unsubscribe_cmd(
+    &self,
+    device: &dyn DeviceImpl,
+    message: messages::RawUnsubscribeCmd,
+  ) -> ButtplugServerResultFuture {
+    let id = message.get_id();
+    let fut = device.unsubscribe(message.into());
+    Box::pin(async move {
+      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+    })
+  }
+
+  fn handle_raw_subscribe_cmd(
+    &self,
+    device: &dyn DeviceImpl,
+    message: messages::RawSubscribeCmd,
+  ) -> ButtplugServerResultFuture {
+    let id = message.get_id();
+    let fut = device.subscribe(message.into());
+    Box::pin(async move {
+      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+    })
   }
 
   fn command_unimplemented(&self) -> ButtplugServerResultFuture {
@@ -222,22 +259,6 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     &self,
     _device: &dyn DeviceImpl,
     _message: messages::VorzeA10CycloneCmd
-  ) -> ButtplugServerResultFuture {
-    self.command_unimplemented()
-  }
-
-  fn handle_unsubscribe_cmd(
-    &self,
-    _device: &dyn DeviceImpl,
-    _message: messages::UnsubscribeCmd,
-  ) -> ButtplugServerResultFuture {
-    self.command_unimplemented()
-  }
-
-  fn handle_subscribe_cmd(
-    &self,
-    _device: &dyn DeviceImpl,
-    _message: messages::SubscribeCmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
   }
