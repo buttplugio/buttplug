@@ -42,10 +42,10 @@ Repo](https://github.com/buttplugio/buttplug).
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
-Buttplug-rs is now a full fledged implementation of Buttplug, on par
-with our [C#](https://github.com/buttplugio/buttplug-csharp) and
+Buttplug-rs is a full fledged implementation of Buttplug, on par with
+our [C#](https://github.com/buttplugio/buttplug-csharp) and
 [Javascript/Typescript](https://github.com/buttplugio/buttplug-js)
-implementations. 
+implementations.
 
 Buttplug-rs is currently capable of controlling:
 
