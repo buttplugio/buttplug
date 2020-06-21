@@ -22,7 +22,7 @@ pub struct RawSubscribeCmd {
 }
 
 impl RawSubscribeCmd {
-  pub fn new(device_index: u32, endpoint: Endpoint, message_type: &str) -> Self {
+  pub fn new(device_index: u32, endpoint: Endpoint) -> Self {
     Self {
       id: 1,
       device_index,
