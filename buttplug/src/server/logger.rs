@@ -42,8 +42,9 @@ impl<S: Subscriber> Layer<S> for ButtplugLogHandler {
     let log_msg = format!("[{}] {}", event.metadata().target(), log_message);
     async_manager::spawn(async move {
       // TODO If our sender fails, it'd be nice to be able to kill our
-      // subscriber, but I'm not sure how?
-      sender_clone
+      // subscriber, but I'm not sure how? We can't log here, as it'd cause a
+      // recursive log call.
+      let _ = sender_clone
         .send(messages::Log::new(level, &log_msg).into())
         .await;
     }).unwrap();

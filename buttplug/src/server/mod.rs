@@ -60,7 +60,6 @@ pub struct ButtplugServer {
   ping_timer: Option<PingTimer>,
   pinged_out: Arc<AtomicBool>,
   connected: Arc<AtomicBool>,
-  log_handler: Option<ButtplugLogHandler>,
 }
 
 impl ButtplugServer {
@@ -109,7 +108,6 @@ impl ButtplugServer {
         pinged_out,
         connected,
         event_sender: send,
-        log_handler: None,
       },
       recv,
     )
