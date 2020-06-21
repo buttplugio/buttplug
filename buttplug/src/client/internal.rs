@@ -25,6 +25,7 @@ use std::{sync::Arc, hash::{Hash, Hasher}};
 use broadcaster::BroadcastChannel;
 use tracing;
 use tracing_futures::Instrument;
+use dashmap::DashMap;
 
 /// Enum used for communication from the client to the event loop.
 pub(super) enum ButtplugClientRequest {
@@ -40,7 +41,6 @@ pub(super) enum ButtplugClientRequest {
   Message(ButtplugClientMessageFuturePair),
 }
 
-#[derive(ShallowCopy)]
 pub(super) struct ButtplugClientDeviceInternal {
   // We do not want to store a full ButtplugClientDevice here, as it will
   // contain event channels that are never handled. Instead, we create new
@@ -92,8 +92,7 @@ where
   ConnectorType:
     ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static,
 {
-  device_map_writer: evmap::WriteHandle<u32, ButtplugClientDeviceInternal>,
-  device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+  device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
   /// Sends events to the [ButtplugClient] instance. This needs to be a
   /// broadcast channel, as the client will have at least 2 copies of it, so we
   /// want one sender, many receivers, all receiving messages.
@@ -126,13 +125,11 @@ where
     event_sender: BroadcastChannel<ButtplugClientEvent>,
     client_sender: Sender<ButtplugClientRequest>,
     client_receiver: Receiver<ButtplugClientRequest>,
-    device_map_writer: evmap::WriteHandle<u32, ButtplugClientDeviceInternal>,
-    device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+    device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>
   ) -> Self {
     trace!("Creating ButtplugClientEventLoop instance.");
     Self {
-      device_map_reader,
-      device_map_writer,
+      device_map,
       client_sender,
       client_receiver,
       event_sender,
@@ -149,7 +146,7 @@ where
   /// returns the instance.
   fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
     debug!("Trying to create a client device from DeviceMessageInfo: {:?}", info);
-    match self.device_map_reader.get_one(&info.device_index) {
+    match self.device_map.get(&info.device_index) {
       // If the device already exists in our map, clone it.
       Some(dev) => {
         debug!("Device already exists, creating clone.");
@@ -160,8 +157,7 @@ where
         debug!("Device does not exist, creating new entry.");
         let channel = BroadcastChannel::new();
         let device = ButtplugClientDevice::from((info, self.client_sender.clone(), channel.clone()));
-        self.device_map_writer.insert(info.device_index, ButtplugClientDeviceInternal::new(info.clone(), channel));
-        self.device_map_writer.flush();
+        self.device_map.insert(info.device_index, ButtplugClientDeviceInternal::new(info.clone(), channel));
         device
       }
     }
@@ -199,11 +195,10 @@ where
           .await;
       }
       ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
-        if self.device_map_reader.contains_key(&dev.device_index) {
+        if self.device_map.contains_key(&dev.device_index) {
           trace!("Device removed, updating map and sending to client");
-          let info = (*self.device_map_reader.get_one(&dev.device_index).unwrap().device).clone();
-          self.device_map_writer.empty(dev.device_index);
-          self.device_map_writer.flush();
+          let info = (*self.device_map.get(&dev.device_index).unwrap().device).clone();
+          self.device_map.remove(&dev.device_index);
           self
             .send_client_event(&ButtplugClientEvent::DeviceRemoved(info))
             .await;
@@ -261,7 +256,7 @@ where
       ButtplugClientRequest::HandleDeviceList(device_list) => {
         trace!("Device list received, updating map.");
         for d in &device_list.devices {
-          if self.device_map_reader.contains_key(&d.device_index) {
+          if self.device_map.contains_key(&d.device_index) {
             continue;
           }
           let device = self.create_client_device(&d);
@@ -332,17 +327,16 @@ pub(super) fn client_event_loop(
   connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
 ) -> (
   impl Future<Output = Result<(), ButtplugClientError>>,
-  evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+  Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
   Sender<ButtplugClientRequest>,
   // This needs clone internally, as the client will make multiple copies.
   impl StreamExt<Item = ButtplugClientEvent> + Clone,
 ) {
   trace!("Creating client event loop future.");
   let event_channel = BroadcastChannel::new();
-  let (device_map_reader, mut device_map_writer) = evmap::new();
+  let device_map = Arc::new(DashMap::new());
   // Make sure we update the map, otherwise it won't exist.
-  device_map_writer.refresh();
-  let device_map_reader_clone = device_map_reader.clone();
+  let device_map_clone = device_map.clone();
   let (client_sender, client_receiver) = bounded(256);
   let client_sender_clone = client_sender.clone();
   let event_loop_sender = event_channel.clone();
@@ -352,8 +346,7 @@ pub(super) fn client_event_loop(
     event_loop_sender,
     client_sender,
     client_receiver,
-    device_map_writer,
-    device_map_reader
+    device_map,    
   );
   (
     Box::pin(async move {
@@ -365,7 +358,7 @@ pub(super) fn client_event_loop(
       info!("Stopping client event loop.");
       Ok(())
     }),
-    device_map_reader_clone,
+    device_map_clone,
     client_sender_clone,
     event_channel,
   )

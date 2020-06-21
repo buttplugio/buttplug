@@ -288,7 +288,6 @@ pub trait ButtplugDeviceImplCreator: Sync + Send {
   ) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
 }
 
-#[derive(ShallowCopy)]
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Arc<Box<dyn DeviceImpl>>,

@@ -54,8 +54,6 @@ async-tungstenite = { version = "0.5.0", features = ["async-std-runtime", "async
 async-tls = { version = "0.7.0", optional = true }
 rustls = { version = "0.17.0", features = ["dangerous_configuration"], optional = true }
 webpki = { version = "0.21.3", optional = true }
-evmap = "10.0.2"
-evmap-derive = "0.1.0"
 futures-timer = "3.0.2"
 async-channel = "1.1.0"
 async-mutex = "1.1.3"

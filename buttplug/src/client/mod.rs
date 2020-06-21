@@ -44,7 +44,7 @@ use std::{
     Arc,
   },
 };
-
+use dashmap::DashMap;
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
@@ -207,7 +207,7 @@ pub struct ButtplugClient {
   // successful.
   connected: Arc<AtomicBool>,
   _client_span: Span,
-  device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+  device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
 }
 
 unsafe impl Send for ButtplugClient {}
@@ -345,7 +345,7 @@ impl ButtplugClient {
   async fn create_client(client_name: &str,
     connected_status: Arc<AtomicBool>, 
     message_sender: Sender<ButtplugClientRequest>, 
-    device_map_reader: evmap::ReadHandle<u32, ButtplugClientDeviceInternal>,
+    device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
     span: Span) 
     -> Result<Self, ButtplugClientError> {
     // Create the client
@@ -358,7 +358,7 @@ impl ButtplugClient {
       // connected here. If that's not true, we won't even execute the client
       // function.
       connected: connected_status,
-      device_map_reader,
+      device_map,
       _client_span: span
     };
 
@@ -497,10 +497,8 @@ impl ButtplugClient {
   pub fn devices(&self) -> Vec<ButtplugClientDevice> {
     info!("Request devices from inner loop!");
     let mut device_clones = vec!();
-    for (_, devices) in &self.device_map_reader.read().unwrap() {
-      for device in devices {
-        device_clones.push(ButtplugClientDevice::from((&(*device.device), self.message_sender.clone(), (*device.channel).clone())));
-      }
+    for device in self.device_map.iter() {
+      device_clones.push(ButtplugClientDevice::from((&(*device.device), self.message_sender.clone(), (*device.channel).clone())));
     }
     device_clones
   }
