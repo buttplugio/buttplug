@@ -49,8 +49,6 @@ fn wait_for_manager_events(
   let (device_event_sender, mut device_event_receiver) = bounded::<(u32, ButtplugDeviceEvent)>(256);
   let device_map = Arc::new(DashMap::new());
   let (device_comm_sender, mut device_comm_receiver) = bounded(256);
-  // Used for feeding devices back to ourselves in the loop.
-  let device_comm_sender_internal = device_comm_sender.clone();
   let device_map_return = device_map.clone();
   let event_loop = async move {
     loop {
@@ -82,7 +80,6 @@ fn wait_for_manager_events(
               let device_index = main_device_index.load(Ordering::SeqCst);
               main_device_index.store(main_device_index.load(Ordering::SeqCst) + 1, Ordering::SeqCst);
               let device_event_sender_clone = device_event_sender.clone();
-              let device_comm_sender_internal_clone = device_comm_sender_internal.clone();
               let device_map_clone = device_map.clone();
               let server_sender_clone = server_sender.clone();
               async_manager::spawn(async move {
