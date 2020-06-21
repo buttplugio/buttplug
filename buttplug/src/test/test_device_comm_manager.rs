@@ -1,23 +1,77 @@
-use super::TestDeviceImplCreator;
+use super::{TestDeviceImplCreator, TestDeviceInternal};
 use crate::{
-  core::ButtplugResultFuture,
+  core::{ButtplugResultFuture, errors::ButtplugError},
   server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
+  device::{
+    configuration_manager::{BluetoothLESpecifier, DeviceSpecifier},
+    ButtplugDevice,
+  },
 };
-use std::sync::Arc;
+use std::{sync::Arc, time::{SystemTime, UNIX_EPOCH}};
 use async_mutex::Mutex;
 use async_channel::Sender;
 use futures::future;
 
+type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
+
+#[allow(dead_code)]
+pub fn new_uninitialized_ble_test_device(
+  name: &str,
+) -> (Arc<TestDeviceInternal>, TestDeviceImplCreator) {
+  // Vaguely, not really random number. Works well enough to be an address that
+  // doesn't collide.
+  let nanos = SystemTime::now()
+    .duration_since(UNIX_EPOCH)
+    .unwrap()
+    .subsec_nanos();
+  let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name));
+  let device_impl = Arc::new(TestDeviceInternal::new(name, &nanos.to_string()));
+  let device_impl_clone = device_impl.clone();
+  let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);
+  (device_impl_clone, device_impl_creator)
+}
+
+pub async fn new_bluetoothle_test_device(
+  name: &str,
+) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
+  let (device_impl, device_impl_creator) =
+    new_uninitialized_ble_test_device(name);
+  let device_impl_clone = device_impl.clone();
+  let device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator))
+    .await
+    .unwrap()
+    .unwrap();
+  Ok((device, device_impl_clone))
+}
+
+pub struct TestDeviceCommunicationManagerHelper {
+  devices: WaitingDeviceList,
+}
+
+impl TestDeviceCommunicationManagerHelper {
+  pub(super) fn new(device_list: WaitingDeviceList) -> Self {
+    Self {
+      devices: device_list
+    }
+  }
+
+  pub async fn add_ble_device(&self, name: &str) -> Arc<TestDeviceInternal> {
+    let (device, creator) = new_uninitialized_ble_test_device(name);
+    self.devices.lock().await.push(creator);
+    device
+  }
+}
+
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
-  devices: Arc<Mutex<Vec<TestDeviceImplCreator>>>,
+  devices: WaitingDeviceList,
 }
 
 impl TestDeviceCommunicationManager {
-  pub fn get_devices_clone(&self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
-    self.devices.clone()
+  pub fn helper(&self) -> TestDeviceCommunicationManagerHelper {
+    TestDeviceCommunicationManagerHelper::new(self.devices.clone())
   }
 }
 
@@ -64,9 +118,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    device::DeviceImpl,
     server::ButtplugServer,
-    test::TestDevice,
     util::async_manager
   };
   use futures::StreamExt;
@@ -74,12 +126,9 @@ mod test {
   #[test]
   fn test_test_device_comm_manager() {
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
-    let (device, device_creator) =
-      TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-
     async_manager::block_on(async {
-      let devices = server.add_test_comm_manager();
-      devices.lock().await.push(device_creator);
+      let helper = server.add_test_comm_manager();
+      let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
       let mut reply = server.parse_message(msg.into()).await;

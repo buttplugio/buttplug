@@ -97,17 +97,17 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, TestDevice},
+    test::{check_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
   #[test]
   pub fn test_lovehoney_desire_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = TestDevice::new_bluetoothle_test_device("PROSTATE VIBE")
+      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE")
         .await
         .unwrap();
-      let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
+      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
 
       // If we send one speed to one motor, we should only see one output.
       device

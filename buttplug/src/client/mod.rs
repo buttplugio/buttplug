@@ -25,7 +25,6 @@ use crate::{
       RequestServerInfo, StartScanning,
     },
   },
-  test::TestDevice,
   util::{
     future::{ButtplugFuture, ButtplugFutureStateShared},
     async_manager,
@@ -314,21 +313,12 @@ impl ButtplugClient {
   /// `run()` method to pass it in.
   pub fn connect_in_process(
     name: &str,
-    max_ping_time: u64,
-    use_test_manager: bool,
+    max_ping_time: u64
   ) -> impl Future<Output = Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
     use crate::connector::ButtplugInProcessClientConnector;
 
     let mut connector =
       ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
-    if use_test_manager {
-      let (_, test_device_impl_creator) =
-      TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-      let devices = connector.server_ref().add_test_comm_manager();
-      async_manager::spawn(async move {
-        devices.lock().await.push(test_device_impl_creator);
-      }).unwrap();
-    }
     #[cfg(feature = "btleplug-manager")]
     {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;

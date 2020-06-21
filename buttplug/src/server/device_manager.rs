@@ -23,12 +23,11 @@ use crate::{
   },
   device::{ButtplugDevice, ButtplugDeviceEvent},
   server::ButtplugServerResultFuture,
-  test::{TestDeviceCommunicationManager, TestDeviceImplCreator},
+  test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
 };
-use async_mutex::Mutex;
 use async_channel::{Receiver, Sender, bounded};
-use evmap::{self, ReadHandle};
+use dashmap::DashMap;
 use futures::{FutureExt, StreamExt, future::{self, Future}};
 use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicU32, Ordering}}};
 
@@ -43,18 +42,16 @@ fn wait_for_manager_events(
   server_sender: Sender<ButtplugServerMessage>,
 ) -> (
   impl Future<Output = ()>,
-  ReadHandle<u32, ButtplugDevice>,
+  Arc<DashMap<u32, ButtplugDevice>>,
   Sender<DeviceCommunicationEvent>,
 ) {
   let main_device_index = Arc::new(AtomicU32::new(0));
   let (device_event_sender, mut device_event_receiver) = bounded::<(u32, ButtplugDeviceEvent)>(256);
-  let (device_map_reader, mut device_map_writer) = evmap::new::<u32, ButtplugDevice>();
-  // Refresh ASAP just in case we ping out before getting any devices.
-  device_map_writer.refresh();
+  let device_map = Arc::new(DashMap::new());
   let (device_comm_sender, mut device_comm_receiver) = bounded(256);
   // Used for feeding devices back to ourselves in the loop.
   let device_comm_sender_internal = device_comm_sender.clone();
-  let device_map_reader_internal = device_map_reader.clone();
+  let device_map_return = device_map.clone();
   let event_loop = async move {
     loop {
       let ping_fut = async {
@@ -85,9 +82,9 @@ fn wait_for_manager_events(
               let device_index = main_device_index.load(Ordering::SeqCst);
               main_device_index.store(main_device_index.load(Ordering::SeqCst) + 1, Ordering::SeqCst);
               let device_event_sender_clone = device_event_sender.clone();
-              let server_sender_clone = server_sender.clone();
               let device_comm_sender_internal_clone = device_comm_sender_internal.clone();
-              
+              let device_map_clone = device_map.clone();
+              let server_sender_clone = server_sender.clone();
               async_manager::spawn(async move {
                 match ButtplugDevice::try_create_device(device_creator).await {
                   Ok(option_dev) => match option_dev {
@@ -109,6 +106,9 @@ fn wait_for_manager_events(
                         device.name(),
                         &device.message_attributes(),
                       );
+                      device_map_clone.insert(device_index, device);
+                      // After that, we can send out to the server's event
+                      // listeners to let them know a device has been added.
                       if server_sender_clone
                         .send(device_added_message.into())
                         .await
@@ -116,25 +116,12 @@ fn wait_for_manager_events(
                           error!("Server disappeared, exiting loop.");
                           return;
                         }
-                      if device_comm_sender_internal_clone
-                        .send(DeviceCommunicationEvent::DeviceConnected((
-                          device_index,
-                          device,
-                        )))
-                        .await
-                        .is_err() {
-                          error!("Device communication event receiver disappeared, exiting loop.");
-                        }
                     }
                     None => debug!("Device could not be matched to a protocol."),
                   },
                   Err(e) => error!("Device errored while trying to connect: {}", e),
                 }
               }).unwrap();
-            }
-            DeviceCommunicationEvent::DeviceConnected((id, device)) => {
-              device_map_writer.insert(id, device);
-              device_map_writer.refresh();
             }
             DeviceCommunicationEvent::ScanningFinished => {
               if server_sender.send(ScanningFinished::default().into()).await.is_err() {
@@ -148,7 +135,7 @@ fn wait_for_manager_events(
         DeviceEvent::DeviceEvent(e) => match e {
           Some((idx, event)) => {
             if let ButtplugDeviceEvent::Removed = event {
-              device_map_writer.empty(idx);
+              device_map.remove(&idx);
               if server_sender.send(DeviceRemoved::new(idx).into()).await.is_err() {
                 error!("Server disappeared, exiting loop.");
                 return;
@@ -163,12 +150,10 @@ fn wait_for_manager_events(
           // read() is a write() lock here, so need to get through this ASAP. We
           // only write within this loop, but there's a chance that won't always
           // be the case.
-          let fut_vec: Vec<_> = device_map_reader_internal
-            .read()
-            .unwrap()
+          let fut_vec: Vec<_> = device_map
             .iter()
-            .map(|(_, dev)| {
-              let device = dev.get_one().unwrap();
+            .map(|dev| {
+              let device = dev.value();
               device.parse_message(messages::StopDeviceCmd::new(1).into())
             })
             .collect();
@@ -185,12 +170,12 @@ fn wait_for_manager_events(
       }
     }
   };
-  (event_loop, device_map_reader, device_comm_sender)
+  (event_loop, device_map_return, device_comm_sender)
 }
 
 pub struct DeviceManager {
   comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
-  devices: ReadHandle<u32, ButtplugDevice>,
+  devices: Arc<DashMap<u32, ButtplugDevice>>,
   sender: Sender<DeviceCommunicationEvent>,
 }
 
@@ -203,12 +188,12 @@ impl DeviceManager {
     event_sender: Sender<ButtplugServerMessage>,
     ping_receiver: Option<Receiver<()>>,
   ) -> Self {
-    let (event_loop_fut, device_map_reader, device_event_sender) =
+    let (event_loop_fut, device_map, device_event_sender) =
       wait_for_manager_events(ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();
     Self {
       sender: device_event_sender,
-      devices: device_map_reader,
+      devices: device_map,
       comm_managers: vec![],
     }
   }
@@ -247,11 +232,9 @@ impl DeviceManager {
   fn stop_all_devices(&self, msg_id: u32) -> ButtplugServerResultFuture {
     let fut_vec: Vec<_> = self
       .devices
-      .read()
-      .unwrap()
       .iter()
-      .map(|(_, dev)| {
-        let device = dev.get_one().unwrap();
+      .map(|dev| {
+        let device = dev.value();
         device.parse_message(messages::StopDeviceCmd::new(1).into())
       })
       .collect();
@@ -266,7 +249,7 @@ impl DeviceManager {
     &self,
     device_msg: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
-    match self.devices.get_one(&device_msg.get_device_index()) {
+    match self.devices.get(&device_msg.get_device_index()) {
       Some(device) => device.parse_message(device_msg),
       None => ButtplugDeviceError::new(&format!(
         "No device with index {} available",
@@ -283,13 +266,11 @@ impl DeviceManager {
       ButtplugDeviceManagerMessageUnion::RequestDeviceList(msg) => {
         let devices = self
           .devices
-          .read()
-          .unwrap()
           .iter()
-          .map(|(id, device)| {
-            let dev = device.get_one().unwrap();
+          .map(|device| {
+            let dev = device.value();
             DeviceMessageInfo {
-              device_index: *id,
+              device_index: *device.key(),
               device_name: dev.name().to_string(),
               device_messages: dev.message_attributes(),
             }
@@ -337,11 +318,13 @@ impl DeviceManager {
       .push(Box::new(T::new(self.sender.clone())));
   }
 
-  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
+  pub fn add_test_comm_manager(&mut self) -> TestDeviceCommunicationManagerHelper {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
-    let devices = mgr.get_devices_clone();
-    self.comm_managers.push(Box::new(mgr));
-    devices
+    let helper = mgr.helper();
+    self
+      .comm_managers
+      .push(Box::new(mgr));
+    helper
   }
 }
 
@@ -353,13 +336,11 @@ impl Drop for DeviceManager {
 
 #[cfg(all(
   test,
-  any(
-    feature = "winrt-ble",
-    feature = "linux-ble",
-    feature = "corebluetooth-ble"
-  )
+  feature = "btleplug-manager"
 ))]
 mod test {
+  // TODO Rewrite this using modern api. Got stuck behind unused features for a while.
+  /*
   use super::DeviceManager;
   use crate::{
     core::messages::{
@@ -400,4 +381,5 @@ mod test {
       task::sleep(Duration::from_secs(10)).await;
     });
   }
+  */
 }

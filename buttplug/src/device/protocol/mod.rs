@@ -102,7 +102,7 @@ pub trait ButtplugProtocolCreator: ButtplugProtocol {
   fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> where Self: Sized;
 }
 
-pub trait ButtplugProtocol: ButtplugProtocolCommandHandler {
+pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
 }
 
 pub trait ButtplugProtocolProperties {

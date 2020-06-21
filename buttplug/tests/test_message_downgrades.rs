@@ -14,7 +14,7 @@ mod test {
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::ButtplugServer,
-    test::{check_recv_value, TestDevice},
+    test::{check_recv_value},
     util::async_manager,
   };
   use futures::StreamExt;
@@ -63,11 +63,9 @@ mod test {
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
 
-    let (_, device_creator) = TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-
     async_manager::block_on(async {
-      let devices = server.add_test_comm_manager();
-      devices.lock().await.push(device_creator);
+      let helper = server.add_test_comm_manager();
+      helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
         .parse_message(serializer.deserialize(rsi.to_owned().into()).unwrap()[0].clone())
@@ -109,11 +107,9 @@ mod test {
   fn test_version0_singlemotorvibratecmd() {
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
-    let (device, device_creator) =
-      TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
     async_manager::block_on(async {
-      let devices = server.add_test_comm_manager();
-      devices.lock().await.push(device_creator);
+      let helper = server.add_test_comm_manager();
+      let device = helper.add_ble_device("Massage Demo").await;
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let output = server
@@ -155,7 +151,7 @@ mod test {
         serializer.serialize(vec!(output2)),
         r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
       );
-      let (_, command_receiver) = device.get_endpoint_channel_clone(Endpoint::Tx).await;
+      let command_receiver = device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),

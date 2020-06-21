@@ -21,12 +21,11 @@ use crate::{
       StopAllDevices, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  test::TestDeviceImplCreator,
+  test::TestDeviceCommunicationManagerHelper,
   util::async_manager,
 };
 use futures::{StreamExt, future::BoxFuture};
 use ping_timer::PingTimer;
-use async_mutex::Mutex;
 use async_channel::{bounded, Sender, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
@@ -127,7 +126,7 @@ impl ButtplugServer {
     }
   }
 
-  pub fn add_test_comm_manager(&mut self) -> Arc<Mutex<Vec<TestDeviceImplCreator>>> {
+  pub fn add_test_comm_manager(&mut self) -> TestDeviceCommunicationManagerHelper {
     if let Some(ref mut dm) = self.device_manager {
       dm.add_test_comm_manager()
     } else {
@@ -248,7 +247,7 @@ impl ButtplugServer {
   }
 
   fn handle_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
-    let sender = self.event_sender.clone();
+    // let sender = self.event_sender.clone();
     Box::pin(async move {
       // let handler = ButtplugLogHandler::new(&msg.log_level, sender);
       Result::Ok(messages::Ok::new(msg.get_id()).into())
@@ -266,7 +265,7 @@ mod test {
   use crate::{
     core::messages::ButtplugMessageSpecVersion,
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, TestDevice},
+    test::check_recv_value,
     util::async_manager,
   };
   use futures::StreamExt;
@@ -366,15 +365,12 @@ mod test {
   }
 
   #[test]
-  #[ignore]
   fn test_device_stop_on_ping_timeout() {
     async_manager::block_on(async {
       let (mut server, mut recv) = ButtplugServer::new("Test Server", 100);
-      let devices = server.add_test_comm_manager();
+      let helper = server.add_test_comm_manager();
       // TODO This should probably use a test protocol we control, not the aneros protocol
-      let (device, device_creator) =
-        TestDevice::new_bluetoothle_test_device_impl_creator("Massage Demo");
-      devices.lock().await.push(device_creator);
+      let device = helper.add_ble_device("Massage Demo").await;
 
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
@@ -386,21 +382,25 @@ mod test {
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
       let msg = recv.next().await.unwrap();
+      let device_index;
       if let ButtplugServerMessage::DeviceAdded(da) = msg {
         assert_eq!(da.device_name, "Aneros Vivi");
+        device_index = da.device_index;
+        println!("{:?}", da);
       } else {
         panic!(format!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
         ));
       }
+      
       server
         .parse_message(
-          messages::VibrateCmd::new(0, vec![messages::VibrateSubcommand::new(0, 0.5)]).into(),
+          messages::VibrateCmd::new(device_index, vec![messages::VibrateSubcommand::new(0, 0.5)]).into(),
         )
         .await
         .unwrap();
-      let (_, command_receiver) = device.get_endpoint_channel_clone(Endpoint::Tx).await;
+      let command_receiver = device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),

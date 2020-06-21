@@ -63,6 +63,7 @@ cfg-if = "0.1.10"
 tracing = "0.1.15"
 tracing-futures = "0.2.4"
 tracing-subscriber = "0.2.5"
+dashmap = "4.0.0-rc6"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

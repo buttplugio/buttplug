@@ -88,21 +88,21 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, TestDevice},
+    test::{check_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
   #[test]
   pub fn test_youou_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = TestDevice::new_bluetoothle_test_device("VX001_")
+      let (device, test_device) = new_bluetoothle_test_device("VX001_")
         .await
         .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
+      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

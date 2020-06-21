@@ -75,21 +75,21 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, TestDevice},
+    test::{check_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
   #[test]
   pub fn test_aneros_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = TestDevice::new_bluetoothle_test_device("Massage Demo")
+      let (device, test_device) = new_bluetoothle_test_device("Massage Demo")
         .await
         .unwrap();
+      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      let (_, command_receiver) = test_device.get_endpoint_channel_clone(Endpoint::Tx).await;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),
