@@ -9,7 +9,7 @@ use crate::{
   },
   server::ButtplugServerResultFuture,
 };
-use std::sync::atomic::{AtomicU8, Ordering};
+use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
 pub struct Youou {
@@ -35,7 +35,7 @@ impl Youou {
 impl ButtplugProtocolCommandHandler for Youou {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     // TODO Convert to using generic command manager

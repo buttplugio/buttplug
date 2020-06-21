@@ -1,21 +1,20 @@
 use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
   server::ButtplugServerResultFuture,
 };
-use std::cell::RefCell;
+use async_mutex::Mutex;
+use std::sync::Arc;
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
 pub struct Aneros {
   name: String,
   message_attributes: MessageAttributesMap,
-  manager: RefCell<GenericCommandManager>,
+  manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
@@ -27,7 +26,7 @@ impl Aneros {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
-      manager: RefCell::new(manager),
+      manager: Arc::new(Mutex::new(manager)),
     }
   }
 }
@@ -35,39 +34,39 @@ impl Aneros {
 impl ButtplugProtocolCommandHandler for Aneros {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
-    let result = self.manager.borrow_mut().update_vibration(&message, false);
-    let mut fut_vec = vec![];
-    // My life for an async closure so I could just do this via and_then(). :(
-    match result {
-      Ok(cmds_option) => {
-        if let Some(cmds) = cmds_option {
-          let mut index = 0u8;
-          for cmd in cmds {
-            if let Some(speed) = cmd {
-              fut_vec.push(device.write_value(DeviceWriteCmd::new(
-                Endpoint::Tx,
-                vec![0xF1 + index, speed as u8],
-                false,
-              )));
+    let manager = self.manager.clone();
+    Box::pin(async move {
+      let result = manager.lock().await.update_vibration(&message, false);
+      let mut fut_vec = vec![];
+      match result {
+        Ok(cmds_option) => {
+          if let Some(cmds) = cmds_option {
+            let mut index = 0u8;
+            for cmd in cmds {
+              if let Some(speed) = cmd {
+                fut_vec.push(device.write_value(DeviceWriteCmd::new(
+                  Endpoint::Tx,
+                  vec![0xF1 + index, speed as u8],
+                  false,
+                )));
+              }
+              index += 1;
             }
-            index += 1;
           }
-        }
-        Box::pin(async move {
           // TODO Just use join_all here
           for fut in fut_vec {
             // TODO Do something about possible errors here
             fut.await?;
           }
           Ok(messages::Ok::default().into())
-        })
+        }
+        Err(e) => Err(e.into()),
       }
-      Err(e) => e.into(),
-    }
+    })
   }
 }
 

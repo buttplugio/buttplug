@@ -24,6 +24,7 @@ use crate::{
 };
 use futures::future::{self, BoxFuture};
 use std::convert::TryFrom;
+use std::sync::Arc;
 
 pub enum ProtocolTypes {
   Aneros,
@@ -113,7 +114,7 @@ pub trait ButtplugProtocolProperties {
 pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   fn handle_command(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     command_message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
     match command_message {
@@ -146,11 +147,11 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_stop_device_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::StopDeviceCmd,
   ) -> ButtplugServerResultFuture {
     let ok_return = messages::Ok::new(message.get_id());
-    let fut_vec: Vec<ButtplugServerResultFuture> = self.stop_commands().iter().map(|cmd| self.handle_command(device, cmd.clone())).collect();
+    let fut_vec: Vec<ButtplugServerResultFuture> = self.stop_commands().iter().map(|cmd| self.handle_command(device.clone(), cmd.clone())).collect();
     Box::pin(async move {
       // TODO We should be able to run these concurrently, and should return any error we get.
       for fut in fut_vec {
@@ -164,7 +165,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_single_motor_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugServerResultFuture {
         // Time for sadness! In order to handle conversion of
@@ -197,7 +198,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_raw_write_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::RawWriteCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.get_id();
@@ -209,7 +210,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_raw_read_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::RawReadCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.get_id();
@@ -224,7 +225,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::RawUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.get_id();
@@ -236,7 +237,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::RawSubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.get_id();
@@ -257,7 +258,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::VorzeA10CycloneCmd
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -265,7 +266,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_kiiroo_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::KiirooCmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -273,7 +274,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -281,7 +282,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_vibrate_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -289,7 +290,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_rotate_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::RotateCmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -297,7 +298,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_linear_cmd(
     &self,
-    _device: &dyn DeviceImpl,
+    _device: Arc<Box<dyn DeviceImpl>>,
     _message: messages::LinearCmd,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -305,7 +306,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 /*
   fn handle_battery_level_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: messages::Battery,
   ) -> ButtplugServerResultFuture {
     self.command_unimplemented()
@@ -313,7 +314,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_rssi_level_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
     unimplemented!("Command not implemented for this protocol");

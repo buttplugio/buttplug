@@ -10,6 +10,7 @@ use crate::{
   },
   server::ButtplugServerResultFuture,
 };
+use std::sync::Arc;
 use std::cell::RefCell;
 use byteorder::{LittleEndian, WriteBytesExt};
 
@@ -37,7 +38,7 @@ impl XInput {
 impl ButtplugProtocolCommandHandler for XInput {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

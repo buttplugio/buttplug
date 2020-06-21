@@ -19,6 +19,7 @@ use crate::{
   },
   server::ButtplugServerResultFuture,
 };
+use std::sync::Arc;
 use std::cell::RefCell;
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
@@ -93,7 +94,7 @@ impl ButtplugProtocolCreator for Lovense {
 impl ButtplugProtocolCommandHandler for Lovense {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -146,7 +147,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
   /*
   fn handle_rotate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::RotateCmd,
   ) -> ButtplugServerResultFuture {
     let result = self.manager.lock().await.update_rotation(msg);

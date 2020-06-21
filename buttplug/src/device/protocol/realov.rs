@@ -9,6 +9,7 @@ use crate::{
   },
   server::ButtplugServerResultFuture,
 };
+use std::sync::Arc;
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
 pub struct Realov {
@@ -32,7 +33,7 @@ impl Realov {
 impl ButtplugProtocolCommandHandler for Realov {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     // TODO Convert to using generic command manager

@@ -9,8 +9,7 @@ use crate::{
   },
   server::ButtplugServerResultFuture,
 };
-#[allow(unused_imports)]
-use futures::future;
+use std::sync::Arc;
 use std::cell::RefCell;
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
@@ -50,7 +49,7 @@ enum VorzeActions {
 impl ButtplugProtocolCommandHandler for VorzeSA {
   fn handle_vibrate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
   ) -> ButtplugServerResultFuture {
     let result = self.manager.borrow_mut().update_vibration(&msg, false);
@@ -88,7 +87,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
   fn handle_rotate_cmd(
     &self,
-    device: &dyn DeviceImpl,
+    device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::RotateCmd,
   ) -> ButtplugServerResultFuture {
     let result = self.manager.borrow_mut().update_rotation(&msg);

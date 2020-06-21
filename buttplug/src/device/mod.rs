@@ -8,7 +8,7 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{fmt, str::FromStr, string::ToString, convert::TryFrom};
+use std::{fmt, str::FromStr, string::ToString, convert::TryFrom, sync::Arc};
 
 use crate::{
   core::{
@@ -291,7 +291,7 @@ pub trait ButtplugDeviceImplCreator: Sync + Send {
 #[derive(ShallowCopy)]
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
-  device: Box<dyn DeviceImpl>,
+  device: Arc<Box<dyn DeviceImpl>>,
 }
 
 impl Hash for ButtplugDevice {
@@ -310,7 +310,10 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
-    Self { protocol, device }
+    Self { 
+      protocol, 
+      device: Arc::new(device) 
+    }
   }
 
   pub async fn try_create_device(
@@ -371,7 +374,7 @@ impl ButtplugDevice {
     &self,
     message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
-    self.protocol.handle_command(&*self.device, message)
+    self.protocol.handle_command(self.device.clone(), message)
   }
   
   // TODO Just return the receiver as part of the constructor
