@@ -1,3 +1,55 @@
+# 0.4.0 (2020-06-21)
+
+## Features
+
+- Logging now handled via tracing.
+  - More work needed to get all futures instrumented and what not, but we're on
+    the way.
+- Connector module created, ungluing connectors from the Client API and making
+  them Client/Server agnostic. Wrappers from 0.3.0 merged into the connector
+  implementation.
+  - Server connectors on the way in an upcoming version.
+- Abstract serializers into connector module
+  - Serializers were split cross Client and Server implementations. Like
+    connectors, they are now agnostic to Client/Server usage.
+- Abstract runtime management to async_manager
+  - Idea taken from https://github.com/najamelan/async_executors, but had some
+    different requirements. May switch to that at some point though.
+- Add more documentation for Client and Connector modules
+- Simplify event loops some
+  - The internal event loops were becoming a rats nest of channels, select!'s
+    and match blocks. They're still not great, but they're better than they
+    were.
+- Move to dashmap for internal concurrent Hashmaps
+  - Tried evmap, but don't need multi-valued maps. Dashmap is a good
+    intermediary between evmap and Arc<Mutex<Hashmap<T>>>
+- Implement RawRead/Write/Subscribe/Unsubscribe
+  - More Buttplug v2 message spec messages. Still not currently exposed on
+    devices as we need it to be an opt-in feature.
+
+## Bugfixes
+
+- Clarify names of messages structs
+  - ButtplugIn/OutMessage, while hilariously on-brand for the project, didn't
+    provide enough context in code. Renamed to ButtplugClient/ServerMessage,
+    which denotes the originating source of the message (since Clients and
+    Servers will never send the same message types).
+- Async functions now actually async.
+  - In earlier versions, most async methods took &mut self, meaning we were not
+    async since usage of a struct would be locked while the future executed. As
+    of 0.4.0, most if not all exposed methods take &self and return a future,
+    meaning the library mostly works through lazy execution now.
+- Protocols are no longer opaque macro structures
+  - Went a little overboard on macros with protocols, meaning it was extremely
+    difficult to tell what code was being generated, and it made debugging a
+    nightmare. Protocols are now just structs with certain derivable traits with
+    default impls, meaning functionality can be implemented in overrides which
+    keeps the code clean and mostly free of boilerplate.
+- Fixed race condition bug on device creation
+  - We fired connection events before storing off the device, meaning depending
+    on task scheduling clients could access devices they just got in DeviceAdded
+    messages, that would then report as not found.
+
 # 0.3.1 (2020-05-13)
 
 ## Bugfixes
