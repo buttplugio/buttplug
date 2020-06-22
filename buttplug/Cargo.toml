@@ -29,10 +29,10 @@ buttplug_derive = { path = "../buttplug_derive" }
 # buttplug_derive = "0.3.0"
 futures = { version = "0.3.5", features = ["thread-pool"] }
 futures-util = "0.3.5"
-async-trait = "0.1.33"
-serde = { version = "1.0.111", features = ["derive"] }
-serde_json = "1.0.53"
-serde_repr = "0.1.5"
+async-trait = "0.1.36"
+serde = { version = "1.0.114", features = ["derive"] }
+serde_json = "1.0.55"
+serde_repr = "0.1.6"
 uuid = { version = "0.8.1", features = ["serde"] }
 url = "2.1.1"
 btleplug = { version = "0.4.3", optional = true }
@@ -41,7 +41,7 @@ btleplug = { version = "0.4.3", optional = true }
 strum_macros = "0.18.0"
 strum = "0.18.0"
 once_cell = "1.4.0"
-paste = "0.1.16"
+paste = "0.1.18"
 # Can't use async-channel here because it's Sender isn't Sink. We'll just use futures-channel.
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
 # Broadcaster uses an older channel implementation, we can have it use a newer one.
@@ -49,8 +49,8 @@ futures-channel = "0.3.5"
 lazy_static = "1.4.0"
 byteorder = "1.3.4"
 valico = "3.4.0"
-thiserror = "1.0.19"
-async-tungstenite = { version = "0.5.0", features = ["async-std-runtime", "async-tls"], optional = true }
+thiserror = "1.0.20"
+async-tungstenite = { version = "0.6.0", features = ["async-std-runtime", "async-tls"], optional = true }
 async-tls = { version = "0.7.0", optional = true }
 rustls = { version = "0.17.0", features = ["dangerous_configuration"], optional = true }
 webpki = { version = "0.21.3", optional = true }
@@ -60,21 +60,21 @@ async-mutex = "1.1.3"
 cfg-if = "0.1.10"
 tracing = "0.1.15"
 tracing-futures = "0.2.4"
-tracing-subscriber = "0.2.5"
+tracing-subscriber = "0.2.6"
 dashmap = "4.0.0-rc6"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
 
 [dependencies.async-std]
-version = "1.6.0"
+version = "1.6.2"
 default-features = false
 features = ["std"]
 optional = true
 
 [dev-dependencies]
-async-std = "1.6.0"
-tracing-log = {version = "0.1.1", features = ["env_logger"]}
+async-std = "1.6.2"
+tracing-log = { version = "0.1.1", features = ["env_logger"] }
 
 [lib]
 name = "buttplug"
