@@ -57,20 +57,13 @@ impl From<ButtplugError> for Error {
   /// [Error] message.
   fn from(error: ButtplugError) -> Self {
     let code = match error {
-      ButtplugError::ButtplugDeviceError(_) => ErrorCode::ErrorDevice,
-      ButtplugError::ButtplugMessageError(_) => ErrorCode::ErrorMessage,
-      ButtplugError::ButtplugPingError(_) => ErrorCode::ErrorPing,
-      ButtplugError::ButtplugHandshakeError(_) => ErrorCode::ErrorHandshake,
-      ButtplugError::ButtplugUnknownError(_) => ErrorCode::ErrorUnknown,
+      ButtplugError::ButtplugDeviceError { .. } => ErrorCode::ErrorDevice,
+      ButtplugError::ButtplugMessageError { .. } => ErrorCode::ErrorMessage,
+      ButtplugError::ButtplugPingError { .. } => ErrorCode::ErrorPing,
+      ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
+      ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
-    // Gross but was having problems with naming collisions on the error trait
-    let msg = match error {
-      ButtplugError::ButtplugDeviceError(_s) => _s.message,
-      ButtplugError::ButtplugMessageError(_s) => _s.message,
-      ButtplugError::ButtplugPingError(_s) => _s.message,
-      ButtplugError::ButtplugHandshakeError(_s) => _s.message,
-      ButtplugError::ButtplugUnknownError(_s) => _s.message,
-    };
+    let msg = error.to_string();
     Error::new(code, &msg)
   }
 }

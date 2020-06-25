@@ -62,6 +62,7 @@ tracing = "0.1.15"
 tracing-futures = "0.2.4"
 tracing-subscriber = "0.2.6"
 dashmap = "4.0.0-rc6"
+displaydoc = "0.1.6"
  
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

@@ -156,37 +156,29 @@ impl ButtplugServer {
 
   pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
     let id = msg.get_id();
+    if !self.connected() {
+      if let ButtplugClientMessage::RequestServerInfo(rsi_msg) = msg {
+        return self.perform_handshake(rsi_msg);
+      } else {
+        return ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
+      }
+    }
+    // TODO This is a really convoluted block, could use clarification.
     let out_fut = if self.pinged_out.load(Ordering::SeqCst) {
-      ButtplugPingError::new("Server has pinged out.").into()
+      ButtplugPingError::PingedOut.into()
     } else if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
-      if !self.connected() {
-        ButtplugHandshakeError::new("Server not connected.").into()
-      } else if let Some(ref dm) = self.device_manager {
+      if let Some(ref dm) = self.device_manager {
         dm.parse_message(msg.clone())
       } else {
         panic!("Device Manager has been taken already!");
       }
     } else {
       match msg {
-        ButtplugClientMessage::RequestServerInfo(m) => self.perform_handshake(m),
-        ButtplugClientMessage::Ping(p) => {
-          if !self.connected() {
-            ButtplugHandshakeError::new("Server not connected.").into()
-          } else {
-            self.handle_ping(p)
-          }
-        }
-        ButtplugClientMessage::RequestLog(l) => {
-          if !self.connected() {
-            ButtplugHandshakeError::new("Server not connected.").into()
-          } else {
-            self.handle_log(l)
-          }
-        }
-        _ => ButtplugMessageError::new(&format!("Message {:?} not handled by server loop.", msg))
-          .into(),
+        ButtplugClientMessage::Ping(p) => self.handle_ping(p),
+        ButtplugClientMessage::RequestLog(l) => self.handle_log(l),
+        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
     };
     // Simple way to set the ID on the way out. Just rewrap
@@ -201,14 +193,10 @@ impl ButtplugServer {
 
   fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
     if self.connected() {
-      return ButtplugHandshakeError::new("Server already connected.").into();
+      return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
-      return ButtplugHandshakeError::new(&format!(
-        "Server version ({}) must be equal to or greater than client version ({}).",
-        BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version
-      ))
-      .into();
+      return ButtplugHandshakeError::MessageSpecVersionMismatch(BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version).into();
     }
     // self.client_name = Some(msg.client_name.clone());
     // self.client_spec_version = Some(msg.message_version);
@@ -240,11 +228,13 @@ impl ButtplugServer {
         Result::Ok(messages::Ok::new(msg.get_id()).into())
       })
     } else {
-      ButtplugPingError::new("Ping message invalid, as ping timer is not running.").into()
+      ButtplugPingError::PingTimerNotRunning.into()
     }
   }
 
   fn handle_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
+    // TODO Reimplement logging!
+    
     // let sender = self.event_sender.clone();
     Box::pin(async move {
       // let handler = ButtplugLogHandler::new(&msg.log_level, sender);
@@ -352,8 +342,7 @@ mod test {
       // Check that we got an event back about the ping out.
       let msg = recv.next().await.unwrap();
       if let ButtplugServerMessage::Error(e) = msg {
-        if let ButtplugError::ButtplugPingError(_) = e.into() {
-        } else {
+        if messages::ErrorCode::ErrorPing != e.error_code {
           panic!("Didn't get a ping error");
         }
       } else {

@@ -88,7 +88,8 @@ use crate::{
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_channel::Receiver;
-use std::{error::Error, fmt};
+use thiserror::Error;
+use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
@@ -101,35 +102,16 @@ pub type ButtplugConnectorResultFuture = BoxFuture<'static, ButtplugConnectorRes
 ///
 /// Errors that relate to the communication method of the client connector. Can
 /// include network/IPC protocol specific errors.
-#[derive(Debug, Clone)]
-pub struct ButtplugConnectorError {
-  /// Error description
-  pub message: String,
-}
-
-impl ButtplugConnectorError {
-  /// Creates a new ButtplugClientConnectorError with a description.
-  pub fn new(msg: &str) -> Self {
-    Self {
-      message: msg.to_owned(),
-    }
-  }
-}
-
-impl fmt::Display for ButtplugConnectorError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "Init Error: {}", self.message)
-  }
-}
-
-impl Error for ButtplugConnectorError {
-  fn description(&self) -> &str {
-    self.message.as_str()
-  }
-
-  fn source(&self) -> Option<&(dyn Error + 'static)> {
-    None
-  }
+#[derive(Debug, Error, Display)]
+pub enum ButtplugConnectorError {
+  /// Connector is not currently connected to a remote.
+  ConnectorNotConnected,
+  /// Connector channel has closed, meaning disconnection is likely.
+  ConnectorChannelClosed,
+  /// Connector already connected, cannot be connected twice.
+  ConnectorAlreadyConnected,
+  /// Specific error for connector type: {0}.
+  TransportSpecificError(transport::ButtplugConnectorTransportSpecificError),
 }
 
 impl<T> From<ButtplugConnectorError> for BoxFuture<'static, Result<T, ButtplugConnectorError>> where T: Send + 'static {

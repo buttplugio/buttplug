@@ -197,10 +197,7 @@ impl DeviceManager {
 
   fn start_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
-      ButtplugUnknownError::new(
-        "Cannot start scanning. Server has no device communication managers to scan with.",
-      )
-      .into()
+      ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.start_scanning()).collect();
       Box::pin(async move {
@@ -212,10 +209,7 @@ impl DeviceManager {
 
   fn stop_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
-      ButtplugUnknownError::new(
-        "Cannot start scanning. Server has no device communication managers to scan with.",
-      )
-      .into()
+      ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.stop_scanning()).collect();
       Box::pin(async move {
@@ -248,10 +242,7 @@ impl DeviceManager {
   ) -> ButtplugServerResultFuture {
     match self.devices.get(&device_msg.get_device_index()) {
       Some(device) => device.parse_message(device_msg),
-      None => ButtplugDeviceError::new(&format!(
-        "No device with index {} available",
-        device_msg.get_device_index()
-      )).into(),
+      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into(),
     }
   }
 
@@ -297,10 +288,10 @@ impl DeviceManager {
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
       Ok(device_msg) => self.parse_device_message(device_msg),
-      Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg) {
+      Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
         Ok(manager_msg) => self.parse_device_manager_message(manager_msg),
         Err(_) => {
-          ButtplugMessageError::new("Message type not handled by Device Manager").into()
+          ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
         }
       },
     }

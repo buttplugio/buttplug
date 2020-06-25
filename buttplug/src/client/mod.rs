@@ -18,7 +18,7 @@ use crate::{
     ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture,
   },
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+    errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
       ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
       ButtplugMessageSpecVersion, DeviceMessageInfo, LogLevel, RequestDeviceList,
@@ -37,13 +37,12 @@ use futures::{
   FutureExt,
 };
 use std::{
-  error::Error,
-  fmt,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
 };
+use thiserror::Error;
 use dashmap::DashMap;
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
@@ -112,45 +111,14 @@ impl ButtplugClientMessageFuturePair {
 /// connection between the client and the server, like a network connection
 /// issue.
 /// - [ButtplugError], which is an error specific to the Buttplug Protocol.
-#[derive(Debug, Clone)]
+#[derive(Debug, Error)]
 pub enum ButtplugClientError {
   /// Connector error
-  ButtplugConnectorError(ButtplugConnectorError),
+  #[error(transparent)]
+  ButtplugConnectorError(#[from] ButtplugConnectorError),
   /// Protocol error
-  ButtplugError(ButtplugError),
-}
-
-impl fmt::Display for ButtplugClientError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    match *self {
-      ButtplugClientError::ButtplugError(ref e) => e.fmt(f),
-      ButtplugClientError::ButtplugConnectorError(ref e) => e.fmt(f),
-    }
-  }
-}
-
-impl Error for ButtplugClientError {
-  fn source(&self) -> Option<&(dyn Error + 'static)> {
-    None
-  }
-}
-
-impl From<ButtplugConnectorError> for ButtplugClientError {
-  fn from(error: ButtplugConnectorError) -> Self {
-    ButtplugClientError::ButtplugConnectorError(error)
-  }
-}
-
-impl From<ButtplugMessageError> for ButtplugClientError {
-  fn from(error: ButtplugMessageError) -> Self {
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(error))
-  }
-}
-
-impl From<ButtplugDeviceError> for ButtplugClientError {
-  fn from(error: ButtplugDeviceError) -> Self {
-    ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(error))
-  }
+  #[error(transparent)]
+  ButtplugError(#[from] ButtplugError),
 }
 
 /// Enum representing different events that can be emitted by a client.
@@ -390,11 +358,9 @@ impl ButtplugClient {
           Ok(client)
         } else {
           client.disconnect().await?;
-          Err(ButtplugClientError::ButtplugError(
-            ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError {
-              message: "Did not receive expected ServerInfo or Error messages.".to_string(),
-            }),
-          ))
+          Err(
+            ButtplugClientError::ButtplugError(ButtplugHandshakeError::UnexpectedHandshakeMessageReceived(format!("{:?}", msg)).into())
+          )
         }
       }
       // TODO Error message case may need to be implemented here when
@@ -441,7 +407,7 @@ impl ButtplugClient {
   fn send_internal_message(&self, msg: ButtplugClientRequest) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Err(
-        ButtplugConnectorError::new("Client not connected")
+        ButtplugConnectorError::ConnectorNotConnected
       )));
     }
     // If we're running the event loop, we should have a message_sender.
@@ -449,7 +415,7 @@ impl ButtplugClient {
     // this function in order to connect also.
     let message_sender = self.message_sender.clone();
     Box::pin(async move {
-      message_sender.send(msg).await.map_err(|err| ButtplugConnectorError::new(&format!("Error with connector channel: {}", err)))?;
+      message_sender.send(msg).await.map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
       Ok(())
     })
   }
@@ -486,7 +452,7 @@ impl ButtplugClient {
       send_fut
         .await
         .and_then(|_| Ok(()))
-        .map_err(|err| ButtplugMessageError::new(&format!("Got non-Ok message back: {:?}", err)).into())
+        .map_err(|err| err.into())
     })
   }
 
@@ -530,11 +496,11 @@ mod test {
       'static,
       Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError>,
     > {
-      ButtplugConnectorError::new("Always fails").into()
+      ButtplugConnectorError::ConnectorNotConnected.into()
     }
 
     fn disconnect(&self) -> ButtplugConnectorResultFuture {
-      ButtplugConnectorError::new("Always fails").into()
+      ButtplugConnectorError::ConnectorNotConnected.into()
     }
 
     fn send(&self, _msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {

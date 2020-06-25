@@ -4,7 +4,7 @@ use super::btleplug_internal::{
 use crate::{
   core::{
     ButtplugResultFuture,
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
     messages::RawReading,
   },
   device::{
@@ -55,9 +55,8 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
-    // TODO ugggggggh there's gotta be a way to ensure this at compile time.
     if self.device.is_none() {
-      panic!("Cannot call try_create_device_impl twice!");
+      return Err(ButtplugDeviceError::DeviceConnectionError("Cannot call try_create_device_impl twice!".to_owned()).into());
     }
     let device = self.device.take().unwrap();
     if let Some(ref proto) = protocol.btle {
@@ -78,7 +77,7 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       if device_sender
         .send((ButtplugDeviceCommand::Connect, waker))
         .await.is_err() {
-          return Err(ButtplugDeviceError::new("Event loop exited before we could connect.").into());
+          return Err(ButtplugDeviceError::DeviceConnectionError("Event loop exited before we could connect.".to_owned()).into());
       };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl::new(
@@ -88,12 +87,12 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
           device_sender,
           output_broadcaster.clone(),
         ))),
-        _ => Err(ButtplugError::ButtplugDeviceError(
-          ButtplugDeviceError::new("Cannot connect"),
-        )),
+        // TODO It'd be nice to carry this error through as a source.
+        ButtplugDeviceReturn::Error(err) => Err(ButtplugDeviceError::DeviceConnectionError(format!("Device connection failed: {:?}", err)).into()),
+        other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
       }
     } else {
-      panic!("Got a protocol with no Bluetooth Definition!");
+      Err(ButtplugDeviceError::DeviceConnectionError("Got a protocol with no Bluetooth Definition!".to_owned()).into())
     }
   }
 }
@@ -130,30 +129,24 @@ impl BtlePlugDeviceImpl {
   fn send_to_device_task(
     &self,
     cmd: ButtplugDeviceCommand,
-    err_msg: &str,
+    _err_msg: &str,
   ) -> ButtplugResultFuture {
     let sender = self.thread_sender.clone();
-    let msg = err_msg.to_owned();
     Box::pin(async move {
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       if sender.send((cmd, waker)).await.is_err() {
         error!("Device event loop shut down, cannot send command.");
-        return Err(ButtplugError::ButtplugDeviceError(
-          ButtplugDeviceError::new("Device event loop shut down, cannot send command.")
-        ));
+        return Err(ButtplugDeviceError::DeviceNotConnected("Device event loop shut down, cannot send command.".to_owned()).into());
       }
       match fut.await {
         ButtplugDeviceReturn::Ok(_) => Ok(()),
         ButtplugDeviceReturn::Error(e) => {
           error!("{:?}", e);
-          Err(ButtplugError::ButtplugDeviceError(
-            ButtplugDeviceError::new(&e.to_string()),
-          ))
-        }
-        _ => Err(ButtplugError::ButtplugDeviceError(
-          ButtplugDeviceError::new(&msg),
-        )),
+          // TODO Need to whittle down what this error actually means.
+          Err(ButtplugDeviceError::DeviceCommunicationError(e.to_string()).into())
+        },
+        other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
       }
     })
   }

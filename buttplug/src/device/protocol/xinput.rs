@@ -1,7 +1,7 @@
 use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugMessageError},
+    errors::ButtplugMessageError,
     messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   },
   device::{
@@ -62,9 +62,9 @@ impl ButtplugProtocolCommandHandler for XInput {
                 .write_u16::<LittleEndian>(cmds[0].unwrap() as u16)
                 .is_err()
             {
-              return Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::new(
+              return Err(ButtplugMessageError::MessageConversionError(
                 "Cannot convert XInput value for processing",
-              )));
+              ).into());
             }
             fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false)));
           }

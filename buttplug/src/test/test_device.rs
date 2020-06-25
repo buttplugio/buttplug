@@ -183,7 +183,6 @@ impl DeviceImpl for TestDevice {
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
     let channels = self.endpoint_channels.clone();
-    let name = self.name.to_owned();
     Box::pin(async move {
       // Since we're only accessing a channel, we can use a read lock here.
       match channels.get(&msg.endpoint) {
@@ -193,11 +192,7 @@ impl DeviceImpl for TestDevice {
           Ok(())
         }
         None => Err(
-          ButtplugDeviceError::new(&format!(
-            "Endpoint {} does not exist for {}",
-            msg.endpoint, name
-          ))
-          .into(),
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into()
         ),
       }
     })

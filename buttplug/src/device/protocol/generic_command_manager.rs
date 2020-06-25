@@ -101,7 +101,7 @@ impl GenericCommandManager {
     // subcommand.
     if msg.speeds.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&"VibrateCmd has 0 commands, will not do anything.").into(),
+        ButtplugDeviceError::ProtocolRequirementError("VibrateCmd has 0 commands, will not do anything.".to_owned()).into(),
       );
     }
 
@@ -126,7 +126,7 @@ impl GenericCommandManager {
       // here instead of in a filter above.
       if index >= self.vibrations.len() {
         return Err(
-          ButtplugDeviceError::new(&format!(
+          ButtplugDeviceError::ProtocolRequirementError(format!(
             "VibrateCmd has {} commands, device has {} vibrators.",
             msg.speeds.len(),
             self.vibrations.len()
@@ -173,7 +173,7 @@ impl GenericCommandManager {
     // command.
     if msg.rotations.is_empty() {
       return Err(
-        ButtplugDeviceError::new(&"RotateCmd has 0 commands, will not do anything.").into(),
+        ButtplugDeviceError::ProtocolRequirementError("RotateCmd has 0 commands, will not do anything.".to_owned()).into(),
       );
     }
 
@@ -190,7 +190,7 @@ impl GenericCommandManager {
       // here instead of in a filter above.
       if index >= self.rotations.len() {
         return Err(
-          ButtplugDeviceError::new(&format!(
+          ButtplugDeviceError::ProtocolRequirementError(format!(
             "RotateCmd has {} commands, device has {} rotators.",
             msg.rotations.len(),
             self.rotations.len()

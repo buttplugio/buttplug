@@ -285,7 +285,7 @@ impl DeviceProtocolConfiguration {
         Ok((attrs.name.as_ref().unwrap().clone(), attributes))
       }
       None => Err(
-        ButtplugDeviceError::new(&format!(
+        ButtplugDeviceError::ProtocolAttributesNotFound(format!(
           "Cannot find identifier {} in protocol.",
           identifier
         ))

@@ -2,9 +2,28 @@ mod json_serializer;
 
 pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
 
-use crate::core::errors::ButtplugError;
+use thiserror::Error;
+pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
+use serde_json::Error as SerdeJsonError;
+use valico::json_schema::ValidationState;
 
-pub type ButtplugSerializerResult<T> = Result<T, ButtplugError>;
+#[derive(Debug, Error)]
+pub enum ButtplugSerializerError {
+  // Valico hands back a vector of errors that isn't easy to encase, so we just
+  // turn it into a big string and pass that back.
+  
+  #[error("JSON Schema Validation Error: {0:?}")]
+  JsonValidatorError(ValidationState),
+  /// Serialization error.
+  #[error(transparent)]
+  JsonSerializerError(#[from] SerdeJsonError),
+  #[error("Cannot deserialize binary in a text handler")]
+  BinaryDeserializationError,
+  #[error("Cannot deserialize text in a binary handler.")]
+  TextDeserializationError,
+  #[error("Message version not received, can't figure out which spec version to de/serialize to.")]
+  MessageSpecVersionNotReceived,
+}
 
 #[derive(Debug, PartialEq)]
 pub enum ButtplugSerializedMessage {

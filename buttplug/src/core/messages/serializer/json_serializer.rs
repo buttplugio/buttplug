@@ -1,7 +1,7 @@
-use super::{ButtplugMessageSerializer, ButtplugSerializedMessage};
+use super::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError};
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugHandshakeError, ButtplugMessageError},
+    errors::{ButtplugHandshakeError, ButtplugError},
     messages::{
       self,
       ButtplugClientMessage,
@@ -62,15 +62,11 @@ where
 fn deserialize_to_message<T>(
   validator: &JSONValidator,
   msg: String,
-) -> Result<Vec<T>, ButtplugError>
+) -> Result<Vec<T>, ButtplugSerializerError>
 where
   T: serde::de::DeserializeOwned + Clone,
 {
-  match validator.validate(&msg) {
-    Ok(_) => serde_json::from_str::<Vec<T>>(&msg)
-      .map_err(|e| ButtplugMessageError::new(&e.to_string()).into()),
-    Err(err) => Err(err.into()),
-  }
+  validator.validate(&msg).and_then(|_| serde_json::from_str::<Vec<T>>(&msg).map_err(|e| e.into()))
 }
 
 fn serialize_to_version(
@@ -85,7 +81,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV0ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => {
-            ButtplugSpecV0ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+            ButtplugSpecV0ServerMessage::Error(ButtplugError::from(err).into())
           }
         })
         .collect();
@@ -98,7 +94,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV1ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => {
-            ButtplugSpecV1ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+            ButtplugSpecV1ServerMessage::Error(ButtplugError::from(err).into())
           }
         })
         .collect();
@@ -111,7 +107,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV2ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => {
-            ButtplugSpecV2ServerMessage::Error(ButtplugError::ButtplugMessageError(err).into())
+            ButtplugSpecV2ServerMessage::Error(ButtplugError::from(err).into())
           }
         })
         .collect();
@@ -132,13 +128,11 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   fn deserialize(
     &mut self,
     serialized_msg: ButtplugSerializedMessage,
-  ) -> Result<Vec<ButtplugClientMessage>, ButtplugError> {
+  ) -> Result<Vec<ButtplugClientMessage>, ButtplugSerializerError> {
     let msg = if let ButtplugSerializedMessage::Text(text_msg) = serialized_msg {
       text_msg
     } else {
-      return Err(ButtplugError::ButtplugMessageError(
-        ButtplugMessageError::new("Cannot deserialize binary messages with JSON serializer."),
-      ));
+      return Err(ButtplugSerializerError::BinaryDeserializationError);
     };
     // If we don't have a message version yet, we need to parse this as a
     // RequestServerInfo message to get the version. RequestServerInfo can
@@ -177,11 +171,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         );
         self.message_version = Some(rsi.message_version);
       } else {
-        return Err(ButtplugError::ButtplugHandshakeError(
-          ButtplugHandshakeError::new(
-            "First message received must be a RequestServerInfo message.",
-          ),
-        ));
+        return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
       }
       Ok(msg_union.iter().cloned().map(|m| m.into()).collect())
     }
@@ -200,10 +190,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
         ButtplugSerializedMessage::Text(msg_to_protocol_json(ButtplugCurrentSpecServerMessage::Error(
-          ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::new(
-            "Got outgoing message before version was set.",
-          ))
-          .into(),
+          ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected).into()
         )))
       }
     }
@@ -234,13 +221,11 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
   fn deserialize(
     &mut self,
     msg: ButtplugSerializedMessage,
-  ) -> Result<Vec<ButtplugCurrentSpecServerMessage>, ButtplugError> {
+  ) -> Result<Vec<ButtplugCurrentSpecServerMessage>, ButtplugSerializerError> {
     if let ButtplugSerializedMessage::Text(text_msg) = msg {
       deserialize_to_message::<Self::Inbound>(&self.validator, text_msg)
     } else {
-      Err(ButtplugError::ButtplugMessageError(
-        ButtplugMessageError::new("Cannot deserialize binary messages with JSON serializer."),
-      ))
+      Err(ButtplugSerializerError::BinaryDeserializationError)
     }
   }
 

@@ -12,10 +12,13 @@ use crate::{
   connector::{
     ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
-  core::messages::{
+  core::{
+    errors::{ButtplugMessageError, ButtplugError},
+    messages::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage,
-  },
+    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage, Error,
+  }
+},
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
@@ -59,7 +62,7 @@ async fn remote_connector_event_loop<
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static,
+  InboundMessageType: ButtplugMessage + From<Error> + 'static,
 {
   // Message sorter that receives messages that come in from the client.
   let mut serializer = SerializerType::default();
@@ -106,13 +109,7 @@ async fn remote_connector_event_loop<
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                // TODO Implement error type to send back to connector
-                /*
-                let err_msg = messages::Error::from(
-                  ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&error_str)).into(),
-                );
-                connector_incoming_sender.send(err_msg.into()).await;
-                */
+                let _ = connector_incoming_sender.send(Error::from(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageSerializationError(e))).into()).await;
               }
             }
           }
@@ -216,7 +213,7 @@ where
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static,
+  InboundMessageType: ButtplugMessage + From<Error> + 'static,
 {
   fn connect(
     &mut self,
@@ -252,7 +249,7 @@ where
         }
       })
     } else {
-      ButtplugConnectorError::new("Connector already connected.").into()
+      ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
   }
 
@@ -263,10 +260,10 @@ where
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Close)
           .await
-          .map_err(|_| ButtplugConnectorError::new("Connector has already disconnected"))
+          .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
       })
     } else {
-      ButtplugConnectorError::new("Connector not connected.").into()
+      ButtplugConnectorError::ConnectorNotConnected.into()
     }
   }
 
@@ -277,10 +274,10 @@ where
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Message(msg))
           .await
-          .map_err(|_| ButtplugConnectorError::new("Connector has disconnected."))
+          .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
       })
     } else {
-      ButtplugConnectorError::new("Connector not connected.").into()
+      ButtplugConnectorError::ConnectorNotConnected.into()
     }
   }
 }

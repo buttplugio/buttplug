@@ -62,7 +62,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "raw" => Ok(ProtocolTypes::RawProtocol),
       _ => {
         error!("Protocol {} not implemented.", protocol_name);
-        Err(ButtplugDeviceError::new(&format!("Protocol {} not implemented.", protocol_name)).into())
+        Err(ButtplugDeviceError::ProtocolNotImplemented(protocol_name.to_owned()).into())
       }
     }
   }
@@ -181,10 +181,10 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
           if let Some(count) = attr.feature_count {
             vibrator_count = count as usize;
           } else {
-            return ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.").into();
+            return ButtplugDeviceError::ProtocolRequirementError(format!("{} needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.", self.name())).into();
           }
         } else {
-          return ButtplugDeviceError::new("$protocol_name needs to support VibrateCmd to use SingleMotorVibrateCmd.").into();
+          return ButtplugDeviceError::ProtocolRequirementError(format!("{} needs to support VibrateCmd to use SingleMotorVibrateCmd.", self.name())).into();
         }
         let speed = message.speed;
         let mut cmds = vec!();
@@ -252,7 +252,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
     Box::pin(future::ready(Err(
-      ButtplugDeviceError::new("Command not implemented for this protocol").into(),
+      ButtplugDeviceError::UnhandledCommand("Command not implemented for this protocol".to_owned()).into(),
     )))
   }
 

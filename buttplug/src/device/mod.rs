@@ -239,6 +239,7 @@ impl From<DeviceUnsubscribeCmd> for DeviceImplCommand {
   }
 }
 
+#[derive(Debug)]
 pub struct ButtplugDeviceImplInfo {
   pub endpoints: Vec<Endpoint>,
   pub manufacturer_name: Option<String>,
@@ -246,12 +247,15 @@ pub struct ButtplugDeviceImplInfo {
   pub serial_number: Option<String>,
 }
 
+#[derive(Debug)]
 pub enum ButtplugDeviceCommand {
   Connect,
   Message(DeviceImplCommand),
   Disconnect,
 }
 
+// TODO Split this down into connections and other returns.
+#[derive(Debug)]
 pub enum ButtplugDeviceReturn {
   Connected(ButtplugDeviceImplInfo),
   Ok(messages::Ok),

@@ -10,7 +10,7 @@
 //! buttplug message de/serializers in both the client and server. Uses the
 //! Valico library.
 
-use crate::core::errors::{ButtplugError, ButtplugMessageError};
+use crate::core::messages::serializer::ButtplugSerializerError;
 use serde_json::Value;
 use valico::json_schema;
 
@@ -40,25 +40,14 @@ impl JSONValidator {
   /// # Parameters
   ///
   /// - `json_str`: JSON string to validate.
-  pub fn validate(&self, json_str: &str) -> Result<(), json_schema::ValidationState> {
+  pub fn validate(&self, json_str: &str) -> Result<(), ButtplugSerializerError> {
     let schema = self.scope.resolve(&self.id).unwrap();
     let check_value = serde_json::from_str(json_str).unwrap();
     let state = schema.validate(&check_value);
     if state.is_valid() {
       Ok(())
     } else {
-      Err(state)
+      Err(ButtplugSerializerError::JsonValidatorError(state))
     }
-  }
-}
-
-impl From<json_schema::ValidationState> for ButtplugError {
-  fn from(validation_error: json_schema::ValidationState) -> ButtplugError {
-    let mut validation_error_msg = "JSON Validation Errors:".to_owned();
-    validation_error
-      .errors
-      .iter()
-      .for_each(|err| validation_error_msg.push_str(&err.to_string()));
-    ButtplugError::ButtplugMessageError(ButtplugMessageError::new(&validation_error_msg))
   }
 }

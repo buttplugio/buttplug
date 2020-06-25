@@ -1,6 +1,6 @@
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages,
   },
   device::{
@@ -16,6 +16,7 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
+  server::comm_managers::ButtplugDeviceSpecificError,
   util::{async_manager, future::{ButtplugFuture, ButtplugFutureStateShared}},
 };
 use futures::{StreamExt, FutureExt};
@@ -100,10 +101,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
       state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
-          "Btleplug device cannot connect: {}",
-          err
-        ))),
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err)).into()
       ));
       return;
     }
@@ -166,12 +164,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.command(&chr, &write_msg.data).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
-          "Device does not contain an endpoint named {}",
-          write_msg.endpoint
-        ))),
-      )),
+      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(write_msg.endpoint).into())),
     }
   }
 
@@ -185,12 +178,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.subscribe(&chr).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
-          "Device does not contain an endpoint named {}",
-          sub_msg.endpoint
-        ))),
-      )),
+      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into())),
     }
   }
 
@@ -204,12 +192,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.subscribe(&chr).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(&format!(
-          "Device does not contain an endpoint named {}",
-          sub_msg.endpoint
-        ))),
-      )),
+      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into())),
     }
   }
 
@@ -232,11 +215,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         DeviceImplCommand::Unsubscribe(sub_msg) => {
           self.handle_unsubscribe(sub_msg, state);
         }
-        _ => state.set_reply(ButtplugDeviceReturn::Error(
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-            "Buttplug-rs does not yet handle reads",
-          )),
-        )),
+        _ => {
+          let error_str = format!("{:?}", command);
+          state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::UnhandledCommand(error_str).into()))
+        }
       },
       ButtplugDeviceCommand::Disconnect => {
         if let Err(e) = self.device.disconnect() {

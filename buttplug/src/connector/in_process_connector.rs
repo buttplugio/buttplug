@@ -96,7 +96,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       let recv = self.connector_outbound_recv.take().unwrap();
       Box::pin(future::ready(Ok(recv)))
     } else {
-      ButtplugConnectorError::new("Connector already connected.").into()
+      ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
   }
 
@@ -114,7 +114,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       sender 
         .send(output.unwrap().try_into().unwrap())
         .await
-        .map_err(|_| ButtplugConnectorError::new("Connector is not connected."))
+        .map_err(|_| ButtplugConnectorError::ConnectorNotConnected.into())
     })
   }
 }

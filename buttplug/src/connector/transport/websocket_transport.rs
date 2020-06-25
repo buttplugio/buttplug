@@ -9,12 +9,12 @@
 
 use crate::{
   connector::{
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager
 };
-use super::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage};
+use super::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage, ButtplugConnectorTransportSpecificError};
 use async_channel::bounded;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
@@ -163,7 +163,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           }).unwrap();
           Ok((request_sender, response_receiver))
         }
-        Err(e) => Err(ButtplugConnectorError::new(&format!("{:?}", e))),
+        Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error))),
       }
     })
   }

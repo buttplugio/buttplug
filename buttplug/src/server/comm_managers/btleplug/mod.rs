@@ -87,14 +87,14 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         }
       };
       // TODO There's no way to unsubscribe central event handlers. That
-      // needs to be fixed in rumble somehow, but for now we'll have to
+      // needs to be fixed in btleplug somehow, but for now we'll have to
       // make our handlers exit early after dying or something?
       central.on_event(Box::new(on_event));
     }
     info!("Starting scan.");
     if let Err(err) = central.start_scan() {
       // TODO Explain the setcap issue on linux here.
-      return ButtplugDeviceError::new(&format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
+      return ButtplugDeviceError::DevicePermissionError(format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
     }
     is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async {
@@ -132,7 +132,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           receiver.next().await.unwrap();
         }
         central.stop_scan().unwrap();
-        info!("Exiting rumble scanning");
+        info!("Exiting btleplug scanning");
       }).unwrap();
       Ok(())
     })
@@ -146,10 +146,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         is_scanning.store(false, Ordering::SeqCst);
         sender.send(()).await.map_err(|_| {
           error!("Scanning event loop already shut down");
-          ButtplugDeviceError::new("Scanning event loop already shut down.").into()
+          ButtplugDeviceError::DeviceScanningAlreadyStopped.into()
         })
       } else {
-        Err(ButtplugDeviceError::new("Scanning not currently happening.").into())
+        Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into())
       }
     })
   }
@@ -164,7 +164,7 @@ impl Drop for BtlePlugCommunicationManager {
     info!("Dropping Comm Manager!");
     let central = self.get_central();
     if let Err(e) = central.stop_scan() {
-      info!("Error on scanning shutdown for rumble bluetooth: {:?}", e);
+      info!("Error on scanning shutdown for bluetooth: {:?}", e);
     }
   }
 }
@@ -183,7 +183,7 @@ mod test {
 
   #[test]
   #[ignore]
-  pub fn test_rumble() {
+  pub fn test_btleplug() {
     async_manager::block_on(async move {
       let (sender, mut receiver) = bounded(256);
       let mgr = BtlePlugCommunicationManager::new(sender);

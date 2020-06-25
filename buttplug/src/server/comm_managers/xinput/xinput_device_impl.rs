@@ -10,6 +10,7 @@ use crate::{
     BoundedDeviceEventBroadcaster, ButtplugDeviceImplCreator, DeviceImpl, DeviceReadCmd,
     DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
+  server::comm_managers::ButtplugDeviceSpecificError,
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
@@ -106,9 +107,7 @@ impl DeviceImpl for XInputDeviceImpl {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::new(
-            &format!("{:?}", e).to_owned(),
-          ))
+          ButtplugDeviceError::from(ButtplugDeviceSpecificError::XInputError(e)).into()
         })
     })
   }

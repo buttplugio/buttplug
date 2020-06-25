@@ -134,7 +134,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Display)]
 #[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
@@ -372,9 +372,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
       ButtplugServerMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV1ServerMessage::ScanningFinished(msg))
       }
-      _ => Err(ButtplugMessageError::new(
-        "ButtplugServerMessage cannot be converted to #name",
-      )),
+      _ => Err(ButtplugMessageError::VersionError("ButtplugServerMessage", format!("{:?}", msg), "ButtplugSpecV1ServerMessage")),
     }
   }
 }
@@ -447,9 +445,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
       ButtplugServerMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV0ServerMessage::ScanningFinished(msg))
       }
-      _ => Err(ButtplugMessageError::new(
-        "ButtplugServerMessage cannot be converted to ButtplugSepcV0OutMessage",
-      )),
+      _ => Err(ButtplugMessageError::VersionError("ButtplugServerMessage", format!("{:?}", msg), "ButtplugSpecV0ServerMessage")),
     }
   }
 }
