@@ -159,6 +159,8 @@ impl ButtplugServer {
     if !self.connected() {
       if let ButtplugClientMessage::RequestServerInfo(rsi_msg) = msg {
         return self.perform_handshake(rsi_msg);
+      } else if self.pinged_out.load(Ordering::SeqCst) {
+        return ButtplugError::from(ButtplugPingError::PingedOut).into();
       } else {
         return ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
       }
@@ -335,7 +337,7 @@ mod test {
           if let ButtplugError::ButtplugPingError(_) = e {
             // do nothing
           } else {
-            panic!("Got wrong type of error back!");
+            panic!("Got wrong type of error back! {:?}", e);
           }
         }
       }
