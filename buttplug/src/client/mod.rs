@@ -22,7 +22,7 @@ use crate::{
     messages::{
       ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
       ButtplugMessageSpecVersion, DeviceMessageInfo, LogLevel, RequestDeviceList,
-      RequestServerInfo, StartScanning,
+      RequestServerInfo, StartScanning, StopScanning,
     },
   },
   util::{
@@ -401,6 +401,14 @@ impl ButtplugClient {
   /// DeviceManagers on the server, disconnection, etc.
   pub fn start_scanning(&self) -> ButtplugClientResultFuture {
     self.send_message_expect_ok(StartScanning::default().into())
+  }
+
+  /// Tells server to stop scanning for devices.
+  ///
+  /// Returns Err([ButtplugClientError]) if request fails due to issues with
+  /// DeviceManagers on the server, disconnection, etc.
+  pub fn stop_scanning(&self) -> ButtplugClientResultFuture {
+    self.send_message_expect_ok(StopScanning::default().into())
   }
 
   /// Send message to the internal event loop. 
