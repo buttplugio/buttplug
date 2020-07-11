@@ -256,7 +256,7 @@ fn test_device_index_generation() {
 }
 
 #[test]
-fn test_scanning_finished() {
+fn test_server_scanning_finished() {
   async_manager::block_on(async {
     let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
     let helper = server.add_test_comm_manager();

@@ -27,7 +27,6 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use async_mutex::Mutex;
 use dashmap::DashMap;
 use futures::{
   future::{self, Future},
@@ -201,6 +200,8 @@ fn wait_for_manager_events(
 }
 
 pub struct DeviceManager {
+  // This uses a map to make sure we don't have 2 comm managers of the same type
+  // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, ButtplugDevice>>,
   sender: Sender<DeviceCommunicationEvent>,
