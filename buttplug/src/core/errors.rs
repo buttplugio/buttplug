@@ -7,7 +7,7 @@
 
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
-use super::messages::{self, ErrorCode, ButtplugMessageSpecVersion, ButtplugDeviceMessageType, serializer::ButtplugSerializerError};
+use super::messages::{self, ErrorCode, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugDeviceMessageType, serializer::ButtplugSerializerError};
 use thiserror::Error;
 use displaydoc::Display;
 use crate::{
@@ -15,6 +15,7 @@ use crate::{
   server::comm_managers::ButtplugDeviceSpecificError,
 };
 use futures::future::BoxFuture;
+use std::fmt;
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 
@@ -24,11 +25,11 @@ pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 /// [crate::connector::ButtplugClientConnectorError].
 impl<T> From<ButtplugHandshakeError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
   fn from(err: ButtplugHandshakeError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
+    ButtplugError::from(ButtplugErrorKind::from(err)).into()
   }
 }
 
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, Clone)]
 pub enum ButtplugHandshakeError {
   /// Expected either a ServerInfo or Error message, received {0}
   UnexpectedHandshakeMessageReceived(String),
@@ -46,11 +47,11 @@ pub enum ButtplugHandshakeError {
 /// received unexpectedly by a client or server.
 impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
   fn from(err: ButtplugMessageError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
+    ButtplugError::from(ButtplugErrorKind::from(err)).into()
   }
 }
 
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, Clone)]
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
   UnexpectedMessageType(String),
@@ -74,11 +75,11 @@ pub enum ButtplugMessageError {
 /// alloted timeframe. This also signifies a server disconnect.
 impl<T> From<ButtplugPingError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
   fn from(err: ButtplugPingError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
+    ButtplugError::from(ButtplugErrorKind::from(err)).into()
   }
 }
 
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, Clone)]
 pub enum ButtplugPingError {
   /// Pinged timer exhausted, system has shut down.
   PingedOut,
@@ -93,10 +94,10 @@ pub enum ButtplugPingError {
 /// attributes, etc...
 impl<T> From<ButtplugDeviceError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
   fn from(err: ButtplugDeviceError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
+    ButtplugError::from(ButtplugErrorKind::from(err)).into()
   }
 }
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, Clone)]
 pub enum ButtplugDeviceError {
   /// Device {0} not connected
   DeviceNotConnected(String),
@@ -142,11 +143,11 @@ pub enum ButtplugDeviceError {
 /// will suffice. These are rare and usually fatal (disconnecting) errors.
 impl<T> From<ButtplugUnknownError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
   fn from(err: ButtplugUnknownError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    ButtplugError::from(err).into()
+    ButtplugError::from(ButtplugErrorKind::from(err)).into()
   }
 }
 
-#[derive(Debug, Error, Display)]
+#[derive(Debug, Error, Display, Clone)]
 pub enum ButtplugUnknownError {
   /// Cannot start scanning, no device communication managers available to use for scanning.
   NoDeviceCommManagers,
@@ -157,8 +158,8 @@ pub enum ButtplugUnknownError {
 }
 
 /// Aggregation enum for protocol error types.
-#[derive(Debug, Error)]
-pub enum ButtplugError {
+#[derive(Debug, Error, Clone)]
+pub enum ButtplugErrorKind {
   #[error(transparent)]
   ButtplugHandshakeError(#[from] ButtplugHandshakeError),
   #[error(transparent)]
@@ -171,16 +172,94 @@ pub enum ButtplugError {
   ButtplugUnknownError(#[from] ButtplugUnknownError),
 }
 
+#[derive(Debug, Display, Clone)]
+pub struct ButtplugError {
+  msg_id: u32,
+  kind: ButtplugErrorKind,
+}
+
+impl ButtplugError {
+  pub fn new_message_error(msg_id: u32, kind: ButtplugErrorKind) -> Self {
+    Self {
+      msg_id,
+      kind
+    }
+  }
+
+  pub fn new_system_error( kind: ButtplugErrorKind) -> Self {
+    Self {
+      msg_id: 0,
+      kind
+    }
+  }
+
+  pub fn id(&self) -> u32 {
+    self.msg_id
+  }
+
+  pub fn kind(&self) -> &ButtplugErrorKind {
+    &self.kind
+  }
+}
+
+impl From<ButtplugErrorKind> for ButtplugError {
+  fn from(kind: ButtplugErrorKind) -> Self {
+    ButtplugError::new_system_error(kind)
+  }
+}
+
+impl From<ButtplugMessageError> for ButtplugError {
+  fn from(err: ButtplugMessageError) -> Self {
+    ButtplugError::new_system_error(err.into())
+  }
+}
+
+impl From<ButtplugUnknownError> for ButtplugError {
+  fn from(err: ButtplugUnknownError) -> Self {
+    ButtplugError::new_system_error(err.into())
+  }
+}
+
+impl From<ButtplugDeviceError> for ButtplugError {
+  fn from(err: ButtplugDeviceError) -> Self {
+    ButtplugError::new_system_error(err.into())
+  }
+}
+
+impl From<ButtplugPingError> for ButtplugError {
+  fn from(err: ButtplugPingError) -> Self {
+    ButtplugError::new_system_error(err.into())
+  }
+}
+
+impl From<ButtplugHandshakeError> for ButtplugError {
+  fn from(err: ButtplugHandshakeError) -> Self {
+    ButtplugError::new_system_error(err.into())
+  }
+}
+
+impl std::fmt::Display for ButtplugError {
+  // This trait requires `fmt` with this exact signature.
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    self.kind.fmt(f)
+  }
+}
+
+impl std::error::Error for ButtplugError {
+  fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    self.kind.source()
+  }
+}
 
 impl From<messages::Error> for ButtplugError {
   /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
   fn from(error: messages::Error) -> Self {
     match error.error_code {
-      ErrorCode::ErrorDevice => ButtplugDeviceError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorMessage => ButtplugMessageError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorHandshake => ButtplugHandshakeError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorUnknown => ButtplugUnknownError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorPing => ButtplugPingError::UntypedDeserializedError(error.error_message).into(),
+      ErrorCode::ErrorDevice => ButtplugError::new_message_error(error.get_id(), ButtplugDeviceError::UntypedDeserializedError(error.error_message).into()),
+      ErrorCode::ErrorMessage => ButtplugError::new_message_error(error.get_id(), ButtplugMessageError::UntypedDeserializedError(error.error_message).into()),
+      ErrorCode::ErrorHandshake => ButtplugError::new_message_error(error.get_id(), ButtplugHandshakeError::UntypedDeserializedError(error.error_message).into()),
+      ErrorCode::ErrorUnknown => ButtplugError::new_message_error(error.get_id(), ButtplugUnknownError::UntypedDeserializedError(error.error_message).into()),
+      ErrorCode::ErrorPing => ButtplugError::new_message_error(error.get_id(), ButtplugPingError::UntypedDeserializedError(error.error_message).into()),
     }
   }
 }

@@ -42,12 +42,15 @@ impl JSONValidator {
   /// - `json_str`: JSON string to validate.
   pub fn validate(&self, json_str: &str) -> Result<(), ButtplugSerializerError> {
     let schema = self.scope.resolve(&self.id).unwrap();
-    let check_value = serde_json::from_str(json_str).unwrap();
+    let check_value = serde_json::from_str(json_str).map_err(|err| ButtplugSerializerError::JsonSerializerError(format!("{:?}", err)))?;
     let state = schema.validate(&check_value);
     if state.is_valid() {
       Ok(())
     } else {
-      Err(ButtplugSerializerError::JsonValidatorError(state))
+      // Our errors need to be clonable, and validation state isn't. We can't do
+      // much with it anyways, so just convert it to its display and hand that
+      // back.
+      Err(ButtplugSerializerError::JsonValidatorError(format!("{:?}", state)))
     }
   }
 }

@@ -14,9 +14,12 @@ use super::{
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  core::messages::{
-    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-    DeviceList, DeviceMessageInfo,
+  core::{
+    errors::ButtplugError,
+    messages::{
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+      DeviceList, DeviceMessageInfo,
+    },
   },
 };
 use async_channel::{bounded, Sender, Receiver};
@@ -105,7 +108,7 @@ where
   /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
-  connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
+  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
   sorter: ClientMessageSorter,
 }
 
@@ -121,7 +124,7 @@ where
   /// returns it.
   pub fn new(
     connector: ConnectorType,
-    connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
+    connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
     event_sender: BroadcastChannel<ButtplugClientEvent>,
     client_sender: Sender<ButtplugClientRequest>,
     client_receiver: Receiver<ButtplugClientRequest>,
@@ -178,12 +181,15 @@ where
   /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
   /// and update its map accordingly. After that, it will pass the information
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
-  async fn parse_connector_message(&mut self, msg: ButtplugCurrentSpecServerMessage) {
-    trace!("Message received from connector, sending to clients.");
-    if self.sorter.maybe_resolve_message(&msg).await {
+  async fn parse_connector_message(&mut self, msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugError>) {
+    if self.sorter.maybe_resolve_result(&msg_result).await {
       trace!("Message future found, returning");
       return;
     }
+    match msg_result {
+      Ok(msg) => {
+    trace!("Message received from connector, sending to clients.");
+
     trace!("Message future not found, assuming server event.");
     match &msg {
       ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
@@ -223,6 +229,14 @@ where
       }
       _ => error!("Cannot process message, dropping: {:?}", msg),
     }
+  },
+  Err(err) => {
+    self
+    .send_client_event(&ButtplugClientEvent::Error(err))
+    .await;
+
+  }
+  }
   }
 
   /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
@@ -324,7 +338,7 @@ where
 pub(super) fn client_event_loop(
   connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
     + 'static,
-  connector_receiver: Receiver<ButtplugCurrentSpecServerMessage>,
+  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
 ) -> (
   impl Future<Output = Result<(), ButtplugClientError>>,
   Arc<DashMap<u32, ButtplugClientDeviceInternal>>,

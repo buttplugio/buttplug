@@ -1,6 +1,9 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-  core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+  core::{
+    errors::{ButtplugError, ButtplugMessageError},
+    messages::{ButtplugMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+  },
   server::ButtplugServer,
   util::async_manager,
 };
@@ -40,9 +43,9 @@ use tracing_futures::Instrument;
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
   server: ButtplugServer,
-  server_outbound_sender: Sender<ButtplugCurrentSpecServerMessage>,
+  server_outbound_sender: Sender<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
   /// Event receiver for the internal server.
-  connector_outbound_recv: Option<Receiver<ButtplugCurrentSpecServerMessage>>,
+  connector_outbound_recv: Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>>,
 }
 
 #[cfg(feature = "server")]
@@ -60,7 +63,7 @@ impl<'a> ButtplugInProcessClientConnector {
       info!("Starting In Process Client Connector Event Sender Loop");
       while let Some(event) = server_recv.next().await {
         // If we get an error back, it means the client dropped our event handler, so just stop trying.
-        if send.send(event.try_into().unwrap()).await.is_err() {
+        if send.send(Ok(event.try_into().unwrap())).await.is_err() {
           break;
         }
       }
@@ -91,7 +94,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<ButtplugCurrentSpecServerMessage>, ButtplugConnectorError>> {
+  ) -> BoxFuture<'static, Result<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>, ButtplugConnectorError>> {
     if self.connector_outbound_recv.is_some() {
       let recv = self.connector_outbound_recv.take().unwrap();
       Box::pin(future::ready(Ok(recv)))
@@ -105,14 +108,15 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
   }
 
   fn send(&self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
+    let out_id = msg.get_id();
     let input = msg.try_into().unwrap();
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {
       // TODO We should definitely do something different than just unwrapping errors here.
-      let output = output_fut.await;
+      let output = output_fut.await.and_then(|msg| msg.try_into().map_err(|_| ButtplugError::new_message_error(out_id, ButtplugMessageError::MessageConversionError("Cannot convert server message to client spec.").into())));
       sender 
-        .send(output.unwrap().try_into().unwrap())
+        .send(output)
         .await
         .map_err(|_| ButtplugConnectorError::ConnectorNotConnected.into())
     })

@@ -30,7 +30,7 @@ pub trait DeviceCommunicationManager: Send {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum ButtplugDeviceSpecificError {
   // XInput library doesn't derive error on its error enum. :(
   #[error("XInput usage error: {0:?}")]

@@ -53,7 +53,8 @@ use tracing_futures::Instrument;
 /// errors related to the connector. Buttplug
 /// [Error][crate::core::messages::Error] messages will still be valid, because
 /// they're coming from the server.
-type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugConnectorError>;
+// TODO This is not longer used since we return errors at the point of deserialization. Remove.
+type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientError>;
 /// Result type used for public APIs.
 ///
 /// Allows us to differentiate between an issue with the connector (as a
@@ -145,6 +146,7 @@ pub enum ButtplugClientEvent {
   /// Emitted when a client connector detects that the server has
   /// disconnected.
   ServerDisconnect,
+  Error(ButtplugError),
 }
 
 /// Struct used by applications to communicate with a Buttplug Server.

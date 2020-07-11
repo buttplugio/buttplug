@@ -51,7 +51,7 @@ async fn remote_connector_event_loop<
   // Takes messages from the client
   mut connector_outgoing_recv: Receiver<ButtplugRemoteConnectorMessage<OutboundMessageType>>,
   // Sends messages not matched in the sorter to the client.
-  connector_incoming_sender: Sender<InboundMessageType>,
+  connector_incoming_sender: Sender<Result<InboundMessageType, ButtplugError>>,
   transport: TransportType,
   // Sends sorter processed messages to the transport.
   transport_outgoing_sender: Sender<ButtplugSerializedMessage>,
@@ -99,7 +99,8 @@ async fn remote_connector_event_loop<
             match serializer.deserialize(serialized_msg) {
               Ok(array) => {
                 for smsg in array {
-                  if connector_incoming_sender.send(smsg).await.is_err() {
+                  // TODO THIS SHOULD CONVERT ERROR MESSAGES FIRST.
+                  if connector_incoming_sender.send(Ok(smsg)).await.is_err() {
                     error!("Connector has disconnected, ending remote connector loop.");
                     return;
                   }
@@ -109,7 +110,7 @@ async fn remote_connector_event_loop<
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                let _ = connector_incoming_sender.send(Error::from(ButtplugError::ButtplugMessageError(ButtplugMessageError::MessageSerializationError(e))).into()).await;
+                let _ = connector_incoming_sender.send(Err(ButtplugError::new_system_error(ButtplugMessageError::MessageSerializationError(e).into()))).await;
               }
             }
           }
@@ -217,7 +218,7 @@ where
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<InboundMessageType>, ButtplugConnectorError>> {
+  ) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugError>>, ButtplugConnectorError>> {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();

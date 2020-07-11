@@ -15,7 +15,7 @@ pub struct Test {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
   pub(super) id: u32,
-  /// Test string, which will be echo'd back to client when sent to server.
+  /// Test string, which will be echoed back to client when sent to server.
   #[cfg_attr(feature = "serialize_json", serde(rename = "TestString"))]
   pub test_string: String,
 }

@@ -56,15 +56,17 @@ impl From<ButtplugError> for Error {
   /// Converts a [ButtplugError] object into a Buttplug Protocol
   /// [Error] message.
   fn from(error: ButtplugError) -> Self {
-    let code = match error {
-      ButtplugError::ButtplugDeviceError { .. } => ErrorCode::ErrorDevice,
-      ButtplugError::ButtplugMessageError { .. } => ErrorCode::ErrorMessage,
-      ButtplugError::ButtplugPingError { .. } => ErrorCode::ErrorPing,
-      ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
-      ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
+    let code = match error.kind() {
+      ButtplugErrorKind::ButtplugDeviceError { .. } => ErrorCode::ErrorDevice,
+      ButtplugErrorKind::ButtplugMessageError { .. } => ErrorCode::ErrorMessage,
+      ButtplugErrorKind::ButtplugPingError { .. } => ErrorCode::ErrorPing,
+      ButtplugErrorKind::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
+      ButtplugErrorKind::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
     let msg = error.to_string();
-    Error::new(code, &msg)
+    let mut err_msg = Error::new(code, &msg);
+    err_msg.set_id(error.id());
+    err_msg
   }
 }
 

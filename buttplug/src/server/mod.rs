@@ -258,6 +258,7 @@ mod test {
     server::{ButtplugServer},
     util::async_manager,
   };
+  use futures::StreamExt;
 
   // Warning: This test is brittle. If any log messages are fired between our
   // log in this message and the asserts, it will fail. If you see failures on
