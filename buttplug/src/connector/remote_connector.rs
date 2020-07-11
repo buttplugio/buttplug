@@ -13,7 +13,7 @@ use crate::{
     ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   core::{
-    errors::{ButtplugMessageError, ButtplugError},
+    errors::{ButtplugMessageError, ButtplugServerError},
     messages::{
     serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
     ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage, Error,
@@ -51,7 +51,7 @@ async fn remote_connector_event_loop<
   // Takes messages from the client
   mut connector_outgoing_recv: Receiver<ButtplugRemoteConnectorMessage<OutboundMessageType>>,
   // Sends messages not matched in the sorter to the client.
-  connector_incoming_sender: Sender<Result<InboundMessageType, ButtplugError>>,
+  connector_incoming_sender: Sender<Result<InboundMessageType, ButtplugServerError>>,
   transport: TransportType,
   // Sends sorter processed messages to the transport.
   transport_outgoing_sender: Sender<ButtplugSerializedMessage>,
@@ -110,7 +110,7 @@ async fn remote_connector_event_loop<
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                let _ = connector_incoming_sender.send(Err(ButtplugError::new_system_error(ButtplugMessageError::MessageSerializationError(e).into()))).await;
+                let _ = connector_incoming_sender.send(Err(ButtplugMessageError::MessageSerializationError(e).into())).await;
               }
             }
           }
@@ -218,7 +218,7 @@ where
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugError>>, ButtplugConnectorError>> {
+  ) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>> {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();

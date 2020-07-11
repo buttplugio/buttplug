@@ -13,7 +13,7 @@ use super::comm_managers::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError, ButtplugError},
+    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
       self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
@@ -197,21 +197,25 @@ impl DeviceManager {
     }
   }
 
-  fn start_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
+  fn start_scanning(&self) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.start_scanning()).collect();
       let is_scanning = self.is_scanning.clone();
       Box::pin(async move {
-        future::join_all(fut_vec).await;
-        is_scanning.store(true, Ordering::SeqCst);
-        Ok(messages::Ok::new(msg_id).into())
+        if is_scanning.load(Ordering::SeqCst) {
+          Err(ButtplugDeviceError::DeviceScanningAlreadyStarted.into())
+        } else {
+          future::join_all(fut_vec).await;
+          is_scanning.store(true, Ordering::SeqCst);
+          Ok(messages::Ok::default().into())
+        }
       })
     }
   }
 
-  fn stop_scanning(&self, msg_id: u32) -> ButtplugServerResultFuture {
+  fn stop_scanning(&self) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
@@ -219,17 +223,17 @@ impl DeviceManager {
       let is_scanning = self.is_scanning.clone();
       Box::pin(async move {
         if !is_scanning.load(Ordering::SeqCst) {
-          Err(ButtplugError::new_message_error(msg_id, ButtplugDeviceError::DeviceScanningAlreadyStopped.into()))
+          Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into())
         } else {
           // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
           future::join_all(fut_vec).await;
-          Ok(messages::Ok::new(msg_id).into())
+          Ok(messages::Ok::default().into())
         }
       })
     }
   }
 
-  fn stop_all_devices(&self, msg_id: u32) -> ButtplugServerResultFuture {
+  fn stop_all_devices(&self) -> ButtplugServerResultFuture {
     let fut_vec: Vec<_> = self
       .devices
       .iter()
@@ -241,7 +245,7 @@ impl DeviceManager {
     // TODO This could use some error reporting.
     Box::pin(async move {
       future::join_all(fut_vec).await;
-      Ok(messages::Ok::new(msg_id).into())
+      Ok(messages::Ok::default().into())
     })
   }
 
@@ -250,8 +254,14 @@ impl DeviceManager {
     device_msg: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
     match self.devices.get(&device_msg.get_device_index()) {
-      Some(device) => device.parse_message(device_msg),
-      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into(),
+      Some(device) => {
+        let fut = device.parse_message(device_msg);
+        // Create a future to run the message through the device, then handle adding the id to the result.
+        Box::pin(async move {
+          fut.await
+        })
+      }
+      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into()
     }
   }
 
@@ -277,14 +287,14 @@ impl DeviceManager {
         device_list.set_id(msg.get_id());
         Box::pin(future::ready(Ok(device_list.into())))
       }
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(msg) => {
-        self.stop_all_devices(msg.get_id())
+      ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => {
+        self.stop_all_devices()
       }
-      ButtplugDeviceManagerMessageUnion::StartScanning(msg) => {
-        self.start_scanning(msg.get_id())
+      ButtplugDeviceManagerMessageUnion::StartScanning(_) => {
+        self.start_scanning()
       }
-      ButtplugDeviceManagerMessageUnion::StopScanning(msg) => {
-        self.stop_scanning(msg.get_id())
+      ButtplugDeviceManagerMessageUnion::StopScanning(_) => {
+        self.stop_scanning()
       }
     }
   }

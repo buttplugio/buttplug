@@ -178,11 +178,8 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
         ButtplugSerializedMessage::Text(msg_to_protocol_json(
-          ButtplugCurrentSpecServerMessage::Error(
-            ButtplugError::new_system_error(
-              ButtplugHandshakeError::RequestServerInfoExpected.into()
-            )
-            .into(),
+     ButtplugCurrentSpecServerMessage::Error(
+            ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into()
           ),
         ))
       }

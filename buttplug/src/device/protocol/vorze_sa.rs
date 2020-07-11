@@ -1,11 +1,10 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
-  server::ButtplugServerResultFuture,
 };
 use async_mutex::Mutex;
 use std::sync::Arc;
@@ -49,7 +48,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&msg, false);
@@ -89,7 +88,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::RotateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
     // This will never change, so we can process it before the future. 
     let dev_id = if self.name.contains("UFO") {

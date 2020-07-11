@@ -1,4 +1,4 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
 use crate::{
   core::{
     messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
@@ -7,7 +7,6 @@ use crate::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
-  server::ButtplugServerResultFuture,
 };
 use std::sync::Arc;
 
@@ -35,7 +34,7 @@ impl ButtplugProtocolCommandHandler for Svakom {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
     let speed = (msg.speeds[0].speed * 19.0) as u8;
     let multiplier: u8 = if speed == 0x00 { 0x00 } else { 0x01 };

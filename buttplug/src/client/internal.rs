@@ -15,7 +15,7 @@ use super::{
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
-    errors::ButtplugError,
+    errors::ButtplugServerError,
     messages::{
       ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
       DeviceList, DeviceMessageInfo,
@@ -108,7 +108,7 @@ where
   /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
-  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
+  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
   sorter: ClientMessageSorter,
 }
 
@@ -124,7 +124,7 @@ where
   /// returns it.
   pub fn new(
     connector: ConnectorType,
-    connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
+    connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
     event_sender: BroadcastChannel<ButtplugClientEvent>,
     client_sender: Sender<ButtplugClientRequest>,
     client_receiver: Receiver<ButtplugClientRequest>,
@@ -181,7 +181,7 @@ where
   /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
   /// and update its map accordingly. After that, it will pass the information
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
-  async fn parse_connector_message(&mut self, msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugError>) {
+  async fn parse_connector_message(&mut self, msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>) {
     if self.sorter.maybe_resolve_result(&msg_result).await {
       trace!("Message future found, returning");
       return;
@@ -232,9 +232,8 @@ where
   },
   Err(err) => {
     self
-    .send_client_event(&ButtplugClientEvent::Error(err))
+    .send_client_event(&ButtplugClientEvent::Error(err.into()))
     .await;
-
   }
   }
   }
@@ -338,7 +337,7 @@ where
 pub(super) fn client_event_loop(
   connector: impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
     + 'static,
-  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>,
+  connector_receiver: Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
 ) -> (
   impl Future<Output = Result<(), ButtplugClientError>>,
   Arc<DashMap<u32, ButtplugClientDeviceInternal>>,

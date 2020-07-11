@@ -1,4 +1,4 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
 use crate::{
   core::{
     messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
@@ -7,7 +7,6 @@ use crate::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
-  server::ButtplugServerResultFuture,
 };
 use std::sync::Arc;
 
@@ -36,7 +35,7 @@ impl ButtplugProtocolCommandHandler for Picobong {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
     let speed = (msg.speeds[0].speed * 10.0) as u8;
     let mode: u8 = if speed == 0 { 0xff } else { 0x01 };

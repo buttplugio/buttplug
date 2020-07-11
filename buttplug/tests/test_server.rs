@@ -1,7 +1,7 @@
 use async_channel::Receiver;
 use buttplug::{
   core::{
-    errors::ButtplugErrorKind,
+    errors::ButtplugError,
     messages::{
       self, ButtplugMessageSpecVersion, ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -87,9 +87,7 @@ fn test_ping_timeout() {
     match server.parse_message(pingmsg.into()).await {
       Ok(_) => panic!("Should get a ping error back!"),
       Err(e) => {
-        if let ButtplugErrorKind::ButtplugPingError(_) = e.kind() {
-          // do nothing
-        } else {
+        if !matches!(e.error(), ButtplugError::ButtplugPingError(_)) {
           panic!("Got wrong type of error back! {:?}", e);
         }
       }

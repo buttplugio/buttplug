@@ -23,13 +23,13 @@ use crate::{
       RawWriteCmd,
       RawSubscribeCmd,
       RawUnsubscribeCmd,
+      ButtplugServerMessage,
     },
   },
   device::{
     configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
     protocol::{ButtplugProtocol, ProtocolTypes}
   },
-  server::ButtplugServerResultFuture,
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
@@ -94,6 +94,8 @@ pub type BoundedDeviceEventBroadcaster = BroadcastChannel<
   futures_channel::mpsc::Sender<ButtplugDeviceEvent>,
   futures_channel::mpsc::Receiver<ButtplugDeviceEvent>,
 >;
+
+pub type ButtplugDeviceResultFuture = BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
 #[derive(PartialEq, Debug)]
 pub struct DeviceReadCmd {
@@ -376,7 +378,7 @@ impl ButtplugDevice {
   pub fn parse_message(
     &self,
     message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
   }
   

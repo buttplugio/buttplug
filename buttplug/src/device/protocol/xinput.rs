@@ -1,4 +1,4 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
 use crate::{
   core::{
     errors::ButtplugMessageError,
@@ -8,7 +8,6 @@ use crate::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
-  server::ButtplugServerResultFuture,
 };
 use async_mutex::Mutex;
 use byteorder::{LittleEndian, WriteBytesExt};
@@ -40,7 +39,7 @@ impl ButtplugProtocolCommandHandler for XInput {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.

@@ -136,7 +136,7 @@ impl ButtplugServer {
     self.connected.load(Ordering::SeqCst)
   }
 
-  pub fn disconnect(&self) -> BoxFuture<Result<(), ButtplugError>> {
+  pub fn disconnect(&self) -> BoxFuture<Result<(), ButtplugServerError>> {
     let mut ping_fut = None;
     if let Some(ping_timer) = &self.ping_timer {
       ping_fut = Some(ping_timer.stop_ping_timer());
@@ -154,21 +154,26 @@ impl ButtplugServer {
     })
   }
 
-  pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
+  // This is the only method that returns ButtplugServerResult, as it handles
+  // the packing of the message ID.
+  pub fn parse_message(&self, msg: ButtplugClientMessage) -> BoxFuture<'static, Result<ButtplugServerMessage, ButtplugServerError>> {
     let id = msg.get_id();
     if !self.connected() {
-      if let ButtplugClientMessage::RequestServerInfo(rsi_msg) = msg {
-        return self.perform_handshake(rsi_msg);
-      } else if self.pinged_out.load(Ordering::SeqCst) {
-        return ButtplugError::from(ButtplugPingError::PingedOut).into();
-      } else {
-        return ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
+      // Check for ping timeout first! There's no way we should've pinged out if
+      // we haven't received RequestServerInfo first, but we do want to know if
+      // we pinged out.
+      if self.pinged_out.load(Ordering::SeqCst) {
+        return ButtplugServerError::new_message_error(msg.get_id(), ButtplugPingError::PingedOut.into()).into();
+      } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
+        return ButtplugServerError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
       }
     }
-    // TODO This is a really convoluted block, could use clarification.
-    let out_fut = if self.pinged_out.load(Ordering::SeqCst) {
-      ButtplugPingError::PingedOut.into()
-    } else if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
+    // Produce whatever future is needed to reply to the message, this may be a
+    // device command future, or something the server handles. All futures will
+    // return Result<ButtplugServerMessage, ButtplugError>, and we'll handle
+    // tagging the result with the message id in the future we put out as the
+    // return value from this method.
+    let out_fut = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
       if let Some(ref dm) = self.device_manager {
@@ -178,9 +183,10 @@ impl ButtplugServer {
       }
     } else {
       match msg {
+        ButtplugClientMessage::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
         ButtplugClientMessage::Ping(p) => self.handle_ping(p),
         ButtplugClientMessage::RequestLog(l) => self.handle_log(l),
-        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
+        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
       }
     };
     // Simple way to set the ID on the way out. Just rewrap
@@ -189,6 +195,8 @@ impl ButtplugServer {
       out_fut.await.and_then(|mut ok_msg| {
         ok_msg.set_id(id);
         Ok(ok_msg)
+      }).map_err(|err| {
+        ButtplugServerError::new_message_error(id, err)
       })
     })
   }

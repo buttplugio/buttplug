@@ -4,7 +4,6 @@ pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerial
 
 use thiserror::Error;
 pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
-use serde_json::Error as SerdeJsonError;
 
 #[derive(Debug, Error, Clone)]
 pub enum ButtplugSerializerError {

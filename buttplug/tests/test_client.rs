@@ -1,19 +1,21 @@
+mod util;
 extern crate buttplug;
 
 use async_channel::Receiver;
 use buttplug::{
-  client::ButtplugClient,
+  client::{ButtplugClient, ButtplugClientError},
   connector::{
     ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
     ButtplugInProcessClientConnector,
   },
   core::{
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
-    errors::ButtplugError,
+    errors::{ButtplugError, ButtplugServerError, ButtplugDeviceError}
   },
   util::async_manager,
 };
 use futures::future::BoxFuture;
+use util::DelayDeviceCommunicationManager;
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}
@@ -23,7 +25,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugError>>, ButtplugConnectorError>>
+  ) -> BoxFuture<'static, Result<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>, ButtplugConnectorError>>
   {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
@@ -95,15 +97,12 @@ fn test_connect_init() {
 
 // Test ignored until we have a test device manager.
 #[test]
-#[ignore]
 fn test_start_scanning() {
   async_manager::block_on(async {
-    let (client, _) = ButtplugClient::connect(
-      "Test Client",
-      ButtplugInProcessClientConnector::new("Test Server", 0),
-    )
-    .await
-    .unwrap();
+    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let test_mgr_helper = connector.server_ref().add_test_comm_manager();
+    test_mgr_helper.add_ble_device("Massage Demo").await;
+    let (client, _) = ButtplugClient::connect("Test Client", connector).await.unwrap();
     assert!(client.start_scanning().await.is_ok());
   });
 }
@@ -112,22 +111,44 @@ fn test_start_scanning() {
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
     let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
-    connector.server_ref().add_test_comm_manager();
+    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
-    assert!(client.stop_scanning().await.is_err());
+    let should_be_err = client.stop_scanning().await;
+    if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
+      assert!(matches!(bp_err, ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)));
+    } else {
+      panic!("Should've thrown error!");
+    }
     assert!(client.stop_scanning().await.is_err());
   });
 }
 
-// #[test]
-// fn test_scanning_finished() {
-//     task::block_on(async {
-//         let mut client = connect_test_client().await;
-//         assert_eq!(client.server_name.as_ref().unwrap(), "Test Server");
-//         assert!(client.start_scanning().await.is_none());
-//     });
-// }
+#[test]
+fn test_start_scanning_when_already_scanning() {
+  async_manager::block_on(async {
+    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
+    let (client, _) = ButtplugClient::connect("Test Client", connector)
+      .await
+      .unwrap();
+    assert!(client.start_scanning().await.is_ok());
+    assert!(client.start_scanning().await.is_err());
+  });
+}
+
+#[test]
+fn test_scanning_finished() {
+  async_manager::block_on(async {
+    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
+    let (client, _) = ButtplugClient::connect("Test Client", connector)
+      .await
+      .unwrap();
+    assert!(client.start_scanning().await.is_ok());
+    assert!(client.stop_scanning().await.is_ok());
+  });
+}
 
 // Failure on server version error is unit tested in server.

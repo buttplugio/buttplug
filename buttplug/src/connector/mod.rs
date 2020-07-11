@@ -85,7 +85,7 @@ pub use transport::ButtplugWebsocketClientTransport;
 
 use crate::{
   core::{
-    errors::ButtplugError,
+    errors::ButtplugServerError,
     messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   },
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
@@ -158,7 +158,7 @@ where
   ///
   /// As connection may involve blocking operations like establishing network
   /// connections, this trait method is marked async.
-  fn connect(&mut self) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugError>>, ButtplugConnectorError>>;
+  fn connect(&mut self) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>>;
   /// Disconnects the client from the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the

@@ -1,11 +1,10 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
-  server::ButtplugServerResultFuture,
 };
 use async_mutex::Mutex;
 use std::sync::Arc;
@@ -36,7 +35,7 @@ impl ButtplugProtocolCommandHandler for Aneros {
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {

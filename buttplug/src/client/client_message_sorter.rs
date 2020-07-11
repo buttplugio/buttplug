@@ -10,7 +10,7 @@
 use crate::{
   client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared},
   core::{
-    errors::ButtplugError,
+    errors::{ButtplugError, ButtplugServerError},
     messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
   },
 };
@@ -91,7 +91,7 @@ impl ClientMessageSorter {
   /// Returns true if the response message was resolved to a future via matching
   /// `id`, otherwise returns false. False returns mean the message should be
   /// considered as an *event*.
-  pub async fn maybe_resolve_result(&mut self, msg_result: &Result<ButtplugCurrentSpecServerMessage, ButtplugError>) -> bool {
+  pub async fn maybe_resolve_result(&mut self, msg_result: &Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>) -> bool {
     let id = match msg_result {
        Ok(msg) => msg.get_id(),
        Err(err) => err.id(),
@@ -100,7 +100,7 @@ impl ClientMessageSorter {
     match self.future_map.remove(&id) {
       Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
-        _state.set_reply(msg_result.clone().map_err(|err| err.into()));
+        _state.set_reply(msg_result.clone().map_err(|err| ButtplugError::from(err).into()));
         true
       }
       None => {
