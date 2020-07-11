@@ -13,7 +13,7 @@ use super::comm_managers::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
+    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError, ButtplugError},
     messages::{
       self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
@@ -29,7 +29,7 @@ use crate::{
 use async_channel::{Receiver, Sender, bounded};
 use dashmap::DashMap;
 use futures::{FutureExt, StreamExt, future::{self, Future}};
-use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicU32, Ordering}}};
+use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicU32, AtomicBool, Ordering}}};
 
 enum DeviceEvent {
   DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
@@ -174,6 +174,7 @@ pub struct DeviceManager {
   comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
   devices: Arc<DashMap<u32, ButtplugDevice>>,
   sender: Sender<DeviceCommunicationEvent>,
+  is_scanning: Arc<AtomicBool>,
 }
 
 unsafe impl Send for DeviceManager {}
@@ -192,6 +193,7 @@ impl DeviceManager {
       sender: device_event_sender,
       devices: device_map,
       comm_managers: vec![],
+      is_scanning: Arc::new(AtomicBool::new(false)),
     }
   }
 
@@ -200,8 +202,10 @@ impl DeviceManager {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.start_scanning()).collect();
+      let is_scanning = self.is_scanning.clone();
       Box::pin(async move {
         future::join_all(fut_vec).await;
+        is_scanning.store(true, Ordering::SeqCst);
         Ok(messages::Ok::new(msg_id).into())
       })
     }
@@ -212,10 +216,15 @@ impl DeviceManager {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.stop_scanning()).collect();
+      let is_scanning = self.is_scanning.clone();
       Box::pin(async move {
-        // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
-        future::join_all(fut_vec).await;
-        Ok(messages::Ok::new(msg_id).into())
+        if !is_scanning.load(Ordering::SeqCst) {
+          Err(ButtplugError::new_message_error(msg_id, ButtplugDeviceError::DeviceScanningAlreadyStopped.into()))
+        } else {
+          // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
+          future::join_all(fut_vec).await;
+          Ok(messages::Ok::new(msg_id).into())
+        }
       })
     }
   }

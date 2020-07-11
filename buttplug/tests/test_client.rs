@@ -108,6 +108,19 @@ fn test_start_scanning() {
   });
 }
 
+#[test]
+fn test_stop_scanning_when_not_scanning() {
+  async_manager::block_on(async {
+    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    connector.server_ref().add_test_comm_manager();
+    let (client, _) = ButtplugClient::connect("Test Client", connector)
+      .await
+      .unwrap();
+    assert!(client.stop_scanning().await.is_err());
+    assert!(client.stop_scanning().await.is_err());
+  });
+}
+
 // #[test]
 // fn test_scanning_finished() {
 //     task::block_on(async {
