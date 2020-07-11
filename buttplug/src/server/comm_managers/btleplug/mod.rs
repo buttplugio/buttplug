@@ -64,6 +64,10 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
 }
 
 impl DeviceCommunicationManager for BtlePlugCommunicationManager {
+  fn name(&self) -> &'static str {
+    "BtlePlugCommunicationManager"
+  }
+
   fn start_scanning(&self) -> ButtplugResultFuture {
     // get the first bluetooth adapter
     debug!("Bringing up adapter.");
@@ -154,8 +158,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     })
   }
 
-  fn is_scanning(&self) -> bool {
-    false
+  fn scanning_status(&self) -> Arc<AtomicBool> {
+    self.is_scanning.clone()
   }
 }
 
@@ -181,6 +185,7 @@ mod test {
   use async_channel::bounded;
   use futures::StreamExt;
 
+  // Ignored because it requires a device. Should probably just be a manual integration test.
   #[test]
   #[ignore]
   pub fn test_btleplug() {

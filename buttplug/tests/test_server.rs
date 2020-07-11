@@ -1,7 +1,9 @@
+mod util;
+
 use async_channel::Receiver;
 use buttplug::{
   core::{
-    errors::ButtplugError,
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     messages::{
       self, ButtplugMessageSpecVersion, ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -16,14 +18,14 @@ use futures::StreamExt;
 use futures_timer::Delay;
 use std::time::Duration;
 
-async fn test_server_setup(
+async fn setup_test_server(
   msg_union: messages::ButtplugClientMessage,
 ) -> (ButtplugServer, Receiver<ButtplugServerMessage>) {
   let (server, recv) = ButtplugServer::new("Test Server", 0);
   // assert_eq!(server.server_name, "Test Server");
   match server.parse_message(msg_union).await.unwrap() {
-    ButtplugServerMessage::ServerInfo(_s) => assert_eq!(
-      _s,
+    ButtplugServerMessage::ServerInfo(s) => assert_eq!(
+      s,
       messages::ServerInfo::new("Test Server", ButtplugMessageSpecVersion::Version2, 0)
     ),
     _ => panic!("Should've received ok"),
@@ -36,8 +38,24 @@ fn test_server_handshake() {
   let msg =
     messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
-    let (server, _recv) = test_server_setup(msg).await;
+    let (server, _recv) = setup_test_server(msg).await;
     assert!(server.connected());
+  });
+}
+
+#[test]
+fn test_server_handshake_not_done_first() {
+  let msg = messages::Ping::default().into();
+  async_manager::block_on(async {
+    let (server, _) = ButtplugServer::new("Test Server", 0);
+    // assert_eq!(server.server_name, "Test Server");
+    let result = server.parse_message(msg).await;
+    assert!(result.is_err());
+    assert!(matches!(
+      result.unwrap_err().error(),
+      ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected)
+    ));
+    assert!(!server.connected());
   });
 }
 
@@ -46,7 +64,7 @@ fn test_server_version_lt() {
   let msg =
     messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
-    test_server_setup(msg).await;
+    setup_test_server(msg).await;
   });
 }
 
@@ -84,13 +102,10 @@ fn test_ping_timeout() {
     );
     Delay::new(Duration::from_millis(300)).await;
     let pingmsg = messages::Ping::default();
-    match server.parse_message(pingmsg.into()).await {
-      Ok(_) => panic!("Should get a ping error back!"),
-      Err(e) => {
-        if !matches!(e.error(), ButtplugError::ButtplugPingError(_)) {
-          panic!("Got wrong type of error back! {:?}", e);
-        }
-      }
+    let result = server.parse_message(pingmsg.into()).await;
+    let err = result.unwrap_err();
+    if !matches!(err.error(), ButtplugError::ButtplugPingError(_)) {
+      panic!("Got wrong type of error back! {:?}", err);
     }
     // Check that we got an event back about the ping out.
     let msg = recv.next().await.unwrap();
@@ -115,25 +130,27 @@ fn test_device_stop_on_ping_timeout() {
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.into()).await;
-    assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+    assert!(reply.is_ok());
     reply = server
       .parse_message(messages::StartScanning::default().into())
       .await;
-    assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+    assert!(reply.is_ok());
     // Check that we got an event back about a new device.
-    let msg = recv.next().await.unwrap();
-    let device_index;
-    if let ButtplugServerMessage::DeviceAdded(da) = msg {
-      assert_eq!(da.device_name, "Aneros Vivi");
-      device_index = da.device_index;
-      println!("{:?}", da);
-    } else {
-      panic!(format!(
-        "Returned message was not a DeviceAdded message or timed out: {:?}",
-        msg
-      ));
+    let mut device_index = 100;
+    while let Some(msg) = recv.next().await {
+      if let ButtplugServerMessage::ScanningFinished(_) = msg {
+        continue;
+      } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
+        assert_eq!(da.device_name, "Aneros Vivi");
+        device_index = da.device_index;
+        break;
+      } else {
+        panic!(format!(
+          "Returned message was not a DeviceAdded message or timed out: {:?}",
+          msg
+        ));
+      }
     }
-
     server
       .parse_message(
         messages::VibrateCmd::new(device_index, vec![messages::VibrateSubcommand::new(0, 0.5)])
@@ -160,5 +177,122 @@ fn test_device_stop_on_ping_timeout() {
       DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
     )
     .await;
+  });
+}
+
+#[test]
+fn test_repeated_handshake() {
+  let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
+  async_manager::block_on(async {
+    let (server, _recv) = setup_test_server((msg.clone()).into()).await;
+    assert!(server.connected());
+    let err = server.parse_message(msg.into()).await.unwrap_err();
+    assert!(matches!(
+      err.error(),
+      ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
+    ));
+  });
+}
+
+#[test]
+fn test_invalid_device_index() {
+  async_manager::block_on(async {
+    let msg =
+      messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let (server, _) = setup_test_server(msg.into()).await;
+    let reply = server
+      .parse_message(messages::VibrateCmd::new(10, vec![]).into())
+      .await;
+    assert!(reply.is_err());
+    assert!(matches!(
+      reply.unwrap_err().error(),
+      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))
+    ));
+  });
+}
+
+#[test]
+fn test_device_index_generation() {
+  async_manager::block_on(async {
+    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let helper = server.add_test_comm_manager();
+    helper.add_ble_device("Massage Demo").await;
+    helper.add_ble_device("Massage Demo").await;
+    assert!(server
+      .parse_message(
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+          .into()
+      )
+      .await
+      .is_ok());
+    assert!(server
+      .parse_message(messages::StartScanning::default().into())
+      .await
+      .is_ok());
+    // Check that we got an event back about a new device.
+    let mut index = 0u32;
+    while let Some(msg) = recv.next().await {
+      if let ButtplugServerMessage::ScanningFinished(_) = msg {
+        continue;
+      } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
+        assert_eq!(da.device_name, "Aneros Vivi");
+        // Devices aren't guaranteed to be added in any specific order, the
+        // scheduler will do whatever it wants. So check boundaries instead of
+        // exact.
+        assert!(da.device_index < 2);
+        index += 1;
+        // Found both devices we're looking for, finish test.
+        if index == 2 {
+          break;
+        }
+      } else {
+        panic!(format!(
+          "Returned message was not a DeviceAdded message or timed out: {:?}",
+          msg
+        ));
+      }
+    }
+  });
+}
+
+#[test]
+fn test_scanning_finished() {
+  async_manager::block_on(async {
+    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let helper = server.add_test_comm_manager();
+    helper.add_ble_device("Massage Demo").await;
+    helper.add_ble_device("Massage Demo").await;
+    assert!(server
+      .parse_message(
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+          .into()
+      )
+      .await
+      .is_ok());
+    assert!(server
+      .parse_message(messages::StartScanning::default().into())
+      .await
+      .is_ok());
+    // Check that we got an event back about a new device.
+    let mut count = 0u32;
+    let mut finish_received = false;
+    // We should get 3 messages: 2 DeviceAdded, 1 ScanningFinished.
+    while let Some(msg) = recv.next().await {
+      if matches!(msg, ButtplugServerMessage::ScanningFinished(_)) {
+        finish_received = true;
+        break;
+      }
+      count += 1;
+      if count == 3 {
+        break;
+      }
+    }
+    assert!(finish_received);
+    server.add_comm_manager::<util::DelayDeviceCommunicationManager>();
+    helper.add_ble_device("Massage Demo").await;
+    assert!(server
+      .parse_message(messages::StartScanning::default().into())
+      .await
+      .is_ok());
   });
 }

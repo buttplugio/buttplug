@@ -6,15 +6,13 @@ mod test {
     core::messages::{
       self,
       serializer::{
-        ButtplugMessageSerializer,
-        ButtplugSerializedMessage,
-        ButtplugServerJSONSerializer,
+        ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
       },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::ButtplugServer,
-    test::{check_recv_value},
+    test::check_recv_value,
     util::async_manager,
   };
   use futures::StreamExt;
@@ -83,11 +81,16 @@ mod test {
         .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-      // Check that we got an event back about a new device.
+      // Check that we got an event back about scanning finishing.
       let msg = recv.next().await.unwrap();
-      // We should get back an aneros with only SingleMotorVibrateCmd
       assert_eq!(
         serializer.serialize(vec!(msg)),
+        r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into()
+      );
+      let da_msg = recv.next().await.unwrap();
+      // We should get back an aneros with only SingleMotorVibrateCmd
+      assert_eq!(
+        serializer.serialize(vec!(da_msg)),
         r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#.to_owned().into()
       );
       let rdl = serializer
@@ -128,11 +131,18 @@ mod test {
         .parse_message(messages::StartScanning::default().into())
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-      // Check that we got an event back about a new device.
+      // Check that we got an event back about scanning finishing.
       let msg = recv.next().await.unwrap();
-      // We should get back an aneros with only SingleMotorVibrateCmd
       assert_eq!(
         serializer.serialize(vec!(msg)),
+        r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into()
+      );
+
+      // Check that we got an event back about a new device.
+      let da_msg = recv.next().await.unwrap();
+      // We should get back an aneros with only SingleMotorVibrateCmd
+      assert_eq!(
+        serializer.serialize(vec!(da_msg)),
         r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#.to_owned().into()
       );
       let output2 = server
@@ -143,7 +153,8 @@ mod test {
                 .to_owned()
                 .into(),
             )
-            .unwrap()[0].clone(),
+            .unwrap()[0]
+            .clone(),
         )
         .await
         .unwrap();

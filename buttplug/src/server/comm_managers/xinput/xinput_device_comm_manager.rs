@@ -32,6 +32,10 @@ impl DeviceCommunicationManagerCreator for XInputDeviceCommunicationManager {
 }
 
 impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
+  fn name(&self) -> &'static str {
+    "XInputDeviceCommunicationManager"
+  }
+
   fn start_scanning(&self) -> ButtplugResultFuture {
     info!("XInput manager scanning!");
     let sender = self.sender.clone();
@@ -63,9 +67,5 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
 
   fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
-  }
-
-  fn is_scanning(&self) -> bool {
-    false
   }
 }

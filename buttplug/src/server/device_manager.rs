@@ -26,10 +26,20 @@ use crate::{
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
 };
-use async_channel::{Receiver, Sender, bounded};
+use async_channel::{bounded, Receiver, Sender};
+use async_mutex::Mutex;
 use dashmap::DashMap;
-use futures::{FutureExt, StreamExt, future::{self, Future}};
-use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicU32, AtomicBool, Ordering}}};
+use futures::{
+  future::{self, Future},
+  FutureExt, StreamExt,
+};
+use std::{
+  convert::TryFrom,
+  sync::{
+    atomic::{AtomicBool, AtomicU32, Ordering},
+    Arc,
+  },
+};
 
 enum DeviceEvent {
   DeviceCommunicationEvent(Option<DeviceCommunicationEvent>),
@@ -50,6 +60,7 @@ fn wait_for_manager_events(
   let device_map = Arc::new(DashMap::new());
   let (device_comm_sender, mut device_comm_receiver) = bounded(256);
   let device_map_return = device_map.clone();
+  let mut device_manager_status: Vec<Arc<AtomicBool>> = vec![];
   let event_loop = async move {
     loop {
       let ping_fut = async {
@@ -78,7 +89,10 @@ fn wait_for_manager_events(
               // Pull and increment the device index now. If connection fails,
               // we'll just iterate to the next one.
               let device_index = main_device_index.load(Ordering::SeqCst);
-              main_device_index.store(main_device_index.load(Ordering::SeqCst) + 1, Ordering::SeqCst);
+              main_device_index.store(
+                main_device_index.load(Ordering::SeqCst) + 1,
+                Ordering::SeqCst,
+              );
               let device_event_sender_clone = device_event_sender.clone();
               let device_map_clone = device_map.clone();
               let server_sender_clone = server_sender.clone();
@@ -97,34 +111,46 @@ fn wait_for_manager_events(
                             return;
                           }
                         }
-                      }).unwrap();
-                      let device_added_message = DeviceAdded::new(
-                        device_index,
-                        device.name(),
-                        &device.message_attributes(),
-                      );
+                      })
+                      .unwrap();
+                      let device_added_message =
+                        DeviceAdded::new(device_index, device.name(), &device.message_attributes());
                       device_map_clone.insert(device_index, device);
                       // After that, we can send out to the server's event
                       // listeners to let them know a device has been added.
                       if server_sender_clone
                         .send(device_added_message.into())
                         .await
-                        .is_err() {
-                          error!("Server disappeared, exiting loop.");
-                          return;
-                        }
+                        .is_err()
+                      {
+                        error!("Server disappeared, exiting loop.");
+                        return;
+                      }
                     }
                     None => debug!("Device could not be matched to a protocol."),
                   },
                   Err(e) => error!("Device errored while trying to connect: {}", e),
                 }
-              }).unwrap();
+              })
+              .unwrap();
             }
             DeviceCommunicationEvent::ScanningFinished => {
-              if server_sender.send(ScanningFinished::default().into()).await.is_err() {
+              for comm_mgr_status in &device_manager_status {
+                if comm_mgr_status.load(Ordering::SeqCst) {
+                  continue;
+                }
+              }
+              if server_sender
+                .send(ScanningFinished::default().into())
+                .await
+                .is_err()
+              {
                 error!("Server disappeared, exiting loop.");
                 return;
               }
+            }
+            DeviceCommunicationEvent::DeviceManagerAdded(status) => {
+              device_manager_status.push(status);
             }
           },
           None => break,
@@ -133,7 +159,11 @@ fn wait_for_manager_events(
           Some((idx, event)) => {
             if let ButtplugDeviceEvent::Removed = event {
               device_map.remove(&idx);
-              if server_sender.send(DeviceRemoved::new(idx).into()).await.is_err() {
+              if server_sender
+                .send(DeviceRemoved::new(idx).into())
+                .await
+                .is_err()
+              {
                 error!("Server disappeared, exiting loop.");
                 return;
               }
@@ -171,10 +201,9 @@ fn wait_for_manager_events(
 }
 
 pub struct DeviceManager {
-  comm_managers: Vec<Box<dyn DeviceCommunicationManager>>,
+  comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, ButtplugDevice>>,
   sender: Sender<DeviceCommunicationEvent>,
-  is_scanning: Arc<AtomicBool>,
 }
 
 unsafe impl Send for DeviceManager {}
@@ -192,8 +221,7 @@ impl DeviceManager {
     Self {
       sender: device_event_sender,
       devices: device_map,
-      comm_managers: vec![],
-      is_scanning: Arc::new(AtomicBool::new(false)),
+      comm_managers: Arc::new(DashMap::new()),
     }
   }
 
@@ -201,16 +229,20 @@ impl DeviceManager {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
-      let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.start_scanning()).collect();
-      let is_scanning = self.is_scanning.clone();
+      let mgrs = self.comm_managers.clone();
       Box::pin(async move {
-        if is_scanning.load(Ordering::SeqCst) {
-          Err(ButtplugDeviceError::DeviceScanningAlreadyStarted.into())
-        } else {
-          future::join_all(fut_vec).await;
-          is_scanning.store(true, Ordering::SeqCst);
-          Ok(messages::Ok::default().into())
+        for mgr in mgrs.iter() {
+          if mgr.value().scanning_status().load(Ordering::SeqCst) {
+            return Err(ButtplugDeviceError::DeviceScanningAlreadyStarted.into());
+          }
         }
+        let fut_vec: Vec<_> = mgrs
+          .iter()
+          .map(|guard| guard.value().start_scanning())
+          .collect();
+        // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
+        future::join_all(fut_vec).await;
+        Ok(messages::Ok::default().into())
       })
     }
   }
@@ -219,31 +251,41 @@ impl DeviceManager {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
-      let fut_vec: Vec<_> = self.comm_managers.iter().map(|mgr| mgr.stop_scanning()).collect();
-      let is_scanning = self.is_scanning.clone();
+      let mgrs = self.comm_managers.clone();
       Box::pin(async move {
-        if !is_scanning.load(Ordering::SeqCst) {
-          Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into())
-        } else {
-          // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
-          future::join_all(fut_vec).await;
-          Ok(messages::Ok::default().into())
+        let mut scanning_stopped = true;
+        for mgr in mgrs.iter() {
+          if mgr.value().scanning_status().load(Ordering::SeqCst) {
+            scanning_stopped = false;
+            break;
+          }
         }
+        if scanning_stopped {
+          return Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into());
+        }
+
+        let fut_vec: Vec<_> = mgrs
+        .iter()
+        .map(|guard| guard.value().stop_scanning())
+        .collect();
+        // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
+        future::join_all(fut_vec).await;
+        Ok(messages::Ok::default().into())
       })
     }
   }
 
   fn stop_all_devices(&self) -> ButtplugServerResultFuture {
-    let fut_vec: Vec<_> = self
-      .devices
+    let device_map = self.devices.clone();
+    // TODO This could use some error reporting.
+    Box::pin(async move {
+      let fut_vec: Vec<_> = device_map
       .iter()
       .map(|dev| {
         let device = dev.value();
         device.parse_message(messages::StopDeviceCmd::new(1).into())
       })
       .collect();
-    // TODO This could use some error reporting.
-    Box::pin(async move {
       future::join_all(fut_vec).await;
       Ok(messages::Ok::default().into())
     })
@@ -257,11 +299,9 @@ impl DeviceManager {
       Some(device) => {
         let fut = device.parse_message(device_msg);
         // Create a future to run the message through the device, then handle adding the id to the result.
-        Box::pin(async move {
-          fut.await
-        })
+        Box::pin(async move { fut.await })
       }
-      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into()
+      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into(),
     }
   }
 
@@ -287,31 +327,20 @@ impl DeviceManager {
         device_list.set_id(msg.get_id());
         Box::pin(future::ready(Ok(device_list.into())))
       }
-      ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => {
-        self.stop_all_devices()
-      }
-      ButtplugDeviceManagerMessageUnion::StartScanning(_) => {
-        self.start_scanning()
-      }
-      ButtplugDeviceManagerMessageUnion::StopScanning(_) => {
-        self.stop_scanning()
-      }
+      ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => self.stop_all_devices(),
+      ButtplugDeviceManagerMessageUnion::StartScanning(_) => self.start_scanning(),
+      ButtplugDeviceManagerMessageUnion::StopScanning(_) => self.stop_scanning(),
     }
   }
 
-  pub fn parse_message(
-    &self,
-    msg: ButtplugClientMessage,
-  ) -> ButtplugServerResultFuture {
+  pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
     // If this is a device command message, just route it directly to the
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
       Ok(device_msg) => self.parse_device_message(device_msg),
       Err(_) => match ButtplugDeviceManagerMessageUnion::try_from(msg.clone()) {
         Ok(manager_msg) => self.parse_device_manager_message(manager_msg),
-        Err(_) => {
-          ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
-        }
+        Err(_) => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       },
     }
   }
@@ -320,17 +349,32 @@ impl DeviceManager {
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
-    self
-      .comm_managers
-      .push(Box::new(T::new(self.sender.clone())));
+    let mgr = T::new(self.sender.clone());
+    let status = mgr.scanning_status();
+    let sender = self.sender.clone();
+    // TODO This could run out of order and possibly cause weird scanning finished bugs?
+    async_manager::spawn(async move {
+      sender
+        .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
+        .await
+        .unwrap();
+    }).unwrap();
+    self.comm_managers.insert(mgr.name().to_owned(), Box::new(mgr));
   }
 
   pub fn add_test_comm_manager(&mut self) -> TestDeviceCommunicationManagerHelper {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
+    let status = mgr.scanning_status();
+    let sender = self.sender.clone();
+    // TODO This could run out of order and possibly cause weird scanning finished bugs?
+    async_manager::spawn(async move {
+      sender
+        .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
+        .await
+        .unwrap();
+    }).unwrap();
     let helper = mgr.helper();
-    self
-      .comm_managers
-      .push(Box::new(mgr));
+    self.comm_managers.insert(mgr.name().to_owned(), Box::new(mgr));
     helper
   }
 }
@@ -339,54 +383,4 @@ impl Drop for DeviceManager {
   fn drop(&mut self) {
     info!("Dropping device manager!");
   }
-}
-
-#[cfg(all(
-  test,
-  feature = "btleplug-manager"
-))]
-mod test {
-  // TODO Rewrite this using modern api. Got stuck behind unused features for a while.
-  /*
-  use super::DeviceManager;
-  use crate::{
-    core::messages::{
-      ButtplugMessage, ButtplugMessageUnion, RequestDeviceList, VibrateCmd, VibrateSubcommand,
-    },
-    server::comm_managers::btleplug::BtlePlugCommunicationManager,
-    util::async_manager
-  };
-  use futures::StreamExt;
-  use async_channel::bounded;
-  use std::time::Duration;
-
-  #[test]
-  pub fn test_device_manager_creation() {
-    async_manager::block_on(async {
-      let (sender, mut receiver) = bounded(256);
-      let mut dm = DeviceManager::new(sender);
-      dm.add_comm_manager::<BtlePlugCommunicationManager>();
-      dm.start_scanning().await;
-      if let ButtplugMessageUnion::DeviceAdded(msg) = receiver.next().await.unwrap() {
-        dm.stop_scanning().await;
-        info!("{:?}", msg);
-        info!("{:?}", msg.as_protocol_json());
-        match dm.parse_message(RequestDeviceList::default().into()).await {
-          Ok(msg) => info!("{:?}", msg),
-          Err(e) => assert!(false, e.to_string()),
-        }
-        match dm
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-        {
-          Ok(_) => info!("Message sent ok!"),
-          Err(e) => assert!(false, e.to_string()),
-        }
-      } else {
-        panic!("Did not get device added message!");
-      }
-      task::sleep(Duration::from_secs(10)).await;
-    });
-  }
-  */
 }

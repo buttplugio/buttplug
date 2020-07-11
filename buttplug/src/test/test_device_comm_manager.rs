@@ -85,6 +85,10 @@ impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
 }
 
 impl DeviceCommunicationManager for TestDeviceCommunicationManager {
+  fn name(&self) -> &'static str {
+    "TestDeviceCommunicationManager"
+  }
+
   fn start_scanning(&self) -> ButtplugResultFuture {
     let devices_vec = self.devices.clone();
     let device_sender = self.device_sender.clone();
@@ -101,16 +105,15 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
             error!("Device channel no longer open.");
           }
       }
+      if device_sender.send(DeviceCommunicationEvent::ScanningFinished).await.is_err() {
+        error!("Error sending scanning finished. Scanning may not register as finished now!");
+      }
       Ok(())
     })
   }
 
   fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
-  }
-
-  fn is_scanning(&self) -> bool {
-    false
   }
 }
 
@@ -138,14 +141,11 @@ mod test {
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
-      let msg = recv.next().await.unwrap();
-      if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
-      } else {
-        panic!(format!(
-          "Returned message was not a DeviceAdded message or timed out: {:?}",
-          msg
-        ));
+      while let Some(msg) = recv.next().await {
+        if let ButtplugServerMessage::DeviceAdded(da) = msg {
+          assert_eq!(da.device_name, "Aneros Vivi");
+          break;
+        }
       }
       device.disconnect().await.unwrap();
       // Check that we got an event back about a removed device.
