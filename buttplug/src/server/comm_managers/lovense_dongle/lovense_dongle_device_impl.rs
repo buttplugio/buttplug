@@ -90,7 +90,7 @@ impl LovenseDongleDeviceImpl {
       }
     });
     Self {
-      name: "Lovense Serial Device".to_owned(),
+      name: "Lovense Dongle Device".to_owned(),
       address: address.to_string(),
       device_outgoing,
       connected: Arc::new(AtomicBool::new(true)),
@@ -148,7 +148,7 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
         message_type: LovenseDongleMessageType::Toy,
         id: Some(address),
         command: Some(std::str::from_utf8(&msg.data).unwrap().to_string()),
-        eager: Some(1),
+        eager: None,
       };
       port_sender
         .send(OutgoingLovenseData::Message(outgoing_msg))

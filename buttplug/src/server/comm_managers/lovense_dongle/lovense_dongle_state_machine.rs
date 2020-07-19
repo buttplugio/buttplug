@@ -297,8 +297,22 @@ state_definition!(LovenseDongleStartScanning);
 impl LovenseDongleState for LovenseDongleStartScanning {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
     info!("scanning for devices");
+
+    // Turn on auto-connect on find
+    let autoconnect_msg = LovenseDongleOutgoingMessage {
+      func: LovenseDongleMessageFunc::Statuss,
+      message_type: LovenseDongleMessageType::Toy,
+      id: None,
+      command: None,
+      eager: None,
+    };
+    self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(autoconnect_msg))).await;
+
+    // This sleep is REQUIRED. If we send too soon after this, the dongle locks up.
+    futures_timer::Delay::new(std::time::Duration::from_millis(250)).await;
+    
     let scan_msg = LovenseDongleOutgoingMessage {
-      message_type: LovenseDongleMessageType::USB,
+      message_type: LovenseDongleMessageType::Toy,
       func: LovenseDongleMessageFunc::Search,
       eager: None,
       id: None,
@@ -320,19 +334,6 @@ state_definition!(LovenseDongleScanning);
 impl LovenseDongleState for LovenseDongleScanning {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
     info!("scanning for devices");
-    let scan_msg = LovenseDongleOutgoingMessage {
-      message_type: LovenseDongleMessageType::USB,
-      func: LovenseDongleMessageFunc::Search,
-      eager: None,
-      id: None,
-      command: None,
-    };
-    self
-      .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
-        scan_msg,
-      )))
-      .await;
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
@@ -341,7 +342,7 @@ impl LovenseDongleState for LovenseDongleScanning {
         }
         IncomingMessage::Dongle(device_msg) => {
           match device_msg.func {
-            LovenseDongleMessageFunc::Search => {
+            LovenseDongleMessageFunc::ToyData => {
               if let Some(data) = device_msg.data {
                 return Some(Box::new(LovenseDongleStopScanningAndConnect::new(
                   self.hub.clone(),
@@ -404,6 +405,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         scan_msg,
       )))
       .await;
+
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
@@ -420,7 +422,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
     }
-    Some(Box::new(LovenseDongleDeviceConnect::new(
+    Some(Box::new(LovenseDongleDeviceLoop::new(
       self.hub.clone(),
       self.device_id.clone(),
     )))
@@ -432,12 +434,13 @@ device_state_definition!(LovenseDongleDeviceConnect);
 #[async_trait]
 impl LovenseDongleState for LovenseDongleDeviceConnect {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+    
     let outgoing_msg = LovenseDongleOutgoingMessage {
       func: LovenseDongleMessageFunc::Connect,
       message_type: LovenseDongleMessageType::Toy,
       id: Some(self.device_id.clone()),
       command: None,
-      eager: None,
+      eager: Some(1),
     };
     self
       .hub
@@ -445,6 +448,7 @@ impl LovenseDongleState for LovenseDongleDeviceConnect {
         outgoing_msg,
       )))
       .await;
+      
     // We need to wait until we get the device connection success status back before emitting the device.
     loop {
       match self.hub.wait_for_input().await {
@@ -453,7 +457,22 @@ impl LovenseDongleState for LovenseDongleDeviceConnect {
             && device_msg.data.unwrap().status.unwrap()
               == LovenseDongleResultCode::DeviceConnectSuccess
           {
-            break;
+            let outgoing_msg = LovenseDongleOutgoingMessage {
+              func: LovenseDongleMessageFunc::Command,
+              message_type: LovenseDongleMessageType::Toy,
+              id: Some(self.device_id.clone()),
+              command: Some("AI;".to_owned()),
+              eager: None,
+            };
+            self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(outgoing_msg))).await;
+            let outgoing_msg2 = LovenseDongleOutgoingMessage {
+              func: LovenseDongleMessageFunc::Command,
+              message_type: LovenseDongleMessageType::Toy,
+              id: Some(self.device_id.clone()),
+              command: Some("AutoSwith:Off:Off;".to_owned()),
+              eager: None,
+            };
+            self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(outgoing_msg2))).await;
           }
         }
         msg => {

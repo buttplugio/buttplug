@@ -15,29 +15,33 @@ use async_channel::{bounded, Receiver, Sender};
 use async_mutex::Mutex;
 use blocking::block_on;
 use futures::StreamExt;
+use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
-use serialport::{
-  available_ports, open_with_settings, SerialPort, SerialPortSettings, SerialPortType,
-};
 use std::{
-  io::ErrorKind,
   sync::{atomic::AtomicBool, Arc},
   thread,
-  time::Duration,
 };
 use tracing;
 use tracing_futures::Instrument;
 
-fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<OutgoingLovenseData>) {
-  let mut port_write = |mut data: String| {
+fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseData>) {
+  info!("Starting HID dongle write thread");
+  let port_write = |mut data: String| {
     data += "\r\n";
-    info!("Writing message: {}", data);
+    debug!("Writing message: {}", data);
 
-    // TODO WRITE SHOULD ALWAYS BE FOLLOWED BY A READ UNLESS "EAGER" IS USED
-    //
-    // We should check this on the outgoing message. Otherwise we will run into
-    // all sorts of trouble.
-    port.write(&data.into_bytes()).unwrap();
+    // For HID, we have to append the null report id before writing.
+    let data_bytes = data.into_bytes();
+    debug!("Writing length: {}", data_bytes.len());
+    // We need to keep the first and last byte of our HID report 0, and we're
+    // packing 65 bytes (1 report id, 64 bytes data). We can chunk into 63 byte
+    // pieces and iterate.
+    for chunk in data_bytes.chunks(63) {
+      debug!("bytes: {:?}", chunk);
+      let mut byte_array = [0u8; 65];
+      byte_array[1..chunk.len() + 1].copy_from_slice(&chunk);
+      dongle.write(&byte_array).unwrap();
+    }
   };
   block_on!({
     while let Some(data) = receiver.next().await {
@@ -51,20 +55,25 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
       }
     }
   });
-  info!("EXITING LOVENSE DONGLE WRITE THREAD.");
+  info!("Leaving HID dongle write thread");
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongleIncomingMessage>) {
+fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessage>) {
+  info!("Starting HID dongle read thread");
+  dongle.set_blocking_mode(true);
   let mut data: String = String::default();
+  let mut buf = [0u8; 1024];
   loop {
-    // TODO This is probably too small
-    let mut buf: [u8; 1024] = [0; 1024];
-    match port.read(&mut buf) {
+    match dongle.read_timeout(&mut buf, 100) {
       Ok(len) => {
-        info!("Got {} serial bytes", len);
-        data += std::str::from_utf8(&buf[0..len]).unwrap();
+        if (len == 0) {
+          continue;
+        }
+        info!("Got {} hid bytes", len);
+        // Don't read last byte, as it'll always be 0 since the string
+        // terminator is sent.
+        data += std::str::from_utf8(&buf[0..len-1]).unwrap();
         if data.contains("\n") {
-          info!("{}", data);
           // We have what should be a full message.
           // Split it.
           let msg_vec: Vec<&str> = data.split("\n").collect();
@@ -72,9 +81,10 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
           let incoming = msg_vec[0];
           let sender_clone = sender.clone();
           block_on!(
+            println!("INCOMING: {}", incoming);
             async move {
               let stream =
-                Deserializer::from_str(&data).into_iter::<LovenseDongleIncomingMessage>();
+                Deserializer::from_str(&incoming).into_iter::<LovenseDongleIncomingMessage>();
               for msg in stream {
                 match msg {
                   Ok(m) => {
@@ -100,24 +110,22 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
         }
       }
       Err(e) => {
-        if e.kind() == ErrorKind::TimedOut {
-          continue;
-        }
         error!("{:?}", e);
         break;
       }
     }
   }
-  info!("EXITING LOVENSE DONGLE READ THREAD.");
+  info!("Leaving HID dongle read thread");
 }
-pub struct LovenseSerialDongleCommunicationManager {
+
+pub struct LovenseHIDDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
   //port: Arc<Mutex<Option<Box<dyn SerialPort>>>>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
 }
 
-impl LovenseSerialDongleCommunicationManager {
+impl LovenseHIDDongleCommunicationManager {
   fn find_dongle(&self) -> ButtplugResultFuture {
     // First off, see if we can actually find a Lovense dongle. If we already
     // have one, skip on to scanning. If we can't find one, send message to log
@@ -127,68 +135,41 @@ impl LovenseSerialDongleCommunicationManager {
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
     Box::pin(async move {
-      // TODO Does this block? Should it run in one of our threads?
-      match available_ports() {
-        Ok(ports) => {
-          info!("Got {} serial ports back", ports.len());
-          for p in ports {
-            if let SerialPortType::UsbPort(usb_info) = p.port_type {
-              // Hardcode the dongle VID/PID for now. We can't really do protocol
-              // detection here because this is a comm bus to us, not a device.
-              if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
-                // We've found a dongle.
-                info!("Found lovense dongle, connecting");
-                let mut settings = SerialPortSettings::default();
-                // Default is 8/N/1 but we'll need to set the baud rate
-                settings.baud_rate = 115200;
-                // Set our timeout at ~2hz. Would be nice if this was async, but oh well.
-                settings.timeout = Duration::from_millis(500);
-                match open_with_settings(&p.port_name, &settings) {
-                  Ok(dongle_port) => {
-                    let (writer_sender, writer_receiver) = bounded(256);
-                    let (reader_sender, reader_receiver) = bounded(256);
+      let (writer_sender, writer_receiver) = bounded(256);
+      let (reader_sender, reader_receiver) = bounded(256);
+      let api = HidApi::new().expect("Failed to create API instance");
+      let dongle1 = api.open(0x1915, 0x520a).expect("Failed to open device");
+      let dongle2 = api.open(0x1915, 0x520a).expect("Failed to open device");
 
-                    let read_port = (*dongle_port).try_clone().unwrap();
-                    let read_thread = thread::Builder::new()
-                      .name("Serial Reader Thread".to_string())
-                      .spawn(move || {
-                        serial_read_thread(read_port, reader_sender);
-                      })
-                      .unwrap();
+      let read_thread = thread::Builder::new()
+        .name("Lovense Dongle HID Reader Thread".to_string())
+        .spawn(move || {
+          hid_read_thread(dongle1, reader_sender);
+        })
+        .unwrap();
 
-                    let write_port = (*dongle_port).try_clone().unwrap();
-                    let write_thread = thread::Builder::new()
-                      .name("Serial Writer Thread".to_string())
-                      .spawn(move || {
-                        serial_write_thread(write_port, writer_receiver);
-                      })
-                      .unwrap();
+      let write_thread = thread::Builder::new()
+        .name("Lovense Dongle HID Writer Thread".to_string())
+        .spawn(move || {
+          hid_write_thread(dongle2, writer_receiver);
+        })
+        .unwrap();
 
-                    *(held_read_thread.lock().await) = Some(read_thread);
-                    *(held_write_thread.lock().await) = Some(write_thread);
-                    machine_sender_clone
-                      .send(LovenseDeviceCommand::DongleFound(
-                        writer_sender,
-                        reader_receiver,
-                      ))
-                      .await;
-                  }
-                  Err(e) => error!("{:?}", e),
-                };
-              }
-            }
-          }
-        }
-        Err(_) => {
-          info!("No serial ports found");
-        }
-      }
+      *(held_read_thread.lock().await) = Some(read_thread);
+      *(held_write_thread.lock().await) = Some(write_thread);
+      machine_sender_clone
+        .send(LovenseDeviceCommand::DongleFound(
+          writer_sender,
+          reader_receiver,
+        ))
+        .await;
+
       Ok(())
     })
   }
 }
 
-impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManager {
+impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     info!("Lovense dongle serial port created!");
     let (machine_sender, machine_receiver) = bounded(256);
@@ -214,7 +195,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
   }
 }
 
-impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
+impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseDongleCommunicationManager"
   }

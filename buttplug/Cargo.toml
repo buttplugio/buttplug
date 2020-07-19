@@ -67,6 +67,7 @@ displaydoc = "0.1.6"
 
 serialport = { version = "3.3.0", optional = true }
 blocking = "0.4.6"
+hidapi = "1.2.3"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

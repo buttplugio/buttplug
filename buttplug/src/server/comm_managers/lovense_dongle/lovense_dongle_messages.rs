@@ -60,6 +60,8 @@ pub enum LovenseDongleMessageFunc {
   Connect,
   #[serde(rename = "error")]
   Error,
+  #[serde(rename = "statuss")]
+  Statuss,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
