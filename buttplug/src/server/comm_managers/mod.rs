@@ -42,9 +42,11 @@ pub trait DeviceCommunicationManager: Send + Sync {
 #[derive(Error, Debug, Clone)]
 pub enum ButtplugDeviceSpecificError {
   // XInput library doesn't derive error on its error enum. :(
+  #[cfg(all(feature = "xinput", target_os = "windows"))]
   #[error("XInput usage error: {0:?}")]
   XInputError(XInputUsageError),
   // Btleplug library uses Failure, not Error, on its error enum. :(
+  #[cfg(feature = "btleplug-manager")]
   #[error("Btleplug error: {0:?}")]
   BtleplugError(BtleplugError)
 }
