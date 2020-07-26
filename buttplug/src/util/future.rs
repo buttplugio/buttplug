@@ -97,7 +97,7 @@ impl<T> ButtplugFutureStateShared<T> {
     }
   }
 
-  /// Locks immediately and returns a [MutexGuard], or panics
+  /// Locks and returns a [MutexGuard].
   ///
   /// See [ButtplugFutureStateShared] struct documentation for more info on
   /// locking.
@@ -107,11 +107,13 @@ impl<T> ButtplugFutureStateShared<T> {
   /// The only thing that needs to read the reply from a future is our poll
   /// method, in this module. Everything else should just be setting replies,
   /// and can use set_reply accordingly.
-  pub(super) fn lock_now_or_panic(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
+  pub(super) fn lock(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
+    // There should only ever be lock contention if we're polling while
+    // settings, which should rarely if ever happen.
     self
       .state
-      .try_lock()
-      .expect("ButtplugFutureStateShared should never have lock contention")
+      .lock()
+      .unwrap()
   }
 
   /// Locks immediately and sets the reply for the internal waker, or panics if
@@ -120,7 +122,7 @@ impl<T> ButtplugFutureStateShared<T> {
   /// See [ButtplugFutureStateShared] struct documentation for more info on
   /// locking.
   pub fn set_reply(&self, reply: T) {
-    self.lock_now_or_panic().set_reply(reply);
+    self.lock().set_reply(reply);
   }
 }
 
@@ -188,12 +190,11 @@ impl<T> Future for ButtplugFuture<T> {
   fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
     // This is the only place lock_now_or_panic should be called, since we're
     // reading the value.
-    let mut waker_state = self.waker_state.lock_now_or_panic();
+    let mut waker_state = self.waker_state.lock();
     if waker_state.reply.is_some() {
       let msg = waker_state.reply.take().unwrap();
       Poll::Ready(msg)
     } else {
-      trace!("Waker set.");
       waker_state.waker = Some(cx.waker().clone());
       Poll::Pending
     }
