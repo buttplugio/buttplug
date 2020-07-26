@@ -142,13 +142,13 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     
     let central = self.adapter.clone().unwrap();
     let adapter_event_handler_clone = self.adapter_event_stream.clone();
-    info!("Starting scan.");
-    if let Err(err) = central.start_scan() {
-      // TODO Explain the setcap issue on linux here.
-      return ButtplugDeviceError::DevicePermissionError(format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into();
-    }
-    is_scanning.store(true, Ordering::SeqCst);
-    Box::pin(async {
+    Box::pin(async move {
+      info!("Starting scan.");
+      if let Err(err) = central.start_scan() {
+        // TODO Explain the setcap issue on linux here.
+        return Err(ButtplugDeviceError::DevicePermissionError(format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into());
+      }
+      is_scanning.store(true, Ordering::SeqCst);  
       async_manager::spawn(async move {
         // When stop_scanning is called, this will get false and stop the
         // task.
