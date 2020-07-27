@@ -1,3 +1,9 @@
+# v0.4.0 - 2020/07/26
+
+## Features
+
+- Fix derives to use new thiserror errors (in buttplug 0.5).
+
 # v0.3.0 - 2020/06/22
 
 ## Features
