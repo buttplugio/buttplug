@@ -30,6 +30,10 @@
   </h3>
 </div>
 
+<div align="center">
+  <img src="buttplug/docs/buttplug_rust_docs.png” raw=true />
+</div>
+
 Rust implementation of the Buttplug Intimate Hardware Protocol,
 including implementations of the client and, at some point, server.
 
@@ -47,10 +51,16 @@ our [C#](https://github.com/buttplugio/buttplug-csharp) and
 [Javascript/Typescript](https://github.com/buttplugio/buttplug-js)
 implementations.
 
-Buttplug-rs is currently capable of controlling:
+Buttplug-rs is currently capable of controlling toys via:
 
-- Some Bluetooth LE toys (See [IOSTIndex](https://iostindex.com) for more info)
+- Bluetooth LE
+- Serial Ports
+- USB HID
+- Lovense Devices via the Lovense Dongle (All Versions)
 - XInput gamepads (Windows only)
+
+Note that only some protocols/hardware is currently supported. See
+[IOSTIndex](https://iostindex.com) for more info.
 
 ## Introduction
 
@@ -82,33 +92,19 @@ The following crate features are available
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
 | `serialize_json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers |
-| `client-ws-ssl` | `client`,`serialize_json` | Websocket client connector with SSL capabilities |
+| `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers (with SSL) |
 | `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
+| `serial-manager` | None | Serial Port hardware support on Windows, Mac, Linux |
 | `xinput` | None | XInput Gamepad support on windows |
+| `thread_pool_runtime` | None | Uses default thread pool executor for futures |
+| `async_std_runtime` | None | Uses async-std/smol executor for futures |
 
-Default features are `client`, `server`, `serialize_json`,
-`client-ws-ssl`, `btleplug-manager`, and `xinput` (feature is only
-relevant on windows, but builds as a noop on all other platforms).
+(Tokio coming soon)
 
-## Building on Windows
-
-In order to build with Websocket support on windows, OpenSSL is
-required. To build with OpenSSL, use the following commands in cmd
-(Powershell will require different commands):
-
-```
-git clone https://github.com/Microsoft/vcpkg.git
-cd vcpkg
-bootstrap-vcpkg.bat -disableMetrics
-vcpkg install openssl:x64-windows
-set VCPKGRS_DYNAMIC=1
-cd ..\buttplug-rs\buttplug
-cargo test --features client-ws-ssl,winrt-ble
-```
-
-If you have issues getting this to build, please [file an
-issue](https://github.com/buttplugio/buttplug-rs/issues).
+Default features are `client`, `server`, `serialize_json`, `client-ws-ssl`,
+`btleplug-manager`, `serial-manager`, `thread_pool_runtime` and `xinput`
+(feature is only relevant on windows, but builds as a noop on all other
+platforms).
 
 ## Contributing
 
