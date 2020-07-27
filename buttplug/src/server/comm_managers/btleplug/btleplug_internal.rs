@@ -1,5 +1,5 @@
 use crate::{
-  core::{errors::ButtplugDeviceError, messages},
+  core::{errors::ButtplugDeviceError, messages, ButtplugResult},
   device::{
     configuration_manager::BluetoothLESpecifier, BoundedDeviceEventBroadcaster,
     ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo, ButtplugDeviceReturn,
@@ -86,14 +86,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   }
 
   // TODO this should probably return Result and we should handle state filling in parent.
-  async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) {
+  async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) -> ButtplugResult {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
       state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err))
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err.clone()))
           .into(),
       ));
-      return;
+      return Err(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err)).into());
     }
     loop {
       let event = self.event_receiver.next().await;
@@ -147,6 +147,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     };
     info!("Device connected!");
     state.set_reply(ButtplugDeviceReturn::Connected(device_info));
+    Ok(())
   }
 
   fn handle_write(&mut self, write_msg: &DeviceWriteCmd, state: &mut DeviceReturnStateShared) {
@@ -197,10 +198,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     &mut self,
     command: &ButtplugDeviceCommand,
     state: &mut DeviceReturnStateShared,
-  ) {
+  ) -> ButtplugResult {
     match command {
       ButtplugDeviceCommand::Connect => {
-        self.handle_connection(state).await;
+        self.handle_connection(state).await?;
       }
       ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
         DeviceImplCommand::Write(write_msg) => {
@@ -229,6 +230,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         }
       }
     }
+    Ok(())
   }
 
   pub async fn handle_device_event(&mut self, event: CentralEvent) -> bool {
@@ -274,7 +276,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       };
       match event {
         BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => {
-          self.handle_device_command(command, state).await
+          if self.handle_device_command(command, state).await.is_err() {
+            break;
+          }
         }
         BtlePlugCommLoopChannelValue::DeviceEvent(event) => {
           if self.handle_device_event(event).await {

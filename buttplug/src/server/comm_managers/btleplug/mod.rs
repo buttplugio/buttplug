@@ -127,12 +127,14 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       while let Some(event) = adapter_event_handler.next().await {
         match event {
           CentralEvent::DeviceDiscovered(_) => {
+            debug!("BTLEPlug Device discovered: {:?}", event);
             let s = sender.clone();
             if s.send(()).await.is_err() {
               error!("Device scanning receiver dropped!");
             }
           }
           CentralEvent::DeviceDisconnected(addr) => {
+            debug!("BTLEPlug Device disconnected: {:?}", event);
             tried_addressses_clone.remove(&addr);
           }
           _ => {}
