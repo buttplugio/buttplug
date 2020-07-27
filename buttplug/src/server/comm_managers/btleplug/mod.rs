@@ -10,57 +10,94 @@ use crate::{
 };
 use futures::StreamExt;
 use async_channel::{bounded, Receiver, Sender};
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::{
+  sync::{Arc, atomic::{AtomicBool, Ordering}},
+  thread
+};
 
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
-use btleplug::bluez::{adapter::ConnectedAdapter, manager::Manager};
+use btleplug::bluez::{adapter::ConnectedAdapter as Adapter, manager::Manager};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 #[cfg(target_os = "windows")]
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
+use broadcaster::BroadcastChannel;
+use blocking::block_on;
 
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
   // manager hold it.
   manager: Manager,
+  adapter: Option<Adapter>,
+  adapter_event_stream: BroadcastChannel<CentralEvent>,
   device_sender: Sender<DeviceCommunicationEvent>,
   scanning_sender: Sender<()>,
   scanning_receiver: Receiver<()>,
   is_scanning: Arc<AtomicBool>,
-  set_handler: Arc<AtomicBool>,
 }
 
-#[cfg(any(target_os = "windows", target_os = "macos", target_os = "ios"))]
 impl BtlePlugCommunicationManager {
-  fn get_central(&self) -> Adapter {
+  fn get_central(&self) -> Option<Adapter> {
     let adapters = self.manager.adapters().unwrap();
-    adapters.into_iter().nth(0).unwrap()
+    if adapters.len() == 0 {
+      return None;
+    }
+
+    let adapter = adapters.into_iter().nth(0).unwrap();
+    
+    // Have to use return statements here due to multiple cfg calls, otherwise
+    // parser gets unhappy?
+    #[cfg(not(target_os = "linux"))]
+    return Some(adapter);
+
+    #[cfg(target_os = "linux")]
+    return Some(adapter.connect().unwrap());
   }
-}
 
-#[cfg(target_os = "linux")]
-impl BtlePlugCommunicationManager {
-  fn get_central(&self) -> ConnectedAdapter {
-    let adapters = self.manager.adapters().unwrap();
-    let adapter = adapters.into_iter().next().unwrap();
-    adapter.connect().unwrap()
+  fn setup_adapter(&mut self) {
+    let maybe_adapter = self.get_central();
+    if maybe_adapter.is_none() {
+      return;
+    }
+    let adapter = maybe_adapter.unwrap();
+    let receiver = adapter.event_receiver().unwrap();
+    self.adapter = Some(adapter);
+    let event_broadcaster = self.adapter_event_stream.clone();
+    thread::spawn(move || {
+      // Since this is an std channel receiver, it's mpsc. That means we don't
+      // have clone or sync. Therefore we have to wrap it in its own thread for
+      // now and block the async calls instead.
+      while let Ok(event) = receiver.recv() {
+        // Send, then instantly receive and drop so we keep our local channel
+        // clean.
+        let mut event_broadcaster_clone = event_broadcaster.clone();
+        block_on!(async move {
+          event_broadcaster_clone.send(&event).await;
+          event_broadcaster_clone.recv().await;
+        }.await);
+      }
+    });
   }
 }
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
     let (scanning_sender, scanning_receiver) = bounded(256);
-    Self {
-      manager: Manager::new().unwrap(),
+    let manager = Manager::new().unwrap();
+    let mut comm_mgr = Self {
+      manager,
+      adapter: None,
+      adapter_event_stream: BroadcastChannel::new(),
       device_sender,
       scanning_sender,
       scanning_receiver,
       is_scanning: Arc::new(AtomicBool::new(false)),
-      set_handler: Arc::new(AtomicBool::new(false)),
-    }
+    };
+    comm_mgr.setup_adapter();
+    comm_mgr
   }
 }
 
@@ -73,37 +110,38 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     // get the first bluetooth adapter
     debug!("Bringing up adapter.");
     // TODO What happens if we don't have a radio?
-    let central = self.get_central();
+    if self.adapter.is_none() {
+      error!("No adapter, can't scan.");
+      return ButtplugDeviceError::UnhandledCommand("Cannot scan, no bluetooth adapters found".to_owned()).into();
+    }
     let device_sender = self.device_sender.clone();
     let sender = self.scanning_sender.clone();
     let mut receiver = self.scanning_receiver.clone();
     let is_scanning = self.is_scanning.clone();
     let tried_addresses = Arc::new(DashMap::new());
     let tried_addressses_clone = tried_addresses.clone();
-    if !self.set_handler.load(Ordering::SeqCst) {
-      info!("Setting bluetooth device event handler.");
-      self.set_handler.store(true, Ordering::SeqCst);
-      let on_event = move |event: CentralEvent| {
+
+    let mut adapter_event_handler = self.adapter_event_stream.clone();
+    info!("Setting bluetooth device event handler.");
+    async_manager::spawn(async move {
+      while let Some(event) = adapter_event_handler.next().await {
         match event {
           CentralEvent::DeviceDiscovered(_) => {
             let s = sender.clone();
-            async_manager::spawn(async move {
-              if s.send(()).await.is_err() {
-                error!("Device scanning receiver dropped!");
-              }
-            }).unwrap();
+            if s.send(()).await.is_err() {
+              error!("Device scanning receiver dropped!");
+            }
           }
           CentralEvent::DeviceDisconnected(addr) => {
             tried_addressses_clone.remove(&addr);
           }
           _ => {}
         }
-      };
-      // TODO There's no way to unsubscribe central event handlers. That
-      // needs to be fixed in btleplug somehow, but for now we'll have to
-      // make our handlers exit early after dying or something?
-      central.on_event(Box::new(on_event));
-    }
+      }
+    }).unwrap();
+    
+    let central = self.adapter.clone().unwrap();
+    let adapter_event_handler_clone = self.adapter_event_stream.clone();
     info!("Starting scan.");
     if let Err(err) = central.start_scan() {
       // TODO Explain the setcap issue on linux here.
@@ -128,7 +166,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
               // advertisement.
               if !name.is_empty() && !tried_addresses.contains_key(&p.properties().address) {
                 tried_addresses.insert(p.properties().address, ());
-                let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
+                let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, adapter_event_handler_clone.clone()));
                 if device_sender
                   .send(DeviceCommunicationEvent::DeviceFound(device_creator))
                   .await
@@ -172,9 +210,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 impl Drop for BtlePlugCommunicationManager {
   fn drop(&mut self) {
     info!("Dropping Comm Manager!");
-    let central = self.get_central();
-    if let Err(e) = central.stop_scan() {
-      info!("Error on scanning shutdown for bluetooth: {:?}", e);
+    if self.adapter.is_some() {
+      if let Err(e) = self.adapter.as_ref().unwrap().stop_scan() {
+        info!("Error on scanning shutdown for bluetooth: {:?}", e);
+      }
     }
   }
 }

@@ -18,25 +18,25 @@ use crate::{
 use async_channel::{bounded, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
-use btleplug::api::{Central, Peripheral};
+use btleplug::api::{Central, Peripheral, CentralEvent};
 use futures::future::BoxFuture;
 
-pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static, C: Central<T> + 'static> {
+pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
-  central: C,
+  broadcaster: BroadcastChannel<CentralEvent>
 }
 
-impl<T: Peripheral, C: Central<T>> BtlePlugDeviceImplCreator<T, C> {
-  pub fn new(device: T, central: C) -> Self {
+impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
+  pub fn new(device: T, broadcaster: BroadcastChannel<CentralEvent>) -> Self {
     Self {
       device: Some(device),
-      central,
+      broadcaster,
     }
   }
 }
 
 #[async_trait]
-impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T, C> {
+impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   fn get_specifier(&self) -> DeviceSpecifier {
     if self.device.is_none() {
       panic!("Cannot call get_specifier after device is taken!");
@@ -70,12 +70,11 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       let p = proto.clone();
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
-      // TODO This is not actually async. We're currently using blocking
-      let central = self.central.clone();
       // rumble calls, so this will block whatever thread it's spawned to.
+      let event_broadcaster_clone = self.broadcaster.clone();
       let broadcaster_clone = output_broadcaster.clone();
       let mut event_loop =
-        BtlePlugInternalEventLoop::new(central, device, p, device_receiver, broadcaster_clone);
+        BtlePlugInternalEventLoop::new(event_broadcaster_clone, device, p, device_receiver, broadcaster_clone);
       async_manager::spawn(async move { event_loop.run().await }).unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();

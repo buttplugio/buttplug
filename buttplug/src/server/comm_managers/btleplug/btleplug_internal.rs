@@ -1,27 +1,20 @@
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages,
-  },
+  core::{errors::ButtplugDeviceError, messages},
   device::{
-    configuration_manager::BluetoothLESpecifier,
-    BoundedDeviceEventBroadcaster,
-    ButtplugDeviceCommand,
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplInfo,
-    ButtplugDeviceReturn,
-    DeviceImplCommand,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    configuration_manager::BluetoothLESpecifier, BoundedDeviceEventBroadcaster,
+    ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo, ButtplugDeviceReturn,
+    DeviceImplCommand, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
-  util::{async_manager, future::{ButtplugFuture, ButtplugFutureStateShared}},
+  util::{
+    async_manager,
+    future::{ButtplugFuture, ButtplugFutureStateShared},
+  },
 };
-use futures::{StreamExt, FutureExt};
 use async_channel::{bounded, Receiver};
-use btleplug::api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
+use broadcaster::BroadcastChannel;
+use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
+use futures::{FutureExt, StreamExt};
 use std::collections::HashMap;
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
@@ -49,43 +42,39 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
 }
 
 impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
-  pub fn new<C>(
-    central: C,
+  pub fn new(
+    mut btleplug_event_broadcaster: BroadcastChannel<CentralEvent>,
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     output_sender: BoundedDeviceEventBroadcaster,
   ) -> Self
-  where
-    C: Central<T>,
   {
     let (event_sender, event_receiver) = bounded(256);
-    // Add ourselves to the central event handler output now, so we don't
-    // have to carry around the Central object. We'll be using this in
-    // connect anyways.
-    let on_event = move |event: CentralEvent| match event {
-      CentralEvent::DeviceConnected(_) => {
-        let s = event_sender.clone();
-        let e = event;
-        async_manager::spawn(async move {
-          // Can be unwrapped because we own both sides.
-          s.send(e).await.unwrap();
-        }).unwrap();
+    async_manager::spawn(async move {
+      while let Some(event) = btleplug_event_broadcaster.next().await {
+        match event {
+          CentralEvent::DeviceConnected(_) => {
+            let s = event_sender.clone();
+            let e = event;
+            if s.send(e).await.is_err() {
+              error!("Trying to send connect event to unbound device!");
+              break;
+            }
+          }
+          CentralEvent::DeviceDisconnected(_) => {
+            let s = event_sender.clone();
+            let e = event;
+            if s.send(e).await.is_err() {
+              error!("Trying to send disconnect event to unbound device!");
+            }
+            // If we got a disconnect message, we're done being a device for now.
+            break;
+          }
+          _ => {}
+        }
       }
-      CentralEvent::DeviceDisconnected(_) => {
-        let s = event_sender.clone();
-        let e = event;
-        async_manager::spawn(async move {
-          // Can be unwrapped because we own both sides.
-          s.send(e).await.unwrap();
-        }).unwrap();
-      }
-      _ => {}
-    };
-    // TODO There's no way to unsubscribe central event handlers. That
-    // needs to be fixed in rumble somehow, but for now we'll have to
-    // make our handlers exit early after dying or something?
-    central.on_event(Box::new(on_event));
+    }).unwrap();
     BtlePlugInternalEventLoop {
       device,
       protocol,
@@ -101,7 +90,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
       state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err)).into()
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err))
+          .into(),
       ));
       return;
     }
@@ -146,7 +136,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
             ))
             .await
             .unwrap()
-        }).unwrap();
+        })
+        .unwrap();
       }));
     let device_info = ButtplugDeviceImplInfo {
       endpoints: self.endpoints.keys().cloned().collect(),
@@ -164,7 +155,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.command(&chr, &write_msg.data).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(write_msg.endpoint).into())),
+      None => state.set_reply(ButtplugDeviceReturn::Error(
+        ButtplugDeviceError::InvalidEndpoint(write_msg.endpoint).into(),
+      )),
     }
   }
 
@@ -178,7 +171,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.subscribe(&chr).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into())),
+      None => state.set_reply(ButtplugDeviceReturn::Error(
+        ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into(),
+      )),
     }
   }
 
@@ -192,7 +187,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self.device.subscribe(&chr).unwrap();
         state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
       }
-      None => state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into())),
+      None => state.set_reply(ButtplugDeviceReturn::Error(
+        ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into(),
+      )),
     }
   }
 
@@ -217,7 +214,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         }
         _ => {
           let error_str = format!("{:?}", command);
-          state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::UnhandledCommand(error_str).into()))
+          state.set_reply(ButtplugDeviceReturn::Error(
+            ButtplugDeviceError::UnhandledCommand(error_str).into(),
+          ))
         }
       },
       ButtplugDeviceCommand::Disconnect => {
@@ -232,7 +231,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
   }
 
-  pub async fn handle_device_event(&mut self, event: CentralEvent) {
+  pub async fn handle_device_event(&mut self, event: CentralEvent) -> bool {
     if let CentralEvent::DeviceDisconnected(addr) = event {
       // TODO Ok. Great. We can disconnect, but output_sender doesn't
       // really *go* anywhere right now. We're just using it in the
@@ -253,8 +252,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           .send(&ButtplugDeviceEvent::Removed)
           .await
           .unwrap();
+        return true;
       }
     }
+    false
   }
 
   pub async fn run(&mut self) {
@@ -275,12 +276,17 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         BtlePlugCommLoopChannelValue::DeviceCommand(ref command, ref mut state) => {
           self.handle_device_command(command, state).await
         }
-        BtlePlugCommLoopChannelValue::DeviceEvent(event) => self.handle_device_event(event).await,
+        BtlePlugCommLoopChannelValue::DeviceEvent(event) => {
+          if self.handle_device_event(event).await {
+            break;
+          }
+        }
         BtlePlugCommLoopChannelValue::ChannelClosed => {
           info!("CHANNEL CLOSED");
           return;
         }
       }
     }
+    info!("Exiting device loop");
   }
 }
