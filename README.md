@@ -31,7 +31,7 @@
 </div>
 
 <div align="center">
-  <img src="buttplug/docs/buttplug_rust_docs.png” raw=true />
+  <img src="https://raw.githubusercontent.com/buttplugio/buttplug-rs/dev/buttplug/docs/buttplug_rust_docs.png” raw=true />
 </div>
 
 Rust implementation of the Buttplug Intimate Hardware Protocol,
