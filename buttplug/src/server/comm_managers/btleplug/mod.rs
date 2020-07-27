@@ -20,6 +20,7 @@ use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 #[cfg(target_os = "windows")]
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
+use dashmap::DashMap;
 
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
@@ -77,17 +78,25 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     let sender = self.scanning_sender.clone();
     let mut receiver = self.scanning_receiver.clone();
     let is_scanning = self.is_scanning.clone();
+    let tried_addresses = Arc::new(DashMap::new());
+    let tried_addressses_clone = tried_addresses.clone();
     if !self.set_handler.load(Ordering::SeqCst) {
       info!("Setting bluetooth device event handler.");
       self.set_handler.store(true, Ordering::SeqCst);
       let on_event = move |event: CentralEvent| {
-        if let CentralEvent::DeviceDiscovered(_) = event {
-          let s = sender.clone();
-          async_manager::spawn(async move {
-            if s.send(()).await.is_err() {
-              error!("Device scanning receiver dropped!");
-            }
-          }).unwrap();
+        match event {
+          CentralEvent::DeviceDiscovered(_) => {
+            let s = sender.clone();
+            async_manager::spawn(async move {
+              if s.send(()).await.is_err() {
+                error!("Device scanning receiver dropped!");
+              }
+            }).unwrap();
+          }
+          CentralEvent::DeviceDisconnected(addr) => {
+            tried_addressses_clone.remove(&addr);
+          }
+          _ => {}
         }
       };
       // TODO There's no way to unsubscribe central event handlers. That
@@ -103,9 +112,6 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async {
       async_manager::spawn(async move {
-        // TODO This should be "tried addresses" probably. Otherwise if we
-        // want to connect, say, 2 launches, we're going to have a Bad Time.
-        let mut tried_names: Vec<String> = vec![];
         // When stop_scanning is called, this will get false and stop the
         // task.
         while is_scanning.load(Ordering::SeqCst) {
@@ -116,12 +122,12 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             // TODO Should probably at least log this and add it to the
             // tried_addresses thing, once that exists.
             if let Some(name) = p.properties().local_name {
-              debug!("Found device {}", name);
+              //debug!("Found device {}", name);
               // Names are the only way we really have to test devices
               // at the moment. Most devices don't send services on
               // advertisement.
-              if !name.is_empty() && !tried_names.contains(&name) {
-                tried_names.push(name.clone());
+              if !name.is_empty() && !tried_addresses.contains_key(&p.properties().address) {
+                tried_addresses.insert(p.properties().address, ());
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, central.clone()));
                 if device_sender
                   .send(DeviceCommunicationEvent::DeviceFound(device_creator))
