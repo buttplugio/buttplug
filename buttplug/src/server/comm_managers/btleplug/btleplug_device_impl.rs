@@ -3,9 +3,9 @@ use super::btleplug_internal::{
 };
 use crate::{
   core::{
-    ButtplugResultFuture,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
     messages::RawReading,
+    ButtplugResultFuture,
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
@@ -56,7 +56,12 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
     protocol: ProtocolDefinition,
   ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
     if self.device.is_none() {
-      return Err(ButtplugDeviceError::DeviceConnectionError("Cannot call try_create_device_impl twice!".to_owned()).into());
+      return Err(
+        ButtplugDeviceError::DeviceConnectionError(
+          "Cannot call try_create_device_impl twice!".to_owned(),
+        )
+        .into(),
+      );
     }
     let device = self.device.take().unwrap();
     if let Some(ref proto) = protocol.btle {
@@ -76,8 +81,15 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
       let waker = fut.get_state_clone();
       if device_sender
         .send((ButtplugDeviceCommand::Connect, waker))
-        .await.is_err() {
-          return Err(ButtplugDeviceError::DeviceConnectionError("Event loop exited before we could connect.".to_owned()).into());
+        .await
+        .is_err()
+      {
+        return Err(
+          ButtplugDeviceError::DeviceConnectionError(
+            "Event loop exited before we could connect.".to_owned(),
+          )
+          .into(),
+        );
       };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl::new(
@@ -88,11 +100,22 @@ impl<T: Peripheral, C: Central<T>> ButtplugDeviceImplCreator for BtlePlugDeviceI
           output_broadcaster.clone(),
         ))),
         // TODO It'd be nice to carry this error through as a source.
-        ButtplugDeviceReturn::Error(err) => Err(ButtplugDeviceError::DeviceConnectionError(format!("Device connection failed: {:?}", err)).into()),
+        ButtplugDeviceReturn::Error(err) => Err(
+          ButtplugDeviceError::DeviceConnectionError(format!(
+            "Device connection failed: {:?}",
+            err
+          ))
+          .into(),
+        ),
         other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
       }
     } else {
-      Err(ButtplugDeviceError::DeviceConnectionError("Got a protocol with no Bluetooth Definition!".to_owned()).into())
+      Err(
+        ButtplugDeviceError::DeviceConnectionError(
+          "Got a protocol with no Bluetooth Definition!".to_owned(),
+        )
+        .into(),
+      )
     }
   }
 }
@@ -137,7 +160,12 @@ impl BtlePlugDeviceImpl {
       let waker = fut.get_state_clone();
       if sender.send((cmd, waker)).await.is_err() {
         error!("Device event loop shut down, cannot send command.");
-        return Err(ButtplugDeviceError::DeviceNotConnected("Device event loop shut down, cannot send command.".to_owned()).into());
+        return Err(
+          ButtplugDeviceError::DeviceNotConnected(
+            "Device event loop shut down, cannot send command.".to_owned(),
+          )
+          .into(),
+        );
       }
       match fut.await {
         ButtplugDeviceReturn::Ok(_) => Ok(()),
@@ -145,7 +173,7 @@ impl BtlePlugDeviceImpl {
           error!("{:?}", e);
           // TODO Need to whittle down what this error actually means.
           Err(ButtplugDeviceError::DeviceCommunicationError(e.to_string()).into())
-        },
+        }
         other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
       }
     })
@@ -176,38 +204,38 @@ impl DeviceImpl for BtlePlugDeviceImpl {
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
-      self.send_to_device_task(
-        ButtplugDeviceCommand::Disconnect,
-        "Cannot disconnect device",
-      )
+    self.send_to_device_task(
+      ButtplugDeviceCommand::Disconnect,
+      "Cannot disconnect device",
+    )
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
-    self
-      .send_to_device_task(
-        ButtplugDeviceCommand::Message(msg.into()),
-        "Cannot write to endpoint",
-      )
+    self.send_to_device_task(
+      ButtplugDeviceCommand::Message(msg.into()),
+      "Cannot write to endpoint",
+    )
   }
 
-  fn read_value(&self, _msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  fn read_value(
+    &self,
+    _msg: DeviceReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Actually implement value reading
     unimplemented!("Shouldn't get here!")
   }
 
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
-    self
-      .send_to_device_task(
-        ButtplugDeviceCommand::Message(msg.into()),
-        "Cannot subscribe",
-      )
+    self.send_to_device_task(
+      ButtplugDeviceCommand::Message(msg.into()),
+      "Cannot subscribe",
+    )
   }
 
   fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
-    self
-      .send_to_device_task(
-        ButtplugDeviceCommand::Message(msg.into()),
-        "Cannot unsubscribe",
-      )
+    self.send_to_device_task(
+      ButtplugDeviceCommand::Message(msg.into()),
+      "Cannot unsubscribe",
+    )
   }
 }
