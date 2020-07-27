@@ -18,7 +18,7 @@ use crate::{
 use async_channel::{bounded, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
-use btleplug::api::{Central, Peripheral, CentralEvent};
+use btleplug::api::{Peripheral, CentralEvent};
 use futures::future::BoxFuture;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {

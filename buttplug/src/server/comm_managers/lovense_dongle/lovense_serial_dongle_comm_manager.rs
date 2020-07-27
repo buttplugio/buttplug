@@ -64,9 +64,6 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
         data += std::str::from_utf8(&buf[0..len]).unwrap();
         if data.contains("\n") {
           debug!("{}", data);
-          // We have what should be a full message.
-          // Split it.
-          let msg_vec: Vec<&str> = data.split("\n").collect();
 
           let sender_clone = sender.clone();
           block_on!(

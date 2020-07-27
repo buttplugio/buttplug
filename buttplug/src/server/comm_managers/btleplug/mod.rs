@@ -75,7 +75,8 @@ impl BtlePlugCommunicationManager {
         // clean.
         let mut event_broadcaster_clone = event_broadcaster.clone();
         block_on!(async move {
-          event_broadcaster_clone.send(&event).await;
+          // Can't fail, we own both sides
+          let _ = event_broadcaster_clone.send(&event).await;
           event_broadcaster_clone.recv().await;
         }.await);
       }

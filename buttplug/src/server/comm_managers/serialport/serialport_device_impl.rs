@@ -10,7 +10,7 @@ use crate::{
 use async_channel::{Receiver, Sender};
 use async_mutex::Mutex;
 use async_trait::async_trait;
-use blocking::{block_on, unblock};
+use blocking::block_on;
 use broadcaster::BroadcastChannel;
 use futures::{
   future::{self, BoxFuture},
@@ -50,7 +50,7 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
   }
 }
 
-fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Vec<u8>>) {
+fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: Receiver<Vec<u8>>) {
   let mut recv = receiver.clone();
   while let Some(v) = block_on!(recv.next().await) {
     port.write_all(&v).unwrap();
