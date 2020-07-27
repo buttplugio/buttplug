@@ -13,7 +13,6 @@ pub enum LovenseDeviceCommand {
   DongleFound(Sender<OutgoingLovenseData>, Receiver<LovenseDongleIncomingMessage>),
   StartScanning,
   StopScanning,
-  Outgoing(String),
 }
 
 #[repr(u16)]

@@ -1,11 +1,11 @@
 use super::{
   lovense_dongle_messages::{
     LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
-    LovenseDongleOutgoingMessage, LovenseDongleResultCode, OutgoingLovenseData
+    LovenseDongleOutgoingMessage, OutgoingLovenseData
   },
 };
 use crate::{
-  core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
+  core::{errors::{ButtplugError, ButtplugDeviceError}, messages::RawReading, ButtplugResultFuture},
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
     BoundedDeviceEventBroadcaster, ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl,
@@ -86,9 +86,9 @@ impl LovenseDongleDeviceImpl {
           continue;
         }
         let data_str = msg.data.unwrap().data.unwrap();
-        event_broadcaster_clone.send(&ButtplugDeviceEvent::Notification(Endpoint::Rx, data_str.into_bytes())).await;
+        event_broadcaster_clone.send(&ButtplugDeviceEvent::Notification(Endpoint::Rx, data_str.into_bytes())).await.unwrap();
       }
-    });
+    }).unwrap();
     Self {
       name: "Lovense Dongle Device".to_owned(),
       address: address.to_string(),
@@ -139,10 +139,6 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      info!(
-        "Writing to lovense device: {}",
-        std::str::from_utf8(&msg.data).unwrap().to_string()
-      );
       let outgoing_msg = LovenseDongleOutgoingMessage {
         func: LovenseDongleMessageFunc::Command,
         message_type: LovenseDongleMessageType::Toy,
@@ -150,10 +146,10 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
         command: Some(std::str::from_utf8(&msg.data).unwrap().to_string()),
         eager: None,
       };
-      port_sender
-        .send(OutgoingLovenseData::Message(outgoing_msg))
-        .await;
-      Ok(())
+      port_sender.send(OutgoingLovenseData::Message(outgoing_msg)).await.map_err(|_| {
+        error!("Port closed during writing.");
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotConnected("Port closed during writing".to_owned()))
+      })
     })
   }
 

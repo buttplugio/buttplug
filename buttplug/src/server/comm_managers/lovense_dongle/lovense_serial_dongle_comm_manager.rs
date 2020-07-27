@@ -57,19 +57,17 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
 fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongleIncomingMessage>) {
   let mut data: String = String::default();
   loop {
-    // TODO This is probably too small
     let mut buf: [u8; 1024] = [0; 1024];
     match port.read(&mut buf) {
       Ok(len) => {
-        info!("Got {} serial bytes", len);
+        debug!("Got {} serial bytes", len);
         data += std::str::from_utf8(&buf[0..len]).unwrap();
         if data.contains("\n") {
-          info!("{}", data);
+          debug!("{}", data);
           // We have what should be a full message.
           // Split it.
           let msg_vec: Vec<&str> = data.split("\n").collect();
 
-          let incoming = msg_vec[0];
           let sender_clone = sender.clone();
           block_on!(
             async move {
@@ -78,8 +76,8 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
               for msg in stream {
                 match msg {
                   Ok(m) => {
-                    info!("Read message: {:?}", m);
-                    sender_clone.send(m).await;
+                    debug!("Read message: {:?}", m);
+                    sender_clone.send(m).await.unwrap();
                   }
                   Err(e) => {
                     error!("Error reading: {:?}", e);
@@ -95,7 +93,8 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
             .await
           );
 
-          // Save off the extra.
+          // TODO We don't seem to have an extra coming through at the moment,
+          // but might need this later?
           data = String::default();
         }
       }

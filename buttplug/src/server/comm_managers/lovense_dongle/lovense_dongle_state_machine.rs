@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugError,
     ButtplugResult,
   },
   server::comm_managers::DeviceCommunicationEvent,
@@ -26,12 +26,6 @@ enum IncomingMessage {
   CommMgr(LovenseDeviceCommand),
   Dongle(LovenseDongleIncomingMessage),
   Device(OutgoingLovenseData),
-}
-
-#[derive(Debug)]
-enum OutgoingMessage {
-  CommMgr(Result<(), ButtplugError>),
-  Dongle(OutgoingLovenseData),
 }
 
 #[derive(Debug, Clone)]
@@ -80,15 +74,12 @@ impl ChannelHub {
     }
   }
 
-  pub async fn send_output(&self, msg: OutgoingMessage) {
-    match msg {
-      OutgoingMessage::CommMgr(res) => self.comm_manager_outgoing.send(res).await.unwrap(),
-      OutgoingMessage::Dongle(device_msg) => self.dongle_outgoing.send(device_msg).await.unwrap(),
-    }
+  pub async fn send_output(&self, msg: OutgoingLovenseData) {
+    self.dongle_outgoing.send(msg).await.unwrap();
   }
 
   pub async fn send_event(&self, msg: DeviceCommunicationEvent) {
-    self.event_outgoing.send(msg).await;
+    self.event_outgoing.send(msg).await.unwrap();
   }
 }
 
@@ -188,66 +179,9 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
         LovenseDeviceCommand::StopScanning => {
           should_scan = false;
         }
-        _ => error!("Cannot handle message while waiting for dongle: {:?}", msg),
       }
     }
     None
-  }
-}
-
-state_definition!(LovenseDongleReset);
-
-#[async_trait]
-impl LovenseDongleState for LovenseDongleReset {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
-    info!("Running Reset step");
-
-    let scan_msg = LovenseDongleOutgoingMessage {
-      message_type: LovenseDongleMessageType::USB,
-      func: LovenseDongleMessageFunc::Reset,
-      eager: None,
-      id: None,
-      command: None,
-    };
-    self
-      .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
-        scan_msg,
-      )))
-      .await;
-    loop {
-      let msg = self.hub.wait_for_input().await;
-      if let IncomingMessage::Dongle(device_msg) = msg {
-        if device_msg.func == LovenseDongleMessageFunc::Reset
-          && device_msg.result.unwrap() == LovenseDongleResultCode::CommandSuccess
-        {
-          return Some(Box::new(LovenseDongleInit::new(self.hub.clone())));
-        }
-      } else {
-        error!("Unexpected lovense dongle message received: {:?}", msg);
-      }
-    }
-  }
-}
-
-state_definition!(LovenseDongleInit);
-
-#[async_trait]
-impl LovenseDongleState for LovenseDongleInit {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
-    info!("Running init step");
-    loop {
-      let msg = self.hub.wait_for_input().await;
-      if let IncomingMessage::Dongle(device_msg) = msg {
-        if device_msg.func == LovenseDongleMessageFunc::Init
-          && device_msg.result.unwrap() == LovenseDongleResultCode::DongleInitialized
-        {
-          return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
-        }
-      } else {
-        error!("Unexpected lovense dongle message received: {:?}", msg);
-      }
-    }
   }
 }
 
@@ -306,7 +240,7 @@ impl LovenseDongleState for LovenseDongleStartScanning {
       command: None,
       eager: None,
     };
-    self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(autoconnect_msg))).await;
+    self.hub.send_output(OutgoingLovenseData::Message(autoconnect_msg)).await;
 
     // This sleep is REQUIRED. If we send too soon after this, the dongle locks up.
     futures_timer::Delay::new(std::time::Duration::from_millis(250)).await;
@@ -320,9 +254,9 @@ impl LovenseDongleState for LovenseDongleStartScanning {
     };
     self
       .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
+      .send_output(OutgoingLovenseData::Message(
         scan_msg,
-      )))
+      ))
       .await;
     Some(Box::new(LovenseDongleScanning::new(self.hub.clone())))
   }
@@ -348,7 +282,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                   self.hub.clone(),
                   data.id.unwrap(),
                 )));
-              } else if let Some(result) = device_msg.result {
+              } else if let Some(_) = device_msg.result {
                 // emit and return to idle
                 return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
               }
@@ -359,7 +293,6 @@ impl LovenseDongleState for LovenseDongleScanning {
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
     }
-    None
   }
 }
 
@@ -378,9 +311,9 @@ impl LovenseDongleState for LovenseDongleStopScanning {
     };
     self
       .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
+      .send_output(OutgoingLovenseData::Message(
         scan_msg,
-      )))
+      ))
       .await;
     None
   }
@@ -401,9 +334,9 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
     };
     self
       .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
+      .send_output(OutgoingLovenseData::Message(
         scan_msg,
-      )))
+      ))
       .await;
 
     loop {
@@ -429,61 +362,6 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
   }
 }
 
-device_state_definition!(LovenseDongleDeviceConnect);
-
-#[async_trait]
-impl LovenseDongleState for LovenseDongleDeviceConnect {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
-    
-    let outgoing_msg = LovenseDongleOutgoingMessage {
-      func: LovenseDongleMessageFunc::Connect,
-      message_type: LovenseDongleMessageType::Toy,
-      id: Some(self.device_id.clone()),
-      command: None,
-      eager: Some(1),
-    };
-    self
-      .hub
-      .send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(
-        outgoing_msg,
-      )))
-      .await;
-      
-    // We need to wait until we get the device connection success status back before emitting the device.
-    loop {
-      match self.hub.wait_for_input().await {
-        IncomingMessage::Dongle(device_msg) => {
-          if device_msg.data.is_some()
-            && device_msg.data.unwrap().status.unwrap()
-              == LovenseDongleResultCode::DeviceConnectSuccess
-          {
-            let outgoing_msg = LovenseDongleOutgoingMessage {
-              func: LovenseDongleMessageFunc::Command,
-              message_type: LovenseDongleMessageType::Toy,
-              id: Some(self.device_id.clone()),
-              command: Some("AI;".to_owned()),
-              eager: None,
-            };
-            self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(outgoing_msg))).await;
-            let outgoing_msg2 = LovenseDongleOutgoingMessage {
-              func: LovenseDongleMessageFunc::Command,
-              message_type: LovenseDongleMessageType::Toy,
-              id: Some(self.device_id.clone()),
-              command: Some("AutoSwith:Off:Off;".to_owned()),
-              eager: None,
-            };
-            self.hub.send_output(OutgoingMessage::Dongle(OutgoingLovenseData::Message(outgoing_msg2))).await;
-          }
-        }
-        msg => {
-          error!("Unexpected incoming message: {:?}", msg);
-        }
-      }
-    }
-    Some(Box::new(LovenseDongleDeviceLoop::new(self.hub.clone(), self.device_id.clone())))
-  }
-}
-
 device_state_definition!(LovenseDongleDeviceLoop);
 
 #[async_trait]
@@ -498,16 +376,13 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
       let msg = self.hub.wait_for_device_input(device_write_receiver.clone()).await;
       match msg {
         IncomingMessage::Device(device_msg) => {
-          self.hub.send_output(OutgoingMessage::Dongle(device_msg)).await;
+          self.hub.send_output(device_msg).await;
         },
         IncomingMessage::Dongle(dongle_msg) => {
-          device_read_sender.send(dongle_msg).await;
+          device_read_sender.send(dongle_msg).await.unwrap();
         }
         _ => error!("Unhandled message: {:?}", msg),
       }
     }
-    None
   }
 }
-
-device_state_definition!(LovenseDongleDeviceDisconnect);

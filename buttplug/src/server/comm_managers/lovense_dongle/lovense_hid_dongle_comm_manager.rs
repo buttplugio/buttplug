@@ -60,16 +60,16 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
 
 fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessage>) {
   info!("Starting HID dongle read thread");
-  dongle.set_blocking_mode(true);
+  dongle.set_blocking_mode(true).unwrap();
   let mut data: String = String::default();
   let mut buf = [0u8; 1024];
   loop {
     match dongle.read_timeout(&mut buf, 100) {
       Ok(len) => {
-        if (len == 0) {
+        if len == 0 {
           continue;
         }
-        info!("Got {} hid bytes", len);
+        debug!("Got {} hid bytes", len);
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
         data += std::str::from_utf8(&buf[0..len-1]).unwrap();
@@ -81,15 +81,14 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
           let incoming = msg_vec[0];
           let sender_clone = sender.clone();
           block_on!(
-            println!("INCOMING: {}", incoming);
             async move {
               let stream =
                 Deserializer::from_str(&incoming).into_iter::<LovenseDongleIncomingMessage>();
               for msg in stream {
                 match msg {
                   Ok(m) => {
-                    info!("Read message: {:?}", m);
-                    sender_clone.send(m).await;
+                    debug!("Read message: {:?}", m);
+                    sender_clone.send(m).await.unwrap();
                   }
                   Err(e) => {
                     error!("Error reading: {:?}", e);
@@ -162,7 +161,7 @@ impl LovenseHIDDongleCommunicationManager {
           writer_sender,
           reader_receiver,
         ))
-        .await;
+        .await.unwrap();
 
       Ok(())
     })
@@ -180,8 +179,8 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(async move {
-      dongle_fut.await;
-    });
+      dongle_fut.await.unwrap();
+    }.instrument(tracing::info_span!("Lovense HID Dongle Finder Task"))).unwrap();
     async_manager::spawn(
       async move {
         let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
@@ -189,8 +188,8 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
           machine = next;
         }
       }
-      .instrument(tracing::info_span!("Lovense Dongle State Machine")),
-    );
+      .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
+    ).unwrap();
     mgr
   }
 }
