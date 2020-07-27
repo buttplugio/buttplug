@@ -30,7 +30,9 @@
   </h3>
 </div>
 
-![Buttplug Rust Project Logo](https://raw.githubusercontent.com/buttplugio/buttplug-rs/dev/buttplug/docs/buttplug_rust_docs.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/buttplugio/buttplug-rs/dev/buttplug/docs/buttplug_rust_docs.png">
+</p>
 
 Rust implementation of the Buttplug Intimate Hardware Protocol,
 including implementations of the client and, at some point, server.
