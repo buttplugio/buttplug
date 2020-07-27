@@ -1,3 +1,23 @@
+# 0.5.0 (2020-07-26)
+
+## Features
+
+- Error system now uses thiserror
+  - Should be more consistent and provide more useful errors. I hope. Maybe.
+- Serial port support added
+  - No protocols using this yet, TCode/ET312/etc coming in point releases.
+- Lovense dongle support added
+  - Handles both serial and HID versions of the dongle, on all desktop
+    platforms.
+
+## Bugfixes
+
+- Bluetooth Device Disconnections now notify on all native platforms
+  - Used to be just linux, now fixed for mac/win also
+- Stopping scanning twice no longer panics
+- Fix start scanning timing to happen when future is await'd
+  - This could cause discovery race conditions in the past
+
 # 0.4.0 (2020-06-21)
 
 ## Features
