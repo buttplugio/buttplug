@@ -12,8 +12,6 @@ mod vorze_sa;
 mod xinput;
 mod youcups;
 mod youou;
-mod erostek_et312;
-mod tcode;
 
 use super::DeviceImpl;
 use crate::{
@@ -41,8 +39,6 @@ pub enum ProtocolTypes {
   XInput,
   Youou,
   RawProtocol,
-  ErostekET312,
-  TCode
 }
 
 impl TryFrom<&str> for ProtocolTypes {
@@ -63,8 +59,6 @@ impl TryFrom<&str> for ProtocolTypes {
       "xinput" => Ok(ProtocolTypes::XInput),
       "youou" => Ok(ProtocolTypes::Youou),
       "raw" => Ok(ProtocolTypes::RawProtocol),
-      "erostek-et312" => Ok(ProtocolTypes::ErostekET312),
-      "tcode" => Ok(ProtocolTypes::TCode),
       _ => {
         error!("Protocol {} not implemented.", protocol_name);
         Err(ButtplugDeviceError::ProtocolNotImplemented(protocol_name.to_owned()).into())
@@ -89,8 +83,6 @@ pub fn try_create_protocol(protocol_type: &ProtocolTypes, device: &dyn DeviceImp
     ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
     ProtocolTypes::Youou => youou::Youou::try_create(device, config),
     ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
-    ProtocolTypes::ErostekET312 => erostek_et312::ErostekET312::try_create(device, config),
-    ProtocolTypes::TCode => tcode::TCode::try_create(device, config),
   }
 }
 
