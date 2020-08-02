@@ -346,7 +346,7 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&mut self)
+  pub fn add_comm_manager<T>(&self)
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
@@ -363,7 +363,7 @@ impl DeviceManager {
     self.comm_managers.insert(mgr.name().to_owned(), Box::new(mgr));
   }
 
-  pub fn add_test_comm_manager(&mut self) -> TestDeviceCommunicationManagerHelper {
+  pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
     let status = mgr.scanning_status();
     let sender = self.sender.clone();

@@ -13,6 +13,8 @@ pub mod remote_server;
 mod logger;
 mod ping_timer;
 
+pub use remote_server::ButtplugRemoteServer;
+
 use crate::{
   core::{
     errors::*,
@@ -56,7 +58,7 @@ pub enum ButtplugServerEvent {
 pub struct ButtplugServer {
   server_name: String,
   max_ping_time: u64,
-  device_manager: Option<DeviceManager>,
+  device_manager: DeviceManager,
   event_sender: Sender<ButtplugServerMessage>,
   ping_timer: Option<PingTimer>,
   pinged_out: Arc<AtomicBool>,
@@ -104,7 +106,7 @@ impl ButtplugServer {
       Self {
         server_name: name.to_string(),
         max_ping_time,
-        device_manager: Some(DeviceManager::new(send.clone(), ping_receiver)),
+        device_manager: DeviceManager::new(send.clone(), ping_receiver),
         ping_timer,
         pinged_out,
         connected,
@@ -114,23 +116,15 @@ impl ButtplugServer {
     )
   }
 
-  pub fn add_comm_manager<T>(&mut self)
+  pub fn add_comm_manager<T>(&self)
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
-    if let Some(ref mut dm) = self.device_manager {
-      dm.add_comm_manager::<T>();
-    } else {
-      panic!("Device Manager has been taken already!");
-    }
+    self.device_manager.add_comm_manager::<T>();
   }
 
-  pub fn add_test_comm_manager(&mut self) -> TestDeviceCommunicationManagerHelper {
-    if let Some(ref mut dm) = self.device_manager {
-      dm.add_test_comm_manager()
-    } else {
-      panic!("Device Manager has been taken already!");
-    }
+  pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
+    self.device_manager.add_test_comm_manager()
   }
 
   pub fn connected(&self) -> bool {
@@ -177,11 +171,7 @@ impl ButtplugServer {
     let out_fut = if ButtplugDeviceManagerMessageUnion::try_from(msg.clone()).is_ok()
       || ButtplugDeviceCommandMessageUnion::try_from(msg.clone()).is_ok()
     {
-      if let Some(ref dm) = self.device_manager {
-        dm.parse_message(msg.clone())
-      } else {
-        panic!("Device Manager has been taken already!");
-      }
+      self.device_manager.parse_message(msg.clone())
     } else {
       match msg {
         ButtplugClientMessage::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
