@@ -19,6 +19,7 @@ extern crate strum_macros;
 #[cfg(feature = "thread-pool-runtime")]
 #[macro_use]
 extern crate lazy_static;
+#[cfg(any(feature = "client", feature = "server"))]
 #[macro_use]
 extern crate futures;
 #[macro_use]

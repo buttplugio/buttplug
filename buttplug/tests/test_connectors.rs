@@ -1,4 +1,4 @@
-#[cfg(feature = "websockets")]
+#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
 mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,

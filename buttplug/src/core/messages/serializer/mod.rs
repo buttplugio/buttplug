@@ -1,5 +1,6 @@
+#[cfg(feature = "serialize-json")]
 mod json_serializer;
-
+#[cfg(feature = "serialize-json")]
 pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
 
 use thiserror::Error;

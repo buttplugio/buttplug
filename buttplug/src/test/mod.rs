@@ -1,4 +1,5 @@
 mod test_device;
+#[cfg(feature = "server")]
 mod test_device_comm_manager;
 
 use crate::device::DeviceImplCommand;
@@ -9,6 +10,7 @@ pub use test_device::{
   TestDeviceImplCreator,
   TestDeviceInternal,
 };
+#[cfg(feature = "server")]
 pub use test_device_comm_manager::{
   new_bluetoothle_test_device,
   TestDeviceCommunicationManager,

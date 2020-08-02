@@ -84,7 +84,6 @@ pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
 use crate::core::errors::ButtplugMessageError;
-#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
@@ -134,8 +133,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Display)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
   VibrateCmd,

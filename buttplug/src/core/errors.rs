@@ -9,13 +9,15 @@
 
 use super::messages::{
   self,
-  serializer::ButtplugSerializerError,
   ButtplugDeviceMessageType,
   ButtplugMessage,
   ButtplugMessageSpecVersion,
   ErrorCode,
 };
-use crate::{device::Endpoint, server::comm_managers::ButtplugDeviceSpecificError};
+use super::messages::serializer::ButtplugSerializerError;
+use crate::device::Endpoint;
+#[cfg(feature = "server")]
+use crate::server::comm_managers::ButtplugDeviceSpecificError;
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 use std::fmt;
@@ -131,9 +133,13 @@ pub enum ButtplugDeviceError {
   InvalidEndpoint(Endpoint),
   /// Device does not handle command type: {0}
   UnhandledCommand(String),
-  /// Device type specific error.
+  #[cfg(feature = "server")]
   #[error(transparent)]
+  /// Device type specific error.
   DeviceSpecificError(#[from] ButtplugDeviceSpecificError),
+  #[cfg(not(feature = "server"))]
+  /// Device type specific error: {0}.
+  DeviceSpecificError(String),
   /// No device available at index {0}
   DeviceNotAvailable(u32),
   /// Device scanning already started.
