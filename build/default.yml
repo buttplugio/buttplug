@@ -22,7 +22,7 @@ jobs:
        nightly:
          rust: nightly
    pool:
-     vmImage: ubuntu-16.04
+     vmImage: ubuntu-latest
    continueOnError: true
    steps:
      - template: install-rust.yml@templates
@@ -47,31 +47,31 @@ jobs:
      strategy:
        matrix:
          "Linux (nightly)":
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: nightly
          "Linux (beta)":
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: beta
          Linux:
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: stable
          MacOS:
-           vmImage: macOS-10.14
+           vmImage: macOS-latest
            rust: stable
          Windows:
-           vmImage: windows-2019
+           vmImage: windows-latest
            rust: stable
    ${{ if ne('true', parameters.cross) }}:
      strategy:
        matrix:
          "Linux (nightly)":
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: nightly
          "Linux (beta)":
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: beta
          Linux:
-           vmImage: ubuntu-16.04
+           vmImage: ubuntu-latest
            rust: stable
    pool:
      vmImage: $(vmImage)
@@ -84,7 +84,7 @@ jobs:
          rust: $(rust)
      # Run any user-specific setup steps
      - ${{ parameters.setup }}
-     - script: sudo apt-get -y install libudev-dev
+     - script: sudo apt-get -y install libudev-dev libusb-1.0-0-dev
        displayName: Install packages
        condition: eq(variables['Agent.OS'], 'Linux')
      - task: Cache@2
@@ -130,7 +130,7 @@ jobs:
      # This represents the minimum Rust version supported.
      # Tests are not run as tests may require newer versions of rust.
      pool:
-       vmImage: ubuntu-16.04
+       vmImage: ubuntu-latest
      steps:
        - template: install-rust.yml@templates
          parameters:
