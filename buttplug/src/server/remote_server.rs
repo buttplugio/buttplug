@@ -6,7 +6,11 @@ use crate::{
   },
   connector::ButtplugConnector,
   util::async_manager,
-  server::comm_managers::btleplug::BtlePlugCommunicationManager
+  server::{
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator
+  },
+  test::TestDeviceCommunicationManagerHelper
 };
 use async_channel::{Sender, Receiver, bounded};
 use async_mutex::Mutex;
@@ -97,9 +101,8 @@ async fn run_server<ConnectorType>(
 
 impl ButtplugRemoteServer {
   pub fn new(name: &str, max_ping_time: u64) -> Self {
-    let (mut server, server_receiver) = ButtplugServer::new(name, max_ping_time);
-    server.add_comm_manager::<BtlePlugCommunicationManager>();
-    Self {
+    let (server, server_receiver) = ButtplugServer::new(name, max_ping_time);
+     Self {
       server: Arc::new(server),
       server_receiver,
       task_channel: Arc::new(Mutex::new(None)),
@@ -129,5 +132,16 @@ impl ButtplugRemoteServer {
     async move {
       Ok(())
     }
+  }
+
+  pub fn add_comm_manager<T>(&self)
+  where
+    T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+  {
+    self.server.add_comm_manager::<T>();
+  }
+
+  pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
+    self.server.add_test_comm_manager()
   }
 }
