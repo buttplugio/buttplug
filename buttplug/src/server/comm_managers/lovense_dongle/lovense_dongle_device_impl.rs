@@ -1,22 +1,37 @@
-use super::{
-  lovense_dongle_messages::{
-    LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
-    LovenseDongleOutgoingMessage, OutgoingLovenseData
-  },
+use super::lovense_dongle_messages::{
+  LovenseDongleIncomingMessage,
+  LovenseDongleMessageFunc,
+  LovenseDongleMessageType,
+  LovenseDongleOutgoingMessage,
+  OutgoingLovenseData,
 };
 use crate::{
-  core::{errors::{ButtplugError, ButtplugDeviceError}, messages::RawReading, ButtplugResultFuture},
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError},
+    messages::RawReading,
+    ButtplugResultFuture,
+  },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster, ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl,
-    DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
-  util::async_manager
+  util::async_manager,
 };
 use async_channel::{Receiver, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
-use futures::{StreamExt, future::{self, BoxFuture}};
+use futures::{
+  future::{self, BoxFuture},
+  StreamExt,
+};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -26,11 +41,15 @@ pub struct LovenseDongleDeviceImplCreator {
   specifier: DeviceSpecifier,
   id: String,
   device_outgoing: Sender<OutgoingLovenseData>,
-  device_incoming: Receiver<LovenseDongleIncomingMessage>
+  device_incoming: Receiver<LovenseDongleIncomingMessage>,
 }
 
 impl LovenseDongleDeviceImplCreator {
-  pub fn new(id: &str, device_outgoing: Sender<OutgoingLovenseData>, device_incoming: Receiver<LovenseDongleIncomingMessage>) -> Self {
+  pub fn new(
+    id: &str,
+    device_outgoing: Sender<OutgoingLovenseData>,
+    device_incoming: Receiver<LovenseDongleIncomingMessage>,
+  ) -> Self {
     Self {
       // We know the only thing we'll ever get from a lovense dongle is a
       // lovense device. However, we don't have a way to specify that in our
@@ -44,7 +63,7 @@ impl LovenseDongleDeviceImplCreator {
       )),
       id: id.to_string(),
       device_outgoing,
-      device_incoming
+      device_incoming,
     }
   }
 }
@@ -62,7 +81,7 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
     Ok(Box::new(LovenseDongleDeviceImpl::new(
       &self.id,
       self.device_outgoing.clone(),
-      self.device_incoming.clone()
+      self.device_incoming.clone(),
     )))
   }
 }
@@ -77,7 +96,11 @@ pub struct LovenseDongleDeviceImpl {
 }
 
 impl LovenseDongleDeviceImpl {
-  pub fn new(address: &str, device_outgoing: Sender<OutgoingLovenseData>, mut device_incoming: Receiver<LovenseDongleIncomingMessage>) -> Self {
+  pub fn new(
+    address: &str,
+    device_outgoing: Sender<OutgoingLovenseData>,
+    mut device_incoming: Receiver<LovenseDongleIncomingMessage>,
+  ) -> Self {
     let event_broadcaster = BroadcastChannel::with_cap(256);
     let event_broadcaster_clone = event_broadcaster.clone();
     async_manager::spawn(async move {
@@ -86,9 +109,16 @@ impl LovenseDongleDeviceImpl {
           continue;
         }
         let data_str = msg.data.unwrap().data.unwrap();
-        event_broadcaster_clone.send(&ButtplugDeviceEvent::Notification(Endpoint::Rx, data_str.into_bytes())).await.unwrap();
+        event_broadcaster_clone
+          .send(&ButtplugDeviceEvent::Notification(
+            Endpoint::Rx,
+            data_str.into_bytes(),
+          ))
+          .await
+          .unwrap();
       }
-    }).unwrap();
+    })
+    .unwrap();
     Self {
       name: "Lovense Dongle Device".to_owned(),
       address: address.to_string(),
@@ -146,10 +176,15 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
         command: Some(std::str::from_utf8(&msg.data).unwrap().to_string()),
         eager: None,
       };
-      port_sender.send(OutgoingLovenseData::Message(outgoing_msg)).await.map_err(|_| {
-        error!("Port closed during writing.");
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotConnected("Port closed during writing".to_owned()))
-      })
+      port_sender
+        .send(OutgoingLovenseData::Message(outgoing_msg))
+        .await
+        .map_err(|_| {
+          error!("Port closed during writing.");
+          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotConnected(
+            "Port closed during writing".to_owned(),
+          ))
+        })
     })
   }
 

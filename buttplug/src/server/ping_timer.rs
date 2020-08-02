@@ -1,8 +1,14 @@
 use crate::util::async_manager;
 use async_channel::{bounded, Receiver, Sender};
-use futures::{StreamExt, future::Future};
+use futures::{future::Future, StreamExt};
 use futures_timer::Delay;
-use std::{time::Duration, sync::{Arc, atomic::{AtomicBool, Ordering}}};
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 
 pub enum PingMessage {
   Ping,
@@ -29,7 +35,7 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
             let sender_clone = ping_msg_sender_clone.clone();
             let pinged_out_sender_clone = pinged_out_sender.clone();
             let pinged_clone = pinged.clone();
-            handle = Some(async_manager::spawn(async move{
+            handle = Some(async_manager::spawn(async move {
               loop {
                 Delay::new(Duration::from_millis(max_ping_time)).await;
                 if pinged_clone.load(Ordering::SeqCst) {
@@ -51,7 +57,7 @@ fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessa
             handle.take();
           }
           PingMessage::Ping => pinged.store(true, Ordering::SeqCst),
-          PingMessage::End => break
+          PingMessage::End => break,
         }
       }
     }
@@ -72,7 +78,8 @@ impl Drop for PingTimer {
       if ping_msg_sender.send(PingMessage::End).await.is_err() {
         debug!("Receiver does not exist, assuming ping timer event loop already dead.");
       }
-    }).unwrap();
+    })
+    .unwrap();
   }
 }
 
@@ -83,11 +90,14 @@ impl PingTimer {
     }
     let (fut, sender, receiver) = ping_timer(max_ping_time);
     async_manager::spawn(fut).unwrap();
-    (Self {
-      // TODO Store this once we can cancel it.
-      // timer_task: task::spawn(fut),
-      ping_msg_sender: sender
-    }, receiver)
+    (
+      Self {
+        // TODO Store this once we can cancel it.
+        // timer_task: task::spawn(fut),
+        ping_msg_sender: sender,
+      },
+      receiver,
+    )
   }
 
   fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> {

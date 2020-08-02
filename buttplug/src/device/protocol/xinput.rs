@@ -1,4 +1,9 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
   core::{
     errors::ButtplugMessageError,
@@ -6,7 +11,9 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_mutex::Mutex;
@@ -61,9 +68,12 @@ impl ButtplugProtocolCommandHandler for XInput {
                 .write_u16::<LittleEndian>(cmds[0].unwrap() as u16)
                 .is_err()
             {
-              return Err(ButtplugMessageError::MessageConversionError(
-                "Cannot convert XInput value for processing",
-              ).into());
+              return Err(
+                ButtplugMessageError::MessageConversionError(
+                  "Cannot convert XInput value for processing",
+                )
+                .into(),
+              );
             }
             fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false)));
           }

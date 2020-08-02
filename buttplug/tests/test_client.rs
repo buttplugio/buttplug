@@ -5,16 +5,18 @@ use async_channel::Receiver;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent},
   connector::{
-    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnector,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
     ButtplugInProcessClientConnector,
   },
   core::{
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugServerError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
-    errors::{ButtplugError, ButtplugServerError, ButtplugDeviceError}
   },
   util::async_manager,
 };
-use futures::{StreamExt, future::BoxFuture};
+use futures::{future::BoxFuture, StreamExt};
 use util::DelayDeviceCommunicationManager;
 
 #[derive(Default)]
@@ -25,8 +27,13 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>, ButtplugConnectorError>>
-  {
+  ) -> BoxFuture<
+    'static,
+    Result<
+      Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
+      ButtplugConnectorError,
+    >,
+  > {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
 
@@ -103,7 +110,9 @@ fn test_start_scanning() {
     let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
     let test_mgr_helper = connector.server_ref().add_test_comm_manager();
     test_mgr_helper.add_ble_device("Massage Demo").await;
-    let (client, _) = ButtplugClient::connect("Test Client", connector).await.unwrap();
+    let (client, _) = ButtplugClient::connect("Test Client", connector)
+      .await
+      .unwrap();
     assert!(client.start_scanning().await.is_ok());
   });
 }
@@ -113,13 +122,18 @@ fn test_start_scanning() {
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
     let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
-    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
+    connector
+      .server_ref()
+      .add_comm_manager::<DelayDeviceCommunicationManager>();
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
     let should_be_err = client.stop_scanning().await;
     if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
-      assert!(matches!(bp_err, ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)));
+      assert!(matches!(
+        bp_err,
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)
+      ));
     } else {
       panic!("Should've thrown error!");
     }
@@ -132,7 +146,9 @@ fn test_stop_scanning_when_not_scanning() {
 fn test_start_scanning_when_already_scanning() {
   async_manager::block_on(async {
     let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
-    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
+    connector
+      .server_ref()
+      .add_comm_manager::<DelayDeviceCommunicationManager>();
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
@@ -146,12 +162,17 @@ fn test_start_scanning_when_already_scanning() {
 fn test_client_scanning_finished() {
   async_manager::block_on(async {
     let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
-    connector.server_ref().add_comm_manager::<DelayDeviceCommunicationManager>();
+    connector
+      .server_ref()
+      .add_comm_manager::<DelayDeviceCommunicationManager>();
     let (client, mut recv) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
     assert!(client.start_scanning().await.is_ok());
     assert!(client.stop_scanning().await.is_ok());
-    assert!(matches!(recv.next().await.unwrap(), ButtplugClientEvent::ScanningFinished));
+    assert!(matches!(
+      recv.next().await.unwrap(),
+      ButtplugClientEvent::ScanningFinished
+    ));
   });
 }

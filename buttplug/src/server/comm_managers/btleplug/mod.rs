@@ -4,17 +4,24 @@ mod btleplug_internal;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
-use futures::StreamExt;
 use async_channel::{bounded, Receiver, Sender};
+use futures::StreamExt;
 use std::{
-  sync::{Arc, atomic::{AtomicBool, Ordering}},
-  thread
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  thread,
 };
 
+use blocking::block_on;
+use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter as Adapter, manager::Manager};
@@ -24,8 +31,6 @@ use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
-use broadcaster::BroadcastChannel;
-use blocking::block_on;
 
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
@@ -47,7 +52,7 @@ impl BtlePlugCommunicationManager {
     }
 
     let adapter = adapters.into_iter().next().unwrap();
-    
+
     // Have to use return statements here due to multiple cfg calls, otherwise
     // parser gets unhappy?
     #[cfg(not(target_os = "linux"))]
@@ -74,11 +79,14 @@ impl BtlePlugCommunicationManager {
         // Send, then instantly receive and drop so we keep our local channel
         // clean.
         let mut event_broadcaster_clone = event_broadcaster.clone();
-        block_on!(async move {
-          // Can't fail, we own both sides
-          let _ = event_broadcaster_clone.send(&event).await;
-          event_broadcaster_clone.recv().await;
-        }.await);
+        block_on!(
+          async move {
+            // Can't fail, we own both sides
+            let _ = event_broadcaster_clone.send(&event).await;
+            event_broadcaster_clone.recv().await;
+          }
+          .await
+        );
       }
     });
   }
@@ -113,7 +121,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     // TODO What happens if we don't have a radio?
     if self.adapter.is_none() {
       error!("No adapter, can't scan.");
-      return ButtplugDeviceError::UnhandledCommand("Cannot scan, no bluetooth adapters found".to_owned()).into();
+      return ButtplugDeviceError::UnhandledCommand(
+        "Cannot scan, no bluetooth adapters found".to_owned(),
+      )
+      .into();
     }
     let device_sender = self.device_sender.clone();
     let sender = self.scanning_sender.clone();
@@ -141,8 +152,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           _ => {}
         }
       }
-    }).unwrap();
-    
+    })
+    .unwrap();
+
     let central = self.adapter.clone().unwrap();
     let adapter_event_handler_clone = self.adapter_event_stream.clone();
     Box::pin(async move {
@@ -151,7 +163,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         // TODO Explain the setcap issue on linux here.
         return Err(ButtplugDeviceError::DevicePermissionError(format!("BTLEPlug cannot start scanning. This may be a permissions error (on linux) or an issue with finding the radio. Reason: {}", err)).into());
       }
-      is_scanning.store(true, Ordering::SeqCst);  
+      is_scanning.store(true, Ordering::SeqCst);
       async_manager::spawn(async move {
         // When stop_scanning is called, this will get false and stop the
         // task.
@@ -169,14 +181,18 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
               // advertisement.
               if !name.is_empty() && !tried_addresses.contains_key(&p.properties().address) {
                 tried_addresses.insert(p.properties().address, ());
-                let device_creator = Box::new(BtlePlugDeviceImplCreator::new(p, adapter_event_handler_clone.clone()));
+                let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
+                  p,
+                  adapter_event_handler_clone.clone(),
+                ));
                 if device_sender
                   .send(DeviceCommunicationEvent::DeviceFound(device_creator))
                   .await
-                  .is_err() {
-                    error!("Device manager receiver dropped, cannot send device found message.");
-                    return;
-                  }
+                  .is_err()
+                {
+                  error!("Device manager receiver dropped, cannot send device found message.");
+                  return;
+                }
               }
             }
           }
@@ -184,7 +200,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         }
         central.stop_scan().unwrap();
         info!("Exiting btleplug scanning");
-      }).unwrap();
+      })
+      .unwrap();
       Ok(())
     })
   }
@@ -226,7 +243,9 @@ mod test {
   use super::BtlePlugCommunicationManager;
   use crate::{
     server::comm_managers::{
-      DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+      DeviceCommunicationEvent,
+      DeviceCommunicationManager,
+      DeviceCommunicationManagerCreator,
     },
     util::async_manager,
   };

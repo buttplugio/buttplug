@@ -8,26 +8,33 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  client_message_sorter::ClientMessageSorter, device::{ButtplugClientDevice, ButtplugClientDeviceEvent}, 
+  client_message_sorter::ClientMessageSorter,
+  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientError,
-  ButtplugClientEvent, ButtplugClientMessageFuturePair,
+  ButtplugClientEvent,
+  ButtplugClientMessageFuturePair,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
     errors::ButtplugServerError,
     messages::{
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-      DeviceList, DeviceMessageInfo,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      DeviceList,
+      DeviceMessageInfo,
     },
   },
 };
-use async_channel::{bounded, Sender, Receiver};
-use futures::{Future, StreamExt, FutureExt};
-use std::{sync::Arc, hash::{Hash, Hasher}};
+use async_channel::{bounded, Receiver, Sender};
 use broadcaster::BroadcastChannel;
-use tracing_futures::Instrument;
 use dashmap::DashMap;
+use futures::{Future, FutureExt, StreamExt};
+use std::{
+  hash::{Hash, Hasher},
+  sync::Arc,
+};
+use tracing_futures::Instrument;
 
 /// Enum used for communication from the client to the event loop.
 pub(super) enum ButtplugClientRequest {
@@ -48,13 +55,17 @@ pub(super) struct ButtplugClientDeviceInternal {
   // contain event channels that are never handled. Instead, we create new
   // client devices when they are requested.
   pub device: Arc<DeviceMessageInfo>,
-  pub channel: Arc<BroadcastChannel<ButtplugClientDeviceEvent>>
+  pub channel: Arc<BroadcastChannel<ButtplugClientDeviceEvent>>,
 }
 
-impl Eq for ButtplugClientDeviceInternal {}
+impl Eq for ButtplugClientDeviceInternal {
+}
 
 impl ButtplugClientDeviceInternal {
-  pub fn new(device: DeviceMessageInfo, channel: BroadcastChannel<ButtplugClientDeviceEvent>) -> Self {
+  pub fn new(
+    device: DeviceMessageInfo,
+    channel: BroadcastChannel<ButtplugClientDeviceEvent>,
+  ) -> Self {
     Self {
       device: Arc::new(device),
       channel: Arc::new(channel),
@@ -127,7 +138,7 @@ where
     event_sender: BroadcastChannel<ButtplugClientEvent>,
     client_sender: Sender<ButtplugClientRequest>,
     client_receiver: Receiver<ButtplugClientRequest>,
-    device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>
+    device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
   ) -> Self {
     trace!("Creating ButtplugClientEventLoop instance.");
     Self {
@@ -147,19 +158,30 @@ where
   /// creates a ButtplugClientDevice and adds it the internal device map, then
   /// returns the instance.
   fn create_client_device(&mut self, info: &DeviceMessageInfo) -> ButtplugClientDevice {
-    debug!("Trying to create a client device from DeviceMessageInfo: {:?}", info);
+    debug!(
+      "Trying to create a client device from DeviceMessageInfo: {:?}",
+      info
+    );
     match self.device_map.get(&info.device_index) {
       // If the device already exists in our map, clone it.
       Some(dev) => {
         debug!("Device already exists, creating clone.");
-        ButtplugClientDevice::from((&*dev.device, self.client_sender.clone(), (*dev.channel).clone()))
-      }, 
+        ButtplugClientDevice::from((
+          &*dev.device,
+          self.client_sender.clone(),
+          (*dev.channel).clone(),
+        ))
+      }
       // If it doesn't, insert it.
       None => {
         debug!("Device does not exist, creating new entry.");
         let channel = BroadcastChannel::new();
-        let device = ButtplugClientDevice::from((info, self.client_sender.clone(), channel.clone()));
-        self.device_map.insert(info.device_index, ButtplugClientDeviceInternal::new(info.clone(), channel));
+        let device =
+          ButtplugClientDevice::from((info, self.client_sender.clone(), channel.clone()));
+        self.device_map.insert(
+          info.device_index,
+          ButtplugClientDeviceInternal::new(info.clone(), channel),
+        );
         device
       }
     }
@@ -180,61 +202,64 @@ where
   /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
   /// and update its map accordingly. After that, it will pass the information
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
-  async fn parse_connector_message(&mut self, msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>) {
+  async fn parse_connector_message(
+    &mut self,
+    msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>,
+  ) {
     if self.sorter.maybe_resolve_result(&msg_result).await {
       trace!("Message future found, returning");
       return;
     }
     match msg_result {
       Ok(msg) => {
-    trace!("Message received from connector, sending to clients.");
+        trace!("Message received from connector, sending to clients.");
 
-    trace!("Message future not found, assuming server event.");
-    match &msg {
-      ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
-        trace!("Device added, updating map and sending to client");
-        let info = DeviceMessageInfo::from(dev);
-        let device = self.create_client_device(&info);
-        self
-          .send_client_event(&ButtplugClientEvent::DeviceAdded(device))
-          .await;
-      }
-      ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
-        if self.device_map.contains_key(&dev.device_index) {
-          trace!("Device removed, updating map and sending to client");
-          let info = (*self.device_map.get(&dev.device_index).unwrap().device).clone();
-          self.device_map.remove(&dev.device_index);
-          self
-            .send_client_event(&ButtplugClientEvent::DeviceRemoved(info))
-            .await;
-        } else {
-            error!("Received DeviceRemoved for non-existent device index");
+        trace!("Message future not found, assuming server event.");
+        match &msg {
+          ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
+            trace!("Device added, updating map and sending to client");
+            let info = DeviceMessageInfo::from(dev);
+            let device = self.create_client_device(&info);
+            self
+              .send_client_event(&ButtplugClientEvent::DeviceAdded(device))
+              .await;
+          }
+          ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
+            if self.device_map.contains_key(&dev.device_index) {
+              trace!("Device removed, updating map and sending to client");
+              let info = (*self.device_map.get(&dev.device_index).unwrap().device).clone();
+              self.device_map.remove(&dev.device_index);
+              self
+                .send_client_event(&ButtplugClientEvent::DeviceRemoved(info))
+                .await;
+            } else {
+              error!("Received DeviceRemoved for non-existent device index");
+            }
+          }
+          ButtplugCurrentSpecServerMessage::Log(log) => {
+            trace!("Forwarding log message to client.");
+            self
+              .send_client_event(&ButtplugClientEvent::Log(
+                log.log_level.clone(),
+                log.log_message.clone(),
+              ))
+              .await;
+          }
+          ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
+            trace!("Scanning finished event received, forwarding to client.");
+            self
+              .send_client_event(&ButtplugClientEvent::ScanningFinished)
+              .await;
+          }
+          _ => error!("Cannot process message, dropping: {:?}", msg),
         }
       }
-      ButtplugCurrentSpecServerMessage::Log(log) => {
-        trace!("Forwarding log message to client.");
+      Err(err) => {
         self
-          .send_client_event(&ButtplugClientEvent::Log(
-            log.log_level.clone(),
-            log.log_message.clone(),
-          ))
+          .send_client_event(&ButtplugClientEvent::Error(err.into()))
           .await;
       }
-      ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
-        trace!("Scanning finished event received, forwarding to client.");
-        self
-          .send_client_event(&ButtplugClientEvent::ScanningFinished)
-          .await;
-      }
-      _ => error!("Cannot process message, dropping: {:?}", msg),
     }
-  },
-  Err(err) => {
-    self
-    .send_client_event(&ButtplugClientEvent::Error(err.into()))
-    .await;
-  }
-  }
   }
 
   /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
@@ -305,7 +330,7 @@ where
             info!("Client disconnected, exiting loop.");
             return;
           }
-          Some(msg) => { 
+          Some(msg) => {
             if !self.parse_client_request(msg).await {
               break;
             }
@@ -358,15 +383,15 @@ pub(super) fn client_event_loop(
     event_loop_sender,
     client_sender,
     client_receiver,
-    device_map,    
+    device_map,
   );
   (
     Box::pin(async move {
       info!("Starting client event loop.");
       event_loop
-      .run()
-      .instrument(tracing::info_span!("Client Event Loop"))
-      .await;
+        .run()
+        .instrument(tracing::info_span!("Client Event Loop"))
+        .await;
       info!("Stopping client event loop.");
       Ok(())
     }),

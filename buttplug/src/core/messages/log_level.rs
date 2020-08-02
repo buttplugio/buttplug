@@ -7,8 +7,8 @@
 
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use tracing::Level;
 use std::cmp::Ord;
+use tracing::Level;
 
 #[derive(Debug, PartialEq, Clone, Ord, PartialOrd, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]

@@ -10,7 +10,7 @@ use buttplug::{
   client::ButtplugClient,
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
   core::messages::serializer::ButtplugClientJSONSerializer,
-  util::async_manager
+  util::async_manager,
 };
 
 #[cfg(feature = "websockets")]

@@ -1,14 +1,22 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
-use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
 pub struct Youou {
@@ -60,9 +68,10 @@ impl ButtplugProtocolCommandHandler for Youou {
       speed,
       state,
     ];
-    self
-      .packet_id
-      .store(self.packet_id.load(Ordering::SeqCst).wrapping_add(1), Ordering::SeqCst);
+    self.packet_id.store(
+      self.packet_id.load(Ordering::SeqCst).wrapping_add(1),
+      Ordering::SeqCst,
+    );
     let mut crc: u8 = 0;
 
     // Simple XOR of everything up to the 9th byte for CRC.
@@ -94,14 +103,15 @@ mod test {
   #[test]
   pub fn test_youou_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("VX001_")
-        .await
-        .unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("VX001_").await.unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
+      let command_receiver = test_device
+        .get_endpoint_channel(&Endpoint::Tx)
+        .unwrap()
+        .receiver;
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

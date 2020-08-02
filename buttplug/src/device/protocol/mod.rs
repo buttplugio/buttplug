@@ -1,5 +1,5 @@
-mod generic_command_manager;
 mod aneros;
+mod generic_command_manager;
 mod lovehoney_desire;
 mod lovense;
 mod maxpro;
@@ -17,9 +17,17 @@ use super::DeviceImpl;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{self, ButtplugDeviceCommandMessageUnion, ButtplugMessage, MessageAttributesMap, ButtplugDeviceMessageType, VibrateCmd, VibrateSubcommand},
+    messages::{
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      MessageAttributesMap,
+      VibrateCmd,
+      VibrateSubcommand,
+    },
   },
-  device::{configuration_manager::{DeviceProtocolConfiguration}, ButtplugDeviceResultFuture},
+  device::{configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture},
 };
 use futures::future::{self, BoxFuture};
 use std::convert::TryFrom;
@@ -67,8 +75,11 @@ impl TryFrom<&str> for ProtocolTypes {
   }
 }
 
-pub fn try_create_protocol(protocol_type: &ProtocolTypes, device: &dyn DeviceImpl, config: DeviceProtocolConfiguration) -> 
-  BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+pub fn try_create_protocol(
+  protocol_type: &ProtocolTypes,
+  device: &dyn DeviceImpl,
+  config: DeviceProtocolConfiguration,
+) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
   match protocol_type {
     ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
     ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
@@ -89,20 +100,22 @@ pub fn try_create_protocol(protocol_type: &ProtocolTypes, device: &dyn DeviceImp
 pub trait ButtplugProtocolCreator: ButtplugProtocol {
   fn try_create(
     device_impl: &dyn DeviceImpl,
-    config: DeviceProtocolConfiguration
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> where Self: Sized {
+    config: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
+  where
+    Self: Sized,
+  {
     let (names, attrs) = config.get_attributes(device_impl.name()).unwrap();
     let name = names.get("en-us").unwrap().clone();
-    Box::pin(async move {
-      Ok(Self::new_protocol(&name, attrs))
-    })
+    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
   }
 
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> where Self: Sized;
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol>
+  where
+    Self: Sized;
 }
 
-pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
-}
+pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {}
 
 pub trait ButtplugProtocolProperties {
   fn name(&self) -> &str;
@@ -153,7 +166,11 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     message: messages::StopDeviceCmd,
   ) -> ButtplugDeviceResultFuture {
     let ok_return = messages::Ok::new(message.get_id());
-    let fut_vec: Vec<ButtplugDeviceResultFuture> = self.stop_commands().iter().map(|cmd| self.handle_command(device.clone(), cmd.clone())).collect();
+    let fut_vec: Vec<ButtplugDeviceResultFuture> = self
+      .stop_commands()
+      .iter()
+      .map(|cmd| self.handle_command(device.clone(), cmd.clone()))
+      .collect();
     Box::pin(async move {
       // TODO We should be able to run these concurrently, and should return any error we get.
       for fut in fut_vec {
@@ -170,32 +187,43 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<Box<dyn DeviceImpl>>,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugDeviceResultFuture {
-        // Time for sadness! In order to handle conversion of
-        // SingleMotorVibrateCmd, we need to know how many vibrators a device
-        // has. We don't actually know that until we get to the protocol level,
-        // so we're stuck parsing this here. Since we can assume
-        // SingleMotorVibrateCmd will ALWAYS map to vibration, we can convert to
-        // VibrateCmd here and save ourselves having to handle it in every
-        // protocol, meaning spec v0 and v1 programs will still be forward
-        // compatible with vibrators.
-        let vibrator_count;
-        if let Some(attr) = self.message_attributes().get(&ButtplugDeviceMessageType::VibrateCmd) {
-          if let Some(count) = attr.feature_count {
-            vibrator_count = count as usize;
-          } else {
-            return ButtplugDeviceError::ProtocolRequirementError(format!("{} needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.", self.name())).into();
-          }
-        } else {
-          return ButtplugDeviceError::ProtocolRequirementError(format!("{} needs to support VibrateCmd to use SingleMotorVibrateCmd.", self.name())).into();
-        }
-        let speed = message.speed;
-        let mut cmds = vec!();
-        for i in 0..vibrator_count {
-          cmds.push(VibrateSubcommand::new(i as u32, speed));
-        }
-        let mut vibrate_cmd = VibrateCmd::new(message.device_index, cmds);
-        vibrate_cmd.set_id(message.get_id());
-        self.handle_command(device, vibrate_cmd.into())
+    // Time for sadness! In order to handle conversion of
+    // SingleMotorVibrateCmd, we need to know how many vibrators a device
+    // has. We don't actually know that until we get to the protocol level,
+    // so we're stuck parsing this here. Since we can assume
+    // SingleMotorVibrateCmd will ALWAYS map to vibration, we can convert to
+    // VibrateCmd here and save ourselves having to handle it in every
+    // protocol, meaning spec v0 and v1 programs will still be forward
+    // compatible with vibrators.
+    let vibrator_count;
+    if let Some(attr) = self
+      .message_attributes()
+      .get(&ButtplugDeviceMessageType::VibrateCmd)
+    {
+      if let Some(count) = attr.feature_count {
+        vibrator_count = count as usize;
+      } else {
+        return ButtplugDeviceError::ProtocolRequirementError(format!(
+          "{} needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.",
+          self.name()
+        ))
+        .into();
+      }
+    } else {
+      return ButtplugDeviceError::ProtocolRequirementError(format!(
+        "{} needs to support VibrateCmd to use SingleMotorVibrateCmd.",
+        self.name()
+      ))
+      .into();
+    }
+    let speed = message.speed;
+    let mut cmds = vec![];
+    for i in 0..vibrator_count {
+      cmds.push(VibrateSubcommand::new(i as u32, speed));
+    }
+    let mut vibrate_cmd = VibrateCmd::new(message.device_index, cmds);
+    vibrate_cmd.set_id(message.get_id());
+    self.handle_command(device, vibrate_cmd.into())
   }
 
   fn handle_raw_write_cmd(
@@ -205,9 +233,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   ) -> ButtplugDeviceResultFuture {
     let id = message.get_id();
     let fut = device.write_value(message.into());
-    Box::pin(async move {
-      fut.await.map(|_| messages::Ok::new(id).into())
-    })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
   fn handle_raw_read_cmd(
@@ -232,9 +258,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   ) -> ButtplugDeviceResultFuture {
     let id = message.get_id();
     let fut = device.unsubscribe(message.into());
-    Box::pin(async move {
-      fut.await.map(|_| messages::Ok::new(id).into())
-    })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
   fn handle_raw_subscribe_cmd(
@@ -244,9 +268,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   ) -> ButtplugDeviceResultFuture {
     let id = message.get_id();
     let fut = device.subscribe(message.into());
-    Box::pin(async move {
-      fut.await.map(|_| messages::Ok::new(id).into())
-    })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
   fn command_unimplemented(&self) -> ButtplugDeviceResultFuture {
@@ -254,14 +276,15 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
     Box::pin(future::ready(Err(
-      ButtplugDeviceError::UnhandledCommand("Command not implemented for this protocol".to_owned()).into(),
+      ButtplugDeviceError::UnhandledCommand("Command not implemented for this protocol".to_owned())
+        .into(),
     )))
   }
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
     _device: Arc<Box<dyn DeviceImpl>>,
-    _message: messages::VorzeA10CycloneCmd
+    _message: messages::VorzeA10CycloneCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented()
   }
@@ -305,7 +328,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented()
   }
-/*
+  /*
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Box<dyn DeviceImpl>>,

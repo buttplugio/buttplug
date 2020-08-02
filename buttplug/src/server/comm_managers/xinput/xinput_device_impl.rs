@@ -7,8 +7,14 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    BoundedDeviceEventBroadcaster, ButtplugDeviceImplCreator, DeviceImpl, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
 };
@@ -93,7 +99,10 @@ impl DeviceImpl for XInputDeviceImpl {
     self.event_receiver.clone()
   }
 
-  fn read_value(&self, _msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  fn read_value(
+    &self,
+    _msg: DeviceReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     panic!("We should never get here!");
   }
 

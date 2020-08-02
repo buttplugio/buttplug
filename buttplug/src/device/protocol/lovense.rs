@@ -1,8 +1,15 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
   core::errors::ButtplugDeviceError,
   device::{
-    configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceEvent, DeviceSubscribeCmd,
+    configuration_manager::DeviceProtocolConfiguration,
+    ButtplugDeviceEvent,
+    DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
   },
 };
@@ -13,7 +20,9 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_mutex::Mutex;
@@ -70,14 +79,20 @@ impl ButtplugProtocolCreator for Lovense {
         }
         Some(ButtplugDeviceEvent::Removed) => {
           return Err(
-            ButtplugDeviceError::ProtocolSpecificError("Lovense", "Lovense Device disconnected while getting DeviceType info.")
-              .into(),
+            ButtplugDeviceError::ProtocolSpecificError(
+              "Lovense",
+              "Lovense Device disconnected while getting DeviceType info.",
+            )
+            .into(),
           );
         }
         None => {
           return Err(
-            ButtplugDeviceError::ProtocolSpecificError("Lovense", "Did not get DeviceType return from Lovense device in time")
-              .into(),
+            ButtplugDeviceError::ProtocolSpecificError(
+              "Lovense",
+              "Did not get DeviceType return from Lovense device in time",
+            )
+            .into(),
           );
         }
       };
@@ -120,11 +135,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
             let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(
-              Endpoint::Tx,
-              lovense_cmd,
-              false,
-            )));
+            fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
           }
         }
       }

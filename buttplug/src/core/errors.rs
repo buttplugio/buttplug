@@ -7,15 +7,19 @@
 
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
-use super::messages::{self, ErrorCode, ButtplugMessage, ButtplugMessageSpecVersion, ButtplugDeviceMessageType, serializer::ButtplugSerializerError};
-use thiserror::Error;
-use displaydoc::Display;
-use crate::{
-  device::Endpoint,
-  server::comm_managers::ButtplugDeviceSpecificError,
+use super::messages::{
+  self,
+  serializer::ButtplugSerializerError,
+  ButtplugDeviceMessageType,
+  ButtplugMessage,
+  ButtplugMessageSpecVersion,
+  ErrorCode,
 };
+use crate::{device::Endpoint, server::comm_managers::ButtplugDeviceSpecificError};
+use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 use std::fmt;
+use thiserror::Error;
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 
@@ -23,7 +27,10 @@ pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 /// usually involves protocol handshake errors. For connector errors (i.e. when
 /// a remote network connection cannot be established), see
 /// [crate::connector::ButtplugClientConnectorError].
-impl<T> From<ButtplugHandshakeError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+impl<T> From<ButtplugHandshakeError> for BoxFuture<'static, Result<T, ButtplugError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugHandshakeError) -> BoxFuture<'static, Result<T, ButtplugError>> {
     ButtplugError::from(err).into()
   }
@@ -45,7 +52,10 @@ pub enum ButtplugHandshakeError {
 
 /// Message errors occur when a message is somehow malformed on creation, or
 /// received unexpectedly by a client or server.
-impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugMessageError) -> BoxFuture<'static, Result<T, ButtplugError>> {
     ButtplugError::from(err).into()
   }
@@ -55,7 +65,7 @@ impl<T> From<ButtplugMessageError> for BoxFuture<'static, Result<T, ButtplugErro
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
   UnexpectedMessageType(String),
-  /// {0} {1} cannot be converted to {2} 
+  /// {0} {1} cannot be converted to {2}
   VersionError(&'static str, String, &'static str),
   /// Message conversion error: {0}
   MessageConversionError(&'static str),
@@ -73,7 +83,10 @@ pub enum ButtplugMessageError {
 /// Ping errors occur when a server requires a ping response (set up during
 /// connection handshake), and the client does not return a response in the
 /// alloted timeframe. This also signifies a server disconnect.
-impl<T> From<ButtplugPingError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+impl<T> From<ButtplugPingError> for BoxFuture<'static, Result<T, ButtplugError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugPingError) -> BoxFuture<'static, Result<T, ButtplugError>> {
     ButtplugError::from(err).into()
   }
@@ -92,7 +105,10 @@ pub enum ButtplugPingError {
 /// Device errors occur during device interactions, including sending
 /// unsupported message commands, addressing the wrong number of device
 /// attributes, etc...
-impl<T> From<ButtplugDeviceError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+impl<T> From<ButtplugDeviceError> for BoxFuture<'static, Result<T, ButtplugError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugDeviceError) -> BoxFuture<'static, Result<T, ButtplugError>> {
     ButtplugError::from(err).into()
   }
@@ -136,12 +152,14 @@ pub enum ButtplugDeviceError {
   ProtocolRequirementError(String),
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
-
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type
 /// will suffice. These are rare and usually fatal (disconnecting) errors.
-impl<T> From<ButtplugUnknownError> for BoxFuture<'static, Result<T, ButtplugError>> where T: Send + 'static {
+impl<T> From<ButtplugUnknownError> for BoxFuture<'static, Result<T, ButtplugError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugUnknownError) -> BoxFuture<'static, Result<T, ButtplugError>> {
     ButtplugError::from(err).into()
   }
@@ -186,17 +204,11 @@ pub struct ButtplugServerError {
 
 impl ButtplugServerError {
   pub fn new_message_error(msg_id: u32, error: ButtplugError) -> Self {
-    Self {
-      msg_id,
-      error
-    }
+    Self { msg_id, error }
   }
 
-  pub fn new_system_error( error: ButtplugError) -> Self {
-    Self {
-      msg_id: 0,
-      error
-    }
+  pub fn new_system_error(error: ButtplugError) -> Self {
+    Self { msg_id: 0, error }
   }
 
   pub fn id(&self) -> u32 {
@@ -264,7 +276,10 @@ impl From<messages::Error> for ButtplugServerError {
   }
 }
 
-impl<T> From<ButtplugServerError> for BoxFuture<'static, Result<T, ButtplugServerError>> where T: Send + 'static {
+impl<T> From<ButtplugServerError> for BoxFuture<'static, Result<T, ButtplugServerError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugServerError) -> BoxFuture<'static, Result<T, ButtplugServerError>> {
     Box::pin(future::ready(Err(err)))
   }
@@ -274,11 +289,21 @@ impl From<messages::Error> for ButtplugError {
   /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
   fn from(error: messages::Error) -> Self {
     match error.error_code {
-      ErrorCode::ErrorDevice => ButtplugDeviceError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorMessage => ButtplugMessageError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorHandshake => ButtplugHandshakeError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorUnknown =>ButtplugUnknownError::UntypedDeserializedError(error.error_message).into(),
-      ErrorCode::ErrorPing => ButtplugPingError::UntypedDeserializedError(error.error_message).into(),
+      ErrorCode::ErrorDevice => {
+        ButtplugDeviceError::UntypedDeserializedError(error.error_message).into()
+      }
+      ErrorCode::ErrorMessage => {
+        ButtplugMessageError::UntypedDeserializedError(error.error_message).into()
+      }
+      ErrorCode::ErrorHandshake => {
+        ButtplugHandshakeError::UntypedDeserializedError(error.error_message).into()
+      }
+      ErrorCode::ErrorUnknown => {
+        ButtplugUnknownError::UntypedDeserializedError(error.error_message).into()
+      }
+      ErrorCode::ErrorPing => {
+        ButtplugPingError::UntypedDeserializedError(error.error_message).into()
+      }
     }
   }
 }

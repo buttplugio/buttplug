@@ -1,12 +1,6 @@
-use super::{
-  lovense_dongle_device_impl::*,
-  lovense_dongle_messages::*,
-};
+use super::{lovense_dongle_device_impl::*, lovense_dongle_messages::*};
 use crate::{
-  core::{
-    errors::ButtplugError,
-    ButtplugResult,
-  },
+  core::{errors::ButtplugError, ButtplugResult},
   server::comm_managers::DeviceCommunicationEvent,
 };
 use async_channel::{bounded, Receiver, Sender};
@@ -63,14 +57,17 @@ impl ChannelHub {
     }
   }
 
-  pub async fn wait_for_device_input(&mut self, mut device_incoming: Receiver<OutgoingLovenseData>) -> IncomingMessage {
+  pub async fn wait_for_device_input(
+    &mut self,
+    mut device_incoming: Receiver<OutgoingLovenseData>,
+  ) -> IncomingMessage {
     let mut comm_fut = self.comm_manager_incoming.next().fuse();
     let mut dongle_fut = self.dongle_incoming.next().fuse();
     let mut device_fut = device_incoming.next().fuse();
     select! {
       comm_res = comm_fut => IncomingMessage::CommMgr(comm_res.unwrap()),
       dongle_res = dongle_fut => IncomingMessage::Dongle(dongle_res.unwrap()),
-      device_res = device_fut => IncomingMessage::Device(device_res.unwrap()) 
+      device_res = device_fut => IncomingMessage::Device(device_res.unwrap())
     }
   }
 
@@ -215,12 +212,9 @@ impl LovenseDongleState for LovenseDongleIdle {
           }
         },
         _ => {
-          error!(
-            "Unhandled message to lovense dongle: {:?}",
-            msg
-          );
+          error!("Unhandled message to lovense dongle: {:?}", msg);
         }
-    }
+      }
     }
   }
 }
@@ -240,11 +234,14 @@ impl LovenseDongleState for LovenseDongleStartScanning {
       command: None,
       eager: None,
     };
-    self.hub.send_output(OutgoingLovenseData::Message(autoconnect_msg)).await;
+    self
+      .hub
+      .send_output(OutgoingLovenseData::Message(autoconnect_msg))
+      .await;
 
     // This sleep is REQUIRED. If we send too soon after this, the dongle locks up.
     futures_timer::Delay::new(std::time::Duration::from_millis(250)).await;
-    
+
     let scan_msg = LovenseDongleOutgoingMessage {
       message_type: LovenseDongleMessageType::Toy,
       func: LovenseDongleMessageFunc::Search,
@@ -254,9 +251,7 @@ impl LovenseDongleState for LovenseDongleStartScanning {
     };
     self
       .hub
-      .send_output(OutgoingLovenseData::Message(
-        scan_msg,
-      ))
+      .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
     Some(Box::new(LovenseDongleScanning::new(self.hub.clone())))
   }
@@ -311,9 +306,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
     };
     self
       .hub
-      .send_output(OutgoingLovenseData::Message(
-        scan_msg,
-      ))
+      .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
     None
   }
@@ -334,9 +327,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
     };
     self
       .hub
-      .send_output(OutgoingLovenseData::Message(
-        scan_msg,
-      ))
+      .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
 
     loop {
@@ -369,15 +360,25 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
     let (device_write_sender, device_write_receiver) = bounded(256);
     let (device_read_sender, device_read_receiver) = bounded(256);
-    self.hub.send_event(DeviceCommunicationEvent::DeviceFound(Box::new(
-      LovenseDongleDeviceImplCreator::new(&self.device_id, device_write_sender, device_read_receiver),
-    ))).await;
+    self
+      .hub
+      .send_event(DeviceCommunicationEvent::DeviceFound(Box::new(
+        LovenseDongleDeviceImplCreator::new(
+          &self.device_id,
+          device_write_sender,
+          device_read_receiver,
+        ),
+      )))
+      .await;
     loop {
-      let msg = self.hub.wait_for_device_input(device_write_receiver.clone()).await;
+      let msg = self
+        .hub
+        .wait_for_device_input(device_write_receiver.clone())
+        .await;
       match msg {
         IncomingMessage::Device(device_msg) => {
           self.hub.send_output(device_msg).await;
-        },
+        }
         IncomingMessage::Dongle(dongle_msg) => {
           device_read_sender.send(dongle_msg).await.unwrap();
         }

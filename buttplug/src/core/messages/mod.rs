@@ -30,6 +30,8 @@ mod ok;
 mod ping;
 mod raw_read_cmd;
 mod raw_reading;
+mod raw_subscribe_cmd;
+mod raw_unsubscribe_cmd;
 mod raw_write_cmd;
 mod request_device_list;
 mod request_log;
@@ -43,9 +45,7 @@ mod start_scanning;
 mod stop_all_devices;
 mod stop_device_cmd;
 mod stop_scanning;
-mod raw_subscribe_cmd;
 mod test;
-mod raw_unsubscribe_cmd;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
@@ -65,6 +65,8 @@ pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;
 pub use raw_reading::RawReading;
+pub use raw_subscribe_cmd::RawSubscribeCmd;
+pub use raw_unsubscribe_cmd::RawUnsubscribeCmd;
 pub use raw_write_cmd::RawWriteCmd;
 pub use request_device_list::RequestDeviceList;
 pub use request_log::RequestLog;
@@ -77,9 +79,7 @@ pub use start_scanning::StartScanning;
 pub use stop_all_devices::StopAllDevices;
 pub use stop_device_cmd::StopDeviceCmd;
 pub use stop_scanning::StopScanning;
-pub use raw_subscribe_cmd::RawSubscribeCmd;
 pub use test::Test;
-pub use raw_unsubscribe_cmd::RawUnsubscribeCmd;
 pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
@@ -372,7 +372,11 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
       ButtplugServerMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV1ServerMessage::ScanningFinished(msg))
       }
-      _ => Err(ButtplugMessageError::VersionError("ButtplugServerMessage", format!("{:?}", msg), "ButtplugSpecV1ServerMessage")),
+      _ => Err(ButtplugMessageError::VersionError(
+        "ButtplugServerMessage",
+        format!("{:?}", msg),
+        "ButtplugSpecV1ServerMessage",
+      )),
     }
   }
 }
@@ -445,7 +449,11 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
       ButtplugServerMessage::ScanningFinished(msg) => {
         Ok(ButtplugSpecV0ServerMessage::ScanningFinished(msg))
       }
-      _ => Err(ButtplugMessageError::VersionError("ButtplugServerMessage", format!("{:?}", msg), "ButtplugSpecV0ServerMessage")),
+      _ => Err(ButtplugMessageError::VersionError(
+        "ButtplugServerMessage",
+        format!("{:?}", msg),
+        "ButtplugSpecV0ServerMessage",
+      )),
     }
   }
 }

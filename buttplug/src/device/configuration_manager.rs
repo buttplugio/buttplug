@@ -307,8 +307,10 @@ pub struct DeviceConfigurationManager {
   pub(self) config: ProtocolConfiguration,
 }
 
-unsafe impl Send for DeviceConfigurationManager {}
-unsafe impl Sync for DeviceConfigurationManager {}
+unsafe impl Send for DeviceConfigurationManager {
+}
+unsafe impl Sync for DeviceConfigurationManager {
+}
 
 impl Default for DeviceConfigurationManager {
   fn default() -> Self {
@@ -387,8 +389,12 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    clear_user_device_config, set_user_device_config, BluetoothLESpecifier,
-    DeviceConfigurationManager, DeviceProtocolConfiguration, DeviceSpecifier,
+    clear_user_device_config,
+    set_user_device_config,
+    BluetoothLESpecifier,
+    DeviceConfigurationManager,
+    DeviceProtocolConfiguration,
+    DeviceSpecifier,
   };
   use crate::core::messages::ButtplugDeviceMessageType;
 

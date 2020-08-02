@@ -8,34 +8,34 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{fmt, str::FromStr, string::ToString, convert::TryFrom, sync::Arc};
+use std::{convert::TryFrom, fmt, str::FromStr, string::ToString, sync::Arc};
 
 use crate::{
   core::{
-    ButtplugResultFuture,
     errors::ButtplugError,
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
+      ButtplugServerMessage,
       MessageAttributesMap,
       RawReadCmd,
       RawReading,
-      RawWriteCmd,
       RawSubscribeCmd,
       RawUnsubscribeCmd,
-      ButtplugServerMessage,
+      RawWriteCmd,
     },
+    ButtplugResultFuture,
   },
   device::{
     configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
-    protocol::{ButtplugProtocol, ProtocolTypes}
+    protocol::{ButtplugProtocol, ProtocolTypes},
   },
 };
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
-use futures::future::BoxFuture;
-use core::hash::{Hash, Hasher};
 use configuration_manager::DeviceProtocolConfiguration;
+use core::hash::{Hash, Hasher};
+use futures::future::BoxFuture;
 
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
@@ -95,7 +95,8 @@ pub type BoundedDeviceEventBroadcaster = BroadcastChannel<
   futures_channel::mpsc::Receiver<ButtplugDeviceEvent>,
 >;
 
-pub type ButtplugDeviceResultFuture = BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
+pub type ButtplugDeviceResultFuture =
+  BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
 #[derive(PartialEq, Debug)]
 pub struct DeviceReadCmd {
@@ -279,7 +280,8 @@ pub trait DeviceImpl: Sync + Send {
   fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
 
   fn disconnect(&self) -> ButtplugResultFuture;
-  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
+  fn read_value(&self, msg: DeviceReadCmd)
+    -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture;
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture;
   fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture;
@@ -301,11 +303,12 @@ pub struct ButtplugDevice {
 
 impl Hash for ButtplugDevice {
   fn hash<H: Hasher>(&self, state: &mut H) {
-      self.device.address().hash(state);
+    self.device.address().hash(state);
   }
 }
 
-impl Eq for ButtplugDevice {}
+impl Eq for ButtplugDevice {
+}
 
 impl PartialEq for ButtplugDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -315,9 +318,9 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
-    Self { 
-      protocol, 
-      device: Arc::new(device) 
+    Self {
+      protocol,
+      device: Arc::new(device),
     }
   }
 
@@ -337,10 +340,8 @@ impl ButtplugDevice {
         // configuration for that device, try to initialize the implementation.
         // This usually means trying to connect to whatever the device is,
         // finding endpoints, etc.
-        let device_protocol_config = DeviceProtocolConfiguration::new(
-          config.defaults.clone(),
-          config.configurations.clone(),
-        );
+        let device_protocol_config =
+          DeviceProtocolConfiguration::new(config.defaults.clone(), config.configurations.clone());
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
@@ -352,7 +353,13 @@ impl ButtplugDevice {
               // whatever it needs. For most protocols, this is a no-op. However, for
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
-              match protocol::try_create_protocol(&proto_type, &*device_impl, device_protocol_config).await {
+              match protocol::try_create_protocol(
+                &proto_type,
+                &*device_impl,
+                device_protocol_config,
+              )
+              .await
+              {
                 Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, device_impl))),
                 Err(e) => Err(e),
               }
@@ -381,11 +388,11 @@ impl ButtplugDevice {
   ) -> ButtplugDeviceResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
   }
-  
+
   // TODO Just return the receiver as part of the constructor
   pub fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
     self.device.get_event_receiver()
   }
-  
+
   // TODO Handle raw messages here.
 }

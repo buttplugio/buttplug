@@ -10,10 +10,13 @@
 
 use buttplug::{
   client::{
-    device::ButtplugClientDevice, device::VibrateCommand, ButtplugClient, ButtplugClientEvent,
+    device::ButtplugClientDevice,
+    device::VibrateCommand,
+    ButtplugClient,
+    ButtplugClientEvent,
   },
   core::messages::ButtplugDeviceMessageType,
-  util::async_manager
+  util::async_manager,
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -107,7 +110,8 @@ async fn device_control_example() {
         let fut = vibrate_device(dev);
         async_manager::spawn(async move {
           fut.await;
-        }).unwrap();
+        })
+        .unwrap();
         // break;
       }
       ButtplugClientEvent::ServerDisconnect => {

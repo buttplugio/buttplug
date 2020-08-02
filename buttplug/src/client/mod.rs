@@ -18,9 +18,15 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-      ButtplugMessageSpecVersion, DeviceMessageInfo, LogLevel, RequestDeviceList,
-      RequestServerInfo, StartScanning, StopScanning,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessageSpecVersion,
+      DeviceMessageInfo,
+      LogLevel,
+      RequestDeviceList,
+      RequestServerInfo,
+      StartScanning,
+      StopScanning,
     },
   },
   util::{
@@ -32,7 +38,8 @@ use async_channel::Sender;
 use dashmap::DashMap;
 use futures::{
   future::{self, BoxFuture, Future},
-  FutureExt, StreamExt,
+  FutureExt,
+  StreamExt,
 };
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -175,10 +182,12 @@ pub struct ButtplugClient {
   device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
 }
 
-unsafe impl Send for ButtplugClient {}
+unsafe impl Send for ButtplugClient {
+}
 // Not actually sure this should be sync, but trying to call handshake breaks
 // without it.
-unsafe impl Sync for ButtplugClient {}
+unsafe impl Sync for ButtplugClient {
+}
 
 impl ButtplugClient {
   pub fn connect<ConnectorType>(
@@ -465,12 +474,7 @@ impl ButtplugClient {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
-    Box::pin(async move {
-      send_fut
-        .await
-        .map(|_| ())
-        .map_err(|err| err)
-    })
+    Box::pin(async move { send_fut.await.map(|_| ()).map_err(|err| err) })
   }
 
   /// Retreives a list of currently connected devices.

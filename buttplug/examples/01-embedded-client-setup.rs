@@ -16,7 +16,11 @@
 // multiple packages for different features, the Rust Buttplug crate contains
 // everything you need to build Buttplug applications. Aren't Cargo Features
 // great?
-use buttplug::{client::ButtplugClient, connector::ButtplugInProcessClientConnector, util::async_manager};
+use buttplug::{
+  client::ButtplugClient,
+  connector::ButtplugInProcessClientConnector,
+  util::async_manager,
+};
 
 async fn embedded_connector_example() {
   tracing_subscriber::fmt::init();

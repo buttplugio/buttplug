@@ -6,7 +6,9 @@ mod test {
     core::messages::{
       self,
       serializer::{
-        ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
+        ButtplugMessageSerializer,
+        ButtplugSerializedMessage,
+        ButtplugServerJSONSerializer,
       },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },

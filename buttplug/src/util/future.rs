@@ -8,11 +8,11 @@
 //! Buttplug futures utilities. Mostly used for building message futures in the
 //! client, used to wait on responses from the server.
 
+use core::pin::Pin;
 use futures::{
   future::Future,
   task::{Context, Poll, Waker},
 };
-use core::pin::Pin;
 use std::sync::{Arc, Mutex, MutexGuard};
 
 /// Struct used for facilitating resolving futures across contexts.
@@ -110,10 +110,7 @@ impl<T> ButtplugFutureStateShared<T> {
   pub(super) fn lock(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
     // There should only ever be lock contention if we're polling while
     // settings, which should rarely if ever happen.
-    self
-      .state
-      .lock()
-      .unwrap()
+    self.state.lock().unwrap()
   }
 
   /// Locks immediately and sets the reply for the internal waker, or panics if

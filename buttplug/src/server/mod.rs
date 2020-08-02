@@ -9,9 +9,9 @@
 
 pub mod comm_managers;
 pub mod device_manager;
-pub mod remote_server;
 mod logger;
 mod ping_timer;
+pub mod remote_server;
 
 pub use remote_server::ButtplugRemoteServer;
 
@@ -19,26 +19,32 @@ use crate::{
   core::{
     errors::*,
     messages::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, DeviceMessageInfo,
-      StopAllDevices, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      DeviceMessageInfo,
+      StopAllDevices,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   test::TestDeviceCommunicationManagerHelper,
   util::async_manager,
 };
-use futures::{StreamExt, future::BoxFuture};
-use ping_timer::PingTimer;
-use async_channel::{bounded, Sender, Receiver};
+use async_channel::{bounded, Receiver, Sender};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
+use futures::{future::BoxFuture, StreamExt};
 use logger::ButtplugLogHandler;
+use ping_timer::PingTimer;
 use std::{
   convert::{TryFrom, TryInto},
   sync::{
-    Arc,
     atomic::{AtomicBool, Ordering},
-  }
+    Arc,
+  },
 };
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
@@ -91,13 +97,15 @@ impl ButtplugServer {
         if event_sender_clone
           .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
           .await
-          .is_err() {
+          .is_err()
+        {
           error!("Server disappeared, cannot update about ping out.");
         };
         if device_manager_sender.send(()).await.is_err() {
           error!("Device Manager disappeared, cannot update about ping out.");
         }
-      }).unwrap();
+      })
+      .unwrap();
       (Some(timer), Some(device_manager_receiver))
     } else {
       (None, None)
@@ -151,14 +159,21 @@ impl ButtplugServer {
 
   // This is the only method that returns ButtplugServerResult, as it handles
   // the packing of the message ID.
-  pub fn parse_message(&self, msg: ButtplugClientMessage) -> BoxFuture<'static, Result<ButtplugServerMessage, ButtplugServerError>> {
+  pub fn parse_message(
+    &self,
+    msg: ButtplugClientMessage,
+  ) -> BoxFuture<'static, Result<ButtplugServerMessage, ButtplugServerError>> {
     let id = msg.get_id();
     if !self.connected() {
       // Check for ping timeout first! There's no way we should've pinged out if
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
       if self.pinged_out.load(Ordering::SeqCst) {
-        return ButtplugServerError::new_message_error(msg.get_id(), ButtplugPingError::PingedOut.into()).into();
+        return ButtplugServerError::new_message_error(
+          msg.get_id(),
+          ButtplugPingError::PingedOut.into(),
+        )
+        .into();
       } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
         return ButtplugServerError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
       }
@@ -177,18 +192,19 @@ impl ButtplugServer {
         ButtplugClientMessage::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
         ButtplugClientMessage::Ping(p) => self.handle_ping(p),
         ButtplugClientMessage::RequestLog(l) => self.handle_log(l),
-        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into()
+        _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
     };
     // Simple way to set the ID on the way out. Just rewrap
     // the returned future to make sure it happens.
     Box::pin(async move {
-      out_fut.await.map(|mut ok_msg| {
-        ok_msg.set_id(id);
-        ok_msg
-      }).map_err(|err| {
-        ButtplugServerError::new_message_error(id, err)
-      })
+      out_fut
+        .await
+        .map(|mut ok_msg| {
+          ok_msg.set_id(id);
+          ok_msg
+        })
+        .map_err(|err| ButtplugServerError::new_message_error(id, err))
     })
   }
 
@@ -197,7 +213,11 @@ impl ButtplugServer {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
-      return ButtplugHandshakeError::MessageSpecVersionMismatch(BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version).into();
+      return ButtplugHandshakeError::MessageSpecVersionMismatch(
+        BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+        msg.message_version,
+      )
+      .into();
     }
     info!("Performing server handshake check");
     // self.client_name = Some(msg.client_name.clone());
@@ -237,7 +257,7 @@ impl ButtplugServer {
 
   fn handle_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
     // TODO Reimplement logging!
-    
+
     // let sender = self.event_sender.clone();
     Box::pin(async move {
       // let handler = ButtplugLogHandler::new(&msg.log_level, sender);
@@ -253,10 +273,8 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
   use crate::{
-    core::{
-      messages::{self, ButtplugServerMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
-    },
-    server::{ButtplugServer},
+    core::messages::{self, ButtplugServerMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+    server::ButtplugServer,
     util::async_manager,
   };
   use futures::StreamExt;
@@ -270,10 +288,22 @@ mod test {
       let mut reply = server.parse_message(msg.clone().into()).await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       reply = server.parse_message(msg.clone().into()).await;
-      assert!(reply.is_err(), format!("Should get back err on double handshake: {:?}", reply));
-      assert!(server.disconnect().await.is_ok(), format!("Should disconnect ok"));
+      assert!(
+        reply.is_err(),
+        format!("Should get back err on double handshake: {:?}", reply)
+      );
+      assert!(
+        server.disconnect().await.is_ok(),
+        format!("Should disconnect ok")
+      );
       reply = server.parse_message(msg.clone().into()).await;
-      assert!(reply.is_ok(), format!("Should get back ok on handshake after disconnect: {:?}", reply));
+      assert!(
+        reply.is_ok(),
+        format!(
+          "Should get back ok on handshake after disconnect: {:?}",
+          reply
+        )
+      );
     });
   }
 

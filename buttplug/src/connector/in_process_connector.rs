@@ -1,18 +1,22 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugServerError, ButtplugMessageError},
-    messages::{ButtplugMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    errors::{ButtplugMessageError, ButtplugServerError},
+    messages::{
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+    },
   },
   server::ButtplugServer,
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use std::convert::TryInto;
 use futures::{
+  future::{self, BoxFuture},
   StreamExt,
-  future::{self, BoxFuture}
 };
+use std::convert::TryInto;
 use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector
@@ -45,7 +49,8 @@ pub struct ButtplugInProcessClientConnector {
   server: ButtplugServer,
   server_outbound_sender: Sender<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
   /// Event receiver for the internal server.
-  connector_outbound_recv: Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>>,
+  connector_outbound_recv:
+    Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>>,
 }
 
 #[cfg(feature = "server")]
@@ -94,7 +99,13 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>, ButtplugConnectorError>> {
+  ) -> BoxFuture<
+    'static,
+    Result<
+      Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
+      ButtplugConnectorError,
+    >,
+  > {
     if self.connector_outbound_recv.is_some() {
       let recv = self.connector_outbound_recv.take().unwrap();
       Box::pin(future::ready(Ok(recv)))
@@ -114,8 +125,18 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {
       // TODO We should definitely do something different than just unwrapping errors here.
-      let output = output_fut.await.and_then(|msg| msg.try_into().map_err(|_| ButtplugServerError::new_message_error(out_id, ButtplugMessageError::MessageConversionError("Cannot convert server message to client spec.").into())));
-      sender 
+      let output = output_fut.await.and_then(|msg| {
+        msg.try_into().map_err(|_| {
+          ButtplugServerError::new_message_error(
+            out_id,
+            ButtplugMessageError::MessageConversionError(
+              "Cannot convert server message to client spec.",
+            )
+            .into(),
+          )
+        })
+      });
+      sender
         .send(output)
         .await
         .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)

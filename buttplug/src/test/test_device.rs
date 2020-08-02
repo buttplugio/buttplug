@@ -6,16 +6,23 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster, ButtplugDeviceEvent, ButtplugDeviceImplCreator,
-    DeviceImpl, DeviceImplCommand, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
-    DeviceWriteCmd, Endpoint,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplCommand,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
+use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
 use std::sync::Arc;
-use dashmap::DashMap;
 
 pub struct TestDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -62,10 +69,7 @@ pub struct TestDeviceEndpointChannel {
 
 impl TestDeviceEndpointChannel {
   pub fn new(sender: Sender<DeviceImplCommand>, receiver: Receiver<DeviceImplCommand>) -> Self {
-    Self {
-      sender,
-      receiver
-    }
+    Self { sender, receiver }
   }
 }
 
@@ -82,7 +86,7 @@ impl TestDeviceInternal {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoint_channels: Arc::new(DashMap::new()),
-      event_broadcaster: BoundedDeviceEventBroadcaster::with_cap(256)
+      event_broadcaster: BoundedDeviceEventBroadcaster::with_cap(256),
     }
   }
 
@@ -95,13 +99,18 @@ impl TestDeviceInternal {
   }
 
   pub fn get_endpoint_channel(&self, endpoint: &Endpoint) -> Option<TestDeviceEndpointChannel> {
-    self.endpoint_channels.get(endpoint).map(|el| el.value().clone())
+    self
+      .endpoint_channels
+      .get(endpoint)
+      .map(|el| el.value().clone())
   }
 
   pub async fn add_endpoint(&self, endpoint: &Endpoint) {
     if !self.endpoint_channels.contains_key(endpoint) {
       let (sender, receiver) = bounded(256);
-      self.endpoint_channels.insert(*endpoint, TestDeviceEndpointChannel::new(sender, receiver));
+      self
+        .endpoint_channels
+        .insert(*endpoint, TestDeviceEndpointChannel::new(sender, receiver));
     }
   }
 
@@ -116,7 +125,6 @@ impl TestDeviceInternal {
     })
   }
 }
-
 
 #[derive(Clone)]
 pub struct TestDevice {
@@ -134,13 +142,17 @@ pub struct TestDevice {
 impl TestDevice {
   #[allow(dead_code)]
   pub fn new(internal_device: &TestDeviceInternal) -> Self {
-    let endpoints: Vec<Endpoint> = internal_device.endpoint_channels.iter().map(|el| *el.key()).collect();
+    let endpoints: Vec<Endpoint> = internal_device
+      .endpoint_channels
+      .iter()
+      .map(|el| *el.key())
+      .collect();
     Self {
       name: internal_device.name(),
       address: internal_device.address(),
       endpoint_channels: internal_device.endpoint_channels.clone(),
       event_broadcaster: internal_device.event_broadcaster.clone(),
-      endpoints
+      endpoints,
     }
   }
 }
@@ -177,7 +189,10 @@ impl DeviceImpl for TestDevice {
     self.event_broadcaster.clone()
   }
 
-  fn read_value(&self, msg: DeviceReadCmd) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  fn read_value(
+    &self,
+    msg: DeviceReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
@@ -191,9 +206,7 @@ impl DeviceImpl for TestDevice {
           device_channel.sender.send(msg.into()).await.unwrap();
           Ok(())
         }
-        None => Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into()
-        ),
+        None => Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into()),
       }
     })
   }

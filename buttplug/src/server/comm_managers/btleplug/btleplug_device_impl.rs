@@ -1,5 +1,7 @@
 use super::btleplug_internal::{
-  BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared,
+  BtlePlugInternalEventLoop,
+  DeviceReturnFuture,
+  DeviceReturnStateShared,
 };
 use crate::{
   core::{
@@ -9,21 +11,28 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster, ButtplugDeviceCommand, ButtplugDeviceImplCreator,
-    ButtplugDeviceReturn, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
-    DeviceWriteCmd, Endpoint,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceCommand,
+    ButtplugDeviceImplCreator,
+    ButtplugDeviceReturn,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   util::async_manager,
 };
 use async_channel::{bounded, Sender};
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
-use btleplug::api::{Peripheral, CentralEvent};
+use btleplug::api::{CentralEvent, Peripheral};
 use futures::future::BoxFuture;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
-  broadcaster: BroadcastChannel<CentralEvent>
+  broadcaster: BroadcastChannel<CentralEvent>,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
@@ -73,8 +82,13 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       // rumble calls, so this will block whatever thread it's spawned to.
       let event_broadcaster_clone = self.broadcaster.clone();
       let broadcaster_clone = output_broadcaster.clone();
-      let mut event_loop =
-        BtlePlugInternalEventLoop::new(event_broadcaster_clone, device, p, device_receiver, broadcaster_clone);
+      let mut event_loop = BtlePlugInternalEventLoop::new(
+        event_broadcaster_clone,
+        device,
+        p,
+        device_receiver,
+        broadcaster_clone,
+      );
       async_manager::spawn(async move { event_loop.run().await }).unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
@@ -128,8 +142,10 @@ pub struct BtlePlugDeviceImpl {
   event_receiver: BoundedDeviceEventBroadcaster,
 }
 
-unsafe impl Send for BtlePlugDeviceImpl {}
-unsafe impl Sync for BtlePlugDeviceImpl {}
+unsafe impl Send for BtlePlugDeviceImpl {
+}
+unsafe impl Sync for BtlePlugDeviceImpl {
+}
 
 impl BtlePlugDeviceImpl {
   pub fn new(

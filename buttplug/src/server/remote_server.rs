@@ -1,22 +1,19 @@
 use super::ButtplugServer;
 use crate::{
+  connector::ButtplugConnector,
   core::{
     errors::{ButtplugError, ButtplugServerError},
     messages::{ButtplugClientMessage, ButtplugServerMessage},
   },
-  connector::ButtplugConnector,
+  server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
+  test::TestDeviceCommunicationManagerHelper,
   util::async_manager,
-  server::{
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator
-  },
-  test::TestDeviceCommunicationManagerHelper
 };
-use async_channel::{Sender, Receiver, bounded};
+use async_channel::{bounded, Receiver, Sender};
 use async_mutex::Mutex;
+use futures::{future::Future, select, FutureExt, StreamExt};
 use std::sync::Arc;
 use thiserror::Error;
-use futures::{StreamExt, future::Future, select, FutureExt};
 
 pub enum ButtplugServerEvent {
   Connected(String),
@@ -28,11 +25,11 @@ pub enum ButtplugServerEvent {
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {
   #[error("Can't connect")]
-  ConnectorError
+  ConnectorError,
 }
 
 pub enum ButtplugServerCommand {
-  Disconnect
+  Disconnect,
 }
 
 pub struct ButtplugRemoteServer {
@@ -46,8 +43,10 @@ async fn run_server<ConnectorType>(
   mut server_receiver: Receiver<ButtplugServerMessage>,
   connector: ConnectorType,
   mut connector_receiver: Receiver<Result<ButtplugClientMessage, ButtplugServerError>>,
-  mut controller_receiver: Receiver<ButtplugServerCommand>
-) where ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static {
+  mut controller_receiver: Receiver<ButtplugServerCommand>,
+) where
+  ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
+{
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
   loop {
@@ -75,7 +74,7 @@ async fn run_server<ConnectorType>(
           info!("Server disconnected via controller request, exiting loop.");
           break;
         }
-        Some(msg) => { 
+        Some(msg) => {
           info!("Server disconnected via controller disappearance, exiting loop.");
           break;
         }
@@ -85,7 +84,7 @@ async fn run_server<ConnectorType>(
           info!("Server disconnected via server disappearance, exiting loop.");
           break;
         }
-        Some(msg) => { 
+        Some(msg) => {
           let connector_clone = shared_connector.clone();
           if connector_clone.send(msg).await.is_err() {
             error!("Server disappeared, exiting remote server thread.");
@@ -101,11 +100,10 @@ async fn run_server<ConnectorType>(
   info!("Exiting remote server loop");
 }
 
-
 impl ButtplugRemoteServer {
   pub fn new(name: &str, max_ping_time: u64) -> Self {
     let (server, server_receiver) = ButtplugServer::new(name, max_ping_time);
-     Self {
+    Self {
       server: Arc::new(server),
       server_receiver,
       task_channel: Arc::new(Mutex::new(None)),
@@ -117,16 +115,27 @@ impl ButtplugRemoteServer {
     mut connector: ConnectorType,
   ) -> impl Future<Output = Result<(), ButtplugServerConnectorError>>
   where
-  ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static {
+    ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
+  {
     let task_channel = self.task_channel.clone();
     let server_clone = self.server.clone();
     let server_receiver_clone = self.server_receiver.clone();
     async move {
-      let connector_receiver= connector.connect().await.map_err(|_| ButtplugServerConnectorError::ConnectorError)?;
+      let connector_receiver = connector
+        .connect()
+        .await
+        .map_err(|_| ButtplugServerConnectorError::ConnectorError)?;
       let (controller_sender, controller_receiver) = bounded(256);
       let mut locked_channel = task_channel.lock().await;
       *locked_channel = Some(controller_sender);
-      run_server(server_clone, server_receiver_clone, connector, connector_receiver, controller_receiver).await;
+      run_server(
+        server_clone,
+        server_receiver_clone,
+        connector,
+        connector_receiver,
+        controller_receiver,
+      )
+      .await;
       Ok(())
     }
   }

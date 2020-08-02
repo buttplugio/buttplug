@@ -2,17 +2,17 @@
 pub mod btleplug;
 #[cfg(all(feature = "xinput", target_os = "windows"))]
 pub mod xinput;
-#[cfg(all(feature = "xinput", target_os = "windows"))]
-use rusty_xinput::XInputUsageError;
 #[cfg(feature = "btleplug-manager")]
 use ::btleplug::Error as BtleplugError;
+#[cfg(all(feature = "xinput", target_os = "windows"))]
+use rusty_xinput::XInputUsageError;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
 
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use async_channel::Sender;
+use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
-use std::sync::{Arc, atomic::AtomicBool};
 // #[cfg(feature = "serial-manager")]
 pub mod lovense_dongle;
 
@@ -49,5 +49,5 @@ pub enum ButtplugDeviceSpecificError {
   // Btleplug library uses Failure, not Error, on its error enum. :(
   #[cfg(feature = "btleplug-manager")]
   #[error("Btleplug error: {0:?}")]
-  BtleplugError(BtleplugError)
+  BtleplugError(BtleplugError),
 }

@@ -1,20 +1,27 @@
+use async_channel::Sender;
 use buttplug::{
   core::ButtplugResultFuture,
-  server::comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator, DeviceCommunicationEvent}
+  server::comm_managers::{
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
+  },
 };
-use async_channel::Sender;
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 
 pub struct DelayDeviceCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl DeviceCommunicationManagerCreator for DelayDeviceCommunicationManager {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,
-      is_scanning: Arc::new(AtomicBool::new(false))
+      is_scanning: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -37,12 +44,15 @@ impl DeviceCommunicationManager for DelayDeviceCommunicationManager {
     let sender = self.sender.clone();
     Box::pin(async move {
       is_scanning.store(false, Ordering::SeqCst);
-      sender.send(DeviceCommunicationEvent::ScanningFinished).await.unwrap();
+      sender
+        .send(DeviceCommunicationEvent::ScanningFinished)
+        .await
+        .unwrap();
       Ok(())
     })
   }
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
-      self.is_scanning.clone()
+    self.is_scanning.clone()
   }
 }

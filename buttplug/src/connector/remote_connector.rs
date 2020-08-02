@@ -14,8 +14,11 @@ use crate::{
     errors::{ButtplugMessageError, ButtplugServerError},
     messages::{
       serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugClientMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-      ButtplugMessage, ButtplugServerMessage,
+      ButtplugClientMessage,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+      ButtplugServerMessage,
     },
   },
   util::async_manager,
@@ -61,7 +64,7 @@ async fn remote_connector_event_loop<
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static //From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static, //From<Error> + 'static,
 {
   // Message sorter that receives messages that come in from the client.
   let mut serializer = SerializerType::default();
@@ -228,7 +231,7 @@ where
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static //+ From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static, //+ From<Error> + 'static,
 {
   fn connect(
     &mut self,

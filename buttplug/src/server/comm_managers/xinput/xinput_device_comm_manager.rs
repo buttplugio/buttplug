@@ -40,29 +40,28 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
     info!("XInput manager scanning!");
     let sender = self.sender.clone();
     Box::pin(async move {
-    let handle = rusty_xinput::XInputHandle::load_default().unwrap();
-    for i in &[
-      XInputControllerIndex::XInputController0,
-      XInputControllerIndex::XInputController1,
-      XInputControllerIndex::XInputController2,
-      XInputControllerIndex::XInputController3,
-    ] {
-      match handle.get_state(*i as u32) {
-        Ok(_) => {
-          info!("XInput manager found device {}", i);
-          let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
-          if sender
-            .send(DeviceCommunicationEvent::DeviceFound(device_creator))
-            .await
-            .is_err() {
-
-            }
+      let handle = rusty_xinput::XInputHandle::load_default().unwrap();
+      for i in &[
+        XInputControllerIndex::XInputController0,
+        XInputControllerIndex::XInputController1,
+        XInputControllerIndex::XInputController2,
+        XInputControllerIndex::XInputController3,
+      ] {
+        match handle.get_state(*i as u32) {
+          Ok(_) => {
+            info!("XInput manager found device {}", i);
+            let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
+            if sender
+              .send(DeviceCommunicationEvent::DeviceFound(device_creator))
+              .await
+              .is_err()
+            {}
+          }
+          Err(_) => continue,
         }
-        Err(_) => continue,
       }
-    }
-    Ok(())
-  })
+      Ok(())
+    })
   }
 
   fn stop_scanning(&self) -> ButtplugResultFuture {

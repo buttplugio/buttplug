@@ -101,7 +101,10 @@ impl GenericCommandManager {
     // subcommand.
     if msg.speeds.is_empty() {
       return Err(
-        ButtplugDeviceError::ProtocolRequirementError("VibrateCmd has 0 commands, will not do anything.".to_owned()).into(),
+        ButtplugDeviceError::ProtocolRequirementError(
+          "VibrateCmd has 0 commands, will not do anything.".to_owned(),
+        )
+        .into(),
       );
     }
 
@@ -173,7 +176,10 @@ impl GenericCommandManager {
     // command.
     if msg.rotations.is_empty() {
       return Err(
-        ButtplugDeviceError::ProtocolRequirementError("RotateCmd has 0 commands, will not do anything.".to_owned()).into(),
+        ButtplugDeviceError::ProtocolRequirementError(
+          "RotateCmd has 0 commands, will not do anything.".to_owned(),
+        )
+        .into(),
       );
     }
 

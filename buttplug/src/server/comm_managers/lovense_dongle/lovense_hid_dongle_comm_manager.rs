@@ -1,13 +1,17 @@
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
+    LovenseDeviceCommand,
+    LovenseDongleIncomingMessage,
+    OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
@@ -71,7 +75,7 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
         debug!("Got {} hid bytes", len);
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
-        data += std::str::from_utf8(&buf[0..len-1]).unwrap();
+        data += std::str::from_utf8(&buf[0..len - 1]).unwrap();
         if data.contains('\n') {
           // We have what should be a full message.
           // Split it.
@@ -160,7 +164,8 @@ impl LovenseHIDDongleCommunicationManager {
           writer_sender,
           reader_receiver,
         ))
-        .await.unwrap();
+        .await
+        .unwrap();
 
       Ok(())
     })
@@ -177,9 +182,13 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       write_thread: Arc::new(Mutex::new(None)),
     };
     let dongle_fut = mgr.find_dongle();
-    async_manager::spawn(async move {
-      dongle_fut.await.unwrap();
-    }.instrument(tracing::info_span!("Lovense HID Dongle Finder Task"))).unwrap();
+    async_manager::spawn(
+      async move {
+        dongle_fut.await.unwrap();
+      }
+      .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
+    )
+    .unwrap();
     async_manager::spawn(
       async move {
         let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
@@ -188,7 +197,8 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
         }
       }
       .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
-    ).unwrap();
+    )
+    .unwrap();
     mgr
   }
 }

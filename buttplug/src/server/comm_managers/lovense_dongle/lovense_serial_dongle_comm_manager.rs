@@ -1,13 +1,17 @@
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
+    LovenseDeviceCommand,
+    LovenseDongleIncomingMessage,
+    OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
@@ -17,7 +21,11 @@ use blocking::block_on;
 use futures::StreamExt;
 use serde_json::Deserializer;
 use serialport::{
-  available_ports, open_with_settings, SerialPort, SerialPortSettings, SerialPortType,
+  available_ports,
+  open_with_settings,
+  SerialPort,
+  SerialPortSettings,
+  SerialPortType,
 };
 use std::{
   io::ErrorKind,
@@ -166,7 +174,8 @@ impl LovenseSerialDongleCommunicationManager {
                         writer_sender,
                         reader_receiver,
                       ))
-                      .await.unwrap();
+                      .await
+                      .unwrap();
                   }
                   Err(e) => error!("{:?}", e),
                 };
@@ -198,7 +207,8 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       if let Err(err) = dongle_fut.await {
         error!("Error finding dongle: {:?}", err);
       }
-    }).unwrap();
+    })
+    .unwrap();
     async_manager::spawn(
       async move {
         let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
@@ -207,7 +217,8 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
         }
       }
       .instrument(tracing::info_span!("Lovense Dongle State Machine")),
-    ).unwrap();
+    )
+    .unwrap();
     mgr
   }
 }

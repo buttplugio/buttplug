@@ -1,9 +1,16 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_mutex::Mutex;
@@ -74,10 +81,11 @@ mod test {
   #[test]
   pub fn test_aneros_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Massage Demo")
-        .await
-        .unwrap();
-      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
+      let (device, test_device) = new_bluetoothle_test_device("Massage Demo").await.unwrap();
+      let command_receiver = test_device
+        .get_endpoint_channel(&Endpoint::Tx)
+        .unwrap()
+        .receiver;
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await

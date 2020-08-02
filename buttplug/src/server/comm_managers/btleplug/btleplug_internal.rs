@@ -1,9 +1,17 @@
 use crate::{
   core::{errors::ButtplugDeviceError, messages, ButtplugResult},
   device::{
-    configuration_manager::BluetoothLESpecifier, BoundedDeviceEventBroadcaster,
-    ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplInfo, ButtplugDeviceReturn,
-    DeviceImplCommand, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    configuration_manager::BluetoothLESpecifier,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceCommand,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplInfo,
+    ButtplugDeviceReturn,
+    DeviceImplCommand,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::{
@@ -48,8 +56,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     output_sender: BoundedDeviceEventBroadcaster,
-  ) -> Self
-  {
+  ) -> Self {
     let (event_sender, event_receiver) = bounded(256);
     async_manager::spawn(async move {
       while let Some(event) = btleplug_event_broadcaster.next().await {
@@ -74,7 +81,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           _ => {}
         }
       }
-    }).unwrap();
+    })
+    .unwrap();
     BtlePlugInternalEventLoop {
       device,
       protocol,
@@ -90,10 +98,15 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
       state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err.clone()))
-          .into(),
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+          err.clone(),
+        ))
+        .into(),
       ));
-      return Err(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err)).into());
+      return Err(
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err))
+          .into(),
+      );
     }
     loop {
       let event = self.event_receiver.next().await;

@@ -9,15 +9,25 @@
 //! specific) Managers
 
 use super::comm_managers::{
-  DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+  DeviceCommunicationEvent,
+  DeviceCommunicationManager,
+  DeviceCommunicationManagerCreator,
 };
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
-      ButtplugServerMessage, DeviceAdded, DeviceList, DeviceMessageInfo, DeviceRemoved,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      DeviceAdded,
+      DeviceList,
+      DeviceMessageInfo,
+      DeviceRemoved,
       ScanningFinished,
     },
   },
@@ -30,7 +40,8 @@ use async_channel::{bounded, Receiver, Sender};
 use dashmap::DashMap;
 use futures::{
   future::{self, Future},
-  FutureExt, StreamExt,
+  FutureExt,
+  StreamExt,
 };
 use std::{
   convert::TryFrom,
@@ -207,9 +218,11 @@ pub struct DeviceManager {
   sender: Sender<DeviceCommunicationEvent>,
 }
 
-unsafe impl Send for DeviceManager {}
+unsafe impl Send for DeviceManager {
+}
 
-unsafe impl Sync for DeviceManager {}
+unsafe impl Sync for DeviceManager {
+}
 
 impl DeviceManager {
   pub fn new(
@@ -266,9 +279,9 @@ impl DeviceManager {
         }
 
         let fut_vec: Vec<_> = mgrs
-        .iter()
-        .map(|guard| guard.value().stop_scanning())
-        .collect();
+          .iter()
+          .map(|guard| guard.value().stop_scanning())
+          .collect();
         // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
         future::join_all(fut_vec).await;
         Ok(messages::Ok::default().into())
@@ -281,12 +294,12 @@ impl DeviceManager {
     // TODO This could use some error reporting.
     Box::pin(async move {
       let fut_vec: Vec<_> = device_map
-      .iter()
-      .map(|dev| {
-        let device = dev.value();
-        device.parse_message(messages::StopDeviceCmd::new(1).into())
-      })
-      .collect();
+        .iter()
+        .map(|dev| {
+          let device = dev.value();
+          device.parse_message(messages::StopDeviceCmd::new(1).into())
+        })
+        .collect();
       future::join_all(fut_vec).await;
       Ok(messages::Ok::default().into())
     })
@@ -359,8 +372,11 @@ impl DeviceManager {
         .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
         .await
         .unwrap();
-    }).unwrap();
-    self.comm_managers.insert(mgr.name().to_owned(), Box::new(mgr));
+    })
+    .unwrap();
+    self
+      .comm_managers
+      .insert(mgr.name().to_owned(), Box::new(mgr));
   }
 
   pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
@@ -373,9 +389,12 @@ impl DeviceManager {
         .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
         .await
         .unwrap();
-    }).unwrap();
+    })
+    .unwrap();
     let helper = mgr.helper();
-    self.comm_managers.insert(mgr.name().to_owned(), Box::new(mgr));
+    self
+      .comm_managers
+      .insert(mgr.name().to_owned(), Box::new(mgr));
     helper
   }
 }

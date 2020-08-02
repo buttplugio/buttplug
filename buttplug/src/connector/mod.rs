@@ -79,9 +79,17 @@ mod remote_connector;
 mod transport;
 
 pub use in_process_connector::ButtplugInProcessClientConnector;
-pub use remote_connector::{ButtplugRemoteClientConnector, ButtplugRemoteConnector, ButtplugRemoteServerConnector};
-#[cfg(feature="websockets")]
-pub use transport::{ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
+pub use remote_connector::{
+  ButtplugRemoteClientConnector,
+  ButtplugRemoteConnector,
+  ButtplugRemoteServerConnector,
+};
+#[cfg(feature = "websockets")]
+pub use transport::{
+  ButtplugWebsocketClientTransport,
+  ButtplugWebsocketServerTransport,
+  ButtplugWebsocketServerTransportOptions,
+};
 
 use crate::{
   core::{
@@ -91,9 +99,9 @@ use crate::{
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use async_channel::Receiver;
-use thiserror::Error;
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
+use thiserror::Error;
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorStateShared =
@@ -119,7 +127,10 @@ pub enum ButtplugConnectorError {
   TransportSpecificError(transport::ButtplugConnectorTransportSpecificError),
 }
 
-impl<T> From<ButtplugConnectorError> for BoxFuture<'static, Result<T, ButtplugConnectorError>> where T: Send + 'static {
+impl<T> From<ButtplugConnectorError> for BoxFuture<'static, Result<T, ButtplugConnectorError>>
+where
+  T: Send + 'static,
+{
   fn from(err: ButtplugConnectorError) -> BoxFuture<'static, Result<T, ButtplugConnectorError>> {
     Box::pin(future::ready(Err(err)))
   }
@@ -160,7 +171,12 @@ where
   ///
   /// As connection may involve blocking operations like establishing network
   /// connections, this trait method is marked async.
-  fn connect(&mut self) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>>;
+  fn connect(
+    &mut self,
+  ) -> BoxFuture<
+    'static,
+    Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>,
+  >;
   /// Disconnects the client from the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the

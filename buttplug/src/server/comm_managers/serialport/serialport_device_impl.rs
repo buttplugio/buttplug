@@ -2,8 +2,15 @@ use crate::{
   core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    BoundedDeviceEventBroadcaster, ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl,
-    DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    BoundedDeviceEventBroadcaster,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   util::async_manager,
 };
@@ -12,12 +19,17 @@ use async_mutex::Mutex;
 use async_trait::async_trait;
 use blocking::block_on;
 use broadcaster::BroadcastChannel;
-use futures::{
-  future::BoxFuture,
-  StreamExt,
-};
+use futures::{future::BoxFuture, StreamExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
-use std::{io::ErrorKind, sync::{Arc, atomic::{AtomicBool, Ordering}}, thread, time::Duration};
+use std::{
+  io::ErrorKind,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  thread,
+  time::Duration,
+};
 
 pub struct SerialPortDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -203,7 +215,7 @@ impl DeviceImpl for SerialPortDeviceImpl {
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
     let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
-    Box::pin(async move { 
+    Box::pin(async move {
       sender.send(msg.data).await.unwrap();
       Ok(())
     })
@@ -230,7 +242,8 @@ impl DeviceImpl for SerialPortDeviceImpl {
             }
           }
         }
-      }).unwrap();
+      })
+      .unwrap();
       Ok(())
     })
   }

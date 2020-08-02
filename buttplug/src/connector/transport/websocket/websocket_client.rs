@@ -9,17 +9,24 @@
 
 use crate::{
   connector::{
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
-    transport::{ButtplugConnectorTransportConnectResult, ButtplugConnectorTransport, ButtplugTransportMessage, ButtplugConnectorTransportSpecificError},
+    transport::{
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportConnectResult,
+      ButtplugConnectorTransportSpecificError,
+      ButtplugTransportMessage,
+    },
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
-  util::async_manager
+  util::async_manager,
 };
 use async_channel::bounded;
 use async_tungstenite::{
-  async_std::connect_async_with_tls_connector, tungstenite::protocol::Message,
+  async_std::connect_async_with_tls_connector,
+  tungstenite::protocol::Message,
 };
-use futures::{SinkExt, StreamExt, future};
+use futures::{future, SinkExt, StreamExt};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
@@ -63,9 +70,7 @@ impl ButtplugWebsocketClientTransport {
 }
 
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
-  fn connect(
-    &self,
-  ) -> ButtplugConnectorTransportConnectResult {
+  fn connect(&self) -> ButtplugConnectorTransportConnectResult {
     let (request_sender, request_receiver) = bounded(256);
     let (response_sender, response_receiver) = bounded(256);
 
@@ -124,7 +129,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
               // TODO see what happens when we try to send to a remote that's closed connection.
               writer.send(out_msg).await.expect("This should never fail?");
             }
-          }).unwrap();
+          })
+          .unwrap();
           async_manager::spawn(async move {
             while let Some(response) = reader.next().await {
               trace!("Websocket receiving: {:?}", response);
@@ -135,9 +141,10 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       ButtplugSerializedMessage::Text(t.to_string()),
                     ))
                     .await
-                    .is_err() {
-                      error!("Websocket holder has closed, exiting websocket loop.");
-                      return;
+                    .is_err()
+                  {
+                    error!("Websocket holder has closed, exiting websocket loop.");
+                    return;
                   }
                 }
                 // TODO Do we need to handle anything else?
@@ -147,9 +154,10 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       ButtplugSerializedMessage::Binary(v),
                     ))
                     .await
-                    .is_err() {
-                      error!("Websocket holder has closed, exiting websocket loop.");
-                      return;
+                    .is_err()
+                  {
+                    error!("Websocket holder has closed, exiting websocket loop.");
+                    return;
                   }
                 }
                 Message::Ping(_) => {}
@@ -160,10 +168,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                 }
               }
             }
-          }).unwrap();
+          })
+          .unwrap();
           Ok((request_sender, response_receiver))
         }
-        Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error))),
+        Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(
+          ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error),
+        )),
       }
     })
   }

@@ -1,9 +1,16 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_mutex::Mutex;
@@ -55,19 +62,15 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          fut_vec.push(
-            device.write_value(
-              DeviceWriteCmd::new(
-                Endpoint::Tx,
-                vec![
-                  VorzeDevices::Bach as u8,
-                  VorzeActions::Vibrate as u8,
-                  speed as u8,
-                ],
-                false,
-              ),
-            ),
-          );
+          fut_vec.push(device.write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![
+              VorzeDevices::Bach as u8,
+              VorzeActions::Vibrate as u8,
+              speed as u8,
+            ],
+            false,
+          )));
         }
       }
       for fut in fut_vec {
@@ -83,7 +86,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     msg: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
-    // This will never change, so we can process it before the future. 
+    // This will never change, so we can process it before the future.
     let dev_id = if self.name.contains("UFO") {
       VorzeDevices::UFO
     } else {
@@ -94,15 +97,11 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       let mut fut_vec = vec![];
       if let Some((speed, clockwise)) = result[0] {
         let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-        fut_vec.push(
-          device.write_value(
-            DeviceWriteCmd::new(
-              Endpoint::Tx,
-              vec![dev_id as u8, VorzeActions::Rotate as u8, data],
-              false,
-            ),
-          ),
-        );
+        fut_vec.push(device.write_value(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![dev_id as u8, VorzeActions::Rotate as u8, data],
+          false,
+        )));
       }
       for fut in fut_vec {
         fut.await?;

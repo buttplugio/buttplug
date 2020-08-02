@@ -1,11 +1,16 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::Arc;
@@ -28,7 +33,6 @@ impl Picobong {
     }
   }
 }
-
 
 impl ButtplugProtocolCommandHandler for Picobong {
   fn handle_vibrate_cmd(

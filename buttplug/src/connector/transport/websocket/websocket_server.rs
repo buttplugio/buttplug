@@ -1,9 +1,13 @@
 use crate::{
   connector::{
     transport::{
-      ButtplugConnectorTransport, ButtplugConnectorTransportConnectResult, ButtplugTransportMessage, ButtplugConnectorTransportSpecificError
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportConnectResult,
+      ButtplugConnectorTransportSpecificError,
+      ButtplugTransportMessage,
     },
-    ButtplugConnectorResultFuture, ButtplugConnectorError
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
@@ -14,17 +18,18 @@ use async_std::net::TcpListener;
 use async_tls::TlsAcceptor;
 use futures::{
   future::{self, select_all, BoxFuture},
-  AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt,
+  AsyncRead,
+  AsyncWrite,
+  FutureExt,
+  SinkExt,
+  StreamExt,
 };
 use rustls::{
   internal::pemfile::{certs, pkcs8_private_keys},
-  NoClientAuth, ServerConfig,
+  NoClientAuth,
+  ServerConfig,
 };
-use std::{
-  fs::File,
-  io::BufReader,
-  sync::Arc,
-};
+use std::{fs::File, io::BufReader, sync::Arc};
 
 #[derive(Default, Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportOptions {
@@ -136,10 +141,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           info!("Websocket Insecure: Got connection");
           async_manager::spawn(async move {
             accept_connection(stream, request_receiver_clone, response_sender_clone).await;
-          }).unwrap();
+          })
+          .unwrap();
           Ok(())
         } else {
-          Err(ButtplugConnectorError::ConnectorGenericError("Could not run accept for insecure port".to_owned()))
+          Err(ButtplugConnectorError::ConnectorGenericError(
+            "Could not run accept for insecure port".to_owned(),
+          ))
         }
       };
       tasks.push(Box::pin(fut));
@@ -152,31 +160,63 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
       let fut = async move {
         if options.ws_cert_file.is_none() {
-          return Err(ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("No cert file provided".to_owned())));
+          return Err(ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "No cert file provided".to_owned(),
+            ),
+          ));
         }
 
-        let cert_file = File::open(options.ws_cert_file.unwrap())
-          .map_err(|_| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("Specified cert file does not exist or cannot be opened".to_owned())))?;
-        let certs = certs(&mut BufReader::new(cert_file))
-          .map_err(|_| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("Specified cert file cannot load correctly".to_owned())))?;
+        let cert_file = File::open(options.ws_cert_file.unwrap()).map_err(|_| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "Specified cert file does not exist or cannot be opened".to_owned(),
+            ),
+          )
+        })?;
+        let certs = certs(&mut BufReader::new(cert_file)).map_err(|_| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "Specified cert file cannot load correctly".to_owned(),
+            ),
+          )
+        })?;
 
         if options.ws_priv_file.is_none() {
-          return Err(ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("No private key file provided".to_owned())));
+          return Err(ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "No private key file provided".to_owned(),
+            ),
+          ));
         }
-  
-        let key_file = File::open(options.ws_priv_file.unwrap())
-          .map_err(|_| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("Specified private key file does not exist or cannot be opened".to_owned())))?;
-        let mut keys = pkcs8_private_keys(&mut BufReader::new(key_file))
-          .map_err(|_| {
-            ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("Specified private key file cannot load correctly".to_owned()))
-          })?;
+
+        let key_file = File::open(options.ws_priv_file.unwrap()).map_err(|_| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "Specified private key file does not exist or cannot be opened".to_owned(),
+            ),
+          )
+        })?;
+        let mut keys = pkcs8_private_keys(&mut BufReader::new(key_file)).map_err(|_| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::SecureServerError(
+              "Specified private key file cannot load correctly".to_owned(),
+            ),
+          )
+        })?;
 
         // we don't use client authentication
         let mut config = ServerConfig::new(NoClientAuth::new());
         config
           // set this server to use one cert together with the loaded private key
           .set_single_cert(certs, keys.remove(0))
-          .map_err(|_| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::SecureServerError("Cannot set up cert with provided cert/key pair due to TLS Error".to_owned())))?;
+          .map_err(|_| {
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::SecureServerError(
+                "Cannot set up cert with provided cert/key pair due to TLS Error".to_owned(),
+              ),
+            )
+          })?;
         let acceptor = TlsAcceptor::from(Arc::new(config));
 
         let addr = format!("127.0.0.1:{}", ws_secure_port);
@@ -195,15 +235,18 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           info!("Websocket Secure: Got connection");
           async_manager::spawn(async move {
             accept_connection(tls_stream, request_receiver_clone, response_sender_clone).await;
-          }).unwrap();
+          })
+          .unwrap();
           Ok(())
         } else {
-          Err(ButtplugConnectorError::ConnectorGenericError("Could not run accept for insecure port".to_owned()))
+          Err(ButtplugConnectorError::ConnectorGenericError(
+            "Could not run accept for insecure port".to_owned(),
+          ))
         }
       };
       tasks.push(Box::pin(fut));
     }
-    
+
     Box::pin(async move {
       if let Err(connector_err) = select_all(tasks).await.0 {
         Err(connector_err)

@@ -8,6 +8,6 @@
 //! Utility module, for storing types and functions used across other modules in
 //! the library.
 
+pub mod async_manager;
 pub mod future;
 pub mod json;
-pub mod async_manager;

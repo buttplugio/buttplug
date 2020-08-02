@@ -1,11 +1,7 @@
 use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
 use crate::{
-  core::{
-    messages::{ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
-  },
-  device::{
-    protocol::ButtplugProtocolProperties,
-  },
+  core::messages::{ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  device::protocol::ButtplugProtocolProperties,
 };
 
 #[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
@@ -20,7 +16,7 @@ impl RawProtocol {
     Self {
       name: name.to_owned(),
       message_attributes,
-      stop_commands: vec!(),
+      stop_commands: vec![],
     }
   }
 }

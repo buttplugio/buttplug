@@ -3,10 +3,18 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
-      self, ButtplugClientMessage, ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageSpecVersion,
-      ButtplugServerMessage, ButtplugSpecV0ClientMessage, ButtplugSpecV0ServerMessage,
-      ButtplugSpecV1ClientMessage, ButtplugSpecV1ServerMessage, ButtplugSpecV2ClientMessage,
+      self,
+      ButtplugClientMessage,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessage,
+      ButtplugSpecV0ClientMessage,
+      ButtplugSpecV0ServerMessage,
+      ButtplugSpecV1ClientMessage,
+      ButtplugSpecV1ServerMessage,
+      ButtplugSpecV2ClientMessage,
       ButtplugSpecV2ServerMessage,
     },
   },
@@ -60,9 +68,10 @@ where
 {
   // We have to pass back a string formatted error, as SerdeJson's error type
   // isn't clonable.
-  validator
-    .validate(&msg)
-    .and_then(|_| serde_json::from_str::<Vec<T>>(&msg).map_err(|e| ButtplugSerializerError::JsonSerializerError(format!("{:?}", e))))
+  validator.validate(&msg).and_then(|_| {
+    serde_json::from_str::<Vec<T>>(&msg)
+      .map_err(|e| ButtplugSerializerError::JsonSerializerError(format!("{:?}", e)))
+  })
 }
 
 fn serialize_to_version(
@@ -106,8 +115,10 @@ fn serialize_to_version(
   })
 }
 
-unsafe impl Sync for ButtplugServerJSONSerializer {}
-unsafe impl Send for ButtplugServerJSONSerializer {}
+unsafe impl Sync for ButtplugServerJSONSerializer {
+}
+unsafe impl Send for ButtplugServerJSONSerializer {
+}
 
 impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   type Inbound = ButtplugClientMessage;
@@ -178,8 +189,8 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
         ButtplugSerializedMessage::Text(msg_to_protocol_json(
-     ButtplugCurrentSpecServerMessage::Error(
-            ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into()
+          ButtplugCurrentSpecServerMessage::Error(
+            ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected).into(),
           ),
         ))
       }
@@ -199,8 +210,10 @@ impl Default for ButtplugClientJSONSerializer {
   }
 }
 
-unsafe impl Sync for ButtplugClientJSONSerializer {}
-unsafe impl Send for ButtplugClientJSONSerializer {}
+unsafe impl Sync for ButtplugClientJSONSerializer {
+}
+unsafe impl Send for ButtplugClientJSONSerializer {
+}
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
   type Inbound = ButtplugCurrentSpecServerMessage;
@@ -284,7 +297,11 @@ mod test {
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
     let mut serializer = ButtplugClientJSONSerializer::default();
-    let _ = serializer.serialize(vec!(RequestServerInfo::new("test client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()));
+    let _ = serializer.serialize(vec![RequestServerInfo::new(
+      "test client",
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+    )
+    .into()]);
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(ButtplugSerializedMessage::Text(msg.to_owned()));
       assert!(res.is_err());

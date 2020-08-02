@@ -1,18 +1,23 @@
 use super::{TestDeviceImplCreator, TestDeviceInternal};
 use crate::{
-  core::{ButtplugResultFuture, errors::ButtplugError},
-  server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
-  },
+  core::{errors::ButtplugError, ButtplugResultFuture},
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier},
     ButtplugDevice,
   },
+  server::comm_managers::{
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
+  },
 };
-use std::{sync::Arc, time::{SystemTime, UNIX_EPOCH}};
-use async_mutex::Mutex;
 use async_channel::Sender;
+use async_mutex::Mutex;
 use futures::future;
+use std::{
+  sync::Arc,
+  time::{SystemTime, UNIX_EPOCH},
+};
 
 type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
 
@@ -36,8 +41,7 @@ pub fn new_uninitialized_ble_test_device(
 pub async fn new_bluetoothle_test_device(
   name: &str,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
-  let (device_impl, device_impl_creator) =
-    new_uninitialized_ble_test_device(name);
+  let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name);
   let device_impl_clone = device_impl.clone();
   let device: ButtplugDevice = ButtplugDevice::try_create_device(Box::new(device_impl_creator))
     .await
@@ -53,7 +57,7 @@ pub struct TestDeviceCommunicationManagerHelper {
 impl TestDeviceCommunicationManagerHelper {
   pub(super) fn new(device_list: WaitingDeviceList) -> Self {
     Self {
-      devices: device_list
+      devices: device_list,
     }
   }
 
@@ -101,11 +105,16 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
         if device_sender
           .send(DeviceCommunicationEvent::DeviceFound(Box::new(d)))
           .await
-          .is_err() {
-            error!("Device channel no longer open.");
-          }
+          .is_err()
+        {
+          error!("Device channel no longer open.");
+        }
       }
-      if device_sender.send(DeviceCommunicationEvent::ScanningFinished).await.is_err() {
+      if device_sender
+        .send(DeviceCommunicationEvent::ScanningFinished)
+        .await
+        .is_err()
+      {
         error!("Error sending scanning finished. Scanning may not register as finished now!");
       }
       Ok(())
@@ -122,7 +131,7 @@ mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
     server::ButtplugServer,
-    util::async_manager
+    util::async_manager,
   };
   use futures::StreamExt;
 

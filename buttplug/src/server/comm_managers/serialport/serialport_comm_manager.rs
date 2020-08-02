@@ -2,7 +2,9 @@ use super::SerialPortDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
   },
 };
 use async_channel::Sender;
@@ -39,9 +41,11 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
               .send(DeviceCommunicationEvent::DeviceFound(Box::new(
                 SerialPortDeviceImplCreator::new(&p),
               )))
-              .await.is_err() {
-                error!("Device manager disappeared, exiting.");
-                break;
+              .await
+              .is_err()
+            {
+              error!("Device manager disappeared, exiting.");
+              break;
             }
           }
         }

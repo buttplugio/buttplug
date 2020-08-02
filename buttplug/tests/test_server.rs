@@ -5,7 +5,9 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     messages::{
-      self, ButtplugMessageSpecVersion, ButtplugServerMessage,
+      self,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
