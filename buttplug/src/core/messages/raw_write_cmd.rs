@@ -7,21 +7,21 @@
 
 use super::*;
 use crate::device::Endpoint;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawWriteCmd {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   pub device_index: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
   pub endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Data"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
   pub data: Vec<u8>,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "WriteWithResponse"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "WriteWithResponse"))]
   pub write_with_response: bool,
 }
 

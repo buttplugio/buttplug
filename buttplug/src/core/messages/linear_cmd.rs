@@ -6,17 +6,17 @@
 // for full license information.
 
 use super::*;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VectorSubcommand {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Index"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   pub index: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Duration"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
   pub duration: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Position"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
   pub position: f64,
 }
 
@@ -31,13 +31,13 @@ impl VectorSubcommand {
 }
 
 #[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   pub device_index: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Vectors"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
   pub vectors: Vec<VectorSubcommand>,
 }
 

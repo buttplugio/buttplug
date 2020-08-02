@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::*;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 fn return_version0() -> ButtplugMessageSpecVersion {
@@ -14,16 +14,16 @@ fn return_version0() -> ButtplugMessageSpecVersion {
 }
 
 #[derive(Debug, ButtplugMessage, Clone, PartialEq)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "ClientName"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
   pub client_name: String,
   // Default for this message is set to 0, as this field didn't exist in the
   // first version of the protocol.
   #[cfg_attr(
-    feature = "serialize_json",
+    feature = "serialize-json",
     serde(rename = "MessageVersion"),
     serde(default = "return_version0")
   )]
@@ -44,7 +44,7 @@ impl RequestServerInfo {
 mod test {
   use super::{ButtplugMessageSpecVersion, RequestServerInfo};
 
-  #[cfg(feature = "serialize_json")]
+  #[cfg(feature = "serialize-json")]
   #[test]
   fn test_request_server_info_version1_json_conversion() {
     let new_json = r#"
@@ -65,7 +65,7 @@ mod test {
     );
   }
 
-  #[cfg(feature = "serialize_json")]
+  #[cfg(feature = "serialize-json")]
   #[test]
   fn test_request_server_info_version0_json_conversion() {
     let old_json = r#"

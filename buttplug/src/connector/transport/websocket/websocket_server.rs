@@ -9,7 +9,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-#[cfg(feature = "async_std_runtime")]
+#[cfg(feature = "async-std-runtime")]
 use async_std::net::TcpListener;
 use async_tls::TlsAcceptor;
 use futures::{

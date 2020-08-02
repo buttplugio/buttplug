@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
+#[cfg(feature = "websockets")]
 use buttplug::{
   client::ButtplugClient,
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
@@ -13,7 +13,7 @@ use buttplug::{
   util::async_manager
 };
 
-#[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
+#[cfg(feature = "websockets")]
 async fn embedded_connector_example() {
   println!(
     "Setting up the client! Run this with RUST_LOG if you'd like to see library log messages."
@@ -72,7 +72,7 @@ async fn embedded_connector_example() {
 
 fn main() {
   // Setup a client, and wait until everything is done before exiting.
-  #[cfg(any(feature = "client-ws", feature = "client-ws-ssl"))]
+  #[cfg(feature = "websockets")]
   async_manager::block_on(async {
     embedded_connector_example().await;
   });

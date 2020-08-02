@@ -12,18 +12,22 @@ edition = "2018"
 exclude = ["examples/**"]
 
 [features]
-default=["thread_pool_runtime", "client", "server", "serialize_json", "btleplug-manager", "client-ws", "xinput", "serial-manager"]
+# Basic features
+default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput", "serial-manager"]
 client=[]
 server=[]
-serialize_json=[]
+serialize-json=[]
+# Connectors
+websockets=["serialize-json", "async-tungstenite", "async-tls", "webpki", "rustls"]
+# Device Communication Managers
 xinput=[]
-thread_pool_runtime=[]
-async_std_runtime=["async-std/default"]
-tokio_runtime=[]
-dummy_runtime=[]
 btleplug-manager=["btleplug"]
-client-ws=["client", "serialize_json", "async-tungstenite", "async-tls", "webpki", "rustls"]
 serial-manager=["serialport"]
+# Runtime managers
+thread-pool-runtime=[]
+async-std-runtime=["async-std/default"]
+tokio-runtime=[]
+dummy-runtime=[]
 # Compiler config
 unstable=[]
 
@@ -38,8 +42,8 @@ serde_json = "1.0.56"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.1", features = ["serde"] }
 url = "2.1.1"
-btleplug = { version = "0.5.0", optional = true }
-# btleplug = { path = "../../btleplug", optional = true}
+# btleplug = { version = "0.5.0", optional = true }
+btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.18.0"
 strum = "0.18.0"
@@ -66,7 +70,6 @@ tracing-futures = "0.2.4"
 tracing-subscriber = "0.2.7"
 dashmap = "4.0.0-rc6"
 displaydoc = "0.1.6"
-
 serialport = { version = "3.3.0", optional = true }
 blocking = "0.4.6"
 hidapi = "1.2.3"
@@ -76,8 +79,8 @@ rusty-xinput = "1.2.0"
 
 [dependencies.async-std]
 version = "1.6.2"
-default-features = false
-features = ["std"]
+# default-features = false
+# features = ["std"]
 optional = true
 
 [dev-dependencies]

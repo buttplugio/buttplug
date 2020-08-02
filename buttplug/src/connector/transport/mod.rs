@@ -1,15 +1,14 @@
-#[cfg(feature="client-ws")]
+#[cfg(feature="websockets")]
 mod websocket;
+#[cfg(feature="websockets")]
+pub use websocket::{ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions, TungsteniteError};
 
 use crate::connector::{
   ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
 };
 use async_channel::{Receiver, Sender};
 use futures::future::BoxFuture;
-#[cfg(feature="client-ws")]
-pub use websocket::{ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
-#[cfg(feature="client-ws")]
-use async_tungstenite::tungstenite::Error as TungsteniteError;
+
 use thiserror::Error;
 
 /// Enum of messages we can receive from a connector.
@@ -42,7 +41,7 @@ pub trait ButtplugConnectorTransport: Send + Sync {
 
 #[derive(Error, Debug)]
 pub enum ButtplugConnectorTransportSpecificError {
-  #[cfg(feature="client-ws")]
+  #[cfg(feature="websockets")]
   #[error("Tungstenite specific error: {0}")]
   TungsteniteError(#[from] TungsteniteError),
 

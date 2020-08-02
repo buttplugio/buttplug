@@ -6,16 +6,16 @@
 // for full license information.
 
 use super::*;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#ok).
 #[derive(Debug, PartialEq, ButtplugMessage, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Ok {
   /// Message Id, used for matching message pairs in remote connection instances.
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
 }
 
@@ -32,7 +32,7 @@ impl Default for Ok {
   }
 }
 
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
   use crate::core::messages::{ButtplugCurrentSpecServerMessage, Ok};

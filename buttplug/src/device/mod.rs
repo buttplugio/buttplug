@@ -1,6 +1,6 @@
 pub mod configuration_manager;
 pub mod protocol;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{
   de::{self, Visitor},
   Deserialize,

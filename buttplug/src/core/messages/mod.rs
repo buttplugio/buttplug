@@ -84,9 +84,9 @@ pub use vibrate_cmd::{VibrateCmd, VibrateSubcommand};
 pub use vorze_a10_cyclone_cmd::VorzeA10CycloneCmd;
 
 use crate::core::errors::ButtplugMessageError;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
 
@@ -94,7 +94,7 @@ use std::convert::TryFrom;
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]
 #[repr(u32)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize_repr, Deserialize_repr))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize_repr, Deserialize_repr))]
 pub enum ButtplugMessageSpecVersion {
   Version0 = 0,
   Version1 = 1,
@@ -135,7 +135,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Display)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
   VibrateCmd,
@@ -244,7 +244,7 @@ pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
   FromSpecificButtplugMessage,
   TryFromButtplugClientMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
@@ -281,7 +281,7 @@ pub enum ButtplugSpecV2ClientMessage {
   FromSpecificButtplugMessage,
   TryFromButtplugServerMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ServerMessage {
   // Status messages
   Ok(Ok),
@@ -305,7 +305,7 @@ pub enum ButtplugSpecV2ServerMessage {
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, TryFromButtplugClientMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
@@ -331,7 +331,7 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ServerMessage {
   // Status messages
   Ok(Ok),
@@ -381,7 +381,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
 #[derive(
   Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, TryFromButtplugClientMessage,
 )]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ClientMessage {
   RequestLog(RequestLog),
   // Handshake messages
@@ -404,7 +404,7 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ServerMessage {
   // Status messages
   Ok(Ok),

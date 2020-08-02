@@ -18,7 +18,7 @@
 extern crate buttplug_derive;
 #[macro_use]
 extern crate strum_macros;
-#[cfg(feature = "thread_pool_runtime")]
+#[cfg(feature = "thread-pool-runtime")]
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]

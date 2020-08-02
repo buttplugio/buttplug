@@ -91,20 +91,19 @@ The following crate features are available
 | --------- | ----------- | ----------- |
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
-| `serialize_json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `client-ws` | `client`,`serialize_json` | Websocket client connector, used to connect clients to remote servers (with SSL) |
+| `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
+| `websockets` | `serialize-json` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
 | `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
 | `serial-manager` | None | Serial Port hardware support on Windows, Mac, Linux |
 | `xinput` | None | XInput Gamepad support on windows |
-| `thread_pool_runtime` | None | Uses default thread pool executor for futures |
-| `async_std_runtime` | None | Uses async-std/smol executor for futures |
+| `thread-pool-runtime` | None | Uses default thread pool executor for futures |
+| `async-std-runtime` | None | Uses async-std/smol executor for futures |
 
 (Tokio coming soon)
 
-Default features are `client`, `server`, `serialize_json`, `client-ws-ssl`,
-`btleplug-manager`, `serial-manager`, `thread_pool_runtime` and `xinput`
-(feature is only relevant on windows, but builds as a noop on all other
-platforms).
+Default features are `client`, `server`, `serialize-json`, `btleplug-manager`,
+`serial-manager`, `thread-pool-runtime` and `xinput` (feature is only relevant
+on windows, but builds as a noop on all other platforms).
 
 ## Contributing
 

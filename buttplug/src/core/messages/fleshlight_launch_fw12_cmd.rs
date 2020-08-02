@@ -6,19 +6,19 @@
 // for full license information.
 
 use super::*;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   pub device_index: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Position"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
   pub position: u8,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Speed"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
   pub speed: u8,
 }
 

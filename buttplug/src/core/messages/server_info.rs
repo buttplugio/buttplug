@@ -6,19 +6,19 @@
 // for full license information.
 
 use super::*;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
   pub message_version: ButtplugMessageSpecVersion,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MaxPingTime"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
   pub max_ping_time: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "ServerName"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
   pub server_name: String,
 }
 
@@ -37,21 +37,21 @@ impl ServerInfo {
   }
 }
 #[derive(Debug, ButtplugMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MajorVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MajorVersion"))]
   pub major_version: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MinorVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MinorVersion"))]
   pub minor_version: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "BuildVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "BuildVersion"))]
   pub build_version: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MessageVersion"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
   pub message_version: ButtplugMessageSpecVersion,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "MaxPingTime"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
   pub max_ping_time: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "ServerName"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
   pub server_name: String,
 }
 

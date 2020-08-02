@@ -7,21 +7,21 @@
 
 use super::*;
 use crate::device::Endpoint;
-#[cfg(feature = "serialize_json")]
+#[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
-#[cfg_attr(feature = "serialize_json", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReadCmd {
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Id"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "DeviceIndex"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   pub device_index: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Endpoint"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
   pub endpoint: Endpoint,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "ExpectedLength"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ExpectedLength"))]
   pub expected_length: u32,
-  #[cfg_attr(feature = "serialize_json", serde(rename = "Timeout"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Timeout"))]
   pub timeout: u32,
 }
 
