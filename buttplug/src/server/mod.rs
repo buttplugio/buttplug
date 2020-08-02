@@ -9,6 +9,7 @@
 
 pub mod comm_managers;
 pub mod device_manager;
+pub mod remote_server;
 mod logger;
 mod ping_timer;
 
@@ -208,6 +209,7 @@ impl ButtplugServer {
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, msg.message_version).into();
     }
+    info!("Performing server handshake check");
     // self.client_name = Some(msg.client_name.clone());
     // self.client_spec_version = Some(msg.message_version);
     let mut ping_timer_fut = None;
@@ -226,6 +228,7 @@ impl ButtplugServer {
         fut.await;
       }
       connected.store(true, Ordering::SeqCst);
+      info!("Server handshake check successful.");
       Result::Ok(out_msg.into())
     })
   }

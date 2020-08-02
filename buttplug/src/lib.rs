@@ -86,6 +86,9 @@
 //! implementation yet, but one we do, those will be marked "Help Wanted" in our
 //! [github issues](https://github.com/buttplugio/buttplug-rs/issues).
 
+// Required for select! expansion in RemoteServer
+#![recursion_limit="256"]
+
 #[macro_use]
 extern crate buttplug_derive;
 #[macro_use]
