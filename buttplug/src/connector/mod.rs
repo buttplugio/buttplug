@@ -79,9 +79,9 @@ mod remote_connector;
 mod transport;
 
 pub use in_process_connector::ButtplugInProcessClientConnector;
-pub use remote_connector::{ButtplugRemoteClientConnector, ButtplugRemoteConnector};
+pub use remote_connector::{ButtplugRemoteClientConnector, ButtplugRemoteConnector, ButtplugRemoteServerConnector};
 #[cfg(feature="client-ws")]
-pub use transport::ButtplugWebsocketClientTransport;
+pub use transport::{ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use crate::{
   core::{
@@ -113,6 +113,8 @@ pub enum ButtplugConnectorError {
   ConnectorChannelClosed,
   /// Connector already connected, cannot be connected twice.
   ConnectorAlreadyConnected,
+  /// Connector error: {0}
+  ConnectorGenericError(String),
   /// Specific error for connector type: {0}.
   TransportSpecificError(transport::ButtplugConnectorTransportSpecificError),
 }

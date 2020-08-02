@@ -9,20 +9,19 @@
 
 use super::transport::{ButtplugConnectorTransport, ButtplugTransportMessage};
 use crate::{
-  connector::{
-    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
-  },
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
     errors::{ButtplugMessageError, ButtplugServerError},
     messages::{
-    serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
-    ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugMessage, Error,
-  }
-},
+      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage},
+      ButtplugClientMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+      ButtplugMessage, ButtplugServerMessage,
+    },
+  },
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use futures::{StreamExt, FutureExt, future::BoxFuture};
+use futures::{future::BoxFuture, FutureExt, StreamExt};
 use std::marker::PhantomData;
 
 enum ButtplugRemoteConnectorMessage<T>
@@ -62,7 +61,7 @@ async fn remote_connector_event_loop<
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static //From<Error> + 'static,
 {
   // Message sorter that receives messages that come in from the client.
   let mut serializer = SerializerType::default();
@@ -74,12 +73,12 @@ async fn remote_connector_event_loop<
     // message from the connector to go to the transport.
     let mut stream_return = select! {
       // Catch messages coming in from the transport.
-      transport = transport_incoming_recv.next().fuse() => 
+      transport = transport_incoming_recv.next().fuse() =>
       match transport {
         Some(msg) => StreamValue::Incoming(msg),
         None => StreamValue::NoValue,
       },
-      connector = connector_outgoing_recv.next().fuse() => 
+      connector = connector_outgoing_recv.next().fuse() =>
       match connector {
         // Catch messages that need to be sent out through the connector.
         Some(msg) => StreamValue::Outgoing(msg),
@@ -110,7 +109,11 @@ async fn remote_connector_event_loop<
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                let _ = connector_incoming_sender.send(Err(ButtplugMessageError::MessageSerializationError(e).into())).await;
+                let _ = connector_incoming_sender
+                  .send(Err(
+                    ButtplugMessageError::MessageSerializationError(e).into(),
+                  ))
+                  .await;
               }
             }
           }
@@ -132,7 +135,11 @@ async fn remote_connector_event_loop<
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
             let serialized_msg = serializer.serialize(vec![msg.clone()]);
-            if transport_outgoing_sender.send(serialized_msg).await.is_err() {
+            if transport_outgoing_sender
+              .send(serialized_msg)
+              .await
+              .is_err()
+            {
               error!("Transport has disconnected, exiting remote connector loop.");
               return;
             }
@@ -154,6 +161,13 @@ pub type ButtplugRemoteClientConnector<TransportType, SerializerType> = Buttplug
   SerializerType,
   ButtplugCurrentSpecClientMessage,
   ButtplugCurrentSpecServerMessage,
+>;
+
+pub type ButtplugRemoteServerConnector<TransportType, SerializerType> = ButtplugRemoteConnector<
+  TransportType,
+  SerializerType,
+  ButtplugServerMessage,
+  ButtplugClientMessage,
 >;
 
 pub struct ButtplugRemoteConnector<
@@ -214,11 +228,14 @@ where
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static //+ From<Error> + 'static,
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<'static, Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>> {
+  ) -> BoxFuture<
+    'static,
+    Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>,
+  > {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();
@@ -242,8 +259,10 @@ where
                 transport,
                 transport_outgoing_sender,
                 transport_incoming_receiver,
-              ).await
-            }).unwrap();
+              )
+              .await
+            })
+            .unwrap();
             Ok(connector_incoming_receiver)
           }
           Err(e) => Err(e),
