@@ -24,6 +24,8 @@ dummy_runtime=[]
 btleplug-manager=["btleplug"]
 client-ws=["client", "serialize_json", "async-tungstenite", "async-tls", "webpki", "rustls"]
 serial-manager=["serialport"]
+# Compiler config
+unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
@@ -92,3 +94,5 @@ doc = true
 # Only build docs on one platform (linux)
 [package.metadata.docs.rs]
 targets = []
+# Features to pass to Cargo (default: [])
+features = ["default", "unstable"]
