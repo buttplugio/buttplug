@@ -268,6 +268,22 @@ mod test {
   };
   use futures::StreamExt;
 
+  #[test]
+  fn test_server_reuse() {
+    let (server, _) = ButtplugServer::new("Test Server", 0);
+    async_manager::block_on(async {
+      let msg =
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+      let mut reply = server.parse_message(msg.clone().into()).await;
+      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      reply = server.parse_message(msg.clone().into()).await;
+      assert!(reply.is_err(), format!("Should get back err on double handshake: {:?}", reply));
+      assert!(server.disconnect().await.is_ok(), format!("Should disconnect ok"));
+      reply = server.parse_message(msg.clone().into()).await;
+      assert!(reply.is_ok(), format!("Should get back ok on handshake after disconnect: {:?}", reply));
+    });
+  }
+
   // Warning: This test is brittle. If any log messages are fired between our
   // log in this message and the asserts, it will fail. If you see failures on
   // this test, that's probably why.
