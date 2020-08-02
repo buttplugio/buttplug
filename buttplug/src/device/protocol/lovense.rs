@@ -98,7 +98,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.
-      let result = manager.lock().await.update_vibration(&msg, false);
+      let result = manager.lock().await.update_vibration(&msg, false)?;
       // Lovense is the same situation as the Lovehoney Desire, where commands
       // are different if we're addressing all motors or seperate motors.
       // Difference here being that there's Lovense variants with different
@@ -109,35 +109,29 @@ impl ButtplugProtocolCommandHandler for Lovense {
       //
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
-      match result {
-        Ok(cmds_option) => {
-          let mut fut_vec = vec![];
-          if let Some(cmds) = cmds_option {
-            if !cmds[0].is_none() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-              let lovense_cmd = format!("Vibrate:{};", cmds[0].unwrap()).as_bytes().to_vec();
-              let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
-              fut.await?;
-              return Ok(messages::Ok::default().into());
-            }
-            for i in 0..cmds.len() {
-              if let Some(speed) = cmds[i] {
-                let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-                fut_vec.push(device.write_value(DeviceWriteCmd::new(
-                  Endpoint::Tx,
-                  lovense_cmd,
-                  false,
-                )));
-              }
-            }
+      let mut fut_vec = vec![];
+      if let Some(cmds) = result {
+        if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
+          let lovense_cmd = format!("Vibrate:{};", cmds[0].unwrap()).as_bytes().to_vec();
+          let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+          fut.await?;
+          return Ok(messages::Ok::default().into());
+        }
+        for (i, cmd) in cmds.iter().enumerate() {
+          if let Some(speed) = cmd {
+            let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
+            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+              Endpoint::Tx,
+              lovense_cmd,
+              false,
+            )));
           }
-
-          for fut in fut_vec {
-            fut.await?;
-          }
-          Ok(messages::Ok::default().into())
-        },
-        Err(e) => Err(e.into()),
+        }
       }
+      for fut in fut_vec {
+        fut.await?;
+      }
+      Ok(messages::Ok::default().into())
     })
   }
 

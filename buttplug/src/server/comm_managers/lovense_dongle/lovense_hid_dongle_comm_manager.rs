@@ -21,7 +21,6 @@ use std::{
   sync::{atomic::AtomicBool, Arc},
   thread,
 };
-use tracing;
 use tracing_futures::Instrument;
 
 fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseData>) {
@@ -73,10 +72,10 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
         data += std::str::from_utf8(&buf[0..len-1]).unwrap();
-        if data.contains("\n") {
+        if data.contains('\n') {
           // We have what should be a full message.
           // Split it.
-          let msg_vec: Vec<&str> = data.split("\n").collect();
+          let msg_vec: Vec<&str> = data.split('\n').collect();
 
           let incoming = msg_vec[0];
           let sender_clone = sender.clone();

@@ -73,7 +73,10 @@ async fn accept_connection<S>(
         Some(msg) => match msg.unwrap() {
           async_tungstenite::tungstenite::Message::Text(text_msg) => {
             info!("Got text: {}", text_msg);
-            response_sender.send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await;
+            if response_sender.send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
+              error!("Connector that owns transport no longer available, exiting.");
+              break;
+            }
           }
           async_tungstenite::tungstenite::Message::Close(_) => {
             break;
@@ -144,8 +147,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
     if let Some(ws_secure_port) = self.options.ws_secure_port {
       let options = self.options.clone();
-      let request_receiver_clone = request_receiver.clone();
-      let response_sender_clone = response_sender.clone();
+      let request_receiver_clone = request_receiver;
+      let response_sender_clone = response_sender;
 
       let fut = async move {
         if options.ws_cert_file.is_none() {

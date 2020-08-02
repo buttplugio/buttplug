@@ -35,11 +35,14 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
           info!("Got {} serial ports back", ports.len());
           for p in ports {
             info!("{:?}", p);
-            sender
+            if sender
               .send(DeviceCommunicationEvent::DeviceFound(Box::new(
                 SerialPortDeviceImplCreator::new(&p),
               )))
-              .await;
+              .await.is_err() {
+                error!("Device manager disappeared, exiting.");
+                break;
+            }
           }
         }
         Err(_) => {

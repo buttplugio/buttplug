@@ -43,7 +43,7 @@ impl ButtplugProtocolCommandHandler for Svakom {
       [0x55, 0x04, 0x03, 0x00, multiplier, speed].to_vec(),
       false,
     );
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async {
       fut.await?;
       Ok(messages::Ok::default().into())

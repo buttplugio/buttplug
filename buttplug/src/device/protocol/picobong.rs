@@ -40,7 +40,7 @@ impl ButtplugProtocolCommandHandler for Picobong {
     let speed = (msg.speeds[0].speed * 10.0) as u8;
     let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
     let msg = DeviceWriteCmd::new(Endpoint::Tx, [0x01, mode, speed].to_vec(), false);
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async {
       fut.await?;
       Ok(messages::Ok::default().into())

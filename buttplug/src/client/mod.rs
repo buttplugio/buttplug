@@ -11,12 +11,10 @@ pub mod device;
 pub mod internal;
 
 use device::ButtplugClientDevice;
-use internal::{client_event_loop, ButtplugClientRequest, ButtplugClientDeviceInternal};
+use internal::{client_event_loop, ButtplugClientDeviceInternal, ButtplugClientRequest};
 
 use crate::{
-  connector::{
-    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture,
-  },
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
@@ -26,24 +24,21 @@ use crate::{
     },
   },
   util::{
-    future::{ButtplugFuture, ButtplugFutureStateShared},
     async_manager,
-  }
-};
-use async_channel::Sender;
-use futures::{
-  future::{self, BoxFuture, Future},
-  StreamExt,
-  FutureExt,
-};
-use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
+    future::{ButtplugFuture, ButtplugFutureStateShared},
   },
 };
-use thiserror::Error;
+use async_channel::Sender;
 use dashmap::DashMap;
+use futures::{
+  future::{self, BoxFuture, Future},
+  FutureExt, StreamExt,
+};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
+use thiserror::Error;
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
@@ -189,9 +184,14 @@ impl ButtplugClient {
   pub fn connect<ConnectorType>(
     name: &str,
     mut connector: ConnectorType,
-  ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item=ButtplugClientEvent>), ButtplugClientError>>
+  ) -> BoxFuture<
+    'static,
+    Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
+  >
   where
-  ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> + 'static {
+    ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+      + 'static,
+  {
     trace!("run() called, creating client future.");
     let client_name = name.to_string();
     Box::pin(async move {
@@ -204,13 +204,8 @@ impl ButtplugClient {
         err
       })?;
       info!("Connection to server succeeded.");
-      let (client_event_loop_fut, 
-        device_map_reader, 
-        message_sender,
-        event_channel) = client_event_loop(
-        connector,
-        connector_receiver,
-      );
+      let (client_event_loop_fut, device_map_reader, message_sender, event_channel) =
+        client_event_loop(connector, connector_receiver);
 
       let client_event_receiver = event_channel.clone();
       let mut disconnect_event_receiver = event_channel.clone();
@@ -218,31 +213,39 @@ impl ButtplugClient {
       let connected_status_clone = connected_status.clone();
 
       // Start the event loop before we run the handshake.
-      async_manager::spawn(async move {
-        let disconnect_fut = async move {
-          loop {
-            if let Some(ButtplugClientEvent::ServerDisconnect) = disconnect_event_receiver.next().await {
-              connected_status.store(false, Ordering::SeqCst);
-              break;
+      async_manager::spawn(
+        async move {
+          let disconnect_fut = async move {
+            loop {
+              if let Some(ButtplugClientEvent::ServerDisconnect) =
+                disconnect_event_receiver.next().await
+              {
+                connected_status.store(false, Ordering::SeqCst);
+                break;
+              }
             }
+            Result::<(), ButtplugClientError>::Ok(())
           }
-          Result::<(), ButtplugClientError>::Ok(())
-        }.instrument(tracing::info_span!("Client Disconnect Loop"));
-        // If we disconnect, we'll also stop the client event loop. If the
-        // client event loop stops, we don't care about listening for disconnect
-        // anymore.
-        select! {
-          _ = client_event_loop_fut.fuse() => (),
-          _ = disconnect_fut.fuse() => (),
-        };
-      }.instrument(tracing::info_span!("Client Loop Span"))).unwrap();
+          .instrument(tracing::info_span!("Client Disconnect Loop"));
+          // If we disconnect, we'll also stop the client event loop. If the
+          // client event loop stops, we don't care about listening for disconnect
+          // anymore.
+          select! {
+            _ = client_event_loop_fut.fuse() => (),
+            _ = disconnect_fut.fuse() => (),
+          };
+        }
+        .instrument(tracing::info_span!("Client Loop Span")),
+      )
+      .unwrap();
       let client = ButtplugClient::create_client(
         &client_name,
         connected_status_clone,
         message_sender,
         device_map_reader,
         span.clone(),
-      ).await?;
+      )
+      .await?;
       Ok((client, client_event_receiver))
     })
   }
@@ -283,8 +286,10 @@ impl ButtplugClient {
   /// `run()` method to pass it in.
   pub fn connect_in_process(
     name: &str,
-    max_ping_time: u64
-  ) -> impl Future<Output = Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>> {
+    max_ping_time: u64,
+  ) -> impl Future<
+    Output = Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
+  > {
     use crate::connector::ButtplugInProcessClientConnector;
 
     let mut connector =
@@ -312,12 +317,13 @@ impl ButtplugClient {
   /// the struct, then tries to run connect and execute the Buttplug protocol
   /// handshake. Will return a connected and ready to use ButtplugClient is all
   /// goes well.
-  async fn create_client(client_name: &str,
-    connected_status: Arc<AtomicBool>, 
-    message_sender: Sender<ButtplugClientRequest>, 
+  async fn create_client(
+    client_name: &str,
+    connected_status: Arc<AtomicBool>,
+    message_sender: Sender<ButtplugClientRequest>,
     device_map: Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
-    span: Span) 
-    -> Result<Self, ButtplugClientError> {
+    span: Span,
+  ) -> Result<Self, ButtplugClientError> {
     // Create the client
     let mut client = ButtplugClient {
       client_name: client_name.to_string(),
@@ -329,45 +335,40 @@ impl ButtplugClient {
       // function.
       connected: connected_status,
       device_map,
-      _client_span: span
+      _client_span: span,
     };
 
     // Run our handshake
     info!("Running handshake with server.");
-    match client
-    .send_message(
-      RequestServerInfo::new(&client.client_name, ButtplugMessageSpecVersion::Version2).into(),
-    )
-    .await {
-      Ok(msg) => {
-        debug!("Got ServerInfo return.");
-        if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
-          info!("Connected to {}", server_info.server_name);
-          client.server_name = server_info.server_name;
-          // TODO Handle ping time in the internal event loop
+    let msg = client
+      .send_message(
+        RequestServerInfo::new(&client.client_name, ButtplugMessageSpecVersion::Version2).into(),
+      )
+      .await?;
 
-          // Get currently connected devices. The event loop will
-          // handle sending the message and getting the return, and
-          // will send the client updates as events.
-          let msg = client
-            .send_message(RequestDeviceList::default().into())
-            .await?;
-          if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
-            client
-              .send_internal_message(ButtplugClientRequest::HandleDeviceList(m))
-              .await?;
-          }
-          Ok(client)
-        } else {
-          client.disconnect().await?;
-          Err(
-            ButtplugClientError::ButtplugError(ButtplugHandshakeError::UnexpectedHandshakeMessageReceived(format!("{:?}", msg)).into())
-          )
-        }
+    debug!("Got ServerInfo return.");
+    if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
+      info!("Connected to {}", server_info.server_name);
+      client.server_name = server_info.server_name;
+      // TODO Handle ping time in the internal event loop
+
+      // Get currently connected devices. The event loop will
+      // handle sending the message and getting the return, and
+      // will send the client updates as events.
+      let msg = client
+        .send_message(RequestDeviceList::default().into())
+        .await?;
+      if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
+        client
+          .send_internal_message(ButtplugClientRequest::HandleDeviceList(m))
+          .await?;
       }
-      // TODO Error message case may need to be implemented here when
-      // we aren't only using embedded connectors.
-      Err(e) => Err(e.into()),
+      Ok(client)
+    } else {
+      client.disconnect().await?;
+      Err(ButtplugClientError::ButtplugError(
+        ButtplugHandshakeError::UnexpectedHandshakeMessageReceived(format!("{:?}", msg)).into(),
+      ))
     }
   }
 
@@ -411,13 +412,16 @@ impl ButtplugClient {
     self.send_message_expect_ok(StopScanning::default().into())
   }
 
-  /// Send message to the internal event loop. 
+  /// Send message to the internal event loop.
   ///
   /// Mostly for handling boilerplate around possible send errors.
-  fn send_internal_message(&self, msg: ButtplugClientRequest) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+  fn send_internal_message(
+    &self,
+    msg: ButtplugClientRequest,
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Err(
-        ButtplugConnectorError::ConnectorNotConnected
+        ButtplugConnectorError::ConnectorNotConnected,
       )));
     }
     // If we're running the event loop, we should have a message_sender.
@@ -425,7 +429,10 @@ impl ButtplugClient {
     // this function in order to connect also.
     let message_sender = self.message_sender.clone();
     Box::pin(async move {
-      message_sender.send(msg).await.map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
+      message_sender
+        .send(msg)
+        .await
+        .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
       Ok(())
     })
   }
@@ -461,8 +468,8 @@ impl ButtplugClient {
     Box::pin(async move {
       send_fut
         .await
-        .and_then(|_| Ok(()))
-        .map_err(|err| err.into())
+        .map(|_| ())
+        .map_err(|err| err)
     })
   }
 
@@ -472,9 +479,13 @@ impl ButtplugClient {
   /// the list requires an asynchronous call to retreive the list from the task.
   pub fn devices(&self) -> Vec<ButtplugClientDevice> {
     info!("Request devices from inner loop!");
-    let mut device_clones = vec!();
+    let mut device_clones = vec![];
     for device in self.device_map.iter() {
-      device_clones.push(ButtplugClientDevice::from((&(*device.device), self.message_sender.clone(), (*device.channel).clone())));
+      device_clones.push(ButtplugClientDevice::from((
+        &(*device.device),
+        self.message_sender.clone(),
+        (*device.channel).clone(),
+      )));
     }
     device_clones
   }

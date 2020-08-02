@@ -282,7 +282,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                   self.hub.clone(),
                   data.id.unwrap(),
                 )));
-              } else if let Some(_) = device_msg.result {
+              } else if device_msg.result.is_some() {
                 // emit and return to idle
                 return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
               }

@@ -206,7 +206,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     let id = message.get_id();
     let fut = device.write_value(message.into());
     Box::pin(async move {
-      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+      fut.await.map(|_| messages::Ok::new(id).into())
     })
   }
 
@@ -218,9 +218,9 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     let id = message.get_id();
     let fut = device.read_value(message.into());
     Box::pin(async move {
-      fut.await.and_then(|mut msg| {
+      fut.await.map(|mut msg| {
         msg.set_id(id);
-        Ok(msg.into())
+        msg.into()
       })
     })
   }
@@ -233,7 +233,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     let id = message.get_id();
     let fut = device.unsubscribe(message.into());
     Box::pin(async move {
-      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+      fut.await.map(|_| messages::Ok::new(id).into())
     })
   }
 
@@ -245,7 +245,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     let id = message.get_id();
     let fut = device.subscribe(message.into());
     Box::pin(async move {
-      fut.await.and_then(|_| Ok(messages::Ok::new(id).into()))
+      fut.await.map(|_| messages::Ok::new(id).into())
     })
   }
 

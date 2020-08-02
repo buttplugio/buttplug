@@ -145,7 +145,7 @@ impl ButtplugServer {
       if let Some(pfut) = ping_fut {
         pfut.await;
       }
-      stop_fut.await.and_then(|_| Ok(()))
+      stop_fut.await.map(|_| ())
     })
   }
 
@@ -183,9 +183,9 @@ impl ButtplugServer {
     // Simple way to set the ID on the way out. Just rewrap
     // the returned future to make sure it happens.
     Box::pin(async move {
-      out_fut.await.and_then(|mut ok_msg| {
+      out_fut.await.map(|mut ok_msg| {
         ok_msg.set_id(id);
-        Ok(ok_msg)
+        ok_msg
       }).map_err(|err| {
         ButtplugServerError::new_message_error(id, err)
       })

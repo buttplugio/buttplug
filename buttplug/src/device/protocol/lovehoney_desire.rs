@@ -1,4 +1,7 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator, ButtplugDeviceResultFuture};
+use super::{
+  ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler,
+  ButtplugProtocolCreator,
+};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -39,54 +42,49 @@ impl ButtplugProtocolCommandHandler for LovehoneyDesire {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false);
-      match result {
-        Ok(cmds_option) => {
-          if let Some(cmds) = cmds_option {
-            // The Lovehoney Desire has 2 types of commands
-            //
-            // - Set both motors with one command
-            // - Set each motor separately
-            //
-            // We'll need to check what we got back and write our
-            // commands accordingly.
-            //
-            // Neat way of checking if everything is the same via
-            // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-            //
-            // Just make sure we're not matching on None, 'cause if
-            // that's the case we ain't got shit to do.
-            let mut fut_vec = vec![];
-            if !cmds[0].is_none() && cmds.windows(2).all(|w| w[0] == w[1]) {
-              let fut = device.write_value(DeviceWriteCmd::new(
-                Endpoint::Tx,
-                vec![0xF3, 0, cmds[0].unwrap() as u8],
-                false,
-              ));
-              fut.await?;
-            } else {
-              // We have differening values. Set each motor separately.
-              let mut i = 1;
+      let result = manager.lock().await.update_vibration(&message, false)?;
+      if let Some(cmds) = result {
+        // The Lovehoney Desire has 2 types of commands
+        //
+        // - Set both motors with one command
+        // - Set each motor separately
+        //
+        // We'll need to check what we got back and write our
+        // commands accordingly.
+        //
+        // Neat way of checking if everything is the same via
+        // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+        //
+        // Just make sure we're not matching on None, 'cause if
+        // that's the case we ain't got shit to do.
+        let mut fut_vec = vec![];
+        if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
+          let fut = device.write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0xF3, 0, cmds[0].unwrap() as u8],
+            false,
+          ));
+          fut.await?;
+        } else {
+          // We have differening values. Set each motor separately.
+          let mut i = 1;
 
-              for cmd in cmds {
-                if let Some(speed) = cmd {
-                  fut_vec.push(device.write_value(DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    vec![0xF3, i, speed as u8],
-                    false,
-                  )));
-                }
-                i += 1;
-              }
-              for fut in fut_vec {
-                fut.await?;
-              }
+          for cmd in cmds {
+            if let Some(speed) = cmd {
+              fut_vec.push(device.write_value(DeviceWriteCmd::new(
+                Endpoint::Tx,
+                vec![0xF3, i, speed as u8],
+                false,
+              )));
             }
+            i += 1;
           }
-          Ok(messages::Ok::default().into())
+          for fut in fut_vec {
+            fut.await?;
+          }
         }
-        Err(e) => Err(e.into()),
       }
+      Ok(messages::Ok::default().into())
     })
   }
 }
@@ -103,10 +101,11 @@ mod test {
   #[test]
   pub fn test_lovehoney_desire_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE")
-        .await
-        .unwrap();
-      let command_receiver = test_device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
+      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE").await.unwrap();
+      let command_receiver = test_device
+        .get_endpoint_channel(&Endpoint::Tx)
+        .unwrap()
+        .receiver;
 
       // If we send one speed to one motor, we should only see one output.
       device

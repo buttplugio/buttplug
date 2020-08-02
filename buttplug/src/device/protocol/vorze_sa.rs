@@ -51,36 +51,29 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&msg, false);
+      let result = manager.lock().await.update_vibration(&msg, false)?;
       let mut fut_vec = vec![];
-      match result {
-        Ok(cmds_option) => {
-          if let Some(cmds) = cmds_option {
-            if let Some(speed) = cmds[0] {
-              fut_vec.push(
-                device.write_value(
-                  DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    vec![
-                      VorzeDevices::Bach as u8,
-                      VorzeActions::Vibrate as u8,
-                      speed as u8,
-                    ],
-                    false,
-                  )
-                  .into(),
-                ),
-              );
-            }
-          }
-
-          for fut in fut_vec {
-            fut.await?;
-          }
-          Ok(messages::Ok::default().into())
+      if let Some(cmds) = result {
+        if let Some(speed) = cmds[0] {
+          fut_vec.push(
+            device.write_value(
+              DeviceWriteCmd::new(
+                Endpoint::Tx,
+                vec![
+                  VorzeDevices::Bach as u8,
+                  VorzeActions::Vibrate as u8,
+                  speed as u8,
+                ],
+                false,
+              ),
+            ),
+          );
         }
-        Err(e) => Err(e.into()),
       }
+      for fut in fut_vec {
+        fut.await?;
+      }
+      Ok(messages::Ok::default().into())
     })
   }
 
@@ -97,31 +90,24 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       VorzeDevices::Cyclone
     };
     Box::pin(async move {
-      let result = manager.lock().await.update_rotation(&msg);
+      let result = manager.lock().await.update_rotation(&msg)?;
       let mut fut_vec = vec![];
-      match result {
-        Ok(cmds) => {
-          if let Some((speed, clockwise)) = cmds[0] {
-            let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-            fut_vec.push(
-              device.write_value(
-                DeviceWriteCmd::new(
-                  Endpoint::Tx,
-                  vec![dev_id as u8, VorzeActions::Rotate as u8, data],
-                  false,
-                )
-                .into(),
-              ),
-            );
-          }
-
-          for fut in fut_vec {
-            fut.await?;
-          }
-          Ok(messages::Ok::default().into())
-        }
-        Err(e) => Err(e.into()),
+      if let Some((speed, clockwise)) = result[0] {
+        let data: u8 = (clockwise as u8) << 7 | (speed as u8);
+        fut_vec.push(
+          device.write_value(
+            DeviceWriteCmd::new(
+              Endpoint::Tx,
+              vec![dev_id as u8, VorzeActions::Rotate as u8, data],
+              false,
+            ),
+          ),
+        );
       }
+      for fut in fut_vec {
+        fut.await?;
+      }
+      Ok(messages::Ok::default().into())
     })
   }
 }

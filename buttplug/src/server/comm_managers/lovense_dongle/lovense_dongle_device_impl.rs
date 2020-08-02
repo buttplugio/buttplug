@@ -77,7 +77,7 @@ pub struct LovenseDongleDeviceImpl {
 }
 
 impl LovenseDongleDeviceImpl {
-  pub fn new(address: &String, device_outgoing: Sender<OutgoingLovenseData>, mut device_incoming: Receiver<LovenseDongleIncomingMessage>) -> Self {
+  pub fn new(address: &str, device_outgoing: Sender<OutgoingLovenseData>, mut device_incoming: Receiver<LovenseDongleIncomingMessage>) -> Self {
     let event_broadcaster = BroadcastChannel::with_cap(256);
     let event_broadcaster_clone = event_broadcaster.clone();
     async_manager::spawn(async move {

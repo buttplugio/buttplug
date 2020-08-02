@@ -64,8 +64,10 @@ async fn run_server<ConnectorType>(
           async_manager::spawn(async move {
             // TODO This isn't handling server errors correctly
             let ret_msg = server_clone.parse_message(msg.unwrap()).await.unwrap();
-            connector_clone.send(ret_msg).await;
-          });
+            if connector_clone.send(ret_msg).await.is_err() {
+              error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+            }
+          }).unwrap();
         }
       },
       controller_msg = controller_receiver.next().fuse() => match controller_msg {
@@ -85,9 +87,10 @@ async fn run_server<ConnectorType>(
         }
         Some(msg) => { 
           let connector_clone = shared_connector.clone();
-          async_manager::spawn(async move {
-            connector_clone.send(msg).await;
-          });
+          if connector_clone.send(msg).await.is_err() {
+            error!("Server disappeared, exiting remote server thread.");
+            break;
+          }
         }
       },
     };
@@ -128,10 +131,8 @@ impl ButtplugRemoteServer {
     }
   }
 
-  pub fn disconnect(&self) -> impl Future<Output=Result<(), ButtplugError>> {
-    async move {
-      Ok(())
-    }
+  pub async fn disconnect(&self) -> Result<(), ButtplugError> {
+    Ok(())
   }
 
   pub fn add_comm_manager<T>(&self)

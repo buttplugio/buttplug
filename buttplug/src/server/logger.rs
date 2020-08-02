@@ -54,7 +54,7 @@ impl<S: Subscriber> Layer<S> for ButtplugLogHandler {
 impl ButtplugLogHandler {
   pub fn new(level: &messages::LogLevel, message_sender: Sender<ButtplugServerMessage>) -> Self {
     Self {
-      level: level.clone().into(),
+      level: level.clone(),
       message_sender,
     }
   }

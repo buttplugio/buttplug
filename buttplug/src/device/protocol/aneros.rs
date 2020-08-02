@@ -39,32 +39,25 @@ impl ButtplugProtocolCommandHandler for Aneros {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false);
+      let result = manager.lock().await.update_vibration(&message, false)?;
       let mut fut_vec = vec![];
-      match result {
-        Ok(cmds_option) => {
-          if let Some(cmds) = cmds_option {
-            let mut index = 0u8;
-            for cmd in cmds {
-              if let Some(speed) = cmd {
-                fut_vec.push(device.write_value(DeviceWriteCmd::new(
-                  Endpoint::Tx,
-                  vec![0xF1 + index, speed as u8],
-                  false,
-                )));
-              }
-              index += 1;
-            }
+      if let Some(cmds) = result {
+        for (index, cmd) in cmds.iter().enumerate() {
+          if let Some(speed) = cmd {
+            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+              Endpoint::Tx,
+              vec![0xF1 + (index as u8), *speed as u8],
+              false,
+            )));
           }
-          // TODO Just use join_all here
-          for fut in fut_vec {
-            // TODO Do something about possible errors here
-            fut.await?;
-          }
-          Ok(messages::Ok::default().into())
         }
-        Err(e) => Err(e.into()),
       }
+      // TODO Just use join_all here
+      for fut in fut_vec {
+        // TODO Do something about possible errors here
+        fut.await?;
+      }
+      Ok(messages::Ok::default().into())
     })
   }
 }

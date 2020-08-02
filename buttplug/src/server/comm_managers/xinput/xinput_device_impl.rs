@@ -61,7 +61,7 @@ impl XInputDeviceImpl {
       handle: rusty_xinput::XInputHandle::load_default().unwrap(),
       index,
       event_receiver,
-      address: format!("XInput Controller {}", index).to_owned(),
+      address: format!("XInput Controller {}", index),
     }
   }
 }

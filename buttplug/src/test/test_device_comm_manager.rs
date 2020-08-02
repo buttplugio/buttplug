@@ -128,7 +128,7 @@ mod test {
 
   #[test]
   fn test_test_device_comm_manager() {
-    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
     async_manager::block_on(async {
       let helper = server.add_test_comm_manager();
       let device = helper.add_ble_device("Massage Demo").await;

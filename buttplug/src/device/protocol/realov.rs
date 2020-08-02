@@ -38,7 +38,7 @@ impl ButtplugProtocolCommandHandler for Realov {
     // TODO Convert to using generic command manager
     let speed = (msg.speeds[0].speed * 50.0) as u8;
     let msg = DeviceWriteCmd::new(Endpoint::Tx, [0xc5, 0x55, speed, 0xaa].to_vec(), false);
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async {
       fut.await?;
       Ok(messages::Ok::default().into())

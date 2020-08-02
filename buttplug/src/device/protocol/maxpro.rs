@@ -51,7 +51,7 @@ impl ButtplugProtocolCommandHandler for Maxpro {
 
     let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
     // device.write_value(msg.into()).await?;
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async move {
       fut.await?;
       Ok(messages::Ok::default().into())

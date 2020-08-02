@@ -42,11 +42,11 @@ pub struct BtlePlugCommunicationManager {
 impl BtlePlugCommunicationManager {
   fn get_central(&self) -> Option<Adapter> {
     let adapters = self.manager.adapters().unwrap();
-    if adapters.len() == 0 {
+    if adapters.is_empty() {
       return None;
     }
 
-    let adapter = adapters.into_iter().nth(0).unwrap();
+    let adapter = adapters.into_iter().next().unwrap();
     
     // Have to use return statements here due to multiple cfg calls, otherwise
     // parser gets unhappy?

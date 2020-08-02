@@ -95,7 +95,7 @@ impl TestDeviceInternal {
   }
 
   pub fn get_endpoint_channel(&self, endpoint: &Endpoint) -> Option<TestDeviceEndpointChannel> {
-    self.endpoint_channels.get(endpoint).and_then(|el| Some(el.value().clone()))
+    self.endpoint_channels.get(endpoint).map(|el| el.value().clone())
   }
 
   pub async fn add_endpoint(&self, endpoint: &Endpoint) {

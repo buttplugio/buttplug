@@ -26,7 +26,6 @@ use async_channel::{bounded, Sender, Receiver};
 use futures::{Future, StreamExt, FutureExt};
 use std::{sync::Arc, hash::{Hash, Hasher}};
 use broadcaster::BroadcastChannel;
-use tracing;
 use tracing_futures::Instrument;
 use dashmap::DashMap;
 

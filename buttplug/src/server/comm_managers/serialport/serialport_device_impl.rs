@@ -66,7 +66,10 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
         let blocking_sender = sender.clone();
-        block_on!(blocking_sender.send(buf[0..len].to_vec()).await);
+        if block_on!(blocking_sender.send(buf[0..len].to_vec()).await.is_err()) {
+          error!("Serial port implementation disappeared, exiting read thread.");
+          break;
+        }
       }
       Err(e) => {
         if e.kind() == ErrorKind::TimedOut {
@@ -81,13 +84,14 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
 pub struct SerialPortDeviceImpl {
   name: String,
   address: String,
-  read_thread: thread::JoinHandle<()>,
-  write_thread: thread::JoinHandle<()>,
   port_receiver: Receiver<Vec<u8>>,
   port_sender: Sender<Vec<u8>>,
-  port: Arc<Mutex<Box<dyn SerialPort>>>,
   connected: Arc<AtomicBool>,
   event_receiver: BoundedDeviceEventBroadcaster,
+  // TODO These aren't actually read, do we need to hold them?
+  _read_thread: thread::JoinHandle<()>,
+  _write_thread: thread::JoinHandle<()>,
+  _port: Arc<Mutex<Box<dyn SerialPort>>>,
 }
 
 impl SerialPortDeviceImpl {
@@ -135,13 +139,13 @@ impl SerialPortDeviceImpl {
       })
       .unwrap();
     Ok(Self {
-      name: port.name().unwrap().to_owned(),
-      address: port.name().unwrap().to_owned(),
-      read_thread,
-      write_thread,
+      name: port.name().unwrap(),
+      address: port.name().unwrap(),
+      _read_thread: read_thread,
+      _write_thread: write_thread,
       port_receiver: reader_receiver,
       port_sender: writer_sender,
-      port: Arc::new(Mutex::new(port)),
+      _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
       event_receiver: BroadcastChannel::with_cap(256),
     })

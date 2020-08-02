@@ -58,7 +58,7 @@ mod test {
 
   #[test]
   fn test_version0_device_added_device_list() {
-    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
 
     async_manager::block_on(async {
@@ -108,7 +108,7 @@ mod test {
 
   #[test]
   fn test_version0_singlemotorvibratecmd() {
-    let (mut server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     async_manager::block_on(async {
       let helper = server.add_test_comm_manager();

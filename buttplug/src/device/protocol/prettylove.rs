@@ -41,7 +41,7 @@ impl ButtplugProtocolCommandHandler for PrettyLove {
       speed = 0xff;
     }
     let msg = DeviceWriteCmd::new(Endpoint::Tx, [0x00, speed].to_vec(), false);
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async {
       fut.await?;
       Ok(messages::Ok::default().into())

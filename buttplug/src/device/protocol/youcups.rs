@@ -43,7 +43,7 @@ impl ButtplugProtocolCommandHandler for Youcups {
         .to_vec(),
       false,
     );
-    let fut = device.write_value(msg.into());
+    let fut = device.write_value(msg);
     Box::pin(async {
       fut.await?;
       Ok(messages::Ok::default().into())

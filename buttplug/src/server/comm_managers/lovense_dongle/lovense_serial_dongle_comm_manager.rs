@@ -25,7 +25,6 @@ use std::{
   thread,
   time::Duration,
 };
-use tracing;
 use tracing_futures::Instrument;
 
 fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<OutgoingLovenseData>) {
@@ -37,7 +36,7 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
     //
     // We should check this on the outgoing message. Otherwise we will run into
     // all sorts of trouble.
-    port.write(&data.into_bytes()).unwrap();
+    port.write_all(&data.into_bytes()).unwrap();
   };
   block_on!({
     while let Some(data) = receiver.next().await {
@@ -62,8 +61,8 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
       Ok(len) => {
         debug!("Got {} serial bytes", len);
         data += std::str::from_utf8(&buf[0..len]).unwrap();
-        if data.contains("\n") {
-          debug!("{}", data);
+        if data.contains('\n') {
+          debug!("Serial Buffer: {}", data);
 
           let sender_clone = sender.clone();
           block_on!(
@@ -194,9 +193,12 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       write_thread: Arc::new(Mutex::new(None)),
     };
     let dongle_fut = mgr.find_dongle();
+    // TODO If we don't find a dongle before scanning, what happens?
     async_manager::spawn(async move {
-      dongle_fut.await;
-    });
+      if let Err(err) = dongle_fut.await {
+        error!("Error finding dongle: {:?}", err);
+      }
+    }).unwrap();
     async_manager::spawn(
       async move {
         let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
@@ -205,7 +207,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
         }
       }
       .instrument(tracing::info_span!("Lovense Dongle State Machine")),
-    );
+    ).unwrap();
     mgr
   }
 }

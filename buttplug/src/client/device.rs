@@ -235,15 +235,11 @@ impl ButtplugClientDevice {
         )))
         .await
         .map_err(|_| ButtplugClientError::ButtplugConnectorError(ButtplugConnectorError::ConnectorChannelClosed))?;
-      match fut.await {
-        Ok(msg) => {
-          if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
-            Err(ButtplugError::from(_err).into())
-          } else {
-            Ok(msg)
-          }
-        }
-        Err(connector_err) => Err(connector_err.into()),
+      let msg = fut.await?;
+      if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
+        Err(ButtplugError::from(_err).into())
+      } else {
+        Ok(msg)
       }
     }.instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id)))
   }
