@@ -167,7 +167,7 @@ impl LovenseSerialDongleCommunicationManager {
                         writer_sender,
                         reader_receiver,
                       ))
-                      .await;
+                      .await.unwrap();
                   }
                   Err(e) => error!("{:?}", e),
                 };

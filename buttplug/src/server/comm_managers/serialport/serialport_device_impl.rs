@@ -13,7 +13,7 @@ use async_trait::async_trait;
 use blocking::block_on;
 use broadcaster::BroadcastChannel;
 use futures::{
-  future::{self, BoxFuture},
+  future::BoxFuture,
   StreamExt,
 };
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
@@ -200,7 +200,7 @@ impl DeviceImpl for SerialPortDeviceImpl {
     let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move { 
-      sender.send(msg.data).await;
+      sender.send(msg.data).await.unwrap();
       Ok(())
     })
   }
