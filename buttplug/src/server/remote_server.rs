@@ -1,4 +1,4 @@
-use super::ButtplugServer;
+use super::{ButtplugServer, ButtplugServerStartupError};
 use crate::{
   connector::ButtplugConnector,
   core::{
@@ -151,14 +151,14 @@ impl ButtplugRemoteServer {
     Ok(())
   }
 
-  pub fn add_comm_manager<T>(&self)
+  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
-    self.server.add_comm_manager::<T>();
+    self.server.add_comm_manager::<T>()
   }
 
-  pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
+  pub fn add_test_comm_manager(&self) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
     self.server.add_test_comm_manager()
   }
 }

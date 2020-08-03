@@ -107,8 +107,8 @@ fn test_connect_init() {
 #[test]
 fn test_start_scanning() {
   async_manager::block_on(async {
-    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
-    let test_mgr_helper = connector.server_ref().add_test_comm_manager();
+    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
     test_mgr_helper.add_ble_device("Massage Demo").await;
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
@@ -121,10 +121,11 @@ fn test_start_scanning() {
 #[test]
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
-    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>();
+      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .unwrap();
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
@@ -145,10 +146,11 @@ fn test_stop_scanning_when_not_scanning() {
 #[test]
 fn test_start_scanning_when_already_scanning() {
   async_manager::block_on(async {
-    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>();
+      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .unwrap();
     let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
@@ -161,10 +163,11 @@ fn test_start_scanning_when_already_scanning() {
 #[test]
 fn test_client_scanning_finished() {
   async_manager::block_on(async {
-    let mut connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>();
+      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .unwrap();
     let (client, mut recv) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();

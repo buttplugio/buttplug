@@ -64,7 +64,7 @@ mod test {
     let mut serializer = ButtplugServerJSONSerializer::default();
 
     async_manager::block_on(async {
-      let helper = server.add_test_comm_manager();
+      let helper = server.add_test_comm_manager().unwrap();
       helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
@@ -113,7 +113,7 @@ mod test {
     let (server, mut recv) = ButtplugServer::new("Test Server", 0);
     let mut serializer = ButtplugServerJSONSerializer::default();
     async_manager::block_on(async {
-      let helper = server.add_test_comm_manager();
+      let helper = server.add_test_comm_manager().unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;

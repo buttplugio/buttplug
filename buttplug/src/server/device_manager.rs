@@ -8,10 +8,13 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use super::comm_managers::{
-  DeviceCommunicationEvent,
-  DeviceCommunicationManager,
-  DeviceCommunicationManagerCreator,
+use super::{
+  ButtplugServerStartupError,
+  comm_managers::{
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerCreator,
+  }
 };
 use crate::{
   core::{
@@ -359,11 +362,14 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self)
+  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
     let mgr = T::new(self.sender.clone());
+    if self.comm_managers.contains_key(mgr.name()) {
+      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(mgr.name().to_owned()));
+    }
     let status = mgr.scanning_status();
     let sender = self.sender.clone();
     // TODO This could run out of order and possibly cause weird scanning finished bugs?
@@ -377,10 +383,14 @@ impl DeviceManager {
     self
       .comm_managers
       .insert(mgr.name().to_owned(), Box::new(mgr));
+    Ok(())
   }
 
-  pub fn add_test_comm_manager(&self) -> TestDeviceCommunicationManagerHelper {
+  pub fn add_test_comm_manager(&self) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
+    if self.comm_managers.contains_key(mgr.name()) {
+      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(mgr.name().to_owned()));
+    }
     let status = mgr.scanning_status();
     let sender = self.sender.clone();
     // TODO This could run out of order and possibly cause weird scanning finished bugs?
@@ -395,7 +405,7 @@ impl DeviceManager {
     self
       .comm_managers
       .insert(mgr.name().to_owned(), Box::new(mgr));
-    helper
+    Ok(helper)
   }
 }
 

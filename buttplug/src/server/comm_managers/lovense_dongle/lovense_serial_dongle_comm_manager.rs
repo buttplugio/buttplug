@@ -217,7 +217,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
 
 impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
   fn name(&self) -> &'static str {
-    "LovenseDongleCommunicationManager"
+    "LovenseSerialDongleCommunicationManager"
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {

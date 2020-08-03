@@ -7,7 +7,10 @@ use super::{
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
-  core::ButtplugResultFuture,
+  core::{
+    errors::ButtplugDeviceError,
+    ButtplugResultFuture,
+  },
   server::comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
@@ -169,7 +172,7 @@ impl LovenseHIDDongleCommunicationManager {
         ))
         .await
         .unwrap();
-
+      info!("Found Lovense HID Dongle");
       Ok(())
     })
   }
@@ -177,7 +180,7 @@ impl LovenseHIDDongleCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    info!("Lovense dongle serial port created!");
+    info!("Lovense dongle HID Manager created!");
     let (machine_sender, machine_receiver) = bounded(256);
     let mgr = Self {
       machine_sender,
@@ -187,7 +190,7 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(
       async move {
-        dongle_fut.await.unwrap();
+        let _ = dongle_fut.await;
       }
       .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
     )
@@ -208,7 +211,7 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
 
 impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
   fn name(&self) -> &'static str {
-    "LovenseDongleCommunicationManager"
+    "LovenseHIDDongleCommunicationManager"
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {

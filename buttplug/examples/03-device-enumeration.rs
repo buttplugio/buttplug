@@ -28,7 +28,7 @@ async fn device_enumeration_example() {
 
   // Since we're going to need to manage our server and client, this example
   // will use an embedded connector.
-  let mut connector = ButtplugInProcessClientConnector::new("Example Server", 0);
+  let connector = ButtplugInProcessClientConnector::new("Example Server", 0);
 
   // This example will also work with a WebsocketConnector if you want to
   // connect to Intiface Desktop or an intiface-cli instance.
@@ -60,7 +60,7 @@ async fn device_enumeration_example() {
   // manager, this gets a little complicated. We'll just be emulating a
   // bluetooth device, the Aneros Vivi, by using its bluetooth name.
 
-  let helper = connector.server_ref().add_test_comm_manager();
+  let helper = connector.server_ref().add_test_comm_manager().unwrap();
   let _ = helper.add_ble_device("Massage Demo").await;
 
   // If we wanted to add a real device manager, like the btleplug manager,
