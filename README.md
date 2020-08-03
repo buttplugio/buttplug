@@ -92,12 +92,14 @@ The following crate features are available
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
 | `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `websockets` | `serialize-json` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
-| `btleplug-manager` | None | Bluetooth hardware support on Windows, Mac, Linux, iOS |
-| `serial-manager` | None | Serial Port hardware support on Windows, Mac, Linux |
-| `xinput` | None | XInput Gamepad support on windows |
-| `thread-pool-runtime` | None | Uses default thread pool executor for futures |
+| `websockets` | `async-std-runtime` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
+| `btleplug-manager` | `server` | Bluetooth hardware support on Windows 10, macOS, Linux, iOS |
+| `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows 7/10, macOS, Linux |
+| `serial-manager` | `server` | Serial Port hardware support on Windows 7/10, macOS, Linux |
+| `xinput-manager` | `server` | XInput Gamepad support on Windows 7/10 |
 | `async-std-runtime` | None | Uses async-std/smol executor for futures |
+| `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
+| `thread-pool-runtime` | None | Uses default thread pool executor for futures |
 
 (Tokio coming soon)
 

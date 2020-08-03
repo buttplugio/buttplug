@@ -74,10 +74,12 @@
 //! work comes in also, but that Windows 7/Android example is where the idea
 //! originally came from.
 
+#[cfg(all(feature = "server", feature = "client"))]
 mod in_process_connector;
 mod remote_connector;
 mod transport;
 
+#[cfg(all(feature = "server", feature = "client"))]
 pub use in_process_connector::ButtplugInProcessClientConnector;
 pub use remote_connector::{
   ButtplugRemoteClientConnector,

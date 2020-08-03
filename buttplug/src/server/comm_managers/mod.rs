@@ -8,13 +8,13 @@ use ::btleplug::Error as BtleplugError;
 use rusty_xinput::XInputUsageError;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
+#[cfg(feature = "lovense-dongle-manager")]
+pub mod lovense_dongle;
 
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use async_channel::Sender;
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
-// #[cfg(feature = "serial-manager")]
-pub mod lovense_dongle;
 
 pub enum DeviceCommunicationEvent {
   // This event only means that a device has been found. The work still needs

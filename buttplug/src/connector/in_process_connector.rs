@@ -88,8 +88,8 @@ impl<'a> ButtplugInProcessClientConnector {
   /// setting up
   /// [DeviceCommunicationManager][crate::server::comm_managers::DeviceCommunicationManager]s
   /// before connection.
-  pub fn server_ref(&'a mut self) -> &'a mut ButtplugServer {
-    &mut self.server
+  pub fn server_ref(&'a self) -> &'a ButtplugServer {
+    &self.server
   }
 }
 

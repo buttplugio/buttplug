@@ -20,9 +20,10 @@ serialize-json=[]
 # Connectors
 websockets=["serialize-json", "async-tungstenite", "async-tls", "webpki", "rustls"]
 # Device Communication Managers
-xinput=[]
-btleplug-manager=["btleplug"]
-serial-manager=["serialport"]
+xinput=["server"]
+btleplug-manager=["server", "btleplug"]
+serial-manager=["server", "serialport"]
+lovense-dongle-manager=["server", "serialport", "hidapi"]
 # Runtime managers
 thread-pool-runtime=[]
 async-std-runtime=["async-std/default"]
@@ -72,7 +73,7 @@ dashmap = "4.0.0-rc6"
 displaydoc = "0.1.6"
 serialport = { version = "3.3.0", optional = true }
 blocking = "0.4.6"
-hidapi = "1.2.3"
+hidapi = { version = "1.2.3", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

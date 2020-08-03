@@ -293,6 +293,7 @@ impl ButtplugClient {
   /// If the library is using outside device managers, it is recommended to
   /// build your own connector, add your device manager to those, and use the
   /// `run()` method to pass it in.
+  #[cfg(feature = "server")]
   pub fn connect_in_process(
     name: &str,
     max_ping_time: u64,
@@ -301,7 +302,7 @@ impl ButtplugClient {
   > {
     use crate::connector::ButtplugInProcessClientConnector;
 
-    let mut connector =
+    let connector =
       ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
     #[cfg(feature = "btleplug-manager")]
     {
