@@ -3,7 +3,7 @@ use crate::{
   connector::ButtplugConnector,
   core::{
     errors::{ButtplugError, ButtplugServerError},
-    messages::{ButtplugClientMessage, ButtplugServerMessage},
+    messages::{self, ButtplugClientMessage, ButtplugServerMessage},
   },
   server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
   test::TestDeviceCommunicationManagerHelper,
@@ -61,10 +61,17 @@ async fn run_server<ConnectorType>(
           let server_clone = server.clone();
           let connector_clone = shared_connector.clone();
           async_manager::spawn(async move {
-            // TODO This isn't handling server errors correctly
-            let ret_msg = server_clone.parse_message(msg.unwrap()).await.unwrap();
-            if connector_clone.send(ret_msg).await.is_err() {
-              error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+            match server_clone.parse_message(msg.unwrap()).await {
+              Ok(ret_msg) => {
+                if connector_clone.send(ret_msg).await.is_err() {
+                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+                }
+              },
+              Err(err_msg) => {
+                if connector_clone.send(messages::Error::from(err_msg).into()).await.is_err() {
+                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+                }
+              }
             }
           }).unwrap();
         }
