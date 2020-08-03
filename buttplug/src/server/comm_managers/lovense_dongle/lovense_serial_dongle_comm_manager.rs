@@ -17,7 +17,6 @@ use crate::{
 };
 use async_channel::{bounded, Receiver, Sender};
 use async_mutex::Mutex;
-use blocking::block_on;
 use futures::StreamExt;
 use serde_json::Deserializer;
 use serialport::{
@@ -46,18 +45,16 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
     // all sorts of trouble.
     port.write_all(&data.into_bytes()).unwrap();
   };
-  block_on!({
-    while let Some(data) = receiver.next().await {
-      match data {
-        OutgoingLovenseData::Raw(s) => {
-          port_write(s);
-        }
-        OutgoingLovenseData::Message(m) => {
-          port_write(serde_json::to_string(&m).unwrap());
-        }
+  while let Some(data) = async_manager::block_on(async { receiver.next().await }) {
+    match data {
+      OutgoingLovenseData::Raw(s) => {
+        port_write(s);
+      }
+      OutgoingLovenseData::Message(m) => {
+        port_write(serde_json::to_string(&m).unwrap());
       }
     }
-  });
+  }
   info!("EXITING LOVENSE DONGLE WRITE THREAD.");
 }
 
@@ -73,29 +70,24 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
           debug!("Serial Buffer: {}", data);
 
           let sender_clone = sender.clone();
-          block_on!(
-            async move {
-              let stream =
-                Deserializer::from_str(&data).into_iter::<LovenseDongleIncomingMessage>();
-              for msg in stream {
-                match msg {
-                  Ok(m) => {
-                    debug!("Read message: {:?}", m);
-                    sender_clone.send(m).await.unwrap();
-                  }
-                  Err(e) => {
-                    error!("Error reading: {:?}", e);
-                    /*
-                    sender_clone
-                      .send(IncomingLovenseData::Raw(incoming.clone().to_string()))
-                      .await;
-                      */
-                  }
-                }
+          let stream =
+            Deserializer::from_str(&data).into_iter::<LovenseDongleIncomingMessage>();
+          for msg in stream {
+            match msg {
+              Ok(m) => {
+                debug!("Read message: {:?}", m);
+                async_manager::block_on(async { sender_clone.send(m).await.unwrap() });
+              }
+              Err(e) => {
+                error!("Error reading: {:?}", e);
+                /*
+                sender_clone
+                  .send(IncomingLovenseData::Raw(incoming.clone().to_string()))
+                  .await;
+                  */
               }
             }
-            .await
-          );
+          }
 
           // TODO We don't seem to have an extra coming through at the moment,
           // but might need this later?

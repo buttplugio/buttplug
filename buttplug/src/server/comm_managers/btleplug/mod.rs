@@ -20,7 +20,6 @@ use std::{
   thread,
 };
 
-use blocking::block_on;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
@@ -79,14 +78,12 @@ impl BtlePlugCommunicationManager {
         // Send, then instantly receive and drop so we keep our local channel
         // clean.
         let mut event_broadcaster_clone = event_broadcaster.clone();
-        block_on!(
-          async move {
+        async_manager::spawn(async move {
             // Can't fail, we own both sides
             let _ = event_broadcaster_clone.send(&event).await;
             event_broadcaster_clone.recv().await;
           }
-          .await
-        );
+        ).unwrap();
       }
     });
   }

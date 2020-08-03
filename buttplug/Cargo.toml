@@ -72,7 +72,6 @@ tracing-subscriber = "0.2.10"
 dashmap = "4.0.0-rc6"
 displaydoc = "0.1.7"
 serialport = { version = "3.3.0", optional = true }
-blocking = "0.4.6"
 hidapi = { version = "1.2.3", optional = true }
 
 [target.'cfg(windows)'.dependencies]

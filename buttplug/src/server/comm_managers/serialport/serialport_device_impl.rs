@@ -17,7 +17,6 @@ use crate::{
 use async_channel::{Receiver, Sender};
 use async_mutex::Mutex;
 use async_trait::async_trait;
-use blocking::block_on;
 use broadcaster::BroadcastChannel;
 use futures::{future::BoxFuture, StreamExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
@@ -64,9 +63,8 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
 
 fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: Receiver<Vec<u8>>) {
   let mut recv = receiver.clone();
-  while let Some(v) = block_on!(recv.next().await) {
+  while let Some(v) = async_manager::block_on(async { recv.next().await }) {
     port.write_all(&v).unwrap();
-    recv = receiver.clone();
   }
 }
 
@@ -78,7 +76,7 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
         let blocking_sender = sender.clone();
-        if block_on!(blocking_sender.send(buf[0..len].to_vec()).await.is_err()) {
+        if async_manager::block_on(async { blocking_sender.send(buf[0..len].to_vec()).await.is_err() }) {
           error!("Serial port implementation disappeared, exiting read thread.");
           break;
         }

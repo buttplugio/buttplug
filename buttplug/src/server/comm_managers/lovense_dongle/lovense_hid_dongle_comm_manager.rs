@@ -17,7 +17,6 @@ use crate::{
 };
 use async_channel::{bounded, Receiver, Sender};
 use async_mutex::Mutex;
-use blocking::block_on;
 use futures::StreamExt;
 use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
@@ -46,18 +45,17 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
       dongle.write(&byte_array).unwrap();
     }
   };
-  block_on!({
-    while let Some(data) = receiver.next().await {
-      match data {
-        OutgoingLovenseData::Raw(s) => {
-          port_write(s);
-        }
-        OutgoingLovenseData::Message(m) => {
-          port_write(serde_json::to_string(&m).unwrap());
-        }
+  
+  while let Some(data) = async_manager::block_on(async { receiver.next().await }) {
+    match data {
+      OutgoingLovenseData::Raw(s) => {
+        port_write(s);
+      }
+      OutgoingLovenseData::Message(m) => {
+        port_write(serde_json::to_string(&m).unwrap());
       }
     }
-  });
+  }
   info!("Leaving HID dongle write thread");
 }
 
@@ -83,30 +81,25 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
 
           let incoming = msg_vec[0];
           let sender_clone = sender.clone();
-          block_on!(
-            async move {
-              let stream =
-                Deserializer::from_str(&incoming).into_iter::<LovenseDongleIncomingMessage>();
-              for msg in stream {
-                match msg {
-                  Ok(m) => {
-                    debug!("Read message: {:?}", m);
-                    sender_clone.send(m).await.unwrap();
-                  }
-                  Err(e) => {
-                    error!("Error reading: {:?}", e);
-                    /*
-                    sender_clone
-                      .send(IncomingLovenseData::Raw(incoming.clone().to_string()))
-                      .await;
-                      */
-                  }
-                }
+
+          let stream =
+            Deserializer::from_str(&incoming).into_iter::<LovenseDongleIncomingMessage>();
+          for msg in stream {
+            match msg {
+              Ok(m) => {
+                debug!("Read message: {:?}", m);
+                async_manager::block_on(async { sender_clone.send(m).await }).unwrap();
+              }
+              Err(e) => {
+                error!("Error reading: {:?}", e);
+                /*
+                sender_clone
+                  .send(IncomingLovenseData::Raw(incoming.clone().to_string()))
+                  .await;
+                  */
               }
             }
-            .await
-          );
-
+          }
           // Save off the extra.
           data = String::default();
         }
