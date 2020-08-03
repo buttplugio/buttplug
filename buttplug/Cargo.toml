@@ -39,17 +39,17 @@ futures = { version = "0.3.5", features = ["thread-pool"] }
 futures-util = "0.3.5"
 async-trait = "0.1.36"
 serde = { version = "1.0.114", features = ["derive"] }
-serde_json = "1.0.56"
+serde_json = "1.0.57"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.1", features = ["serde"] }
 url = "2.1.1"
 btleplug = { version = "0.5.0", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
-strum_macros = "0.18.0"
-strum = "0.18.0"
+strum_macros = "0.19.1"
+strum = "0.19.1"
 once_cell = "1.4.0"
-paste = "0.1.18"
+paste = "1.0.0"
 # Can't use async-channel here because it's Sender isn't Sink. We'll just use futures-channel.
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
 # Broadcaster uses an older channel implementation, we can have it use a newer one.
@@ -58,19 +58,19 @@ lazy_static = "1.4.0"
 byteorder = "1.3.4"
 valico = "3.4.0"
 thiserror = "1.0.20"
-async-tungstenite = { version = "0.7.1", features = ["async-std-runtime", "async-tls"], optional = true }
-async-tls = { version = "0.7.0", optional = true }
-rustls = { version = "0.17.0", features = ["dangerous_configuration"], optional = true }
+async-tungstenite = { version = "0.8.0", features = ["async-std-runtime", "async-tls"], optional = true }
+async-tls = { version = "0.9.0", optional = true }
+rustls = { version = "0.18.0", features = ["dangerous_configuration"], optional = true }
 webpki = { version = "0.21.3", optional = true }
 futures-timer = "3.0.2"
-async-channel = "1.1.1"
+async-channel = "1.4.0"
 async-mutex = "1.1.5"
 cfg-if = "0.1.10"
-tracing = "0.1.16"
+tracing = "0.1.18"
 tracing-futures = "0.2.4"
-tracing-subscriber = "0.2.7"
+tracing-subscriber = "0.2.10"
 dashmap = "4.0.0-rc6"
-displaydoc = "0.1.6"
+displaydoc = "0.1.7"
 serialport = { version = "3.3.0", optional = true }
 blocking = "0.4.6"
 hidapi = { version = "1.2.3", optional = true }
