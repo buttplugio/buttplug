@@ -1,10 +1,10 @@
 #[cfg(feature = "btleplug-manager")]
 pub mod btleplug;
-#[cfg(all(feature = "xinput", target_os = "windows"))]
+#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
 #[cfg(feature = "btleplug-manager")]
 use ::btleplug::Error as BtleplugError;
-#[cfg(all(feature = "xinput", target_os = "windows"))]
+#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 use rusty_xinput::XInputUsageError;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
@@ -43,7 +43,7 @@ pub trait DeviceCommunicationManager: Send + Sync {
 #[derive(Error, Debug, Clone)]
 pub enum ButtplugDeviceSpecificError {
   // XInput library doesn't derive error on its error enum. :(
-  #[cfg(all(feature = "xinput", target_os = "windows"))]
+  #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   #[error("XInput usage error: {0:?}")]
   XInputError(XInputUsageError),
   // Btleplug library uses Failure, not Error, on its error enum. :(

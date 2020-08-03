@@ -311,7 +311,7 @@ impl ButtplugClient {
         .server_ref()
         .add_comm_manager::<BtlePlugCommunicationManager>();
     }
-    #[cfg(all(feature = "xinput", target_os = "windows"))]
+    #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
       use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;
       connector

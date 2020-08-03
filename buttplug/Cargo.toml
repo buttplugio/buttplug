@@ -13,14 +13,14 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput", "serial-manager"]
+default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 client=[]
 server=[]
 serialize-json=[]
 # Connectors
 websockets=["serialize-json", "async-tungstenite", "async-tls", "webpki", "rustls"]
 # Device Communication Managers
-xinput=["server"]
+xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
 serial-manager=["server", "serialport"]
 lovense-dongle-manager=["server", "serialport", "hidapi"]
