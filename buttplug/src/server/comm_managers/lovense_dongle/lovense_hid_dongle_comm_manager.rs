@@ -132,9 +132,19 @@ impl LovenseHIDDongleCommunicationManager {
     Box::pin(async move {
       let (writer_sender, writer_receiver) = bounded(256);
       let (reader_sender, reader_receiver) = bounded(256);
-      let api = HidApi::new().expect("Failed to create API instance");
-      let dongle1 = api.open(0x1915, 0x520a).expect("Failed to open device");
-      let dongle2 = api.open(0x1915, 0x520a).expect("Failed to open device");
+      let api = HidApi::new().map_err(|_| {
+        // This may happen if we create a new server in the same process?
+        error!("Failed to create HIDAPI instance. Was one already created?");
+        ButtplugDeviceError::DeviceConnectionError("Cannot create HIDAPI.".to_owned())
+      })?;
+      let dongle1 = api.open(0x1915, 0x520a).map_err(|_| {
+        warn!("Cannot find lovense HID dongle.");
+        ButtplugDeviceError::DeviceConnectionError("Cannot find lovense HID Dongle.".to_owned())
+      })?;
+      let dongle2 = api.open(0x1915, 0x520a).map_err(|_| {
+        warn!("Cannot find lovense HID dongle.");
+        ButtplugDeviceError::DeviceConnectionError("Cannot find lovense HID Dongle.".to_owned())
+      })?;
 
       let read_thread = thread::Builder::new()
         .name("Lovense Dongle HID Reader Thread".to_string())
