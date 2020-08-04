@@ -3,11 +3,13 @@ mod websocket;
 #[cfg(feature = "websockets")]
 pub use websocket::{
   ButtplugWebsocketClientTransport,
-  ButtplugWebsocketServerTransport,
-  ButtplugWebsocketServerTransportOptions,
   TungsteniteError,
 };
-
+#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
+pub use websocket::{
+  ButtplugWebsocketServerTransport,
+  ButtplugWebsocketServerTransportOptions,
+};
 use crate::connector::{
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,
