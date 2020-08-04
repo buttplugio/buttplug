@@ -1,3 +1,28 @@
+# 0.6.0 (2020-08-03)
+
+## Features
+
+- Add websocket server transport, allowing a buttplug client/server to sit
+  behind either a websocket client or server.
+- Add Remote Server class, allowing a buttplug server to be wrapped in a
+  serializer and transport for remote use (i.e. over websockets, tcp, etc), as
+  well as being reused between connections.
+
+## Bugfixes
+
+- Fix names of Lovense Dongle managers so they don't write over each other.
+- Fix checking of comm managers being added so two managers of the same
+  name/type can't be added.
+- Lovense HID Dongle manager no longer panics if it can't find a dongle.
+- Import README as top level doc
+- Fix library building with feature variations (i.e. no features, client only,
+  server only, etc)
+
+## Maintenance
+
+- Change feature names to all be kebab-case, and to follow certain standards
+  (i.e. all comm manager features end in "-manager")
+
 # 0.5.0 (2020-07-26)
 
 ## Features
