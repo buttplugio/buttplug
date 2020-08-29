@@ -120,7 +120,7 @@ pub struct ButtplugClientDevice {
   /// Index of the device, matching the index in the
   /// [ButtplugServer][crate::server::ButtplugServer]'s
   /// [DeviceManager][crate::server::device_manager::DeviceManager].
-  pub(super) index: u32,
+  index: u32,
   /// Map of messages the device can take, along with the attributes of those
   /// messages.
   pub allowed_messages: MessageAttributesMap,
@@ -485,6 +485,18 @@ impl ButtplugClientDevice {
   pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
     self.send_message_expect_ok(StopDeviceCmd::default().into())
+  }
+
+  pub fn index(&self) -> u32 {
+    self.index
+  }
+}
+
+impl Eq for ButtplugClientDevice {}
+
+impl PartialEq for ButtplugClientDevice {
+  fn eq(&self, other: &Self) -> bool {
+      self.index == other.index
   }
 }
 
