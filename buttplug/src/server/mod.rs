@@ -58,19 +58,10 @@ pub enum ButtplugServerStartupError {
   DeviceManagerTypeAlreadyAdded(String)
 }
 
-pub enum ButtplugServerEvent {
-  DeviceAdded(DeviceMessageInfo),
-  DeviceRemoved(DeviceMessageInfo),
-  DeviceMessage(ButtplugServerMessage),
-  ScanningFinished(),
-  ServerError(ButtplugError),
-  PingTimeout(),
-  Log(messages::Log),
-}
-
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
+  client_name: String,
   max_ping_time: u64,
   device_manager: DeviceManager,
   event_sender: Sender<ButtplugServerMessage>,
@@ -121,6 +112,7 @@ impl ButtplugServer {
     (
       Self {
         server_name: name.to_string(),
+        client_name: String::default(),
         max_ping_time,
         device_manager: DeviceManager::new(send.clone(), ping_receiver),
         ping_timer,
@@ -130,6 +122,10 @@ impl ButtplugServer {
       },
       recv,
     )
+  }
+
+  pub fn client_name(&self) -> String {
+    self.client_name.clone()
   }
 
   pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>

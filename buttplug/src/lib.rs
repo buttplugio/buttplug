@@ -8,7 +8,7 @@
 #![crate_type = "lib"]
 #![crate_name = "buttplug"]
 // Required for select! expansion in RemoteServer
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 #![cfg_attr(feature = "unstable", feature(external_doc))]
 #![cfg_attr(feature = "unstable", doc(include = "../../README.md"))]
 
