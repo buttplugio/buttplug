@@ -12,13 +12,11 @@ use crate::{
     device::{
         configuration_manager::DeviceProtocolConfiguration,
         protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-        ButtplugDeviceEvent, DeviceImpl, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
-        Endpoint,
+        DeviceImpl, DeviceWriteCmd, Endpoint,
     },
 };
 use async_mutex::Mutex;
 use futures::future::BoxFuture;
-use futures::StreamExt;
 use std::sync::{
     atomic::{AtomicU8, Ordering::SeqCst},
     Arc,
@@ -28,7 +26,7 @@ use std::sync::{
 pub struct KiirooV2 {
     name: String,
     message_attributes: MessageAttributesMap,
-    manager: Arc<Mutex<GenericCommandManager>>,
+    _manager: Arc<Mutex<GenericCommandManager>>,
     stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
     previous_position: Arc<AtomicU8>,
 }
@@ -41,7 +39,7 @@ impl KiirooV2 {
             name: name.to_owned(),
             message_attributes,
             stop_commands: manager.get_stop_commands(),
-            manager: Arc::new(Mutex::new(manager)),
+            _manager: Arc::new(Mutex::new(manager)),
             previous_position: Arc::new(AtomicU8::new(0)),
         }
     }
@@ -111,7 +109,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
 #[cfg(test)]
 mod test {
     use crate::{
-        core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, StopDeviceCmd, VectorSubcommand},
+        core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
         device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
         test::{check_recv_value, new_bluetoothle_test_device},
         util::async_manager,
