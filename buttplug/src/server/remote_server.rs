@@ -17,8 +17,8 @@ use thiserror::Error;
 
 pub enum ButtplugRemoteServerEvent {
   Connected(String),
-  DeviceAdded(String),
-  DeviceRemoved(String),
+  DeviceAdded(u32, String),
+  DeviceRemoved(u32),
   Disconnected,
 }
 
@@ -71,12 +71,12 @@ async fn run_server<ConnectorType>(
                   remote_event_sender_clone.send(ButtplugRemoteServerEvent::Connected(rsi.client_name)).await.unwrap();
                 }
                 if connector_clone.send(ret_msg).await.is_err() {
-                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               },
               Err(err_msg) => {
                 if connector_clone.send(messages::Error::from(err_msg).into()).await.is_err() {
-                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.")
+                  error!("Cannot send reply to server, dropping and assuming remote server thread has exited.");
                 }
               }
             }
@@ -99,10 +99,18 @@ async fn run_server<ConnectorType>(
           break;
         }
         Some(msg) => {
+          match &msg {
+            ButtplugServerMessage::DeviceAdded(da) => {
+              remote_event_sender.send(ButtplugRemoteServerEvent::DeviceAdded(da.device_index, da.device_name.clone())).await.unwrap();
+            },
+            ButtplugServerMessage::DeviceRemoved(dr) => {
+              remote_event_sender.send(ButtplugRemoteServerEvent::DeviceRemoved(dr.device_index)).await.unwrap();
+            },
+            _ => {}
+          }
           let connector_clone = shared_connector.clone();
           if connector_clone.send(msg).await.is_err() {
             error!("Server disappeared, exiting remote server thread.");
-            break;
           }
         }
       },
