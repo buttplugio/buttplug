@@ -2,6 +2,7 @@ mod aneros;
 mod fleshlight_launch_helper;
 mod generic_command_manager;
 mod kiiroov2;
+mod lelof1s;
 mod lovehoney_desire;
 mod lovense;
 mod maxpro;
@@ -38,6 +39,7 @@ use std::sync::Arc;
 pub enum ProtocolTypes {
   Aneros,
   KiirooV2,
+  LeloF1s,
   LovehoneyDesire,
   Lovense,
   Maxpro,
@@ -59,6 +61,7 @@ impl TryFrom<&str> for ProtocolTypes {
     match protocol_name {
       "aneros" => Ok(ProtocolTypes::Aneros),
       "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
+      "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),      
       "lovense" => Ok(ProtocolTypes::Lovense),
       "maxpro" => Ok(ProtocolTypes::Maxpro),
@@ -87,6 +90,7 @@ pub fn try_create_protocol(
   match protocol_type {
     ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
     ProtocolTypes::KiirooV2 => kiiroov2::KiirooV2::try_create(device, config),
+    ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
     ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
