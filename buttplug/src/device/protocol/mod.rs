@@ -11,6 +11,7 @@ mod prettylove;
 mod raw_protocol;
 mod realov;
 mod svakom;
+mod vibratissimo;
 mod vorze_sa;
 mod xinput;
 mod youcups;
@@ -48,6 +49,7 @@ pub enum ProtocolTypes {
   RawProtocol,
   Realov,
   Svakom,
+  Vibratissimo,
   VorzeSA,
   XInput,
   Youcups,
@@ -70,6 +72,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "raw" => Ok(ProtocolTypes::RawProtocol),      
       "realov" => Ok(ProtocolTypes::Realov),
       "svakom" => Ok(ProtocolTypes::Svakom),
+      "vibratissimo" => Ok(ProtocolTypes::Vibratissimo),
       "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
       "xinput" => Ok(ProtocolTypes::XInput),
       "youcups" => Ok(ProtocolTypes::Youcups),
@@ -99,6 +102,7 @@ pub fn try_create_protocol(
     ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
     ProtocolTypes::Realov => realov::Realov::try_create(device, config),
     ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
+    ProtocolTypes::Vibratissimo => vibratissimo::Vibratissimo::try_create(device, config),
     ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
     ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
     ProtocolTypes::Youcups => youcups::Youcups::try_create(device, config),
