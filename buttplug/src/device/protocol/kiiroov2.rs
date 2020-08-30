@@ -139,7 +139,6 @@ mod test {
 
     #[test]
     pub fn test_kiiroov2_linearcmd() {
-      tracing_subscriber::fmt::init();
         async_manager::block_on(async move {
           
             let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
