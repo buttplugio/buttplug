@@ -119,8 +119,8 @@ impl GenericCommandManager {
     // If we're in a match all situation, set up the array with all prior
     // values before switching them out.
     if match_all {
-      for speed in &self.vibrations {
-        result.push(Some(*speed));
+      for (index, speed) in self.vibrations.iter().enumerate() {
+        result[index] = Some(*speed);
       }
     }
     for speed_command in &msg.speeds {
