@@ -1,5 +1,7 @@
 mod aneros;
+mod fleshlight_launch_helper;
 mod generic_command_manager;
+mod kiiroov2;
 mod lovehoney_desire;
 mod lovense;
 mod maxpro;
@@ -35,18 +37,19 @@ use std::sync::Arc;
 
 pub enum ProtocolTypes {
   Aneros,
-  Maxpro,
-  Lovense,
-  Picobong,
-  Realov,
-  PrettyLove,
-  Svakom,
-  Youcups,
+  KiirooV2,
   LovehoneyDesire,
+  Lovense,
+  Maxpro,
+  Picobong,
+  PrettyLove,
+  RawProtocol,
+  Realov,
+  Svakom,
   VorzeSA,
   XInput,
+  Youcups,
   Youou,
-  RawProtocol,
 }
 
 impl TryFrom<&str> for ProtocolTypes {
@@ -55,18 +58,19 @@ impl TryFrom<&str> for ProtocolTypes {
   fn try_from(protocol_name: &str) -> Result<Self, Self::Error> {
     match protocol_name {
       "aneros" => Ok(ProtocolTypes::Aneros),
-      "maxpro" => Ok(ProtocolTypes::Maxpro),
+      "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
+      "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),      
       "lovense" => Ok(ProtocolTypes::Lovense),
+      "maxpro" => Ok(ProtocolTypes::Maxpro),
       "picobong" => Ok(ProtocolTypes::Picobong),
-      "realov" => Ok(ProtocolTypes::Realov),
       "prettylove" => Ok(ProtocolTypes::PrettyLove),
+      "raw" => Ok(ProtocolTypes::RawProtocol),      
+      "realov" => Ok(ProtocolTypes::Realov),
       "svakom" => Ok(ProtocolTypes::Svakom),
-      "youcups" => Ok(ProtocolTypes::Youcups),
-      "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),
       "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
       "xinput" => Ok(ProtocolTypes::XInput),
+      "youcups" => Ok(ProtocolTypes::Youcups),
       "youou" => Ok(ProtocolTypes::Youou),
-      "raw" => Ok(ProtocolTypes::RawProtocol),
       _ => {
         error!("Protocol {} not implemented.", protocol_name);
         Err(ButtplugDeviceError::ProtocolNotImplemented(protocol_name.to_owned()).into())
@@ -82,18 +86,19 @@ pub fn try_create_protocol(
 ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
   match protocol_type {
     ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
-    ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
-    ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
-    ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
-    ProtocolTypes::Realov => realov::Realov::try_create(device, config),
-    ProtocolTypes::PrettyLove => prettylove::PrettyLove::try_create(device, config),
-    ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
-    ProtocolTypes::Youcups => youcups::Youcups::try_create(device, config),
+    ProtocolTypes::KiirooV2 => kiiroov2::KiirooV2::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
+    ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
+    ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
+    ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
+    ProtocolTypes::PrettyLove => prettylove::PrettyLove::try_create(device, config),
+    ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
+    ProtocolTypes::Realov => realov::Realov::try_create(device, config),
+    ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
     ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
     ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
+    ProtocolTypes::Youcups => youcups::Youcups::try_create(device, config),
     ProtocolTypes::Youou => youou::Youou::try_create(device, config),
-    ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
   }
 }
 
