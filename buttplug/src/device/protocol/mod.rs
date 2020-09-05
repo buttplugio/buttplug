@@ -5,6 +5,9 @@ mod kiiroov2;
 mod lelof1s;
 mod lovehoney_desire;
 mod lovense;
+mod magic_motion_v1;
+mod magic_motion_v2;
+mod magic_motion_v3;
 mod maxpro;
 mod motorbunny;
 mod picobong;
@@ -46,6 +49,9 @@ pub enum ProtocolTypes {
   LeloF1s,
   LovehoneyDesire,
   Lovense,
+  MagicMotionV1,
+  MagicMotionV2,
+  MagicMotionV3,
   Maxpro,
   Motorbunny,
   Picobong,
@@ -72,6 +78,9 @@ impl TryFrom<&str> for ProtocolTypes {
       "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),      
       "lovense" => Ok(ProtocolTypes::Lovense),
+      "magic-motion-1" => Ok(ProtocolTypes::MagicMotionV1),
+      "magic-motion-2" => Ok(ProtocolTypes::MagicMotionV2),
+      "magic-motion-3" => Ok(ProtocolTypes::MagicMotionV3),
       "maxpro" => Ok(ProtocolTypes::Maxpro),
       "motorbunny" => Ok(ProtocolTypes::Motorbunny),
       "picobong" => Ok(ProtocolTypes::Picobong),
@@ -105,6 +114,9 @@ pub fn try_create_protocol(
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
+    ProtocolTypes::MagicMotionV1 => magic_motion_v1::MagicMotionV1::try_create(device, config),
+    ProtocolTypes::MagicMotionV2 => magic_motion_v2::MagicMotionV2::try_create(device, config),
+    ProtocolTypes::MagicMotionV3 => magic_motion_v3::MagicMotionV3::try_create(device, config),
     ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
     ProtocolTypes::Motorbunny => motorbunny::Motorbunny::try_create(device, config),
     ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
