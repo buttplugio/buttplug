@@ -138,7 +138,11 @@ impl GenericCommandManager {
         );
       }
 
-      let speed = (speed_command.speed * self.vibration_step_counts[index] as f64) as u32;
+      // When calculating speeds, round up. This follows how we calculated
+      // things in buttplug-js and buttplug-csharp, so it's more for history
+      // than anything, but it's what users will expect.
+      let speed = (speed_command.speed * self.vibration_step_counts[index] as f64).ceil() as u32; 
+
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
@@ -204,7 +208,11 @@ impl GenericCommandManager {
           .into(),
         );
       }
-      let speed = (rotate_command.speed * self.rotation_step_counts[index] as f64) as u32;
+
+      // When calculating speeds, round up. This follows how we calculated
+      // things in buttplug-js and buttplug-csharp, so it's more for history
+      // than anything, but it's what users will expect.
+      let speed = (rotate_command.speed * self.rotation_step_counts[index] as f64).ceil() as u32;
       let clockwise = rotate_command.clockwise;
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure

@@ -14,6 +14,8 @@ mod realov;
 mod svakom;
 mod vibratissimo;
 mod vorze_sa;
+mod wevibe;
+mod wevibe8bit;
 mod xinput;
 mod youcups;
 mod youou;
@@ -53,6 +55,8 @@ pub enum ProtocolTypes {
   Svakom,
   Vibratissimo,
   VorzeSA,
+  WeVibe,
+  WeVibe8Bit,
   XInput,
   Youcups,
   Youou,
@@ -77,6 +81,8 @@ impl TryFrom<&str> for ProtocolTypes {
       "svakom" => Ok(ProtocolTypes::Svakom),
       "vibratissimo" => Ok(ProtocolTypes::Vibratissimo),
       "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
+      "wevibe" => Ok(ProtocolTypes::WeVibe),
+      "wevibe-8bit" => Ok(ProtocolTypes::WeVibe8Bit),
       "xinput" => Ok(ProtocolTypes::XInput),
       "youcups" => Ok(ProtocolTypes::Youcups),
       "youou" => Ok(ProtocolTypes::Youou),
@@ -108,6 +114,8 @@ pub fn try_create_protocol(
     ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
     ProtocolTypes::Vibratissimo => vibratissimo::Vibratissimo::try_create(device, config),
     ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
+    ProtocolTypes::WeVibe => wevibe::WeVibe::try_create(device, config),
+    ProtocolTypes::WeVibe8Bit => wevibe8bit::WeVibe8Bit::try_create(device, config),
     ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
     ProtocolTypes::Youcups => youcups::Youcups::try_create(device, config),
     ProtocolTypes::Youou => youou::Youou::try_create(device, config),
