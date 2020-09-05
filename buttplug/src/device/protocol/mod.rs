@@ -3,6 +3,7 @@ mod fleshlight_launch_helper;
 mod generic_command_manager;
 mod kiiroo_v2;
 mod kiiroo_v2_vibrator;
+mod kiiroo_v21;
 mod lelof1s;
 mod lovehoney_desire;
 mod lovense;
@@ -48,6 +49,7 @@ pub enum ProtocolTypes {
   Aneros,
   KiirooV2,
   KiirooV2Vibrator,
+  KiirooV21,
   LeloF1s,
   LovehoneyDesire,
   Lovense,
@@ -78,6 +80,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "aneros" => Ok(ProtocolTypes::Aneros),
       "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
       "kiiroo-v2-vibrator" => Ok(ProtocolTypes::KiirooV2Vibrator),
+      "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
       "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),      
       "lovense" => Ok(ProtocolTypes::Lovense),
@@ -115,6 +118,7 @@ pub fn try_create_protocol(
     ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
     ProtocolTypes::KiirooV2 => kiiroo_v2::KiirooV2::try_create(device, config),
     ProtocolTypes::KiirooV2Vibrator => kiiroo_v2_vibrator::KiirooV2Vibrator::try_create(device, config),
+    ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
