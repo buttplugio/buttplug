@@ -120,7 +120,7 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![0xF3, 0x1, 0x3f],
+          vec![0xF3, 0x1, 0x40],
           false,
         )),
       )
@@ -145,7 +145,7 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![0xF3, 0x0, 0x0c],
+          vec![0xF3, 0x0, 0x0d],
           false,
         )),
       )
@@ -179,7 +179,7 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![0xF3, 0x02, 0x3f],
+          vec![0xF3, 0x02, 0x40],
           false,
         )),
       )

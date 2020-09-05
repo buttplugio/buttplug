@@ -163,7 +163,7 @@ fn test_device_stop_on_ping_timeout() {
     let command_receiver = device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
     check_recv_value(
       &command_receiver,
-      DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 63], false)),
+      DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
     )
     .await;
     // Wait out the ping, we should get a stop message.

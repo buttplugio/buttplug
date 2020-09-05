@@ -112,7 +112,7 @@ mod test {
       .await;
       check_recv_value(
         &command_receiver_vibrate,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxVibrate, vec![0x7f, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxVibrate, vec![0x80, 0x00], false)),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
