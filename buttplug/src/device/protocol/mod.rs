@@ -6,6 +6,7 @@ mod lelof1s;
 mod lovehoney_desire;
 mod lovense;
 mod maxpro;
+mod motorbunny;
 mod picobong;
 mod prettylove;
 mod raw_protocol;
@@ -44,6 +45,7 @@ pub enum ProtocolTypes {
   LovehoneyDesire,
   Lovense,
   Maxpro,
+  Motorbunny,
   Picobong,
   PrettyLove,
   RawProtocol,
@@ -67,6 +69,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),      
       "lovense" => Ok(ProtocolTypes::Lovense),
       "maxpro" => Ok(ProtocolTypes::Maxpro),
+      "motorbunny" => Ok(ProtocolTypes::Motorbunny),
       "picobong" => Ok(ProtocolTypes::Picobong),
       "prettylove" => Ok(ProtocolTypes::PrettyLove),
       "raw" => Ok(ProtocolTypes::RawProtocol),      
@@ -97,6 +100,7 @@ pub fn try_create_protocol(
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
     ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
+    ProtocolTypes::Motorbunny => motorbunny::Motorbunny::try_create(device, config),
     ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
     ProtocolTypes::PrettyLove => prettylove::PrettyLove::try_create(device, config),
     ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
