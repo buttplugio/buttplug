@@ -1,3 +1,23 @@
+# 0.7.0 (2020-09-06)
+
+## Features
+
+- Added device support:
+  - Kiiroo v2 (Onyx 2/Launch), v2.1 (Onyx+/Cliona/Titan/Blowbot/Pearl 2/Pearl 2.1 etc)
+  - Vibratissimo (all products)
+  - Motorbunny
+  - WeVibe
+  - Magic Motion
+- Expose device index on client devices for FFI usage
+- Have remote server emit events for Intiface CLI
+
+## Bugfixes
+
+- Fix LinearCmd JSON schema
+- Fix mismatched stepcounts for some devices in device config
+- Make device command rounding use ceiling, mirroring output of
+  buttplug-js/buttplug-csharp
+
 # 0.6.0 (2020-08-03)
 
 ## Features

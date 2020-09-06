@@ -103,9 +103,18 @@ The following crate features are available
 
 (Tokio coming soon)
 
-Default features are `client`, `server`, `serialize-json`, `btleplug-manager`,
-`serial-manager`, `thread-pool-runtime` and `xinput` (feature is only relevant
-on windows, but builds as a noop on all other platforms).
+Default features are enough to build a full desktop system:
+
+- `thread-pool-runtime`
+- `client`
+- `server`
+- `serialize-json` 
+- `websocket`
+- `btleplug-manager`
+- `serial-manager`
+- `lovense-dongle-manager`
+- `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
+  other platforms).
 
 ## Contributing
 
