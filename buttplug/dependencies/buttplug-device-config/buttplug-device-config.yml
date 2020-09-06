@@ -524,6 +524,7 @@ protocols:
             FeatureCount: 2
             StepCount:
               - 100
+              - 100
   magic-motion-3:
     btle:
       names:
@@ -936,10 +937,23 @@ protocols:
           - Virtual Blowbot
         name:
           en-us: PornHub Virtual Blowbot
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
       - identifier:
           - Titan
         name:
           en-us: Kiiroo Titan
+        messages:
+          VibrateCmd:
+            FeatureCount: 3
+            StepCount:
+              - 100
+              - 100
+              - 100
   kiiroo-v21:
     btle:
       names:

@@ -617,6 +617,7 @@
             "VibrateCmd": {
               "FeatureCount": 2,
               "StepCount": [
+                100,
                 100
               ]
             }
@@ -1273,6 +1274,15 @@
           ],
           "name": {
             "en-us": "PornHub Virtual Blowbot"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                100
+              ]
+            }
           }
         },
         {
@@ -1281,6 +1291,16 @@
           ],
           "name": {
             "en-us": "Kiiroo Titan"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 3,
+              "StepCount": [
+                100,
+                100,
+                100
+              ]
+            }
           }
         }
       ]
