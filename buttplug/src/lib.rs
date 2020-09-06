@@ -10,7 +10,7 @@
 // Required for select! expansion in RemoteServer
 #![recursion_limit = "512"]
 #![cfg_attr(feature = "unstable", feature(external_doc))]
-#![cfg_attr(feature = "unstable", doc(include = "../../README.md"))]
+#![cfg_attr(feature = "unstable", doc(include = "../README.md"))]
 
 #[macro_use]
 extern crate buttplug_derive;
