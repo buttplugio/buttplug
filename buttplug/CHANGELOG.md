@@ -1,3 +1,9 @@
+# 0.7.1 (2020-09-06)
+
+## Bugfixes
+
+- Fix documentation location so docs.rs doesn't get mad about missing docs.
+
 # 0.7.0 (2020-09-06)
 
 ## Features

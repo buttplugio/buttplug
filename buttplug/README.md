@@ -124,6 +124,13 @@ implementation yet, but one we do, those will be marked "Help Wanted"
 in our [github
 issues](https://github.com/buttplugio/buttplug-rs/issues).
 
+As we need money to keep up with supporting the latest and greatest hardware, we
+also have multiple ways to donate!
+
+- [Patreon](https://patreon.com/qdot)
+- [Github Sponsors](https://github.com/sponsors/qdot)
+- [Ko-Fi](https://ko-fi.com/qdot76367)
+
 ## License
 
 Buttplug is BSD licensed.

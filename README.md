@@ -37,6 +37,14 @@
 Rust implementation of the Buttplug Intimate Hardware Protocol,
 including implementations of the client and, at some point, server.
 
+This repo is a monorepo with 2 projects:
+
+- [buttplug](buttplug/) - Main library
+- [buttplug_device](buttplug_derive/) - Procedural macros used by the buttplug rust library.
+
+For information about compiling and using these libraries, please check the
+README files in their directories.
+
 ## Read Me First!
 
 If you are new to Buttplug, you most likely want to start with the
@@ -80,42 +88,6 @@ that connects to libraries that registers and communicates with
 different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
 
-## Usage
-
-To use Buttplug in your rust application or library, check out the
-[buttplug package on crates.io](https://crates.io/buttplug).
-
-The following crate features are available
-
-| Feature | Other Features Used | Description |
-| --------- | ----------- | ----------- |
-| `client` | None | Buttplug client implementation (in-process connection only) |
-| `server` | None | Buttplug server implementation (in-process connection only) |
-| `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `websockets` | `async-std-runtime` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
-| `btleplug-manager` | `server` | Bluetooth hardware support on Windows 10, macOS, Linux, iOS |
-| `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows 7/10, macOS, Linux |
-| `serial-manager` | `server` | Serial Port hardware support on Windows 7/10, macOS, Linux |
-| `xinput-manager` | `server` | XInput Gamepad support on Windows 7/10 |
-| `async-std-runtime` | None | Uses async-std/smol executor for futures |
-| `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
-| `thread-pool-runtime` | None | Uses default thread pool executor for futures |
-
-(Tokio coming soon)
-
-Default features are enough to build a full desktop system:
-
-- `thread-pool-runtime`
-- `client`
-- `server`
-- `serialize-json` 
-- `websocket`
-- `btleplug-manager`
-- `serial-manager`
-- `lovense-dongle-manager`
-- `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
-  other platforms).
-
 ## Contributing
 
 Right now, we mostly need code/API style reviews and feedback. We
@@ -123,6 +95,13 @@ don't really have any good bite-sized chunks to mentor the
 implementation yet, but one we do, those will be marked "Help Wanted"
 in our [github
 issues](https://github.com/buttplugio/buttplug-rs/issues).
+
+As we need money to keep up with supporting the latest and greatest hardware, we
+also have multiple ways to donate!
+
+- [Patreon](https://patreon.com/qdot)
+- [Github Sponsors](https://github.com/sponsors/qdot)
+- [Ko-Fi](https://ko-fi.com/qdot76367)
 
 ## License
 
