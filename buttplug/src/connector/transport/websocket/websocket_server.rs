@@ -124,8 +124,16 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     let (response_sender, response_receiver) = bounded(256);
     let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
 
+    let base_addr = if self.options.ws_listen_on_all_interfaces {
+      "0.0.0.0"
+    } else {
+      "127.0.0.1"
+    };
+
+
     if let Some(ws_insecure_port) = self.options.ws_insecure_port {
-      let addr = format!("127.0.0.1:{}", ws_insecure_port);
+      let addr = format!("{}:{}", base_addr, ws_insecure_port);
+
       debug!("Websocket Insecure: Trying to listen on {}", addr);
       let request_receiver_clone = request_receiver.clone();
       let response_sender_clone = response_sender.clone();
@@ -218,8 +226,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             )
           })?;
         let acceptor = TlsAcceptor::from(Arc::new(config));
+        let addr = format!("{}:{}", base_addr, ws_secure_port);
 
-        let addr = format!("127.0.0.1:{}", ws_secure_port);
         debug!("Websocket Secure: Trying to listen on {}", addr);
         // Create the event loop and TCP listener we'll accept connections on.
         let try_socket = TcpListener::bind(&addr).await;
