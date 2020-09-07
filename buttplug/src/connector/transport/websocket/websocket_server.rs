@@ -130,7 +130,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       "127.0.0.1"
     };
 
-
     if let Some(ws_insecure_port) = self.options.ws_insecure_port {
       let addr = format!("{}:{}", base_addr, ws_insecure_port);
 

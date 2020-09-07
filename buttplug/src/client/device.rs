@@ -492,11 +492,12 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {}
+impl Eq for ButtplugClientDevice {
+}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {
-      self.index == other.index
+    self.index == other.index
   }
 }
 

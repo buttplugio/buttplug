@@ -9,12 +9,12 @@
 //! specific) Managers
 
 use super::{
-  ButtplugServerStartupError,
   comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerCreator,
-  }
+  },
+  ButtplugServerStartupError,
 };
 use crate::{
   core::{
@@ -368,7 +368,9 @@ impl DeviceManager {
   {
     let mgr = T::new(self.sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(mgr.name().to_owned()));
+      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
+        mgr.name().to_owned(),
+      ));
     }
     let status = mgr.scanning_status();
     let sender = self.sender.clone();
@@ -386,10 +388,14 @@ impl DeviceManager {
     Ok(())
   }
 
-  pub fn add_test_comm_manager(&self) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
+  pub fn add_test_comm_manager(
+    &self,
+  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
     let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(mgr.name().to_owned()));
+      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
+        mgr.name().to_owned(),
+      ));
     }
     let status = mgr.scanning_status();
     let sender = self.sender.clone();

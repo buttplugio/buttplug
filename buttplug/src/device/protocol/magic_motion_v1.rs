@@ -48,11 +48,26 @@ impl ButtplugProtocolCommandHandler for MagicMotionV1 {
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, cmds[0].unwrap_or(0) as u8, 0x64, 0x00],
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![
+              0x0b,
+              0xff,
+              0x04,
+              0x0a,
+              0x32,
+              0x32,
+              0x00,
+              0x04,
+              0x08,
+              cmds[0].unwrap_or(0) as u8,
+              0x64,
+              0x00,
+            ],
+            false,
+          ))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -71,7 +86,9 @@ mod test {
   #[test]
   pub fn test_magic_motion_v1_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Smart Mini Vibe").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Smart Mini Vibe")
+        .await
+        .unwrap();
       let command_receiver = test_device
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
@@ -82,7 +99,13 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, 0x32, 0x64, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, 0x32, 0x64, 0x00,
+          ],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -97,7 +120,13 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x0b, 0xff, 0x04, 0x0a, 0x32, 0x32, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00,
+          ],
+          false,
+        )),
       )
       .await;
     });

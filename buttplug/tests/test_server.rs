@@ -290,7 +290,9 @@ fn test_server_scanning_finished() {
       }
     }
     assert!(finish_received);
-    server.add_comm_manager::<util::DelayDeviceCommunicationManager>().unwrap();
+    server
+      .add_comm_manager::<util::DelayDeviceCommunicationManager>()
+      .unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(messages::StartScanning::default().into())

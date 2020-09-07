@@ -1,5 +1,3 @@
-
-
 pub fn get_distance(duration: u32, mut speed: f64) -> f64 {
   if speed <= 0f64 {
     return 0f64;
@@ -14,7 +12,9 @@ pub fn get_distance(duration: u32, mut speed: f64) -> f64 {
   if diff.abs() < 0.001 {
     0f64
   } else {
-    ((90f64 - (diff / mil * 90f64)) / 100f64).min(1f64).max(0f64)
+    ((90f64 - (diff / mil * 90f64)) / 100f64)
+      .min(1f64)
+      .max(0f64)
   }
 }
 

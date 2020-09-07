@@ -5,7 +5,13 @@ use super::{
   ButtplugProtocolCreator,
 };
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap, VibrateSubcommand, VibrateCmd},
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    MessageAttributesMap,
+    VibrateCmd,
+    VibrateSubcommand,
+  },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -38,13 +44,15 @@ impl Vibratissimo {
 }
 
 impl ButtplugProtocolCommandHandler for Vibratissimo {
-
   fn handle_stop_device_cmd(
-      &self,
-      device: Arc<Box<dyn DeviceImpl>>,
-      message: messages::StopDeviceCmd,
-    ) -> ButtplugDeviceResultFuture {
-      self.handle_vibrate_cmd(device, VibrateCmd::new(message.device_index, vec![VibrateSubcommand::new(0, 0f64)]))
+    &self,
+    device: Arc<Box<dyn DeviceImpl>>,
+    message: messages::StopDeviceCmd,
+  ) -> ButtplugDeviceResultFuture {
+    self.handle_vibrate_cmd(
+      device,
+      VibrateCmd::new(message.device_index, vec![VibrateSubcommand::new(0, 0f64)]),
+    )
   }
 
   fn handle_vibrate_cmd(
@@ -59,7 +67,11 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         // We have something to write, so push our mode command.
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x03, 0xff], false)));
+        fut_vec.push(device.write_value(DeviceWriteCmd::new(
+          Endpoint::TxMode,
+          vec![0x03, 0xff],
+          false,
+        )));
         for cmd in cmds.iter() {
           if let Some(speed) = cmd {
             fut_vec.push(device.write_value(DeviceWriteCmd::new(
@@ -107,12 +119,20 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver_mode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x03, 0xff], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::TxMode,
+          vec![0x03, 0xff],
+          false,
+        )),
       )
       .await;
       check_recv_value(
         &command_receiver_vibrate,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxVibrate, vec![0x80, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::TxVibrate,
+          vec![0x80, 0x00],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -128,12 +148,20 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver_mode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x03, 0xff], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::TxMode,
+          vec![0x03, 0xff],
+          false,
+        )),
       )
       .await;
       check_recv_value(
         &command_receiver_vibrate,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxVibrate, vec![0x0, 0x0], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::TxVibrate,
+          vec![0x0, 0x0],
+          false,
+        )),
       )
       .await;
     });

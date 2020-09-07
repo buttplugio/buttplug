@@ -76,7 +76,9 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
         let blocking_sender = sender.clone();
-        if async_manager::block_on(async { blocking_sender.send(buf[0..len].to_vec()).await.is_err() }) {
+        if async_manager::block_on(async {
+          blocking_sender.send(buf[0..len].to_vec()).await.is_err()
+        }) {
           error!("Serial port implementation disappeared, exiting read thread.");
           break;
         }

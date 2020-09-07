@@ -39,7 +39,6 @@ use device_manager::DeviceManager;
 use futures::{future::BoxFuture, StreamExt};
 use logger::ButtplugLogHandler;
 use ping_timer::PingTimer;
-use thiserror::Error;
 use std::{
   convert::{TryFrom, TryInto},
   sync::{
@@ -47,15 +46,15 @@ use std::{
     Arc,
   },
 };
+use thiserror::Error;
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
-
 #[derive(Error, Debug)]
 pub enum ButtplugServerStartupError {
   #[error("DeviceManager of type {0} has already been added.")]
-  DeviceManagerTypeAlreadyAdded(String)
+  DeviceManagerTypeAlreadyAdded(String),
 }
 
 /// Represents a ButtplugServer.
@@ -135,7 +134,9 @@ impl ButtplugServer {
     self.device_manager.add_comm_manager::<T>()
   }
 
-  pub fn add_test_comm_manager(&self) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
+  pub fn add_test_comm_manager(
+    &self,
+  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
     self.device_manager.add_test_comm_manager()
   }
 

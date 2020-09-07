@@ -70,8 +70,7 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
           debug!("Serial Buffer: {}", data);
 
           let sender_clone = sender.clone();
-          let stream =
-            Deserializer::from_str(&data).into_iter::<LovenseDongleIncomingMessage>();
+          let stream = Deserializer::from_str(&data).into_iter::<LovenseDongleIncomingMessage>();
           for msg in stream {
             match msg {
               Ok(m) => {

@@ -79,11 +79,11 @@ impl BtlePlugCommunicationManager {
         // clean.
         let mut event_broadcaster_clone = event_broadcaster.clone();
         async_manager::spawn(async move {
-            // Can't fail, we own both sides
-            let _ = event_broadcaster_clone.send(&event).await;
-            event_broadcaster_clone.recv().await;
-          }
-        ).unwrap();
+          // Can't fail, we own both sides
+          let _ = event_broadcaster_clone.send(&event).await;
+          event_broadcaster_clone.recv().await;
+        })
+        .unwrap();
       }
     });
   }

@@ -58,15 +58,13 @@ impl ButtplugProtocolCommandHandler for Motorbunny {
           } else {
             command_vec = vec![0xff];
             let mut vibe_commands = [speed as u8, 0x14].repeat(7);
-            let crc = vibe_commands.iter().fold(0u8, |a,b| a.overflowing_add(*b).0);
+            let crc = vibe_commands
+              .iter()
+              .fold(0u8, |a, b| a.overflowing_add(*b).0);
             command_vec.append(&mut vibe_commands);
             command_vec.append(&mut vec![crc, 0xec]);
           }
-          fut_vec.push(device.write_value(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            command_vec,
-            false,
-          )));
+          fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, command_vec, false)));
         }
       }
       // TODO Just use join_all here
@@ -102,7 +100,14 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xff, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x0c, 0xec], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0xff, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80, 0x14, 0x80,
+            0x14, 0x0c, 0xec,
+          ],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -117,7 +122,11 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf0, 0x00, 0x00, 0x00, 0x00, 0xec], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0xf0, 0x00, 0x00, 0x00, 0x00, 0xec],
+          false,
+        )),
       )
       .await;
     });

@@ -48,11 +48,26 @@ impl ButtplugProtocolCommandHandler for MagicMotionV3 {
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, cmds[0].unwrap_or(0) as u8, 0x64, 0x00],
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![
+              0x0b,
+              0xff,
+              0x04,
+              0x0a,
+              0x46,
+              0x46,
+              0x00,
+              0x04,
+              0x08,
+              cmds[0].unwrap_or(0) as u8,
+              0x64,
+              0x00,
+            ],
+            false,
+          ))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -82,7 +97,13 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x27, 0x64, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x27, 0x64, 0x00,
+          ],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -97,7 +118,13 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00,
+          ],
+          false,
+        )),
       )
       .await;
     });

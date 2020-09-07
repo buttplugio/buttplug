@@ -7,10 +7,7 @@ use super::{
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    ButtplugResultFuture,
-  },
+  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
@@ -48,7 +45,7 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
       dongle.write(&byte_array).unwrap();
     }
   };
-  
+
   while let Some(data) = async_manager::block_on(async { receiver.next().await }) {
     match data {
       OutgoingLovenseData::Raw(s) => {

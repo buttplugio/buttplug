@@ -126,13 +126,15 @@ impl ButtplugRemoteServer {
   pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugRemoteServerEvent>) {
     let (server, server_receiver) = ButtplugServer::new(name, max_ping_time);
     let (remote_event_sender, remote_event_receiver) = bounded(256);
-    (Self {
-      event_sender: remote_event_sender,
-      server: Arc::new(server),
-      server_receiver,
-      task_channel: Arc::new(Mutex::new(None)),
-    },
-    remote_event_receiver)
+    (
+      Self {
+        event_sender: remote_event_sender,
+        server: Arc::new(server),
+        server_receiver,
+        task_channel: Arc::new(Mutex::new(None)),
+      },
+      remote_event_receiver,
+    )
   }
 
   pub fn start<ConnectorType>(
@@ -178,7 +180,9 @@ impl ButtplugRemoteServer {
     self.server.add_comm_manager::<T>()
   }
 
-  pub fn add_test_comm_manager(&self) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
+  pub fn add_test_comm_manager(
+    &self,
+  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
     self.server.add_test_comm_manager()
   }
 }

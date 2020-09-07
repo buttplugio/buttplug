@@ -1,15 +1,5 @@
 #[cfg(feature = "websockets")]
 mod websocket;
-#[cfg(feature = "websockets")]
-pub use websocket::{
-  ButtplugWebsocketClientTransport,
-  TungsteniteError,
-};
-#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
-pub use websocket::{
-  ButtplugWebsocketServerTransport,
-  ButtplugWebsocketServerTransportOptions,
-};
 use crate::connector::{
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,
@@ -17,6 +7,10 @@ use crate::connector::{
 };
 use async_channel::{Receiver, Sender};
 use futures::future::BoxFuture;
+#[cfg(feature = "websockets")]
+pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError};
+#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
+pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use thiserror::Error;
 

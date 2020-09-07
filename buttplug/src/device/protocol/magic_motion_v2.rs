@@ -49,15 +49,49 @@ impl ButtplugProtocolCommandHandler for MagicMotionV2 {
       let result = manager.lock().await.update_vibration(&message, true)?;
       if let Some(cmds) = result {
         let data = if cmds.len() == 1 {
-          vec![0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, cmds[0].unwrap_or(0) as u8, 0x64, 0x00, 0x04, 0x08, 0, 0x64, 0x01]
+          vec![
+            0x10,
+            0xff,
+            0x04,
+            0x0a,
+            0x32,
+            0x0a,
+            0x00,
+            0x04,
+            0x08,
+            cmds[0].unwrap_or(0) as u8,
+            0x64,
+            0x00,
+            0x04,
+            0x08,
+            0,
+            0x64,
+            0x01,
+          ]
         } else {
-          vec![0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, cmds[0].unwrap_or(0) as u8, 0x64, 0x00, 0x04, 0x08, cmds[1].unwrap_or(0) as u8, 0x64, 0x01]
+          vec![
+            0x10,
+            0xff,
+            0x04,
+            0x0a,
+            0x32,
+            0x0a,
+            0x00,
+            0x04,
+            0x08,
+            cmds[0].unwrap_or(0) as u8,
+            0x64,
+            0x00,
+            0x04,
+            0x08,
+            cmds[1].unwrap_or(0) as u8,
+            0x64,
+            0x01,
+          ]
         };
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          data,
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -87,7 +121,14 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, 0x32, 0x64, 0x00, 0x04, 0x08, 0x00, 0x64, 0x01], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, 0x32, 0x64, 0x00, 0x04, 0x08,
+            0x00, 0x64, 0x01,
+          ],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -102,10 +143,16 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00, 0x04, 0x08, 0x00, 0x64, 0x01], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0x10, 0xff, 0x04, 0x0a, 0x32, 0x0a, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00, 0x04, 0x08,
+            0x00, 0x64, 0x01,
+          ],
+          false,
+        )),
       )
       .await;
-      
     });
   }
 }

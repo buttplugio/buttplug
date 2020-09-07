@@ -54,14 +54,22 @@ impl ButtplugProtocolCommandHandler for WeVibe8Bit {
         if r_speed_int == 0 && r_speed_ext == 0 {
           data = vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
         } else {
-          let status_byte: u8 = (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
-          data = vec![0x0f, 0x03, 0x00, r_speed_ext + 3, r_speed_int + 3, status_byte, 0x00, 0x00];
+          let status_byte: u8 =
+            (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
+          data = vec![
+            0x0f,
+            0x03,
+            0x00,
+            r_speed_ext + 3,
+            r_speed_int + 3,
+            status_byte,
+            0x00,
+            0x00,
+          ];
         }
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          data,
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -78,45 +86,45 @@ mod test {
   };
 
   #[test]
-    pub fn test_wevibe8bit_protocol() {
-        async_manager::block_on(async move {
-            let (device, test_device) = new_bluetoothle_test_device("Moxie").await.unwrap();
-            let command_receiver = test_device
-                .get_endpoint_channel(&Endpoint::Tx)
-                .unwrap()
-                .receiver;
-            device
-                .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-                .await
-                .unwrap();
-            check_recv_value(
-                &command_receiver,
-                DeviceImplCommand::Write(DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    vec![0x0f, 0x03, 0x00, 0x09, 0x09, 0x03, 0x00, 0x00],
-                    false,
-                )),
-            )
-            .await;
-            // Since we only created one subcommand, we should only receive one command.
-            device
-                .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-                .await
-                .unwrap();
-            assert!(command_receiver.is_empty());
-            device
-                .parse_message(StopDeviceCmd::new(0).into())
-                .await
-                .unwrap();
-            check_recv_value(
-                &command_receiver,
-                DeviceImplCommand::Write(DeviceWriteCmd::new(
-                    Endpoint::Tx,
-                    vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-                    false,
-                )),
-            )
-            .await;
-        });
-    }
+  pub fn test_wevibe8bit_protocol() {
+    async_manager::block_on(async move {
+      let (device, test_device) = new_bluetoothle_test_device("Moxie").await.unwrap();
+      let command_receiver = test_device
+        .get_endpoint_channel(&Endpoint::Tx)
+        .unwrap()
+        .receiver;
+      device
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .unwrap();
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x03, 0x00, 0x09, 0x09, 0x03, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
+      // Since we only created one subcommand, we should only receive one command.
+      device
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .unwrap();
+      assert!(command_receiver.is_empty());
+      device
+        .parse_message(StopDeviceCmd::new(0).into())
+        .await
+        .unwrap();
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
+    });
+  }
 }

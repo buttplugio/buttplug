@@ -53,11 +53,9 @@ impl ButtplugProtocolCommandHandler for LeloF1s {
         for cmd in cmds.iter() {
           cmd_vec.push(cmd.unwrap() as u8);
         }
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          cmd_vec,
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd_vec, false))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -87,7 +85,11 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x32, 0x0], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x01, 0x32, 0x0],
+          false,
+        )),
       )
       .await;
       // Since we only created one subcommand, we should only receive one command.
@@ -96,7 +98,7 @@ mod test {
         .await
         .unwrap();
       assert!(command_receiver.is_empty());
-      
+
       device
         .parse_message(
           VibrateCmd::new(
@@ -113,7 +115,11 @@ mod test {
       // TODO There's probably a more concise way to do this.
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x1, 0xa, 0x32], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x1, 0xa, 0x32],
+          false,
+        )),
       )
       .await;
       device
@@ -122,7 +128,11 @@ mod test {
         .unwrap();
       check_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x1, 0x0, 0x0], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x1, 0x0, 0x0],
+          false,
+        )),
       )
       .await;
     });
