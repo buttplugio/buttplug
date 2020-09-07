@@ -166,6 +166,9 @@ protocols:
         42300001-0023-4bd4-bbd5-a6920e4c5653: # Max 2
           tx: 42300002-0023-4bd4-bbd5-a6920e4c5653
           rx: 42300003-0023-4bd4-bbd5-a6920e4c5653
+        43300001-0023-4bd4-bbd5-a6920e4c5653: # New Nora
+          tx: 43300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 43300003-0023-4bd4-bbd5-a6920e4c5653          
     defaults:
       messages:
         VibrateCmd:
@@ -655,6 +658,7 @@ protocols:
         - 4_Plus # 4 Plus alias
         - 4plus # 4 Plus alias
         - Bloom
+        - Chrous
         - classic # 4 Plus alias
         - Classic # 4 Plus alias
         - Ditto
@@ -665,8 +669,10 @@ protocols:
         - NOVAV2
         - Pivot
         - Rave
+        - Skeena
         - Sync
         - Verge
+        - Wand
         - Wish
       services:
         f000bb03-0451-4000-b000-000000000000:
@@ -710,6 +716,18 @@ protocols:
           - Verge
         name:
           en-us: WeVibe Verge
+      - identifier:
+          - Chorus
+        name:
+          en-us: WeVibe Chorus
+      - identifier:
+          - Skeena
+        name:
+          en-us: WeVibe Skeena
+      - identifier:
+          - Wand
+        name:
+          en-us: WeVibe Wand
       - identifier:
           - Wish
         name:
@@ -895,6 +913,7 @@ protocols:
         - Fuse
         - Virtual Blowbot
         - Titan
+        - Virtual Rabbit
       services:
         88f82580-0000-01e6-aace-0002a5d5c51b:
           tx: 88f82581-0000-01e6-aace-0002a5d5c51b
@@ -958,6 +977,7 @@ protocols:
     btle:
       names:
         - Onyx2.1
+        - Onyx+
         - Titan1.1
         - Cliona
         - Pearl2.1
@@ -1117,6 +1137,7 @@ protocols:
         - Bach smart
         - CycSA
         - UFOSA
+        - VorzePiston
       services:
         40ee1111-63ec-4b7f-8ce7-712efd55b90e:
           tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e
@@ -1149,6 +1170,15 @@ protocols:
           en-us: Vorze UFO SA
         messages:
           RotateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 99
+      - identifier:
+          - VorzePiston
+        name:
+          en-us: Vorze Piston
+        messages:
+          LinearCmd:
             FeatureCount: 1
             StepCount:
               - 99
@@ -1253,6 +1283,7 @@ protocols:
     btle:
       names:
         - MB Controller
+        - MB LINK 201
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff6-0000-1000-8000-00805f9b34fb
@@ -1277,7 +1308,11 @@ protocols:
       - identifier:
           - MB Controller
         name:
-          en-us: Motorbunny
+          en-us: Motorbunny Classic
+      - identifier:
+          - MB LINK 201
+        name:
+          en-us: Motorbunny Buck
   zalo:
     btle:
       names:
@@ -1470,6 +1505,14 @@ protocols:
           - M2
         name:
           en-us: MaxPro 2
+  # lovenuts:
+  #   btle:
+  #     names:
+  #       - Love_Nuts
+  #     services:
+  #       0000fff0-0000-1000-8000-00805f9b34fb:
+  #         tx: 0000fff1-0000-1000-8000-00805f9b34fb
+  #         rx: 0000fff1-0000-1000-8000-00805f9b34fb
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

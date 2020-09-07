@@ -45,6 +45,10 @@
           "42300001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "42300002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "42300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "43300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "43300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "43300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -825,6 +829,7 @@
           "4_Plus",
           "4plus",
           "Bloom",
+          "Chrous",
           "classic",
           "Classic",
           "Ditto",
@@ -835,8 +840,10 @@
           "NOVAV2",
           "Pivot",
           "Rave",
+          "Skeena",
           "Sync",
           "Verge",
+          "Wand",
           "Wish"
         ],
         "services": {
@@ -913,6 +920,30 @@
           ],
           "name": {
             "en-us": "WeVibe Verge"
+          }
+        },
+        {
+          "identifier": [
+            "Chorus"
+          ],
+          "name": {
+            "en-us": "WeVibe Chorus"
+          }
+        },
+        {
+          "identifier": [
+            "Skeena"
+          ],
+          "name": {
+            "en-us": "WeVibe Skeena"
+          }
+        },
+        {
+          "identifier": [
+            "Wand"
+          ],
+          "name": {
+            "en-us": "WeVibe Wand"
           }
         },
         {
@@ -1206,7 +1237,8 @@
           "Pearl2",
           "Fuse",
           "Virtual Blowbot",
-          "Titan"
+          "Titan",
+          "Virtual Rabbit"
         ],
         "services": {
           "88f82580-0000-01e6-aace-0002a5d5c51b": {
@@ -1309,6 +1341,7 @@
       "btle": {
         "names": [
           "Onyx2.1",
+          "Onyx+",
           "Titan1.1",
           "Cliona",
           "Pearl2.1",
@@ -1568,7 +1601,8 @@
         "names": [
           "Bach smart",
           "CycSA",
-          "UFOSA"
+          "UFOSA",
+          "VorzePiston"
         ],
         "services": {
           "40ee1111-63ec-4b7f-8ce7-712efd55b90e": {
@@ -1624,6 +1658,22 @@
           },
           "messages": {
             "RotateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "VorzePiston"
+          ],
+          "name": {
+            "en-us": "Vorze Piston"
+          },
+          "messages": {
+            "LinearCmd": {
               "FeatureCount": 1,
               "StepCount": [
                 99
@@ -1802,7 +1852,8 @@
     "motorbunny": {
       "btle": {
         "names": [
-          "MB Controller"
+          "MB Controller",
+          "MB LINK 201"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -1834,7 +1885,15 @@
             "MB Controller"
           ],
           "name": {
-            "en-us": "Motorbunny"
+            "en-us": "Motorbunny Classic"
+          }
+        },
+        {
+          "identifier": [
+            "MB LINK 201"
+          ],
+          "name": {
+            "en-us": "Motorbunny Buck"
           }
         }
       ]
