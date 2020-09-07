@@ -48,15 +48,14 @@ impl ButtplugProtocolCommandHandler for WeVibe8Bit {
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, true)?;
       if let Some(cmds) = result {
-        let mut data: Vec<u8>;
         let r_speed_int = cmds[0].unwrap_or(0) as u8;
         let r_speed_ext = cmds.last().unwrap_or(&None).unwrap_or(0u32) as u8;
-        if r_speed_int == 0 && r_speed_ext == 0 {
-          data = vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+        let data = if r_speed_int == 0 && r_speed_ext == 0 {
+          vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         } else {
           let status_byte: u8 =
             (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
-          data = vec![
+          vec![
             0x0f,
             0x03,
             0x00,
@@ -65,8 +64,8 @@ impl ButtplugProtocolCommandHandler for WeVibe8Bit {
             status_byte,
             0x00,
             0x00,
-          ];
-        }
+          ]
+        };
         device
           .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
           .await?;

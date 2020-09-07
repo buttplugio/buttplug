@@ -6,17 +6,13 @@ use super::{
   ButtplugProtocolCreator,
 };
 use crate::{
-  core::{
-    errors::ButtplugError,
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      FleshlightLaunchFW12Cmd,
-      MessageAttributesMap,
-    },
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    FleshlightLaunchFW12Cmd,
+    MessageAttributesMap,
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
@@ -24,7 +20,6 @@ use crate::{
   },
 };
 use async_mutex::Mutex;
-use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,

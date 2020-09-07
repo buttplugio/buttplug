@@ -25,7 +25,6 @@ use crate::{
       ButtplugDeviceManagerMessageUnion,
       ButtplugMessage,
       ButtplugServerMessage,
-      DeviceMessageInfo,
       StopAllDevices,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },

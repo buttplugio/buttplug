@@ -62,7 +62,7 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
 }
 
 fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: Receiver<Vec<u8>>) {
-  let mut recv = receiver.clone();
+  let mut recv = receiver;
   while let Some(v) = async_manager::block_on(async { recv.next().await }) {
     port.write_all(&v).unwrap();
   }
@@ -76,9 +76,10 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
         let blocking_sender = sender.clone();
-        if async_manager::block_on(async {
+        let send_failed = async_manager::block_on(async {
           blocking_sender.send(buf[0..len].to_vec()).await.is_err()
-        }) {
+        });
+        if send_failed {
           error!("Serial port implementation disappeared, exiting read thread.");
           break;
         }
