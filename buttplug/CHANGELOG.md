@@ -1,3 +1,14 @@
+# 0.7.2 (2020-09-07)
+
+## Features
+
+- Merge device configuration changes from mainline device config
+  - Should fix up some issues with Lovense devices not appearing.
+
+## Bugfixes
+
+- Websockets now actually listen on all interfaces when option is passed.
+
 # 0.7.1 (2020-09-06)
 
 ## Bugfixes
