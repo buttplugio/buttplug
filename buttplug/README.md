@@ -80,6 +80,20 @@ that connects to libraries that registers and communicates with
 different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
 
+## Compiling
+
+On Windows and macOS, running `cargo build` should suffice for building the
+project. All dependencies are vendored in.
+
+On Linux, the following packages will be needed to build with default features:
+
+- `libudev-dev` (Required for serial port/HID support)
+- `libusb-1.0-0-dev` (Required for serial port/HID support)
+
+The package names are listed as their debian requirements, and may be different
+for other distributions. Removing the `lovense-dongle-manager` and
+`serial-manager` features should stop these from being requires.
+
 ## Usage
 
 To use Buttplug in your rust application or library, check out the
