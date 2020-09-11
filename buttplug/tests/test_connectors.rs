@@ -41,7 +41,7 @@ mod websocket_connector_tests {
         ButtplugWebsocketClientTransport,
         ButtplugClientJSONSerializer,
       >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
-        "ws://localhost:12345",
+        "ws://127.0.0.1:12345",
       ));
 
       let (client, _) = ButtplugClient::connect("Example Client", connector)
@@ -62,7 +62,7 @@ mod websocket_connector_tests {
           ButtplugWebsocketClientTransport,
           ButtplugServerJSONSerializer,
         >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
-          "ws://localhost:12347",
+          "ws://127.0.0.1:12347",
         ));
         server_clone.start(connector).await.unwrap();
       })

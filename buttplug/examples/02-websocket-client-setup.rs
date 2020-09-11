@@ -40,7 +40,7 @@ async fn embedded_connector_example() {
   //
   // This time, instead of specifying a Server Name, we now specify a server
   // network address. The default server address is
-  // "ws://localhost:12345/buttplug", so we'll use that. If you are trying to
+  // "ws://127.0.0.1:12345/buttplug", so we'll use that. If you are trying to
   // connect to another machine, you'll need to change this address to point
   // to that machine. The second argument specifies whether we should ignore
   // secure cert validity, but we're not connecting to a secure server so it
@@ -49,7 +49,7 @@ async fn embedded_connector_example() {
     ButtplugWebsocketClientTransport,
     ButtplugClientJSONSerializer,
   >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
-    "ws://localhost:12345",
+    "ws://127.0.0.1:12345",
   ));
 
   // ButtplugClient creation is the same as the last example. From here on
