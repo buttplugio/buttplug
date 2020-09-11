@@ -25,7 +25,7 @@ use futures::{
   StreamExt,
 };
 use rustls::{
-  internal::pemfile::{certs, pkcs8_private_keys},
+  internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
   NoClientAuth,
   ServerConfig,
 };
@@ -33,10 +33,20 @@ use std::{fs::File, io::BufReader, sync::Arc};
 
 #[derive(Default, Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportOptions {
+  /// If true, listens all on available interfaces. Otherwise, only listens on 127.0.0.1.
   pub ws_listen_on_all_interfaces: bool,
+  /// Insecure port for listening for websocket connections.
   pub ws_insecure_port: Option<u16>,
+  /// Secure port for listen for websocket connections. Requires cert and key
+  /// file options to be passed in also. For secure connections to localhost
+  /// (i.e. from browsers that require secure localhost context to native
+  /// buttplug-rs), certs should work for 127.0.0.1. Certs signed to "localhost"
+  /// may work, but many Buttplug apps default to 127.0.0.1.
   pub ws_secure_port: Option<u16>,
+  /// Certificate file for secure connections.
   pub ws_cert_file: Option<String>,
+  /// Private key file for secure connections. Key must be > 1024 bit, and in
+  /// either RSA or PKCS8 format.
   pub ws_priv_file: Option<String>,
 }
 
@@ -174,6 +184,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           ));
         }
 
+        info!("Loading cert file {:?}", options.ws_cert_file);
         let cert_file = File::open(options.ws_cert_file.unwrap()).map_err(|_| {
           ButtplugConnectorError::TransportSpecificError(
             ButtplugConnectorTransportSpecificError::SecureServerError(
@@ -188,6 +199,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             ),
           )
         })?;
+        info!("Loaded certificate file");
 
         if options.ws_priv_file.is_none() {
           return Err(ButtplugConnectorError::TransportSpecificError(
@@ -197,14 +209,19 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           ));
         }
 
-        let key_file = File::open(options.ws_priv_file.unwrap()).map_err(|_| {
+
+        info!("Loading RSA private key file {:?}", options.ws_priv_file);
+        let rsa_key_file = File::open(options.ws_priv_file.clone().unwrap()).map_err(|_| {
           ButtplugConnectorError::TransportSpecificError(
             ButtplugConnectorTransportSpecificError::SecureServerError(
               "Specified private key file does not exist or cannot be opened".to_owned(),
             ),
           )
         })?;
-        let mut keys = pkcs8_private_keys(&mut BufReader::new(key_file)).map_err(|_| {
+
+        let mut rsa_key_buf = BufReader::new(rsa_key_file);
+        let mut keys = rsa_private_keys(&mut rsa_key_buf).map_err(|e| {
+          error!("Cannot load RSA keys: {:?}", e);
           ButtplugConnectorError::TransportSpecificError(
             ButtplugConnectorTransportSpecificError::SecureServerError(
               "Specified private key file cannot load correctly".to_owned(),
@@ -212,12 +229,42 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           )
         })?;
 
+        if keys.len() == 0 {
+          let pkcs8_key_file = File::open(options.ws_priv_file.unwrap()).map_err(|_| {
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::SecureServerError(
+                "Specified private key file does not exist or cannot be opened".to_owned(),
+              ),
+            )
+          })?;
+  
+          let mut pkcs8_key_buf = BufReader::new(pkcs8_key_file);
+          keys = pkcs8_private_keys(&mut pkcs8_key_buf).map_err(|e| {
+            error!("Cannot load PKCS8 keys: {:?}", e);
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::SecureServerError(
+                "Specified private key file cannot load correctly".to_owned(),
+              ),
+            )
+          })?;
+          if keys.len() == 0 {
+            error!("No keys were loaded, cannot start secure server.");
+            return Err(ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::SecureServerError(
+                "Could not load private keys from file".to_owned(),
+              ),
+            ));
+          }
+        }
+        info!("Loaded private key file");
+
         // we don't use client authentication
         let mut config = ServerConfig::new(NoClientAuth::new());
         config
           // set this server to use one cert together with the loaded private key
           .set_single_cert(certs, keys.remove(0))
-          .map_err(|_| {
+          .map_err(|e| {
+            error!("Secure cert config cannot set up: {:?}", e);
             ButtplugConnectorError::TransportSpecificError(
               ButtplugConnectorTransportSpecificError::SecureServerError(
                 "Cannot set up cert with provided cert/key pair due to TLS Error".to_owned(),
@@ -238,7 +285,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           let handshake = acceptor.accept(stream);
           // The handshake is a future we can await to get an encrypted
           // stream back.
-          let tls_stream = handshake.await.unwrap();
+          let tls_stream = handshake.await.map_err(|e| {
+            error!("Secure cert config cannot run handshake: {:?}", e);
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::SecureServerError(
+                format!("{:?}", e).to_owned(),
+              ),
+            )
+          })?;
           info!("Websocket Secure: Got connection");
           async_manager::spawn(async move {
             accept_connection(tls_stream, request_receiver_clone, response_sender_clone).await;
