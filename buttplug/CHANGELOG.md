@@ -1,3 +1,10 @@
+# 0.7.3 (2020-09-11)
+
+## Bugfixes
+
+- Allow for loading either PKCS8 or RSA private keys in websocket secure server
+  impl
+
 # 0.7.2 (2020-09-07)
 
 ## Features
