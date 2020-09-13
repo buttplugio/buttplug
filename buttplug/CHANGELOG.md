@@ -1,3 +1,22 @@
+# 0.8.0 (2020-09-13)
+
+## Features
+
+- Simplified logging, adding a channel output filter while removing
+  request_log/log client access for the moment.
+  - Minor version update due to public facing API surface change.
+  - Not particularly sure about the future of logging in the Buttplug Protocol,
+    as it's both a security risk and difficult to work with. It seems like it
+    might be better to expunge logging from the protocol and just deal with it
+    at the library/app level. See
+    https://github.com/buttplugio/buttplug-rs/issues/131 for more discussion.
+
+## Bugfixes
+
+- Lovense rotation for Nora works again
+- Websocket Server should stop panicing on unwrap when connection is not severed
+  gracefully (#153)
+
 # 0.7.3 (2020-09-11)
 
 ## Bugfixes
