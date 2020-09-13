@@ -69,14 +69,20 @@ async fn accept_connection<S>(
     select! {
       serialized_msg = request_receiver.next().fuse() => match serialized_msg {
         Some(msg) => match msg {
-          ButtplugSerializedMessage::Text(text_msg) => websocket_server_sender
-            .send(async_tungstenite::tungstenite::Message::Text(text_msg))
-            .await
-            .unwrap(),
+          ButtplugSerializedMessage::Text(text_msg) => {
+            if Err(send_error) = websocket_server_sender
+              .send(async_tungstenite::tungstenite::Message::Text(text_msg))
+              .await {
+                error!("Cannot send text value to server, considering connection closed.");
+                return;
+              }
+              
           ButtplugSerializedMessage::Binary(binary_msg) => websocket_server_sender
             .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
-            .await
-            .unwrap()
+            .await {
+              error!("Cannot send binary value to server, considering connection closed.");
+              return;
+            }
         },
         None => {
           error!("Server disappeared, breaking.");
