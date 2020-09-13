@@ -11,3 +11,4 @@
 pub mod async_manager;
 pub mod future;
 pub mod json;
+pub mod logging;
