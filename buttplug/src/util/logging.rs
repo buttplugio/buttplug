@@ -1,6 +1,4 @@
-use crate::{
-  util::async_manager,
-};
+use crate::util::async_manager;
 use async_channel::Sender;
 
 use tracing_subscriber::fmt::MakeWriter;
@@ -18,9 +16,7 @@ pub struct ChannelWriter {
 
 impl ChannelWriter {
   pub fn new(sender: Sender<Vec<u8>>) -> Self {
-    Self {
-      log_sender: sender,
-    }
+    Self { log_sender: sender }
   }
 }
 
@@ -31,7 +27,8 @@ impl std::io::Write for ChannelWriter {
     let send_buf = buf.to_vec();
     async_manager::spawn(async move {
       sender.send(send_buf.to_vec()).await;
-    }).unwrap();
+    })
+    .unwrap();
     Ok(len)
   }
 

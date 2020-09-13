@@ -76,7 +76,7 @@ async fn accept_connection<S>(
                 error!("Cannot send text value to server, considering connection closed.");
                 return;
               }
-              
+            }
           ButtplugSerializedMessage::Binary(binary_msg) => websocket_server_sender
             .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
             .await {
@@ -215,7 +215,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           ));
         }
 
-
         info!("Loading RSA private key file {:?}", options.ws_priv_file);
         let rsa_key_file = File::open(options.ws_priv_file.clone().unwrap()).map_err(|_| {
           ButtplugConnectorError::TransportSpecificError(
@@ -243,7 +242,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ),
             )
           })?;
-  
+
           let mut pkcs8_key_buf = BufReader::new(pkcs8_key_file);
           keys = pkcs8_private_keys(&mut pkcs8_key_buf).map_err(|e| {
             error!("Cannot load PKCS8 keys: {:?}", e);

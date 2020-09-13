@@ -28,7 +28,10 @@ use crate::{
 use async_mutex::Mutex;
 use futures::future::BoxFuture;
 use futures::StreamExt;
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct Lovense {
@@ -36,7 +39,7 @@ pub struct Lovense {
   message_attributes: MessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  rotation_direction: Arc<AtomicBool>
+  rotation_direction: Arc<AtomicBool>,
 }
 
 impl Lovense {
@@ -48,7 +51,7 @@ impl Lovense {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-      rotation_direction: Arc::new(AtomicBool::new(false))
+      rotation_direction: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -148,7 +151,6 @@ impl ButtplugProtocolCommandHandler for Lovense {
     })
   }
 
-  
   fn handle_rotate_cmd(
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
@@ -166,8 +168,12 @@ impl ButtplugProtocolCommandHandler for Lovense {
         // TODO Should we store speed and direction as an option for rotation caching? This is weird.
         if dir != clockwise {
           direction.store(clockwise, Ordering::SeqCst);
-          let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, "RotateChange;".as_bytes().to_vec(), false));
-          fut.await?;  
+          let fut = device.write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            "RotateChange;".as_bytes().to_vec(),
+            false,
+          ));
+          fut.await?;
         }
       }
       Ok(messages::Ok::default().into())
