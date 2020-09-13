@@ -28,7 +28,7 @@ use crate::{
 use async_mutex::Mutex;
 use futures::future::BoxFuture;
 use futures::StreamExt;
-use std::sync::Arc;
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct Lovense {
@@ -36,6 +36,7 @@ pub struct Lovense {
   message_attributes: MessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  rotation_direction: Arc<AtomicBool>
 }
 
 impl Lovense {
@@ -47,6 +48,7 @@ impl Lovense {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
+      rotation_direction: Arc::new(AtomicBool::new(false))
     }
   }
 }
@@ -146,52 +148,31 @@ impl ButtplugProtocolCommandHandler for Lovense {
     })
   }
 
-  // TODO Reimplement this for futures passing
-  /*
+  
   fn handle_rotate_cmd(
     &self,
     device: Arc<Box<dyn DeviceImpl>>,
     msg: messages::RotateCmd,
-  ) -> ButtplugServerResultFuture {
-    let result = self.manager.lock().await.update_rotation(msg);
-    match result {
-      Ok(cmds) => {
-        // Due to lovense devices having separate commands for rotation
-        // and speed, we can't completely depend on the generic command
-        // manager here.
-        //
-        // TODO Should the generic command manager maybe store the
-        // previous command as well as returning the next? That might
-        // save us having to store this in the protocol members, but I'm
-        // also not sure anyone but Lovense does this. For Vorze, we
-        // need speed and direction regardless because they form a
-        // single command.
-        if let Some((speed, clockwise)) = cmds[0] {
-          let mut lovense_cmds = vec![];
-          {
-            let mut last_rotation = self.last_rotation.lock().await;
-            if let Some((rot_speed, rot_dir)) = *last_rotation {
-              if rot_dir != clockwise {
-                lovense_cmds.push("RotateChange;".as_bytes().to_vec());
-              }
-              if rot_speed != speed {
-                lovense_cmds.push(format!("Rotate:{};", speed).as_bytes().to_vec());
-              }
-            }
-            *last_rotation = Some((speed, clockwise));
-          }
-          for cmd in lovense_cmds {
-            device
-              .write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false))
-              .await?;
-          }
+  ) -> ButtplugDeviceResultFuture {
+    let manager = self.manager.clone();
+    let direction = self.rotation_direction.clone();
+    Box::pin(async move {
+      let result = manager.lock().await.update_rotation(&msg)?;
+      if let Some((speed, clockwise)) = result[0] {
+        let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
+        let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+        fut.await?;
+        let dir = direction.load(Ordering::SeqCst);
+        // TODO Should we store speed and direction as an option for rotation caching? This is weird.
+        if dir != clockwise {
+          direction.store(clockwise, Ordering::SeqCst);
+          let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, "RotateChange;".as_bytes().to_vec(), false));
+          fut.await?;  
         }
-        Ok(messages::Ok::default().into())
       }
-      Err(e) => Err(e),
-    }
+      Ok(messages::Ok::default().into())
+    })
   }
-  */
 }
 
 // TODO Gonna need to add the ability to set subscribe data in tests before
