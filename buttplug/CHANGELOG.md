@@ -1,3 +1,10 @@
+# 0.8.1 (2020-09-13)
+
+## Bugfixes
+
+- Fix compile issues missed due to feature build failure
+  - Need to get feature building into CI. :(
+
 # 0.8.0 (2020-09-13)
 
 ## Features
