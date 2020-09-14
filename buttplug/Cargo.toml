@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "0.8.1"
+version = "0.8.2"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -13,8 +13,8 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-# default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
-default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
+default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
+# default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 client=[]
 server=[]
 serialize-json=[]

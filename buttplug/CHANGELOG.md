@@ -1,3 +1,9 @@
+# 0.8.2 (2020-09-13)
+
+## Bugfixes
+
+- Fix default feature list in Cargo that got changed while testing 0.8.1 :(
+
 # 0.8.1 (2020-09-13)
 
 ## Bugfixes
