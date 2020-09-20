@@ -203,7 +203,8 @@
             ]
           },
           "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
+          "RSSILevelCmd": {},
+          "FleshlightLaunchFW12Cmd": {}
         }
       },
       "configurations": [
@@ -1433,7 +1434,8 @@
               "StepCount": [
                 99
               ]
-            }
+            },
+            "FleshlightLaunchFW12Cmd": {}
           }
         },
         {
@@ -1449,7 +1451,8 @@
               "StepCount": [
                 99
               ]
-            }
+            },
+            "FleshlightLaunchFW12Cmd": {}
           }
         }
       ]

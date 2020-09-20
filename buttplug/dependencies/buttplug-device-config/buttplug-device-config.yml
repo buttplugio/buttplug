@@ -277,6 +277,7 @@ protocols:
             - 99
         BatteryLevelCmd: {}
         RSSILevelCmd: {}
+        FleshlightLaunchFW12Cmd: {}
     configurations:
       - identifier:
           - Launch
@@ -1036,6 +1037,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
+          FleshlightLaunchFW12Cmd: {}
       - identifier:
           - Onyx2.1
         name:
@@ -1045,6 +1047,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
+          FleshlightLaunchFW12Cmd: {}
   erostek-et312:
     serial:
       - port: default

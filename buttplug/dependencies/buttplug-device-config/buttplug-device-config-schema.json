@@ -248,6 +248,9 @@
         "SingleMotorVibrateCmd": {
           "$ref": "#/components/NullMessageAttributes"
         },
+        "FleshlightLaunchFW12Cmd": {
+          "$ref": "#/components/NullMessageAttributes"
+        },
         "BatteryLevelCmd": {
           "$ref": "#/components/NullMessageAttributes"
         },
