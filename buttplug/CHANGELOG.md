@@ -1,3 +1,16 @@
+# 0.8.3 (2020-09-20)
+
+## Features
+
+- Add wasm-bindgen executor to async-manager
+- Add serializer type default to RemoteClientConnector type to simplify
+  definitions.
+
+## Bugfixes
+
+- Expose Connector building traits to public API surface
+- Add FleshlightLaunchFW12 message capabilities to device config
+
 # 0.8.2 (2020-09-13)
 
 ## Bugfixes
