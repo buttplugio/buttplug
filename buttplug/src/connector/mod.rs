@@ -76,8 +76,8 @@
 
 #[cfg(all(feature = "server", feature = "client"))]
 mod in_process_connector;
-mod remote_connector;
-mod transport;
+pub mod remote_connector;
+pub mod transport;
 
 #[cfg(all(feature = "server", feature = "client"))]
 pub use in_process_connector::ButtplugInProcessClientConnector;
