@@ -14,9 +14,13 @@ use crate::{
   },
 };
 use async_mutex::Mutex;
+use futures::future::BoxFuture;
 use std::sync::Arc;
+use crate::device::DeviceSubscribeCmd;
+use crate::device::configuration_manager::DeviceProtocolConfiguration;
+use crate::core::errors::ButtplugError;
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct LeloF1s {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -34,6 +38,30 @@ impl LeloF1s {
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
     }
+  }
+}
+
+impl ButtplugProtocolCreator for LeloF1s {
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
+  }
+
+  fn try_create(
+    device_impl: &dyn DeviceImpl,
+    config: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
+    where
+        Self: Sized,
+  {
+    let (names, attrs) = config.get_attributes(device_impl.name()).unwrap();
+    let name = names.get("en-us").unwrap().clone();
+
+    // The Lelo F1s needs you to hit the power button after connection
+    // before it'll accept any commands. Unless we listen for event on
+    // the button, this is more likely to turn the device off.
+    device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
+
+    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
   }
 }
 
