@@ -1454,6 +1454,23 @@
             },
             "FleshlightLaunchFW12Cmd": {}
           }
+        },
+        {
+          "identifier": [
+            "Onyx+"
+          ],
+          "name": {
+            "en-us": "Kiiroo Onyx +"
+          },
+          "messages": {
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            },
+            "FleshlightLaunchFW12Cmd": {}
+          }
         }
       ]
     },
