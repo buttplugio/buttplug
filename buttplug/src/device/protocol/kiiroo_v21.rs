@@ -6,13 +6,17 @@ use super::{
   ButtplugProtocolCreator,
 };
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    FleshlightLaunchFW12Cmd,
-    MessageAttributesMap,
+  core::{
+    errors::ButtplugError,
+    messages::{
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      FleshlightLaunchFW12Cmd,
+      MessageAttributesMap,
+    },
   },
   device::{
+    configuration_manager::DeviceProtocolConfiguration,
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
@@ -20,18 +24,45 @@ use crate::{
   },
 };
 use async_mutex::Mutex;
+use async_std::task;
+use futures::future::BoxFuture;
+use std::time::Duration;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct KiirooV21 {
   name: String,
   message_attributes: MessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
+}
+
+impl ButtplugProtocolCreator for KiirooV21 {
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
+  }
+
+  fn try_create(
+    device_impl: &dyn DeviceImpl,
+    configuration: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+    debug!("calling Onyx+ init");
+    let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0x03u8, 0x00u8, 0x64u8, 0x19u8], true));
+    let init_fut2 = device_impl.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0x03u8, 0x00u8, 0x64u8, 0x00u8], true));
+    let device_name = device_impl.name().to_owned();
+    Box::pin(async move {
+      init_fut1.await?;
+      task::sleep(Duration::from_millis(100)).await;
+      init_fut2.await?;
+      let (names, attrs) = configuration.get_attributes(&device_name).unwrap();
+      let name = names.get("en-us").unwrap();
+      Ok(Self::new_protocol(name, attrs))
+    })
+  }
 }
 
 impl KiirooV21 {
