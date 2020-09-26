@@ -24,13 +24,13 @@ use crate::{
   },
 };
 use async_mutex::Mutex;
-use async_std::task;
 use futures::future::BoxFuture;
-use std::time::Duration;
+use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
+use std::time::Duration;
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct KiirooV21 {
@@ -51,12 +51,20 @@ impl ButtplugProtocolCreator for KiirooV21 {
     configuration: DeviceProtocolConfiguration,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
     debug!("calling Onyx+ init");
-    let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0x03u8, 0x00u8, 0x64u8, 0x19u8], true));
-    let init_fut2 = device_impl.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![0x03u8, 0x00u8, 0x64u8, 0x00u8], true));
+    let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+      true,
+    ));
+    let init_fut2 = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+      true,
+    ));
     let device_name = device_impl.name().to_owned();
     Box::pin(async move {
       init_fut1.await?;
-      task::sleep(Duration::from_millis(100)).await;
+      Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
       let (names, attrs) = configuration.get_attributes(&device_name).unwrap();
       let name = names.get("en-us").unwrap();
@@ -165,6 +173,25 @@ mod test {
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
         .receiver;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      )
+      .await;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      )
+      .await;
+
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
@@ -189,6 +216,24 @@ mod test {
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
         .receiver;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      )
+      .await;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      )
+      .await;
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await
@@ -213,6 +258,24 @@ mod test {
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
         .receiver;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      )
+      .await;
+      check_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      )
+      .await;
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
