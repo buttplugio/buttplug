@@ -357,6 +357,13 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
+  /// Provides read-only access to the internal protocol/identifier map. Mainly
+  /// used for WebBluetooth filter construction, but could also be handy for
+  /// listing capabilities in UI, etc.
+  pub fn protocol_configurations(&self) -> &HashMap<String, ProtocolDefinition> {
+    &self.config.protocols
+  }
+
   pub fn find_configuration(
     &self,
     specifier: &DeviceSpecifier,
