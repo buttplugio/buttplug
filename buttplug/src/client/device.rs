@@ -33,7 +33,7 @@ use crate::{
 };
 use async_channel::Sender;
 use broadcaster::BroadcastChannel;
-use futures::{channel::mpsc::SendError, future, sink::SinkExt};
+use futures::{channel::mpsc::SendError, future, StreamExt};
 use std::{
   collections::HashMap,
   sync::{
@@ -270,9 +270,7 @@ impl ButtplugClientDevice {
     )
   }
 
-  pub fn event_receiver(
-    &self,
-  ) -> impl SinkExt<ButtplugClientDeviceEvent, Error = SendError> + Sync + Send {
+  pub fn event_receiver(&self) -> impl StreamExt<Item = ButtplugClientDeviceEvent> + Sync + Send {
     self.event_receiver.clone()
   }
 
