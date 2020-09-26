@@ -5,8 +5,16 @@ use super::{
   ButtplugProtocolCreator,
 };
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  core::{
+    errors::ButtplugError,
+    messages::{
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      MessageAttributesMap
+    },
+  },
   device::{
+    configuration_manager::DeviceProtocolConfiguration,
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
@@ -14,9 +22,12 @@ use crate::{
   },
 };
 use async_mutex::Mutex;
+use futures::future::BoxFuture;
+use futures_timer::Delay;
 use std::sync::Arc;
+use std::time::Duration;
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct WeVibe {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -34,6 +45,38 @@ impl WeVibe {
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
     }
+  }
+}
+
+impl ButtplugProtocolCreator for WeVibe {
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
+  }
+
+  fn try_create(
+    device_impl: &dyn DeviceImpl,
+    configuration: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+    debug!("calling WeVibe init");
+    let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+      false
+    ));
+    let vibration_off = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+      false
+    ));
+    let device_name = device_impl.name().to_owned();
+    Box::pin(async move {
+      vibration_on.await?;
+      Delay::new(Duration::from_millis(100)).await;
+      vibration_off.await?;
+      let (names, attrs) = configuration.get_attributes(&device_name).unwrap();
+      let name = names.get("en-us").unwrap();
+      Ok(Self::new_protocol(name, attrs))
+    })
   }
 }
 
