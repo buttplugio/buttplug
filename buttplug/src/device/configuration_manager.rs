@@ -10,7 +10,7 @@
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::MessageAttributesMap,
+    messages::{MessageAttributesMap, ButtplugDeviceMessageType, MessageAttributes}
   },
   device::Endpoint,
   util::json::JSONValidator,
@@ -289,6 +289,9 @@ impl DeviceProtocolConfiguration {
       Some(ref attrs) => {
         if let Some(ref msg_attrs) = attrs.messages {
           attributes.extend(msg_attrs.clone());
+        }
+        if !attributes.contains_key(&ButtplugDeviceMessageType::StopDeviceCmd) {
+          attributes.insert(ButtplugDeviceMessageType::StopDeviceCmd, MessageAttributes::default());
         }
         Ok((attrs.name.as_ref().unwrap().clone(), attributes))
       }

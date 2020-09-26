@@ -93,7 +93,7 @@ mod test {
       // We should get back an aneros with only SingleMotorVibrateCmd
       assert_eq!(
         serializer.serialize(vec!(da_msg)),
-        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#.to_owned().into()
+        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()
       );
       let rdl = serializer
         .deserialize(ButtplugSerializedMessage::Text(
@@ -103,7 +103,7 @@ mod test {
       output = server.parse_message(rdl[0].clone()).await.unwrap();
       assert_eq!(
         serializer.serialize(vec!(output)),
-        r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}]}}]"#.to_owned().into()
+        r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}]}}]"#.to_owned().into()
       );
     });
   }
@@ -145,7 +145,7 @@ mod test {
       // We should get back an aneros with only SingleMotorVibrateCmd
       assert_eq!(
         serializer.serialize(vec!(da_msg)),
-        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd"]}}]"#.to_owned().into()
+        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()
       );
       let output2 = server
         .parse_message(
