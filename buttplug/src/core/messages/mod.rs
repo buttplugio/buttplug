@@ -88,6 +88,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::convert::TryFrom;
+use std::cmp::Ordering;
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
@@ -159,6 +160,21 @@ pub enum ButtplugDeviceMessageType {
   // RSSILevelReading
   // ShockCmd?
   // ToneEmitterCmd?
+}
+
+
+// Ordering for ButtplugDeviceMessageType should be lexicographic, for
+// serialization reasons.
+impl PartialOrd for ButtplugDeviceMessageType {
+  fn partial_cmp(&self, other: &ButtplugDeviceMessageType) -> Option<Ordering> {
+      Some(self.cmp(other))
+  }
+}
+
+impl Ord for ButtplugDeviceMessageType {
+  fn cmp(&self, other: &ButtplugDeviceMessageType) -> Ordering {
+      self.to_string().cmp(&other.to_string())
+  }
 }
 
 /// Represents all possible messages a

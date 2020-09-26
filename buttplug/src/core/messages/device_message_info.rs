@@ -7,10 +7,18 @@
 
 use super::*;
 #[cfg(feature = "serialize-json")]
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize, Serializer};
+use std::collections::{HashMap, BTreeMap};
 
 pub type MessageAttributesMap = HashMap<ButtplugDeviceMessageType, MessageAttributes>;
+
+fn ordered_map<S>(value: &MessageAttributesMap, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let ordered: BTreeMap<_, _> = value.iter().collect();
+    ordered.serialize(serializer)
+}
 
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -19,7 +27,7 @@ pub struct DeviceMessageInfo {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages", serialize_with="ordered_map"))]
   pub device_messages: MessageAttributesMap,
 }
 
@@ -50,7 +58,7 @@ pub struct DeviceMessageInfoV1 {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages", serialize_with="ordered_map"))]
   pub device_messages: MessageAttributesMap,
 }
 
@@ -145,6 +153,7 @@ impl From<DeviceMessageInfoV1> for DeviceMessageInfoV0 {
     ];
 
     device_messages.retain(|x| !v1_message_types.contains(x));
+    device_messages.sort();
 
     // SingleMotorVibrateCmd is added as part of the V1 conversion, so we
     // can expect we'll have it here.
