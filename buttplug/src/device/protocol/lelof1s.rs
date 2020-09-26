@@ -4,6 +4,9 @@ use super::{
   ButtplugProtocolCommandHandler,
   ButtplugProtocolCreator,
 };
+use crate::core::errors::ButtplugError;
+use crate::device::configuration_manager::DeviceProtocolConfiguration;
+use crate::device::DeviceSubscribeCmd;
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -16,9 +19,6 @@ use crate::{
 use async_mutex::Mutex;
 use futures::future::BoxFuture;
 use std::sync::Arc;
-use crate::device::DeviceSubscribeCmd;
-use crate::device::configuration_manager::DeviceProtocolConfiguration;
-use crate::core::errors::ButtplugError;
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct LeloF1s {
@@ -50,8 +50,8 @@ impl ButtplugProtocolCreator for LeloF1s {
     device_impl: &dyn DeviceImpl,
     config: DeviceProtocolConfiguration,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
-    where
-        Self: Sized,
+  where
+    Self: Sized,
   {
     let (names, attrs) = config.get_attributes(device_impl.name()).unwrap();
     let name = names.get("en-us").unwrap().clone();

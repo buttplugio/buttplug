@@ -28,7 +28,7 @@ impl std::io::Write for ChannelWriter {
     async_manager::spawn(async move {
       // Ignore errors on dropped channels here. We can't really do a ton about
       // them.
-      let _  = sender.send(send_buf.to_vec()).await;
+      let _ = sender.send(send_buf.to_vec()).await;
     })
     .unwrap();
     Ok(len)

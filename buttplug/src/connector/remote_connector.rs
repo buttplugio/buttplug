@@ -13,7 +13,11 @@ use crate::{
   core::{
     errors::{ButtplugMessageError, ButtplugServerError},
     messages::{
-      serializer::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugClientJSONSerializer},
+      serializer::{
+        ButtplugClientJSONSerializer,
+        ButtplugMessageSerializer,
+        ButtplugSerializedMessage,
+      },
       ButtplugClientMessage,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
@@ -159,7 +163,10 @@ async fn remote_connector_event_loop<
   }
 }
 
-pub type ButtplugRemoteClientConnector<TransportType, SerializerType = ButtplugClientJSONSerializer> = ButtplugRemoteConnector<
+pub type ButtplugRemoteClientConnector<
+  TransportType,
+  SerializerType = ButtplugClientJSONSerializer,
+> = ButtplugRemoteConnector<
   TransportType,
   SerializerType,
   ButtplugCurrentSpecClientMessage,
