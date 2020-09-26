@@ -234,10 +234,20 @@ impl DeviceImpl for BtlePlugDeviceImpl {
 
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    msg: DeviceReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
-    // TODO Actually implement value reading
-    unimplemented!("Shouldn't get here!")
+    // Right now we only need read for doing a whitelist check on devices. We
+    // don't care about the data we get back.
+    info!("Read value does not actually return a value at this point. Be careful when using it.");
+    let endpoint = msg.endpoint;
+    let task = self.send_to_device_task(
+      ButtplugDeviceCommand::Message(msg.into()),
+      "Cannot read value",
+    );
+    Box::pin(async move {
+      task.await?;
+      Ok(RawReading::new(0, endpoint, vec![]))
+    })
   }
 
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {

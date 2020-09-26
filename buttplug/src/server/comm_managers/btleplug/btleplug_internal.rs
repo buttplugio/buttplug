@@ -8,6 +8,7 @@ use crate::{
     ButtplugDeviceImplInfo,
     ButtplugDeviceReturn,
     DeviceImplCommand,
+    DeviceReadCmd,
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
@@ -175,6 +176,18 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
   }
 
+  fn handle_read(&mut self, read_msg: &DeviceReadCmd, state: &mut DeviceReturnStateShared) {
+    match self.endpoints.get(&read_msg.endpoint) {
+      Some(chr) => {
+        self.device.read(&chr).unwrap();
+        state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+      }
+      None => state.set_reply(ButtplugDeviceReturn::Error(
+        ButtplugDeviceError::InvalidEndpoint(read_msg.endpoint).into(),
+      )),
+    }
+  }
+
   fn handle_subscribe(
     &mut self,
     sub_msg: &DeviceSubscribeCmd,
@@ -219,6 +232,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       ButtplugDeviceCommand::Message(raw_msg) => match raw_msg {
         DeviceImplCommand::Write(write_msg) => {
           self.handle_write(write_msg, state);
+        }
+        DeviceImplCommand::Read(read_msg) => {
+          self.handle_read(read_msg, state);
         }
         DeviceImplCommand::Subscribe(sub_msg) => {
           self.handle_subscribe(sub_msg, state);
