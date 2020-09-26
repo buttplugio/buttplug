@@ -169,6 +169,9 @@ protocols:
         43300001-0023-4bd4-bbd5-a6920e4c5653: # New Nora
           tx: 43300002-0023-4bd4-bbd5-a6920e4c5653
           rx: 43300003-0023-4bd4-bbd5-a6920e4c5653          
+        4c300001-0023-4bd4-bbd5-a6920e4c5653: # Ambi
+          tx: 4c300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4c300003-0023-4bd4-bbd5-a6920e4c5653          
     defaults:
       messages:
         VibrateCmd:
