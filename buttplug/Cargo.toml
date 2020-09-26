@@ -84,9 +84,8 @@ rusty-xinput = "1.2.0"
 [dependencies.async-std]
 version = "1.6.3"
 # default-features = false
-# features = ["std"]
-# optional = true
-features = [ "attributes" ]
+features = ["std"]
+optional = true
 
 [dev-dependencies]
 async-std = "1.6.3"
