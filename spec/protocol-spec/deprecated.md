@@ -253,13 +253,12 @@ sequenceDiagram
 ---
 ## RawCmd
 
-**Reason for Deprecation:** Message is ill-defined (doesn't specify
-where the data should go, assumes all devices have one endpoint which
-is very not true), was never actually implemented in any reference
-implemenation. Being superceded by RawDataCmd and RawDataReading. As
-the message was never in any protocol implementation, it can safely be
-ignored when implementing new servers, but should also not be used to
-name new messages (hence RawDataCmd and RawDataReading).
+**Reason for Deprecation:** Message is ill-defined (doesn't specify where the
+data should go, assumes all devices have one endpoint which is very not true),
+was never actually implemented in any reference implemenation. Being superceded
+by [Raw\*Cmd](raw.md). As the message was never in any protocol implementation, it can
+safely be ignored when implementing new servers, but should also not be used to
+name new messages.
 
 **Description:** Used to send a raw byte string to a device. Should
 only be used for development, and should not be exposed to untrusted
