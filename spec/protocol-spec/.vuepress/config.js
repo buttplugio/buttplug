@@ -13,7 +13,6 @@ module.exports = {
       "/raw.md",
       "/generic.md",
       "/sensors.md",
-      "/specific.md",
       "/deprecated.md",
     ],
     repo: 'buttplugio/buttplug',

@@ -1,6 +1,6 @@
 # Spec Changelog
 
-## Version 2 (In Development)
+## Version 2 (2020-09-28)
 
 - Messages Added:
   - RawWriteCmd
@@ -8,8 +8,6 @@
   - RawReading
   - RawSubscribeCmd
   - RawUnsubscribeCmd
-  - ShockCmd
-  - PatternCmd
   - BatteryLevelCmd
   - BatteryLevelReading
   - RSSILevelCmd

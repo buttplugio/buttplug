@@ -302,3 +302,203 @@ sequenceDiagram
   }
 ]
 ```
+---
+---
+## KiirooCmd
+
+**Reason for Deprecation:** Only implemented in early versions of the C#
+library, did not cover nearly enough of the vast spectrum of possible commands
+for Kiiroo devices. Replaced by... pretty much everything generic.
+
+**Description:** Causes a device that supports Kiiroo style commands
+to run whatever event may be related. More information on Kiiroo
+commands can be found in STPIHKAL.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (string): Parsed into an unsigned integer in range [0-4]
+  for position/speed.
+
+**Expected Response:**
+
+* Ok message with matching Id on successful request.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>Server: KiirooCmd Id=1
+    Server->>Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "KiirooCmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Command": "4"
+    }
+  }
+]
+```
+---
+## FleshlightLaunchFW12Cmd
+
+**Reason for Deprecation:** Superceded by [LinearCmd](generic.md#linearcmd),
+which provided an easier way to reason about movement time and position.
+
+**Description:** Causes a device that supports Fleshlight Launch
+(Firmware Version 1.2) style commands to run whatever event may be
+related. More information on Fleshlight Launch commands can be found
+in STPIHKAL.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Position_ (unsigned int): Unsigned integer in range [0-99],
+  denoting position to move to.
+* _Speed_ (unsigned int): Unsigned integer in range [0-99], denoting
+  speed to requested position at.
+
+**Expected Response:**
+
+* Ok message with matching Id on successful request.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>Server: FleshlightLaunchFW12Cmd Id=1
+    Server->>Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "FleshlightLaunchFW12Cmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Position": 95,
+      "Speed": 90
+    }
+  }
+]
+```
+---
+## LovenseCmd
+
+**Reason for Deprecation:** Never implemented in any reference version of the
+library. Superceded by a combination of [VibrateCmd](generic.md#linearcmd),
+[RotateCmd](generic.md#rotatecmd), [BatteryCmd](generic.md#batterycmd), and the
+[Raw*Cmd](raw.md) commands.
+
+**Description:** Causes a device that supports Lovense style commands
+to run whatever event may be related. More information on Lovense
+commands can be found in STPIHKAL.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Command_ (string): String command for Lovense devices. Must be a
+  valid Lovense command accessible on most of their devices. See
+  STPIHKAL for more info. Implementations should check this for
+  validity.
+
+**Expected Response:**
+
+* Ok message with matching Id on successful request.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>Server: LovenseCmd Id=1
+    Server->>Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "LovenseCmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Command": "Vibrate:20;"
+    }
+  }
+]
+```
+---
+## VorzeA10CycloneCmd
+
+**Reason for Deprecation:** Superceded by a combination of
+[VibrateCmd](generic.md#linearcmd) and [RotateCmd](generic.md#rotatecmd).
+
+**Description:** Causes a device that supports Vorze A10 Cyclone style
+commands to run whatever event may be related. More information on
+Vorze commands can be found in STPIHKAL.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device
+* _Speed_ (unsigned int): Unsigned integer in range [0-100], denoting
+  speed to rotate at.
+* _Clockwise_ (boolean): Rotation direction
+
+**Expected Response:**
+
+* Ok message with matching Id on successful request.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>Server: VorzeA10CycloneCmd Id=1
+    Server->>Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "VorzeA10CycloneCmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Speed": 50,
+      "Clockwise": true
+    }
+  }
+]
+```
