@@ -46,6 +46,13 @@
     - Superceded by LinearCmd/Raw*Cmd. See above for more explanation.
     - Implemented for the Fleshlight Launch, and will be problematic
       to switch out. This may require multiple stages of removal.
+  - Test
+    - Violates assumptions that client/server sends different message types.
+      Also, not particularly useful.
+  - RequestLog/Log
+    - Allows too much information leakage across the protocol in situations we
+      may not want, and also has nothing to do with sex toy control. Logging is
+      an application level function, not really required in the protocol itself.
 
 ## Version 1 (2017-12-11)
 

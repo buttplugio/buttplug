@@ -502,3 +502,164 @@ sequenceDiagram
   }
 ]
 ```
+---
+## Test
+
+**Reason for Deprecation:** Violates the assumption that server and client
+should not be able to send the same message type. Not particularly useful
+either, since the whole protocol is made up of messages, so if you've
+send/received one, you're... pretty much good.
+
+**Description:** The Test message is used for development and testing
+purposes. Sending a Test message with a string to the server will
+cause the server to return a Test message. If the string is "Error",
+the server will return an error message instead.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _TestString_ (string): String to echo back from server.
+
+**Expected Response:**
+
+* Test message with matching Id and TestString on successful request.
+* Error message on value or message error, or TestString being 'Error'.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>+Server: Test Id=5 TestString=X
+    Server->>-Client: Test Id=5 TestString=X
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "Test": {
+      "Id": 5,
+      "TestString": "Moo"
+    }
+  }
+]
+```
+---
+## RequestLog
+
+**Reason for Deprecation:** Requesting logging means that the client, whoever
+that may be, can request dumps of information from the server. When the
+client/server are in the same process, that's fine. However, when the client may
+be remote to the server (for instance, a web app accessing intiface desktop),
+this allows WAY too much information leakage, as the logging messages may be
+quite verbose, unless the server is setup to ignore it. Also, this has nothing
+to do with controlling sex toys. It was more for debugging situations that have
+never really arisen. If we need logs, we can get them from servers, and we don't
+really need to fly them over the line.
+
+**Description:** Requests that the server send all internal log
+messages to the client. Useful for debugging.
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _LogLevel_ (string): The highest level of message to receive.
+  Sending "Off" turns off messages, while sending "Trace" denotes that
+  all log messages should be sent to the client. Valid LogLevel
+  values:
+  * Off
+  * Fatal
+  * Error
+  * Warn
+  * Info
+  * Debug
+  * Trace
+
+**Expected Response:**
+
+* Ok message with matching Id on successful logging request. Assuming
+  the LogLevel was not "Off", Log type messages will be received after
+  this.
+* Error message on value or message error.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>+Server: RequestLog Id=1
+    Server->>-Client: Ok Id=1
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "RequestLog": {
+      "Id": 1,
+      "LogLevel": "Warn"
+    }
+  }
+]
+```
+---
+## Log
+
+**Reason for Deprecation:** See RequestLog reason.
+
+**Description:** Log message from the server. Only sent after the
+client has sent a RequestLog message with a level other than "Off".
+
+**Introduced In Spec Version:** 0
+
+**Last Updated In Spec Version:** 0
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _LogLevel_ (string): The level of the log message.
+  * Off 
+  * Fatal
+  * Error
+  * Warn
+  * Info
+  * Debug
+  * Trace
+* _LogMessage_ (string): Log message.
+
+**Expected Response:**
+
+None. Server-to-Client message only.
+
+**Flow Diagram:**
+
+<mermaid>
+sequenceDiagram
+    Client->>+Server: RequestLog Id=1
+    Server->>-Client: Ok Id=1
+    Server->>Client: Log Id=0 LogLevel=Warn
+    Server->>Client: Log Id=0 LogLevel=Trace
+</mermaid>
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "Log": {
+      "Id": 0,
+      "LogLevel": "Trace",
+      "LogMessage": "This is a Log Message."
+    }
+  }
+]
+```
