@@ -23,12 +23,12 @@
     - Remove Version fields
 - Messages Deprecated:
   - LovenseCmd
-    - Superceded by VibrateCmd/RotateCmd/Raw*Cmd. The protocol
+    - Superceded by VibrateCmd/RotateCmd/Raw\*Cmd. The protocol
       messages were originally meant to map generic -> protocol ->
       raw, but the protocols change quickly enough that it's not worth
       it to encode that at the protocol level. From v2 of the spec on,
       we will try to encode as many actions as possible in generic
-      messages. For anything we haven't mapped yet, Raw*Cmd can be
+      messages. For anything we haven't mapped yet, Raw\*Cmd can be
       used, though it's not a great idea due to security concerns.
     - LovenseCmd was never implemented in any of the Buttplug
       reference libraries, so removal shouldn't affect anything.
@@ -43,9 +43,10 @@
     - Implemented for the Vorze A10 Cyclone in C# and JS, but
       translates directly to rotation messages.
   - FleshlightLaunchFW12Cmd
-    - Superceded by LinearCmd/Raw*Cmd. See above for more explanation.
-    - Implemented for the Fleshlight Launch, and will be problematic
-      to switch out. This may require multiple stages of removal.
+    - Superceded by LinearCmd/Raw\*Cmd. See LovenseCmd reason for more
+      explanation.
+    - Implemented for the Fleshlight Launch, and will be problematic to switch
+      out. We should still support it on the server side for v0/v1 for compat.
   - Test
     - Violates assumptions that client/server sends different message types.
       Also, not particularly useful.
