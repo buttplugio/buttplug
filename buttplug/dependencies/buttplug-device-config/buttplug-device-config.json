@@ -53,6 +53,10 @@
           "4c300001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "4c300002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "4c300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "56300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "56300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "56300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -149,6 +153,14 @@
           ],
           "name": {
             "en-us": "Lovense Osci"
+          }
+        },
+        {
+          "identifier": [
+            "V"
+          ],
+          "name": {
+            "en-us": "Lovense Mission"
           }
         }
       ]
@@ -1464,7 +1476,7 @@
             "Onyx+"
           ],
           "name": {
-            "en-us": "Kiiroo Onyx +"
+            "en-us": "Kiiroo Onyx+"
           },
           "messages": {
             "LinearCmd": {
