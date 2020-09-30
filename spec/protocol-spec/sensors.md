@@ -16,6 +16,7 @@ buttons, etc.
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device to query for battery reading.
 
 **Expected Response:**
 
@@ -27,8 +28,8 @@ buttons, etc.
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: BatteryLevelCmd Id=1
-    Server->>Client: BatteryLevelReading Id=1 BatteryLevel=0.5
+    Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
+    Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
 </mermaid>
 
 **Serialization Example:**
@@ -37,7 +38,8 @@ sequenceDiagram
 [
   {
     "BatteryLevelCmd": {
-      "Id": 1
+      "Id": 1,
+      "DeviceIndex": 0
     }
   }
 ]
@@ -55,6 +57,7 @@ device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device battery reading is from.
 * _BatteryLevel_ (double): Battery Level with a range of [0.0-1.0]
 
 **Expected Response:**
@@ -65,8 +68,8 @@ device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: BatteryLevelCmd Id=1
-    Server->>Client: BatteryLevelReading Id=1 BatteryLevel=0.5
+    Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
+    Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
 </mermaid>
 
 **Serialization Example:**
@@ -76,6 +79,7 @@ sequenceDiagram
   {
     "BatteryLevelReading": {
       "Id": 1,
+      "DeviceIndex": 0,
       "BatteryLevel": 0.5
     }
   }
@@ -93,6 +97,7 @@ sequenceDiagram
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device to query for RSSI level.
 
 **Expected Response:**
 
@@ -104,8 +109,8 @@ sequenceDiagram
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: RSSILevelCmd Id=1
-    Server->>Client: RSSILevelReading Id=1 RSSILevel=-40
+    Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
+    Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
 </mermaid>
 
 **Serialization Example:**
@@ -114,7 +119,8 @@ sequenceDiagram
 [
   {
     "RSSILevelCmd": {
-      "Id": 1
+      "Id": 1,
+      "DeviceIndex": 0
     }
   }
 ]
@@ -132,6 +138,7 @@ device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device the reading is from.
 * _RSSILevel_ (int): RSSI Level, usually expressed as db gain, usually [-100:0]
 
 **Expected Response:**
@@ -142,8 +149,8 @@ device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: RSSILevelCmd Id=1
-    Server->>Client: RSSILevelReading Id=1 RSSILevel=-40
+    Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
+    Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
 </mermaid>
 
 **Serialization Example:**
@@ -153,6 +160,7 @@ sequenceDiagram
   {
     "RSSILevelReading": {
       "Id": 1,
+      "DeviceIndex": 0,
       "RSSILevel": -40
     }
   }
