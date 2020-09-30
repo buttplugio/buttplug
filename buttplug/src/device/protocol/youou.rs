@@ -17,8 +17,11 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use crate::device::configuration_manager::DeviceProtocolConfiguration;
+use crate::core::errors::ButtplugError;
+use futures::future::BoxFuture;
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct Youou {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -36,6 +39,27 @@ impl Youou {
       stop_commands: manager.get_stop_commands(),
       packet_id: AtomicU8::new(0),
     }
+  }
+}
+
+impl ButtplugProtocolCreator for Youou {
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
+  }
+
+  fn try_create(
+    _device_impl: &dyn DeviceImpl,
+    config: DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
+    where
+        Self: Sized,
+  {
+    // Youou devices have wildcarded names of VX001_*
+    // Force the identifier lookup to VX001_
+    let (names, attrs) = config.get_attributes("VX001_").unwrap();
+    let name = names.get("en-us").unwrap().clone();
+
+    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
   }
 }
 
@@ -103,7 +127,7 @@ mod test {
   #[test]
   pub fn test_youou_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("VX001_").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("VX001_01234").await.unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
