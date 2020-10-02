@@ -39,9 +39,9 @@ unstable=[]
 buttplug_derive = "0.4.0"
 futures = { version = "0.3.5", features = ["thread-pool"] }
 futures-util = "0.3.5"
-async-trait = "0.1.40"
+async-trait = "0.1.41"
 serde = { version = "1.0.116", features = ["derive"] }
-serde_json = "1.0.57"
+serde_json = "1.0.58"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.1", features = ["serde"] }
 url = "2.1.1"
@@ -51,7 +51,7 @@ btleplug = { version = "0.5.1", optional = true }
 strum_macros = "0.19.2"
 strum = "0.19.2"
 once_cell = "1.4.1"
-paste = "1.0.0"
+paste = "1.0.1"
 # Can't use async-channel here because it's Sender isn't Sink. We'll just use futures-channel.
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
 # Broadcaster uses an older channel implementation, we can have it use a newer one.
@@ -67,10 +67,10 @@ rustls = { version = "0.18.1", features = ["dangerous_configuration"], optional 
 webpki = { version = "0.21.3", optional = true }
 futures-timer = "3.0.2"
 async-channel = "1.4.2"
-async-mutex = "1.3.0"
-wasm-bindgen-futures = {version = "0.4.13", optional = true }
+async-mutex = "1.4.0"
+wasm-bindgen-futures = { version = "0.4.18", optional = true }
 cfg-if = "0.1.10"
-tracing = "0.1.19"
+tracing = "0.1.21"
 tracing-futures = "0.2.4"
 tracing-subscriber = { version = "0.2.12", features = ["json"] }
 dashmap = "4.0.0-rc6"
@@ -82,13 +82,13 @@ hidapi = { version = "1.2.3", optional = true }
 rusty-xinput = "1.2.0"
 
 [dependencies.async-std]
-version = "1.6.3"
+version = "1.6.5"
 # default-features = false
 features = ["std"]
 optional = true
 
 [dev-dependencies]
-async-std = "1.6.3"
+async-std = "1.6.5"
 tracing-log = { version = "0.1.1", features = ["env_logger"] }
 
 [lib]
