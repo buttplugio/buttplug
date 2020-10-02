@@ -242,12 +242,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         DeviceImplCommand::Unsubscribe(sub_msg) => {
           self.handle_unsubscribe(sub_msg, state);
         }
-        _ => {
-          let error_str = format!("{:?}", command);
-          state.set_reply(ButtplugDeviceReturn::Error(
-            ButtplugDeviceError::UnhandledCommand(error_str).into(),
-          ))
-        }
       },
       ButtplugDeviceCommand::Disconnect => {
         if let Err(e) = self.device.disconnect() {

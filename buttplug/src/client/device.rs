@@ -33,7 +33,7 @@ use crate::{
 };
 use async_channel::Sender;
 use broadcaster::BroadcastChannel;
-use futures::{channel::mpsc::SendError, future, StreamExt};
+use futures::{future, StreamExt};
 use std::{
   collections::HashMap,
   sync::{
