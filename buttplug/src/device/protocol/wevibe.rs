@@ -133,6 +133,24 @@ mod test {
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
         .receiver;
+      check_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+            false,
+          )),
+        )
+        .await;
+      check_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+            false,
+          )),
+        )
+        .await;  
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -199,6 +217,24 @@ mod test {
         .get_endpoint_channel(&Endpoint::Tx)
         .unwrap()
         .receiver;
+      check_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+            false,
+          )),
+        )
+        .await;
+      check_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+            false,
+          )),
+        )
+        .await;        
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
