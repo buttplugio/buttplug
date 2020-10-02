@@ -1,3 +1,23 @@
+# 0.8.4 (2020-10-01)
+
+## Features
+
+- Added more Lovense UUIDs
+  - Should work with Ambi now? Maybe?
+  - Might work with Lovense Mission
+- Add wasm-bindgen async manager (Needed for WASM FFI)
+- Implement read capabilties for btleplug comm manager devices
+
+## Bugfixes
+
+- Fixed LeloF1s bringup
+- Fixed Onyx+ connection creation (requires pairing with OS)
+- Fixed WeVibe initial connection (now vibrates on pair)
+- EventReceiver is now StreamExt instead of SinkExt (fixed for FFI)
+- Fix device message enum ordering (needed for test verifications)
+- Make sure we send StopDeviceCmd in device attributes
+- Fix issues with Youou and wildcard name lookups
+
 # 0.8.3 (2020-09-20)
 
 ## Features
