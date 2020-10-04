@@ -59,10 +59,17 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     output_sender: BoundedDeviceEventBroadcaster,
   ) -> Self {
     let (event_sender, event_receiver) = bounded(256);
+    let device_address = device.address();
     async_manager::spawn(async move {
       while let Some(event) = btleplug_event_broadcaster.next().await {
         match event {
-          CentralEvent::DeviceConnected(_) => {
+          CentralEvent::DeviceConnected(ev) => {
+            if ev != device_address {
+              debug!("Device {} connect event received, but instance device address is {}, ignoring", ev, device_address);
+              continue;
+            } else {
+              info!("Device {} connect event received, matches instance device address, notifying event loop", ev);
+            }
             let s = event_sender.clone();
             let e = event;
             if s.send(e).await.is_err() {
@@ -70,7 +77,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               break;
             }
           }
-          CentralEvent::DeviceDisconnected(_) => {
+          CentralEvent::DeviceDisconnected(ev) => {
+            if ev != device_address {
+              debug!("Device {} disconnect event received, but instance device address is {}, ignoring", ev, device_address);
+              continue;
+            } else {
+              info!("Device {} disconnect event received, matches instance device address, exiting", ev);
+            }
             let s = event_sender.clone();
             let e = event;
             if s.send(e).await.is_err() {
@@ -291,7 +304,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       // Race our device input (from the client side) and any subscribed
       // notifications.
       let mut event = select! {
-        ev = er.next().fuse() => BtlePlugCommLoopChannelValue::DeviceEvent(ev.unwrap()),
+        ev = er.next().fuse() => match ev {
+          Some(valid_ev) => BtlePlugCommLoopChannelValue::DeviceEvent(valid_ev),
+          None => BtlePlugCommLoopChannelValue::ChannelClosed,
+        },
         recv = wr.next().fuse() => match recv {
           Some((command, state)) => BtlePlugCommLoopChannelValue::DeviceCommand(command, state),
           None => BtlePlugCommLoopChannelValue::ChannelClosed,
