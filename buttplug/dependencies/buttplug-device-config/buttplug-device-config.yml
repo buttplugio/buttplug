@@ -182,7 +182,6 @@ protocols:
           StepCount:
             - 20
         BatteryLevelCmd: {}
-        RSSILevelCmd: {}
     configurations:
       # For lovense, our identifiers are the letters returned from the
       # DeviceInfo query sent on initialization.
@@ -285,8 +284,6 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 99
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         FleshlightLaunchFW12Cmd: {}
     configurations:
       - identifier:
@@ -309,8 +306,6 @@ protocols:
             txmode: 00006002-0000-1000-8000-00805f9b34fb
       defaults:
         messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
           VibrateCmd:
             FeatureCount: 2
             StepCount:
@@ -336,8 +331,6 @@ protocols:
             txmode: 00006002-0000-1000-8000-00805f9b34fb
       defaults:
         messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
           VibrateCmd:
             FeatureCount: 2
             StepCount:
@@ -361,9 +354,7 @@ protocols:
           00006050-0000-1000-8000-00805f9b34fb:
             rxpressure: 00006051-0000-1000-8000-00805f9b34fb
       defaults:
-        messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
+        messages: {}
       configurations:
         - identifier:
             - SuoYinQiu
@@ -390,8 +381,6 @@ protocols:
             txmode: 00006002-0000-1000-8000-00805f9b34fb
       defaults:
         messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
           VibrateCmd:
             FeatureCount: 1
             StepCount:
@@ -577,8 +566,6 @@ protocols:
           txvibrate: f0006903-110c-478b-b74b-6f403b364a9c
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 6
           StepCount:
@@ -615,8 +602,6 @@ protocols:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -655,8 +640,6 @@ protocols:
           rx: 00001527-1212-efde-1523-785feabcd123
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -693,8 +676,6 @@ protocols:
           rx: f000b000-0451-4000-b000-000000000000
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -794,8 +775,6 @@ protocols:
           rx: f000b000-0451-4000-b000-000000000000
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -857,9 +836,7 @@ protocols:
           tx: f000c000-0451-4000-b000-000000000000
           rx: f000b000-0451-4000-b000-000000000000
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
     configurations:
       - identifier:
           - Rey
@@ -882,8 +859,6 @@ protocols:
           tx: d44bc439-abfd-45a2-b575-925416129600
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -904,8 +879,6 @@ protocols:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 8
           StepCount:
@@ -953,8 +926,6 @@ protocols:
           rxaccel: 88f82584-0000-01e6-aace-0002a5d5c51b
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 3
           StepCount:
@@ -1024,9 +995,7 @@ protocols:
           tx: a0d70002-4c16-4ba7-977a-d394920e13a3
           rx: a0d70003-4c16-4ba7-977a-d394920e13a3
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
     configurations:
       - identifier:
           - Pearl2.1
@@ -1153,9 +1122,7 @@ protocols:
           #
           # cmd2: 49535343-6daa-4d02-abf6-19569aca69fe
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
     configurations:
       - identifier:
           - PEARL
@@ -1186,9 +1153,7 @@ protocols:
         40ee1111-63ec-4b7f-8ce7-712efd55b90e:
           tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
     configurations:
       - identifier:
           - Bach smart
@@ -1235,8 +1200,6 @@ protocols:
           tx: 0000fff6-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1271,8 +1234,6 @@ protocols:
           rx: 0000ffe2-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1292,8 +1253,6 @@ protocols:
           rx: 0000ffe2-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1312,8 +1271,6 @@ protocols:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1338,8 +1295,6 @@ protocols:
           # rx: 0000fff6-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1366,8 +1321,6 @@ protocols:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 2
           StepCount:
@@ -1388,9 +1341,7 @@ protocols:
           tx: 0000fff6-0000-1000-8000-00805f9b34fb
           rx: 0000fff8-0000-1000-8000-00805f9b34fb
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
     configurations:
       - identifier:
           - SayberX
@@ -1415,8 +1366,6 @@ protocols:
           tx: 0000aaa1-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -1445,8 +1394,6 @@ protocols:
           # types is added to Buttplug
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 2
           StepCount:
@@ -1466,8 +1413,6 @@ protocols:
           tx: 0000ff01-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 2
           StepCount:
@@ -1488,8 +1433,6 @@ protocols:
           tx: 0000ff01-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 2
           StepCount:
@@ -1520,9 +1463,7 @@ protocols:
           tx: 00000a66-0000-1000-8000-00805f9b34fb
           rx: 00000a67-0000-1000-8000-00805f9b34fb
     defaults:
-      messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+      messages: {}
         # Vibration and Rotation protocols still need to be establised
         # Twerk mode will be represented as a vibrator
     configurations:
@@ -1541,8 +1482,6 @@ protocols:
           tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
     defaults:
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
         VibrateCmd:
           FeatureCount: 1
           StepCount:

@@ -68,8 +68,7 @@
               20
             ]
           },
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
+          "BatteryLevelCmd": {}
         }
       },
       "configurations": [
@@ -218,8 +217,6 @@
               99
             ]
           },
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "FleshlightLaunchFW12Cmd": {}
         }
       },
@@ -257,8 +254,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -301,8 +296,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -339,10 +332,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -379,8 +369,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -704,8 +692,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 6,
             "StepCount": [
@@ -760,8 +746,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -826,8 +810,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -878,8 +860,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1047,8 +1027,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1152,10 +1130,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -1193,8 +1168,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1227,8 +1200,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 8,
             "StepCount": [
@@ -1301,8 +1272,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 3,
             "StepCount": [
@@ -1411,10 +1380,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -1626,10 +1592,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -1681,10 +1644,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -1766,8 +1726,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1829,8 +1787,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1864,8 +1820,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1898,8 +1852,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1933,8 +1885,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1981,8 +1931,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -2017,10 +1965,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -2063,8 +2008,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -2106,8 +2049,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -2141,8 +2082,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -2177,8 +2116,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 2,
             "StepCount": [
@@ -2230,10 +2167,7 @@
         }
       },
       "defaults": {
-        "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {}
-        }
+        "messages": {}
       },
       "configurations": [
         {
@@ -2261,8 +2195,6 @@
       },
       "defaults": {
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
