@@ -14,6 +14,8 @@
 //! also enum types that are used to classify messages into categories, for
 //! instance, messages that only should be sent by a client or server.
 
+mod battery_level_cmd;
+mod battery_level_reading;
 mod device_added;
 mod device_list;
 mod device_message_info;
@@ -37,6 +39,8 @@ mod request_device_list;
 mod request_log;
 mod request_server_info;
 mod rotate_cmd;
+mod rssi_level_cmd;
+mod rssi_level_reading;
 mod scanning_finished;
 pub mod serializer;
 mod server_info;
@@ -50,6 +54,8 @@ mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
 pub use self::log::Log;
+pub use battery_level_cmd::{BatteryLevelCmd};
+pub use battery_level_reading::{BatteryLevelReading};
 pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
 pub use device_message_info::{DeviceMessageInfo, MessageAttributesMap};
@@ -72,6 +78,8 @@ pub use request_device_list::RequestDeviceList;
 pub use request_log::RequestLog;
 pub use request_server_info::RequestServerInfo;
 pub use rotate_cmd::{RotateCmd, RotationSubcommand};
+pub use rssi_level_cmd::{RSSILevelCmd};
+pub use rssi_level_reading::{RSSILevelReading};
 pub use scanning_finished::ScanningFinished;
 pub use server_info::{ServerInfo, ServerInfoV0};
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
@@ -202,6 +210,9 @@ pub enum ButtplugClientMessage {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
+  // Sensor commands
+  BatteryLevelCmd(BatteryLevelCmd),
+  RSSILevelCmd(RSSILevelCmd),
   // Deprecated generic commands
   SingleMotorVibrateCmd(SingleMotorVibrateCmd),
   // Deprecated device specific commands
@@ -211,8 +222,6 @@ pub enum ButtplugClientMessage {
   VorzeA10CycloneCmd(VorzeA10CycloneCmd),
   // To Add:
   // PatternCmd
-  // BatteryLevelCmd
-  // RSSILevelCmd
   // ShockCmd?
   // ToneEmitterCmd?
 }
@@ -238,9 +247,9 @@ pub enum ButtplugServerMessage {
   ScanningFinished(ScanningFinished),
   // Generic commands
   RawReading(RawReading),
-  // To Add:
-  // BatteryLevelReading
-  // RSSILevelReading
+  // Sensor Reading Messages
+  BatteryLevelReading(BatteryLevelReading),
+  RSSILevelReading(RSSILevelReading)
 }
 
 /// Type alias for the latest version of client-to-server messages.
@@ -277,12 +286,9 @@ pub enum ButtplugSpecV2ClientMessage {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
-  // To Add:
-  // PatternCmd
-  // BatteryLevelCmd
-  // RSSILevelCmd
-  // ShockCmd?
-  // ToneEmitterCmd?
+  // Sensor commands
+  BatteryLevelCmd(BatteryLevelCmd),
+  RSSILevelCmd(RSSILevelCmd)
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
@@ -310,9 +316,9 @@ pub enum ButtplugSpecV2ServerMessage {
   ScanningFinished(ScanningFinished),
   // Generic commands
   RawReading(RawReading),
-  // To Add:
-  // BatteryLevelReading
-  // RSSILevelReading
+  // Sensor commands
+  BatteryLevelReading(BatteryLevelReading),
+  RSSILevelReading(RSSILevelReading)
 }
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
@@ -514,4 +520,6 @@ pub enum ButtplugDeviceCommandMessageUnion {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
+  BatteryLevelCmd(BatteryLevelCmd),
+  RSSILevelCmd(RSSILevelCmd)
 }

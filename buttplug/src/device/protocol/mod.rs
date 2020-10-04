@@ -204,6 +204,8 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => {
         self.handle_vorze_a10_cyclone_cmd(device, msg)
       }
+      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(msg) => self.handle_battery_level_cmd(device, msg),
+      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(msg) => self.handle_rssi_level_cmd(device, msg),
     }
   }
 
@@ -375,21 +377,20 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented()
   }
-  /*
+
   fn handle_battery_level_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
-    message: messages::Battery,
+    _device: Arc<Box<dyn DeviceImpl>>,
+    _message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented()
   }
 
   fn handle_rssi_level_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
-    message: ButtplugDeviceCommandMessageUnion,
+    _device: Arc<Box<dyn DeviceImpl>>,
+    _message: messages::RSSILevelCmd,
   ) -> ButtplugDeviceResultFuture {
-    unimplemented!("Command not implemented for this protocol");
+    self.command_unimplemented()
   }
-  */
 }

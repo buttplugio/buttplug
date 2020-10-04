@@ -14,6 +14,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
+      BatteryLevelCmd,      
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
@@ -23,6 +24,7 @@ use crate::{
       MessageAttributesMap,
       RotateCmd,
       RotationSubcommand,
+      RSSILevelCmd,
       StopDeviceCmd,
       VectorSubcommand,
       VibrateCmd,
@@ -274,7 +276,7 @@ impl ButtplugClientDevice {
     self.event_receiver.clone()
   }
 
-  fn create_boxed_future_client_error(&self, err: ButtplugError) -> ButtplugClientResultFuture {
+  fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T> where T: 'static + Send + Sync {
     Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
   }
 
@@ -477,6 +479,58 @@ impl ButtplugClientDevice {
     }
     let msg = RotateCmd::new(self.index, rotate_vec).into();
     self.send_message_expect_ok(msg)
+  }
+
+  pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
+    if !self
+      .allowed_messages
+      .contains_key(&ButtplugDeviceMessageType::BatteryLevelCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::BatteryLevelCmd(BatteryLevelCmd::new(self.index));
+    let send_fut = self.send_message(msg);
+    Box::pin(async move {
+      match send_fut.await? {
+        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level),
+        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        msg => Err(
+          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
+            "{:?}",
+            msg
+          )))
+          .into(),
+        ),
+      }
+    })
+  }
+
+  pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
+    if !self
+      .allowed_messages
+      .contains_key(&ButtplugDeviceMessageType::RSSILevelCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::RSSILevelCmd(RSSILevelCmd::new(self.index));
+    let send_fut = self.send_message(msg);
+    Box::pin(async move {
+      match send_fut.await? {
+        ButtplugCurrentSpecServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level),
+        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        msg => Err(
+          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
+            "{:?}",
+            msg
+          )))
+          .into(),
+        ),
+      }
+    })
   }
 
   /// Commands device to stop all movement.
