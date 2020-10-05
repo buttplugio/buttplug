@@ -1,3 +1,16 @@
+# 0.9.0 (2020-10-04)
+
+## Features
+
+- Implements BatteryLevelCmd/BatteryLevelReading
+  - Can read battery values from Lovense and some MagicMotion devices.
+
+## Bugfixes
+
+- Devices now only pay attention to their events, not all events ever.
+  - Devices were mistaking other devices disconnecting for their own
+    disconnection, causing tons of issues in 2+ device situations.
+
 # 0.8.4 (2020-10-01)
 
 ## Features
