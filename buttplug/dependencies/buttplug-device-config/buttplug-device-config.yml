@@ -455,6 +455,9 @@ protocols:
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        # Battery service
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
     defaults:
       messages:
         BatteryLevelCmd: {}
@@ -464,6 +467,10 @@ protocols:
           StepCount:
             - 100
     configurations:
+      - identifier:
+          - Smart Bean
+        name:
+          en-us: MagicMotion Smart Bean
       - identifier:
           - Smart Mini Vibe
         name:
