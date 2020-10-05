@@ -37,9 +37,10 @@ use crate::{
       MessageAttributesMap,
       VibrateCmd,
       VibrateSubcommand,
+      RawReading
     },
   },
-  device::{configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture},
+  device::{configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture, Endpoint, DeviceReadCmd},
 };
 use futures::future::{self, BoxFuture};
 use std::convert::TryFrom;
@@ -380,10 +381,25 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 
   fn handle_battery_level_cmd(
     &self,
-    _device: Arc<Box<dyn DeviceImpl>>,
-    _message: messages::BatteryLevelCmd,
+    device: Arc<Box<dyn DeviceImpl>>,
+    message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    // If we have a standardized BLE Battery endpoint, handle that above the
+    // protocol, as it'll always be the same.
+    if device.endpoints().contains(&Endpoint::RxBLEBattery) {
+      info!("Trying to get battery reading.");
+      let msg = DeviceReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
+      let fut = device.read_value(msg);
+      Box::pin(async move {
+        let raw_msg: RawReading = fut.await?;
+        let battery_level = raw_msg.data[0] as f64 / 100f64;
+        let battery_reading = messages::BatteryLevelReading::new(message.device_index, battery_level);
+        info!("Got battery reading: {}", battery_level);
+        Ok(battery_reading.into())
+      })
+    } else {
+      self.command_unimplemented()
+    }
   }
 
   fn handle_rssi_level_cmd(

@@ -167,8 +167,7 @@ impl BtlePlugDeviceImpl {
   fn send_to_device_task(
     &self,
     cmd: ButtplugDeviceCommand,
-    _err_msg: &str,
-  ) -> ButtplugResultFuture {
+  ) -> ButtplugResultFuture<ButtplugDeviceReturn> {
     let sender = self.thread_sender.clone();
     Box::pin(async move {
       let fut = DeviceReturnFuture::default();
@@ -182,14 +181,27 @@ impl BtlePlugDeviceImpl {
           .into(),
         );
       }
-      match fut.await {
+      Ok(fut.await)
+    })
+  }
+
+  fn send_to_device_expect_ok(
+    &self,
+    cmd: ButtplugDeviceCommand,
+    err_str: &str,
+   ) -> ButtplugResultFuture {
+    let fut = self.send_to_device_task(cmd);
+    let err_fut_str = err_str.to_owned();
+    Box::pin(async move {
+      match fut.await? {
         ButtplugDeviceReturn::Ok(_) => Ok(()),
         ButtplugDeviceReturn::Error(e) => {
-          error!("{:?}", e);
+          let err_out = format!("{}: {:?}", err_fut_str, e);
+          error!("{}", err_out);
           // TODO Need to whittle down what this error actually means.
-          Err(ButtplugDeviceError::DeviceCommunicationError(e.to_string()).into())
+          Err(ButtplugDeviceError::DeviceCommunicationError(err_out).into())
         }
-        other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
+        other => Err(ButtplugUnknownError::UnexpectedType(format!("{}: {:?}", err_fut_str, other)).into()),
       }
     })
   }
@@ -219,14 +231,14 @@ impl DeviceImpl for BtlePlugDeviceImpl {
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
-    self.send_to_device_task(
+    self.send_to_device_expect_ok(
       ButtplugDeviceCommand::Disconnect,
       "Cannot disconnect device",
     )
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
-    self.send_to_device_task(
+    self.send_to_device_expect_ok(
       ButtplugDeviceCommand::Message(msg.into()),
       "Cannot write to endpoint",
     )
@@ -238,27 +250,28 @@ impl DeviceImpl for BtlePlugDeviceImpl {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
-    info!("Read value does not actually return a value at this point. Be careful when using it.");
-    let endpoint = msg.endpoint;
     let task = self.send_to_device_task(
-      ButtplugDeviceCommand::Message(msg.into()),
-      "Cannot read value",
+      ButtplugDeviceCommand::Message(msg.into())
     );
     Box::pin(async move {
-      task.await?;
-      Ok(RawReading::new(0, endpoint, vec![]))
+      let val = task.await?;
+      if let ButtplugDeviceReturn::RawReading(reading) = val {
+        Ok(reading)
+      } else {
+        Err(ButtplugUnknownError::UnexpectedType(format!("Read Error, unexpected return type: {:?}", val)).into())
+      }
     })
   }
 
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
-    self.send_to_device_task(
+    self.send_to_device_expect_ok(
       ButtplugDeviceCommand::Message(msg.into()),
       "Cannot subscribe",
     )
   }
 
   fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
-    self.send_to_device_task(
+    self.send_to_device_expect_ok(
       ButtplugDeviceCommand::Message(msg.into()),
       "Cannot unsubscribe",
     )

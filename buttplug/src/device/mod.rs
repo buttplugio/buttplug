@@ -44,6 +44,7 @@ pub enum Endpoint {
   RxPressure,
   RxTouch,
   RxAccel,
+  RxBLEBattery,
   Command,
   Firmware,
   TxMode,

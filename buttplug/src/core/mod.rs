@@ -13,8 +13,8 @@ pub mod messages;
 use errors::ButtplugError;
 use futures::future::{self, BoxFuture};
 
-pub type ButtplugResult = Result<(), ButtplugError>;
-pub type ButtplugResultFuture = BoxFuture<'static, ButtplugResult>;
+pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
+pub type ButtplugResultFuture<T = ()> = BoxFuture<'static, ButtplugResult<T>>;
 
 impl<T> From<ButtplugError> for BoxFuture<'static, Result<T, ButtplugError>>
 where
