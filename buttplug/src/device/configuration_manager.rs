@@ -19,7 +19,7 @@ use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::mem;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, RwLock, atomic::{AtomicBool, Ordering}};
 use uuid::Uuid;
 
 static DEVICE_CONFIGURATION_JSON: &str =
@@ -32,6 +32,16 @@ static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
   Lazy::new(|| Arc::new(RwLock::new(None)));
 static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
   Lazy::new(|| Arc::new(RwLock::new(None)));
+static ALLOW_RAW_MESSAGES: Lazy<Arc<AtomicBool>> =
+  Lazy::new(|| Arc::new(AtomicBool::new(false)));
+
+pub fn set_allow_raw_messages() {
+  ALLOW_RAW_MESSAGES.store(true, Ordering::SeqCst);
+}
+
+pub fn get_allow_raw_message() -> bool {
+  ALLOW_RAW_MESSAGES.load(Ordering::SeqCst)
+}
 
 pub fn set_external_device_config(config: Option<String>) {
   let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
@@ -271,6 +281,7 @@ impl DeviceProtocolConfiguration {
   pub fn get_attributes(
     &self,
     identifier: &str,
+    endpoints: &Vec<Endpoint>,
   ) -> Result<(HashMap<String, String>, MessageAttributesMap), ButtplugError> {
     let mut attributes = MessageAttributesMap::new();
     // If we find defaults, set those up first.
@@ -293,6 +304,14 @@ impl DeviceProtocolConfiguration {
         if !attributes.contains_key(&ButtplugDeviceMessageType::StopDeviceCmd) {
           attributes.insert(ButtplugDeviceMessageType::StopDeviceCmd, MessageAttributes::default());
         }
+        if get_allow_raw_message() {
+          let mut endpoint_attributes = MessageAttributes::default();
+          endpoint_attributes.endpoints = Some(endpoints.clone());
+          attributes.insert(ButtplugDeviceMessageType::RawReadCmd, endpoint_attributes.clone());
+          attributes.insert(ButtplugDeviceMessageType::RawWriteCmd, endpoint_attributes.clone());
+          attributes.insert(ButtplugDeviceMessageType::RawSubscribeCmd, endpoint_attributes.clone());
+          attributes.insert(ButtplugDeviceMessageType::RawUnsubscribeCmd, endpoint_attributes.clone());
+        }
         Ok((attrs.name.as_ref().unwrap().clone(), attributes))
       }
       None => Err(
@@ -307,7 +326,7 @@ impl DeviceProtocolConfiguration {
 }
 
 pub struct DeviceConfigurationManager {
-  pub(self) config: ProtocolConfiguration,
+  pub(self) config: ProtocolConfiguration
 }
 
 unsafe impl Send for DeviceConfigurationManager {
@@ -437,7 +456,7 @@ mod test {
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P").unwrap();
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
     // Make sure we overwrote the default of 1

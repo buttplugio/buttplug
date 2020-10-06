@@ -62,11 +62,12 @@ impl ButtplugProtocolCreator for KiirooV21 {
       true,
     ));
     let device_name = device_impl.name().to_owned();
+    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       init_fut1.await?;
       Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
-      let (names, attrs) = configuration.get_attributes(&device_name).unwrap();
+      let (names, attrs) = configuration.get_attributes(&device_name, &endpoints).unwrap();
       let name = names.get("en-us").unwrap();
       Ok(Self::new_protocol(name, attrs))
     })

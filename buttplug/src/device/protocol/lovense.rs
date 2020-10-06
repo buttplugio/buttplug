@@ -101,6 +101,7 @@ impl ButtplugProtocolCreator for Lovense {
     let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
     let info_fut = device_impl.write_value(msg);
     let mut event_receiver = device_impl.get_event_receiver();
+    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       let identifier;
       subscribe_fut.await?;
@@ -132,7 +133,7 @@ impl ButtplugProtocolCreator for Lovense {
           );
         }
       };
-      let (names, attrs) = configuration.get_attributes(&identifier).unwrap();
+      let (names, attrs) = configuration.get_attributes(&identifier, &endpoints).unwrap();
       let name = names.get("en-us").unwrap();
       let device: Box<dyn ButtplugProtocol> = Box::new(Self::new(name, attrs, event_receiver));
       Ok(device)

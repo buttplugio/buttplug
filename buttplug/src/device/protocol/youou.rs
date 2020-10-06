@@ -48,7 +48,7 @@ impl ButtplugProtocolCreator for Youou {
   }
 
   fn try_create(
-    _device_impl: &dyn DeviceImpl,
+    device_impl: &dyn DeviceImpl,
     config: DeviceProtocolConfiguration,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
     where
@@ -56,7 +56,8 @@ impl ButtplugProtocolCreator for Youou {
   {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
-    let (names, attrs) = config.get_attributes("VX001_").unwrap();
+    let endpoints = device_impl.endpoints();
+    let (names, attrs) = config.get_attributes("VX001_", &endpoints).unwrap();
     let name = names.get("en-us").unwrap().clone();
 
     Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
