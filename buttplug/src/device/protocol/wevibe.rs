@@ -69,11 +69,12 @@ impl ButtplugProtocolCreator for WeVibe {
       false
     ));
     let device_name = device_impl.name().to_owned();
+    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       vibration_on.await?;
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
-      let (names, attrs) = configuration.get_attributes(&device_name).unwrap();
+      let (names, attrs) = configuration.get_attributes(&device_name, &endpoints).unwrap();
       let name = names.get("en-us").unwrap();
       Ok(Self::new_protocol(name, attrs))
     })

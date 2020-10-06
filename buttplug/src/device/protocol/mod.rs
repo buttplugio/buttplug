@@ -153,7 +153,8 @@ pub trait ButtplugProtocolCreator: ButtplugProtocol {
   where
     Self: Sized,
   {
-    let (names, attrs) = config.get_attributes(device_impl.name()).unwrap();
+    let endpoints = device_impl.endpoints();
+    let (names, attrs) = config.get_attributes(device_impl.name(), &endpoints).unwrap();
     let name = names.get("en-us").unwrap().clone();
     Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
   }

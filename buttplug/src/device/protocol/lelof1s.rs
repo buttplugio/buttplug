@@ -53,15 +53,19 @@ impl ButtplugProtocolCreator for LeloF1s {
   where
     Self: Sized,
   {
-    let (names, attrs) = config.get_attributes(device_impl.name()).unwrap();
+    let endpoints = device_impl.endpoints();
+    let (names, attrs) = config.get_attributes(device_impl.name(), &endpoints).unwrap();
     let name = names.get("en-us").unwrap().clone();
 
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
-    device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
+    let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
 
-    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
+    Box::pin(async move { 
+      subscribe_fut.await;
+      Ok(Self::new_protocol(&name, attrs)) 
+    })
   }
 }
 
