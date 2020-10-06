@@ -22,6 +22,11 @@ use crate::{
       DeviceMessageInfo,
       LinearCmd,
       MessageAttributesMap,
+      RawReadCmd,
+      RawReading,
+      RawSubscribeCmd,
+      RawUnsubscribeCmd,
+      RawWriteCmd,
       RotateCmd,
       RotationSubcommand,
       RSSILevelCmd,
@@ -31,6 +36,7 @@ use crate::{
       VibrateSubcommand,
     },
   },
+  device::Endpoint,
   util::async_manager,
 };
 use async_channel::Sender;
@@ -531,6 +537,71 @@ impl ButtplugClientDevice {
         ),
       }
     })
+  }
+
+  pub fn raw_write(&self, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> ButtplugClientResultFuture {
+    if !self
+    .allowed_messages
+    .contains_key(&ButtplugDeviceMessageType::RawWriteCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmd::new(self.index, endpoint, data, write_with_response));
+    self.send_message_expect_ok(msg)
+  }
+
+  pub fn raw_read(&self, endpoint: Endpoint, expected_length: u32, timeout: u32) -> ButtplugClientResultFuture<Vec<u8>> {
+    if !self
+    .allowed_messages
+    .contains_key(&ButtplugDeviceMessageType::RawReadCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::RawReadCmd(RawReadCmd::new(self.index, endpoint, expected_length, timeout));
+    let send_fut = self.send_message(msg);
+    Box::pin(async move {
+      match send_fut.await? {
+        ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data),
+        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
+        msg => Err(
+          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
+            "{:?}",
+            msg
+          )))
+          .into(),
+        ),
+      }
+    })
+  }
+
+  pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
+    if !self
+    .allowed_messages
+    .contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
+    self.send_message_expect_ok(msg)
+  }
+
+  pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
+    if !self
+    .allowed_messages
+    .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd)
+    {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd).into(),
+      );
+    }
+    let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(self.index, endpoint));
+    self.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.
