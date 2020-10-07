@@ -1,3 +1,10 @@
+# 0.9.2 (2020-10-06)
+
+## Bugfixes
+
+- Update to btleplug 0.5.4, fixing a bug with trying to read from bluetooth
+  devices on macOS.
+
 # 0.9.1 (2020-10-05)
 
 ## Bugfixes
