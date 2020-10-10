@@ -1,14 +1,14 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugMessageError, ButtplugServerError},
+    errors::{ButtplugMessageError, ButtplugServerError, ButtplugError},
     messages::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugMessage,
     },
   },
-  server::ButtplugServer,
+  server::{ButtplugServer, ButtplugServerOptions},
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
@@ -54,14 +54,22 @@ pub struct ButtplugInProcessClientConnector {
 }
 
 #[cfg(feature = "server")]
+impl<'a> Default for ButtplugInProcessClientConnector {
+  fn default() -> Self {
+    // Unwrap is fine here, if we pass in default options we'll never fail.
+    ButtplugInProcessClientConnector::new(ButtplugServerOptions::default()).unwrap()
+  }
+}
+
+#[cfg(feature = "server")]
 impl<'a> ButtplugInProcessClientConnector {
   /// Creates a new in-process connector, with a server instance.
   ///
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
-  pub fn new(name: &str, max_ping_time: u64) -> Self {
-    let (server, mut server_recv) = ButtplugServer::new(&name, max_ping_time);
+  pub fn new(options: ButtplugServerOptions) -> Result<Self, ButtplugError> {
+    let (server, mut server_recv) = ButtplugServer::new(options)?;
     let (send, recv) = bounded(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {
@@ -75,11 +83,11 @@ impl<'a> ButtplugInProcessClientConnector {
       info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
     }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();
 
-    Self {
+    Ok(Self {
       connector_outbound_recv: Some(recv),
       server_outbound_sender,
       server,
-    }
+    })
   }
 
   /// Get a reference to the internal server.

@@ -64,7 +64,7 @@ fn test_disconnect_status() {
   async_manager::block_on(async {
     let (client, _) = ButtplugClient::connect(
       "Test Client",
-      ButtplugInProcessClientConnector::new("Test Server", 0),
+      ButtplugInProcessClientConnector::default(),
     )
     .await
     .unwrap();
@@ -79,7 +79,7 @@ fn test_double_disconnect() {
   async_manager::block_on(async {
     let (client, _) = ButtplugClient::connect(
       "Test Client",
-      ButtplugInProcessClientConnector::new("Test Server", 0),
+      ButtplugInProcessClientConnector::default(),
     )
     .await
     .unwrap();
@@ -94,11 +94,11 @@ fn test_connect_init() {
   async_manager::block_on(async {
     let (client, _) = ButtplugClient::connect(
       "Test Client",
-      ButtplugInProcessClientConnector::new("Test Server", 0),
+      ButtplugInProcessClientConnector::default(),
     )
     .await
     .unwrap();
-    assert_eq!(client.server_name, "Test Server");
+    assert_eq!(client.server_name, "Buttplug Server");
   });
 }
 
@@ -107,7 +107,7 @@ fn test_connect_init() {
 #[test]
 fn test_start_scanning() {
   async_manager::block_on(async {
-    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::default();
     let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
     test_mgr_helper.add_ble_device("Massage Demo").await;
     let (client, _) = ButtplugClient::connect("Test Client", connector)
@@ -121,7 +121,7 @@ fn test_start_scanning() {
 #[test]
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
-    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
       .add_comm_manager::<DelayDeviceCommunicationManager>()
@@ -146,7 +146,7 @@ fn test_stop_scanning_when_not_scanning() {
 #[test]
 fn test_start_scanning_when_already_scanning() {
   async_manager::block_on(async {
-    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
       .add_comm_manager::<DelayDeviceCommunicationManager>()
@@ -163,7 +163,7 @@ fn test_start_scanning_when_already_scanning() {
 #[test]
 fn test_client_scanning_finished() {
   async_manager::block_on(async {
-    let connector = ButtplugInProcessClientConnector::new("Test Server", 0);
+    let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
       .add_comm_manager::<DelayDeviceCommunicationManager>()

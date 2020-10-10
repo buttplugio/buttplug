@@ -37,7 +37,7 @@ async fn embedded_connector_example() {
   //
   // For now, we'll just give the server a name. We'll go over other server
   // constructor arguments in later examples.
-  let connector = ButtplugInProcessClientConnector::new("Example Server", 0);
+  let connector = ButtplugInProcessClientConnector::default();
 
   // Now that we've got a connector, we can use the ButtplugClient::connect()
   // function to spin up our client event loop. We pass this function three

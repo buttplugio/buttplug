@@ -296,14 +296,15 @@ impl ButtplugClient {
   #[cfg(feature = "server")]
   pub fn connect_in_process(
     name: &str,
-    max_ping_time: u64,
-  ) -> impl Future<
-    Output = Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
-  > {
+    options: crate::server::ButtplugServerOptions
+  ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>>
+  {
     use crate::connector::ButtplugInProcessClientConnector;
 
-    let connector =
-      ButtplugInProcessClientConnector::new("Default In Process Server", max_ping_time);
+    let connector = match ButtplugInProcessClientConnector::new(options) {
+      Ok(conn) => conn,
+      Err(err) => return Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
+    };
     #[cfg(feature = "btleplug-manager")]
     {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;

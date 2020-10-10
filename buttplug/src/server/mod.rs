@@ -54,6 +54,24 @@ pub enum ButtplugServerStartupError {
   DeviceManagerTypeAlreadyAdded(String),
 }
 
+pub struct ButtplugServerOptions {
+  pub name: String,
+  pub max_ping_time: u64,
+  pub device_configuration_file: Option<String>,
+  pub user_device_configuration_file: Option<String>,
+}
+
+impl Default for ButtplugServerOptions {
+  fn default() -> Self {
+    Self {
+      name: "Buttplug Server".to_owned(),
+      max_ping_time: 0,
+      device_configuration_file: None,
+      user_device_configuration_file: None,
+    }
+  }  
+}
+
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
@@ -67,12 +85,17 @@ pub struct ButtplugServer {
 }
 
 impl ButtplugServer {
-  pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugServerMessage>) {
+  // Can't use default() because we return a tuple, so this is the next best thing.
+  pub fn new_with_defaults() -> (Self, Receiver<ButtplugServerMessage>) {
+    Self::new(ButtplugServerOptions::default()).unwrap()
+  }
+
+  pub fn new(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
     let (send, recv) = bounded(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
-    let (ping_timer, ping_receiver) = if max_ping_time > 0 {
-      let (timer, mut receiver) = PingTimer::new(max_ping_time);
+    let (ping_timer, ping_receiver) = if options.max_ping_time > 0 {
+      let (timer, mut receiver) = PingTimer::new(options.max_ping_time);
       // This is super dumb, but: we have a chain of channels to make sure we
       // notify both the server and the device manager. Should probably just use
       // a broadcaster here too.
@@ -105,11 +128,11 @@ impl ButtplugServer {
     } else {
       (None, None)
     };
-    (
+    Ok((
       Self {
-        server_name: name.to_string(),
+        server_name: options.name,
         client_name: String::default(),
-        max_ping_time,
+        max_ping_time: options.max_ping_time,
         device_manager: DeviceManager::new(send.clone(), ping_receiver),
         ping_timer,
         pinged_out,
@@ -117,7 +140,7 @@ impl ButtplugServer {
         event_sender: send,
       },
       recv,
-    )
+    ))
   }
 
   pub fn client_name(&self) -> String {
@@ -283,7 +306,7 @@ mod test {
 
   #[test]
   fn test_server_reuse() {
-    let (server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new_with_defaults();
     async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
@@ -321,7 +344,7 @@ mod test {
     // see output.
     //
     // let _ = env_logger::builder().is_test(true).try_init();
-    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new_with_defaults();
     async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);

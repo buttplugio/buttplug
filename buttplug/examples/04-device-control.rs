@@ -16,6 +16,7 @@ use buttplug::{
     ButtplugClientEvent,
   },
   core::messages::ButtplugDeviceMessageType,
+  server::ButtplugServerOptions,
   util::async_manager,
 };
 use futures::StreamExt;
@@ -29,7 +30,7 @@ async fn device_control_example() {
   // connect_in_process convenience method. This creates an in process connector
   // for us, and also adds all of the device managers built into the library to
   // the server it uses. Handy!
-  let (client, mut event_stream) = ButtplugClient::connect_in_process("Example Client", 0)
+  let (client, mut event_stream) = ButtplugClient::connect_in_process("Example Client", ButtplugServerOptions::default())
     .await
     .unwrap();
 

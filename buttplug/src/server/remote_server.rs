@@ -1,4 +1,4 @@
-use super::{ButtplugServer, ButtplugServerStartupError};
+use super::{ButtplugServer, ButtplugServerStartupError, ButtplugServerOptions};
 use crate::{
   connector::ButtplugConnector,
   core::{
@@ -129,10 +129,10 @@ async fn run_server<ConnectorType>(
 }
 
 impl ButtplugRemoteServer {
-  pub fn new(name: &str, max_ping_time: u64) -> (Self, Receiver<ButtplugRemoteServerEvent>) {
-    let (server, server_receiver) = ButtplugServer::new(name, max_ping_time);
+  pub fn new(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugRemoteServerEvent>), ButtplugError> {
+    let (server, server_receiver) = ButtplugServer::new(options)?;
     let (remote_event_sender, remote_event_receiver) = bounded(256);
-    (
+    Ok((
       Self {
         event_sender: remote_event_sender,
         server: Arc::new(server),
@@ -140,7 +140,7 @@ impl ButtplugRemoteServer {
         task_channel: Arc::new(Mutex::new(None)),
       },
       remote_event_receiver,
-    )
+    ))
   }
 
   pub fn start<ConnectorType>(

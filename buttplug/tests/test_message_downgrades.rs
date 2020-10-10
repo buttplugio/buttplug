@@ -21,7 +21,7 @@ mod test {
 
   #[test]
   fn test_version0_connection() {
-    let (server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new_with_defaults();
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
@@ -31,7 +31,7 @@ mod test {
       assert_eq!(
         incoming_json,
         format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         ).into()
       );
@@ -40,7 +40,7 @@ mod test {
 
   #[test]
   fn test_version2_connection() {
-    let (server, _) = ButtplugServer::new("Test Server", 0);
+    let (server, _) = ButtplugServer::new_with_defaults();
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi =
       r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
@@ -51,7 +51,7 @@ mod test {
       assert_eq!(
         incoming_json,
         format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         ).into()
       );
@@ -60,7 +60,7 @@ mod test {
 
   #[test]
   fn test_version0_device_added_device_list() {
-    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new_with_defaults();
     let mut serializer = ButtplugServerJSONSerializer::default();
 
     async_manager::block_on(async {
@@ -74,7 +74,7 @@ mod test {
       assert_eq!(
         serializer.serialize(vec!(output)),
         format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         ).into()
       );
@@ -110,7 +110,7 @@ mod test {
 
   #[test]
   fn test_version0_singlemotorvibratecmd() {
-    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new_with_defaults();
     let mut serializer = ButtplugServerJSONSerializer::default();
     async_manager::block_on(async {
       let helper = server.add_test_comm_manager().unwrap();
@@ -124,7 +124,7 @@ mod test {
       assert_eq!(
         serializer.serialize(vec!(output)),
         format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Test Server"}}}}]"#,
+          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
           BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
         ).into()
       );

@@ -19,7 +19,7 @@ use futures::StreamExt;
 #[test]
 fn test_capabilities_exposure() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::new("Test Server", 0);
+    let (server, mut recv) = ButtplugServer::new_with_defaults();
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Onyx+").await;
     server
