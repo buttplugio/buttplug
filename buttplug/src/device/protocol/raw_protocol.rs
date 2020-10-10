@@ -1,23 +1,23 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolCreator};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::protocol::ButtplugProtocolProperties,
 };
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct RawProtocol {
   name: String,
   message_attributes: MessageAttributesMap,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl RawProtocol {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
-    Self {
+impl ButtplugProtocol for RawProtocol {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: vec![],
-    }
+    })
   }
 }
 

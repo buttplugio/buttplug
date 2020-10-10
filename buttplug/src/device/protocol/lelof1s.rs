@@ -2,10 +2,8 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::core::errors::ButtplugError;
-use crate::device::configuration_manager::DeviceProtocolConfiguration;
 use crate::device::DeviceSubscribeCmd;
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
@@ -20,7 +18,7 @@ use async_mutex::Mutex;
 use futures::future::BoxFuture;
 use std::sync::Arc;
 
-#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct LeloF1s {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -28,22 +26,16 @@ pub struct LeloF1s {
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl LeloF1s {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+impl ButtplugProtocol for LeloF1s {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Self {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-    }
-  }
-}
-
-impl ButtplugProtocolCreator for LeloF1s {
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    Box::new(Self::new(name, attrs))
+    })
   }
 
   fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {

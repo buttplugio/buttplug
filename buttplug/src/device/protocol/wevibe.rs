@@ -2,7 +2,6 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::{
   core::{
@@ -14,7 +13,6 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
@@ -27,7 +25,7 @@ use futures_timer::Delay;
 use std::sync::Arc;
 use std::time::Duration;
 
-#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct WeVibe {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -35,22 +33,16 @@ pub struct WeVibe {
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl WeVibe {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+impl ButtplugProtocol for WeVibe {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Self {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-    }
-  }
-}
-
-impl ButtplugProtocolCreator for WeVibe {
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    Box::new(Self::new(name, attrs))
+    })
   }
 
   fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {

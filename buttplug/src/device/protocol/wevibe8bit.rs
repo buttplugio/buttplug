@@ -2,7 +2,6 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
@@ -16,7 +15,7 @@ use crate::{
 use async_mutex::Mutex;
 use std::sync::Arc;
 
-#[derive(ButtplugProtocol, ButtplugProtocolCreator, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct WeVibe8Bit {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -24,16 +23,16 @@ pub struct WeVibe8Bit {
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl WeVibe8Bit {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+impl ButtplugProtocol for WeVibe8Bit {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Self {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-    }
+    })
   }
 }
 

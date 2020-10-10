@@ -2,15 +2,12 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::{
   core::errors::ButtplugDeviceError,
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
     ButtplugDeviceEvent,
     DeviceSubscribeCmd,
-    BoundedDeviceEventBroadcaster
   },
 };
 use crate::{
@@ -24,10 +21,8 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::async_manager
 };
 use async_mutex::Mutex;
-use async_channel::{Receiver, bounded};
 use futures::future::BoxFuture;
 use futures::StreamExt;
 use std::sync::{
@@ -35,62 +30,30 @@ use std::sync::{
   Arc,
 };
 
-#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct Lovense {
   name: String,
   message_attributes: MessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  rotation_direction: Arc<AtomicBool>,
-  battery_receiver: Receiver<f64>
+  rotation_direction: Arc<AtomicBool>
 }
 
-impl Lovense {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap, mut device_notification_receiver: BoundedDeviceEventBroadcaster) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
-    let (battery_sender, battery_receiver) = bounded(256);
-    async_manager::spawn(async move {
-      while let Some(event) = device_notification_receiver.recv().await {
-        match event {
-          ButtplugDeviceEvent::Notification(_, data) => {
-            if let Ok(data_str) = std::str::from_utf8(&data) {
-              let len = data_str.len();
-              // Chop the semicolon at the end of the received line.
-              if let Ok(level) = data_str[0..(len-1)].parse::<u8>() {
-                if let Err(_) = battery_sender.send(level as f64 / 100f64).await {
-                  debug!("Lovense device removed, exiting notification loop.");
-                  return;
-                }
-              }
-            }
-          }
-          ButtplugDeviceEvent::Removed => {
-            debug!("Lovense device removed, exiting notification loop.");
-            return;
-          }
-        }
-      }
-      debug!("Lovense notification channel shut down, assuming device has disconnected.");
-    }).unwrap();
-    Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-      rotation_direction: Arc::new(AtomicBool::new(false)),
-      battery_receiver
-    }
-  }
-}
-
-impl ButtplugProtocolCreator for Lovense {
+impl ButtplugProtocol for Lovense {
   // Due to this lacking the ability to take extra fields, we can't pass in our
   // event receiver from the subscription, which we'll need for things like
   // battery readings. Therefore, we expect initialize() to return the protocol
   // itself instead of calling this, which is simply a convenience method for
   // the default implementation anyways.
   fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    Box::new(Self::new(name, attrs))
+    let manager = GenericCommandManager::new(&attrs);
+    Box::new(Self {
+      name: name.to_owned(),
+      message_attributes: attrs,
+      stop_commands: manager.get_stop_commands(),
+      manager: Arc::new(Mutex::new(manager)),
+      rotation_direction: Arc::new(AtomicBool::new(false)),
+    })
   }
 
   fn initialize(
@@ -208,7 +171,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
   }
 
   fn handle_battery_level_cmd(&self, device: Arc<Box<dyn DeviceImpl>>, message: messages::BatteryLevelCmd) -> ButtplugDeviceResultFuture {
-    let mut battery_receiver = self.battery_receiver.clone();
+    let mut device_notification_receiver = device.get_event_receiver();
     Box::pin(async move {
       let write_fut = device.write_value(DeviceWriteCmd::new(
         Endpoint::Tx,
@@ -216,10 +179,24 @@ impl ButtplugProtocolCommandHandler for Lovense {
         false,
       ));
       write_fut.await?;
-      match battery_receiver.next().await {
-        Some(battery_level) => Ok(messages::BatteryLevelReading::new(message.device_index, battery_level).into()),
-        None => Err(ButtplugDeviceError::DeviceNotConnected("Notification channel no longer exists, assuming device disconnected.".to_owned()).into())
+      while let Some(event) = device_notification_receiver.recv().await {
+        match event {
+          ButtplugDeviceEvent::Notification(_, data) => {
+            if let Ok(data_str) = std::str::from_utf8(&data) {
+              let len = data_str.len();
+              // Chop the semicolon at the end of the received line.
+              if let Ok(level) = data_str[0..(len-1)].parse::<u8>() {
+                return Ok(messages::BatteryLevelReading::new(message.device_index, level as f64 / 100f64).into());
+              }
+            }
+          }
+          ButtplugDeviceEvent::Removed => {
+            debug!("Lovense device removed, exiting notification loop.");
+            return Err(ButtplugDeviceError::DeviceNotConnected("Device disconnected while waiting for battery message.".to_owned()).into());
+          }
+        }
       }
+      Err(ButtplugDeviceError::DeviceNotConnected("Device disconnected while waiting for battery message.".to_owned()).into())
     })
   }
 }

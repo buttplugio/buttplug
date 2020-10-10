@@ -2,7 +2,6 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
@@ -17,11 +16,10 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
-use crate::device::configuration_manager::DeviceProtocolConfiguration;
 use crate::core::errors::ButtplugError;
 use futures::future::{self, BoxFuture};
 
-#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct Youou {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -29,22 +27,16 @@ pub struct Youou {
   packet_id: AtomicU8,
 }
 
-impl Youou {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+impl ButtplugProtocol for Youou {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Self {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       packet_id: AtomicU8::new(0),
-    }
-  }
-}
-
-impl ButtplugProtocolCreator for Youou {
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    Box::new(Self::new(name, attrs))
+    })
   }
 
   fn initialize(_device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>

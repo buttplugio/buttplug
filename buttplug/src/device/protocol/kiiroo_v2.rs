@@ -3,7 +3,6 @@ use super::{
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
-  ButtplugProtocolCreator,
 };
 use crate::{
   core::{
@@ -16,7 +15,6 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
@@ -30,7 +28,7 @@ use std::sync::{
   Arc,
 };
 
-#[derive(ButtplugProtocol, ButtplugProtocolProperties)]
+#[derive(ButtplugProtocolProperties)]
 pub struct KiirooV2 {
   name: String,
   message_attributes: MessageAttributesMap,
@@ -39,23 +37,17 @@ pub struct KiirooV2 {
   previous_position: Arc<AtomicU8>,
 }
 
-impl KiirooV2 {
-  pub(super) fn new(name: &str, message_attributes: MessageAttributesMap) -> Self {
+impl ButtplugProtocol for KiirooV2 {
+  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Self {
+    Box::new(Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       _manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-impl ButtplugProtocolCreator for KiirooV2 {
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    Box::new(Self::new(name, attrs))
+    })
   }
 
   fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
