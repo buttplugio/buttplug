@@ -19,7 +19,7 @@ use std::sync::{
 };
 use crate::device::configuration_manager::DeviceProtocolConfiguration;
 use crate::core::errors::ButtplugError;
-use futures::future::BoxFuture;
+use futures::future::{self, BoxFuture};
 
 #[derive(ButtplugProtocol, ButtplugProtocolProperties)]
 pub struct Youou {
@@ -47,20 +47,11 @@ impl ButtplugProtocolCreator for Youou {
     Box::new(Self::new(name, attrs))
   }
 
-  fn try_create(
-    device_impl: &dyn DeviceImpl,
-    config: DeviceProtocolConfiguration,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
-    where
-        Self: Sized,
+  fn initialize(_device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
   {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
-    let endpoints = device_impl.endpoints();
-    let (names, attrs) = config.get_attributes("VX001_", &endpoints).unwrap();
-    let name = names.get("en-us").unwrap().clone();
-
-    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
+    Box::pin(future::ready(Ok(Some("VX001_".to_owned()))))
   }
 }
 

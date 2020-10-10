@@ -86,22 +86,20 @@ impl Lovense {
 impl ButtplugProtocolCreator for Lovense {
   // Due to this lacking the ability to take extra fields, we can't pass in our
   // event receiver from the subscription, which we'll need for things like
-  // battery readings. Therefore, we expect try_create() to return the protocol
+  // battery readings. Therefore, we expect initialize() to return the protocol
   // itself instead of calling this, which is simply a convenience method for
   // the default implementation anyways.
-  fn new_protocol(_name: &str, _attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
-    unimplemented!("This should never be called!");
+  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+    Box::new(Self::new(name, attrs))
   }
 
-  fn try_create(
+  fn initialize(
     device_impl: &dyn DeviceImpl,
-    configuration: DeviceProtocolConfiguration,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
     let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
     let info_fut = device_impl.write_value(msg);
     let mut event_receiver = device_impl.get_event_receiver();
-    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       let identifier;
       subscribe_fut.await?;
@@ -133,10 +131,7 @@ impl ButtplugProtocolCreator for Lovense {
           );
         }
       };
-      let (names, attrs) = configuration.get_attributes(&identifier, &endpoints).unwrap();
-      let name = names.get("en-us").unwrap();
-      let device: Box<dyn ButtplugProtocol> = Box::new(Self::new(name, attrs, event_receiver));
-      Ok(device)
+      Ok(Some(identifier))
     })
   }
 }

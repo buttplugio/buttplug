@@ -58,19 +58,12 @@ impl ButtplugProtocolCreator for KiirooV2 {
     Box::new(Self::new(name, attrs))
   }
 
-  fn try_create(
-    device_impl: &dyn DeviceImpl,
-    configuration: DeviceProtocolConfiguration,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
-    let device_name = device_impl.name().to_owned();
-    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       info_fut.await?;
-      let (names, attrs) = configuration.get_attributes(&device_name, &endpoints).unwrap();
-      let name = names.get("en-us").unwrap();
-      Ok(Self::new_protocol(name, attrs))
+      Ok(None)
     })
   }
 }

@@ -154,9 +154,21 @@ pub trait ButtplugProtocolCreator: ButtplugProtocol {
     Self: Sized,
   {
     let endpoints = device_impl.endpoints();
-    let (names, attrs) = config.get_attributes(device_impl.name(), &endpoints).unwrap();
-    let name = names.get("en-us").unwrap().clone();
-    Box::pin(async move { Ok(Self::new_protocol(&name, attrs)) })
+    let name = device_impl.name().to_owned();
+    let init_fut = Self::initialize(device_impl);
+    Box::pin(async move {
+      let device_identifier = match init_fut.await {
+        Ok(maybe_ident) => maybe_ident.unwrap_or(name),
+        Err(err) => return Err(err)
+      };
+      let (names, attrs) = config.get_attributes(&device_identifier, &endpoints).unwrap();
+      let name = names.get("en-us").unwrap().clone();  
+      Ok(Self::new_protocol(&name, attrs)) 
+    })
+  }
+
+  fn initialize(_device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+    Box::pin(future::ready(Ok(None)))
   }
 
   fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol>

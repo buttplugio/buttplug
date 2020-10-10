@@ -46,10 +46,7 @@ impl ButtplugProtocolCreator for KiirooV21 {
     Box::new(Self::new(name, attrs))
   }
 
-  fn try_create(
-    device_impl: &dyn DeviceImpl,
-    configuration: DeviceProtocolConfiguration,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling Onyx+ init");
     let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
@@ -61,15 +58,11 @@ impl ButtplugProtocolCreator for KiirooV21 {
       vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
       true,
     ));
-    let device_name = device_impl.name().to_owned();
-    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       init_fut1.await?;
       Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
-      let (names, attrs) = configuration.get_attributes(&device_name, &endpoints).unwrap();
-      let name = names.get("en-us").unwrap();
-      Ok(Self::new_protocol(name, attrs))
+      Ok(None)
     })
   }
 }

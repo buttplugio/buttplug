@@ -53,10 +53,7 @@ impl ButtplugProtocolCreator for WeVibe {
     Box::new(Self::new(name, attrs))
   }
 
-  fn try_create(
-    device_impl: &dyn DeviceImpl,
-    configuration: DeviceProtocolConfiguration,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
+  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
@@ -68,15 +65,11 @@ impl ButtplugProtocolCreator for WeVibe {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
       false
     ));
-    let device_name = device_impl.name().to_owned();
-    let endpoints = device_impl.endpoints();
     Box::pin(async move {
       vibration_on.await?;
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
-      let (names, attrs) = configuration.get_attributes(&device_name, &endpoints).unwrap();
-      let name = names.get("en-us").unwrap();
-      Ok(Self::new_protocol(name, attrs))
+      Ok(None)
     })
   }
 }
