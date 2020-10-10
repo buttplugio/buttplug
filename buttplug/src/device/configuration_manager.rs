@@ -15,11 +15,9 @@ use crate::{
   device::Endpoint,
   util::json::JSONValidator,
 };
-use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 use std::mem;
-use std::sync::{Arc, RwLock, atomic::{AtomicBool, Ordering}};
 use uuid::Uuid;
 
 static DEVICE_CONFIGURATION_JSON: &str =
@@ -28,36 +26,6 @@ static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../dependencies/buttplug-device-config/buttplug-device-config-schema.json");
 static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../dependencies/buttplug-device-config/buttplug-user-device-config-schema.json");
-static DEVICE_EXTERNAL_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
-  Lazy::new(|| Arc::new(RwLock::new(None)));
-static DEVICE_USER_CONFIGURATION_JSON: Lazy<Arc<RwLock<Option<String>>>> =
-  Lazy::new(|| Arc::new(RwLock::new(None)));
-static ALLOW_RAW_MESSAGES: Lazy<Arc<AtomicBool>> =
-  Lazy::new(|| Arc::new(AtomicBool::new(false)));
-
-pub fn set_allow_raw_messages() {
-  ALLOW_RAW_MESSAGES.store(true, Ordering::SeqCst);
-}
-
-pub fn get_allow_raw_message() -> bool {
-  ALLOW_RAW_MESSAGES.load(Ordering::SeqCst)
-}
-
-pub fn set_external_device_config(config: Option<String>) {
-  let mut c = DEVICE_EXTERNAL_CONFIGURATION_JSON.write().unwrap();
-  *c = config;
-}
-
-pub fn set_user_device_config(config: Option<String>) {
-  let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
-  *c = config;
-}
-
-#[allow(dead_code)]
-fn clear_user_device_config() {
-  let mut c = DEVICE_USER_CONFIGURATION_JSON.write().unwrap();
-  *c = None;
-}
 
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
@@ -263,16 +231,19 @@ impl ProtocolConfiguration {
 
 #[derive(Clone, Debug)]
 pub struct DeviceProtocolConfiguration {
+  allow_raw_messages: bool,
   defaults: Option<ProtocolAttributes>,
   configurations: Vec<ProtocolAttributes>,
 }
 
 impl DeviceProtocolConfiguration {
   pub fn new(
+    allow_raw_messages: bool,
     defaults: Option<ProtocolAttributes>,
     configurations: Vec<ProtocolAttributes>,
   ) -> Self {
     Self {
+      allow_raw_messages,
       defaults,
       configurations,
     }
@@ -304,7 +275,7 @@ impl DeviceProtocolConfiguration {
         if !attributes.contains_key(&ButtplugDeviceMessageType::StopDeviceCmd) {
           attributes.insert(ButtplugDeviceMessageType::StopDeviceCmd, MessageAttributes::default());
         }
-        if get_allow_raw_message() {
+        if self.allow_raw_messages {
           let mut endpoint_attributes = MessageAttributes::default();
           endpoint_attributes.endpoints = Some(endpoints.clone());
           attributes.insert(ButtplugDeviceMessageType::RawReadCmd, endpoint_attributes.clone());
@@ -326,6 +297,7 @@ impl DeviceProtocolConfiguration {
 }
 
 pub struct DeviceConfigurationManager {
+  allow_raw_messages: bool,
   pub(self) config: ProtocolConfiguration
 }
 
@@ -336,46 +308,44 @@ unsafe impl Sync for DeviceConfigurationManager {
 
 impl Default for DeviceConfigurationManager {
   fn default() -> Self {
-    let external_config_guard = DEVICE_EXTERNAL_CONFIGURATION_JSON.clone();
-    let external_config = external_config_guard.read().unwrap();
-    let mut config: ProtocolConfiguration;
-    // TODO We should already load the JSON into the file statics, and just
-    // clone it out of our statics as needed.
-    let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
-
-    if let Some(ref cfg) = *external_config {
-      match config_validator.validate(&cfg) {
-        Ok(_) => config = serde_json::from_str(&cfg).unwrap(),
-        Err(e) => panic!(
-          "Built-in configuration schema is invalid! Aborting! {:?}",
-          e
-        ),
-      }
-    } else {
-      match config_validator.validate(DEVICE_CONFIGURATION_JSON) {
-        Ok(_) => config = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap(),
-        Err(e) => panic!(
-          "Built-in configuration schema is invalid! Aborting! {:?}",
-          e
-        ),
-      }
-    }
-
-    let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
-    let user_config_guard = DEVICE_USER_CONFIGURATION_JSON.clone();
-    let user_config_str = user_config_guard.read().unwrap();
-    if let Some(ref user_cfg) = *user_config_str {
-      match user_validator.validate(&user_cfg.to_string()) {
-        Ok(_) => config.merge_user_config(serde_json::from_str(&user_cfg.to_string()).unwrap()),
-        Err(e) => panic!("User configuration schema is invalid! Aborting! {:?}", e),
-      }
-    }
-
-    DeviceConfigurationManager { config }
+    Self::new(false, None, None).unwrap()
   }
 }
 
 impl DeviceConfigurationManager {
+  pub fn new(allow_raw_messages: bool, external_config: Option<String>, user_config: Option<String>) -> Result<Self, ButtplugDeviceError> {
+    // TODO Handling references incorrectly here.
+    let config_str = if let Some(cfg) = external_config {
+      cfg
+    } else {
+      DEVICE_CONFIGURATION_JSON.to_owned()
+    };
+
+    let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
+    let mut config: ProtocolConfiguration = match config_validator.validate(&config_str) {
+      Ok(_) => {
+        match serde_json::from_str(&config_str) {
+          Ok(config) => config,
+          Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+        }
+      },
+      Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+    };
+
+    if let Some(user_config_str) = user_config {
+      let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
+      match user_validator.validate(&user_config_str) {
+        Ok(_) => match serde_json::from_str(&user_config_str) {
+            Ok(user_cfg) => config.merge_user_config(user_cfg),
+            Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+        },
+        Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+      }
+    }
+
+    Ok(DeviceConfigurationManager { allow_raw_messages, config })
+  }
+
   /// Provides read-only access to the internal protocol/identifier map. Mainly
   /// used for WebBluetooth filter construction, but could also be handy for
   /// listing capabilities in UI, etc.
@@ -386,12 +356,12 @@ impl DeviceConfigurationManager {
   pub fn find_configuration(
     &self,
     specifier: &DeviceSpecifier,
-  ) -> Option<(String, ProtocolDefinition)> {
+  ) -> Option<(bool, String, ProtocolDefinition)> {
     info!("Looking for protocol that matches spec: {:?}", specifier);
     for (name, def) in self.config.protocols.iter() {
       if def == specifier {
         debug!("Found protocol for spec!");
-        return Some((name.clone(), def.clone()));
+        return Some((self.allow_raw_messages, name.clone(), def.clone()));
       }
     }
     info!("No protocol found for spec!");
@@ -405,6 +375,7 @@ impl DeviceConfigurationManager {
     if let Some(proto) = self.config.protocols.get(name) {
       info!("Found a protocol definition for {}", name);
       Some(DeviceProtocolConfiguration::new(
+        self.allow_raw_messages,
         proto.defaults.clone(),
         proto.configurations.clone(),
       ))
@@ -418,8 +389,6 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    clear_user_device_config,
-    set_user_device_config,
     BluetoothLESpecifier,
     DeviceConfigurationManager,
     DeviceProtocolConfiguration,
@@ -455,7 +424,7 @@ mod test {
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
-      DeviceProtocolConfiguration::new(proto.1.defaults.clone(), proto.1.configurations);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
@@ -494,7 +463,7 @@ mod test {
         .len(),
       1
     );
-    set_user_device_config(Some(
+    config = DeviceConfigurationManager::new(false, None, Some(
       r#"
         { 
             "protocols": {
@@ -513,8 +482,7 @@ mod test {
         }
         "#
       .to_string(),
-    ));
-    config = DeviceConfigurationManager::default();
+    )).unwrap();
     assert!(config.config.protocols.contains_key("erostek-et312"));
     assert!(config
       .config
@@ -546,6 +514,5 @@ mod test {
       .unwrap()
       .iter()
       .any(|x| x.port == "COM1"));
-    clear_user_device_config();
   }
 }

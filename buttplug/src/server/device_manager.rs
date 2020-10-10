@@ -34,7 +34,7 @@ use crate::{
       ScanningFinished,
     },
   },
-  device::{ButtplugDevice, ButtplugDeviceEvent},
+  device::{ButtplugDevice, ButtplugDeviceEvent, configuration_manager::DeviceConfigurationManager},
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
@@ -61,6 +61,7 @@ enum DeviceEvent {
 }
 
 fn wait_for_manager_events(
+  device_config_manager: Arc<DeviceConfigurationManager>,
   ping_receiver: Option<Receiver<()>>,
   server_sender: Sender<ButtplugServerMessage>,
 ) -> (
@@ -109,8 +110,9 @@ fn wait_for_manager_events(
               let device_event_sender_clone = device_event_sender.clone();
               let device_map_clone = device_map.clone();
               let server_sender_clone = server_sender.clone();
+              let device_config_mgr_clone = device_config_manager.clone();
               async_manager::spawn(async move {
-                match ButtplugDevice::try_create_device(device_creator).await {
+                match ButtplugDevice::try_create_device(device_config_mgr_clone, device_creator).await {
                   Ok(option_dev) => match option_dev {
                     Some(device) => {
                       info!("Assigning index {} to {}", device_index, device.name());
@@ -231,15 +233,19 @@ impl DeviceManager {
   pub fn new(
     event_sender: Sender<ButtplugServerMessage>,
     ping_receiver: Option<Receiver<()>>,
-  ) -> Self {
+    allow_raw_messages: bool,
+    device_config_str: Option<String>,
+    user_device_config_str: Option<String>,
+  ) -> Result<Self, ButtplugDeviceError> {
+    let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages, device_config_str, user_device_config_str)?);
     let (event_loop_fut, device_map, device_event_sender) =
-      wait_for_manager_events(ping_receiver, event_sender);
+      wait_for_manager_events(config.clone(), ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();
-    Self {
+    Ok(Self {
       sender: device_event_sender,
       devices: device_map,
       comm_managers: Arc::new(DashMap::new()),
-    }
+    })
   }
 
   fn start_scanning(&self) -> ButtplugServerResultFuture {

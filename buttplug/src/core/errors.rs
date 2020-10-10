@@ -158,6 +158,8 @@ pub enum ButtplugDeviceError {
   ProtocolRequirementError(String),
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
+  /// Device Configuration File Error: {0}
+  DeviceConfigurationFileError(String)
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

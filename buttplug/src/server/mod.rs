@@ -57,6 +57,7 @@ pub enum ButtplugServerStartupError {
 pub struct ButtplugServerOptions {
   pub name: String,
   pub max_ping_time: u64,
+  pub allow_raw_messages: bool,
   pub device_configuration_file: Option<String>,
   pub user_device_configuration_file: Option<String>,
 }
@@ -66,6 +67,7 @@ impl Default for ButtplugServerOptions {
     Self {
       name: "Buttplug Server".to_owned(),
       max_ping_time: 0,
+      allow_raw_messages: false,
       device_configuration_file: None,
       user_device_configuration_file: None,
     }
@@ -128,12 +130,13 @@ impl ButtplugServer {
     } else {
       (None, None)
     };
+    let device_manager = DeviceManager::new(send.clone(), ping_receiver, options.allow_raw_messages, options.device_configuration_file, options.user_device_configuration_file)?;
     Ok((
       Self {
         server_name: options.name,
         client_name: String::default(),
         max_ping_time: options.max_ping_time,
-        device_manager: DeviceManager::new(send.clone(), ping_receiver),
+        device_manager,
         ping_timer,
         pinged_out,
         connected,

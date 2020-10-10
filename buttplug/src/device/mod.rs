@@ -357,23 +357,23 @@ impl ButtplugDevice {
   }
 
   pub async fn try_create_device(
+    device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
-    let device_cfg_mgr = DeviceConfigurationManager::default();
     // First off, we need to see if we even have a configuration available
     // for the device we're trying to create. If we don't, return Ok(None),
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
 
-    match device_cfg_mgr.find_configuration(&device_creator.get_specifier()) {
-      Some((config_name, config)) => {
+    match device_config_mgr.find_configuration(&device_creator.get_specifier()) {
+      Some((allow_raw_messages, config_name, config)) => {
         // Now that we have both a possible device implementation and a
         // configuration for that device, try to initialize the implementation.
         // This usually means trying to connect to whatever the device is,
         // finding endpoints, etc.
         let device_protocol_config =
-          DeviceProtocolConfiguration::new(config.defaults.clone(), config.configurations.clone());
+          DeviceProtocolConfiguration::new(allow_raw_messages, config.defaults.clone(), config.configurations.clone());
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
