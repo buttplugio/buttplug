@@ -85,6 +85,7 @@ impl Drop for PingTimer {
 
 impl PingTimer {
   pub fn new(max_ping_time: u64) -> (Self, Receiver<()>) {
+    // TODO This should be fallible new, not a panic.
     if max_ping_time == 0 {
       panic!("Can't create ping timer with no max ping time.");
     }

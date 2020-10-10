@@ -307,7 +307,7 @@ mod test {
       assert!(res.is_err());
       println!("{:?}", res);
       if let Err(ButtplugSerializerError::MessageSpecVersionNotReceived) = res {
-        panic!("Wrong error!");
+        assert!(false, "Wrong error!");
       }
     }
   }

@@ -113,7 +113,7 @@ async fn accept_connection<S>(
             continue;
           }
           async_tungstenite::tungstenite::Message::Binary(_) => {
-            panic!("Don't know how to handle binary message types!");
+            error!("Don't know how to handle binary message types!");
           }
         },
         None => {

@@ -45,7 +45,10 @@ impl Into<Level> for LogLevel {
       LogLevel::Info => Level::INFO,
       LogLevel::Debug => Level::DEBUG,
       LogLevel::Trace => Level::TRACE,
-      LogLevel::Off => panic!("Log messages with a log level of Off are not allowed"),
+      LogLevel::Off => {
+        error!("Log messages with a log level of Off are not allowed");
+        Level::ERROR
+      }
     }
   }
 }

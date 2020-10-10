@@ -37,7 +37,7 @@ use crate::{
 use async_channel::Sender;
 use dashmap::DashMap;
 use futures::{
-  future::{self, BoxFuture, Future},
+  future::{self, BoxFuture},
   FutureExt,
   StreamExt,
 };
