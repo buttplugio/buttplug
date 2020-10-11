@@ -335,47 +335,4 @@ mod test {
       );
     });
   }
-
-  // Warning: This test is brittle. If any log messages are fired between our
-  // log in this message and the asserts, it will fail. If you see failures on
-  // this test, that's probably why.
-  #[test]
-  #[ignore]
-  fn test_log_handler() {
-    // The log crate only allows one log handler at a time, meaning if we
-    // set up env_logger, our server log function won't work. This is a
-    // problem. Only uncomment this if this test if failing and you need to
-    // see output.
-    //
-    // let _ = env_logger::builder().is_test(true).try_init();
-    let (server, mut recv) = ButtplugServer::default();
-    async_manager::block_on(async {
-      let msg =
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      let mut reply = server.parse_message(msg.into()).await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-      reply = server
-        .parse_message(messages::RequestLog::new(messages::LogLevel::Debug).into())
-        .await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
-      debug!("Test log message");
-
-      let mut did_log = false;
-      // Check that we got an event back about a new device.
-
-      while let Some(msg) = recv.next().await {
-        if let ButtplugServerMessage::Log(log) = msg {
-          // We can't assert here, because we may get multiple log
-          // messages back, so we just want to break whenever we get
-          // what we expected.
-          assert_eq!(log.log_level, messages::LogLevel::Debug);
-          assert!(log.log_message.contains("Test log message"));
-          did_log = true;
-          break;
-        }
-      }
-
-      assert!(did_log, "Should've gotten log message");
-    });
-  }
 }
