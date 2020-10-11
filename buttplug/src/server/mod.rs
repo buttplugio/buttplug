@@ -25,6 +25,7 @@ use crate::{
       ButtplugMessage,
       ButtplugServerMessage,
       StopAllDevices,
+      StopScanning,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -173,16 +174,24 @@ impl ButtplugServer {
     if let Some(ping_timer) = &self.ping_timer {
       ping_fut = Some(ping_timer.stop_ping_timer());
     }
+    let stop_scanning_fut = self.parse_message(ButtplugClientMessage::StopScanning(
+      StopScanning::default(),
+    ));
     let stop_fut = self.parse_message(ButtplugClientMessage::StopAllDevices(
       StopAllDevices::default(),
     ));
     let connected = self.connected.clone();
     Box::pin(async move {
+      // TODO We should really log more here.
       connected.store(false, Ordering::SeqCst);
       if let Some(pfut) = ping_fut {
         pfut.await;
       }
-      stop_fut.await.map(|_| ())
+      info!("Server disconnected, stopping all devices...");
+      stop_fut.await;
+      info!("Server disconnected, stopping device scanning if it was started...");
+      stop_scanning_fut.await;
+      Ok(())
     })
   }
 
