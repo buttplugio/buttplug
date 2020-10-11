@@ -142,7 +142,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
   VibrateCmd,
