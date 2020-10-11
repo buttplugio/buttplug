@@ -57,7 +57,7 @@ pub struct ButtplugInProcessClientConnector {
 impl<'a> Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
     // Unwrap is fine here, if we pass in default options we'll never fail.
-    ButtplugInProcessClientConnector::new(ButtplugServerOptions::default()).unwrap()
+    ButtplugInProcessClientConnector::new_with_options(ButtplugServerOptions::default()).unwrap()
   }
 }
 
@@ -68,8 +68,8 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
-  pub fn new(options: ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    let (server, mut server_recv) = ButtplugServer::new(options)?;
+  pub fn new_with_options(options: ButtplugServerOptions) -> Result<Self, ButtplugError> {
+    let (server, mut server_recv) = ButtplugServer::new_with_options(options)?;
     let (send, recv) = bounded(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {

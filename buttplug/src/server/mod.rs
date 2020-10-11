@@ -87,12 +87,13 @@ pub struct ButtplugServer {
 }
 
 impl ButtplugServer {
-  // Can't use default() because we return a tuple, so this is the next best thing.
-  pub fn new_with_defaults() -> (Self, Receiver<ButtplugServerMessage>) {
-    Self::new(ButtplugServerOptions::default()).unwrap()
+  // Can't use the Default trait because we return a tuple, so this is the next best thing.
+  pub fn default() -> (Self, Receiver<ButtplugServerMessage>) {
+    // We can unwrap here because if default init fails, so will pretty much every test.
+    Self::new_with_options(ButtplugServerOptions::default()).unwrap()
   }
 
-  pub fn new(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
+  pub fn new_with_options(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
     let (send, recv) = bounded(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
@@ -309,7 +310,7 @@ mod test {
 
   #[test]
   fn test_server_reuse() {
-    let (server, _) = ButtplugServer::new_with_defaults();
+    let (server, _) = ButtplugServer::default();
     async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
@@ -347,7 +348,7 @@ mod test {
     // see output.
     //
     // let _ = env_logger::builder().is_test(true).try_init();
-    let (server, mut recv) = ButtplugServer::new_with_defaults();
+    let (server, mut recv) = ButtplugServer::default();
     async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);

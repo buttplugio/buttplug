@@ -129,8 +129,14 @@ async fn run_server<ConnectorType>(
 }
 
 impl ButtplugRemoteServer {
-  pub fn new(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugRemoteServerEvent>), ButtplugError> {
-    let (server, server_receiver) = ButtplugServer::new(options)?;
+  // Can't use the Default trait because we need to return our stream, so this
+  // is the next best thing.
+  pub fn default() -> (Self, Receiver<ButtplugRemoteServerEvent>) {
+    Self::new_with_options(ButtplugServerOptions::default()).unwrap()
+  }
+
+  pub fn new_with_options(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugRemoteServerEvent>), ButtplugError> {
+    let (server, server_receiver) = ButtplugServer::new_with_options(options)?;
     let (remote_event_sender, remote_event_receiver) = bounded(256);
     Ok((
       Self {

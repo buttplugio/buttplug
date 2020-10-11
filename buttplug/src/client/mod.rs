@@ -301,7 +301,7 @@ impl ButtplugClient {
   {
     use crate::connector::ButtplugInProcessClientConnector;
 
-    let connector = match ButtplugInProcessClientConnector::new(options) {
+    let connector = match ButtplugInProcessClientConnector::new_with_options(options) {
       Ok(conn) => conn,
       Err(err) => return Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
     };
