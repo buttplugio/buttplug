@@ -442,6 +442,42 @@ mod test {
   }
 
   #[test]
+  fn test_raw_device_config_creation() {
+    let config = DeviceConfigurationManager::new_with_options(true, None, None).unwrap();
+    let lovense =
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+    let proto = config.find_configuration(&lovense).unwrap();
+    let proto_config =
+      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
+    // Make sure we got the right name
+    assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
+    assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawReadCmd));
+    assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
+    assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
+  }
+
+  #[test]
+  fn test_non_raw_device_config_creation() {
+    let config = DeviceConfigurationManager::default();
+    let lovense =
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+    let proto = config.find_configuration(&lovense).unwrap();
+    let proto_config =
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
+    // Make sure we got the right name
+    assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
+    assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawReadCmd));
+    assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
+    assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
+  }
+
+  #[test]
   fn test_user_config_loading() {
     let mut config = DeviceConfigurationManager::default();
     assert!(config.config.protocols.contains_key("erostek-et312"));
@@ -465,7 +501,7 @@ mod test {
         .len(),
       1
     );
-    config = DeviceConfigurationManager::new(false, None, Some(
+    config = DeviceConfigurationManager::new_with_options(false, None, Some(
       r#"
         { 
             "protocols": {
