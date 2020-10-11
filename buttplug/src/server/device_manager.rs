@@ -237,7 +237,7 @@ impl DeviceManager {
     device_config_str: Option<String>,
     user_device_config_str: Option<String>,
   ) -> Result<Self, ButtplugDeviceError> {
-    let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages, device_config_str, user_device_config_str)?);
+    let config = Arc::new(DeviceConfigurationManager::new_with_options(allow_raw_messages, device_config_str, user_device_config_str)?);
     let (event_loop_fut, device_map, device_event_sender) =
       wait_for_manager_events(config.clone(), ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();

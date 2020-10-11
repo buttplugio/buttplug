@@ -308,12 +308,14 @@ unsafe impl Sync for DeviceConfigurationManager {
 
 impl Default for DeviceConfigurationManager {
   fn default() -> Self {
-    Self::new(false, None, None).unwrap()
+    // Unwrap allowed here because we assume our built in device config will
+    // always work. System won't pass tests or possibly even build otherwise.
+    Self::new_with_options(false, None, None).unwrap()
   }
 }
 
 impl DeviceConfigurationManager {
-  pub fn new(allow_raw_messages: bool, external_config: Option<String>, user_config: Option<String>) -> Result<Self, ButtplugDeviceError> {
+  pub fn new_with_options(allow_raw_messages: bool, external_config: Option<String>, user_config: Option<String>) -> Result<Self, ButtplugDeviceError> {
     // TODO Handling references incorrectly here.
     let config_str = if let Some(cfg) = external_config {
       cfg
