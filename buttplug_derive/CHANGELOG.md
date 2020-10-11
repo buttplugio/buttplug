@@ -1,3 +1,11 @@
+# v0.5.0 - 2020/10/09
+
+## Features
+
+- Remove ButtplugProtocolCreator and ButtplugProtocol derives
+  - ButtplugProtocolCreator is no longer a thing, and ButtplugProtocol can
+    no longer be derived.
+
 # v0.4.0 - 2020/07/26
 
 ## Features
