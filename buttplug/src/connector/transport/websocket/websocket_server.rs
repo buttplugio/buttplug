@@ -93,27 +93,37 @@ async fn accept_connection<S>(
       },
       websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
         // TODO should match instead of unwrap here in case there's a socket error.
-        Some(msg) => match msg.unwrap() {
-          async_tungstenite::tungstenite::Message::Text(text_msg) => {
-            info!("Got text: {}", text_msg);
-            if response_sender.send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
-              error!("Connector that owns transport no longer available, exiting.");
+        Some(ws_data) => {
+          match ws_data {
+            Ok(msg) => {
+              match (msg) {
+                async_tungstenite::tungstenite::Message::Text(text_msg) => {
+                  info!("Got text: {}", text_msg);
+                  if response_sender.send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
+                    error!("Connector that owns transport no longer available, exiting.");
+                    break;
+                  }
+                }
+                async_tungstenite::tungstenite::Message::Close(_) => {
+                  break;
+                }
+                async_tungstenite::tungstenite::Message::Ping(_) => {
+                  // noop
+                  continue;
+                }
+                async_tungstenite::tungstenite::Message::Pong(_) => {
+                  // noop
+                  continue;
+                }
+                async_tungstenite::tungstenite::Message::Binary(_) => {
+                  error!("Don't know how to handle binary message types!");
+                }
+              }
+            },
+            Err(err) => {
+              error!("Error from websocket server, assuming disconnection: {:?}", err);
               break;
             }
-          }
-          async_tungstenite::tungstenite::Message::Close(_) => {
-            break;
-          }
-          async_tungstenite::tungstenite::Message::Ping(_) => {
-            // noop
-            continue;
-          }
-          async_tungstenite::tungstenite::Message::Pong(_) => {
-            // noop
-            continue;
-          }
-          async_tungstenite::tungstenite::Message::Binary(_) => {
-            error!("Don't know how to handle binary message types!");
           }
         },
         None => {
