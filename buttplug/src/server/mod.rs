@@ -187,10 +187,11 @@ impl ButtplugServer {
       if let Some(pfut) = ping_fut {
         pfut.await;
       }
+      // Ignore returns here, we just want to stop.
       info!("Server disconnected, stopping all devices...");
-      stop_fut.await;
+      let _ = stop_fut.await;
       info!("Server disconnected, stopping device scanning if it was started...");
-      stop_scanning_fut.await;
+      let _ = stop_scanning_fut.await;
       Ok(())
     })
   }
@@ -311,11 +312,10 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
   use crate::{
-    core::messages::{self, ButtplugServerMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+    core::messages::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,
     util::async_manager,
   };
-  use futures::StreamExt;
 
   #[test]
   fn test_server_reuse() {

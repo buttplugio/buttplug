@@ -8,7 +8,6 @@ use buttplug::{
       self,
       ButtplugMessageSpecVersion,
       ButtplugServerMessage,
-      ButtplugDeviceMessageType,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },

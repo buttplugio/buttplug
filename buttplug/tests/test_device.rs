@@ -1,7 +1,7 @@
 mod util;
 use buttplug::{
   core::{
-    errors::{ButtplugError, ButtplugDeviceError, ButtplugServerError},
+    errors::{ButtplugError, ButtplugDeviceError},
     messages::{
       self,
       ButtplugDeviceMessageType,
