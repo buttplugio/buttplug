@@ -50,18 +50,14 @@ pub struct ButtplugWebsocketServerTransportOptions {
   pub ws_priv_file: Option<String>,
 }
 
-async fn accept_connection<S>(
-  stream: S,
+async fn run_connection_loop<S>(
+  ws_stream: async_tungstenite::WebSocketStream<S>,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportMessage>,
 ) where
   S: AsyncRead + AsyncWrite + Unpin,
 {
-  let ws_stream = async_tungstenite::accept_async(stream)
-    .await
-    .expect("Error during the websocket handshake occurred");
-
-  info!("New WebSocket connection.");
+  info!("Starting websocket server connection event loop.");
 
   let (mut websocket_server_sender, mut websocket_server_receiver) = ws_stream.split();
 
@@ -174,8 +170,19 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
         if let Ok((stream, _)) = listener.accept().await {
           info!("Websocket Insecure: Got connection");
+          let ws_stream = async_tungstenite::accept_async(stream)
+            .await
+            .map_err(|err| {
+              error!("Websocket server accept error: {:?}", err);
+              ButtplugConnectorError::TransportSpecificError(
+                ButtplugConnectorTransportSpecificError::SecureServerError(
+                  format!("Error occurred during the websocket handshake: {:?}", err)
+                ).into()
+              )
+            })?;
+
           async_manager::spawn(async move {
-            accept_connection(stream, request_receiver_clone, response_sender_clone).await;
+            run_connection_loop(ws_stream, request_receiver_clone, response_sender_clone).await;
           })
           .unwrap();
           Ok(())
@@ -311,8 +318,18 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             )
           })?;
           info!("Websocket Secure: Got connection");
+          let ws_stream = async_tungstenite::accept_async(tls_stream)
+            .await
+            .map_err(|err| { 
+              error!("Websocket server accept error: {:?}", err);
+              ButtplugConnectorError::TransportSpecificError(
+                ButtplugConnectorTransportSpecificError::SecureServerError(
+                  format!("Error occurred during the websocket handshake: {:?}", err)
+                ).into()
+              )
+            })?;
           async_manager::spawn(async move {
-            accept_connection(tls_stream, request_receiver_clone, response_sender_clone).await;
+            run_connection_loop(ws_stream, request_receiver_clone, response_sender_clone).await;
           })
           .unwrap();
           Ok(())
