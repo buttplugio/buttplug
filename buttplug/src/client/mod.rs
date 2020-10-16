@@ -22,7 +22,6 @@ use crate::{
       ButtplugCurrentSpecServerMessage,
       ButtplugMessageSpecVersion,
       DeviceMessageInfo,
-      LogLevel,
       RequestDeviceList,
       RequestServerInfo,
       StartScanning,
@@ -140,8 +139,6 @@ pub enum ButtplugClientEvent {
   /// Emitted when a device has been removed from the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
   DeviceRemoved(DeviceMessageInfo),
-  /// Emitted when log messages are sent from the server.
-  Log(LogLevel, String),
   /// Emitted when a client has not pinged the server in a sufficient amount
   /// of time.
   PingTimeout,

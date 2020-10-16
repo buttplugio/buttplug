@@ -236,15 +236,6 @@ where
               error!("Received DeviceRemoved for non-existent device index");
             }
           }
-          ButtplugCurrentSpecServerMessage::Log(log) => {
-            trace!("Forwarding log message to client.");
-            self
-              .send_client_event(&ButtplugClientEvent::Log(
-                log.log_level.clone(),
-                log.log_message.clone(),
-              ))
-              .await;
-          }
           ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
             trace!("Scanning finished event received, forwarding to client.");
             self

@@ -269,7 +269,6 @@ pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ClientMessage {
-  RequestLog(RequestLog),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
   // Device enumeration messages
@@ -306,7 +305,6 @@ pub enum ButtplugSpecV2ServerMessage {
   // Status messages
   Ok(Ok),
   Error(Error),
-  Log(Log),
   // Handshake messages
   ServerInfo(ServerInfo),
   // Device enumeration messages
@@ -327,7 +325,6 @@ pub enum ButtplugSpecV2ServerMessage {
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ClientMessage {
-  RequestLog(RequestLog),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
   // Device enumeration messages

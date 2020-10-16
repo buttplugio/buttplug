@@ -230,7 +230,6 @@ impl ButtplugServer {
       match msg {
         ButtplugClientMessage::RequestServerInfo(rsi_msg) => self.perform_handshake(rsi_msg),
         ButtplugClientMessage::Ping(p) => self.handle_ping(p),
-        ButtplugClientMessage::RequestLog(l) => self.handle_request_log(l),
         _ => ButtplugMessageError::UnexpectedMessageType(format!("{:?}", msg)).into(),
       }
     };
@@ -292,20 +291,6 @@ impl ButtplugServer {
     } else {
       ButtplugPingError::PingTimerNotRunning.into()
     }
-  }
-
-  fn handle_request_log(&self, msg: messages::RequestLog) -> ButtplugServerResultFuture {
-    let event_sender = self.event_sender.clone();
-    Box::pin(async move {
-      // Spawn and hope this runs after we return?
-      async_manager::spawn(async move {
-        // Don't particularly care if this fails, we can't do much about it if
-        // it does.
-        let _ = event_sender.send(messages::Log::new(messages::LogLevel::Error,
-          "Buttplug protocol level logging not yet implemented, but Request. See https://github.com/buttplugio/buttplug-rs/issues/131 for more info.").into()).await;
-      }).unwrap();
-      Result::Ok(messages::Ok::new(msg.get_id()).into())
-    })
   }
 }
 
