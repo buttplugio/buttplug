@@ -81,7 +81,6 @@ pub struct ButtplugServer {
   client_name: String,
   max_ping_time: u64,
   device_manager: DeviceManager,
-  event_sender: Sender<ButtplugServerMessage>,
   ping_timer: Option<PingTimer>,
   pinged_out: Arc<AtomicBool>,
   connected: Arc<AtomicBool>,
@@ -142,7 +141,6 @@ impl ButtplugServer {
         ping_timer,
         pinged_out,
         connected,
-        event_sender: send,
       },
       recv,
     ))
