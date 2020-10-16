@@ -15,6 +15,9 @@
 
 ## API Changes
 
+- Removed RequestLog/Log access in API, as those messages were deprecated in v2
+  of the message spec.
+  - Older apps will just receive an error when RequestLog is sent.
 - Creating a server now takes a Server Options struct argument.
   - All methods of creating servers (directly, ButtplugRemoteServer, servers in
     InProcessConnectors) have been updated to this format.
