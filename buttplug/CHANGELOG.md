@@ -6,6 +6,7 @@
   - Must be explicitly turned on during server creation
 - Added 32 generic endpoints
   - Needed for Raw message setup
+- Added stop_all_devices to client API
 
 ## Bugfixes
 

@@ -25,6 +25,7 @@ use crate::{
       RequestDeviceList,
       RequestServerInfo,
       StartScanning,
+      StopAllDevices,
       StopScanning,
     },
   },
@@ -440,6 +441,14 @@ impl ButtplugClient {
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_scanning(&self) -> ButtplugClientResultFuture {
     self.send_message_expect_ok(StopScanning::default().into())
+  }
+
+  /// Tells server to stop all devices.
+  ///
+  /// Returns Err([ButtplugClientError]) if request fails due to issues with
+  /// DeviceManagers on the server, disconnection, etc.
+  pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
+    self.send_message_expect_ok(StopAllDevices::default().into())
   }
 
   /// Send message to the internal event loop.
