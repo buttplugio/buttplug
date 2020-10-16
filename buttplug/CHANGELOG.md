@@ -1,3 +1,33 @@
+# 0.10.0 (2020-10-16)
+
+## Features
+
+- Added Raw commands, which allows direct read/write access to devices.
+  - Must be explicitly turned on during server creation
+- Added 32 generic endpoints
+  - Needed for Raw message setup
+
+## Bugfixes
+
+- Websocket Server no longer panics on bogus connect (TLS on non-TLS port, vice
+  versa, browser hasn't accepted cert, etc...)
+- Server now stops scanning when a client disconnects
+
+## API Changes
+
+- Creating a server now takes a Server Options struct argument.
+  - All methods of creating servers (directly, ButtplugRemoteServer, servers in
+    InProcessConnectors) have been updated to this format.
+- DeviceConfigurationManager no longer static
+  - Makes it easier to configure for Raw Messages, and is also just a better
+    architecture in general.
+- Fallible/non-Self-returning new() methods no longer called new()
+  - Idiomatic rust requires infallible new() -> Self, and a lot of our
+    constructors are fallible and sometimes return tuples.
+- Removed ButtplugProtocolCreator
+  - Was needed when we were using async_trait due to associated trait methods,
+    now just bound on Self: Sized.
+
 # 0.9.2 (2020-10-06)
 
 ## Bugfixes
