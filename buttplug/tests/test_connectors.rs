@@ -18,7 +18,7 @@ mod websocket_connector_tests {
   #[test]
   fn test_client_ws_client_server_ws_server_insecure() {
     async_manager::block_on(async move {
-      let (test_server, _) = ButtplugRemoteServer::new("Test Server", 0);
+      let (test_server, _) = ButtplugRemoteServer::default();
       let server = Arc::new(test_server);
       let server_clone = server.clone();
       async_manager::spawn(async move {
@@ -56,7 +56,7 @@ mod websocket_connector_tests {
   #[test]
   fn test_client_ws_server_server_ws_client_insecure() {
     async_manager::block_on(async move {
-      let (test_server, _) = ButtplugRemoteServer::new("Test Server", 0);
+      let (test_server, _) = ButtplugRemoteServer::default();
       let server = Arc::new(test_server);
       let server_clone = server.clone();
       async_manager::spawn(async move {
