@@ -1,8 +1,4 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -26,7 +22,8 @@ pub struct Aneros {
 impl ButtplugProtocol for Aneros {
   fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol>
   where
-      Self: Sized {
+    Self: Sized,
+  {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {

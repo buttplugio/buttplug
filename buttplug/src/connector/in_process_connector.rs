@@ -1,7 +1,7 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugMessageError, ButtplugServerError, ButtplugError},
+    errors::{ButtplugError, ButtplugMessageError, ButtplugServerError},
     messages::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,

@@ -25,7 +25,7 @@ impl BatteryLevelReading {
     Self {
       id: 1,
       device_index,
-      battery_level
+      battery_level,
     }
   }
 }

@@ -38,7 +38,10 @@ pub struct KiirooV2 {
 }
 
 impl ButtplugProtocol for KiirooV2 {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {
@@ -50,7 +53,9 @@ impl ButtplugProtocol for KiirooV2 {
     })
   }
 
-  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn initialize(
+    device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {

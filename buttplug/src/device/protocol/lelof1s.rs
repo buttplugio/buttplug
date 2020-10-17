@@ -1,8 +1,4 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::core::errors::ButtplugError;
 use crate::device::DeviceSubscribeCmd;
 use crate::{
@@ -27,7 +23,10 @@ pub struct LeloF1s {
 }
 
 impl ButtplugProtocol for LeloF1s {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {
@@ -38,13 +37,15 @@ impl ButtplugProtocol for LeloF1s {
     })
   }
 
-  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn initialize(
+    device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
     let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
 
-    Box::pin(async move { 
+    Box::pin(async move {
       subscribe_fut.await?;
       Ok(None)
     })

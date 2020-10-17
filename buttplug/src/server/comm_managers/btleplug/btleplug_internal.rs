@@ -191,18 +191,25 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
 
   fn handle_read(&mut self, read_msg: &DeviceReadCmd, state: &mut DeviceReturnStateShared) {
     match self.endpoints.get(&read_msg.endpoint) {
-      Some(chr) => {
-        match self.device.read(&chr) {
-          Ok (data) => {
-            trace!("Got reading: {:?}", data);
-            state.set_reply(ButtplugDeviceReturn::RawReading(messages::RawReading::new(0, read_msg.endpoint, data)));
-          }
-          Err(err) => {
-            trace!("Read failed");
-            state.set_reply(ButtplugDeviceReturn::Error(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err)).into()));
-          }
+      Some(chr) => match self.device.read(&chr) {
+        Ok(data) => {
+          trace!("Got reading: {:?}", data);
+          state.set_reply(ButtplugDeviceReturn::RawReading(messages::RawReading::new(
+            0,
+            read_msg.endpoint,
+            data,
+          )));
         }
-      }
+        Err(err) => {
+          trace!("Read failed");
+          state.set_reply(ButtplugDeviceReturn::Error(
+            ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+              err,
+            ))
+            .into(),
+          ));
+        }
+      },
       None => state.set_reply(ButtplugDeviceReturn::Error(
         ButtplugDeviceError::InvalidEndpoint(read_msg.endpoint).into(),
       )),

@@ -294,14 +294,16 @@ impl ButtplugClient {
   #[cfg(feature = "server")]
   pub fn connect_in_process(
     name: &str,
-    options: &crate::server::ButtplugServerOptions
-  ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>>
-  {
+    options: &crate::server::ButtplugServerOptions,
+  ) -> BoxFuture<
+    'static,
+    Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
+  > {
     use crate::connector::ButtplugInProcessClientConnector;
 
     let connector = match ButtplugInProcessClientConnector::new_with_options(options) {
       Ok(conn) => conn,
-      Err(err) => return Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
+      Err(err) => return Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err)))),
     };
     #[cfg(feature = "btleplug-manager")]
     {
@@ -321,12 +323,15 @@ impl ButtplugClient {
     }
     #[cfg(feature = "lovense-dongle-manager")]
     {
-      use crate::server::comm_managers::lovense_dongle::{LovenseHIDDongleCommunicationManager, LovenseSerialDongleCommunicationManager};
+      use crate::server::comm_managers::lovense_dongle::{
+        LovenseHIDDongleCommunicationManager,
+        LovenseSerialDongleCommunicationManager,
+      };
       connector
         .server_ref()
         .add_comm_manager::<LovenseHIDDongleCommunicationManager>()
         .unwrap();
-        connector
+      connector
         .server_ref()
         .add_comm_manager::<LovenseSerialDongleCommunicationManager>()
         .unwrap();

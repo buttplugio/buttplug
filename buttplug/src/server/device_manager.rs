@@ -34,7 +34,11 @@ use crate::{
       ScanningFinished,
     },
   },
-  device::{ButtplugDevice, ButtplugDeviceEvent, configuration_manager::DeviceConfigurationManager},
+  device::{
+    configuration_manager::DeviceConfigurationManager,
+    ButtplugDevice,
+    ButtplugDeviceEvent,
+  },
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
@@ -112,7 +116,9 @@ fn wait_for_manager_events(
               let server_sender_clone = server_sender.clone();
               let device_config_mgr_clone = device_config_manager.clone();
               async_manager::spawn(async move {
-                match ButtplugDevice::try_create_device(device_config_mgr_clone, device_creator).await {
+                match ButtplugDevice::try_create_device(device_config_mgr_clone, device_creator)
+                  .await
+                {
                   Ok(option_dev) => match option_dev {
                     Some(device) => {
                       info!("Assigning index {} to {}", device_index, device.name());
@@ -128,8 +134,11 @@ fn wait_for_manager_events(
                         }
                       })
                       .unwrap();
-                      let device_added_message =
-                        DeviceAdded::new(device_index, &device.name(), &device.message_attributes());
+                      let device_added_message = DeviceAdded::new(
+                        device_index,
+                        &device.name(),
+                        &device.message_attributes(),
+                      );
                       device_map_clone.insert(device_index, device);
                       // After that, we can send out to the server's event
                       // listeners to let them know a device has been added.
@@ -237,7 +246,11 @@ impl DeviceManager {
     device_config_json: &Option<String>,
     user_device_config_json: &Option<String>,
   ) -> Result<Self, ButtplugDeviceError> {
-    let config = Arc::new(DeviceConfigurationManager::new_with_options(allow_raw_messages, device_config_json, user_device_config_json)?);
+    let config = Arc::new(DeviceConfigurationManager::new_with_options(
+      allow_raw_messages,
+      device_config_json,
+      user_device_config_json,
+    )?);
     let (event_loop_fut, device_map, device_event_sender) =
       wait_for_manager_events(config.clone(), ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();

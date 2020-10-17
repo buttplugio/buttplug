@@ -25,7 +25,7 @@ impl RSSILevelReading {
     Self {
       id: 1,
       device_index,
-      rssi_level
+      rssi_level,
     }
   }
 }

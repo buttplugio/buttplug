@@ -1,14 +1,7 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::errors::ButtplugDeviceError,
-  device::{
-    ButtplugDeviceEvent,
-    DeviceSubscribeCmd,
-  },
+  device::{ButtplugDeviceEvent, DeviceSubscribeCmd},
 };
 use crate::{
   core::{
@@ -36,7 +29,7 @@ pub struct Lovense {
   message_attributes: MessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  rotation_direction: Arc<AtomicBool>
+  rotation_direction: Arc<AtomicBool>,
 }
 
 impl ButtplugProtocol for Lovense {
@@ -170,7 +163,11 @@ impl ButtplugProtocolCommandHandler for Lovense {
     })
   }
 
-  fn handle_battery_level_cmd(&self, device: Arc<Box<dyn DeviceImpl>>, message: messages::BatteryLevelCmd) -> ButtplugDeviceResultFuture {
+  fn handle_battery_level_cmd(
+    &self,
+    device: Arc<Box<dyn DeviceImpl>>,
+    message: messages::BatteryLevelCmd,
+  ) -> ButtplugDeviceResultFuture {
     let mut device_notification_receiver = device.get_event_receiver();
     Box::pin(async move {
       let write_fut = device.write_value(DeviceWriteCmd::new(
@@ -185,18 +182,31 @@ impl ButtplugProtocolCommandHandler for Lovense {
             if let Ok(data_str) = std::str::from_utf8(&data) {
               let len = data_str.len();
               // Chop the semicolon at the end of the received line.
-              if let Ok(level) = data_str[0..(len-1)].parse::<u8>() {
-                return Ok(messages::BatteryLevelReading::new(message.device_index, level as f64 / 100f64).into());
+              if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
+                return Ok(
+                  messages::BatteryLevelReading::new(message.device_index, level as f64 / 100f64)
+                    .into(),
+                );
               }
             }
           }
           ButtplugDeviceEvent::Removed => {
             debug!("Lovense device removed, exiting notification loop.");
-            return Err(ButtplugDeviceError::DeviceNotConnected("Device disconnected while waiting for battery message.".to_owned()).into());
+            return Err(
+              ButtplugDeviceError::DeviceNotConnected(
+                "Device disconnected while waiting for battery message.".to_owned(),
+              )
+              .into(),
+            );
           }
         }
       }
-      Err(ButtplugDeviceError::DeviceNotConnected("Device disconnected while waiting for battery message.".to_owned()).into())
+      Err(
+        ButtplugDeviceError::DeviceNotConnected(
+          "Device disconnected while waiting for battery message.".to_owned(),
+        )
+        .into(),
+      )
     })
   }
 }

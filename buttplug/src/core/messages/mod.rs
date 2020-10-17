@@ -54,8 +54,8 @@ mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
 
 pub use self::log::Log;
-pub use battery_level_cmd::{BatteryLevelCmd};
-pub use battery_level_reading::{BatteryLevelReading};
+pub use battery_level_cmd::BatteryLevelCmd;
+pub use battery_level_reading::BatteryLevelReading;
 pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
 pub use device_message_info::{DeviceMessageInfo, MessageAttributesMap};
@@ -78,8 +78,8 @@ pub use request_device_list::RequestDeviceList;
 pub use request_log::RequestLog;
 pub use request_server_info::RequestServerInfo;
 pub use rotate_cmd::{RotateCmd, RotationSubcommand};
-pub use rssi_level_cmd::{RSSILevelCmd};
-pub use rssi_level_reading::{RSSILevelReading};
+pub use rssi_level_cmd::RSSILevelCmd;
+pub use rssi_level_reading::RSSILevelReading;
 pub use scanning_finished::ScanningFinished;
 pub use server_info::{ServerInfo, ServerInfoV0};
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
@@ -95,8 +95,8 @@ use crate::core::errors::ButtplugMessageError;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::convert::TryFrom;
 use std::cmp::Ordering;
+use std::convert::TryFrom;
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
@@ -170,18 +170,17 @@ pub enum ButtplugDeviceMessageType {
   // ToneEmitterCmd?
 }
 
-
 // Ordering for ButtplugDeviceMessageType should be lexicographic, for
 // serialization reasons.
 impl PartialOrd for ButtplugDeviceMessageType {
   fn partial_cmp(&self, other: &ButtplugDeviceMessageType) -> Option<Ordering> {
-      Some(self.cmp(other))
+    Some(self.cmp(other))
   }
 }
 
 impl Ord for ButtplugDeviceMessageType {
   fn cmp(&self, other: &ButtplugDeviceMessageType) -> Ordering {
-      self.to_string().cmp(&other.to_string())
+    self.to_string().cmp(&other.to_string())
   }
 }
 
@@ -249,7 +248,7 @@ pub enum ButtplugServerMessage {
   RawReading(RawReading),
   // Sensor Reading Messages
   BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading)
+  RSSILevelReading(RSSILevelReading),
 }
 
 /// Type alias for the latest version of client-to-server messages.
@@ -287,7 +286,7 @@ pub enum ButtplugSpecV2ClientMessage {
   RawUnsubscribeCmd(RawUnsubscribeCmd),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd)
+  RSSILevelCmd(RSSILevelCmd),
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
@@ -316,7 +315,7 @@ pub enum ButtplugSpecV2ServerMessage {
   RawReading(RawReading),
   // Sensor commands
   BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading)
+  RSSILevelReading(RSSILevelReading),
 }
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
@@ -518,5 +517,5 @@ pub enum ButtplugDeviceCommandMessageUnion {
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
   BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd)
+  RSSILevelCmd(RSSILevelCmd),
 }

@@ -40,7 +40,10 @@ pub struct KiirooV21 {
 }
 
 impl ButtplugProtocol for KiirooV21 {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {
@@ -52,7 +55,9 @@ impl ButtplugProtocol for KiirooV21 {
     })
   }
 
-  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn initialize(
+    device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling Onyx+ init");
     let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,

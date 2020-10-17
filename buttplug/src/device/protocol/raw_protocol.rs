@@ -12,7 +12,10 @@ pub struct RawProtocol {
 }
 
 impl ButtplugProtocol for RawProtocol {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     Box::new(Self {
       name: name.to_owned(),
       message_attributes,

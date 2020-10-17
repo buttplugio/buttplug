@@ -30,9 +30,10 @@ async fn device_control_example() {
   // connect_in_process convenience method. This creates an in process connector
   // for us, and also adds all of the device managers built into the library to
   // the server it uses. Handy!
-  let (client, mut event_stream) = ButtplugClient::connect_in_process("Example Client", &ButtplugServerOptions::default())
-    .await
-    .unwrap();
+  let (client, mut event_stream) =
+    ButtplugClient::connect_in_process("Example Client", &ButtplugServerOptions::default())
+      .await
+      .unwrap();
 
   // We'll mostly be doing the same thing we did in example #3, up until we get
   // a device.

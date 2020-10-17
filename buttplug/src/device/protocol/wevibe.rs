@@ -1,16 +1,8 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      MessageAttributesMap
-    },
+    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -34,7 +26,10 @@ pub struct WeVibe {
 }
 
 impl ButtplugProtocol for WeVibe {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {
@@ -45,17 +40,19 @@ impl ButtplugProtocol for WeVibe {
     })
   }
 
-  fn initialize(device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn initialize(
+    device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-      false
+      false,
     ));
     let vibration_off = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-      false
+      false,
     ));
     Box::pin(async move {
       vibration_on.await?;
@@ -120,23 +117,23 @@ mod test {
         .unwrap()
         .receiver;
       check_recv_value(
-          &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-            false,
-          )),
-        )
-        .await;
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
       check_recv_value(
-          &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            false,
-          )),
-        )
-        .await;  
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -204,23 +201,23 @@ mod test {
         .unwrap()
         .receiver;
       check_recv_value(
-          &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-            false,
-          )),
-        )
-        .await;
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
       check_recv_value(
-          &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-            false,
-          )),
-        )
-        .await;        
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+          false,
+        )),
+      )
+      .await;
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await

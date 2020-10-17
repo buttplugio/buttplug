@@ -1,8 +1,4 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -24,7 +20,10 @@ pub struct WeVibe8Bit {
 }
 
 impl ButtplugProtocol for WeVibe8Bit {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {

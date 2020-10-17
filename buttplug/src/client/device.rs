@@ -14,7 +14,7 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      BatteryLevelCmd,      
+      BatteryLevelCmd,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
@@ -22,13 +22,13 @@ use crate::{
       DeviceMessageInfo,
       LinearCmd,
       MessageAttributesMap,
+      RSSILevelCmd,
       RawReadCmd,
       RawSubscribeCmd,
       RawUnsubscribeCmd,
       RawWriteCmd,
       RotateCmd,
       RotationSubcommand,
-      RSSILevelCmd,
       StopDeviceCmd,
       VectorSubcommand,
       VibrateCmd,
@@ -118,13 +118,9 @@ pub enum LinearCommand {
 // to do validity checks on every call since we return futures, not results.
 macro_rules! check_message_support {
   ($self:ident, $msg:expr) => {
-    if !$self
-    .allowed_messages
-    .contains_key(&$msg)
-    {
-      return $self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported($msg).into(),
-      );
+    if !$self.allowed_messages.contains_key(&$msg) {
+      return $self
+        .create_boxed_future_client_error(ButtplugDeviceError::MessageNotSupported($msg).into());
     }
   };
 }
@@ -296,7 +292,10 @@ impl ButtplugClientDevice {
     self.event_receiver.clone()
   }
 
-  fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T> where T: 'static + Send + Sync {
+  fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T>
+  where
+    T: 'static + Send + Sync,
+  {
     Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
   }
 
@@ -518,15 +517,35 @@ impl ButtplugClientDevice {
     })
   }
 
-  pub fn raw_write(&self, endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> ButtplugClientResultFuture {
+  pub fn raw_write(
+    &self,
+    endpoint: Endpoint,
+    data: Vec<u8>,
+    write_with_response: bool,
+  ) -> ButtplugClientResultFuture {
     check_message_support!(self, ButtplugDeviceMessageType::RawWriteCmd);
-    let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmd::new(self.index, endpoint, data, write_with_response));
+    let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmd::new(
+      self.index,
+      endpoint,
+      data,
+      write_with_response,
+    ));
     self.send_message_expect_ok(msg)
   }
 
-  pub fn raw_read(&self, endpoint: Endpoint, expected_length: u32, timeout: u32) -> ButtplugClientResultFuture<Vec<u8>> {
+  pub fn raw_read(
+    &self,
+    endpoint: Endpoint,
+    expected_length: u32,
+    timeout: u32,
+  ) -> ButtplugClientResultFuture<Vec<u8>> {
     check_message_support!(self, ButtplugDeviceMessageType::RawReadCmd);
-    let msg = ButtplugCurrentSpecClientMessage::RawReadCmd(RawReadCmd::new(self.index, endpoint, expected_length, timeout));
+    let msg = ButtplugCurrentSpecClientMessage::RawReadCmd(RawReadCmd::new(
+      self.index,
+      endpoint,
+      expected_length,
+      timeout,
+    ));
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
@@ -545,13 +564,16 @@ impl ButtplugClientDevice {
 
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     check_message_support!(self, ButtplugDeviceMessageType::RawSubscribeCmd);
-    let msg = ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
+    let msg =
+      ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     check_message_support!(self, ButtplugDeviceMessageType::RawUnsubscribeCmd);
-    let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(self.index, endpoint));
+    let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(
+      self.index, endpoint,
+    ));
     self.send_message_expect_ok(msg)
   }
 

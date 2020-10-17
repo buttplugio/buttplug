@@ -10,7 +10,7 @@
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{MessageAttributesMap, ButtplugDeviceMessageType, MessageAttributes}
+    messages::{ButtplugDeviceMessageType, MessageAttributes, MessageAttributesMap},
   },
   device::Endpoint,
   util::json::JSONValidator,
@@ -273,15 +273,30 @@ impl DeviceProtocolConfiguration {
           attributes.extend(msg_attrs.clone());
         }
         if !attributes.contains_key(&ButtplugDeviceMessageType::StopDeviceCmd) {
-          attributes.insert(ButtplugDeviceMessageType::StopDeviceCmd, MessageAttributes::default());
+          attributes.insert(
+            ButtplugDeviceMessageType::StopDeviceCmd,
+            MessageAttributes::default(),
+          );
         }
         if self.allow_raw_messages {
           let mut endpoint_attributes = MessageAttributes::default();
           endpoint_attributes.endpoints = Some(endpoints.clone());
-          attributes.insert(ButtplugDeviceMessageType::RawReadCmd, endpoint_attributes.clone());
-          attributes.insert(ButtplugDeviceMessageType::RawWriteCmd, endpoint_attributes.clone());
-          attributes.insert(ButtplugDeviceMessageType::RawSubscribeCmd, endpoint_attributes.clone());
-          attributes.insert(ButtplugDeviceMessageType::RawUnsubscribeCmd, endpoint_attributes.clone());
+          attributes.insert(
+            ButtplugDeviceMessageType::RawReadCmd,
+            endpoint_attributes.clone(),
+          );
+          attributes.insert(
+            ButtplugDeviceMessageType::RawWriteCmd,
+            endpoint_attributes.clone(),
+          );
+          attributes.insert(
+            ButtplugDeviceMessageType::RawSubscribeCmd,
+            endpoint_attributes.clone(),
+          );
+          attributes.insert(
+            ButtplugDeviceMessageType::RawUnsubscribeCmd,
+            endpoint_attributes.clone(),
+          );
         }
         Ok((attrs.name.as_ref().unwrap().clone(), attributes))
       }
@@ -298,7 +313,7 @@ impl DeviceProtocolConfiguration {
 
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
-  pub(self) config: ProtocolConfiguration
+  pub(self) config: ProtocolConfiguration,
 }
 
 unsafe impl Send for DeviceConfigurationManager {
@@ -315,7 +330,11 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
-  pub fn new_with_options(allow_raw_messages: bool, external_config: &Option<String>, user_config: &Option<String>) -> Result<Self, ButtplugDeviceError> {
+  pub fn new_with_options(
+    allow_raw_messages: bool,
+    external_config: &Option<String>,
+    user_config: &Option<String>,
+  ) -> Result<Self, ButtplugDeviceError> {
     // TODO Handling references incorrectly here.
     let config_str = if let Some(cfg) = external_config {
       cfg
@@ -325,27 +344,48 @@ impl DeviceConfigurationManager {
 
     let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
     let mut config: ProtocolConfiguration = match config_validator.validate(&config_str) {
-      Ok(_) => {
-        match serde_json::from_str(&config_str) {
-          Ok(config) => config,
-          Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+      Ok(_) => match serde_json::from_str(&config_str) {
+        Ok(config) => config,
+        Err(err) => {
+          return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
+            "{}",
+            err
+          )))
         }
       },
-      Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+      Err(err) => {
+        return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
+          "{}",
+          err
+        )))
+      }
     };
 
     if let Some(user_config_str) = user_config {
       let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
       match user_validator.validate(&user_config_str) {
         Ok(_) => match serde_json::from_str(&user_config_str) {
-            Ok(user_cfg) => config.merge_user_config(user_cfg),
-            Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+          Ok(user_cfg) => config.merge_user_config(user_cfg),
+          Err(err) => {
+            return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
+              "{}",
+              err
+            )))
+          }
         },
-        Err(err) => return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)))
+        Err(err) => {
+          return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
+            "{}",
+            err
+          )))
+        }
       }
     }
 
-    Ok(DeviceConfigurationManager { allow_raw_messages, config })
+    Ok(DeviceConfigurationManager {
+      allow_raw_messages,
+      config,
+    })
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly
@@ -427,7 +467,7 @@ mod test {
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
     // Make sure we overwrote the default of 1
@@ -449,7 +489,7 @@ mod test {
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
     // Make sure we overwrote the default of 1
@@ -467,7 +507,7 @@ mod test {
     let proto = config.find_configuration(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec!()).unwrap();
+    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
     // Make sure we got the right name
     assert_eq!(name_map.get("en-us").unwrap(), "Lovense Edge");
     // Make sure we overwrote the default of 1
@@ -501,8 +541,11 @@ mod test {
         .len(),
       1
     );
-    config = DeviceConfigurationManager::new_with_options(false, &None, &Some(
-      r#"
+    config = DeviceConfigurationManager::new_with_options(
+      false,
+      &None,
+      &Some(
+        r#"
         { 
             "protocols": {
                 "erostek-et312": {
@@ -519,8 +562,10 @@ mod test {
             }
         }
         "#
-      .to_string(),
-    )).unwrap();
+        .to_string(),
+      ),
+    )
+    .unwrap();
     assert!(config.config.protocols.contains_key("erostek-et312"));
     assert!(config
       .config

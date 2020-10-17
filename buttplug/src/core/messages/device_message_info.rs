@@ -8,16 +8,16 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize, Serializer};
-use std::collections::{HashMap, BTreeMap};
+use std::collections::{BTreeMap, HashMap};
 
 pub type MessageAttributesMap = HashMap<ButtplugDeviceMessageType, MessageAttributes>;
 
 fn ordered_map<S>(value: &MessageAttributesMap, serializer: S) -> Result<S::Ok, S::Error>
 where
-    S: Serializer,
+  S: Serializer,
 {
-    let ordered: BTreeMap<_, _> = value.iter().collect();
-    ordered.serialize(serializer)
+  let ordered: BTreeMap<_, _> = value.iter().collect();
+  ordered.serialize(serializer)
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -27,7 +27,10 @@ pub struct DeviceMessageInfo {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages", serialize_with="ordered_map"))]
+  #[cfg_attr(
+    feature = "serialize-json",
+    serde(rename = "DeviceMessages", serialize_with = "ordered_map")
+  )]
   pub device_messages: MessageAttributesMap,
 }
 
@@ -58,7 +61,10 @@ pub struct DeviceMessageInfoV1 {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages", serialize_with="ordered_map"))]
+  #[cfg_attr(
+    feature = "serialize-json",
+    serde(rename = "DeviceMessages", serialize_with = "ordered_map")
+  )]
   pub device_messages: MessageAttributesMap,
 }
 

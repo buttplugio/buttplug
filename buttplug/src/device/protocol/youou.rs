@@ -1,8 +1,5 @@
-use super::{
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolCommandHandler,
-};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use crate::core::errors::ButtplugError;
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -12,12 +9,11 @@ use crate::{
     Endpoint,
   },
 };
+use futures::future::{self, BoxFuture};
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
-use crate::core::errors::ButtplugError;
-use futures::future::{self, BoxFuture};
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Youou {
@@ -28,7 +24,10 @@ pub struct Youou {
 }
 
 impl ButtplugProtocol for Youou {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(
+    name: &str,
+    message_attributes: MessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Box::new(Self {
@@ -39,8 +38,9 @@ impl ButtplugProtocol for Youou {
     })
   }
 
-  fn initialize(_device_impl: &dyn DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
-  {
+  fn initialize(
+    _device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
     Box::pin(future::ready(Ok(Some("VX001_".to_owned()))))

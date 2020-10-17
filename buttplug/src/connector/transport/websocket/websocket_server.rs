@@ -175,9 +175,11 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             .map_err(|err| {
               error!("Websocket server accept error: {:?}", err);
               ButtplugConnectorError::TransportSpecificError(
-                ButtplugConnectorTransportSpecificError::SecureServerError(
-                  format!("Error occurred during the websocket handshake: {:?}", err)
-                ).into()
+                ButtplugConnectorTransportSpecificError::SecureServerError(format!(
+                  "Error occurred during the websocket handshake: {:?}",
+                  err
+                ))
+                .into(),
               )
             })?;
 
@@ -320,12 +322,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           info!("Websocket Secure: Got connection");
           let ws_stream = async_tungstenite::accept_async(tls_stream)
             .await
-            .map_err(|err| { 
+            .map_err(|err| {
               error!("Websocket server accept error: {:?}", err);
               ButtplugConnectorError::TransportSpecificError(
-                ButtplugConnectorTransportSpecificError::SecureServerError(
-                  format!("Error occurred during the websocket handshake: {:?}", err)
-                ).into()
+                ButtplugConnectorTransportSpecificError::SecureServerError(format!(
+                  "Error occurred during the websocket handshake: {:?}",
+                  err
+                ))
+                .into(),
               )
             })?;
           async_manager::spawn(async move {

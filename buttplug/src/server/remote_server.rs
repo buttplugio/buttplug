@@ -1,4 +1,4 @@
-use super::{ButtplugServer, ButtplugServerStartupError, ButtplugServerOptions};
+use super::{ButtplugServer, ButtplugServerOptions, ButtplugServerStartupError};
 use crate::{
   connector::ButtplugConnector,
   core::{
@@ -135,7 +135,9 @@ impl ButtplugRemoteServer {
     Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
   }
 
-  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugRemoteServerEvent>), ButtplugError> {
+  pub fn new_with_options(
+    options: &ButtplugServerOptions,
+  ) -> Result<(Self, Receiver<ButtplugRemoteServerEvent>), ButtplugError> {
     let (server, server_receiver) = ButtplugServer::new_with_options(options)?;
     let (remote_event_sender, remote_event_receiver) = bounded(256);
     Ok((

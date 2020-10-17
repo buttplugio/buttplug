@@ -2,7 +2,7 @@ use super::{TestDeviceImplCreator, TestDeviceInternal};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   device::{
-    configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, DeviceConfigurationManager},
+    configuration_manager::{BluetoothLESpecifier, DeviceConfigurationManager, DeviceSpecifier},
     ButtplugDevice,
   },
   server::comm_managers::{
@@ -40,15 +40,16 @@ pub fn new_uninitialized_ble_test_device(
 
 pub async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
-  device_config_mgr: Option<Arc<DeviceConfigurationManager>>
+  device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
   let config_mgr = device_config_mgr.unwrap_or(Arc::new(DeviceConfigurationManager::default()));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name);
   let device_impl_clone = device_impl.clone();
-  let device: ButtplugDevice = ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
-    .await
-    .unwrap()
-    .unwrap();
+  let device: ButtplugDevice =
+    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
+      .await
+      .unwrap()
+      .unwrap();
   Ok((device, device_impl_clone))
 }
 

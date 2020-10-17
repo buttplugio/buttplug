@@ -62,12 +62,10 @@ fn test_failing_connection() {
 #[test]
 fn test_disconnect_status() {
   async_manager::block_on(async {
-    let (client, _) = ButtplugClient::connect(
-      "Test Client",
-      ButtplugInProcessClientConnector::default(),
-    )
-    .await
-    .unwrap();
+    let (client, _) =
+      ButtplugClient::connect("Test Client", ButtplugInProcessClientConnector::default())
+        .await
+        .unwrap();
     assert!(client.disconnect().await.is_ok());
     assert!(!client.connected());
   });
@@ -77,12 +75,10 @@ fn test_disconnect_status() {
 #[test]
 fn test_double_disconnect() {
   async_manager::block_on(async {
-    let (client, _) = ButtplugClient::connect(
-      "Test Client",
-      ButtplugInProcessClientConnector::default(),
-    )
-    .await
-    .unwrap();
+    let (client, _) =
+      ButtplugClient::connect("Test Client", ButtplugInProcessClientConnector::default())
+        .await
+        .unwrap();
     assert!(client.disconnect().await.is_ok());
     assert!(client.disconnect().await.is_err());
   });
@@ -92,12 +88,10 @@ fn test_double_disconnect() {
 #[test]
 fn test_connect_init() {
   async_manager::block_on(async {
-    let (client, _) = ButtplugClient::connect(
-      "Test Client",
-      ButtplugInProcessClientConnector::default(),
-    )
-    .await
-    .unwrap();
+    let (client, _) =
+      ButtplugClient::connect("Test Client", ButtplugInProcessClientConnector::default())
+        .await
+        .unwrap();
     assert_eq!(client.server_name, "Buttplug Server");
   });
 }

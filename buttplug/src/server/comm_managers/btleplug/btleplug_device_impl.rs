@@ -189,7 +189,7 @@ impl BtlePlugDeviceImpl {
     &self,
     cmd: ButtplugDeviceCommand,
     err_str: &str,
-   ) -> ButtplugResultFuture {
+  ) -> ButtplugResultFuture {
     let fut = self.send_to_device_task(cmd);
     let err_fut_str = err_str.to_owned();
     Box::pin(async move {
@@ -201,7 +201,9 @@ impl BtlePlugDeviceImpl {
           // TODO Need to whittle down what this error actually means.
           Err(ButtplugDeviceError::DeviceCommunicationError(err_out).into())
         }
-        other => Err(ButtplugUnknownError::UnexpectedType(format!("{}: {:?}", err_fut_str, other)).into()),
+        other => {
+          Err(ButtplugUnknownError::UnexpectedType(format!("{}: {:?}", err_fut_str, other)).into())
+        }
       }
     })
   }
@@ -250,15 +252,19 @@ impl DeviceImpl for BtlePlugDeviceImpl {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
-    let task = self.send_to_device_task(
-      ButtplugDeviceCommand::Message(msg.into())
-    );
+    let task = self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()));
     Box::pin(async move {
       let val = task.await?;
       if let ButtplugDeviceReturn::RawReading(reading) = val {
         Ok(reading)
       } else {
-        Err(ButtplugUnknownError::UnexpectedType(format!("Read Error, unexpected return type: {:?}", val)).into())
+        Err(
+          ButtplugUnknownError::UnexpectedType(format!(
+            "Read Error, unexpected return type: {:?}",
+            val
+          ))
+          .into(),
+        )
       }
     })
   }

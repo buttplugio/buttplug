@@ -73,7 +73,7 @@ impl Default for ButtplugServerOptions {
       device_configuration_json: None,
       user_device_configuration_json: None,
     }
-  }  
+  }
 }
 
 /// Represents a ButtplugServer.
@@ -94,7 +94,9 @@ impl ButtplugServer {
     Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
   }
 
-  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
+  pub fn new_with_options(
+    options: &ButtplugServerOptions,
+  ) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
     let (send, recv) = bounded(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
@@ -132,7 +134,13 @@ impl ButtplugServer {
     } else {
       (None, None)
     };
-    let device_manager = DeviceManager::new_with_options(send.clone(), ping_receiver, options.allow_raw_messages, &options.device_configuration_json, &options.user_device_configuration_json)?;
+    let device_manager = DeviceManager::new_with_options(
+      send.clone(),
+      ping_receiver,
+      options.allow_raw_messages,
+      &options.device_configuration_json,
+      &options.user_device_configuration_json,
+    )?;
     Ok((
       Self {
         server_name: options.name.clone(),
@@ -173,9 +181,8 @@ impl ButtplugServer {
     if let Some(ping_timer) = &self.ping_timer {
       ping_fut = Some(ping_timer.stop_ping_timer());
     }
-    let stop_scanning_fut = self.parse_message(ButtplugClientMessage::StopScanning(
-      StopScanning::default(),
-    ));
+    let stop_scanning_fut =
+      self.parse_message(ButtplugClientMessage::StopScanning(StopScanning::default()));
     let stop_fut = self.parse_message(ButtplugClientMessage::StopAllDevices(
       StopAllDevices::default(),
     ));

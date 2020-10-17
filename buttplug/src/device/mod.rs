@@ -84,7 +84,7 @@ pub enum Endpoint {
   Generic29,
   Generic30,
   Generic31,
- }
+}
 
 impl Serialize for Endpoint {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -372,8 +372,11 @@ impl ButtplugDevice {
         // configuration for that device, try to initialize the implementation.
         // This usually means trying to connect to whatever the device is,
         // finding endpoints, etc.
-        let device_protocol_config =
-          DeviceProtocolConfiguration::new(allow_raw_messages, config.defaults.clone(), config.configurations.clone());
+        let device_protocol_config = DeviceProtocolConfiguration::new(
+          allow_raw_messages,
+          config.defaults.clone(),
+          config.configurations.clone(),
+        );
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
@@ -413,7 +416,13 @@ impl ButtplugDevice {
     //
     // Having raw turned on means it'll work for read/write/sub/unsub on any
     // endpoint so just use an arbitrary message here to check.
-    if self.protocol.supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(RawSubscribeCmd::new(1, Endpoint::Tx))).is_ok() {
+    if self
+      .protocol
+      .supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(
+        RawSubscribeCmd::new(1, Endpoint::Tx),
+      ))
+      .is_ok()
+    {
       format!("{} (Raw)", self.protocol.name())
     } else {
       self.protocol.name().to_owned()
