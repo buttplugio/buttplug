@@ -1376,7 +1376,8 @@
           "Titan1.1",
           "Cliona",
           "Pearl2.1",
-          "OhMiBod 4.0"
+          "OhMiBod 4.0",
+          "KEON"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -1488,6 +1489,23 @@
           ],
           "name": {
             "en-us": "Kiiroo Onyx+"
+          },
+          "messages": {
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            },
+            "FleshlightLaunchFW12Cmd": {}
+          }
+        },
+        {
+          "identifier": [
+            "KEON"
+          ],
+          "name": {
+            "en-us": "Kiiroo Keon"
           },
           "messages": {
             "LinearCmd": {
