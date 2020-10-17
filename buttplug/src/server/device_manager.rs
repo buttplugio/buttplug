@@ -129,7 +129,7 @@ fn wait_for_manager_events(
                       })
                       .unwrap();
                       let device_added_message =
-                        DeviceAdded::new(device_index, device.name(), &device.message_attributes());
+                        DeviceAdded::new(device_index, &device.name(), &device.message_attributes());
                       device_map_clone.insert(device_index, device);
                       // After that, we can send out to the server's event
                       // listeners to let them know a device has been added.

@@ -406,8 +406,18 @@ impl ButtplugDevice {
     }
   }
 
-  pub fn name(&self) -> &str {
-    self.protocol.name()
+  pub fn name(&self) -> String {
+    // Instead of checking for raw messages at the protocol level, add the raw
+    // call here, since this is the only way to access devices in the library
+    // anyways.
+    //
+    // Having raw turned on means it'll work for read/write/sub/unsub on any
+    // endpoint so just use an arbitrary message here to check.
+    if self.protocol.supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(RawSubscribeCmd::new(1, Endpoint::Tx))).is_ok() {
+      format!("{} (Raw)", self.protocol.name())
+    } else {
+      self.protocol.name().to_owned()
+    }
   }
 
   pub fn message_attributes(&self) -> MessageAttributesMap {
