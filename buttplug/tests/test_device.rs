@@ -54,7 +54,7 @@ fn test_server_raw_message() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
     options.allow_raw_messages = true;
-    let (server, mut recv) = ButtplugServer::new_with_options(options).unwrap();
+    let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -72,7 +72,7 @@ fn test_server_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
+        assert_eq!(da.device_name, "Aneros Vivi (Raw)");
         assert!(da.device_messages.contains_key(&ButtplugDeviceMessageType::RawReadCmd));
         assert!(da.device_messages.contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
         assert!(da.device_messages.contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));

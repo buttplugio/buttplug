@@ -91,7 +91,7 @@ fn test_server_version_gt() {
 fn test_ping_timeout() {
   let mut options = ButtplugServerOptions::default();
   options.max_ping_time = 100;
-  let (server, mut recv) = ButtplugServer::new_with_options(options).unwrap();
+  let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
   async_manager::block_on(async {
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
@@ -128,7 +128,7 @@ fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
     options.max_ping_time = 100;
-    let (server, mut recv) = ButtplugServer::new_with_options(options).unwrap();
+    let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
     let helper = server.add_test_comm_manager().unwrap();
     // TODO This should probably use a test protocol we control, not the aneros protocol
     let device = helper.add_ble_device("Massage Demo").await;

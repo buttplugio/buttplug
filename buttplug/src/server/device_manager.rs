@@ -230,14 +230,14 @@ unsafe impl Sync for DeviceManager {
 }
 
 impl DeviceManager {
-  pub fn new(
+  pub fn new_with_options(
     event_sender: Sender<ButtplugServerMessage>,
     ping_receiver: Option<Receiver<()>>,
     allow_raw_messages: bool,
-    device_config_str: Option<String>,
-    user_device_config_str: Option<String>,
+    device_config_json: &Option<String>,
+    user_device_config_json: &Option<String>,
   ) -> Result<Self, ButtplugDeviceError> {
-    let config = Arc::new(DeviceConfigurationManager::new_with_options(allow_raw_messages, device_config_str, user_device_config_str)?);
+    let config = Arc::new(DeviceConfigurationManager::new_with_options(allow_raw_messages, device_config_json, user_device_config_json)?);
     let (event_loop_fut, device_map, device_event_sender) =
       wait_for_manager_events(config.clone(), ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();

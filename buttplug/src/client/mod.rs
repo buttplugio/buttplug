@@ -294,7 +294,7 @@ impl ButtplugClient {
   #[cfg(feature = "server")]
   pub fn connect_in_process(
     name: &str,
-    options: crate::server::ButtplugServerOptions
+    options: &crate::server::ButtplugServerOptions
   ) -> BoxFuture<'static, Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>>
   {
     use crate::connector::ButtplugInProcessClientConnector;

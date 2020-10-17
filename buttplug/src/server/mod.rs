@@ -32,7 +32,7 @@ use crate::{
   test::TestDeviceCommunicationManagerHelper,
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
+use async_channel::{bounded, Receiver};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
 use futures::{future::BoxFuture, StreamExt};
@@ -55,12 +55,13 @@ pub enum ButtplugServerStartupError {
   DeviceManagerTypeAlreadyAdded(String),
 }
 
+#[derive(Debug, Clone)]
 pub struct ButtplugServerOptions {
   pub name: String,
   pub max_ping_time: u64,
   pub allow_raw_messages: bool,
-  pub device_configuration_file: Option<String>,
-  pub user_device_configuration_file: Option<String>,
+  pub device_configuration_json: Option<String>,
+  pub user_device_configuration_json: Option<String>,
 }
 
 impl Default for ButtplugServerOptions {
@@ -69,8 +70,8 @@ impl Default for ButtplugServerOptions {
       name: "Buttplug Server".to_owned(),
       max_ping_time: 0,
       allow_raw_messages: false,
-      device_configuration_file: None,
-      user_device_configuration_file: None,
+      device_configuration_json: None,
+      user_device_configuration_json: None,
     }
   }  
 }
@@ -90,10 +91,10 @@ impl ButtplugServer {
   // Can't use the Default trait because we return a tuple, so this is the next best thing.
   pub fn default() -> (Self, Receiver<ButtplugServerMessage>) {
     // We can unwrap here because if default init fails, so will pretty much every test.
-    Self::new_with_options(ButtplugServerOptions::default()).unwrap()
+    Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
   }
 
-  pub fn new_with_options(options: ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
+  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
     let (send, recv) = bounded(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
@@ -131,10 +132,10 @@ impl ButtplugServer {
     } else {
       (None, None)
     };
-    let device_manager = DeviceManager::new(send.clone(), ping_receiver, options.allow_raw_messages, options.device_configuration_file, options.user_device_configuration_file)?;
+    let device_manager = DeviceManager::new_with_options(send.clone(), ping_receiver, options.allow_raw_messages, &options.device_configuration_json, &options.user_device_configuration_json)?;
     Ok((
       Self {
-        server_name: options.name,
+        server_name: options.name.clone(),
         client_name: String::default(),
         max_ping_time: options.max_ping_time,
         device_manager,

@@ -310,17 +310,17 @@ impl Default for DeviceConfigurationManager {
   fn default() -> Self {
     // Unwrap allowed here because we assume our built in device config will
     // always work. System won't pass tests or possibly even build otherwise.
-    Self::new_with_options(false, None, None).unwrap()
+    Self::new_with_options(false, &None, &None).unwrap()
   }
 }
 
 impl DeviceConfigurationManager {
-  pub fn new_with_options(allow_raw_messages: bool, external_config: Option<String>, user_config: Option<String>) -> Result<Self, ButtplugDeviceError> {
+  pub fn new_with_options(allow_raw_messages: bool, external_config: &Option<String>, user_config: &Option<String>) -> Result<Self, ButtplugDeviceError> {
     // TODO Handling references incorrectly here.
     let config_str = if let Some(cfg) = external_config {
       cfg
     } else {
-      DEVICE_CONFIGURATION_JSON.to_owned()
+      DEVICE_CONFIGURATION_JSON
     };
 
     let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
@@ -443,7 +443,7 @@ mod test {
 
   #[test]
   fn test_raw_device_config_creation() {
-    let config = DeviceConfigurationManager::new_with_options(true, None, None).unwrap();
+    let config = DeviceConfigurationManager::new_with_options(true, &None, &None).unwrap();
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
     let proto = config.find_configuration(&lovense).unwrap();
@@ -501,7 +501,7 @@ mod test {
         .len(),
       1
     );
-    config = DeviceConfigurationManager::new_with_options(false, None, Some(
+    config = DeviceConfigurationManager::new_with_options(false, &None, &Some(
       r#"
         { 
             "protocols": {
