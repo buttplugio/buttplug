@@ -42,7 +42,7 @@ pub async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
-  let config_mgr = device_config_mgr.unwrap_or(Arc::new(DeviceConfigurationManager::default()));
+  let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(DeviceConfigurationManager::default()));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name);
   let device_impl_clone = device_impl.clone();
   let device: ButtplugDevice =

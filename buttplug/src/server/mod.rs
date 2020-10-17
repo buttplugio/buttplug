@@ -135,7 +135,7 @@ impl ButtplugServer {
       (None, None)
     };
     let device_manager = DeviceManager::new_with_options(
-      send.clone(),
+      send,
       ping_receiver,
       options.allow_raw_messages,
       &options.device_configuration_json,

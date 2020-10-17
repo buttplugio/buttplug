@@ -252,7 +252,7 @@ impl DeviceManager {
       user_device_config_json,
     )?);
     let (event_loop_fut, device_map, device_event_sender) =
-      wait_for_manager_events(config.clone(), ping_receiver, event_sender);
+      wait_for_manager_events(config, ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();
     Ok(Self {
       sender: device_event_sender,
@@ -354,7 +354,7 @@ impl DeviceManager {
             let dev = device.value();
             DeviceMessageInfo {
               device_index: *device.key(),
-              device_name: dev.name().to_string(),
+              device_name: dev.name(),
               device_messages: dev.message_attributes(),
             }
           })

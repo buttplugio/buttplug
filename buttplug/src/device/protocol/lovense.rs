@@ -153,7 +153,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
           direction.store(clockwise, Ordering::SeqCst);
           let fut = device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
-            "RotateChange;".as_bytes().to_vec(),
+            b"RotateChange;".to_vec(),
             false,
           ));
           fut.await?;
@@ -172,7 +172,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     Box::pin(async move {
       let write_fut = device.write_value(DeviceWriteCmd::new(
         Endpoint::Tx,
-        "Battery;".as_bytes().to_vec(),
+        b"Battery;".to_vec(),
         false,
       ));
       write_fut.await?;

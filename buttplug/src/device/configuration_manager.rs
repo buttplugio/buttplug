@@ -252,7 +252,7 @@ impl DeviceProtocolConfiguration {
   pub fn get_attributes(
     &self,
     identifier: &str,
-    endpoints: &Vec<Endpoint>,
+    endpoints: &[Endpoint],
   ) -> Result<(HashMap<String, String>, MessageAttributesMap), ButtplugError> {
     let mut attributes = MessageAttributesMap::new();
     // If we find defaults, set those up first.
@@ -272,15 +272,14 @@ impl DeviceProtocolConfiguration {
         if let Some(ref msg_attrs) = attrs.messages {
           attributes.extend(msg_attrs.clone());
         }
-        if !attributes.contains_key(&ButtplugDeviceMessageType::StopDeviceCmd) {
-          attributes.insert(
-            ButtplugDeviceMessageType::StopDeviceCmd,
-            MessageAttributes::default(),
+        attributes
+          .entry(ButtplugDeviceMessageType::StopDeviceCmd)
+          .or_insert_with(
+            MessageAttributes::default
           );
-        }
         if self.allow_raw_messages {
           let mut endpoint_attributes = MessageAttributes::default();
-          endpoint_attributes.endpoints = Some(endpoints.clone());
+          endpoint_attributes.endpoints = Some(endpoints.to_owned());
           attributes.insert(
             ButtplugDeviceMessageType::RawReadCmd,
             endpoint_attributes.clone(),
@@ -295,7 +294,7 @@ impl DeviceProtocolConfiguration {
           );
           attributes.insert(
             ButtplugDeviceMessageType::RawUnsubscribeCmd,
-            endpoint_attributes.clone(),
+            endpoint_attributes,
           );
         }
         Ok((attrs.name.as_ref().unwrap().clone(), attributes))
