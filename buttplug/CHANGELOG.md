@@ -1,9 +1,13 @@
-# 0.10.0 (2020-10-16)
+# 0.10.0 (2020-10-17)
 
 ## Features
 
+- New Device Support
+  - Kiiroo Keon
 - Added Raw commands, which allows direct read/write access to devices.
   - Must be explicitly turned on during server creation
+  - Devices will have "(Raw)" appended to their display names to let users know
+    raw commands are active.
 - Added 32 generic endpoints
   - Needed for Raw message setup
 - Added stop_all_devices to client API
