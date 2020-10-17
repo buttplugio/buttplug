@@ -11,13 +11,7 @@
 use async_std::io;
 use buttplug::{
   client::{device::VibrateCommand, ButtplugClient, ButtplugClientEvent},
-  connector::{
-    ButtplugInProcessClientConnector,
-    ButtplugRemoteClientConnector,
-    ButtplugWebsocketClientTransport,
-  },
-  core::messages::serializer::ButtplugClientJSONSerializer,
-  server::{comm_managers::btleplug::BtlePlugCommunicationManager, ButtplugServerOptions},
+  server::{ButtplugServerOptions},
   util::async_manager,
 };
 use futures::StreamExt;
@@ -34,7 +28,6 @@ async fn device_enumeration_example() {
 
   // Since we're going to need to manage our server and client, this example
   // will use an embedded connector.
-  //let connector = ButtplugInProcessClientConnector::default();
   //let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://192.168.123.100:12345"));
 
   // This example will also work with a WebsocketConnector if you want to
@@ -144,8 +137,7 @@ async fn device_enumeration_example() {
           // in a later example. For now, we'll just print the
           // device name then drop our instance of it.
           println!("We got a device: {}", device.name);
-          //device.vibrate(VibrateCommand::Speed(0.5)).await.unwrap();
-          println!("Battery: {}", device.battery_level().await.unwrap());
+          device.vibrate(VibrateCommand::Speed(0.5)).await.unwrap();
         }
         ButtplugClientEvent::ServerDisconnect => {
           // The server disconnected, which means we're done
