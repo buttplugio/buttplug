@@ -10,11 +10,15 @@
 // which devices are available.
 use async_std::io;
 use buttplug::{
+  client::{device::VibrateCommand, ButtplugClient, ButtplugClientEvent},
+  connector::{
+    ButtplugInProcessClientConnector,
+    ButtplugRemoteClientConnector,
+    ButtplugWebsocketClientTransport,
+  },
   core::messages::serializer::ButtplugClientJSONSerializer,
-  client::{ButtplugClient, ButtplugClientEvent, device::VibrateCommand},
-  connector::{ButtplugInProcessClientConnector, ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
+  server::{comm_managers::btleplug::BtlePlugCommunicationManager, ButtplugServerOptions},
   util::async_manager,
-  server::comm_managers::btleplug::BtlePlugCommunicationManager,
 };
 use futures::StreamExt;
 use tracing::{info, span, Level};
@@ -30,8 +34,8 @@ async fn device_enumeration_example() {
 
   // Since we're going to need to manage our server and client, this example
   // will use an embedded connector.
-  //let connector = ButtplugInProcessClientConnector::new("Example Server", 0);
-  let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://192.168.123.100:12345"));
+  //let connector = ButtplugInProcessClientConnector::default();
+  //let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://192.168.123.100:12345"));
 
   // This example will also work with a WebsocketConnector if you want to
   // connect to Intiface Desktop or an intiface-cli instance.
@@ -64,8 +68,8 @@ async fn device_enumeration_example() {
   // bluetooth device, the Aneros Vivi, by using its bluetooth name.
 
   /* let helper = connector.server_ref().add_test_comm_manager().unwrap();
-  let _ = helper.add_ble_device("Massage Demo").await;
- */
+   let _ = helper.add_ble_device("Massage Demo").await;
+  */
   // If we wanted to add a real device manager, like the btleplug manager,
   // we'd run something like this:
   //
@@ -100,9 +104,10 @@ async fn device_enumeration_example() {
   //   steps wouldn't have to happen again.
   //
   // With that out of the way, let's build our client.
-  let (client, mut event_stream) = ButtplugClient::connect("Example Client", connector)
-    .await
-    .unwrap();
+  let (client, mut event_stream) =
+    ButtplugClient::connect_in_process("test client", &ButtplugServerOptions::default())
+      .await
+      .unwrap();
   // First, we'll start the server looking for devices.
   if let Err(err) = client.start_scanning().await {
     // If the server disconnected between the time we spun up the
@@ -139,7 +144,8 @@ async fn device_enumeration_example() {
           // in a later example. For now, we'll just print the
           // device name then drop our instance of it.
           println!("We got a device: {}", device.name);
-          device.vibrate(VibrateCommand::Speed(0.5)).await.unwrap();
+          //device.vibrate(VibrateCommand::Speed(0.5)).await.unwrap();
+          println!("Battery: {}", device.battery_level().await.unwrap());
         }
         ButtplugClientEvent::ServerDisconnect => {
           // The server disconnected, which means we're done
