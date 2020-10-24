@@ -218,3 +218,52 @@ fn test_reject_on_no_raw_message() {
     }
   });
 }
+
+#[test]
+fn test_repeated_address_additions() {
+  tracing_subscriber::fmt::init();
+  async_manager::block_on(async {
+    let (server, mut recv) = ButtplugServer::default();
+    let helper = server.add_test_comm_manager().unwrap();
+    helper.add_ble_device_with_address("Massage Demo", "SameAddress").await;
+    helper.add_ble_device_with_address("Massage Demo", "SameAddress").await;
+    assert!(server
+      .parse_message(
+        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+          .into()
+      )
+      .await
+      .is_ok());
+    assert!(server
+      .parse_message(messages::StartScanning::default().into())
+      .await
+      .is_ok());
+    let mut device_index = None;
+    let mut device_removed_called = true;
+    while let Some(msg) = recv.next().await {
+      match msg {
+        ButtplugServerMessage::ScanningFinished(_) => continue,
+        ButtplugServerMessage::DeviceAdded(da)  => {
+          assert_eq!(da.device_name, "Aneros Vivi");
+          if device_index.is_none() {
+            device_index = Some(da.device_index);
+          } else {
+            assert!(device_removed_called);
+            assert_eq!(da.device_index, device_index.unwrap());
+            return;
+          }
+        },
+        ButtplugServerMessage::DeviceRemoved(dr) => {
+          assert_eq!(dr.device_index, 0);
+          device_removed_called = true;
+        },
+        _ => {
+          panic!(format!(
+            "Returned message was not a DeviceAdded message or timed out: {:?}",
+            msg
+          ));
+        }
+      }
+    }
+  });
+}

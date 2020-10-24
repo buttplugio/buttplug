@@ -356,6 +356,10 @@ impl ButtplugDevice {
     }
   }
 
+  pub fn address(&self) -> &str {
+    self.device.address()
+  }
+
   pub async fn try_create_device(
     device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
@@ -427,6 +431,10 @@ impl ButtplugDevice {
     } else {
       self.protocol.name().to_owned()
     }
+  }
+
+  pub fn disconnect(&self) -> ButtplugResultFuture {
+    self.device.disconnect()
   }
 
   pub fn message_attributes(&self) -> MessageAttributesMap {

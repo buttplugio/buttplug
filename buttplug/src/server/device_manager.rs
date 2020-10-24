@@ -44,6 +44,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
+use async_lock::Semaphore;
 use dashmap::DashMap;
 use futures::{
   future::{self, Future},
@@ -74,11 +75,13 @@ fn wait_for_manager_events(
   Sender<DeviceCommunicationEvent>,
 ) {
   let main_device_index = Arc::new(AtomicU32::new(0));
+  let mut device_index_map: Arc<DashMap<String, u32>> = Arc::new(DashMap::new());
   let (device_event_sender, mut device_event_receiver) = bounded::<(u32, ButtplugDeviceEvent)>(256);
   let device_map = Arc::new(DashMap::new());
   let (device_comm_sender, mut device_comm_receiver) = bounded(256);
   let device_map_return = device_map.clone();
   let mut device_manager_status: Vec<Arc<AtomicBool>> = vec![];
+  let device_addition_semaphore = Arc::new(Semaphore::new(1));
   let event_loop = async move {
     loop {
       let ping_fut = async {
@@ -106,23 +109,69 @@ fn wait_for_manager_events(
             DeviceCommunicationEvent::DeviceFound(device_creator) => {
               // Pull and increment the device index now. If connection fails,
               // we'll just iterate to the next one.
-              let device_index = main_device_index.load(Ordering::SeqCst);
+              let generated_device_index = main_device_index.load(Ordering::SeqCst);
               main_device_index.store(
                 main_device_index.load(Ordering::SeqCst) + 1,
                 Ordering::SeqCst,
               );
+              debug!("Current generated device index: {}", generated_device_index);
               let device_event_sender_clone = device_event_sender.clone();
               let device_map_clone = device_map.clone();
               let server_sender_clone = server_sender.clone();
               let device_config_mgr_clone = device_config_manager.clone();
+              let device_index_map_clone = device_index_map.clone();
+              let device_addition_semaphore_clone = device_addition_semaphore.clone();
               async_manager::spawn(async move {
                 match ButtplugDevice::try_create_device(device_config_mgr_clone, device_creator)
                   .await
                 {
                   Ok(option_dev) => match option_dev {
                     Some(device) => {
+                      // In order to make sure we don't collide IDs, we can only
+                      // insert one device at a time. So much for lockless
+                      // buttplugs. :(
+                      let _guard = device_addition_semaphore_clone.acquire_arc().await;
+                      // See if we have a reusable device index here.
+                      let device_index = if let Some(id) = device_index_map_clone.get(device.address()) {
+                        id.value().clone()
+                      } else {
+                        device_index_map_clone.insert(device.address().to_owned(), generated_device_index);
+                        generated_device_index
+                      };
+                      // Since we can now reuse device indexes, this means we
+                      // might possibly stomp on devices already in the map if
+                      // they don't register a disconnect before we try to
+                      // insert the new device. If we have a device already in
+                      // the map with the same index (and therefore same
+                      // address), consider it disconnected and eject it from
+                      // the map. This should also trigger a disconnect event
+                      // before our new DeviceAdded message goes out, so timing
+                      // matters here.
+                      if device_map_clone.contains_key(&device_index) {
+                        info!("Device map contains key!");
+                        // We just checked that the key exists, so we can unwrap
+                        // here.
+                        let old_device: dashmap::ElementGuard<u32, ButtplugDevice> = device_map_clone.remove_take(&device_index).unwrap();
+                        // After removing the device from the array, manually
+                        // disconnect it to make sure the event is thrown.
+                        if let Err(err) = old_device.value().disconnect().await {
+                          // If we throw an error during the disconnect, we
+                          // can't really do anything with it, but should at
+                          // least log it.
+                          error!("Error during index collision disconnect: {:?}", err);
+                        }
+                      } else {
+                        info!("Device map does not contain key!");
+                      }
+
                       info!("Assigning index {} to {}", device_index, device.name());
                       let mut recv = device.get_event_receiver();
+                      let device_added_message = DeviceAdded::new(
+                        device_index,
+                        &device.name(),
+                        &device.message_attributes(),
+                      );
+                      device_map_clone.insert(device_index, device);
                       let sender_clone = device_event_sender_clone.clone();
                       let idx_clone = device_index;
                       async_manager::spawn(async move {
@@ -134,12 +183,6 @@ fn wait_for_manager_events(
                         }
                       })
                       .unwrap();
-                      let device_added_message = DeviceAdded::new(
-                        device_index,
-                        &device.name(),
-                        &device.message_attributes(),
-                      );
-                      device_map_clone.insert(device_index, device);
                       // After that, we can send out to the server's event
                       // listeners to let them know a device has been added.
                       if server_sender_clone
