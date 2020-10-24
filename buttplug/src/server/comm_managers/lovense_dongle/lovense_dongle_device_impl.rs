@@ -59,7 +59,7 @@ impl LovenseDongleDeviceImplCreator {
       //
       // Hacky, but it works.
       specifier: DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-SerialPortDevice",
+        "LVS-DongleDevice",
       )),
       id: id.to_string(),
       device_outgoing,
@@ -117,6 +117,15 @@ impl LovenseDongleDeviceImpl {
           .await
           .unwrap();
       }
+      info!(
+        "Lovense dongle device disconnected",
+      );
+      // This should always succeed, as it'll relay up to the device manager,
+      // and that's what owns us.
+      event_broadcaster_clone
+        .send(&ButtplugDeviceEvent::Removed)
+        .await
+        .unwrap();
     })
     .unwrap();
     Self {

@@ -380,7 +380,17 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
           self.hub.send_output(device_msg).await;
         }
         IncomingMessage::Dongle(dongle_msg) => {
-          device_read_sender.send(dongle_msg).await.unwrap();
+          match dongle_msg.func {
+            LovenseDongleMessageFunc::IncomingStatus => {
+              if let Some(data) = dongle_msg.data {
+                if data.status == Some(LovenseDongleResultCode::DeviceDisconnected) {
+                  // Device disconnected, emit and return to idle.
+                  return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
+                }
+              }
+            },
+            _ => device_read_sender.send(dongle_msg).await.unwrap()
+          }
         }
         _ => error!("Unhandled message: {:?}", msg),
       }

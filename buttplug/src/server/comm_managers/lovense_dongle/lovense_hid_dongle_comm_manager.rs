@@ -115,7 +115,6 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
 
 pub struct LovenseHIDDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
-  //port: Arc<Mutex<Option<Box<dyn SerialPort>>>>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
 }
