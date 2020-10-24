@@ -75,7 +75,7 @@ fn wait_for_manager_events(
   Sender<DeviceCommunicationEvent>,
 ) {
   let main_device_index = Arc::new(AtomicU32::new(0));
-  let mut device_index_map: Arc<DashMap<String, u32>> = Arc::new(DashMap::new());
+  let device_index_map: Arc<DashMap<String, u32>> = Arc::new(DashMap::new());
   let (device_event_sender, mut device_event_receiver) = bounded::<(u32, ButtplugDeviceEvent)>(256);
   let device_map = Arc::new(DashMap::new());
   let (device_comm_sender, mut device_comm_receiver) = bounded(256);
