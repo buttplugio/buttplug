@@ -12,7 +12,7 @@ use crate::{
   },
 };
 use async_channel::Sender;
-use async_mutex::Mutex;
+use async_lock::Mutex;
 use futures::future;
 use std::{
   sync::Arc,

@@ -15,7 +15,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{Receiver, Sender};
-use async_mutex::Mutex;
+use async_lock::Mutex;
 use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use futures::{future::BoxFuture, StreamExt};

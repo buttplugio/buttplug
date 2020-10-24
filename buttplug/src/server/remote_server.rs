@@ -10,7 +10,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use async_mutex::Mutex;
+use async_lock::Mutex;
 use futures::{future::Future, select, FutureExt, StreamExt};
 use std::sync::Arc;
 use thiserror::Error;

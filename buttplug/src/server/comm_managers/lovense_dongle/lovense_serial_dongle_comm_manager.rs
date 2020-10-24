@@ -16,7 +16,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
-use async_mutex::Mutex;
+use async_lock::Mutex;
 use futures::StreamExt;
 use serde_json::Deserializer;
 use serialport::{

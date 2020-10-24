@@ -21,7 +21,7 @@ use crate::{
     Endpoint,
   },
 };
-use async_mutex::Mutex;
+use async_lock::Mutex;
 use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
