@@ -124,6 +124,16 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
     loop {
       let event = self.event_receiver.next().await;
+      if event.is_none() {
+        error!("BTLEPlug connection event handler died, cannot receive connection event.");
+        state.set_reply(ButtplugDeviceReturn::Error(
+          ButtplugDeviceError::DeviceConnectionError("BTLEPlug connection event handler died, cannot receive connection event.".to_owned()).into()
+        ));
+        return Err(
+          ButtplugDeviceError::DeviceConnectionError("BTLEPlug connection event handler died, cannot receive connection event.".to_owned()).into()
+        );
+      }
+      // We just checked it, we can unwrap here.
       match event.unwrap() {
         CentralEvent::DeviceConnected(addr) => {
           if addr == self.device.address() {
@@ -139,7 +149,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<UUID, Endpoint>::new();
-    let chars = self.device.discover_characteristics().unwrap();
+    let chars = match self.device.discover_characteristics() {
+      Ok(chars) => chars,
+      Err(err) => {
+        error!("BTLEPlug error discovering characteristics: {:?}", err);
+        return Err(ButtplugDeviceError::DeviceConnectionError(format!("BTLEPlug error discovering characteristics: {:?}", err)).into())
+      }
+    };
     for proto_service in self.protocol.services.values() {
       for (chr_name, chr_uuid) in proto_service.iter() {
         let maybe_chr = chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
@@ -150,19 +166,29 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       }
     }
     let os = self.output_sender.clone();
+    let mut error_notification = false;
     self
       .device
       .on_notification(Box::new(move |notification: ValueNotification| {
-        let endpoint = *uuid_map.get(&notification.uuid).unwrap();
+        let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
+          *endpoint
+        } else {
+          if !error_notification {
+            error!("Endpoint for UUID {} not found in map, assuming device has disconnected.", notification.uuid);
+            error_notification = true;            
+          }
+          return;
+        };
         let sender = os.clone();
         async_manager::spawn(async move {
-          sender
+          if let Err(err) = sender
             .send(&ButtplugDeviceEvent::Notification(
               endpoint,
               notification.value,
             ))
-            .await
-            .unwrap()
+            .await {
+              error!("Cannot send notification, device object disappeared: {:?}", err);
+            }            
         })
         .unwrap();
       }));
@@ -180,8 +206,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   fn handle_write(&mut self, write_msg: &DeviceWriteCmd, state: &mut DeviceReturnStateShared) {
     match self.endpoints.get(&write_msg.endpoint) {
       Some(chr) => {
-        self.device.command(&chr, &write_msg.data).unwrap();
-        state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        if let Err(err) = self.device.command(&chr, &write_msg.data) {
+          error!("BTLEPlug device write error: {:?}", err);
+        } else {
+          state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        }
       }
       None => state.set_reply(ButtplugDeviceReturn::Error(
         ButtplugDeviceError::InvalidEndpoint(write_msg.endpoint).into(),
@@ -201,7 +230,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           )));
         }
         Err(err) => {
-          trace!("Read failed");
+          error!("BTLEPlug device read error: {:?}", err);
           state.set_reply(ButtplugDeviceReturn::Error(
             ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
               err,
@@ -223,8 +252,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   ) {
     match self.endpoints.get(&sub_msg.endpoint) {
       Some(chr) => {
-        self.device.subscribe(&chr).unwrap();
-        state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        if let Err(err) = self.device.subscribe(&chr) {
+          error!("BTLEPlug device subscribe error: {:?}", err);
+        } else {
+          state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        }
       }
       None => state.set_reply(ButtplugDeviceReturn::Error(
         ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into(),
@@ -239,8 +271,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   ) {
     match self.endpoints.get(&sub_msg.endpoint) {
       Some(chr) => {
-        self.device.subscribe(&chr).unwrap();
-        state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        if let Err(err) = self.device.subscribe(&chr) {
+          error!("BTLEPlug device unsubscribe error: {:?}", err);
+        } else {
+          state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
+        }
       }
       None => state.set_reply(ButtplugDeviceReturn::Error(
         ButtplugDeviceError::InvalidEndpoint(sub_msg.endpoint).into(),
@@ -299,7 +334,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           "Device {:?} disconnected",
           self.device.properties().local_name
         );
-        // This should always succeed
+        // This should always succeed, as it'll relay up to the device manager,
+        // and that's what owns us.
         self
           .output_sender
           .send(&ButtplugDeviceEvent::Removed)
