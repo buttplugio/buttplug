@@ -29,7 +29,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 thread-pool-runtime=[]
 async-std-runtime=["async-std/default"]
 tokio-runtime=[]
-wasm-bindgen-runtime=["wasm-bindgen-futures"]
+wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -77,6 +77,7 @@ dashmap = "4.0.0-rc6"
 displaydoc = "0.1.7"
 serialport = { version = "3.3.0", optional = true }
 hidapi = { version = "1.2.3", optional = true }
+wasm-bindgen = { version = "0.2.68", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
