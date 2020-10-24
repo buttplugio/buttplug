@@ -221,7 +221,6 @@ fn test_reject_on_no_raw_message() {
 
 #[test]
 fn test_repeated_address_additions() {
-  tracing_subscriber::fmt::init();
   async_manager::block_on(async {
     let (server, mut recv) = ButtplugServer::default();
     let helper = server.add_test_comm_manager().unwrap();
