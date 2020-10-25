@@ -5,7 +5,6 @@ use crate::{
 };
 use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 use futures::{select, FutureExt, StreamExt};
 
 // I found this hot dog on the ground at
@@ -26,7 +25,6 @@ enum IncomingMessage {
 
 #[derive(Debug, Clone)]
 struct ChannelHub {
-  has_run_device_check: Arc<AtomicBool>,
   comm_manager_outgoing: Sender<ButtplugResult>,
   comm_manager_incoming: Receiver<LovenseDeviceCommand>,
   dongle_outgoing: Sender<OutgoingLovenseData>,
@@ -43,7 +41,6 @@ impl ChannelHub {
     event_outgoing: Sender<DeviceCommunicationEvent>,
   ) -> Self {
     Self {
-      has_run_device_check: Arc::new(AtomicBool::new(false)),
       comm_manager_outgoing,
       comm_manager_incoming,
       dongle_outgoing,
@@ -56,14 +53,6 @@ impl ChannelHub {
     Some(Box::new(LovenseDongleWaitForDongle::new(self.comm_manager_incoming.clone(), 
     self.comm_manager_outgoing.clone(),
     self.event_outgoing.clone())))
-  }
-
-  pub fn has_run_device_check(&self) -> bool {
-    self.has_run_device_check.load(Ordering::SeqCst)
-  }
-
-  pub fn set_run_device_check(&self) {
-    self.has_run_device_check.store(true, Ordering::SeqCst);
   }
 
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
