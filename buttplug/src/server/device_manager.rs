@@ -335,6 +335,7 @@ impl DeviceManager {
         let mut scanning_stopped = true;
         for mgr in mgrs.iter() {
           if mgr.value().scanning_status().load(Ordering::SeqCst) {
+            debug!("Device manager {} has not stopped scanning yet.", mgr.key());
             scanning_stopped = false;
             break;
           }

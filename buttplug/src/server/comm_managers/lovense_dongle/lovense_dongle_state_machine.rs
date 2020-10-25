@@ -5,6 +5,7 @@ use crate::{
 };
 use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 use futures::{select, FutureExt, StreamExt};
 
 // I found this hot dog on the ground at
@@ -20,10 +21,12 @@ enum IncomingMessage {
   CommMgr(LovenseDeviceCommand),
   Dongle(LovenseDongleIncomingMessage),
   Device(OutgoingLovenseData),
+  Disconnect
 }
 
 #[derive(Debug, Clone)]
 struct ChannelHub {
+  has_run_device_check: Arc<AtomicBool>,
   comm_manager_outgoing: Sender<ButtplugResult>,
   comm_manager_incoming: Receiver<LovenseDeviceCommand>,
   dongle_outgoing: Sender<OutgoingLovenseData>,
@@ -40,6 +43,7 @@ impl ChannelHub {
     event_outgoing: Sender<DeviceCommunicationEvent>,
   ) -> Self {
     Self {
+      has_run_device_check: Arc::new(AtomicBool::new(false)),
       comm_manager_outgoing,
       comm_manager_incoming,
       dongle_outgoing,
@@ -48,12 +52,42 @@ impl ChannelHub {
     }
   }
 
+  pub fn create_new_wait_for_dongle_state(&self) -> Option<Box<dyn LovenseDongleState>> {
+    Some(Box::new(LovenseDongleWaitForDongle::new(self.comm_manager_incoming.clone(), 
+    self.comm_manager_outgoing.clone(),
+    self.event_outgoing.clone())))
+  }
+
+  pub fn has_run_device_check(&self) -> bool {
+    self.has_run_device_check.load(Ordering::SeqCst)
+  }
+
+  pub fn set_run_device_check(&self) {
+    self.has_run_device_check.store(true, Ordering::SeqCst);
+  }
+
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
     let mut comm_fut = self.comm_manager_incoming.next().fuse();
     let mut dongle_fut = self.dongle_incoming.next().fuse();
     select! {
-      comm_res = comm_fut => IncomingMessage::CommMgr(comm_res.unwrap()),
-      dongle_res = dongle_fut => IncomingMessage::Dongle(dongle_res.unwrap())
+      comm_res = comm_fut => {
+        match comm_res {
+          Some(msg) => IncomingMessage::CommMgr(msg),
+          None => {
+            error!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
+            IncomingMessage::Disconnect
+          }
+        }
+      }
+      dongle_res = dongle_fut => {
+        match dongle_res {
+          Some(msg) => IncomingMessage::Dongle(msg),
+          None => {
+            error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+            IncomingMessage::Disconnect
+          }
+        }
+      }
     }
   }
 
@@ -65,9 +99,33 @@ impl ChannelHub {
     let mut dongle_fut = self.dongle_incoming.next().fuse();
     let mut device_fut = device_incoming.next().fuse();
     select! {
-      comm_res = comm_fut => IncomingMessage::CommMgr(comm_res.unwrap()),
-      dongle_res = dongle_fut => IncomingMessage::Dongle(dongle_res.unwrap()),
-      device_res = device_fut => IncomingMessage::Device(device_res.unwrap())
+      comm_res = comm_fut => {
+        match comm_res {
+          Some(msg) => IncomingMessage::CommMgr(msg),
+          None => {
+            error!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
+            IncomingMessage::Disconnect
+          }
+        }
+      }
+      dongle_res = dongle_fut => {
+        match dongle_res {
+          Some(msg) => IncomingMessage::Dongle(msg),
+          None => {
+            error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+            IncomingMessage::Disconnect
+          }
+        }
+      }
+      device_res = device_fut => {
+        match device_res {
+          Some(msg) => IncomingMessage::Device(msg),
+          None => {
+            error!("Disconnect in device channel, assuming shutdown or disconnect, exiting loop");
+            IncomingMessage::Disconnect
+          }
+        }
+      }
     }
   }
 
@@ -188,45 +246,8 @@ state_definition!(LovenseDongleIdle);
 impl LovenseDongleState for LovenseDongleIdle {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
     info!("Running idle step");
-    loop {
-      let msg = self.hub.wait_for_input().await;
-      match msg {
-        IncomingMessage::Dongle(device_msg) => {
-          error!(
-            "Unhandled comm manager message to lovense dongle: {:?}",
-            device_msg
-          );
-        }
-        IncomingMessage::CommMgr(comm_msg) => match comm_msg {
-          LovenseDeviceCommand::StartScanning => {
-            return Some(Box::new(LovenseDongleStartScanning::new(self.hub.clone())));
-          }
-          LovenseDeviceCommand::StopScanning => {
-            return Some(Box::new(LovenseDongleStopScanning::new(self.hub.clone())));
-          }
-          _ => {
-            error!(
-              "Unhandled comm manager message to lovense dongle: {:?}",
-              comm_msg
-            );
-          }
-        },
-        _ => {
-          error!("Unhandled message to lovense dongle: {:?}", msg);
-        }
-      }
-    }
-  }
-}
 
-state_definition!(LovenseDongleStartScanning);
-
-#[async_trait]
-impl LovenseDongleState for LovenseDongleStartScanning {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
-    info!("scanning for devices");
-
-    // Turn on auto-connect on find
+    // Check to see if any toy is already connected.
     let autoconnect_msg = LovenseDongleOutgoingMessage {
       func: LovenseDongleMessageFunc::Statuss,
       message_type: LovenseDongleMessageType::Toy,
@@ -241,6 +262,58 @@ impl LovenseDongleState for LovenseDongleStartScanning {
 
     // This sleep is REQUIRED. If we send too soon after this, the dongle locks up.
     futures_timer::Delay::new(std::time::Duration::from_millis(250)).await;
+
+    loop {
+      let msg = self.hub.wait_for_input().await;
+      match msg {
+        IncomingMessage::Dongle(device_msg) => {
+          match device_msg.func {
+            LovenseDongleMessageFunc::IncomingStatus => {
+              if let Some(incoming_data) = device_msg.data {
+                if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
+                  info!("Lovense dongle already connected to a device, registering in system.");
+                  return Some(Box::new(LovenseDongleDeviceLoop::new(
+                    self.hub.clone(),
+                    incoming_data.id.unwrap(),
+                  )))
+                }
+              }
+            }
+            _ => error!("Cannot handle dongle function {:?}", device_msg),
+          }
+        },
+        IncomingMessage::CommMgr(comm_msg) => match comm_msg {
+          LovenseDeviceCommand::StartScanning => {
+            return Some(Box::new(LovenseDongleStartScanning::new(self.hub.clone())));
+          }
+          LovenseDeviceCommand::StopScanning => {
+            return Some(Box::new(LovenseDongleStopScanning::new(self.hub.clone())));
+          }
+          _ => {
+            error!(
+              "Unhandled comm manager message to lovense dongle: {:?}",
+              comm_msg
+            );
+          }
+        },
+        IncomingMessage::Disconnect => {
+          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          return self.hub.create_new_wait_for_dongle_state();
+        }
+        _ => {
+          error!("Unhandled message to lovense dongle: {:?}", msg);
+        }
+      }
+    }
+  }
+}
+
+state_definition!(LovenseDongleStartScanning);
+
+#[async_trait]
+impl LovenseDongleState for LovenseDongleStartScanning {
+  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+    info!("scanning for devices");
 
     let scan_msg = LovenseDongleOutgoingMessage {
       message_type: LovenseDongleMessageType::Toy,
@@ -285,6 +358,10 @@ impl LovenseDongleState for LovenseDongleScanning {
             _ => error!("Cannot handle dongle function {:?}", device_msg),
           }
         }
+        IncomingMessage::Disconnect => {
+          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          return self.hub.create_new_wait_for_dongle_state();
+        }
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
     }
@@ -308,6 +385,10 @@ impl LovenseDongleState for LovenseDongleStopScanning {
       .hub
       .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
+    self
+      .hub
+      .send_event(DeviceCommunicationEvent::ScanningFinished)
+      .await;
     None
   }
 }
@@ -329,7 +410,6 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
       .hub
       .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
-
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
@@ -343,9 +423,17 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
           }
           _ => error!("Cannot handle dongle function {:?}", device_msg),
         },
+        IncomingMessage::Disconnect => {
+          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          return self.hub.create_new_wait_for_dongle_state();
+        }
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
     }
+    self
+      .hub
+      .send_event(DeviceCommunicationEvent::ScanningFinished)
+      .await;
     Some(Box::new(LovenseDongleDeviceLoop::new(
       self.hub.clone(),
       self.device_id.clone(),
@@ -358,6 +446,7 @@ device_state_definition!(LovenseDongleDeviceLoop);
 #[async_trait]
 impl LovenseDongleState for LovenseDongleDeviceLoop {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+    info!("Running Lovense Dongle Device Event Loop");
     let (device_write_sender, device_write_receiver) = bounded(256);
     let (device_read_sender, device_read_receiver) = bounded(256);
     self
@@ -392,7 +481,27 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
             _ => device_read_sender.send(dongle_msg).await.unwrap()
           }
         }
-        _ => error!("Unhandled message: {:?}", msg),
+        IncomingMessage::CommMgr(comm_msg) => {
+          match comm_msg {
+            LovenseDeviceCommand::StartScanning => {
+              self
+                .hub
+                .send_event(DeviceCommunicationEvent::ScanningFinished)
+                .await;
+            }
+            LovenseDeviceCommand::StopScanning => {
+              self
+                .hub
+                .send_event(DeviceCommunicationEvent::ScanningFinished)
+                .await;
+            }
+            _ => error!("Cannot handle communication manager function {:?}", comm_msg),
+          }
+        }
+        IncomingMessage::Disconnect => {
+          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          return self.hub.create_new_wait_for_dongle_state();
+        }
       }
     }
   }
