@@ -1,3 +1,19 @@
+# 0.10.1 (2020-10-24)
+
+## Bugfixes
+
+- Devices now keep their indexes for the life of the process, based on device
+  address.
+- Fixed a lot of Lovense Dongle bugs
+  - Devices now register disconnects
+  - Dongle now emits scanning finished events
+  - Dongle now handles being unplugged (but not replugged yet)
+- Removed .unwrap()s in BTLEPlug that were causing crashes.
+
+## API Changes
+
+- Exposed Endpoint enum to WASM when doing wasm runtime builds
+
 # 0.10.0 (2020-10-17)
 
 ## Features
