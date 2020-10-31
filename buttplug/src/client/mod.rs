@@ -139,7 +139,7 @@ pub enum ButtplugClientEvent {
   DeviceAdded(ButtplugClientDevice),
   /// Emitted when a device has been removed from the server. Includes a
   /// [ButtplugClientDevice] object representing the device.
-  DeviceRemoved(DeviceMessageInfo),
+  DeviceRemoved(ButtplugClientDevice),
   /// Emitted when a client has not pinged the server in a sufficient amount
   /// of time.
   PingTimeout,

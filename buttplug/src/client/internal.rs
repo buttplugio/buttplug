@@ -228,9 +228,12 @@ where
             if self.device_map.contains_key(&dev.device_index) {
               trace!("Device removed, updating map and sending to client");
               let info = (*self.device_map.get(&dev.device_index).unwrap().device).clone();
+              // Grab a clone of the device
+              let device = self.create_client_device(&info);
+              // Then remove it from our storage map
               self.device_map.remove(&dev.device_index);
               self
-                .send_client_event(&ButtplugClientEvent::DeviceRemoved(info))
+                .send_client_event(&ButtplugClientEvent::DeviceRemoved(device))
                 .await;
             } else {
               error!("Received DeviceRemoved for non-existent device index");
