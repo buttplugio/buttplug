@@ -21,7 +21,6 @@ use crate::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugMessageSpecVersion,
-      DeviceMessageInfo,
       RequestDeviceList,
       RequestServerInfo,
       StartScanning,
