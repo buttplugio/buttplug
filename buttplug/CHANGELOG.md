@@ -1,3 +1,11 @@
+# 0.11.0 (2020-10-31)
+
+## API Changes
+
+- ButtplugClientDevice now sent with ButtplugClientEvent::DeviceRemoved event
+  - Used to just send the index, but that's annoying for the user.
+- More WASM type exposure.
+
 # 0.10.1 (2020-10-24)
 
 ## Bugfixes
