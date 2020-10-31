@@ -97,6 +97,9 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::cmp::Ordering;
 use std::convert::TryFrom;
+#[cfg(feature = "wasm-bindgen-runtime")]
+use wasm_bindgen::prelude::*;
+
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
@@ -142,17 +145,25 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
+#[cfg_attr(feature = "wasm-bindgen-runtime", wasm_bindgen)]
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
+  //
+  // If you add to or change this, make sure to update the
+  // ServerMessage.MessageAttributeType enum in buttplug-rs-ffi repo, including
+  // the try_from trait, otherwise conversion will always fail and we won't see
+  // the new messages in the FFI layers.
   VibrateCmd,
   LinearCmd,
   RotateCmd,
+  StopDeviceCmd,
   RawWriteCmd,
   RawReadCmd,
-  StopDeviceCmd,
   RawSubscribeCmd,
   RawUnsubscribeCmd,
+  BatteryLevelCmd,
+  RSSILevelCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -160,8 +171,6 @@ pub enum ButtplugDeviceMessageType {
   LovenseCmd,
   KiirooCmd,
   VorzeA10CycloneCmd,
-  BatteryLevelCmd,
-  RSSILevelCmd,
   // To Add:
   // PatternCmd
   // BatteryLevelReading
