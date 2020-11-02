@@ -566,7 +566,7 @@ protocols:
         - MV Crescendo
         # Tenuto contains trailing spaces, so just deal with that
         # using a wildcard.
-        - MV Tenuto*
+        - "MV Tenuto   "
       services:
         f0006900-110c-478b-b74b-6f403b364a9c:
           txmode: f0006901-110c-478b-b74b-6f403b364a9c
@@ -584,11 +584,11 @@ protocols:
             - 56
     configurations:
       - identifier:
-          - MV Crescendo 
+          - MV Crescendo
         name:
           en-us: MysteryVibe Crescendo
       - identifier:
-          - MV Tenuto 
+          - "MV Tenuto   "
         name:
           en-us: MysteryVibe Tenuto
   picobong:

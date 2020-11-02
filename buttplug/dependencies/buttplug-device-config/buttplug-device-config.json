@@ -692,7 +692,7 @@
       "btle": {
         "names": [
           "MV Crescendo",
-          "MV Tenuto*"
+          "MV Tenuto   "
         ],
         "services": {
           "f0006900-110c-478b-b74b-6f403b364a9c": {
@@ -727,7 +727,7 @@
         },
         {
           "identifier": [
-            "MV Tenuto"
+            "MV Tenuto   "
           ],
           "name": {
             "en-us": "MysteryVibe Tenuto"
