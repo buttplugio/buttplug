@@ -12,6 +12,7 @@ mod magic_motion_v2;
 mod magic_motion_v3;
 mod maxpro;
 mod motorbunny;
+mod mysteryvibe;
 mod picobong;
 mod prettylove;
 mod raw_protocol;
@@ -64,6 +65,7 @@ pub enum ProtocolTypes {
   MagicMotionV3,
   Maxpro,
   Motorbunny,
+  MysteryVibe,
   Picobong,
   PrettyLove,
   RawProtocol,
@@ -95,6 +97,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "magic-motion-3" => Ok(ProtocolTypes::MagicMotionV3),
       "maxpro" => Ok(ProtocolTypes::Maxpro),
       "motorbunny" => Ok(ProtocolTypes::Motorbunny),
+      "mysteryvibe" => Ok(ProtocolTypes::MysteryVibe),
       "picobong" => Ok(ProtocolTypes::Picobong),
       "prettylove" => Ok(ProtocolTypes::PrettyLove),
       "raw" => Ok(ProtocolTypes::RawProtocol),
@@ -135,6 +138,7 @@ pub fn try_create_protocol(
     ProtocolTypes::MagicMotionV3 => magic_motion_v3::MagicMotionV3::try_create(device, config),
     ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
     ProtocolTypes::Motorbunny => motorbunny::Motorbunny::try_create(device, config),
+    ProtocolTypes::MysteryVibe => mysteryvibe::MysteryVibe::try_create(device, config),
     ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
     ProtocolTypes::PrettyLove => prettylove::PrettyLove::try_create(device, config),
     ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
