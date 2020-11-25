@@ -38,7 +38,6 @@ use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
 use futures::future::BoxFuture;
 
-
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature
 // to assume we're building for WASM and attach our bindgen. The serde

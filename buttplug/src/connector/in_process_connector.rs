@@ -18,7 +18,10 @@ use futures::{
 };
 use std::{
   convert::TryInto,
-  sync::{Arc, atomic::{AtomicBool, Ordering}}
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
 use tracing_futures::Instrument;
 
@@ -54,7 +57,7 @@ pub struct ButtplugInProcessClientConnector {
   /// Event receiver for the internal server.
   connector_outbound_recv:
     Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>>,
-  connected: Arc<AtomicBool>
+  connected: Arc<AtomicBool>,
 }
 
 #[cfg(feature = "server")]
@@ -91,7 +94,7 @@ impl<'a> ButtplugInProcessClientConnector {
       connector_outbound_recv: Some(recv),
       server_outbound_sender,
       server,
-      connected: Arc::new(AtomicBool::new(false))
+      connected: Arc::new(AtomicBool::new(false)),
     })
   }
 
@@ -134,7 +137,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       Box::pin(future::ready(Ok(())))
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
-    }    
+    }
   }
 
   fn send(&self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {

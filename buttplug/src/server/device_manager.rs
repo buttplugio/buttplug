@@ -132,12 +132,14 @@ fn wait_for_manager_events(
                       // buttplugs. :(
                       let _guard = device_addition_semaphore_clone.acquire_arc().await;
                       // See if we have a reusable device index here.
-                      let device_index = if let Some(id) = device_index_map_clone.get(device.address()) {
-                        id.value().clone()
-                      } else {
-                        device_index_map_clone.insert(device.address().to_owned(), generated_device_index);
-                        generated_device_index
-                      };
+                      let device_index =
+                        if let Some(id) = device_index_map_clone.get(device.address()) {
+                          id.value().clone()
+                        } else {
+                          device_index_map_clone
+                            .insert(device.address().to_owned(), generated_device_index);
+                          generated_device_index
+                        };
                       // Since we can now reuse device indexes, this means we
                       // might possibly stomp on devices already in the map if
                       // they don't register a disconnect before we try to
@@ -151,7 +153,8 @@ fn wait_for_manager_events(
                         info!("Device map contains key!");
                         // We just checked that the key exists, so we can unwrap
                         // here.
-                        let old_device: dashmap::ElementGuard<u32, ButtplugDevice> = device_map_clone.remove_take(&device_index).unwrap();
+                        let old_device: dashmap::ElementGuard<u32, ButtplugDevice> =
+                          device_map_clone.remove_take(&device_index).unwrap();
                         // After removing the device from the array, manually
                         // disconnect it to make sure the event is thrown.
                         if let Err(err) = old_device.value().disconnect().await {

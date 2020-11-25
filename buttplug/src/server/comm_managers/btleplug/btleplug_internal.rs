@@ -127,10 +127,16 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       if event.is_none() {
         error!("BTLEPlug connection event handler died, cannot receive connection event.");
         state.set_reply(ButtplugDeviceReturn::Error(
-          ButtplugDeviceError::DeviceConnectionError("BTLEPlug connection event handler died, cannot receive connection event.".to_owned()).into()
+          ButtplugDeviceError::DeviceConnectionError(
+            "BTLEPlug connection event handler died, cannot receive connection event.".to_owned(),
+          )
+          .into(),
         ));
         return Err(
-          ButtplugDeviceError::DeviceConnectionError("BTLEPlug connection event handler died, cannot receive connection event.".to_owned()).into()
+          ButtplugDeviceError::DeviceConnectionError(
+            "BTLEPlug connection event handler died, cannot receive connection event.".to_owned(),
+          )
+          .into(),
         );
       }
       // We just checked it, we can unwrap here.
@@ -153,7 +159,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       Ok(chars) => chars,
       Err(err) => {
         error!("BTLEPlug error discovering characteristics: {:?}", err);
-        return Err(ButtplugDeviceError::DeviceConnectionError(format!("BTLEPlug error discovering characteristics: {:?}", err)).into())
+        return Err(
+          ButtplugDeviceError::DeviceConnectionError(format!(
+            "BTLEPlug error discovering characteristics: {:?}",
+            err
+          ))
+          .into(),
+        );
       }
     };
     for proto_service in self.protocol.services.values() {
@@ -174,8 +186,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           *endpoint
         } else {
           if !error_notification {
-            error!("Endpoint for UUID {} not found in map, assuming device has disconnected.", notification.uuid);
-            error_notification = true;            
+            error!(
+              "Endpoint for UUID {} not found in map, assuming device has disconnected.",
+              notification.uuid
+            );
+            error_notification = true;
           }
           return;
         };
@@ -186,9 +201,13 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               endpoint,
               notification.value,
             ))
-            .await {
-              error!("Cannot send notification, device object disappeared: {:?}", err);
-            }            
+            .await
+          {
+            error!(
+              "Cannot send notification, device object disappeared: {:?}",
+              err
+            );
+          }
         })
         .unwrap();
       }));

@@ -117,9 +117,7 @@ impl LovenseDongleDeviceImpl {
           .await
           .unwrap();
       }
-      info!(
-        "Lovense dongle device disconnected",
-      );
+      info!("Lovense dongle device disconnected",);
       // This should always succeed, as it'll relay up to the device manager,
       // and that's what owns us.
       event_broadcaster_clone

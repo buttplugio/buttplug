@@ -1,8 +1,8 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
+    errors::ButtplugError,
     messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
-    errors::ButtplugError
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -10,15 +10,18 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::async_manager
-};
-use std::{
-  sync::{Arc, atomic::{AtomicBool, Ordering}},
-  time::Duration
+  util::async_manager,
 };
 use async_lock::{Mutex, RwLock};
 use futures::future::BoxFuture;
 use futures_timer::Delay;
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
 // a best guess derived from watching packet timing a few years ago.
@@ -33,7 +36,7 @@ pub struct MysteryVibe {
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   current_command: Arc<RwLock<Vec<u8>>>,
-  updater_running: Arc<AtomicBool>
+  updater_running: Arc<AtomicBool>,
 }
 
 impl ButtplugProtocol for MysteryVibe {
@@ -49,7 +52,7 @@ impl ButtplugProtocol for MysteryVibe {
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       updater_running: Arc::new(AtomicBool::new(false)),
-      current_command: Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0]))
+      current_command: Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0])),
     })
   }
 
@@ -65,17 +68,27 @@ impl ButtplugProtocol for MysteryVibe {
   }
 }
 
-async fn vibration_update_handler(device: Arc<Box<dyn DeviceImpl>>, command_holder: Arc<RwLock<Vec<u8>>>) {
+async fn vibration_update_handler(
+  device: Arc<Box<dyn DeviceImpl>>,
+  command_holder: Arc<RwLock<Vec<u8>>>,
+) {
   info!("Entering Mysteryvibe Control Loop");
   let mut current_command = command_holder.read().await.clone();
-  while device.write_value(DeviceWriteCmd::new(Endpoint::TxVibrate, current_command, false)).await.is_ok() {
+  while device
+    .write_value(DeviceWriteCmd::new(
+      Endpoint::TxVibrate,
+      current_command,
+      false,
+    ))
+    .await
+    .is_ok()
+  {
     //Delay::new(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
     current_command = command_holder.read().await.clone();
     info!("MV Command: {:?}", current_command);
   }
   info!("Mysteryvibe control loop exiting, most likely due to device disconnection.");
 }
-
 
 impl ButtplugProtocolCommandHandler for MysteryVibe {
   fn handle_vibrate_cmd(
@@ -95,12 +108,17 @@ impl ButtplugProtocolCommandHandler for MysteryVibe {
       }
       let write_mutex = current_command.clone();
       let mut command_writer = write_mutex.write().await;
-      let command: Vec<u8> = result.unwrap().into_iter().map(|x| x.unwrap() as u8).collect();
+      let command: Vec<u8> = result
+        .unwrap()
+        .into_iter()
+        .map(|x| x.unwrap() as u8)
+        .collect();
       *command_writer = command;
       if !update_running.load(Ordering::SeqCst) {
-        async_manager::spawn(async move {
-          vibration_update_handler(device, current_command).await
-        }).unwrap();
+        async_manager::spawn(
+          async move { vibration_update_handler(device, current_command).await },
+        )
+        .unwrap();
         update_running.store(true, Ordering::SeqCst);
       }
       Ok(messages::Ok::default().into())

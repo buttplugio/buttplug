@@ -14,6 +14,7 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Receiver, Sender};
+use async_lock::Mutex;
 #[cfg(feature = "async-std-runtime")]
 use async_std::net::TcpListener;
 use async_tls::TlsAcceptor;
@@ -25,7 +26,6 @@ use futures::{
   SinkExt,
   StreamExt,
 };
-use async_lock::Mutex;
 use rustls::{
   internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
   NoClientAuth,
@@ -147,15 +147,15 @@ async fn run_connection_loop<S>(
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
   options: ButtplugWebsocketServerTransportOptions,
-  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>
+  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>,
 }
 
 impl ButtplugWebsocketServerTransport {
   pub fn new(options: ButtplugWebsocketServerTransportOptions) -> Self {
     let (unused_sender, _) = bounded(256);
-    Self { 
+    Self {
       options,
-      disconnect_sender: Arc::new(Mutex::new(unused_sender))
+      disconnect_sender: Arc::new(Mutex::new(unused_sender)),
     }
   }
 }
@@ -379,7 +379,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     let disconnect_sender = self.disconnect_sender.clone();
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
-      if disconnect_sender.lock().await.send(ButtplugTransportOutgoingMessage::Close).await.is_err() {
+      if disconnect_sender
+        .lock()
+        .await
+        .send(ButtplugTransportOutgoingMessage::Close)
+        .await
+        .is_err()
+      {
         Err(ButtplugConnectorError::ConnectorNotConnected)
       } else {
         Ok(())

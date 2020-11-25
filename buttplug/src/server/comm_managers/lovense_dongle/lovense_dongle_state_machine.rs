@@ -20,7 +20,7 @@ enum IncomingMessage {
   CommMgr(LovenseDeviceCommand),
   Dongle(LovenseDongleIncomingMessage),
   Device(OutgoingLovenseData),
-  Disconnect
+  Disconnect,
 }
 
 #[derive(Debug, Clone)]
@@ -50,9 +50,11 @@ impl ChannelHub {
   }
 
   pub fn create_new_wait_for_dongle_state(&self) -> Option<Box<dyn LovenseDongleState>> {
-    Some(Box::new(LovenseDongleWaitForDongle::new(self.comm_manager_incoming.clone(), 
-    self.comm_manager_outgoing.clone(),
-    self.event_outgoing.clone())))
+    Some(Box::new(LovenseDongleWaitForDongle::new(
+      self.comm_manager_incoming.clone(),
+      self.comm_manager_outgoing.clone(),
+      self.event_outgoing.clone(),
+    )))
   }
 
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
@@ -255,21 +257,19 @@ impl LovenseDongleState for LovenseDongleIdle {
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
-        IncomingMessage::Dongle(device_msg) => {
-          match device_msg.func {
-            LovenseDongleMessageFunc::IncomingStatus => {
-              if let Some(incoming_data) = device_msg.data {
-                if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
-                  info!("Lovense dongle already connected to a device, registering in system.");
-                  return Some(Box::new(LovenseDongleDeviceLoop::new(
-                    self.hub.clone(),
-                    incoming_data.id.unwrap(),
-                  )))
-                }
+        IncomingMessage::Dongle(device_msg) => match device_msg.func {
+          LovenseDongleMessageFunc::IncomingStatus => {
+            if let Some(incoming_data) = device_msg.data {
+              if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
+                info!("Lovense dongle already connected to a device, registering in system.");
+                return Some(Box::new(LovenseDongleDeviceLoop::new(
+                  self.hub.clone(),
+                  incoming_data.id.unwrap(),
+                )));
               }
             }
-            _ => error!("Cannot handle dongle function {:?}", device_msg),
           }
+          _ => error!("Cannot handle dongle function {:?}", device_msg),
         },
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {
           LovenseDeviceCommand::StartScanning => {
@@ -466,27 +466,28 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
                   return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
                 }
               }
-            },
-            _ => device_read_sender.send(dongle_msg).await.unwrap()
+            }
+            _ => device_read_sender.send(dongle_msg).await.unwrap(),
           }
         }
-        IncomingMessage::CommMgr(comm_msg) => {
-          match comm_msg {
-            LovenseDeviceCommand::StartScanning => {
-              self
-                .hub
-                .send_event(DeviceCommunicationEvent::ScanningFinished)
-                .await;
-            }
-            LovenseDeviceCommand::StopScanning => {
-              self
-                .hub
-                .send_event(DeviceCommunicationEvent::ScanningFinished)
-                .await;
-            }
-            _ => error!("Cannot handle communication manager function {:?}", comm_msg),
+        IncomingMessage::CommMgr(comm_msg) => match comm_msg {
+          LovenseDeviceCommand::StartScanning => {
+            self
+              .hub
+              .send_event(DeviceCommunicationEvent::ScanningFinished)
+              .await;
           }
-        }
+          LovenseDeviceCommand::StopScanning => {
+            self
+              .hub
+              .send_event(DeviceCommunicationEvent::ScanningFinished)
+              .await;
+          }
+          _ => error!(
+            "Cannot handle communication manager function {:?}",
+            comm_msg
+          ),
+        },
         IncomingMessage::Disconnect => {
           error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();

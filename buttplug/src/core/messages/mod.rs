@@ -100,7 +100,6 @@ use std::convert::TryFrom;
 #[cfg(feature = "wasm-bindgen-runtime")]
 use wasm_bindgen::prelude::*;
 
-
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Display)]

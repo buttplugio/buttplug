@@ -24,15 +24,17 @@ type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
 #[allow(dead_code)]
 pub fn new_uninitialized_ble_test_device(
   name: &str,
-  address: Option<String>
+  address: Option<String>,
 ) -> (Arc<TestDeviceInternal>, TestDeviceImplCreator) {
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
-  let address = address.unwrap_or(SystemTime::now()
-    .duration_since(UNIX_EPOCH)
-    .unwrap()
-    .subsec_nanos()
-    .to_string());
+  let address = address.unwrap_or(
+    SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .subsec_nanos()
+      .to_string(),
+  );
   let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name));
   let device_impl = Arc::new(TestDeviceInternal::new(name, &address));
   let device_impl_clone = device_impl.clone();
@@ -44,7 +46,8 @@ pub async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
-  let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(DeviceConfigurationManager::default()));
+  let config_mgr =
+    device_config_mgr.unwrap_or_else(|| Arc::new(DeviceConfigurationManager::default()));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
   let device: ButtplugDevice =
@@ -78,7 +81,11 @@ impl TestDeviceCommunicationManagerHelper {
     device
   }
 
-  pub async fn add_ble_device_with_address(&self, name: &str, address: &str) -> Arc<TestDeviceInternal> {
+  pub async fn add_ble_device_with_address(
+    &self,
+    name: &str,
+    address: &str,
+  ) -> Arc<TestDeviceInternal> {
     let (device, creator) = new_uninitialized_ble_test_device(name, Some(address.to_owned()));
     self.devices.lock().await.push(creator);
     device

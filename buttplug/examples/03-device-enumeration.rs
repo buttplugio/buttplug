@@ -11,7 +11,7 @@
 use async_std::io;
 use buttplug::{
   client::{device::VibrateCommand, ButtplugClient, ButtplugClientEvent},
-  server::{ButtplugServerOptions},
+  server::ButtplugServerOptions,
   util::async_manager,
 };
 use futures::StreamExt;

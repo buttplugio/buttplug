@@ -274,9 +274,7 @@ impl DeviceProtocolConfiguration {
         }
         attributes
           .entry(ButtplugDeviceMessageType::StopDeviceCmd)
-          .or_insert_with(
-            MessageAttributes::default
-          );
+          .or_insert_with(MessageAttributes::default);
         if self.allow_raw_messages {
           let mut endpoint_attributes = MessageAttributes::default();
           endpoint_attributes.endpoints = Some(endpoints.to_owned());

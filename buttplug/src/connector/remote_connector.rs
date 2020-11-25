@@ -7,7 +7,11 @@
 
 //! Handling of websockets using async-tungstenite
 
-use super::transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage, ButtplugTransportOutgoingMessage};
+use super::transport::{
+  ButtplugConnectorTransport,
+  ButtplugTransportIncomingMessage,
+  ButtplugTransportOutgoingMessage,
+};
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
@@ -141,7 +145,8 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg = ButtplugTransportOutgoingMessage::Message(serializer.serialize(vec![msg.clone()]));
+            let serialized_msg =
+              ButtplugTransportOutgoingMessage::Message(serializer.serialize(vec![msg.clone()]));
             if transport_outgoing_sender
               .send(serialized_msg)
               .await

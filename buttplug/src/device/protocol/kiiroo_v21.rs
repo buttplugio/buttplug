@@ -71,7 +71,7 @@ impl ButtplugProtocol for KiirooV21 {
     ));
     Box::pin(async move {
       init_fut1.await?;
-      Delay::new(Duration::from_millis(100)).await;
+      // Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
       Ok(None)
     })
