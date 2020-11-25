@@ -23,13 +23,13 @@ use crate::{
   util::async_manager,
 };
 use async_channel::{bounded, Sender};
+use async_lock::Mutex;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
 use futures::{future, SinkExt, StreamExt};
 use std::sync::Arc;
-use async_lock::Mutex;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
@@ -41,11 +41,10 @@ pub struct ButtplugWebsocketClientTransport {
   /// certs.
   bypass_cert_verify: bool,
   /// Internally held sender, used for when disconnect is called.
-  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>
+  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>,
 }
 
 impl ButtplugWebsocketClientTransport {
-
   fn create(address: &str, should_use_tls: bool, bypass_cert_verify: bool) -> Self {
     // Create a dummy channel here. Saves us having to check option on every
     // call, and if it fails it means we're disconnected anyways, which is fine.
@@ -54,7 +53,7 @@ impl ButtplugWebsocketClientTransport {
       should_use_tls,
       address: address.to_owned(),
       bypass_cert_verify,
-      disconnect_sender: Arc::new(Mutex::new(unused_sender))
+      disconnect_sender: Arc::new(Mutex::new(unused_sender)),
     }
   }
 
@@ -135,11 +134,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           async_manager::spawn(async move {
             while let Ok(msg) = request_receiver.recv().await {
               let out_msg = match msg {
-                ButtplugTransportOutgoingMessage::Message(outgoing_msg) => {
-                  match outgoing_msg {
-                    ButtplugSerializedMessage::Text(text) => Message::Text(text),
-                    ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
-                  }
+                ButtplugTransportOutgoingMessage::Message(outgoing_msg) => match outgoing_msg {
+                  ButtplugSerializedMessage::Text(text) => Message::Text(text),
+                  ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
                 },
                 ButtplugTransportOutgoingMessage::Close => {
                   // If we can't close, just print the error to the logs but
@@ -158,36 +155,45 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           async_manager::spawn(async move {
             while let Some(response) = reader.next().await {
               trace!("Websocket receiving: {:?}", response);
-              match response.unwrap() {
-                Message::Text(t) => {
-                  if response_sender
-                    .send(ButtplugTransportIncomingMessage::Message(
-                      ButtplugSerializedMessage::Text(t.to_string()),
-                    ))
-                    .await
-                    .is_err()
-                  {
-                    error!("Websocket holder has closed, exiting websocket loop.");
+              match response {
+                Ok(msg) => match msg {
+                  Message::Text(t) => {
+                    if response_sender
+                      .send(ButtplugTransportIncomingMessage::Message(
+                        ButtplugSerializedMessage::Text(t.to_string()),
+                      ))
+                      .await
+                      .is_err()
+                    {
+                      error!("Websocket holder has closed, exiting websocket loop.");
+                      return;
+                    }
+                  }
+                  Message::Binary(v) => {
+                    if response_sender
+                      .send(ButtplugTransportIncomingMessage::Message(
+                        ButtplugSerializedMessage::Binary(v),
+                      ))
+                      .await
+                      .is_err()
+                    {
+                      error!("Websocket holder has closed, exiting websocket loop.");
+                      return;
+                    }
+                  }
+                  Message::Ping(_) => {}
+                  Message::Pong(_) => {}
+                  Message::Close(_) => {
+                    info!("Websocket has requested close.");
                     return;
                   }
-                }
-                Message::Binary(v) => {
-                  if response_sender
-                    .send(ButtplugTransportIncomingMessage::Message(
-                      ButtplugSerializedMessage::Binary(v),
-                    ))
-                    .await
-                    .is_err()
-                  {
-                    error!("Websocket holder has closed, exiting websocket loop.");
-                    return;
-                  }
-                }
-                Message::Ping(_) => {}
-                Message::Pong(_) => {}
-                Message::Close(_) => {
-                  info!("Websocket has requested close.");
-                  return;
+                },
+                Err(err) => {
+                  error!(
+                    "Error in websocket client loop (assuming disconnect): {}",
+                    err
+                  );
+                  break;
                 }
               }
             }
@@ -206,7 +212,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     let disconnect_sender = self.disconnect_sender.clone();
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
-      if disconnect_sender.lock().await.send(ButtplugTransportOutgoingMessage::Close).await.is_err() {
+      if disconnect_sender
+        .lock()
+        .await
+        .send(ButtplugTransportOutgoingMessage::Close)
+        .await
+        .is_err()
+      {
         Err(ButtplugConnectorError::ConnectorNotConnected)
       } else {
         Ok(())
