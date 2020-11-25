@@ -582,7 +582,7 @@ impl ButtplugClientDevice {
     // Everything *should* support StopDeviceCmd but let's just make sure.
     check_message_support!(self, ButtplugDeviceMessageType::StopDeviceCmd);
     // All devices accept StopDeviceCmd
-    self.send_message_expect_ok(StopDeviceCmd::default().into())
+    self.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
   }
 
   pub fn index(&self) -> u32 {
