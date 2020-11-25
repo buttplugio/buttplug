@@ -16,7 +16,10 @@ use futures::{
   future::{self, BoxFuture},
   StreamExt,
 };
-use std::convert::TryInto;
+use std::{
+  convert::TryInto,
+  sync::{Arc, atomic::{AtomicBool, Ordering}}
+};
 use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector
@@ -51,6 +54,7 @@ pub struct ButtplugInProcessClientConnector {
   /// Event receiver for the internal server.
   connector_outbound_recv:
     Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>>,
+  connected: Arc<AtomicBool>
 }
 
 #[cfg(feature = "server")]
@@ -87,6 +91,7 @@ impl<'a> ButtplugInProcessClientConnector {
       connector_outbound_recv: Some(recv),
       server_outbound_sender,
       server,
+      connected: Arc::new(AtomicBool::new(false))
     })
   }
 
@@ -116,6 +121,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
   > {
     if self.connector_outbound_recv.is_some() {
       let recv = self.connector_outbound_recv.take().unwrap();
+      self.connected.store(true, Ordering::SeqCst);
       Box::pin(future::ready(Ok(recv)))
     } else {
       ButtplugConnectorError::ConnectorAlreadyConnected.into()
@@ -123,16 +129,23 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
   }
 
   fn disconnect(&self) -> ButtplugConnectorResultFuture {
-    Box::pin(future::ready(Ok(())))
+    if self.connected.load(Ordering::SeqCst) {
+      self.connected.store(false, Ordering::SeqCst);
+      Box::pin(future::ready(Ok(())))
+    } else {
+      ButtplugConnectorError::ConnectorNotConnected.into()
+    }    
   }
 
   fn send(&self, msg: ButtplugCurrentSpecClientMessage) -> ButtplugConnectorResultFuture {
+    if !self.connected.load(Ordering::SeqCst) {
+      return ButtplugConnectorError::ConnectorNotConnected.into();
+    }
     let out_id = msg.get_id();
     let input = msg.try_into().unwrap();
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {
-      // TODO We should definitely do something different than just unwrapping errors here.
       let output = output_fut.await.and_then(|msg| {
         msg.try_into().map_err(|_| {
           ButtplugServerError::new_message_error(

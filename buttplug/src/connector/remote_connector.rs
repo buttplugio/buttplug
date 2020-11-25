@@ -7,7 +7,7 @@
 
 //! Handling of websockets using async-tungstenite
 
-use super::transport::{ButtplugConnectorTransport, ButtplugTransportMessage};
+use super::transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage, ButtplugTransportOutgoingMessage};
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
@@ -44,7 +44,7 @@ where
   T: ButtplugMessage + 'static,
 {
   NoValue,
-  Incoming(ButtplugTransportMessage),
+  Incoming(ButtplugTransportIncomingMessage),
   Outgoing(ButtplugRemoteConnectorMessage<T>),
 }
 
@@ -60,9 +60,9 @@ async fn remote_connector_event_loop<
   connector_incoming_sender: Sender<Result<InboundMessageType, ButtplugServerError>>,
   transport: TransportType,
   // Sends sorter processed messages to the transport.
-  transport_outgoing_sender: Sender<ButtplugSerializedMessage>,
+  transport_outgoing_sender: Sender<ButtplugTransportOutgoingMessage>,
   // Takes data coming in from the transport.
-  mut transport_incoming_recv: Receiver<ButtplugTransportMessage>,
+  mut transport_incoming_recv: Receiver<ButtplugTransportIncomingMessage>,
 ) where
   TransportType: ButtplugConnectorTransport + 'static,
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
@@ -101,7 +101,7 @@ async fn remote_connector_event_loop<
       // an event.
       StreamValue::Incoming(remote_msg) => {
         match remote_msg {
-          ButtplugTransportMessage::Message(serialized_msg) => {
+          ButtplugTransportIncomingMessage::Message(serialized_msg) => {
             match serializer.deserialize(serialized_msg) {
               Ok(array) => {
                 for smsg in array {
@@ -124,14 +124,14 @@ async fn remote_connector_event_loop<
               }
             }
           }
-          ButtplugTransportMessage::Close(s) => {
+          ButtplugTransportIncomingMessage::Close(s) => {
             info!("Connector closing connection {}", s);
             break;
           }
           // TODO We should probably make connecting an event?
-          ButtplugTransportMessage::Connected => {}
+          ButtplugTransportIncomingMessage::Connected => {}
           // TODO We should probably figure out what this even does?
-          ButtplugTransportMessage::Error(_) => {}
+          ButtplugTransportIncomingMessage::Error(_) => {}
         }
       }
       // If we receive something from the client, register it with our sorter
@@ -141,7 +141,7 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg = serializer.serialize(vec![msg.clone()]);
+            let serialized_msg = ButtplugTransportOutgoingMessage::Message(serializer.serialize(vec![msg.clone()]));
             if transport_outgoing_sender
               .send(serialized_msg)
               .await

@@ -14,12 +14,21 @@ pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTra
 
 use thiserror::Error;
 
-/// Enum of messages we can receive from a connector.
-pub enum ButtplugTransportMessage {
+/// Messages we can send thru the connector.
+pub enum ButtplugTransportOutgoingMessage {
+  /// Text version of message we are sending to the remote server.
+  Message(ButtplugSerializedMessage),
+  /// Request for connector to close the connection
+  Close,
+}
+
+/// Messages we can receive from a connector.
+pub enum ButtplugTransportIncomingMessage {
   /// Send when connection is established.
   Connected,
-  /// Text version of message we received from remote server.
+  /// Serialized version of message we received from remote server.
   Message(ButtplugSerializedMessage),
+  // TODO Implement binary message at some point.
   /// Error received from remote server.
   Error(String),
   /// Connector (or remote server) itself closed the connection.
@@ -30,8 +39,8 @@ pub type ButtplugConnectorTransportConnectResult = BoxFuture<
   'static,
   Result<
     (
-      Sender<ButtplugSerializedMessage>,
-      Receiver<ButtplugTransportMessage>,
+      Sender<ButtplugTransportOutgoingMessage>,
+      Receiver<ButtplugTransportIncomingMessage>,
     ),
     ButtplugConnectorError,
   >,

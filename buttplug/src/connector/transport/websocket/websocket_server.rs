@@ -4,7 +4,8 @@ use crate::{
       ButtplugConnectorTransport,
       ButtplugConnectorTransportConnectResult,
       ButtplugConnectorTransportSpecificError,
-      ButtplugTransportMessage,
+      ButtplugTransportIncomingMessage,
+      ButtplugTransportOutgoingMessage,
     },
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
@@ -24,6 +25,7 @@ use futures::{
   SinkExt,
   StreamExt,
 };
+use async_lock::Mutex;
 use rustls::{
   internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
   NoClientAuth,
@@ -52,8 +54,8 @@ pub struct ButtplugWebsocketServerTransportOptions {
 
 async fn run_connection_loop<S>(
   ws_stream: async_tungstenite::WebSocketStream<S>,
-  mut request_receiver: Receiver<ButtplugSerializedMessage>,
-  response_sender: Sender<ButtplugTransportMessage>,
+  mut request_receiver: Receiver<ButtplugTransportOutgoingMessage>,
+  response_sender: Sender<ButtplugTransportIncomingMessage>,
 ) where
   S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -65,19 +67,29 @@ async fn run_connection_loop<S>(
     select! {
       serialized_msg = request_receiver.next().fuse() => match serialized_msg {
         Some(msg) => match msg {
-          ButtplugSerializedMessage::Text(text_msg) => {
-            if let Err(send_error) = websocket_server_sender
-              .send(async_tungstenite::tungstenite::Message::Text(text_msg))
-              .await {
-                error!("Cannot send text value to server, considering connection closed.");
-                return;
+          ButtplugTransportOutgoingMessage::Message(outgoing_msg) => {
+            match outgoing_msg {
+              ButtplugSerializedMessage::Text(text_msg) => {
+                if let Err(send_error) = websocket_server_sender
+                  .send(async_tungstenite::tungstenite::Message::Text(text_msg))
+                  .await {
+                    error!("Cannot send text value to server, considering connection closed.");
+                    return;
+                  }
+                }
+              ButtplugSerializedMessage::Binary(binary_msg) => {
+                if let Err(send_error) = websocket_server_sender
+                  .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
+                  .await {
+                    error!("Cannot send binary value to server, considering connection closed.");
+                    return;
+                  }
+                }
               }
-            }
-          ButtplugSerializedMessage::Binary(binary_msg) => {
-            if let Err(send_error) = websocket_server_sender
-              .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
-              .await {
-                error!("Cannot send binary value to server, considering connection closed.");
+            },
+            ButtplugTransportOutgoingMessage::Close => {
+              if let Err(send_error) = websocket_server_sender.close().await {
+                error!("Cannot close, assuming connection already closed");
                 return;
               }
             }
@@ -88,19 +100,19 @@ async fn run_connection_loop<S>(
         }
       },
       websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
-        // TODO should match instead of unwrap here in case there's a socket error.
         Some(ws_data) => {
           match ws_data {
             Ok(msg) => {
               match (msg) {
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
                   debug!("Got text: {}", text_msg);
-                  if response_sender.send(ButtplugTransportMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
+                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
                     error!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
                 }
                 async_tungstenite::tungstenite::Message::Close(_) => {
+                  response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
                   break;
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
@@ -118,6 +130,7 @@ async fn run_connection_loop<S>(
             },
             Err(err) => {
               error!("Error from websocket server, assuming disconnection: {:?}", err);
+              response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
               break;
             }
           }
@@ -134,11 +147,16 @@ async fn run_connection_loop<S>(
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
   options: ButtplugWebsocketServerTransportOptions,
+  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>
 }
 
 impl ButtplugWebsocketServerTransport {
   pub fn new(options: ButtplugWebsocketServerTransportOptions) -> Self {
-    Self { options }
+    let (unused_sender, _) = bounded(256);
+    Self { 
+      options,
+      disconnect_sender: Arc::new(Mutex::new(unused_sender))
+    }
   }
 }
 
@@ -146,6 +164,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   fn connect(&self) -> ButtplugConnectorTransportConnectResult {
     let (request_sender, request_receiver) = bounded(256);
     let (response_sender, response_receiver) = bounded(256);
+    let disconnect_sender = self.disconnect_sender.clone();
     let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
 
     let base_addr = if self.options.ws_listen_on_all_interfaces {
@@ -347,6 +366,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     }
 
     Box::pin(async move {
+      *disconnect_sender.lock().await = request_sender.clone();
       if let Err(connector_err) = select_all(tasks).await.0 {
         Err(connector_err)
       } else {
@@ -356,7 +376,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    // TODO We should definitely allow people to disconnect. That would be a good thing.
-    Box::pin(future::ready(Ok(())))
+    let disconnect_sender = self.disconnect_sender.clone();
+    Box::pin(async move {
+      // If we can't send the message, we have no loop, so we're not connected.
+      if disconnect_sender.lock().await.send(ButtplugTransportOutgoingMessage::Close).await.is_err() {
+        Err(ButtplugConnectorError::ConnectorNotConnected)
+      } else {
+        Ok(())
+      }
+    })
   }
 }
