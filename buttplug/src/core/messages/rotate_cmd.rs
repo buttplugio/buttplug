@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RotationSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
@@ -30,7 +30,7 @@ impl RotationSubcommand {
   }
 }
 
-#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RotateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
