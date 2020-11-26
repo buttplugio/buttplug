@@ -5,6 +5,7 @@
 - Add hardware support
   - Mysteryvibe (all products)
 - Implement device disconnect in buttplug-rs client
+- Implement manual ping in buttplug-rs client
 
 ## Bugfixes
 
