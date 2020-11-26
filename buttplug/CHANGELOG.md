@@ -1,3 +1,17 @@
+# 0.11.1 (2020-11-26)
+
+## API Changes
+
+- Add hardware support
+  - Mysteryvibe (all products)
+- Implement device disconnect in buttplug-rs client
+
+## Bugfixes
+
+- Remove Default trait implementations for device messages
+  - They always need device IDs and shouldn't be default constructable.
+  - Fixes StopDeviceCmd issues in buttplug-rs client
+
 # 0.11.0 (2020-10-31)
 
 ## API Changes
