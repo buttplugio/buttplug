@@ -37,29 +37,29 @@ unstable=[]
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
 buttplug_derive = "0.5.0"
-futures = { version = "0.3.7", features = ["thread-pool"] }
-futures-util = "0.3.7"
-async-trait = "0.1.41"
+futures = { version = "0.3.8", features = ["thread-pool"] }
+futures-util = "0.3.8"
+async-trait = "0.1.42"
 serde = { version = "1.0.117", features = ["derive"] }
 serde_json = "1.0.59"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.1", features = ["serde"] }
-url = "2.1.1"
+url = "2.2.0"
 btleplug = { version = "0.5.4", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
-strum_macros = "0.19.4"
-strum = "0.19.5"
-once_cell = "1.4.1"
-paste = "1.0.2"
+strum_macros = "0.20.1"
+strum = "0.20.0"
+once_cell = "1.5.2"
+paste = "1.0.3"
 # Can't use async-channel here because it's Sender isn't Sink. We'll just use futures-channel.
 broadcaster = { version = "1.0.0", features = ["default-channels"] }
 # Broadcaster uses an older channel implementation, we can have it use a newer one.
-futures-channel = "0.3.7"
+futures-channel = "0.3.8"
 lazy_static = "1.4.0"
 byteorder = "1.3.4"
 valico = "3.4.0"
-thiserror = "1.0.21"
+thiserror = "1.0.22"
 async-tungstenite = { version = "0.10.0", features = ["async-std-runtime", "async-tls"], optional = true }
 # Needs to stay in line with async-tungstenite's version
 async-tls = { version = "0.10.0", optional = true }
@@ -70,9 +70,9 @@ async-channel = "1.5.1"
 async-lock = "2.3.0"
 wasm-bindgen-futures = { version = "0.4.18", optional = true }
 cfg-if = "1.0.0"
-tracing = "0.1.21"
+tracing = "0.1.22"
 tracing-futures = "0.2.4"
-tracing-subscriber = { version = "0.2.14", features = ["json"] }
+tracing-subscriber = { version = "0.2.15", features = ["json"] }
 dashmap = "4.0.0-rc6"
 displaydoc = "0.1.7"
 serialport = { version = "3.3.0", optional = true }
@@ -83,13 +83,13 @@ wasm-bindgen = { version = "0.2.68", optional = true }
 rusty-xinput = "1.2.0"
 
 [dependencies.async-std]
-version = "1.6.5"
+version = "1.7.0"
 default-features = false
 features = ["std"]
 optional = true
 
 [dev-dependencies]
-async-std = "1.6.5"
+async-std = "1.7.0"
 tracing-log = { version = "0.1.1", features = ["env_logger"] }
 
 [lib]
