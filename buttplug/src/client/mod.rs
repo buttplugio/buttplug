@@ -21,6 +21,7 @@ use crate::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugMessageSpecVersion,
+      Ping,
       RequestDeviceList,
       RequestServerInfo,
       StartScanning,
@@ -526,5 +527,12 @@ impl ButtplugClient {
       )));
     }
     device_clones
+  }
+
+  pub fn ping(&self) -> ButtplugClientResultFuture {
+    let ping_fut = self.send_message_expect_ok(Ping::default().into());
+    Box::pin(async move {
+      ping_fut.await
+    })
   }
 }

@@ -278,6 +278,7 @@ pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
 pub enum ButtplugSpecV2ClientMessage {
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
+  Ping(Ping),
   // Device enumeration messages
   StartScanning(StartScanning),
   StopScanning(StopScanning),
@@ -334,6 +335,7 @@ pub enum ButtplugSpecV2ServerMessage {
 pub(crate) enum ButtplugSpecV1ClientMessage {
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
+  Ping(Ping),
   // Device enumeration messages
   StartScanning(StartScanning),
   StopScanning(StopScanning),
@@ -412,6 +414,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ClientMessage {
   RequestLog(RequestLog),
+  Ping(Ping),
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
   // Device enumeration messages

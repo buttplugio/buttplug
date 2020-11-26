@@ -14,9 +14,12 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugServerError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
+  server::ButtplugServerOptions,
   util::async_manager,
 };
 use futures::{future::BoxFuture, StreamExt};
+use futures_timer::Delay;
+use std::time::Duration;
 use util::DelayDeviceCommunicationManager;
 
 #[derive(Default)]
@@ -171,5 +174,21 @@ fn test_client_scanning_finished() {
       recv.next().await.unwrap(),
       ButtplugClientEvent::ScanningFinished
     ));
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_client_ping() {
+  async_manager::block_on(async {
+    let mut options = ButtplugServerOptions::default();
+    options.max_ping_time = 200;
+    let connector = ButtplugInProcessClientConnector::new_with_options(&options).unwrap();
+    let (client, mut recv) = ButtplugClient::connect("Test Client", connector)
+      .await
+      .unwrap();
+    assert!(client.ping().await.is_ok());
+    Delay::new(Duration::from_millis(800)).await;
+    assert!(client.ping().await.is_err());
   });
 }
