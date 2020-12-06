@@ -17,15 +17,16 @@ impl Spawn for WasmBindgenAsyncManager {
 
 pub fn spawn<Fut>(future: Fut) -> Result<(), SpawnError>
 where
-  Fut: Future<Output = ()> + Send + 'static,
+  Fut: Future<Output = ()> + 'static,
 {
-  WasmBindgenAsyncManager::default().spawn(future)
+  spawn_local(future);
+  Ok(())
 }
 
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
 where
   Fut: Future + Send + 'static,
-  Fut::Output: Send,
+  Fut::Output: Send
 {
   WasmBindgenAsyncManager::default().spawn_with_handle(future)
 }
