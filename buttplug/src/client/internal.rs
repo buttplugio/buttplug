@@ -308,11 +308,15 @@ where
     // supposed to go.
     let mut client_receiver = self.client_receiver.clone();
     let mut connector_receiver = self.connector_receiver.clone();
+    let event_sender = self.event_sender.clone();
     loop {
       select! {
         event = connector_receiver.next().fuse() => match event {
           None => {
             info!("Connector disconnected, exiting loop.");
+            if event_sender.send(&ButtplugClientEvent::ServerDisconnect).await.is_err() {
+              error!("Cannot send disconnection event.");
+            }
             return;
           }
           Some(msg) => {
@@ -322,6 +326,9 @@ where
         client = client_receiver.next().fuse() => match client {
           None => {
             info!("Client disconnected, exiting loop.");
+            if event_sender.send(&ButtplugClientEvent::ServerDisconnect).await.is_err() {
+              error!("Cannot send disconnection event.");
+            }
             return;
           }
           Some(msg) => {
@@ -331,6 +338,9 @@ where
           }
         },
       };
+    }
+    if event_sender.send(&ButtplugClientEvent::ServerDisconnect).await.is_err() {
+      error!("Cannot send disconnection event.");
     }
     debug!("Exiting client event loop.");
   }
