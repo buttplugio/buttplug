@@ -165,6 +165,7 @@ pub enum ButtplugClientEvent {
 /// Clients are created by the [ButtplugClient::run()] method, which also
 /// handles spinning up the event loop and connecting the client to the server.
 /// Closures passed to the run() method can access and use the Client object.
+#[derive(Clone)]
 pub struct ButtplugClient {
   /// The client name. Depending on the connection type and server being used,
   /// this name is sometimes shown on the server logs or GUI.
