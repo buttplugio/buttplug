@@ -7,14 +7,17 @@
 
 #[cfg(feature = "websockets")]
 use buttplug::{
-  client::ButtplugClient,
+  client::{ButtplugClient, ButtplugClientEvent},
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
   core::messages::serializer::ButtplugClientJSONSerializer,
   util::async_manager,
 };
+use futures::StreamExt;
+use tracing_subscriber;
 
 #[cfg(feature = "websockets")]
-async fn embedded_connector_example() {
+async fn websocket_connector_example() {
+  tracing_subscriber::fmt::init();
   println!(
     "Setting up the client! Run this with RUST_LOG if you'd like to see library log messages."
   );
@@ -56,11 +59,19 @@ async fn embedded_connector_example() {
   // out, things look basically the same, EXCEPT for the fact that, unlike the
   // mebedded connector, this can fail! If it does, the unwrap on run() will
   // panic and you'll get an error message about not being able to connect.
-  let (client, _) = ButtplugClient::connect("Example Client", connector)
+  let (client, mut event_stream) = ButtplugClient::connect("Example Client", connector)
     .await
     .unwrap();
   println!("Is the client connected? {}", client.connected());
-
+  println!("Waiting for server disconnect...");
+  while let Some(event) = event_stream.next().await  {
+    match event {
+      ButtplugClientEvent::ServerDisconnect => {
+        break;
+      }
+      default => {}
+    }
+  }
   // We don't actually have anything to do here yet, since we're just
   // showing off how to set up execution. We'll just fall out of our
   // closure here.
@@ -74,6 +85,6 @@ fn main() {
   // Setup a client, and wait until everything is done before exiting.
   #[cfg(feature = "websockets")]
   async_manager::block_on(async {
-    embedded_connector_example().await;
+    websocket_connector_example().await;
   });
 }
