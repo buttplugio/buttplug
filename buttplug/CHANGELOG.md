@@ -1,3 +1,12 @@
+# 0.11.2 (2020-12-12)
+
+## Bugfixes
+
+- Client now emits ServerDisconnect when server disconnects.
+- Client and Server now emit ScanningFinished when all scanning has stopped.
+- Adjust Send trait requirements for async spawned tasks from the WASM manager.
+- Remove unused WASM bindings.
+
 # 0.11.1 (2020-11-26)
 
 ## API Changes
