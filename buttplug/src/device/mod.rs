@@ -8,8 +8,6 @@ use serde::{
   Serializer,
 };
 use std::{convert::TryFrom, fmt, str::FromStr, string::ToString, sync::Arc};
-#[cfg(feature = "wasm-bindgen-runtime")]
-use wasm_bindgen::prelude::*;
 
 use crate::{
   core::{
@@ -42,7 +40,6 @@ use futures::future::BoxFuture;
 // is to expose it at the declaration level. Therefore, we use the WASM feature
 // to assume we're building for WASM and attach our bindgen. The serde
 // de/serialization is taken care of at the FFI level.
-#[cfg_attr(feature = "wasm-bindgen-runtime", wasm_bindgen)]
 #[derive(EnumString, Clone, Debug, PartialEq, Eq, Hash, Display, Copy)]
 #[strum(serialize_all = "lowercase")]
 pub enum Endpoint {

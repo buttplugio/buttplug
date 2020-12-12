@@ -97,8 +97,6 @@ use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::cmp::Ordering;
 use std::convert::TryFrom;
-#[cfg(feature = "wasm-bindgen-runtime")]
-use wasm_bindgen::prelude::*;
 
 /// Enum of possible [Buttplug Message
 /// Spec](https://buttplug-spec.docs.buttplug.io) versions.
@@ -144,7 +142,6 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 
 /// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
 /// capabilties.
-#[cfg_attr(feature = "wasm-bindgen-runtime", wasm_bindgen)]
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
   // Generic commands
