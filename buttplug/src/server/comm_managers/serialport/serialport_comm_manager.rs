@@ -53,6 +53,13 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
           info!("No serial ports found");
         }
       }
+      if sender
+        .send(DeviceCommunicationEvent::ScanningFinished)
+        .await
+        .is_err()
+      {
+        error!("Error sending scanning finished from Xinput.");
+      }
       Ok(())
     })
   }

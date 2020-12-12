@@ -55,10 +55,19 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
               .send(DeviceCommunicationEvent::DeviceFound(device_creator))
               .await
               .is_err()
-            {}
+            {
+              error!("Error sending device found message from Xinput.");
+            }
           }
           Err(_) => continue,
         }
+      }
+      if sender
+        .send(DeviceCommunicationEvent::ScanningFinished)
+        .await
+        .is_err()
+      {
+        error!("Error sending scanning finished from Xinput.");
       }
       Ok(())
     })

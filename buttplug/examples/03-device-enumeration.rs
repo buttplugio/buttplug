@@ -137,7 +137,9 @@ async fn device_enumeration_example() {
           // in a later example. For now, we'll just print the
           // device name then drop our instance of it.
           println!("We got a device: {}", device.name);
-          device.vibrate(VibrateCommand::Speed(0.5)).await.unwrap();
+        }
+        ButtplugClientEvent::ScanningFinished => {
+          println!("Scanning finished signaled.");
         }
         ButtplugClientEvent::ServerDisconnect => {
           // The server disconnected, which means we're done

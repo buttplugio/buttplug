@@ -194,8 +194,15 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             }
           }
           receiver.next().await.unwrap();
-        }
+        }        
         central.stop_scan().unwrap();
+        if device_sender
+          .send(DeviceCommunicationEvent::ScanningFinished)
+          .await
+          .is_err()
+        {
+          error!("Error sending scanning finished from Xinput.");
+        }
         info!("Exiting btleplug scanning");
       })
       .unwrap();
