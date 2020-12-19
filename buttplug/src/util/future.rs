@@ -85,9 +85,9 @@ pub struct ButtplugFutureStateShared<T> {
   state: Arc<Mutex<ButtplugFutureState<T>>>,
 }
 
-unsafe impl<T> Sync for ButtplugFutureStateShared<T> {
+unsafe impl<T: Sync> Sync for ButtplugFutureStateShared<T> {
 }
-unsafe impl<T> Send for ButtplugFutureStateShared<T> {
+unsafe impl<T: Send> Send for ButtplugFutureStateShared<T> {
 }
 
 impl<T> ButtplugFutureStateShared<T> {
