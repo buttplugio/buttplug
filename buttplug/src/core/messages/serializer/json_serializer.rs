@@ -305,7 +305,6 @@ mod test {
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(ButtplugSerializedMessage::Text(msg.to_owned()));
       assert!(res.is_err());
-      println!("{:?}", res);
       if let Err(ButtplugSerializerError::MessageSpecVersionNotReceived) = res {
         assert!(false, "Wrong error!");
       }
