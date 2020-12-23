@@ -21,10 +21,10 @@ use crate::{
   },
 };
 use async_channel::{bounded, Receiver};
-use broadcaster::BroadcastChannel;
 use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
 use futures::{FutureExt, StreamExt};
 use std::collections::HashMap;
+use tokio::sync::broadcast;
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
@@ -52,7 +52,7 @@ fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
 
 impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   pub fn new(
-    mut btleplug_event_broadcaster: BroadcastChannel<CentralEvent>,
+    mut btleplug_event_broadcaster: broadcast::Receiver<CentralEvent>,
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
@@ -61,7 +61,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     let (event_sender, event_receiver) = bounded(256);
     let device_address = device.address();
     async_manager::spawn(async move {
-      while let Some(event) = btleplug_event_broadcaster.next().await {
+      while let Ok(event) = btleplug_event_broadcaster.recv().await {
         match event {
           CentralEvent::DeviceConnected(ev) => {
             if ev != device_address {

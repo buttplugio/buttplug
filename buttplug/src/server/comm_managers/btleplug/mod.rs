@@ -20,8 +20,7 @@ use std::{
   thread,
 };
 
-use broadcaster::BroadcastChannel;
-use btleplug::api::{Central, CentralEvent, Peripheral};
+use btleplug::api::{Central, CentralEvent, Peripheral, BDAddr};
 #[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter as Adapter, manager::Manager};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -30,13 +29,16 @@ use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
+use tokio::sync::broadcast;
 
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
   // manager hold it.
   manager: Manager,
   adapter: Option<Adapter>,
-  adapter_event_stream: BroadcastChannel<CentralEvent>,
+  adapter_event_sender: broadcast::Sender<CentralEvent>,
+  tried_addresses: Arc<DashMap<BDAddr, ()>>,
+  connected_addresses: Arc<DashMap<BDAddr, ()>>,
   device_sender: Sender<DeviceCommunicationEvent>,
   scanning_sender: Sender<()>,
   scanning_receiver: Receiver<()>,
@@ -69,21 +71,19 @@ impl BtlePlugCommunicationManager {
     let adapter = maybe_adapter.unwrap();
     let receiver = adapter.event_receiver().unwrap();
     self.adapter = Some(adapter);
-    let event_broadcaster = self.adapter_event_stream.clone();
+    let event_sender = self.adapter_event_sender.clone();
     thread::spawn(move || {
       // Since this is an std channel receiver, it's mpsc. That means we don't
       // have clone or sync. Therefore we have to wrap it in its own thread for
       // now and block the async calls instead.
       while let Ok(event) = receiver.recv() {
-        // Send, then instantly receive and drop so we keep our local channel
-        // clean.
-        let mut event_broadcaster_clone = event_broadcaster.clone();
-        async_manager::spawn(async move {
-          // Can't fail, we own both sides
-          let _ = event_broadcaster_clone.send(&event).await;
-          event_broadcaster_clone.recv().await;
-        })
-        .unwrap();
+        let event_broadcaster_clone = event_sender.clone();
+        if event_broadcaster_clone.receiver_count() > 0 {
+          async_manager::spawn(async move {
+            let _ = event_broadcaster_clone.send(event);
+          })
+          .unwrap();
+        }
       }
     });
   }
@@ -91,12 +91,48 @@ impl BtlePlugCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
+    // At this point, no one will be subscribed, so just drop the receiver.
+    let (adapter_event_sender, _) = broadcast::channel(256);
     let (scanning_sender, scanning_receiver) = bounded(256);
     let manager = Manager::new().unwrap();
+    let tried_addresses = Arc::new(DashMap::new());
+    let tried_addresses_clone = tried_addresses.clone();
+    let mut adapter_event_handler = adapter_event_sender.subscribe();
+    info!("Setting bluetooth device event handler.");
+    let scanning_sender_clone = scanning_sender.clone();
+    let connected_addresses = Arc::new(DashMap::new());
+    let connected_addresses_clone = connected_addresses.clone();
+    async_manager::spawn(async move {
+      while let Ok(event) = adapter_event_handler.recv().await {
+        match event {
+          CentralEvent::DeviceDiscovered(_) => {
+            debug!("BTLEPlug Device discovered: {:?}", event);
+            let s = scanning_sender_clone.clone();
+            if s.send(()).await.is_err() {
+              error!("Device scanning receiver dropped!");
+            }
+          }
+          CentralEvent::DeviceConnected(addr) => {
+            info!("BTLEPlug Device connected: {:?}", addr);
+            connected_addresses_clone.insert(addr, ());
+          }
+          CentralEvent::DeviceDisconnected(addr) => {
+            debug!("BTLEPlug Device disconnected: {:?}", event);
+            connected_addresses_clone.remove(&addr);
+            tried_addresses_clone.remove(&addr);
+          }
+          _ => {}
+        }
+      }
+    })
+    .unwrap();
+
     let mut comm_mgr = Self {
       manager,
       adapter: None,
-      adapter_event_stream: BroadcastChannel::new(),
+      adapter_event_sender,
+      connected_addresses,
+      tried_addresses,
       device_sender,
       scanning_sender,
       scanning_receiver,
@@ -124,36 +160,13 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       .into();
     }
     let device_sender = self.device_sender.clone();
-    let sender = self.scanning_sender.clone();
     let mut receiver = self.scanning_receiver.clone();
     let is_scanning = self.is_scanning.clone();
-    let tried_addresses = Arc::new(DashMap::new());
-    let tried_addressses_clone = tried_addresses.clone();
-
-    let mut adapter_event_handler = self.adapter_event_stream.clone();
-    info!("Setting bluetooth device event handler.");
-    async_manager::spawn(async move {
-      while let Some(event) = adapter_event_handler.next().await {
-        match event {
-          CentralEvent::DeviceDiscovered(_) => {
-            debug!("BTLEPlug Device discovered: {:?}", event);
-            let s = sender.clone();
-            if s.send(()).await.is_err() {
-              error!("Device scanning receiver dropped!");
-            }
-          }
-          CentralEvent::DeviceDisconnected(addr) => {
-            debug!("BTLEPlug Device disconnected: {:?}", event);
-            tried_addressses_clone.remove(&addr);
-          }
-          _ => {}
-        }
-      }
-    })
-    .unwrap();
 
     let central = self.adapter.clone().unwrap();
-    let adapter_event_handler_clone = self.adapter_event_stream.clone();
+    let adapter_event_sender_clone = self.adapter_event_sender.clone();
+    let tried_addresses_handler = self.tried_addresses.clone();
+    let connected_addresses_handler = self.connected_addresses.clone();
     Box::pin(async move {
       info!("Starting scan.");
       if let Err(err) = central.start_scan() {
@@ -168,19 +181,17 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           for p in central.peripherals() {
             // If a device has no discernable name, we can't do anything
             // with it, just ignore it.
-            //
-            // TODO Should probably at least log this and add it to the
-            // tried_addresses thing, once that exists.
             if let Some(name) = p.properties().local_name {
               //debug!("Found device {}", name);
               // Names are the only way we really have to test devices
               // at the moment. Most devices don't send services on
               // advertisement.
-              if !name.is_empty() && !tried_addresses.contains_key(&p.properties().address) {
-                tried_addresses.insert(p.properties().address, ());
+              if !name.is_empty() && !tried_addresses_handler.contains_key(&p.properties().address) && !connected_addresses_handler.contains_key(&p.properties().address) {
+                debug!("Found new bluetooth device: {} {}", p.properties().local_name.unwrap_or("[NAME UNKNOWN]".to_owned()), p.properties().address);
+                tried_addresses_handler.insert(p.properties().address, ());
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
                   p,
-                  adapter_event_handler_clone.clone(),
+                  adapter_event_sender_clone.clone(),
                 ));
                 if device_sender
                   .send(DeviceCommunicationEvent::DeviceFound(device_creator))
@@ -191,6 +202,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                   return;
                 }
               }
+            } else {
+              debug!("Device {} found, no advertised name, ignoring.", p.properties().address);
+              tried_addresses_handler.insert(p.properties().address, ());
             }
           }
           receiver.next().await.unwrap();
@@ -203,6 +217,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         {
           error!("Error sending scanning finished from Xinput.");
         }
+        tried_addresses_handler.clear();
         info!("Exiting btleplug scanning");
       })
       .unwrap();

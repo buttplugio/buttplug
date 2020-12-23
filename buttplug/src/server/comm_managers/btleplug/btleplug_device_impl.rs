@@ -1,7 +1,9 @@
-use super::btleplug_internal::{
-  BtlePlugInternalEventLoop,
-  DeviceReturnFuture,
-  DeviceReturnStateShared,
+use super::{
+  btleplug_internal::{
+    BtlePlugInternalEventLoop,
+    DeviceReturnFuture,
+    DeviceReturnStateShared,
+  }
 };
 use crate::{
   core::{
@@ -29,14 +31,15 @@ use async_trait::async_trait;
 use broadcaster::BroadcastChannel;
 use btleplug::api::{CentralEvent, Peripheral};
 use futures::future::BoxFuture;
+use tokio::sync::broadcast;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
-  broadcaster: BroadcastChannel<CentralEvent>,
+  broadcaster: broadcast::Sender<CentralEvent>,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
-  pub fn new(device: T, broadcaster: BroadcastChannel<CentralEvent>) -> Self {
+  pub fn new(device: T, broadcaster: broadcast::Sender<CentralEvent>) -> Self {
     Self {
       device: Some(device),
       broadcaster,
@@ -80,10 +83,9 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
       // rumble calls, so this will block whatever thread it's spawned to.
-      let event_broadcaster_clone = self.broadcaster.clone();
       let broadcaster_clone = output_broadcaster.clone();
       let mut event_loop = BtlePlugInternalEventLoop::new(
-        event_broadcaster_clone,
+        self.broadcaster.subscribe(),
         device,
         p,
         device_receiver,
@@ -133,7 +135,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   }
 }
 
-#[derive(Clone)]
+//#[derive(Clone)]
 pub struct BtlePlugDeviceImpl {
   name: String,
   address: String,
