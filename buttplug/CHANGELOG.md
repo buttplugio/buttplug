@@ -1,3 +1,10 @@
+# 0.11.3 (2020-12-22)
+
+## Bugfixes
+
+- Fixed memory/task leak and CPU spikes when start scanning was called often. (#226)
+- Fixed possible race due to lack of trait bounds on future types (#225)
+
 # 0.11.2 (2020-12-12)
 
 ## Bugfixes
