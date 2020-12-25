@@ -40,7 +40,7 @@ use crate::{
 };
 use async_channel::Sender;
 use broadcaster::BroadcastChannel;
-use futures::{future, StreamExt};
+use futures::{future, StreamExt, Stream};
 use std::{
   collections::HashMap,
   sync::{
@@ -288,7 +288,7 @@ impl ButtplugClientDevice {
     )
   }
 
-  pub fn event_receiver(&self) -> impl StreamExt<Item = ButtplugClientDeviceEvent> + Sync + Send {
+  pub fn event_receiver(&self) -> impl Stream<Item = ButtplugClientDeviceEvent> + Sync + Send {
     self.event_receiver.clone()
   }
 

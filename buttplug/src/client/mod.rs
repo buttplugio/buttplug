@@ -39,6 +39,7 @@ use dashmap::DashMap;
 use futures::{
   future::{self, BoxFuture},
   FutureExt,
+  Stream,
   StreamExt,
 };
 use std::sync::{
@@ -194,7 +195,7 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> BoxFuture<
     'static,
-    Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
+    Result<(Self, impl Stream<Item = ButtplugClientEvent>), ButtplugClientError>,
   >
   where
     ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
@@ -298,7 +299,7 @@ impl ButtplugClient {
     options: &crate::server::ButtplugServerOptions,
   ) -> BoxFuture<
     'static,
-    Result<(Self, impl StreamExt<Item = ButtplugClientEvent>), ButtplugClientError>,
+    Result<(Self, impl Stream<Item = ButtplugClientEvent>), ButtplugClientError>,
   > {
     use crate::connector::ButtplugInProcessClientConnector;
 

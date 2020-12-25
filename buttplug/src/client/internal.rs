@@ -29,7 +29,7 @@ use crate::{
 use async_channel::{bounded, Receiver, Sender};
 use broadcaster::BroadcastChannel;
 use dashmap::DashMap;
-use futures::{Future, FutureExt, StreamExt};
+use futures::{Future, FutureExt, StreamExt, Stream};
 use std::{
   hash::{Hash, Hasher},
   sync::Arc,
@@ -371,7 +371,7 @@ pub(super) fn client_event_loop(
   Arc<DashMap<u32, ButtplugClientDeviceInternal>>,
   Sender<ButtplugClientRequest>,
   // This needs clone internally, as the client will make multiple copies.
-  impl StreamExt<Item = ButtplugClientEvent> + Clone,
+  impl Stream<Item = ButtplugClientEvent> + Clone,
 ) {
   trace!("Creating client event loop future.");
   let event_channel = BroadcastChannel::new();
