@@ -132,14 +132,12 @@ Default features are enough to build a full desktop system:
 
 ## Contributing
 
-Right now, we mostly need code/API style reviews and feedback. We
-don't really have any good bite-sized chunks to mentor the
-implementation yet, but one we do, those will be marked "Help Wanted"
-in our [github
-issues](https://github.com/buttplugio/buttplug-rs/issues).
+If you have issues or feature requests, please feel free to [file an issue](https://github.com/buttplugio/buttplug-rs/issues).
 
-As we need money to keep up with supporting the latest and greatest hardware, we
-also have multiple ways to donate!
+We are not looking for code contributions or pull requests at this time, and will not accept pull requests that do not have a matching issue where the matter was previously discussed. Pull requests should only be submitted after talking to [qdot](https://github.com/qdot) via issues (or on [discord](https://discord.buttplug.io) or [twitter DMs](https://twitter.com/buttplugio) if you would like to stay anonymous and out of recorded info on the repo) before submitting PRs. Random PRs without matching issues and discussion are likely to be closed without merging. and receiving approval to develop code based on an issue. Any random or non-issue pull requests will most likely be closed without merging.
+
+If you'd like to contribute in a non-technical way, we need money to keep up with supporting the
+latest and greatest hardware. We have multiple ways to donate!
 
 - [Patreon](https://patreon.com/qdot)
 - [Github Sponsors](https://github.com/sponsors/qdot)
