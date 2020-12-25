@@ -39,17 +39,16 @@ including implementations of the client and, at some point, server.
 
 ## Read Me First!
 
-If you are new to Buttplug, you most likely want to start with the
-[Buttplug Website](https://buttplug.io) or the [Buttplug Core
-Repo](https://github.com/buttplugio/buttplug).
+If you are new to Buttplug, you most likely want to start with the [Buttplug
+Website](https://buttplug.io) or the [Buttplug Core Repo](https://github.com/buttplugio/buttplug).
 
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
-Buttplug-rs is a full fledged implementation of Buttplug, on par with
-our [C#](https://github.com/buttplugio/buttplug-csharp) and
-[Javascript/Typescript](https://github.com/buttplugio/buttplug-js)
-implementations.
+Buttplug-rs is a full fledged implementation of Buttplug, implementing both the client and server
+portions of the system. Implementations for other langauges (such as C# and JS) are built on top of the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for more info.
+
+## Hardware Support
 
 Buttplug-rs is currently capable of controlling toys via:
 
@@ -59,8 +58,7 @@ Buttplug-rs is currently capable of controlling toys via:
 - Lovense Devices via the Lovense Dongle (All Versions)
 - XInput gamepads (Windows only)
 
-Note that only some protocols/hardware is currently supported. See
-[IOSTIndex](https://iostindex.com) for more info.
+See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
 ## Introduction
 
@@ -147,7 +145,7 @@ latest and greatest hardware. We have multiple ways to donate!
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016-2019, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2020, Nonpolynomial Labs, LLC
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
