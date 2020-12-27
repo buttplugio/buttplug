@@ -14,20 +14,21 @@ use crate::{
 };
 use async_lock::{Mutex, RwLock};
 use futures::future::BoxFuture;
-use futures_timer::Delay;
+// use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
-  time::Duration,
+  // time::Duration,
 };
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
 // a best guess derived from watching packet timing a few years ago.
 //
 // Thelemic vibrator. Neat.
-const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 25;
+//
+// const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 23;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct MysteryVibe {

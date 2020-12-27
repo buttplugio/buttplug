@@ -19,7 +19,7 @@ use async_lock::Mutex;
 use async_std::net::TcpListener;
 use async_tls::TlsAcceptor;
 use futures::{
-  future::{self, select_all, BoxFuture},
+  future::{select_all, BoxFuture},
   AsyncRead,
   AsyncWrite,
   FutureExt,
@@ -70,7 +70,7 @@ async fn run_connection_loop<S>(
           ButtplugTransportOutgoingMessage::Message(outgoing_msg) => {
             match outgoing_msg {
               ButtplugSerializedMessage::Text(text_msg) => {
-                if let Err(send_error) = websocket_server_sender
+                if let Err(_) = websocket_server_sender
                   .send(async_tungstenite::tungstenite::Message::Text(text_msg))
                   .await {
                     error!("Cannot send text value to server, considering connection closed.");
@@ -78,7 +78,7 @@ async fn run_connection_loop<S>(
                   }
                 }
               ButtplugSerializedMessage::Binary(binary_msg) => {
-                if let Err(send_error) = websocket_server_sender
+                if let Err(_) = websocket_server_sender
                   .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
                   .await {
                     error!("Cannot send binary value to server, considering connection closed.");
@@ -88,7 +88,7 @@ async fn run_connection_loop<S>(
               }
             },
             ButtplugTransportOutgoingMessage::Close => {
-              if let Err(send_error) = websocket_server_sender.close().await {
+              if let Err(_) = websocket_server_sender.close().await {
                 error!("Cannot close, assuming connection already closed");
                 return;
               }
@@ -103,7 +103,7 @@ async fn run_connection_loop<S>(
         Some(ws_data) => {
           match ws_data {
             Ok(msg) => {
-              match (msg) {
+              match msg {
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
                   debug!("Got text: {}", text_msg);
                   if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
@@ -112,7 +112,7 @@ async fn run_connection_loop<S>(
                   }
                 }
                 async_tungstenite::tungstenite::Message::Close(_) => {
-                  response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
+                  let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
                   break;
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
@@ -130,7 +130,7 @@ async fn run_connection_loop<S>(
             },
             Err(err) => {
               error!("Error from websocket server, assuming disconnection: {:?}", err);
-              response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
+              let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
               break;
             }
           }

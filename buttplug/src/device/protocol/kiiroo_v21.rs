@@ -23,12 +23,12 @@ use crate::{
 };
 use async_lock::Mutex;
 use futures::future::BoxFuture;
-use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
-use std::time::Duration;
+// use futures_timer::Delay;
+// use std::time::Duration;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV21 {

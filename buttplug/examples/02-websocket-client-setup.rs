@@ -69,7 +69,7 @@ async fn websocket_connector_example() {
       ButtplugClientEvent::ServerDisconnect => {
         break;
       }
-      default => {}
+      _ => {}
     }
   }
   // We don't actually have anything to do here yet, since we're just

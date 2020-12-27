@@ -90,7 +90,7 @@ async fn run_server<ConnectorType>(
           info!("Server disconnected via controller request, exiting loop.");
           break;
         }
-        Some(msg) => {
+        Some(_) => {
           info!("Server disconnected via controller disappearance, exiting loop.");
           break;
         }

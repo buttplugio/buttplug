@@ -184,7 +184,7 @@ fn test_client_ping() {
     let mut options = ButtplugServerOptions::default();
     options.max_ping_time = 200;
     let connector = ButtplugInProcessClientConnector::new_with_options(&options).unwrap();
-    let (client, mut recv) = ButtplugClient::connect("Test Client", connector)
+    let (client, _) = ButtplugClient::connect("Test Client", connector)
       .await
       .unwrap();
     assert!(client.ping().await.is_ok());

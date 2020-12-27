@@ -28,7 +28,7 @@ use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
-use futures::{future, SinkExt, StreamExt};
+use futures::{SinkExt, StreamExt};
 use std::sync::Arc;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]

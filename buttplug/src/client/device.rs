@@ -40,7 +40,7 @@ use crate::{
 };
 use async_channel::Sender;
 use broadcaster::BroadcastChannel;
-use futures::{future, StreamExt, Stream};
+use futures::{future, Stream};
 use std::{
   collections::HashMap,
   sync::{

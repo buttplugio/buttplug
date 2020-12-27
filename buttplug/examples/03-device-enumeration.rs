@@ -10,7 +10,7 @@
 // which devices are available.
 use async_std::io;
 use buttplug::{
-  client::{device::VibrateCommand, ButtplugClient, ButtplugClientEvent},
+  client::{ButtplugClient, ButtplugClientEvent},
   server::ButtplugServerOptions,
   util::async_manager,
 };

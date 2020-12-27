@@ -20,7 +20,6 @@ use crate::{
       serializer::{
         ButtplugClientJSONSerializer,
         ButtplugMessageSerializer,
-        ButtplugSerializedMessage,
       },
       ButtplugClientMessage,
       ButtplugCurrentSpecClientMessage,
