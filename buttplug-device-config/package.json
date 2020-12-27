@@ -1,6 +1,6 @@
 {
   "name": "buttplug-device-config",
-  "version": "0.0.1",
+  "version": "47.0.0",
   "description": "Buttplug Device Configuration File",
   "main": "index.js",
   "scripts": {
