@@ -21,11 +21,11 @@ use std::mem;
 use uuid::Uuid;
 
 static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../dependencies/buttplug-device-config/buttplug-device-config.json");
+  include_str!("../../../buttplug-device-config/buttplug-device-config.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../dependencies/buttplug-device-config/buttplug-device-config-schema.json");
+  include_str!("../../../buttplug-device-config/buttplug-device-config-schema.json");
 static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../dependencies/buttplug-device-config/buttplug-user-device-config-schema.json");
+  include_str!("../../../buttplug-device-config/buttplug-user-device-config-schema.json");
 
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
