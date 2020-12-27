@@ -1,3 +1,10 @@
+# 1.0.0 (2020-12-27)
+
+## API Changes
+
+- Return futures::Stream instead of futures::StreamExt for event streams
+- Add device config file version loading
+
 # 0.11.3 (2020-12-22)
 
 ## Bugfixes

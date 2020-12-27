@@ -46,7 +46,9 @@ For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
 
 Buttplug-rs is a full fledged implementation of Buttplug, implementing both the client and server
-portions of the system. Implementations for other langauges (such as C# and JS) are built on top of the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for more info.
+portions of the system. Implementations for other langauges (such as C# and JS) are built on top of
+the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for
+more info.
 
 ## Hardware Support
 
@@ -56,41 +58,38 @@ Buttplug-rs is currently capable of controlling toys via:
 - Serial Ports
 - USB HID
 - Lovense Devices via the Lovense Dongle (All Versions)
-- XInput gamepads (Windows only)
+- XInput gamepads (Windows only at the moment)
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
 ## Introduction
 
-[Buttplug](https://buttplug.io) is a framework for hooking up hardware
-to interfaces, where hardware usually means sex toys, but could
-honestly be just about anything. It's basically a userland HID manager
-for things that may not specifically be HID.
+[Buttplug](https://buttplug.io) is a framework for hooking up hardware to interfaces, where hardware
+usually means sex toys, but could honestly be just about anything. It's basically a userland HID
+manager for things that may not specifically be HID.
 
-In more concrete terms, think of Buttplug as something like
-[osculator](http://www.osculator.net/) or [VRPN](http://vrpn.org), but
-for sex toys. Instead of wiimotes and control surfaces, we interface
-with vibrators, electrostim equipment, fucking machines, and other
-hardware that can communicate with computers.
+In more concrete terms, think of Buttplug as something like [osculator](http://www.osculator.net/)
+or [VRPN](http://vrpn.org), but for sex toys. Instead of wiimotes and control surfaces, we interface
+with vibrators, electrostim equipment, fucking machines, and other hardware that can communicate
+with computers.
 
-The core of buttplug works as a router. It is a Rust based application
-that connects to libraries that registers and communicates with
-different hardware. Clients can then connect over websockets or
+The core of buttplug works as a router. It is a Rust based application that connects to libraries
+that registers and communicates with different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
 
 ## Compiling
 
-On Windows and macOS, running `cargo build` should suffice for building the
-project. All dependencies are vendored in.
+On Windows and macOS, running `cargo build` should suffice for building the project. All
+dependencies are vendored in.
 
 On Linux, the following packages will be needed to build with default features:
 
 - `libudev-dev` (Required for serial port/HID support)
 - `libusb-1.0-0-dev` (Required for serial port/HID support)
 
-The package names are listed as their debian requirements, and may be different
-for other distributions. Removing the `lovense-dongle-manager` and
-`serial-manager` features should stop these from being requires.
+The package names are listed as their debian requirements, and may be different for other
+distributions. Removing the `lovense-dongle-manager` and `serial-manager` features should stop these
+from being requires.
 
 ## Usage
 
@@ -130,9 +129,17 @@ Default features are enough to build a full desktop system:
 
 ## Contributing
 
-If you have issues or feature requests, please feel free to [file an issue](https://github.com/buttplugio/buttplug-rs/issues).
+If you have issues or feature requests, please feel free to [file an
+issue](https://github.com/buttplugio/buttplug-rs/issues).
 
-We are not looking for code contributions or pull requests at this time, and will not accept pull requests that do not have a matching issue where the matter was previously discussed. Pull requests should only be submitted after talking to [qdot](https://github.com/qdot) via issues (or on [discord](https://discord.buttplug.io) or [twitter DMs](https://twitter.com/buttplugio) if you would like to stay anonymous and out of recorded info on the repo) before submitting PRs. Random PRs without matching issues and discussion are likely to be closed without merging. and receiving approval to develop code based on an issue. Any random or non-issue pull requests will most likely be closed without merging.
+We are not looking for code contributions or pull requests at this time, and will not accept pull
+requests that do not have a matching issue where the matter was previously discussed. Pull requests
+should only be submitted after talking to [qdot](https://github.com/qdot) via issues (or on
+[discord](https://discord.buttplug.io) or [twitter DMs](https://twitter.com/buttplugio) if you would
+like to stay anonymous and out of recorded info on the repo) before submitting PRs. Random PRs
+without matching issues and discussion are likely to be closed without merging. and receiving
+approval to develop code based on an issue. Any random or non-issue pull requests will most likely
+be closed without merging.
 
 If you'd like to contribute in a non-technical way, we need money to keep up with supporting the
 latest and greatest hardware. We have multiple ways to donate!
@@ -145,7 +152,7 @@ latest and greatest hardware. We have multiple ways to donate!
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016-2020, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2020, Nonpolynomial, LLC
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
