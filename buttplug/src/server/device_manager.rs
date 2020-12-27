@@ -153,11 +153,11 @@ fn wait_for_manager_events(
                         info!("Device map contains key!");
                         // We just checked that the key exists, so we can unwrap
                         // here.
-                        let old_device: dashmap::ElementGuard<u32, ButtplugDevice> =
-                          device_map_clone.remove_take(&device_index).unwrap();
+                        let (_, old_device): (_, ButtplugDevice) =
+                          device_map_clone.remove(&device_index).unwrap();
                         // After removing the device from the array, manually
                         // disconnect it to make sure the event is thrown.
-                        if let Err(err) = old_device.value().disconnect().await {
+                        if let Err(err) = old_device.disconnect().await {
                           // If we throw an error during the disconnect, we
                           // can't really do anything with it, but should at
                           // least log it.
