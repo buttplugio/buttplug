@@ -204,6 +204,7 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
 
 #[derive(Deserialize, Debug)]
 pub struct ProtocolConfiguration {
+  pub version: u32,
   pub(self) protocols: HashMap<String, ProtocolDefinition>,
 }
 
@@ -342,7 +343,9 @@ impl DeviceConfigurationManager {
     let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
     let mut config: ProtocolConfiguration = match config_validator.validate(&config_str) {
       Ok(_) => match serde_json::from_str(&config_str) {
-        Ok(config) => config,
+        Ok(protocol_config) => {
+          protocol_config
+        },
         Err(err) => {
           return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
             "{}",
@@ -357,6 +360,7 @@ impl DeviceConfigurationManager {
         )))
       }
     };
+    info!("Successfully loaded Device Configuration File Version {}", config.version);
 
     if let Some(user_config_str) = user_config {
       let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
