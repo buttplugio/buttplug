@@ -340,6 +340,11 @@
   },
   "type": "object",
   "properties": {
+    "version": {
+      "description": "Version of the device configuration file.",
+      "type": "integer",
+      "minimum": 0
+    },
     "protocols": {
       "type": "object",
       "patternProperties": {
@@ -378,6 +383,7 @@
     "additionalProperties": false
   },
   "required": [
+    "version",
     "protocols"
   ],
   "additionalProperties": false
