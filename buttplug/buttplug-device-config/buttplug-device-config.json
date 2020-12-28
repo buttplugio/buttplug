@@ -1127,8 +1127,6 @@
     "wevibe-legacy": {
       "btle": {
         "names": [
-          "Rey",
-          "We-Vibe Rocketman",
           "Reina",
           "imassager",
           "Interactive Massager",
@@ -1145,15 +1143,6 @@
         "messages": {}
       },
       "configurations": [
-        {
-          "identifier": [
-            "Rey",
-            "We-Vibe Rocketman"
-          ],
-          "name": {
-            "en-us": "WeVibe Realm Rey"
-          }
-        },
         {
           "identifier": [
             "Reina",
@@ -1372,6 +1361,8 @@
     "kiiroo-v21": {
       "btle": {
         "names": [
+          "Rey",
+          "We-Vibe Rocketman",
           "Onyx2.1",
           "Onyx+",
           "Titan1.1",
@@ -1507,6 +1498,24 @@
           ],
           "name": {
             "en-us": "Kiiroo Keon"
+          },
+          "messages": {
+            "LinearCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                99
+              ]
+            },
+            "FleshlightLaunchFW12Cmd": {}
+          }
+        },
+        {
+          "identifier": [
+            "Rey",
+            "We-Vibe Rocketman"
+          ],
+          "name": {
+            "en-us": "Kiiroo Onyx+ Realm Edition"
           },
           "messages": {
             "LinearCmd": {
