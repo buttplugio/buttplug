@@ -1,3 +1,10 @@
+# 1.0.1 (2020-12-27)
+
+## Bugfixes
+
+- Roll back Valico dependency to 3.4.0. 3.5.0 brings in a ton of extremely old and unmaintained
+  libraries, some of which break WASM.
+
 # 1.0.0 (2020-12-27)
 
 ## API Changes
