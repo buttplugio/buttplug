@@ -834,8 +834,6 @@ protocols:
   wevibe-legacy:
     btle:
       names:
-        - Rey # Branded Realm
-        - We-Vibe Rocketman # Rey alias
         - Reina # Branded Realm
         - imassager # Reina alias
         - Interactive Massager # Reina alias
@@ -847,11 +845,6 @@ protocols:
     defaults:
       messages: {}
     configurations:
-      - identifier:
-          - Rey
-          - We-Vibe Rocketman
-        name:
-          en-us: WeVibe Realm Rey
       - identifier:
           - Reina
           - imassager
@@ -988,6 +981,8 @@ protocols:
   kiiroo-v21:
     btle:
       names:
+        - Rey # Branded Realm
+        - We-Vibe Rocketman # Rey alias
         - Onyx2.1
         - Onyx+
         - Titan1.1
@@ -1072,6 +1067,17 @@ protocols:
           - KEON
         name:
           en-us: Kiiroo Keon
+        messages:
+          LinearCmd:
+            FeatureCount: 1
+            StepCount:
+              - 99
+          FleshlightLaunchFW12Cmd: {}
+      - identifier:
+          - Rey
+          - We-Vibe Rocketman
+        name:
+          en-us: Kiiroo Onyx+ Realm Edition
         messages:
           LinearCmd:
             FeatureCount: 1
