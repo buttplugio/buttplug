@@ -28,6 +28,6 @@ Evaluating Rust in late 2019 was a far different situation than it was in 2016. 
 
 Of course, coming from GC'd, Runtime'd languages, the jump to the native compiled world of Rust isn't going to be trivial by any means, but how we've dealt with the change is documented as part of this book.
 
-Anyways, that's why this book is being written. The new (and hopefully forever) plan is to keep a single core reference implementation of Buttplug in Rust, then FFI to other languages (including C#) on top of that, so the most we implement across multiple langauges are the FFI shims.
+Anyways, that's why this book is being written. The new (and hopefully forever) plan is to keep a single core reference implementation of Buttplug in Rust, then FFI to other languages (including C#) on top of that, so the most we implement across multiple languages are the FFI shims.
 
 May god have mercy on us all.
