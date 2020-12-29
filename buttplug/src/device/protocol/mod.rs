@@ -5,6 +5,7 @@ mod kiiroo_v2;
 mod kiiroo_v21;
 mod kiiroo_v2_vibrator;
 mod lelof1s;
+mod libo_elle;
 mod lovehoney_desire;
 mod lovense;
 mod magic_motion_v1;
@@ -31,20 +32,12 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      MessageAttributesMap,
-      RawReading,
-      VibrateCmd,
-      VibrateSubcommand,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage,
+      MessageAttributesMap, RawReading, VibrateCmd, VibrateSubcommand,
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
-    ButtplugDeviceResultFuture,
-    DeviceReadCmd,
+    configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture, DeviceReadCmd,
     Endpoint,
   },
 };
@@ -58,6 +51,7 @@ pub enum ProtocolTypes {
   KiirooV2Vibrator,
   KiirooV21,
   LeloF1s,
+  LiboElle,
   LovehoneyDesire,
   Lovense,
   MagicMotionV1,
@@ -90,6 +84,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "kiiroo-v2-vibrator" => Ok(ProtocolTypes::KiirooV2Vibrator),
       "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
       "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
+      "libo-elle" => Ok(ProtocolTypes::LiboElle),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),
       "lovense" => Ok(ProtocolTypes::Lovense),
       "magic-motion-1" => Ok(ProtocolTypes::MagicMotionV1),
@@ -131,6 +126,7 @@ pub fn try_create_protocol(
     }
     ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
+    ProtocolTypes::LiboElle => libo_elle::LiboElle::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
     ProtocolTypes::MagicMotionV1 => magic_motion_v1::MagicMotionV1::try_create(device, config),

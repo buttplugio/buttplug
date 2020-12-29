@@ -311,8 +311,8 @@ protocols:
           VibrateCmd:
             FeatureCount: 2
             StepCount:
-              - 3  # Vibe
               - 14 # Estim
+              - 3  # Vibe
       configurations:
         - identifier:
             - PiPiJing
