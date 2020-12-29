@@ -4,3 +4,7 @@ members = [
     "buttplug",
     "buttplug_derive",
 ]
+
+[profile.release]
+lto = true
+codegen-units = 1
