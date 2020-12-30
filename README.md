@@ -41,6 +41,15 @@ This repo is a monorepo with 2 projects:
 
 - [buttplug](buttplug/) - Main library
 - [buttplug_device](buttplug_derive/) - Procedural macros used by the buttplug rust library.
+- [buttplug-device-config](buttplug/buttplug-device-config) - Device configuration file for buttplug (where we store all of the device identifiers)
 
 For information about compiling and using these libraries, please check the
 README files in their directories.
+
+For a list of applications using Buttplug, see the [awesome-buttplug repo](https://github.com/buttplugio/awesome-buttplug).
+
+## Other Implementations
+
+- [Buttplug C#](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/csharp)
+- [Buttplug JS/Typescript/WASM](https://github.com/buttplugio/buttplug-rs-ffi/tree/master/js)
+- [Buttplug Python](https://github.com/buttplugio/buttplug-py)
