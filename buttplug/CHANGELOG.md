@@ -1,3 +1,11 @@
+# 1.0.2 (2020-12-31)
+
+## Bugfixes
+
+- Fix race condition that caused ScanningFinished to be fired before some managers may have finished
+  scanning.
+- Fix a bunch of intermittent test issues that were plaguing CI.
+
 # 1.0.1 (2020-12-27)
 
 ## Bugfixes
