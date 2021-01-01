@@ -84,17 +84,13 @@ mod test {
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about scanning finishing.
-      let msg = recv.next().await.unwrap();
-      assert_eq!(
-        serializer.serialize(vec!(msg)),
-        r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into()
-      );
-      let da_msg = recv.next().await.unwrap();
+      let mut msg = recv.next().await.unwrap();
+      // We should receive ScanningFinished and DeviceAdded, but the order may change.
+      let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
+      assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
+      msg = recv.next().await.unwrap();
       // We should get back an aneros with only SingleMotorVibrateCmd
-      assert_eq!(
-        serializer.serialize(vec!(da_msg)),
-        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()
-      );
+      assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
       let rdl = serializer
         .deserialize(ButtplugSerializedMessage::Text(
           r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
@@ -134,19 +130,13 @@ mod test {
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about scanning finishing.
-      let msg = recv.next().await.unwrap();
-      assert_eq!(
-        serializer.serialize(vec!(msg)),
-        r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into()
-      );
-
-      // Check that we got an event back about a new device.
-      let da_msg = recv.next().await.unwrap();
+      let mut msg = recv.next().await.unwrap();
+      // We should receive ScanningFinished and DeviceAdded, but the order may change.
+      let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
+      assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
+      msg = recv.next().await.unwrap();
       // We should get back an aneros with only SingleMotorVibrateCmd
-      assert_eq!(
-        serializer.serialize(vec!(da_msg)),
-        r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()
-      );
+      assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
       let output2 = server
         .parse_message(
           serializer
