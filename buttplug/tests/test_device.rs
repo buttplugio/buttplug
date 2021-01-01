@@ -257,7 +257,7 @@ fn test_repeated_address_additions() {
           }
         }
         ButtplugServerMessage::DeviceRemoved(dr) => {
-          assert_eq!(dr.device_index, 0);
+          assert_eq!(dr.device_index, device_index.unwrap());
           device_removed_called = true;
         }
         _ => {
