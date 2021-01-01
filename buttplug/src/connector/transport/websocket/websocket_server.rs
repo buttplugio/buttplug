@@ -70,17 +70,19 @@ async fn run_connection_loop<S>(
           ButtplugTransportOutgoingMessage::Message(outgoing_msg) => {
             match outgoing_msg {
               ButtplugSerializedMessage::Text(text_msg) => {
-                if let Err(_) = websocket_server_sender
-                  .send(async_tungstenite::tungstenite::Message::Text(text_msg))
-                  .await {
+                if websocket_server_sender
+                    .send(async_tungstenite::tungstenite::Message::Text(text_msg))
+                    .await
+                    .is_err() {
                     error!("Cannot send text value to server, considering connection closed.");
                     return;
                   }
                 }
               ButtplugSerializedMessage::Binary(binary_msg) => {
-                if let Err(_) = websocket_server_sender
-                  .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
-                  .await {
+                if websocket_server_sender
+                    .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
+                    .await
+                    .is_err() {
                     error!("Cannot send binary value to server, considering connection closed.");
                     return;
                   }
@@ -88,7 +90,7 @@ async fn run_connection_loop<S>(
               }
             },
             ButtplugTransportOutgoingMessage::Close => {
-              if let Err(_) = websocket_server_sender.close().await {
+              if websocket_server_sender.close().await.is_err() {
                 error!("Cannot close, assuming connection already closed");
                 return;
               }
@@ -197,8 +199,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
                 ButtplugConnectorTransportSpecificError::SecureServerError(format!(
                   "Error occurred during the websocket handshake: {:?}",
                   err
-                ))
-                .into(),
+                )),
               )
             })?;
 
@@ -274,7 +275,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           )
         })?;
 
-        if keys.len() == 0 {
+        if keys.is_empty() {
           let pkcs8_key_file = File::open(options.ws_priv_file.unwrap()).map_err(|_| {
             ButtplugConnectorError::TransportSpecificError(
               ButtplugConnectorTransportSpecificError::SecureServerError(
@@ -292,7 +293,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ),
             )
           })?;
-          if keys.len() == 0 {
+          if keys.is_empty() {
             error!("No keys were loaded, cannot start secure server.");
             return Err(ButtplugConnectorError::TransportSpecificError(
               ButtplugConnectorTransportSpecificError::SecureServerError(
@@ -334,7 +335,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             error!("Secure cert config cannot run handshake: {:?}", e);
             ButtplugConnectorError::TransportSpecificError(
               ButtplugConnectorTransportSpecificError::SecureServerError(
-                format!("{:?}", e).to_owned(),
+                format!("{:?}", e),
               ),
             )
           })?;
@@ -347,8 +348,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
                 ButtplugConnectorTransportSpecificError::SecureServerError(format!(
                   "Error occurred during the websocket handshake: {:?}",
                   err
-                ))
-                .into(),
+                )),
               )
             })?;
           async_manager::spawn(async move {
@@ -376,7 +376,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    let disconnect_sender = self.disconnect_sender.clone();
+    let disconnect_sender = self.disconnect_sender;
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
       if disconnect_sender

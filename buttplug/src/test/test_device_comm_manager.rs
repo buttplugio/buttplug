@@ -28,7 +28,7 @@ pub fn new_uninitialized_ble_test_device(
 ) -> (Arc<TestDeviceInternal>, TestDeviceImplCreator) {
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
-  let address = address.unwrap_or(
+  let address = address.unwrap_or_else (||
     SystemTime::now()
       .duration_since(UNIX_EPOCH)
       .unwrap()

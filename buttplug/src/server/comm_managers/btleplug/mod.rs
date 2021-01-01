@@ -194,7 +194,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                   "Found new bluetooth device: {} {}",
                   p.properties()
                     .local_name
-                    .unwrap_or("[NAME UNKNOWN]".to_owned()),
+                    .unwrap_or_else(|| "[NAME UNKNOWN]".to_owned()),
                   p.properties().address
                 );
                 tried_addresses_handler.insert(p.properties().address, ());

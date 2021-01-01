@@ -209,7 +209,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    let disconnect_sender = self.disconnect_sender.clone();
+    let disconnect_sender = self.disconnect_sender;
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
       if disconnect_sender

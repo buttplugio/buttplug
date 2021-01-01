@@ -235,14 +235,14 @@ impl ButtplugClient {
             }
             Result::<(), ButtplugClientError>::Ok(())
           }
-          .instrument(tracing::info_span!("Client Disconnect Loop"));
+          .instrument(tracing::info_span!("Wait for Client Disconnect Loop"));
           // If we disconnect, we'll also stop the client event loop. If the
           // client event loop stops, we don't care about listening for disconnect
           // anymore.
           select! {
-            _ = client_event_loop_fut.fuse() => (),
-            _ = disconnect_fut.fuse() => (),
-          };
+            _ = client_event_loop_fut.fuse() => {},
+            _ = disconnect_fut.fuse() => {},
+          }
         }
         .instrument(tracing::info_span!("Client Loop Span")),
       )

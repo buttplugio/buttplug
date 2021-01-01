@@ -164,7 +164,7 @@ fn wait_for_manager_events(
                       // See if we have a reusable device index here.
                       let device_index =
                         if let Some(id) = device_index_map_clone.get(device.address()) {
-                          id.value().clone()
+                          *id.value()
                         } else {
                           device_index_map_clone
                             .insert(device.address().to_owned(), generated_device_index);
