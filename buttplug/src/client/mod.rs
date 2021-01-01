@@ -198,7 +198,7 @@ impl ButtplugClient {
     Result<(Self, impl Stream<Item = ButtplugClientEvent>), ButtplugClientError>,
   >
   where
-    ConnectorType: 
+    ConnectorType:
       ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
         + 'static,
   {

@@ -52,10 +52,11 @@ mod websocket_connector_tests {
 
         if ButtplugClient::connect("Example Client", connector)
           .await
-          .is_ok() {
-            connected = true;
-            break;
-          }
+          .is_ok()
+        {
+          connected = true;
+          break;
+        }
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
@@ -97,10 +98,11 @@ mod websocket_connector_tests {
 
         if ButtplugClient::connect("Example Client", connector)
           .await
-          .is_ok() {
-            connected = true;
-            break;
-          }
+          .is_ok()
+        {
+          connected = true;
+          break;
+        }
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
