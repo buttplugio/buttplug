@@ -50,13 +50,12 @@ mod websocket_connector_tests {
           "ws://127.0.0.1:12345",
         ));
 
-        let (client, _) = ButtplugClient::connect("Example Client", connector)
+        if ButtplugClient::connect("Example Client", connector)
           .await
-          .unwrap();
-        if client.connected() {
-          connected = true;
-          break;
-        }
+          .is_ok() {
+            connected = true;
+            break;
+          }
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
@@ -96,13 +95,12 @@ mod websocket_connector_tests {
           },
         ));
 
-        let (client, _) = ButtplugClient::connect("Example Client", connector)
+        if ButtplugClient::connect("Example Client", connector)
           .await
-          .unwrap();
-        if client.connected() {
-          connected = true;
-          break;
-        }
+          .is_ok() {
+            connected = true;
+            break;
+          }
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
