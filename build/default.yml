@@ -22,7 +22,7 @@ jobs:
        nightly:
          rust: nightly
    pool:
-     vmImage: ubuntu-latest
+     vmImage: windows-latest
    continueOnError: true
    steps:
      - template: install-rust.yml@templates
