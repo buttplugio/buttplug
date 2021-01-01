@@ -64,7 +64,7 @@ async fn websocket_connector_example() {
     .unwrap();
   println!("Is the client connected? {}", client.connected());
   println!("Waiting for server disconnect...");
-  while let Some(event) = event_stream.next().await  {
+  while let Some(event) = event_stream.next().await {
     match event {
       ButtplugClientEvent::ServerDisconnect => {
         break;

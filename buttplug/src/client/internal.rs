@@ -29,7 +29,7 @@ use crate::{
 use async_channel::{bounded, Receiver, Sender};
 use broadcaster::BroadcastChannel;
 use dashmap::DashMap;
-use futures::{Future, FutureExt, StreamExt, Stream};
+use futures::{Future, FutureExt, Stream, StreamExt};
 use std::{
   hash::{Hash, Hasher},
   sync::Arc,
@@ -339,7 +339,11 @@ where
         },
       };
     }
-    if event_sender.send(&ButtplugClientEvent::ServerDisconnect).await.is_err() {
+    if event_sender
+      .send(&ButtplugClientEvent::ServerDisconnect)
+      .await
+      .is_err()
+    {
       error!("Cannot send disconnection event.");
     }
     debug!("Exiting client event loop.");

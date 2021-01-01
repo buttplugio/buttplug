@@ -20,7 +20,7 @@ use std::{
   thread,
 };
 
-use btleplug::api::{Central, CentralEvent, Peripheral, BDAddr};
+use btleplug::api::{BDAddr, Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
 use btleplug::bluez::{adapter::ConnectedAdapter as Adapter, manager::Manager};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -186,8 +186,17 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
               // Names are the only way we really have to test devices
               // at the moment. Most devices don't send services on
               // advertisement.
-              if !name.is_empty() && !tried_addresses_handler.contains_key(&p.properties().address) && !connected_addresses_handler.contains_key(&p.properties().address) {
-                debug!("Found new bluetooth device: {} {}", p.properties().local_name.unwrap_or("[NAME UNKNOWN]".to_owned()), p.properties().address);
+              if !name.is_empty()
+                && !tried_addresses_handler.contains_key(&p.properties().address)
+                && !connected_addresses_handler.contains_key(&p.properties().address)
+              {
+                debug!(
+                  "Found new bluetooth device: {} {}",
+                  p.properties()
+                    .local_name
+                    .unwrap_or("[NAME UNKNOWN]".to_owned()),
+                  p.properties().address
+                );
                 tried_addresses_handler.insert(p.properties().address, ());
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
                   p,
@@ -203,7 +212,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                 }
               }
             } else {
-              debug!("Device {} found, no advertised name, ignoring.", p.properties().address);
+              debug!(
+                "Device {} found, no advertised name, ignoring.",
+                p.properties().address
+              );
               tried_addresses_handler.insert(p.properties().address, ());
             }
           }

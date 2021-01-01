@@ -109,14 +109,19 @@ fn wait_for_manager_events(
           Some(event) => match event {
             DeviceCommunicationEvent::ScanningStarted => {
               scanning_in_progress = true;
-            },
+            }
             DeviceCommunicationEvent::ScanningFinished => {
               debug!("System signaled that scanning was finished, check to see if all managers are finished.");
               if !scanning_in_progress {
-                debug!("Manager finished before scanning was fully started, continuing event loop.");
+                debug!(
+                  "Manager finished before scanning was fully started, continuing event loop."
+                );
                 continue;
               }
-              if device_manager_status.iter().any(|x| x.load(Ordering::SeqCst)) {
+              if device_manager_status
+                .iter()
+                .any(|x| x.load(Ordering::SeqCst))
+              {
                 debug!("At least one manager still scanning, continuing event loop.");
                 continue;
               }
@@ -130,7 +135,7 @@ fn wait_for_manager_events(
                 error!("Server disappeared, exiting loop.");
                 return;
               }
-            },
+            }
             DeviceCommunicationEvent::DeviceFound(device_creator) => {
               // Pull and increment the device index now. If connection fails,
               // we'll just iterate to the next one.
@@ -348,8 +353,15 @@ impl DeviceManager {
         // event loop could shut down is if the whole system is shutting down.
         // So complain if our sends error out, but don't worry about returning
         // an error.
-        if sender.send(DeviceCommunicationEvent::ScanningStarted).await.is_err() ||
-          sender.send(DeviceCommunicationEvent::ScanningFinished).await.is_err() {
+        if sender
+          .send(DeviceCommunicationEvent::ScanningStarted)
+          .await
+          .is_err()
+          || sender
+            .send(DeviceCommunicationEvent::ScanningFinished)
+            .await
+            .is_err()
+        {
           error!("Device manager event loop shut down, cannot send ScanningStarted");
         }
         Ok(messages::Ok::default().into())

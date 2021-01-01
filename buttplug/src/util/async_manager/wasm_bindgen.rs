@@ -26,7 +26,7 @@ where
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
 where
   Fut: Future + Send + 'static,
-  Fut::Output: Send
+  Fut::Output: Send,
 {
   WasmBindgenAsyncManager::default().spawn_with_handle(future)
 }

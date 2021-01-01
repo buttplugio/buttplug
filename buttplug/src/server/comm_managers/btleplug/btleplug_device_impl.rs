@@ -1,9 +1,7 @@
-use super::{
-  btleplug_internal::{
-    BtlePlugInternalEventLoop,
-    DeviceReturnFuture,
-    DeviceReturnStateShared,
-  }
+use super::btleplug_internal::{
+  BtlePlugInternalEventLoop,
+  DeviceReturnFuture,
+  DeviceReturnStateShared,
 };
 use crate::{
   core::{

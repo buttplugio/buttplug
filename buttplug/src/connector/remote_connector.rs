@@ -17,10 +17,7 @@ use crate::{
   core::{
     errors::{ButtplugMessageError, ButtplugServerError},
     messages::{
-      serializer::{
-        ButtplugClientJSONSerializer,
-        ButtplugMessageSerializer,
-      },
+      serializer::{ButtplugClientJSONSerializer, ButtplugMessageSerializer},
       ButtplugClientMessage,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,

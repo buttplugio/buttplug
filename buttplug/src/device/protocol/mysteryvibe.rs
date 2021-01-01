@@ -15,12 +15,9 @@ use crate::{
 use async_lock::{Mutex, RwLock};
 use futures::future::BoxFuture;
 // use futures_timer::Delay;
-use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
-  // time::Duration,
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
 };
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
