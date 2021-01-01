@@ -182,14 +182,15 @@ mod test {
       }
       device.disconnect().await.unwrap();
       // Check that we got an event back about a removed device.
-      let msg = recv.next().await.unwrap();
-      if let ButtplugServerMessage::DeviceRemoved(da) = msg {
-        assert_eq!(da.device_index, 0);
-      } else {
-        panic!(format!(
-          "Returned message was not a DeviceRemoved message or timed out: {:?}",
-          msg
-        ));
+      while let Ok(msg) = recv.next().await {
+        match msg {
+          ButtplugServerMessage::DeviceRemoved(da) => assert_eq!(da.device_index, 0),
+          ButtplugServerMessage::ScanningFinished(_) => continue,
+          _ => panic!(format!(
+            "Returned message was not a DeviceRemoved message or timed out: {:?}",
+            msg
+          ))
+        }
       }
     });
   }
