@@ -212,11 +212,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                 }
               }
             } else {
-              debug!(
+              trace!(
                 "Device {} found, no advertised name, ignoring.",
                 p.properties().address
               );
-              tried_addresses_handler.insert(p.properties().address, ());
             }
           }
           receiver.next().await.unwrap();
