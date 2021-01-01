@@ -1,3 +1,15 @@
+# 1.0.3 (2021-01-01)
+
+## Features
+
+- #235: XInput now rescans every 1 second until told to stop (versus scanning once and never
+  scanning until StartScanning is called again.)
+
+## Bugfixes
+
+- #236: Bluetooth device scanning no longer ignores addresses without names in advertisements. Fixes
+  issues where RSSI updates were received before advertisements.
+
 # 1.0.2 (2020-12-31)
 
 ## Bugfixes
