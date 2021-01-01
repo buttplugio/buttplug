@@ -119,6 +119,8 @@ jobs:
      #   displayName: cargo check --all-features
      - script: cargo test --all
        displayName: cargo test
+       # Set timeout for tests, as some tests seem to randomly stall.
+       timeoutInMinutes: 5
        env:
          VCPKG_ROOT: "c:/vcpkg"
          VCPKGRS_DYNAMIC: 1
