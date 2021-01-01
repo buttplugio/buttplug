@@ -33,9 +33,9 @@ jobs:
            - clippy
      # Run any user-specific setup steps
      - ${{ parameters.setup }}
-     - script: cargo fmt --all -- --check
+     - script: cargo +nightly fmt --all -- --check
        displayName: cargo fmt --check
-     - script: cargo clippy --all
+     - script: cargo +nightly clippy --all
        displayName: cargo clippy
  - job: main
    variables:
