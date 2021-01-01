@@ -198,8 +198,9 @@ impl ButtplugClient {
     Result<(Self, impl Stream<Item = ButtplugClientEvent>), ButtplugClientError>,
   >
   where
-    ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
-      + 'static,
+    ConnectorType: 
+      ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+        + 'static,
   {
     trace!("run() called, creating client future.");
     let client_name = name.to_string();

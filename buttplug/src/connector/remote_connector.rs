@@ -65,8 +65,9 @@ async fn remote_connector_event_loop<
   mut transport_incoming_recv: Receiver<ButtplugTransportIncomingMessage>,
 ) where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
-    + 'static,
+  SerializerType: 
+    ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+      + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static, //From<Error> + 'static,
 {
@@ -188,8 +189,9 @@ pub struct ButtplugRemoteConnector<
   InboundMessageType,
 > where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
-    + 'static,
+  SerializerType: 
+    ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+      + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
@@ -212,8 +214,9 @@ impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
   ButtplugRemoteConnector<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
 where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
-    + 'static,
+  SerializerType: 
+    ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+      + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static,
 {
@@ -236,8 +239,9 @@ impl<TransportType, SerializerType, OutboundMessageType, InboundMessageType>
   >
 where
   TransportType: ButtplugConnectorTransport + 'static,
-  SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
-    + 'static,
+  SerializerType: 
+    ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
+      + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
   InboundMessageType: ButtplugMessage + 'static, //+ From<Error> + 'static,
 {
