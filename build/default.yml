@@ -4,10 +4,9 @@
 # for us since we have platform specific features.
 
 parameters:
-  minrust: 1.32.0 # Rust 2018 with uniform paths
+  minrust: 1.49.0 # Rust 2018 with uniform paths
   setup: []
   services: {}
-  env: {}
   cross: true
 
 jobs:
@@ -87,27 +86,8 @@ jobs:
      - script: sudo apt-get -y install libudev-dev libusb-1.0-0-dev
        displayName: Install packages
        condition: eq(variables['Agent.OS'], 'Linux')
-     - task: Cache@2
-       displayName: Cache vcpkg
-       condition: eq(variables['Agent.OS'], 'Windows_NT')
-       inputs:
-         # As 'key' use the content of the response file, vcpkg's commit id and build agent name.
-         # The key must be one liner, each segment separated by pipe, non-path segments enclosed by
-         # double quotes.
-         key: $(Build.SourcesDirectory)/build/vcpkg_x64-windows.txt | "$(Agent.OS)"
-         path: 'c:/vcpkg'
-     - script: |
-        vcpkg install @build/vcpkg_x64-windows.txt
-        echo ##vso[task.setvariable variable=VCPKGRS_DYNAMIC]1
-       env:
-         RUSTUP_TOOLCHAIN: ${{parameters.rust}}
-       displayName: "vcpkg (openssl)"
-       condition: eq(variables['Agent.OS'], 'Windows_NT')
      - script: cargo check --all --bins --examples
        displayName: cargo check
-       env:
-         VCPKG_ROOT: "c:/vcpkg"
-         VCPKGRS_DYNAMIC: 1
      # Can't do no features because we're in a workspace
      #
      # - script: cargo check --all --bins --examples --no-default-features
@@ -121,10 +101,6 @@ jobs:
        displayName: cargo test
        # Set timeout for tests, as some tests seem to randomly stall.
        timeoutInMinutes: 5
-       env:
-         VCPKG_ROOT: "c:/vcpkg"
-         VCPKGRS_DYNAMIC: 1
-         ${{ insert }}: ${{ parameters.env }}
  - ${{ if ne('false', parameters.minrust) }}:
    - job: msrv
      displayName: "${{ format('Minimum supported Rust version: {0}', parameters.minrust) }}"
