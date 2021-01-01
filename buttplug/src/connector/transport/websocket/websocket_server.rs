@@ -334,9 +334,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           let tls_stream = handshake.await.map_err(|e| {
             error!("Secure cert config cannot run handshake: {:?}", e);
             ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(
-                format!("{:?}", e),
-              ),
+              ButtplugConnectorTransportSpecificError::SecureServerError(format!("{:?}", e)),
             )
           })?;
           info!("Websocket Secure: Got connection");
