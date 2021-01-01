@@ -4,11 +4,13 @@
 
 - #235: XInput now rescans every 1 second until told to stop (versus scanning once and never
   scanning until StartScanning is called again.)
+- #231: Use LTO in release builds
 
 ## Bugfixes
 
 - #236: Bluetooth device scanning no longer ignores addresses without names in advertisements. Fixes
   issues where RSSI updates were received before advertisements.
+- #234: Fix declaration of Send/Sync on ButtplugFutureSharedState
 
 # 1.0.2 (2020-12-31)
 
