@@ -174,24 +174,30 @@ mod test {
         .await;
       assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
       // Check that we got an event back about a new device.
+      let mut device_index = 0;
       while let Some(msg) = recv.next().await {
         if let ButtplugServerMessage::DeviceAdded(da) = msg {
           assert_eq!(da.device_name, "Aneros Vivi");
+          device_index = da.device_index;
           break;
         }
       }
       device.disconnect().await.unwrap();
       // Check that we got an event back about a removed device.
-      while let Ok(msg) = recv.next().await {
+      while let Some(msg) = recv.next().await {
         match msg {
-          ButtplugServerMessage::DeviceRemoved(da) => assert_eq!(da.device_index, 0),
+          ButtplugServerMessage::DeviceRemoved(da) => {
+            assert_eq!(da.device_index, device_index);
+            return;
+          }
           ButtplugServerMessage::ScanningFinished(_) => continue,
           _ => panic!(format!(
             "Returned message was not a DeviceRemoved message or timed out: {:?}",
             msg
-          ))
+          )),
         }
       }
+      panic!("Shouldn't get here!");
     });
   }
 }
