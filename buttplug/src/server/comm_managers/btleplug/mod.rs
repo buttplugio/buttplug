@@ -112,6 +112,16 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
               error!("Device scanning receiver dropped!");
             }
           }
+          CentralEvent::DeviceUpdated(_) => {
+            // We will get a LOT of these messages due to RSSI updates, but
+            // they'll also happen if we got RSSI first then got an
+            // advertisement packet with a name update.
+            trace!("BTLEPlug Device updated: {:?}", event);
+            let s = scanning_sender_clone.clone();
+            if s.send(()).await.is_err() {
+              error!("Device scanning receiver dropped!");
+            }
+          }
           CentralEvent::DeviceConnected(addr) => {
             info!("BTLEPlug Device connected: {:?}", addr);
             connected_addresses_clone.insert(addr, ());
