@@ -82,6 +82,7 @@ fn wait_for_manager_events(
   let device_map_return = device_map.clone();
   let mut device_manager_status: Vec<Arc<AtomicBool>> = vec![];
   let device_addition_semaphore = Arc::new(Semaphore::new(1));
+  let mut scanning_in_progress = false;
   let event_loop = async move {
     loop {
       let ping_fut = async {
@@ -106,6 +107,30 @@ fn wait_for_manager_events(
       match manager_event {
         DeviceEvent::DeviceCommunicationEvent(e) => match e {
           Some(event) => match event {
+            DeviceCommunicationEvent::ScanningStarted => {
+              scanning_in_progress = true;
+            },
+            DeviceCommunicationEvent::ScanningFinished => {
+              debug!("System signaled that scanning was finished, check to see if all managers are finished.");
+              if !scanning_in_progress {
+                debug!("Manager finished before scanning was fully started, continuing event loop.");
+                continue;
+              }
+              if device_manager_status.iter().any(|x| x.load(Ordering::SeqCst)) {
+                debug!("At least one manager still scanning, continuing event loop.");
+                continue;
+              }
+              debug!("All managers finished, emitting ScanningFinished");
+              scanning_in_progress = false;
+              if server_sender
+                .send(ScanningFinished::default().into())
+                .await
+                .is_err()
+              {
+                error!("Server disappeared, exiting loop.");
+                return;
+              }
+            },
             DeviceCommunicationEvent::DeviceFound(device_creator) => {
               // Pull and increment the device index now. If connection fails,
               // we'll just iterate to the next one.
@@ -204,21 +229,6 @@ fn wait_for_manager_events(
               })
               .unwrap();
             }
-            DeviceCommunicationEvent::ScanningFinished => {
-              for comm_mgr_status in &device_manager_status {
-                if comm_mgr_status.load(Ordering::SeqCst) {
-                  continue;
-                }
-              }
-              if server_sender
-                .send(ScanningFinished::default().into())
-                .await
-                .is_err()
-              {
-                error!("Server disappeared, exiting loop.");
-                return;
-              }
-            }
             DeviceCommunicationEvent::DeviceManagerAdded(status) => {
               device_manager_status.push(status);
             }
@@ -275,7 +285,7 @@ pub struct DeviceManager {
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, ButtplugDevice>>,
-  sender: Sender<DeviceCommunicationEvent>,
+  device_event_sender: Sender<DeviceCommunicationEvent>,
 }
 
 unsafe impl Send for DeviceManager {
@@ -301,7 +311,7 @@ impl DeviceManager {
       wait_for_manager_events(config, ping_receiver, event_sender);
     async_manager::spawn(event_loop_fut).unwrap();
     Ok(Self {
-      sender: device_event_sender,
+      device_event_sender,
       devices: device_map,
       comm_managers: Arc::new(DashMap::new()),
     })
@@ -312,6 +322,7 @@ impl DeviceManager {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let mgrs = self.comm_managers.clone();
+      let sender = self.device_event_sender.clone();
       Box::pin(async move {
         for mgr in mgrs.iter() {
           if mgr.value().scanning_status().load(Ordering::SeqCst) {
@@ -324,6 +335,23 @@ impl DeviceManager {
           .collect();
         // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
         future::join_all(fut_vec).await;
+        debug!("All managers started, sending ScanningStarted (and invoking ScanningFinished hack) signal to event loop.");
+        // HACK: In case everything somehow exited between the time all of our
+        // futures resolved and when we updated the event loop, act like we're a
+        // device comm manager and send a ScanningFinished message. This will
+        // cause the finish check to run just in case, so we don't get stuck.
+        //
+        // Ideally, this should be some sort of state machine, but for now, we
+        // can deal with this.
+        //
+        // At this point, it doesn't really matter what we return, only way that
+        // event loop could shut down is if the whole system is shutting down.
+        // So complain if our sends error out, but don't worry about returning
+        // an error.
+        if sender.send(DeviceCommunicationEvent::ScanningStarted).await.is_err() ||
+          sender.send(DeviceCommunicationEvent::ScanningFinished).await.is_err() {
+          error!("Device manager event loop shut down, cannot send ScanningStarted");
+        }
         Ok(messages::Ok::default().into())
       })
     }
@@ -432,14 +460,14 @@ impl DeviceManager {
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
-    let mgr = T::new(self.sender.clone());
+    let mgr = T::new(self.device_event_sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
       return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
       ));
     }
     let status = mgr.scanning_status();
-    let sender = self.sender.clone();
+    let sender = self.device_event_sender.clone();
     // TODO This could run out of order and possibly cause weird scanning finished bugs?
     async_manager::spawn(async move {
       sender
@@ -457,14 +485,14 @@ impl DeviceManager {
   pub fn add_test_comm_manager(
     &self,
   ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
-    let mgr = TestDeviceCommunicationManager::new(self.sender.clone());
+    let mgr = TestDeviceCommunicationManager::new(self.device_event_sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
       return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
       ));
     }
     let status = mgr.scanning_status();
-    let sender = self.sender.clone();
+    let sender = self.device_event_sender.clone();
     // TODO This could run out of order and possibly cause weird scanning finished bugs?
     async_manager::spawn(async move {
       sender

@@ -208,14 +208,15 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             }
           }
           receiver.next().await.unwrap();
-        }        
+        }
         central.stop_scan().unwrap();
+        info!("BTLEPlug scanning finished.");
         if device_sender
           .send(DeviceCommunicationEvent::ScanningFinished)
           .await
           .is_err()
         {
-          error!("Error sending scanning finished from Xinput.");
+          error!("Error sending scanning finished from btleplug.");
         }
         tried_addresses_handler.clear();
         info!("Exiting btleplug scanning");

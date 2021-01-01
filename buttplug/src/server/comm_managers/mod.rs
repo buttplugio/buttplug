@@ -21,6 +21,7 @@ pub enum DeviceCommunicationEvent {
   // to be done to make sure we can use it.
   DeviceFound(Box<dyn ButtplugDeviceImplCreator>),
   DeviceManagerAdded(Arc<AtomicBool>),
+  ScanningStarted,
   ScanningFinished,
 }
 
