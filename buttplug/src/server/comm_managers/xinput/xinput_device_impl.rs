@@ -1,4 +1,4 @@
-use super::xinput_device_comm_manager::XInputControllerIndex;
+use super::xinput_device_comm_manager::{XInputControllerIndex, XInputConnectionTracker};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -58,16 +58,20 @@ pub struct XInputDeviceImpl {
   index: XInputControllerIndex,
   event_receiver: BoundedDeviceEventBroadcaster,
   address: String,
+  connection_tracker: XInputConnectionTracker
 }
 
 impl XInputDeviceImpl {
   pub fn new(index: XInputControllerIndex) -> Self {
     let event_receiver = BroadcastChannel::with_cap(256);
+    let connection_tracker = XInputConnectionTracker::default();
+    connection_tracker.add_with_sender(index, event_receiver.clone());
     Self {
       handle: rusty_xinput::XInputHandle::load_default().unwrap(),
       index,
       event_receiver,
       address: format!("XInput Controller {}", index),
+      connection_tracker
     }
   }
 }
@@ -84,7 +88,7 @@ impl DeviceImpl for XInputDeviceImpl {
   }
 
   fn connected(&self) -> bool {
-    true
+    self.connection_tracker.connected(self.index)
   }
 
   fn endpoints(&self) -> Vec<Endpoint> {
