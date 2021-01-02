@@ -1,3 +1,10 @@
+# 1.0.4 (2021-01-02)
+
+## Features
+
+- #238: XInput gamepads now fire Disconnection events, which should stop devices from being
+  double-added.
+
 # 1.0.3 (2021-01-01)
 
 ## Features
