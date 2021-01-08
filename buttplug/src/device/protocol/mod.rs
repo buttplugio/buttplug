@@ -6,6 +6,7 @@ mod kiiroo_v21;
 mod kiiroo_v2_vibrator;
 mod lelof1s;
 mod libo_elle;
+mod libo_shark;
 mod libo_vibes;
 mod lovehoney_desire;
 mod lovense;
@@ -53,6 +54,7 @@ pub enum ProtocolTypes {
   KiirooV21,
   LeloF1s,
   LiboElle,
+  LiboShark,
   LiboVibes,
   LovehoneyDesire,
   Lovense,
@@ -87,6 +89,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
       "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
       "libo-elle" => Ok(ProtocolTypes::LiboElle),
+      "libo-shark" => Ok(ProtocolTypes::LiboShark),
       "libo-vibes" => Ok(ProtocolTypes::LiboVibes),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),
       "lovense" => Ok(ProtocolTypes::Lovense),
@@ -130,6 +133,7 @@ pub fn try_create_protocol(
     ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LiboElle => libo_elle::LiboElle::try_create(device, config),
+    ProtocolTypes::LiboShark => libo_shark::LiboShark::try_create(device, config),
     ProtocolTypes::LiboVibes => libo_vibes::LiboVibes::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
