@@ -325,7 +325,7 @@ protocols:
   libo-shark:
       btle:
         names:
-          - ShaYu # Shark - Enflating Rabbit
+          - ShaYu # Shark - Inflating Rabbit
         services:
           # Write Service
           00006000-0000-1000-8000-00805f9b34fb:
