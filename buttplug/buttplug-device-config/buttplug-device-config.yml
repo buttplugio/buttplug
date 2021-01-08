@@ -965,6 +965,19 @@ protocols:
               - 1
               - 0
       - identifier:
+          - Virtual Rabbit
+        name:
+          en-us: PornHub Virtual Rabit
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+            FeatureOrder:
+              - 1
+              - 0
+      - identifier:
           - Virtual Blowbot
         name:
           en-us: PornHub Virtual Blowbot
