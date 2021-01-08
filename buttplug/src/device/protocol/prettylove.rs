@@ -1,4 +1,5 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use crate::core::errors::ButtplugError;
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
@@ -8,6 +9,7 @@ use crate::{
     Endpoint,
   },
 };
+use futures::future::{self, BoxFuture};
 use std::sync::Arc;
 
 #[derive(ButtplugProtocolProperties)]
@@ -29,6 +31,14 @@ impl ButtplugProtocol for PrettyLove {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
     })
+  }
+
+  fn initialize(
+    _device_impl: &dyn DeviceImpl,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+    // Pretty Love devices have wildcarded names of Aogu BLE *
+    // Force the identifier lookup to "Aogu BLE"
+    Box::pin(future::ready(Ok(Some("Aogu BLE".to_owned()))))
   }
 }
 
