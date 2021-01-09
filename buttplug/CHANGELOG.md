@@ -1,3 +1,14 @@
+# 1.0.5 (2021-01-09)
+
+## Features
+
+- #242: Added Libo support
+
+## Bugfixes
+
+- #244: Prettylove protocol handling now uses command caching, fixed name lookup
+- #245: Fix device configuration for Virtual Rabbit
+
 # 1.0.4 (2021-01-02)
 
 ## Features
