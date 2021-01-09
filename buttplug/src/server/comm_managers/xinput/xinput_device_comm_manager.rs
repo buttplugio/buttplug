@@ -14,10 +14,11 @@ use futures::{future, FutureExt};
 use futures_timer::Delay;
 use std::{
   sync::{
-    Arc, 
-    atomic::{AtomicU8, AtomicBool, Ordering}
+    atomic::{AtomicBool, AtomicU8, Ordering},
+    Arc,
   },
-  time::Duration};
+  time::Duration,
+};
 use tokio::sync::Notify;
 
 #[derive(Debug, Display, Clone, Copy)]
@@ -39,7 +40,11 @@ pub(super) struct XInputConnectionTracker {
   check_running: Arc<AtomicBool>,
 }
 
-async fn check_gamepad_connectivity(connected_gamepads: Arc<AtomicU8>, check_running: Arc<AtomicBool>, sender: Option<BoundedDeviceEventBroadcaster>) {
+async fn check_gamepad_connectivity(
+  connected_gamepads: Arc<AtomicU8>,
+  check_running: Arc<AtomicBool>,
+  sender: Option<BoundedDeviceEventBroadcaster>,
+) {
   check_running.store(true, Ordering::SeqCst);
   let handle = rusty_xinput::XInputHandle::load_default().unwrap();
   loop {
@@ -52,7 +57,7 @@ async fn check_gamepad_connectivity(connected_gamepads: Arc<AtomicU8>, check_run
       XInputControllerIndex::XInputController1,
       XInputControllerIndex::XInputController2,
       XInputControllerIndex::XInputController3,
-    ]  {
+    ] {
       // If this isn't in our list of known gamepads, continue.
       if (gamepads & 1 << *index as u8) == 0 {
         continue;
@@ -65,10 +70,7 @@ async fn check_gamepad_connectivity(connected_gamepads: Arc<AtomicU8>, check_run
         if let Some(send) = &sender {
           // This should always succeed, as it'll relay up to the device manager,
           // and that's what owns us.
-          send
-            .send(&ButtplugDeviceEvent::Removed)
-            .await
-            .unwrap();
+          send.send(&ButtplugDeviceEvent::Removed).await.unwrap();
         }
         // If we're out of gamepads to track, return immediately.
         if new_connected_gamepads == 0 {
@@ -93,11 +95,16 @@ impl XInputConnectionTracker {
       let check_running = self.check_running.clone();
       async_manager::spawn(async move {
         check_gamepad_connectivity(connected_gamepads, check_running, None).await;
-      }).unwrap();
+      })
+      .unwrap();
     }
   }
 
-  pub fn add_with_sender(&self, index: XInputControllerIndex, sender: BoundedDeviceEventBroadcaster) {
+  pub fn add_with_sender(
+    &self,
+    index: XInputControllerIndex,
+    sender: BoundedDeviceEventBroadcaster,
+  ) {
     let mut connected = self.connected_gamepads.load(Ordering::SeqCst);
     let should_start = connected == 0;
     connected |= 1 << index as u8;
@@ -107,7 +114,8 @@ impl XInputConnectionTracker {
       let check_running = self.check_running.clone();
       async_manager::spawn(async move {
         check_gamepad_connectivity(connected_gamepads, check_running, Some(sender)).await;
-      }).unwrap();
+      })
+      .unwrap();
     }
   }
 

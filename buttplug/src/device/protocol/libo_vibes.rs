@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_lock::Mutex;

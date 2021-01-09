@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use async_lock::Mutex;
@@ -51,11 +53,9 @@ impl ButtplugProtocolCommandHandler for LiboShark {
         if let Some(speed) = cmds[1] {
           data |= speed as u8;
         }
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![data],
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![data], false))
+          .await?;
       }
       Ok(messages::Ok::default().into())
     })
@@ -111,7 +111,7 @@ mod test {
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x23], false)),
       )
-          .await;
+      .await;
       assert!(command_receiver_tx.is_empty());
 
       device

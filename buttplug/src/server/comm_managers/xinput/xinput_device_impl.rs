@@ -1,4 +1,4 @@
-use super::xinput_device_comm_manager::{XInputControllerIndex, XInputConnectionTracker};
+use super::xinput_device_comm_manager::{XInputConnectionTracker, XInputControllerIndex};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -58,7 +58,7 @@ pub struct XInputDeviceImpl {
   index: XInputControllerIndex,
   event_receiver: BoundedDeviceEventBroadcaster,
   address: String,
-  connection_tracker: XInputConnectionTracker
+  connection_tracker: XInputConnectionTracker,
 }
 
 impl XInputDeviceImpl {
@@ -71,7 +71,7 @@ impl XInputDeviceImpl {
       index,
       event_receiver,
       address: format!("XInput Controller {}", index),
-      connection_tracker
+      connection_tracker,
     }
   }
 }

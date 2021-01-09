@@ -34,12 +34,20 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, ButtplugMessage,
-      MessageAttributesMap, RawReading, VibrateCmd, VibrateSubcommand,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      MessageAttributesMap,
+      RawReading,
+      VibrateCmd,
+      VibrateSubcommand,
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture, DeviceReadCmd,
+    configuration_manager::DeviceProtocolConfiguration,
+    ButtplugDeviceResultFuture,
+    DeviceReadCmd,
     Endpoint,
   },
 };

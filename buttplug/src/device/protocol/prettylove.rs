@@ -9,9 +9,9 @@ use crate::{
     Endpoint,
   },
 };
+use async_lock::Mutex;
 use futures::future::{self, BoxFuture};
 use std::sync::Arc;
-use async_lock::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct PrettyLove {
@@ -57,18 +57,19 @@ impl ButtplugProtocolCommandHandler for PrettyLove {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          device.write_value(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x00, speed as u8],
-            false,
-          )).await?;
+          device
+            .write_value(DeviceWriteCmd::new(
+              Endpoint::Tx,
+              vec![0x00, speed as u8],
+              false,
+            ))
+            .await?;
         }
       }
       Ok(messages::Ok::default().into())
     })
   }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -82,38 +83,40 @@ mod test {
   #[test]
   pub fn test_prettylove_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Aogu BLE Device").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Aogu BLE Device")
+        .await
+        .unwrap();
       let command_receiver = test_device
-          .get_endpoint_channel(&Endpoint::Tx)
-          .unwrap()
-          .receiver;
+        .get_endpoint_channel(&Endpoint::Tx)
+        .unwrap()
+        .receiver;
       device
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-          .unwrap();
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .unwrap();
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x02], false)),
       )
-          .await;
+      .await;
       assert!(command_receiver.is_empty());
 
       // Since we only created one subcommand, we should only receive one command.
       device
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-          .unwrap();
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .unwrap();
       assert!(command_receiver.is_empty());
 
       device
-          .parse_message(StopDeviceCmd::new(0).into())
-          .await
-          .unwrap();
+        .parse_message(StopDeviceCmd::new(0).into())
+        .await
+        .unwrap();
       check_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x00], false)),
       )
-          .await;
+      .await;
       assert!(command_receiver.is_empty());
     });
   }
