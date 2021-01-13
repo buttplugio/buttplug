@@ -109,7 +109,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="server"))]
 mod test {
   use crate::{
     core::messages::{RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand},

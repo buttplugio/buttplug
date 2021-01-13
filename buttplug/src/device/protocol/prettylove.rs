@@ -71,7 +71,7 @@ impl ButtplugProtocolCommandHandler for PrettyLove {
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="server"))]
 mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},

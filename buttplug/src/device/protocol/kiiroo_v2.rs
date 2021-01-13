@@ -105,7 +105,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="server"))]
 mod test {
   use crate::{
     core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},

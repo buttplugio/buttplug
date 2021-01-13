@@ -140,7 +140,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature="server"))]
 mod test {
   use crate::{
     core::messages::{
