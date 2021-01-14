@@ -11,7 +11,7 @@ use crate::{
   server::{ButtplugServer, ButtplugServerOptions},
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use futures::{
   future::{self, BoxFuture},
   StreamExt,
@@ -77,7 +77,7 @@ impl<'a> ButtplugInProcessClientConnector {
   /// of 0 meaning infinite ping.
   pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
     let (server, mut server_recv) = ButtplugServer::new_with_options(options)?;
-    let (send, recv) = bounded(256);
+    let (send, recv) = channel(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {
       info!("Starting In Process Client Connector Event Sender Loop");

@@ -13,7 +13,7 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use async_lock::Mutex;
 #[cfg(feature = "async-std-runtime")]
 use async_std::net::TcpListener;
@@ -65,7 +65,7 @@ async fn run_connection_loop<S>(
 
   loop {
     select! {
-      serialized_msg = request_receiver.next().fuse() => match serialized_msg {
+      serialized_msg = request_receiver.recv().fuse() => match serialized_msg {
         Some(msg) => match msg {
           ButtplugTransportOutgoingMessage::Message(outgoing_msg) => {
             match outgoing_msg {
@@ -154,7 +154,7 @@ pub struct ButtplugWebsocketServerTransport {
 
 impl ButtplugWebsocketServerTransport {
   pub fn new(options: ButtplugWebsocketServerTransportOptions) -> Self {
-    let (unused_sender, _) = bounded(256);
+    let (unused_sender, _) = channel(256);
     Self {
       options,
       disconnect_sender: Arc::new(Mutex::new(unused_sender)),
@@ -164,8 +164,8 @@ impl ButtplugWebsocketServerTransport {
 
 impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   fn connect(&self) -> ButtplugConnectorTransportConnectResult {
-    let (request_sender, request_receiver) = bounded(256);
-    let (response_sender, response_receiver) = bounded(256);
+    let (request_sender, request_receiver) = channel(256);
+    let (response_sender, response_receiver) = channel(256);
     let disconnect_sender = self.disconnect_sender.clone();
     let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
 

@@ -22,7 +22,7 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use async_channel::{bounded, Sender};
+use tokio::sync::mpsc::{channel, Sender};
 use async_lock::Mutex;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
@@ -48,7 +48,7 @@ impl ButtplugWebsocketClientTransport {
   fn create(address: &str, should_use_tls: bool, bypass_cert_verify: bool) -> Self {
     // Create a dummy channel here. Saves us having to check option on every
     // call, and if it fails it means we're disconnected anyways, which is fine.
-    let (unused_sender, _) = bounded(256);
+    let (unused_sender, _) = channel(256);
     Self {
       should_use_tls,
       address: address.to_owned(),
@@ -80,8 +80,8 @@ impl ButtplugWebsocketClientTransport {
 
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   fn connect(&self) -> ButtplugConnectorTransportConnectResult {
-    let (request_sender, request_receiver) = bounded(256);
-    let (response_sender, response_receiver) = bounded(256);
+    let (request_sender, mut request_receiver) = channel(256);
+    let (response_sender, response_receiver) = channel(256);
 
     let disconnect_sender_clone = self.disconnect_sender.clone();
 
@@ -132,7 +132,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           let (mut writer, mut reader) = stream.split();
           // TODO Do we want to store/join these tasks anywhere?
           async_manager::spawn(async move {
-            while let Ok(msg) = request_receiver.recv().await {
+            while let Some(msg) = request_receiver.recv().await {
               let out_msg = match msg {
                 ButtplugTransportOutgoingMessage::Message(outgoing_msg) => match outgoing_msg {
                   ButtplugSerializedMessage::Text(text) => Message::Text(text),

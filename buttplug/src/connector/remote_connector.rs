@@ -27,7 +27,7 @@ use crate::{
   },
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use futures::{future::BoxFuture, FutureExt, StreamExt};
 use std::marker::PhantomData;
 
@@ -81,12 +81,12 @@ async fn remote_connector_event_loop<
     // message from the connector to go to the transport.
     let mut stream_return = select! {
       // Catch messages coming in from the transport.
-      transport = transport_incoming_recv.next().fuse() =>
+      transport = transport_incoming_recv.recv().fuse() =>
       match transport {
         Some(msg) => StreamValue::Incoming(msg),
         None => StreamValue::NoValue,
       },
-      connector = connector_outgoing_recv.next().fuse() =>
+      connector = connector_outgoing_recv.recv().fuse() =>
       match connector {
         // Catch messages that need to be sent out through the connector.
         Some(msg) => StreamValue::Outgoing(msg),
@@ -254,14 +254,14 @@ where
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();
-      let (connector_outgoing_sender, connector_outgoing_receiver) = bounded(256);
+      let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       Box::pin(async move {
         match transport.connect().await {
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
-            let (connector_incoming_sender, connector_incoming_receiver) = bounded(256);
+            let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
             async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
