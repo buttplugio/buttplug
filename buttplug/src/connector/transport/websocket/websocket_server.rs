@@ -13,8 +13,7 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use tokio::sync::mpsc::{channel, Receiver, Sender};
-use async_lock::Mutex;
+use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
 #[cfg(feature = "async-std-runtime")]
 use async_std::net::TcpListener;
 use async_tls::TlsAcceptor;
@@ -164,7 +163,8 @@ impl ButtplugWebsocketServerTransport {
 
 impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   fn connect(&self) -> ButtplugConnectorTransportConnectResult {
-    let (request_sender, request_receiver) = channel(256);
+    let (request_sender, request_receiver_bare) = channel(256);
+    let request_receiver = Arc::new(Mutex::new(Some(request_receiver_bare)));
     let (response_sender, response_receiver) = channel(256);
     let disconnect_sender = self.disconnect_sender.clone();
     let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
@@ -204,7 +204,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             })?;
 
           async_manager::spawn(async move {
-            run_connection_loop(ws_stream, request_receiver_clone, response_sender_clone).await;
+            run_connection_loop(ws_stream, (*request_receiver_clone.lock().await).take().unwrap(), response_sender_clone).await;
           })
           .unwrap();
           Ok(())
@@ -350,7 +350,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               )
             })?;
           async_manager::spawn(async move {
-            run_connection_loop(ws_stream, request_receiver_clone, response_sender_clone).await;
+            run_connection_loop(ws_stream, (*request_receiver_clone.lock().await).take().unwrap(), response_sender_clone).await;
           })
           .unwrap();
           Ok(())

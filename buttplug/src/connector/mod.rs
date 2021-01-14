@@ -88,8 +88,8 @@ pub use remote_connector::{
 };
 #[cfg(feature = "websockets")]
 pub use transport::ButtplugWebsocketClientTransport;
-// #[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
-// pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
+#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
+pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use crate::{
   core::{
