@@ -9,7 +9,6 @@ use crate::{
   },
   util::async_manager,
 };
-use async_channel::Sender;
 use futures::{future, FutureExt};
 use futures_timer::Delay;
 use std::{
@@ -19,7 +18,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::Notify;
+use tokio::sync::{Notify, mpsc::Sender};
 
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]

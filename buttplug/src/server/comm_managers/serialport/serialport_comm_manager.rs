@@ -7,7 +7,7 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use async_channel::Sender;
+use tokio::sync::mpsc::Sender;
 use futures::future;
 use serialport::available_ports;
 

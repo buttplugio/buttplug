@@ -10,12 +10,12 @@
 pub mod comm_managers;
 pub mod device_manager;
 mod ping_timer;
+mod device_manager_event_loop;
 pub mod remote_server;
 
 pub use remote_server::ButtplugRemoteServer;
 
-use crate::{
-  core::{
+use crate::{core::{
     errors::*,
     messages::{
       self,
@@ -28,14 +28,11 @@ use crate::{
       StopScanning,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  },
-  test::TestDeviceCommunicationManagerHelper,
-  util::async_manager,
-};
-use async_channel::{bounded, Receiver};
+  }, test::TestDeviceCommunicationManagerHelper, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
+use tokio::sync::broadcast;
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
-use futures::{future::BoxFuture, StreamExt};
+use futures::{future::BoxFuture, Stream, StreamExt};
 use ping_timer::PingTimer;
 use std::{
   convert::{TryFrom, TryInto},
@@ -82,77 +79,68 @@ pub struct ButtplugServer {
   client_name: String,
   max_ping_time: u64,
   device_manager: DeviceManager,
-  ping_timer: Option<PingTimer>,
+  ping_timer: Arc<PingTimer>,
   pinged_out: Arc<AtomicBool>,
   connected: Arc<AtomicBool>,
+  output_sender: broadcast::Sender<ButtplugServerMessage>
 }
 
-impl ButtplugServer {
-  // Can't use the Default trait because we return a tuple, so this is the next best thing.
-  pub fn default() -> (Self, Receiver<ButtplugServerMessage>) {
+impl Default for ButtplugServer {
+  fn default() -> Self {
     // We can unwrap here because if default init fails, so will pretty much every test.
     Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
   }
+}
 
+impl ButtplugServer {
   pub fn new_with_options(
     options: &ButtplugServerOptions,
-  ) -> Result<(Self, Receiver<ButtplugServerMessage>), ButtplugError> {
-    let (send, recv) = bounded(256);
+  ) -> Result<Self, ButtplugError> {
+    let (send, _) = broadcast::channel(256);
+    let output_sender_clone = send.clone();
     let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
-    let (ping_timer, ping_receiver) = if options.max_ping_time > 0 {
-      let (timer, mut receiver) = PingTimer::new(options.max_ping_time);
-      // This is super dumb, but: we have a chain of channels to make sure we
-      // notify both the server and the device manager. Should probably just use
-      // a broadcaster here too.
-      //
-      // TODO Use a broadcaster here. Or just come up with a better solution.
-      let (device_manager_sender, device_manager_receiver) = bounded(1);
-      let pinged_out_clone = pinged_out.clone();
+      let ping_timer = Arc::new(PingTimer::new(options.max_ping_time));
+      let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
       let connected_clone = connected.clone();
       let event_sender_clone = send.clone();
       async_manager::spawn(async move {
-        // If we receive anything here, it means we've pinged out.
-        receiver.next().await;
+        // This will only exit if we've pinged out.
+        ping_timeout_notifier.await;
         error!("Ping out signal received, stopping server");
-        pinged_out_clone.store(true, Ordering::SeqCst);
         connected_clone.store(false, Ordering::SeqCst);
         // TODO Should the event sender return a result instead of an error message?
-        if event_sender_clone
+        if output_sender_clone
           .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
-          .await
           .is_err()
         {
           error!("Server disappeared, cannot update about ping out.");
         };
-        if device_manager_sender.send(()).await.is_err() {
-          error!("Device Manager disappeared, cannot update about ping out.");
-        }
       })
       .unwrap();
-      (Some(timer), Some(device_manager_receiver))
-    } else {
-      (None, None)
-    };
-    let device_manager = DeviceManager::new_with_options(
-      send,
-      ping_receiver,
+    let device_manager = DeviceManager::try_new(
+      send.clone(),
+      ping_timer.clone(),
       options.allow_raw_messages,
       &options.device_configuration_json,
       &options.user_device_configuration_json,
     )?;
-    Ok((
-      Self {
-        server_name: options.name.clone(),
-        client_name: String::default(),
-        max_ping_time: options.max_ping_time,
-        device_manager,
-        ping_timer,
-        pinged_out,
-        connected,
-      },
-      recv,
-    ))
+    Ok(Self {
+      server_name: options.name.clone(),
+      client_name: String::default(),
+      max_ping_time: options.max_ping_time,
+      device_manager,
+      ping_timer,
+      pinged_out,
+      connected,
+      output_sender: send
+    })
+  }
+
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
+    // Unlike the client API, we can expect anyone using the server to pin this
+    // themselves.
+    convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
   pub fn client_name(&self) -> String {
@@ -177,10 +165,7 @@ impl ButtplugServer {
   }
 
   pub fn disconnect(&self) -> BoxFuture<Result<(), ButtplugServerError>> {
-    let mut ping_fut = None;
-    if let Some(ping_timer) = &self.ping_timer {
-      ping_fut = Some(ping_timer.stop_ping_timer());
-    }
+    let ping_timer = self.ping_timer.clone();
     let stop_scanning_fut =
       self.parse_message(ButtplugClientMessage::StopScanning(StopScanning::default()));
     let stop_fut = self.parse_message(ButtplugClientMessage::StopAllDevices(
@@ -190,9 +175,7 @@ impl ButtplugServer {
     Box::pin(async move {
       // TODO We should really log more here.
       connected.store(false, Ordering::SeqCst);
-      if let Some(pfut) = ping_fut {
-        pfut.await;
-      }
+      ping_timer.stop_ping_timer();
       // Ignore returns here, we just want to stop.
       info!("Server disconnected, stopping all devices...");
       let _ = stop_fut.await;
@@ -266,11 +249,8 @@ impl ButtplugServer {
     info!("Performing server handshake check");
     // self.client_name = Some(msg.client_name.clone());
     // self.client_spec_version = Some(msg.message_version);
-    let mut ping_timer_fut = None;
     // Only start the ping timer after we've received the handshake.
-    if let Some(timer) = &self.ping_timer {
-      ping_timer_fut = Some(timer.start_ping_timer());
-    }
+    let ping_timer = self.ping_timer.clone();
     let out_msg = messages::ServerInfo::new(
       &self.server_name,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -278,9 +258,7 @@ impl ButtplugServer {
     );
     let connected = self.connected.clone();
     Box::pin(async move {
-      if let Some(fut) = ping_timer_fut {
-        fut.await;
-      }
+      ping_timer.start_ping_timer();
       connected.store(true, Ordering::SeqCst);
       info!("Server handshake check successful.");
       Result::Ok(out_msg.into())
@@ -288,15 +266,14 @@ impl ButtplugServer {
   }
 
   fn handle_ping(&self, msg: messages::Ping) -> ButtplugServerResultFuture {
-    if let Some(timer) = &self.ping_timer {
-      let fut = timer.update_ping_time();
-      Box::pin(async move {
-        fut.await;
-        Result::Ok(messages::Ok::new(msg.get_id()).into())
-      })
-    } else {
-      ButtplugPingError::PingTimerNotRunning.into()
+    if self.max_ping_time == 0 {
+      return ButtplugPingError::PingTimerNotRunning.into();
     }
+    let fut = self.ping_timer.update_ping_time();
+    Box::pin(async move {
+      fut.await;
+      Result::Ok(messages::Ok::new(msg.get_id()).into())
+    })
   }
 }
 
@@ -310,7 +287,7 @@ mod test {
 
   #[test]
   fn test_server_reuse() {
-    let (server, _) = ButtplugServer::default();
+    let server = ButtplugServer::default();
     async_manager::block_on(async {
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);

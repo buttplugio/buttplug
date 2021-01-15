@@ -76,11 +76,13 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
   pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    let (server, mut server_recv) = ButtplugServer::new_with_options(options)?;
+    let server = ButtplugServer::new_with_options(options)?;
+    let mut server_recv = server.event_stream();
     let (send, recv) = channel(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {
       info!("Starting In Process Client Connector Event Sender Loop");
+      pin_mut!(server_recv);
       while let Some(event) = server_recv.next().await {
         // If we get an error back, it means the client dropped our event handler, so just stop trying.
         if send.send(Ok(event.try_into().unwrap())).await.is_err() {

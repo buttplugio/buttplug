@@ -10,8 +10,7 @@ use crate::{
   },
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
-use futures::StreamExt;
+use tokio::sync::{broadcast, Notify, mpsc::Sender};
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -29,7 +28,6 @@ use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
-use tokio::sync::broadcast;
 
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
@@ -40,8 +38,7 @@ pub struct BtlePlugCommunicationManager {
   tried_addresses: Arc<DashMap<BDAddr, ()>>,
   connected_addresses: Arc<DashMap<BDAddr, ()>>,
   device_sender: Sender<DeviceCommunicationEvent>,
-  scanning_sender: Sender<()>,
-  scanning_receiver: Receiver<()>,
+  scanning_notifier: Arc<Notify>,
   is_scanning: Arc<AtomicBool>,
 }
 
@@ -93,34 +90,28 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
     // At this point, no one will be subscribed, so just drop the receiver.
     let (adapter_event_sender, _) = broadcast::channel(256);
-    let (scanning_sender, scanning_receiver) = bounded(256);
     let manager = Manager::new().unwrap();
     let tried_addresses = Arc::new(DashMap::new());
     let tried_addresses_clone = tried_addresses.clone();
     let mut adapter_event_handler = adapter_event_sender.subscribe();
     info!("Setting bluetooth device event handler.");
-    let scanning_sender_clone = scanning_sender.clone();
     let connected_addresses = Arc::new(DashMap::new());
     let connected_addresses_clone = connected_addresses.clone();
+    let scanning_notifier = Arc::new(Notify::new());
+    let scanning_notifier_clone = scanning_notifier.clone();
     async_manager::spawn(async move {
       while let Ok(event) = adapter_event_handler.recv().await {
         match event {
           CentralEvent::DeviceDiscovered(_) => {
             debug!("BTLEPlug Device discovered: {:?}", event);
-            let s = scanning_sender_clone.clone();
-            if s.send(()).await.is_err() {
-              error!("Device scanning receiver dropped!");
-            }
+            scanning_notifier_clone.notify_waiters();
           }
           CentralEvent::DeviceUpdated(_) => {
             // We will get a LOT of these messages due to RSSI updates, but
             // they'll also happen if we got RSSI first then got an
             // advertisement packet with a name update.
             trace!("BTLEPlug Device updated: {:?}", event);
-            let s = scanning_sender_clone.clone();
-            if s.send(()).await.is_err() {
-              error!("Device scanning receiver dropped!");
-            }
+            scanning_notifier_clone.notify_waiters();
           }
           CentralEvent::DeviceConnected(addr) => {
             info!("BTLEPlug Device connected: {:?}", addr);
@@ -144,8 +135,7 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
       connected_addresses,
       tried_addresses,
       device_sender,
-      scanning_sender,
-      scanning_receiver,
+      scanning_notifier,
       is_scanning: Arc::new(AtomicBool::new(false)),
     };
     comm_mgr.setup_adapter();
@@ -170,7 +160,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
       .into();
     }
     let device_sender = self.device_sender.clone();
-    let mut receiver = self.scanning_receiver.clone();
+    let scanning_notifier = self.scanning_notifier.clone();
     let is_scanning = self.is_scanning.clone();
 
     let central = self.adapter.clone().unwrap();
@@ -228,7 +218,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
               );
             }
           }
-          receiver.next().await.unwrap();
+          scanning_notifier.notified().await;
         }
         central.stop_scan().unwrap();
         info!("BTLEPlug scanning finished.");
@@ -249,14 +239,12 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
   fn stop_scanning(&self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
-    let sender = self.scanning_sender.clone();
+    let scanning_notifier = self.scanning_notifier.clone();
     Box::pin(async move {
       if is_scanning.load(Ordering::SeqCst) {
         is_scanning.store(false, Ordering::SeqCst);
-        sender.send(()).await.map_err(|_| {
-          error!("Scanning event loop already shut down");
-          ButtplugDeviceError::DeviceScanningAlreadyStopped.into()
-        })
+        scanning_notifier.notify_waiters();
+        Ok(())
       } else {
         Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into())
       }
@@ -290,19 +278,18 @@ mod test {
     },
     util::async_manager,
   };
-  use async_channel::bounded;
-  use futures::StreamExt;
+  use tokio::sync::mpsc::channel;
 
   // Ignored because it requires a device. Should probably just be a manual integration test.
   #[test]
   #[ignore]
   pub fn test_btleplug() {
     async_manager::block_on(async move {
-      let (sender, mut receiver) = bounded(256);
+      let (sender, mut receiver) = channel(256);
       let mgr = BtlePlugCommunicationManager::new(sender);
       mgr.start_scanning().await.unwrap();
       loop {
-        match receiver.next().await.unwrap() {
+        match receiver.recv().await.unwrap() {
           DeviceCommunicationEvent::DeviceFound(_device) => {
             info!("Got device!");
             info!("Sending message!");

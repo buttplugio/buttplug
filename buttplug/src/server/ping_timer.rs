@@ -1,12 +1,9 @@
 use crate::util::async_manager;
-use async_channel::{bounded, Receiver, Sender};
-use futures::{future::Future, StreamExt};
+use tokio::sync::{mpsc, Notify};
+use futures::{future, Future, FutureExt};
 use futures_timer::Delay;
 use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+  sync::Arc,
   time::Duration,
 };
 
@@ -17,93 +14,82 @@ pub enum PingMessage {
   End,
 }
 
-fn ping_timer(max_ping_time: u64) -> (impl Future<Output = ()>, Sender<PingMessage>, Receiver<()>) {
-  let (ping_msg_sender, mut ping_msg_receiver) = bounded(256);
-  let (pinged_out_sender, pinged_out_receiver) = bounded(1);
-
-  let ping_msg_sender_clone = ping_msg_sender.clone();
-  let fut = async move {
-    let pinged = Arc::new(AtomicBool::new(false));
-    let mut handle = None;
-    loop {
-      while let Some(msg) = ping_msg_receiver.next().await {
-        match msg {
-          PingMessage::StartTimer => {
-            if handle.is_some() {
-              continue;
-            }
-            let sender_clone = ping_msg_sender_clone.clone();
-            let pinged_out_sender_clone = pinged_out_sender.clone();
-            let pinged_clone = pinged.clone();
-            handle = Some(async_manager::spawn(async move {
-              loop {
-                Delay::new(Duration::from_millis(max_ping_time)).await;
-                if pinged_clone.load(Ordering::SeqCst) {
-                  pinged_clone.store(false, Ordering::SeqCst);
-                  continue;
-                } else {
-                  error!("Pinged out.");
-                  if pinged_out_sender_clone.send(()).await.is_err() {
-                    error!("Ping out receiver disappeared, cannot update.");
-                  }
-                  // This is our own loop, we can unwrap.
-                  sender_clone.send(PingMessage::StopTimer).await.unwrap();
-                  break;
-                }
-              }
-            }));
+async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<PingMessage>, notifier: Arc<Notify>) {
+  let mut started = false;
+  let mut pinged = false;
+  loop {
+    select! {
+      _ = Delay::new(Duration::from_millis(max_ping_time)).fuse() => {
+        if started {
+          if !pinged {
+            notifier.notify_waiters();
+            return;
           }
-          PingMessage::StopTimer => {
-            handle.take();
-          }
-          PingMessage::Ping => pinged.store(true, Ordering::SeqCst),
+          pinged = false;
+        }
+      }
+      msg = ping_msg_receiver.recv().fuse() => {
+        if msg.is_none() {
+          return;
+        }
+        match msg.unwrap() {
+          PingMessage::StartTimer => started = true,
+          PingMessage::StopTimer => started = false,
+          PingMessage::Ping => pinged = true,
           PingMessage::End => break,
         }
       }
-    }
-  };
-
-  (fut, ping_msg_sender, pinged_out_receiver)
+    };
+  }
 }
 
 pub struct PingTimer {
-  ping_msg_sender: Sender<PingMessage>,
-  // timer_task: JoinHandle<()>,
+  max_ping_time: u64,
+  ping_msg_sender: mpsc::Sender<PingMessage>,
+  ping_timeout_notifier: Arc<Notify>
 }
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    let ping_msg_sender = self.ping_msg_sender.clone();
-    async_manager::spawn(async move {
-      if ping_msg_sender.send(PingMessage::End).await.is_err() {
+    if self.ping_msg_sender.blocking_send(PingMessage::End).is_err() {
         debug!("Receiver does not exist, assuming ping timer event loop already dead.");
-      }
-    })
-    .unwrap();
+    }
   }
 }
 
 impl PingTimer {
-  pub fn new(max_ping_time: u64) -> (Self, Receiver<()>) {
-    // TODO This should be fallible new, not a panic.
-    if max_ping_time == 0 {
-      panic!("Can't create ping timer with no max ping time.");
+  pub fn new(max_ping_time: u64) -> Self {
+    let ping_timeout_notifier = Arc::new(Notify::new());
+    let (sender, receiver) = mpsc::channel(256);
+    if max_ping_time > 0 {
+      let fut = ping_timer(max_ping_time,receiver, ping_timeout_notifier.clone());
+      async_manager::spawn(async move { fut.await }).unwrap();
     }
-    let (fut, sender, receiver) = ping_timer(max_ping_time);
-    async_manager::spawn(fut).unwrap();
-    (
-      Self {
-        // TODO Store this once we can cancel it.
-        // timer_task: task::spawn(fut),
-        ping_msg_sender: sender,
-      },
-      receiver,
-    )
+    Self {
+      max_ping_time,
+      ping_msg_sender: sender,
+      ping_timeout_notifier
+    }
+  }
+
+  pub fn max_ping_time(&self) -> u64 {
+    self.max_ping_time
+  }
+
+  pub fn ping_timeout_waiter(&self) -> impl Future<Output = ()> {
+    let notify = self.ping_timeout_notifier.clone();
+    async move {
+      notify.notified().await;
+    }
   }
 
   fn send_ping_msg(&self, msg: PingMessage) -> impl Future<Output = ()> {
     let ping_msg_sender = self.ping_msg_sender.clone();
+    let max_ping_time = self.max_ping_time;
     async move {
+      if max_ping_time == 0 {
+        return ();
+      }
       if ping_msg_sender.send(msg).await.is_err() {
         error!("Cannot ping, no event loop available.");
       }
@@ -122,5 +108,3 @@ impl PingTimer {
     self.send_ping_msg(PingMessage::Ping)
   }
 }
-
-// TODO Impl Drop for ping timer that stops the internal async task

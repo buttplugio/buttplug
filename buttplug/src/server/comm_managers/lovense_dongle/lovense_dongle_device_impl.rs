@@ -36,12 +36,22 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use std::fmt::{self, Debug};
 
 pub struct LovenseDongleDeviceImplCreator {
   specifier: DeviceSpecifier,
   id: String,
   device_outgoing: Sender<OutgoingLovenseData>,
   device_incoming: Receiver<LovenseDongleIncomingMessage>,
+}
+
+impl Debug for LovenseDongleDeviceImplCreator {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("LovenseDongleDeviceImplCreator")
+      .field("id", &self.id)
+      .field("specifier", &self.specifier)
+      .finish()
+  }
 }
 
 impl LovenseDongleDeviceImplCreator {

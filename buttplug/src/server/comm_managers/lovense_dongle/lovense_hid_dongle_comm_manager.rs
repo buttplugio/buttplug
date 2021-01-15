@@ -15,8 +15,7 @@ use crate::{
   },
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
-use async_lock::Mutex;
+use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
 use futures::StreamExt;
 use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
@@ -46,7 +45,7 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
     }
   };
 
-  while let Some(data) = async_manager::block_on(async { receiver.next().await }) {
+  while let Some(data) = async_manager::block_on(async { receiver.recv().await }) {
     match data {
       OutgoingLovenseData::Raw(s) => {
         port_write(s);
@@ -129,8 +128,8 @@ impl LovenseHIDDongleCommunicationManager {
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
     Box::pin(async move {
-      let (writer_sender, writer_receiver) = bounded(256);
-      let (reader_sender, reader_receiver) = bounded(256);
+      let (writer_sender, writer_receiver) = channel(256);
+      let (reader_sender, reader_receiver) = channel(256);
       let api = HidApi::new().map_err(|_| {
         // This may happen if we create a new server in the same process?
         error!("Failed to create HIDAPI instance. Was one already created?");
@@ -177,7 +176,7 @@ impl LovenseHIDDongleCommunicationManager {
 impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     info!("Lovense dongle HID Manager created!");
-    let (machine_sender, machine_receiver) = bounded(256);
+    let (machine_sender, machine_receiver) = channel(256);
     let mgr = Self {
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),

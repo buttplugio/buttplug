@@ -313,6 +313,7 @@ impl ButtplugClient {
         .add_comm_manager::<SerialPortCommunicationManager>()
         .unwrap();
     }
+    /*
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{
@@ -328,6 +329,7 @@ impl ButtplugClient {
         .add_comm_manager::<LovenseSerialDongleCommunicationManager>()
         .unwrap();
     }
+     */
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
       use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;
@@ -431,18 +433,14 @@ impl ButtplugClient {
     self.send_message_expect_ok(StopAllDevices::default().into())
   } 
 
-  pub fn event_stream(&self) -> Option<impl Stream<Item = ButtplugClientEvent>> {
-    if !self.connected() {
-      None
-    } else {
-      let stream = convert_broadcast_receiver_to_stream(self.event_stream.subscribe());
-      // We can either Box::pin here or force the user to pin_mut!() on their
-      // end. While this does end up with a dynamic dispatch on our end, it
-      // still makes the API nicer for the user, so we'll just eat the perf hit.
-      // Not to mention, this is not a high throughput system really, so it
-      // shouldn't matter.
-      Some(Box::pin(stream))
-    }
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
+    let stream = convert_broadcast_receiver_to_stream(self.event_stream.subscribe());
+    // We can either Box::pin here or force the user to pin_mut!() on their
+    // end. While this does end up with a dynamic dispatch on our end, it
+    // still makes the API nicer for the user, so we'll just eat the perf hit.
+    // Not to mention, this is not a high throughput system really, so it
+    // shouldn't matter.
+    Box::pin(stream)
   }
 
   /// Send message to the internal event loop.
@@ -509,5 +507,9 @@ impl ButtplugClient {
   pub fn ping(&self) -> ButtplugClientResultFuture {
     let ping_fut = self.send_message_expect_ok(Ping::default().into());
     Box::pin(async move { ping_fut.await })
+  }
+
+  pub fn server_name(&self) -> Option<String> {
+    (*self.server_name.read()).clone()
   }
 }

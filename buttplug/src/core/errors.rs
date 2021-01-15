@@ -100,6 +100,8 @@ pub enum ButtplugPingError {
   PingedOut,
   /// Ping timer not running.
   PingTimerNotRunning,
+  /// Ping time must be greater than 0.
+  InvalidPingTimeout,
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
 }

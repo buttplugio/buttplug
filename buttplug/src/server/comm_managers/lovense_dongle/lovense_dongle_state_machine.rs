@@ -3,7 +3,8 @@ use crate::{
   core::{errors::ButtplugError, ButtplugResult},
   server::comm_managers::DeviceCommunicationEvent,
 };
-use async_channel::{bounded, Receiver, Sender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
 use async_trait::async_trait;
 use futures::{select, FutureExt, StreamExt};
 
@@ -26,9 +27,9 @@ enum IncomingMessage {
 #[derive(Debug, Clone)]
 struct ChannelHub {
   comm_manager_outgoing: Sender<ButtplugResult>,
-  comm_manager_incoming: Receiver<LovenseDeviceCommand>,
+  comm_manager_incoming: Arc<Receiver<LovenseDeviceCommand>>,
   dongle_outgoing: Sender<OutgoingLovenseData>,
-  dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
+  dongle_incoming: Arc<Receiver<LovenseDongleIncomingMessage>>,
   event_outgoing: Sender<DeviceCommunicationEvent>,
 }
 
@@ -58,10 +59,12 @@ impl ChannelHub {
   }
 
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
-    let mut comm_fut = self.comm_manager_incoming.next().fuse();
-    let mut dongle_fut = self.dongle_incoming.next().fuse();
+    let mut comm_incoming = self.comm_manager_incoming.clone();
+    let mut dongle_incoming = self.dongle_incoming.clone();
+    pin_mut!(comm_incoming);
+    pin_mut!(dongle_incoming);
     select! {
-      comm_res = comm_fut => {
+      comm_res = comm_incoming.recv().fuse() => {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
@@ -70,7 +73,7 @@ impl ChannelHub {
           }
         }
       }
-      dongle_res = dongle_fut => {
+      dongle_res = dongle_incoming.recv().fuse() => {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
@@ -86,11 +89,13 @@ impl ChannelHub {
     &mut self,
     mut device_incoming: Receiver<OutgoingLovenseData>,
   ) -> IncomingMessage {
-    let mut comm_fut = self.comm_manager_incoming.next().fuse();
-    let mut dongle_fut = self.dongle_incoming.next().fuse();
-    let mut device_fut = device_incoming.next().fuse();
+    let mut comm_incoming = self.comm_manager_incoming.clone();
+    let mut dongle_incoming = self.dongle_incoming.clone();
+    pin_mut!(comm_incoming);
+    pin_mut!(dongle_incoming);
+    pin_mut!(device_incoming);
     select! {
-      comm_res = comm_fut => {
+      comm_res = comm_incoming.recv().fuse() => {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
@@ -99,7 +104,7 @@ impl ChannelHub {
           }
         }
       }
-      dongle_res = dongle_fut => {
+      dongle_res = dongle_incoming.recv().fuse() => {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
@@ -108,7 +113,7 @@ impl ChannelHub {
           }
         }
       }
-      device_res = device_fut => {
+      device_res = device_incoming.recv().fuse() => {
         match device_res {
           Some(msg) => IncomingMessage::Device(msg),
           None => {
@@ -136,7 +141,7 @@ pub fn create_lovense_dongle_machine(
   Box<dyn LovenseDongleState>,
   Receiver<Result<(), ButtplugError>>,
 ) {
-  let (comm_outgoing_sender, comm_outgoing_receiver) = bounded(256);
+  let (comm_outgoing_sender, comm_outgoing_receiver) = channel(256);
   (
     Box::new(LovenseDongleWaitForDongle::new(
       comm_incoming_receiver,
@@ -180,14 +185,14 @@ macro_rules! device_state_definition {
 
 #[derive(Debug)]
 struct LovenseDongleWaitForDongle {
-  comm_receiver: Receiver<LovenseDeviceCommand>,
+  comm_receiver: Arc<Receiver<LovenseDeviceCommand>>,
   comm_sender: Sender<ButtplugResult>,
   event_sender: Sender<DeviceCommunicationEvent>,
 }
 
 impl LovenseDongleWaitForDongle {
   pub fn new(
-    comm_receiver: Receiver<LovenseDeviceCommand>,
+    comm_receiver: Arc<Receiver<LovenseDeviceCommand>>,
     comm_sender: Sender<ButtplugResult>,
     event_sender: Sender<DeviceCommunicationEvent>,
   ) -> Self {
@@ -436,8 +441,8 @@ device_state_definition!(LovenseDongleDeviceLoop);
 impl LovenseDongleState for LovenseDongleDeviceLoop {
   async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
     info!("Running Lovense Dongle Device Event Loop");
-    let (device_write_sender, device_write_receiver) = bounded(256);
-    let (device_read_sender, device_read_receiver) = bounded(256);
+    let (device_write_sender, device_write_receiver) = channel(256);
+    let (device_read_sender, device_read_receiver) = channel(256);
     self
       .hub
       .send_event(DeviceCommunicationEvent::DeviceFound(Box::new(

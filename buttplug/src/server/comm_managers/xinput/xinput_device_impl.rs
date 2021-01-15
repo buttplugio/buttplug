@@ -23,7 +23,10 @@ use broadcaster::BroadcastChannel;
 use byteorder::{LittleEndian, ReadBytesExt};
 use futures::future::{self, BoxFuture};
 use rusty_xinput::{XInputHandle, XInputUsageError};
-use std::io::Cursor;
+use std::{
+  io::Cursor,
+  fmt::{self, Debug}
+};
 
 pub struct XInputDeviceImplCreator {
   index: XInputControllerIndex,
@@ -33,6 +36,14 @@ impl XInputDeviceImplCreator {
   pub fn new(index: XInputControllerIndex) -> Self {
     debug!("Emitting a new xbox device impl creator!");
     Self { index }
+  }
+}
+
+impl Debug for XInputDeviceImplCreator {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("XInputDeviceImplCreator")
+      .field("index", &self.index)
+      .finish()
   }
 }
 

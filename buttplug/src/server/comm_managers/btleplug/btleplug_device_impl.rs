@@ -30,6 +30,7 @@ use broadcaster::BroadcastChannel;
 use btleplug::api::{CentralEvent, Peripheral};
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
+use std::fmt::{self, Debug};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
@@ -42,6 +43,12 @@ impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
       device: Some(device),
       broadcaster,
     }
+  }
+}
+
+impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("BtlePlugDeviceImplCreator").finish()
   }
 }
 

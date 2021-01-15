@@ -6,16 +6,17 @@ pub mod xinput;
 use ::btleplug::Error as BtleplugError;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 use rusty_xinput::XInputUsageError;
-#[cfg(feature = "lovense-dongle-manager")]
-pub mod lovense_dongle;
+//#[cfg(feature = "lovense-dongle-manager")]
+//pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
 
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
-use async_channel::Sender;
+use tokio::sync::mpsc::Sender;
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
 
+#[derive(Debug)]
 pub enum DeviceCommunicationEvent {
   // This event only means that a device has been found. The work still needs
   // to be done to make sure we can use it.
@@ -25,7 +26,7 @@ pub enum DeviceCommunicationEvent {
   ScanningFinished,
 }
 
-// Storing this in a Vec<Box<dyn T>> causes a associated function issue due to
+// Storing this in a Vec<Box<dyn T>> causes a associated method issue due to
 // the lack of new. Just create an extra trait for defining comm managers.
 pub trait DeviceCommunicationManagerCreator: Send {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;

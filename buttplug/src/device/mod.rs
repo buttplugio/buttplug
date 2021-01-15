@@ -35,6 +35,7 @@ use broadcaster::BroadcastChannel;
 use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
 use futures::future::BoxFuture;
+use std::fmt::Debug;
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature
@@ -324,7 +325,7 @@ pub trait DeviceImpl: Sync + Send {
 }
 
 #[async_trait]
-pub trait ButtplugDeviceImplCreator: Sync + Send {
+pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
   fn get_specifier(&self) -> DeviceSpecifier;
   async fn try_create_device_impl(
     &mut self,

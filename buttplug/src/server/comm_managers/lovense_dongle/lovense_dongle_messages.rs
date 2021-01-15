@@ -1,4 +1,4 @@
-use async_channel::{Receiver, Sender};
+use tokio::sync::mpsc::{Receiver, Sender};
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
 

@@ -28,6 +28,7 @@ use std::{
   },
   thread,
   time::Duration,
+  fmt::{self, Debug}
 };
 
 pub struct SerialPortDeviceImplCreator {
@@ -41,6 +42,14 @@ impl SerialPortDeviceImplCreator {
       specifier: DeviceSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
       port_info: port_info.clone(),
     }
+  }
+}
+
+impl Debug for SerialPortDeviceImplCreator {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("SerialPortDeviceImplCreator")
+      .field("port_info", &self.port_info)
+      .finish()
   }
 }
 
