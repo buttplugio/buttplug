@@ -12,7 +12,7 @@ use crate::{
   },
   util::async_manager,
 };
-use async_lock::{Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock};
 use futures::future::BoxFuture;
 // use futures_timer::Delay;
 use std::sync::{

@@ -11,7 +11,7 @@ use crate::{
     Endpoint,
   },
 };
-use async_lock::Mutex;
+use tokio::sync::Mutex;
 use futures::future::BoxFuture;
 use futures_timer::Delay;
 use std::sync::Arc;

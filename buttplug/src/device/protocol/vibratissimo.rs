@@ -14,7 +14,7 @@ use crate::{
     Endpoint,
   },
 };
-use async_lock::Mutex;
+use tokio::sync::Mutex;
 use std::sync::Arc;
 
 #[derive(ButtplugProtocolProperties)]

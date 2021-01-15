@@ -10,7 +10,7 @@ use crate::{
   util::async_manager,
 };
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use async_lock::Mutex;
+use tokio::sync::Mutex;
 use futures::{future::Future, select, FutureExt, StreamExt, Stream};
 use std::sync::Arc;
 use thiserror::Error;

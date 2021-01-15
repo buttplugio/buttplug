@@ -23,7 +23,7 @@ use crate::{
   util::async_manager,
 };
 use tokio::sync::mpsc::{channel, Sender};
-use async_lock::Mutex;
+use tokio::sync::Mutex;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,

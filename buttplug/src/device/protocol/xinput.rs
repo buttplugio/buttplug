@@ -11,7 +11,7 @@ use crate::{
     Endpoint,
   },
 };
-use async_lock::Mutex;
+use tokio::sync::Mutex;
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::sync::Arc;
 
