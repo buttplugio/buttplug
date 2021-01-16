@@ -1,4 +1,4 @@
-use async_channel::Sender;
+use tokio::sync::mpsc::Sender;
 use buttplug::{
   core::ButtplugResultFuture,
   server::comm_managers::{

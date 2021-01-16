@@ -17,11 +17,11 @@ mod test {
     test::check_recv_value,
     util::async_manager,
   };
-  use futures::StreamExt;
+  use futures::{pin_mut, StreamExt};
 
   #[test]
   fn test_version0_connection() {
-    let (server, _) = ButtplugServer::default();
+    let server = ButtplugServer::default();
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
     let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
@@ -40,7 +40,7 @@ mod test {
 
   #[test]
   fn test_version2_connection() {
-    let (server, _) = ButtplugServer::default();
+    let server = ButtplugServer::default();
     let mut serializer = ButtplugServerJSONSerializer::default();
     let rsi =
       r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
@@ -60,7 +60,9 @@ mod test {
 
   #[test]
   fn test_version0_device_added_device_list() {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let mut serializer = ButtplugServerJSONSerializer::default();
 
     async_manager::block_on(async {
@@ -106,7 +108,9 @@ mod test {
 
   #[test]
   fn test_version0_singlemotorvibratecmd() {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let mut serializer = ButtplugServerJSONSerializer::default();
     async_manager::block_on(async {
       let helper = server.add_test_comm_manager().unwrap();

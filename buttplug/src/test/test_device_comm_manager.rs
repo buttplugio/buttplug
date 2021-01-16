@@ -11,8 +11,8 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use async_channel::Sender;
-use async_lock::Mutex;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::Mutex;
 use futures::future;
 use std::{
   sync::Arc,
@@ -161,7 +161,9 @@ mod test {
 
   #[test]
   fn test_test_device_comm_manager() {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     async_manager::block_on(async {
       let helper = server.add_test_comm_manager().unwrap();
       let device = helper.add_ble_device("Massage Demo").await;

@@ -1,6 +1,5 @@
 mod util;
 
-use async_channel::Receiver;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
@@ -16,14 +15,15 @@ use buttplug::{
   test::check_recv_value,
   util::async_manager,
 };
-use futures::StreamExt;
+use futures::{Stream, pin_mut, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
 
 async fn setup_test_server(
   msg_union: messages::ButtplugClientMessage,
-) -> (ButtplugServer, Receiver<ButtplugServerMessage>) {
-  let (server, recv) = ButtplugServer::default();
+) -> (ButtplugServer, impl Stream<Item = ButtplugServerMessage>) {
+  let server = ButtplugServer::default();
+  let recv = server.event_stream();
   // assert_eq!(server.server_name, "Test Server");
   match server.parse_message(msg_union).await.unwrap() {
     ButtplugServerMessage::ServerInfo(s) => assert_eq!(
@@ -49,7 +49,7 @@ fn test_server_handshake() {
 fn test_server_handshake_not_done_first() {
   let msg = messages::Ping::default().into();
   async_manager::block_on(async {
-    let (server, _) = ButtplugServer::default();
+    let server = ButtplugServer::default();
     // assert_eq!(server.server_name, "Test Server");
     let result = server.parse_message(msg).await;
     assert!(result.is_err());
@@ -66,7 +66,7 @@ fn test_server_version_lt() {
   let msg =
     messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
-    setup_test_server(msg).await;
+    let _ = setup_test_server(msg).await;
   });
 }
 
@@ -76,7 +76,7 @@ fn test_server_version_lt() {
 #[test]
 #[ignore]
 fn test_server_version_gt() {
-  let (server, _) = ButtplugServer::default();
+  let server = ButtplugServer::default();
   let msg =
     messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
@@ -89,9 +89,12 @@ fn test_server_version_gt() {
 
 #[test]
 fn test_ping_timeout() {
+  tracing_subscriber::fmt::init();
   let mut options = ButtplugServerOptions::default();
   options.max_ping_time = 100;
-  let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
+  let server = ButtplugServer::new_with_options(&options).unwrap();
+  let recv = server.event_stream();
+  pin_mut!(recv);
   async_manager::block_on(async {
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
@@ -128,7 +131,9 @@ fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
     options.max_ping_time = 100;
-    let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
+    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     // TODO This should probably use a test protocol we control, not the aneros protocol
     let device = helper.add_ble_device("Massage Demo").await;
@@ -220,7 +225,9 @@ fn test_invalid_device_index() {
 #[test]
 fn test_device_index_generation() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;
@@ -264,7 +271,9 @@ fn test_device_index_generation() {
 #[test]
 fn test_server_scanning_finished() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;

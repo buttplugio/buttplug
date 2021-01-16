@@ -22,7 +22,10 @@ use async_channel::{bounded, Receiver, Sender};
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
-use std::sync::Arc;
+use std::{
+  sync::Arc,
+  fmt::{self, Debug}
+};
 
 pub struct TestDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -36,6 +39,14 @@ impl TestDeviceImplCreator {
       specifier,
       device_impl: Some(device_impl),
     }
+  }
+}
+
+impl Debug for TestDeviceImplCreator {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("TestDeviceImplCreator")
+      .field("specifier", &self.specifier)
+      .finish()
   }
 }
 

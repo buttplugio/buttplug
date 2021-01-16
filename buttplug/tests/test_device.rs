@@ -13,7 +13,7 @@ use buttplug::{
   server::{ButtplugServer, ButtplugServerOptions},
   util::async_manager,
 };
-use futures::StreamExt;
+use futures::{pin_mut, StreamExt};
 use std::matches;
 
 // Test devices that have protocols that support movements not all devices do.
@@ -22,7 +22,9 @@ use std::matches;
 #[test]
 fn test_capabilities_exposure() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server= ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Onyx+").await;
     server
@@ -61,7 +63,9 @@ fn test_server_raw_message() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
     options.allow_raw_messages = true;
-    let (server, mut recv) = ButtplugServer::new_with_options(&options).unwrap();
+    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -106,7 +110,9 @@ fn test_server_raw_message() {
 #[test]
 fn test_server_no_raw_message() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -151,7 +157,9 @@ fn test_server_no_raw_message() {
 #[test]
 fn test_reject_on_no_raw_message() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -222,7 +230,9 @@ fn test_reject_on_no_raw_message() {
 #[test]
 fn test_repeated_address_additions() {
   async_manager::block_on(async {
-    let (server, mut recv) = ButtplugServer::default();
+    let server = ButtplugServer::default();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();
     helper
       .add_ble_device_with_address("Massage Demo", "SameAddress")
