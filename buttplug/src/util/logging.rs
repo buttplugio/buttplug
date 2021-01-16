@@ -1,5 +1,5 @@
 use crate::util::async_manager;
-use async_channel::Sender;
+use tokio::sync::mpsc::Sender;
 
 use tracing_subscriber::fmt::MakeWriter;
 
