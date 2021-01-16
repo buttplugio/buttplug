@@ -30,9 +30,7 @@ use crate::{connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConne
 use dashmap::DashMap;
 use futures::{
   future::{self, BoxFuture},
-  FutureExt,
   Stream,
-  StreamExt,
 };
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -42,10 +40,7 @@ use thiserror::Error;
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 use parking_lot::RwLock;
-use tokio::sync::{
-  mpsc::{channel, Sender},
-  broadcast
-};
+use tokio::sync::broadcast;
 
 /// Result type used inside the client module.
 ///

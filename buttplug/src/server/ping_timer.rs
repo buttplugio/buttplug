@@ -1,9 +1,9 @@
 use crate::util::async_manager;
 use tokio::sync::{mpsc, Notify};
-use futures::{future, Future, FutureExt};
+use futures::{Future, FutureExt};
 use futures_timer::Delay;
 use std::{
-  sync::Arc,
+  sync::{Arc, atomic::{AtomicBool, Ordering}},
   time::Duration,
 };
 
@@ -14,7 +14,7 @@ pub enum PingMessage {
   End,
 }
 
-async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<PingMessage>, notifier: Arc<Notify>) {
+async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<PingMessage>, notifier: Arc<Notify>, pinged_out_status: Arc<AtomicBool>) {
   let mut started = false;
   let mut pinged = false;
   loop {
@@ -23,6 +23,7 @@ async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<Pi
         if started {
           if !pinged {
             notifier.notify_waiters();
+            pinged_out_status.store(true, Ordering::SeqCst);
             return;
           }
           pinged = false;
@@ -46,7 +47,8 @@ async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<Pi
 pub struct PingTimer {
   max_ping_time: u64,
   ping_msg_sender: mpsc::Sender<PingMessage>,
-  ping_timeout_notifier: Arc<Notify>
+  ping_timeout_notifier: Arc<Notify>,
+  pinged_out: Arc<AtomicBool>
 }
 
 impl Drop for PingTimer {
@@ -61,14 +63,16 @@ impl PingTimer {
   pub fn new(max_ping_time: u64) -> Self {
     let ping_timeout_notifier = Arc::new(Notify::new());
     let (sender, receiver) = mpsc::channel(256);
+    let pinged_out = Arc::new(AtomicBool::new(false));
     if max_ping_time > 0 {
-      let fut = ping_timer(max_ping_time,receiver, ping_timeout_notifier.clone());
+      let fut = ping_timer(max_ping_time,receiver, ping_timeout_notifier.clone(), pinged_out.clone());
       async_manager::spawn(async move { fut.await }).unwrap();
     }
     Self {
       max_ping_time,
       ping_msg_sender: sender,
-      ping_timeout_notifier
+      ping_timeout_notifier,
+      pinged_out
     }
   }
 
@@ -97,6 +101,8 @@ impl PingTimer {
   }
 
   pub fn start_ping_timer(&self) -> impl Future<Output = ()> {
+    // If we're starting the timer, clear our status.
+    self.pinged_out.store(false, Ordering::SeqCst);
     self.send_ping_msg(PingMessage::StartTimer)
   }
 
@@ -106,5 +112,9 @@ impl PingTimer {
 
   pub fn update_ping_time(&self) -> impl Future<Output = ()> {
     self.send_ping_msg(PingMessage::Ping)
+  }
+
+  pub fn pinged_out(&self) -> bool {
+    self.pinged_out.load(Ordering::SeqCst)
   }
 }

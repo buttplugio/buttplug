@@ -28,7 +28,7 @@ use crate::{
   util::async_manager,
 };
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use futures::{future::BoxFuture, FutureExt, StreamExt};
+use futures::{future::BoxFuture, FutureExt};
 use std::marker::PhantomData;
 
 enum ButtplugRemoteConnectorMessage<T>

@@ -144,9 +144,6 @@ pub struct ButtplugClientDevice {
   /// through the connector.
   event_loop_sender: broadcast::Sender<ButtplugClientRequest>,
   internal_event_sender: Arc<RwLock<Option<broadcast::Sender<ButtplugClientDeviceEvent>>>>,
-  /// Signals whether we already have another next_event() task running, so we
-  /// can't run multiple in parallel.
-  next_event_running: Arc<AtomicBool>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
   device_connected: Arc<AtomicBool>,
@@ -195,7 +192,6 @@ impl ButtplugClientDevice {
       allowed_messages,
       event_loop_sender: message_sender,
       internal_event_sender: Arc::new(RwLock::new(Some(event_sender))),
-      next_event_running: Arc::new(AtomicBool::new(false)),
       device_connected,
       client_connected,
     }

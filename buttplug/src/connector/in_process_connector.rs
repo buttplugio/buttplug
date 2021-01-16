@@ -77,7 +77,7 @@ impl<'a> ButtplugInProcessClientConnector {
   /// of 0 meaning infinite ping.
   pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
     let server = ButtplugServer::new_with_options(options)?;
-    let mut server_recv = server.event_stream();
+    let server_recv = server.event_stream();
     let (send, recv) = channel(256);
     let server_outbound_sender = send.clone();
     async_manager::spawn(async move {

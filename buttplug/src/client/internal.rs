@@ -10,7 +10,6 @@
 use super::{
   client_message_sorter::ClientMessageSorter,
   device::ButtplugClientDevice,
-  ButtplugClientError,
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
 };
@@ -31,9 +30,8 @@ use tokio::sync::{
   broadcast
 };
 use dashmap::DashMap;
-use futures::{Future, FutureExt};
+use futures::FutureExt;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
-use tracing_futures::Instrument;
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]

@@ -32,7 +32,7 @@ use crate::{core::{
 use tokio::sync::broadcast;
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
-use futures::{future::BoxFuture, Stream, StreamExt};
+use futures::{future::BoxFuture, Stream};
 use ping_timer::PingTimer;
 use std::{
   convert::{TryFrom, TryInto},
@@ -80,7 +80,6 @@ pub struct ButtplugServer {
   max_ping_time: u64,
   device_manager: DeviceManager,
   ping_timer: Arc<PingTimer>,
-  pinged_out: Arc<AtomicBool>,
   connected: Arc<AtomicBool>,
   output_sender: broadcast::Sender<ButtplugServerMessage>
 }
@@ -98,26 +97,24 @@ impl ButtplugServer {
   ) -> Result<Self, ButtplugError> {
     let (send, _) = broadcast::channel(256);
     let output_sender_clone = send.clone();
-    let pinged_out = Arc::new(AtomicBool::new(false));
     let connected = Arc::new(AtomicBool::new(false));
-      let ping_timer = Arc::new(PingTimer::new(options.max_ping_time));
-      let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
-      let connected_clone = connected.clone();
-      let event_sender_clone = send.clone();
-      async_manager::spawn(async move {
-        // This will only exit if we've pinged out.
-        ping_timeout_notifier.await;
-        error!("Ping out signal received, stopping server");
-        connected_clone.store(false, Ordering::SeqCst);
-        // TODO Should the event sender return a result instead of an error message?
-        if output_sender_clone
-          .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
-          .is_err()
-        {
-          error!("Server disappeared, cannot update about ping out.");
-        };
-      })
-      .unwrap();
+    let ping_timer = Arc::new(PingTimer::new(options.max_ping_time));
+    let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
+    let connected_clone = connected.clone();
+    async_manager::spawn(async move {
+      // This will only exit if we've pinged out.
+      ping_timeout_notifier.await;
+      error!("Ping out signal received, stopping server");
+      connected_clone.store(false, Ordering::SeqCst);
+      // TODO Should the event sender return a result instead of an error message?
+      if output_sender_clone
+        .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
+        .is_err()
+      {
+        error!("Server disappeared, cannot update about ping out.");
+      };
+    })
+    .unwrap();
     let device_manager = DeviceManager::try_new(
       send.clone(),
       ping_timer.clone(),
@@ -131,7 +128,6 @@ impl ButtplugServer {
       max_ping_time: options.max_ping_time,
       device_manager,
       ping_timer,
-      pinged_out,
       connected,
       output_sender: send
     })
@@ -175,7 +171,7 @@ impl ButtplugServer {
     Box::pin(async move {
       // TODO We should really log more here.
       connected.store(false, Ordering::SeqCst);
-      ping_timer.stop_ping_timer();
+      ping_timer.stop_ping_timer().await;
       // Ignore returns here, we just want to stop.
       info!("Server disconnected, stopping all devices...");
       let _ = stop_fut.await;
@@ -196,7 +192,7 @@ impl ButtplugServer {
       // Check for ping timeout first! There's no way we should've pinged out if
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
-      if self.pinged_out.load(Ordering::SeqCst) {
+      if self.ping_timer.pinged_out() {
         return ButtplugServerError::new_message_error(
           msg.get_id(),
           ButtplugPingError::PingedOut.into(),
@@ -258,7 +254,7 @@ impl ButtplugServer {
     );
     let connected = self.connected.clone();
     Box::pin(async move {
-      ping_timer.start_ping_timer();
+      ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
       info!("Server handshake check successful.");
       Result::Ok(out_msg.into())

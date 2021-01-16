@@ -24,8 +24,6 @@ extern crate lazy_static;
 extern crate futures;
 #[macro_use]
 extern crate tracing;
-#[macro_use]
-extern crate async_stream;
 
 #[cfg(feature = "client")]
 pub mod client;

@@ -38,11 +38,7 @@ use crate::{
 };
 use tokio::sync::{mpsc, broadcast};
 use dashmap::DashMap;
-use futures::{
-  future,
-  FutureExt,
-  StreamExt,
-};
+use futures::future;
 use std::{
   convert::TryFrom,
   sync::{
