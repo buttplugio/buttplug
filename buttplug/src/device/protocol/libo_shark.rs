@@ -67,7 +67,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -76,13 +76,11 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("ShaYu").await.unwrap();
       let command_receiver_tx = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       let command_receiver_tx_mode = test_device
-        .get_endpoint_channel(&Endpoint::TxMode)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::TxMode)
+        .unwrap();
       device
         .parse_message(
           VibrateCmd::new(
@@ -96,41 +94,38 @@ mod test {
         )
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x22], false)),
-      )
-      .await;
-      assert!(command_receiver_tx.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver_tx));
 
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 1.0)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x23], false)),
-      )
-      .await;
-      assert!(command_receiver_tx.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver_tx));
 
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      assert!(command_receiver_tx.is_empty());
+      assert!(check_test_recv_empty(&command_receiver_tx));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00], false)),
-      )
-      .await;
-      assert!(command_receiver_tx.is_empty());
-      assert!(command_receiver_tx_mode.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver_tx));
+      assert!(check_test_recv_empty(&command_receiver_tx_mode));
     });
   }
 }

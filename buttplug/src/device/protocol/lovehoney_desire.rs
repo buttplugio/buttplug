@@ -96,7 +96,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -105,25 +105,23 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
 
       // If we send one speed to one motor, we should only see one output.
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0xF3, 0x1, 0x40],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       // If we send the same speed to each motor, we should only get one command.
       device
@@ -139,16 +137,15 @@ mod test {
         )
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0xF3, 0x0, 0x0d],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       // If we send different commands to both motors, we should get 2 different commands, each with an index.
       device
@@ -164,40 +161,37 @@ mod test {
         )
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0xF3, 0x01, 0x00],
           false,
         )),
-      )
-      .await;
-      check_recv_value(
+      );
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0xF3, 0x02, 0x40],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0xF3, 0x02, 0x0],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
     });
   }
 }

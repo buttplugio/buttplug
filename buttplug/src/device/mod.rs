@@ -31,10 +31,9 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use broadcaster::BroadcastChannel;
 use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
-use futures::future::BoxFuture;
+use futures::{Stream, future::BoxFuture};
 use std::fmt::Debug;
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
@@ -125,12 +124,6 @@ impl<'de> Deserialize<'de> for Endpoint {
     deserializer.deserialize_str(EndpointVisitor)
   }
 }
-
-pub type BoundedDeviceEventBroadcaster = BroadcastChannel<
-  ButtplugDeviceEvent,
-  futures_channel::mpsc::Sender<ButtplugDeviceEvent>,
-  futures_channel::mpsc::Receiver<ButtplugDeviceEvent>,
->;
 
 pub type ButtplugDeviceResultFuture =
   BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
@@ -314,7 +307,10 @@ pub trait DeviceImpl: Sync + Send {
   fn address(&self) -> &str;
   fn connected(&self) -> bool;
   fn endpoints(&self) -> Vec<Endpoint>;
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster;
+  // Not super thrilled with this being dynamic dispatch, but it's either that
+  // or hardcode it to tokio, and since this is a public trait that other people
+  // may someday use, I'd rather not. Can't use impl trait in trait defs yet tho.
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send>;
 
   fn disconnect(&self) -> ButtplugResultFuture;
   fn read_value(&self, msg: DeviceReadCmd)
@@ -453,9 +449,8 @@ impl ButtplugDevice {
     self.protocol.handle_command(self.device.clone(), message)
   }
 
-  // TODO Just return the receiver as part of the constructor
-  pub fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.device.get_event_receiver()
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugDeviceEvent> {
+    self.device.event_stream()
   }
 
   // TODO Handle raw messages here.

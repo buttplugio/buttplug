@@ -114,7 +114,7 @@ mod test {
   use crate::{
     core::messages::{RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -123,38 +123,35 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Bach smart").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 50],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 0x0],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
     });
   }
 
@@ -163,53 +160,49 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("CycSA").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       device
         .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 50],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       device
         .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 178],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 0x0],
           false,
         )),
-      )
-      .await;
-      assert!(command_receiver.is_empty());
+      );
+      assert!(check_test_recv_empty(&command_receiver));
     });
   }
 }

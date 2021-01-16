@@ -14,7 +14,7 @@ mod test {
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::ButtplugServer,
-    test::check_recv_value,
+    test::check_test_recv_value,
     util::async_manager,
   };
   use futures::{pin_mut, StreamExt};
@@ -158,12 +158,11 @@ mod test {
         serializer.serialize(vec!(output2)),
         r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
       );
-      let command_receiver = device.get_endpoint_channel(&Endpoint::Tx).unwrap().receiver;
-      check_recv_value(
+      let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
-      )
-      .await;
+      );
     });
   }
 }

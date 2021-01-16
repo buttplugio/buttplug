@@ -55,7 +55,7 @@ impl ButtplugProtocol for Lovense {
     let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
     let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
     let info_fut = device_impl.write_value(msg);
-    let mut event_receiver = device_impl.get_event_receiver();
+    let mut event_receiver = device_impl.event_stream();
     Box::pin(async move {
       let identifier;
       subscribe_fut.await?;
@@ -168,7 +168,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     device: Arc<Box<dyn DeviceImpl>>,
     message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
-    let mut device_notification_receiver = device.get_event_receiver();
+    let mut device_notification_receiver = device.event_stream();
     Box::pin(async move {
       let write_fut = device.write_value(DeviceWriteCmd::new(
         Endpoint::Tx,
@@ -176,7 +176,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
         false,
       ));
       write_fut.await?;
-      while let Some(event) = device_notification_receiver.recv().await {
+      while let Some(event) = device_notification_receiver.next().await {
         match event {
           ButtplugDeviceEvent::Notification(_, data) => {
             if let Ok(data_str) = std::str::from_utf8(&data) {

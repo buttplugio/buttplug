@@ -95,7 +95,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -104,64 +104,58 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.unwrap();
       let command_receiver_vibrate = test_device
-        .get_endpoint_channel(&Endpoint::TxVibrate)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::TxVibrate)
+        .unwrap();
       let command_receiver_mode = test_device
-        .get_endpoint_channel(&Endpoint::TxMode)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::TxMode)
+        .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver_mode,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::TxMode,
           vec![0x03, 0xff],
           false,
         )),
-      )
-      .await;
-      check_recv_value(
+      );
+      check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::TxVibrate,
           vec![0x80, 0x00],
           false,
         )),
-      )
-      .await;
+      );
       // Since we only created one subcommand, we should only receive one command.
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      assert!(command_receiver_mode.is_empty());
-      assert!(command_receiver_vibrate.is_empty());
+      assert!(check_test_recv_empty(&command_receiver_mode));
+      assert!(check_test_recv_empty(&command_receiver_vibrate));
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver_mode,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::TxMode,
           vec![0x03, 0xff],
           false,
         )),
-      )
-      .await;
-      check_recv_value(
+      );
+      check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::TxVibrate,
           vec![0x0, 0x0],
           false,
         )),
-      )
-      .await;
+      );
     });
   }
 }

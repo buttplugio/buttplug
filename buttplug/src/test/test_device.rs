@@ -1,12 +1,9 @@
-use crate::{
-  core::{
+use crate::{core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  },
-  device::{
+  }, device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster,
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -16,12 +13,11 @@ use crate::{
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  },
-};
-use async_channel::{bounded, Receiver, Sender};
+  }, util::stream::convert_broadcast_receiver_to_stream};
+use tokio::sync::{broadcast, mpsc, Mutex};
 use async_trait::async_trait;
 use dashmap::DashMap;
-use futures::future::{self, BoxFuture};
+use futures::{Stream, future::{self, BoxFuture}};
 use std::{
   sync::Arc,
   fmt::{self, Debug}
@@ -74,13 +70,14 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
 
 #[derive(Clone)]
 pub struct TestDeviceEndpointChannel {
-  pub sender: Sender<DeviceImplCommand>,
-  pub receiver: Receiver<DeviceImplCommand>,
+  pub sender: Arc<mpsc::Sender<DeviceImplCommand>>,
+  // This is a sync mutex because tests should run procedurally and not conflict
+  pub receiver: Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>,
 }
 
 impl TestDeviceEndpointChannel {
-  pub fn new(sender: Sender<DeviceImplCommand>, receiver: Receiver<DeviceImplCommand>) -> Self {
-    Self { sender, receiver }
+  pub fn new(sender: mpsc::Sender<DeviceImplCommand>, receiver: mpsc::Receiver<DeviceImplCommand>) -> Self {
+    Self { sender: Arc::new(sender), receiver: Arc::new(std::sync::Mutex::new(receiver)) }
   }
 }
 
@@ -88,16 +85,17 @@ pub struct TestDeviceInternal {
   name: String,
   address: String,
   endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  pub event_broadcaster: BoundedDeviceEventBroadcaster,
+  pub event_sender: broadcast::Sender<ButtplugDeviceEvent>
 }
 
 impl TestDeviceInternal {
   pub fn new(name: &str, address: &str) -> Self {
+    let (event_sender, _) = broadcast::channel(256);
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoint_channels: Arc::new(DashMap::new()),
-      event_broadcaster: BoundedDeviceEventBroadcaster::with_cap(256),
+      event_sender
     }
   }
 
@@ -109,16 +107,16 @@ impl TestDeviceInternal {
     self.address.clone()
   }
 
-  pub fn get_endpoint_channel(&self, endpoint: &Endpoint) -> Option<TestDeviceEndpointChannel> {
+  pub fn get_endpoint_receiver(&self, endpoint: &Endpoint) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>> {
     self
       .endpoint_channels
       .get(endpoint)
-      .map(|el| el.value().clone())
+      .map(|el| el.value().receiver.clone())
   }
 
   pub async fn add_endpoint(&self, endpoint: &Endpoint) {
     if !self.endpoint_channels.contains_key(endpoint) {
-      let (sender, receiver) = bounded(256);
+      let (sender, receiver) = mpsc::channel(256);
       self
         .endpoint_channels
         .insert(*endpoint, TestDeviceEndpointChannel::new(sender, receiver));
@@ -126,14 +124,11 @@ impl TestDeviceInternal {
   }
 
   pub fn disconnect(&self) -> ButtplugResultFuture {
-    let broadcaster = self.event_broadcaster.clone();
-    Box::pin(async move {
-      broadcaster
-        .send(&ButtplugDeviceEvent::Removed)
-        .await
-        .unwrap();
-      Ok(())
-    })
+    self
+      .event_sender
+      .send(ButtplugDeviceEvent::Removed)
+      .unwrap();
+    Box::pin(future::ready(Ok(())))
   }
 }
 
@@ -147,7 +142,7 @@ pub struct TestDevice {
   // for creation in ButtplugDevice, so initialization and cloning order
   // matters here.
   pub endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  pub event_broadcaster: BoundedDeviceEventBroadcaster,
+  pub event_sender: broadcast::Sender<ButtplugDeviceEvent>
 }
 
 impl TestDevice {
@@ -162,7 +157,7 @@ impl TestDevice {
       name: internal_device.name(),
       address: internal_device.address(),
       endpoint_channels: internal_device.endpoint_channels.clone(),
-      event_broadcaster: internal_device.event_broadcaster.clone(),
+      event_sender: internal_device.event_sender.clone(),
       endpoints,
     }
   }
@@ -186,18 +181,15 @@ impl DeviceImpl for TestDevice {
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
-    let broadcaster = self.event_broadcaster.clone();
-    Box::pin(async move {
-      broadcaster
-        .send(&ButtplugDeviceEvent::Removed)
-        .await
-        .unwrap();
-      Ok(())
-    })
+    self
+      .event_sender
+      .send(ButtplugDeviceEvent::Removed)
+      .unwrap();
+    Box::pin(future::ready(Ok(())))
   }
 
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.event_broadcaster.clone()
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(

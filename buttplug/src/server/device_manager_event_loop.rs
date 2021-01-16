@@ -134,7 +134,7 @@ impl DeviceManagerEventLoop {
               info!("Device map does not contain key!");
             }
             info!("Assigning index {} to {}", device_index, device.name());
-            let mut recv = device.get_event_receiver();
+            let mut recv = device.event_stream();
 
             let sender_clone = device_event_sender_clone.clone();
             let idx_clone = device_index;

@@ -77,7 +77,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -86,14 +86,13 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Krush").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
@@ -102,19 +101,18 @@ mod test {
           ],
           false,
         )),
-      )
-      .await;
+      );
       // Since we only created one subcommand, we should only receive one command.
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      assert!(command_receiver.is_empty());
+      assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
@@ -123,8 +121,7 @@ mod test {
           ],
           false,
         )),
-      )
-      .await;
+      );
     });
   }
 }

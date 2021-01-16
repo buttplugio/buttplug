@@ -1,8 +1,5 @@
-use crate::{
-  core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
-  device::{
+use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture}, device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    BoundedDeviceEventBroadcaster,
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -11,14 +8,10 @@ use crate::{
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  },
-  util::async_manager,
-};
-use async_channel::{Receiver, Sender};
-use tokio::sync::Mutex;
+  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
+use tokio::sync::{mpsc, broadcast, Mutex};
 use async_trait::async_trait;
-use broadcaster::BroadcastChannel;
-use futures::{future::BoxFuture, StreamExt};
+use futures::{Stream, future::BoxFuture};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
 use std::{
   io::ErrorKind,
@@ -70,25 +63,21 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
   }
 }
 
-fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: Receiver<Vec<u8>>) {
+fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: mpsc::Receiver<Vec<u8>>) {
   let mut recv = receiver;
-  while let Some(v) = async_manager::block_on(async { recv.next().await }) {
+  while let Some(v) = recv.blocking_recv() {
     port.write_all(&v).unwrap();
   }
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
+fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: mpsc::Sender<Vec<u8>>) {
   loop {
     // TODO This is probably too small
     let mut buf: [u8; 1024] = [0; 1024];
     match port.read(&mut buf) {
       Ok(len) => {
         info!("Got {} serial bytes", len);
-        let blocking_sender = sender.clone();
-        let send_failed = async_manager::block_on(async {
-          blocking_sender.send(buf[0..len].to_vec()).await.is_err()
-        });
-        if send_failed {
+        if sender.blocking_send(buf[0..len].to_vec()).is_err() {
           error!("Serial port implementation disappeared, exiting read thread.");
           break;
         }
@@ -106,10 +95,10 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<Vec<u8>>) {
 pub struct SerialPortDeviceImpl {
   name: String,
   address: String,
-  port_receiver: Receiver<Vec<u8>>,
-  port_sender: Sender<Vec<u8>>,
+  port_receiver: Arc<Mutex<mpsc::Receiver<Vec<u8>>>>,
+  port_sender: mpsc::Sender<Vec<u8>>,
   connected: Arc<AtomicBool>,
-  event_receiver: BoundedDeviceEventBroadcaster,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   // TODO These aren't actually read, do we need to hold them?
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
@@ -142,8 +131,8 @@ impl SerialPortDeviceImpl {
     */
     let port = open_with_settings(&port_info.port_name, &settings).unwrap();
 
-    let (writer_sender, writer_receiver) = async_channel::bounded(256);
-    let (reader_sender, reader_receiver) = async_channel::bounded(256);
+    let (writer_sender, writer_receiver) = mpsc::channel(256);
+    let (reader_sender, reader_receiver) = mpsc::channel(256);
 
     let read_port = (*port).try_clone().unwrap();
     let read_thread = thread::Builder::new()
@@ -160,16 +149,18 @@ impl SerialPortDeviceImpl {
         serial_write_thread(write_port, writer_receiver);
       })
       .unwrap();
+
+    let (event_sender, _) = broadcast::channel(256);
     Ok(Self {
       name: port.name().unwrap(),
       address: port.name().unwrap(),
       _read_thread: read_thread,
       _write_thread: write_thread,
-      port_receiver: reader_receiver,
+      port_receiver: Arc::new(Mutex::new(reader_receiver)),
       port_sender: writer_sender,
       _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
-      event_receiver: BroadcastChannel::with_cap(256),
+      event_sender
     })
   }
 }
@@ -199,8 +190,8 @@ impl DeviceImpl for SerialPortDeviceImpl {
     })
   }
 
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.event_receiver.clone()
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(
@@ -208,17 +199,14 @@ impl DeviceImpl for SerialPortDeviceImpl {
     _msg: DeviceReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Should check endpoint validity and length requirements
-    let mut receiver = self.port_receiver.clone();
+    let receiver = self.port_receiver.clone();
     Box::pin(async move {
-      if receiver.is_empty() {
-        Ok(RawReading::new(0, Endpoint::Rx, vec![]))
-      } else {
-        Ok(RawReading::new(
-          0,
-          Endpoint::Rx,
-          receiver.next().await.unwrap(),
-        ))
-      }
+      let mut recv_mut = receiver.lock().await;
+      Ok(RawReading::new(
+        0,
+        Endpoint::Rx,
+        recv_mut.recv().await.unwrap(),
+      ))
     })
   }
 
@@ -233,17 +221,20 @@ impl DeviceImpl for SerialPortDeviceImpl {
 
   fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     // TODO Should check endpoint validity
-    let mut data_receiver = self.port_receiver.clone();
-    let event_sender = self.event_receiver.clone();
+    let data_receiver = self.port_receiver.clone();
+    let event_sender = self.event_sender.clone();
     Box::pin(async move {
       async_manager::spawn(async move {
+        // TODO There's only one subscribable endpoint on a serial port, so we
+        // should check to make sure we don't have multiple subscriptions so we
+        // don't deadlock.
+        let mut data_receiver_mut = data_receiver.lock().await;
         loop {
-          match data_receiver.next().await {
+          match data_receiver_mut.recv().await {
             Some(data) => {
               info!("Got serial data! {:?}", data);
               event_sender
-                .send(&ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
-                .await
+                .send(ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
                 .unwrap();
             }
             None => {

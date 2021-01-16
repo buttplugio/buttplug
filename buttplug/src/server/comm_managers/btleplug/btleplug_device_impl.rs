@@ -3,17 +3,15 @@ use super::btleplug_internal::{
   DeviceReturnFuture,
   DeviceReturnStateShared,
 };
-use crate::{
-  core::{
+use crate::{core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
     messages::RawReading,
     ButtplugResultFuture,
-  },
-  device::{
+  }, device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster,
     ButtplugDeviceCommand,
     ButtplugDeviceImplCreator,
+    ButtplugDeviceEvent,
     ButtplugDeviceReturn,
     DeviceImpl,
     DeviceReadCmd,
@@ -21,15 +19,11 @@ use crate::{
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  },
-  util::async_manager,
-};
-use async_channel::{bounded, Sender};
+  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
 use async_trait::async_trait;
-use broadcaster::BroadcastChannel;
 use btleplug::api::{CentralEvent, Peripheral};
-use futures::future::BoxFuture;
-use tokio::sync::broadcast;
+use futures::{Stream, future::BoxFuture};
+use tokio::sync::{mpsc, broadcast};
 use std::fmt::{self, Debug};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
@@ -82,8 +76,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     }
     let device = self.device.take().unwrap();
     if let Some(ref proto) = protocol.btle {
-      let (device_sender, device_receiver) = bounded(256);
-      let output_broadcaster = BroadcastChannel::with_cap(256);
+      let (device_sender, device_receiver) = mpsc::channel(256);
+      let (output_broadcaster, _) = broadcast::channel(256);
       let p = proto.clone();
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
@@ -145,8 +139,8 @@ pub struct BtlePlugDeviceImpl {
   name: String,
   address: String,
   endpoints: Vec<Endpoint>,
-  thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-  event_receiver: BoundedDeviceEventBroadcaster,
+  thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 unsafe impl Send for BtlePlugDeviceImpl {
@@ -159,15 +153,15 @@ impl BtlePlugDeviceImpl {
     name: &str,
     address: &str,
     endpoints: Vec<Endpoint>,
-    thread_sender: Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    event_receiver: BoundedDeviceEventBroadcaster,
+    thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+    event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     Self {
       name: name.to_string(),
       address: address.to_string(),
       endpoints,
       thread_sender,
-      event_receiver,
+      event_sender,
     }
   }
 
@@ -217,8 +211,8 @@ impl BtlePlugDeviceImpl {
 }
 
 impl DeviceImpl for BtlePlugDeviceImpl {
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.event_receiver.clone()
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn name(&self) -> &str {

@@ -2,7 +2,6 @@ use crate::{
   core::{errors::ButtplugDeviceError, messages, ButtplugResult},
   device::{
     configuration_manager::BluetoothLESpecifier,
-    BoundedDeviceEventBroadcaster,
     ButtplugDeviceCommand,
     ButtplugDeviceEvent,
     ButtplugDeviceImplInfo,
@@ -20,11 +19,10 @@ use crate::{
     future::{ButtplugFuture, ButtplugFutureStateShared},
   },
 };
-use async_channel::{bounded, Receiver};
 use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
-use futures::{FutureExt, StreamExt};
+use futures::FutureExt;
 use std::collections::HashMap;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, mpsc};
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
@@ -38,9 +36,9 @@ enum BtlePlugCommLoopChannelValue {
 pub struct BtlePlugInternalEventLoop<T: Peripheral> {
   device: T,
   protocol: BluetoothLESpecifier,
-  write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-  event_receiver: Receiver<CentralEvent>,
-  output_sender: BoundedDeviceEventBroadcaster,
+  write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+  event_receiver: mpsc::Receiver<CentralEvent>,
+  output_sender: broadcast::Sender<ButtplugDeviceEvent>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
@@ -55,10 +53,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     mut btleplug_event_broadcaster: broadcast::Receiver<CentralEvent>,
     device: T,
     protocol: BluetoothLESpecifier,
-    write_receiver: Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    output_sender: BoundedDeviceEventBroadcaster,
+    write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
+    output_sender: broadcast::Sender<ButtplugDeviceEvent>,
   ) -> Self {
-    let (event_sender, event_receiver) = bounded(256);
+    let (event_sender, event_receiver) = mpsc::channel(256);
     let device_address = device.address();
     async_manager::spawn(async move {
       while let Ok(event) = btleplug_event_broadcaster.recv().await {
@@ -123,7 +121,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       );
     }
     loop {
-      let event = self.event_receiver.next().await;
+      let event = self.event_receiver.recv().await;
       if event.is_none() {
         error!("BTLEPlug connection event handler died, cannot receive connection event.");
         state.set_reply(ButtplugDeviceReturn::Error(
@@ -197,11 +195,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         let sender = os.clone();
         async_manager::spawn(async move {
           if let Err(err) = sender
-            .send(&ButtplugDeviceEvent::Notification(
+            .send(ButtplugDeviceEvent::Notification(
               endpoint,
               notification.value,
             ))
-            .await
           {
             error!(
               "Cannot send notification, device object disappeared: {:?}",
@@ -357,8 +354,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         // and that's what owns us.
         self
           .output_sender
-          .send(&ButtplugDeviceEvent::Removed)
-          .await
+          .send(ButtplugDeviceEvent::Removed)
           .unwrap();
         return true;
       }
@@ -368,17 +364,14 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
 
   pub async fn run(&mut self) {
     loop {
-      let mut wr = self.write_receiver.clone();
-      let mut er = self.event_receiver.clone();
-
       // Race our device input (from the client side) and any subscribed
       // notifications.
       let mut event = select! {
-        ev = er.next().fuse() => match ev {
+        ev = self.event_receiver.recv().fuse() => match ev {
           Some(valid_ev) => BtlePlugCommLoopChannelValue::DeviceEvent(valid_ev),
           None => BtlePlugCommLoopChannelValue::ChannelClosed,
         },
-        recv = wr.next().fuse() => match recv {
+        recv = self.write_receiver.recv().fuse() => match recv {
           Some((command, state)) => BtlePlugCommLoopChannelValue::DeviceCommand(command, state),
           None => BtlePlugCommLoopChannelValue::ChannelClosed,
         }

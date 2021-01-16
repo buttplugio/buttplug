@@ -110,7 +110,7 @@ mod test {
   use crate::{
     core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -119,18 +119,16 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![50, 50], false)),
-      )
-      .await;
+      );
     });
   }
 
@@ -139,18 +137,16 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![49, 19], false)),
-      )
-      .await;
+      );
     });
   }
 }

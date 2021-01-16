@@ -1,32 +1,18 @@
 use super::xinput_device_comm_manager::{XInputConnectionTracker, XInputControllerIndex};
-use crate::{
-  core::{
+use crate::{core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  },
-  device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    BoundedDeviceEventBroadcaster,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
-  },
-  server::comm_managers::ButtplugDeviceSpecificError,
-};
+  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier}}, server::comm_managers::ButtplugDeviceSpecificError, util::stream::convert_broadcast_receiver_to_stream};
 use async_trait::async_trait;
-use broadcaster::BroadcastChannel;
 use byteorder::{LittleEndian, ReadBytesExt};
-use futures::future::{self, BoxFuture};
+use futures::{Stream, future::{self, BoxFuture}};
 use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::{
   io::Cursor,
   fmt::{self, Debug}
 };
+use tokio::sync::broadcast;
 
 pub struct XInputDeviceImplCreator {
   index: XInputControllerIndex,
@@ -67,20 +53,20 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
 pub struct XInputDeviceImpl {
   handle: XInputHandle,
   index: XInputControllerIndex,
-  event_receiver: BoundedDeviceEventBroadcaster,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   address: String,
   connection_tracker: XInputConnectionTracker,
 }
 
 impl XInputDeviceImpl {
   pub fn new(index: XInputControllerIndex) -> Self {
-    let event_receiver = BroadcastChannel::with_cap(256);
+    let (event_sender, _) = broadcast::channel(256);
     let connection_tracker = XInputConnectionTracker::default();
-    connection_tracker.add_with_sender(index, event_receiver.clone());
+    connection_tracker.add_with_sender(index, event_sender.clone());
     Self {
       handle: rusty_xinput::XInputHandle::load_default().unwrap(),
       index,
-      event_receiver,
+      event_sender,
       address: format!("XInput Controller {}", index),
       connection_tracker,
     }
@@ -110,8 +96,8 @@ impl DeviceImpl for XInputDeviceImpl {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.event_receiver.clone()
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(

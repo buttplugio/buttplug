@@ -2,8 +2,12 @@ mod test_device;
 #[cfg(feature = "server")]
 mod test_device_comm_manager;
 
-use crate::device::DeviceImplCommand;
-use async_channel::Receiver;
+use std::sync::{Arc, Mutex};
+use crate::{
+  device::DeviceImplCommand,
+  util::stream::{recv_now, iffy_is_empty_check}
+};
+use tokio::sync::mpsc::Receiver;
 pub use test_device::{
   TestDevice,
   TestDeviceEndpointChannel,
@@ -18,7 +22,11 @@ pub use test_device_comm_manager::{
 };
 
 #[allow(dead_code)]
-pub async fn check_recv_value(receiver: &Receiver<DeviceImplCommand>, command: DeviceImplCommand) {
-  assert!(!receiver.is_empty());
-  assert_eq!(receiver.recv().await.unwrap(), command);
+pub fn check_test_recv_value(receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>, command: DeviceImplCommand) {
+  assert_eq!(recv_now(&mut receiver.lock().unwrap()).unwrap().unwrap(), command);
+}
+
+#[allow(dead_code)]
+pub fn check_test_recv_empty(receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>) -> bool {
+  iffy_is_empty_check(&mut receiver.lock().unwrap())
 }

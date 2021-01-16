@@ -104,7 +104,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_recv_value, new_bluetoothle_test_device},
+    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
     util::async_manager,
   };
 
@@ -117,10 +117,9 @@ mod test {
         .await
         .unwrap();
       let command_receiver = test_device
-        .get_endpoint_channel(&Endpoint::Tx)
-        .unwrap()
-        .receiver;
-      check_recv_value(
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .unwrap();
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
@@ -145,14 +144,13 @@ mod test {
           ],
           false,
         )),
-      )
-      .await;
+      );
       // Test to make sure we handle packet IDs across protocol clones correctly.
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
         .unwrap();
-      check_recv_value(
+      check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
@@ -162,8 +160,7 @@ mod test {
           ],
           false,
         )),
-      )
-      .await;
+      );
     });
   }
 }

@@ -1,7 +1,7 @@
 use super::xinput_device_impl::XInputDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
-  device::{BoundedDeviceEventBroadcaster, ButtplugDeviceEvent},
+  device::ButtplugDeviceEvent,
   server::comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
@@ -18,7 +18,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{Notify, mpsc::Sender};
+use tokio::sync::{broadcast, Notify, mpsc};
 
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]
@@ -42,7 +42,7 @@ pub(super) struct XInputConnectionTracker {
 async fn check_gamepad_connectivity(
   connected_gamepads: Arc<AtomicU8>,
   check_running: Arc<AtomicBool>,
-  sender: Option<BoundedDeviceEventBroadcaster>,
+  sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
 ) {
   check_running.store(true, Ordering::SeqCst);
   let handle = rusty_xinput::XInputHandle::load_default().unwrap();
@@ -69,7 +69,7 @@ async fn check_gamepad_connectivity(
         if let Some(send) = &sender {
           // This should always succeed, as it'll relay up to the device manager,
           // and that's what owns us.
-          send.send(&ButtplugDeviceEvent::Removed).await.unwrap();
+          send.send(ButtplugDeviceEvent::Removed).unwrap();
         }
         // If we're out of gamepads to track, return immediately.
         if new_connected_gamepads == 0 {
@@ -102,7 +102,7 @@ impl XInputConnectionTracker {
   pub fn add_with_sender(
     &self,
     index: XInputControllerIndex,
-    sender: BoundedDeviceEventBroadcaster,
+    sender: broadcast::Sender<ButtplugDeviceEvent>,
   ) {
     let mut connected = self.connected_gamepads.load(Ordering::SeqCst);
     let should_start = connected == 0;
@@ -124,13 +124,13 @@ impl XInputConnectionTracker {
 }
 
 pub struct XInputDeviceCommunicationManager {
-  sender: Sender<DeviceCommunicationEvent>,
+  sender: mpsc::Sender<DeviceCommunicationEvent>,
   scanning_notifier: Arc<Notify>,
   connected_gamepads: Arc<XInputConnectionTracker>,
 }
 
 impl DeviceCommunicationManagerCreator for XInputDeviceCommunicationManager {
-  fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,
       scanning_notifier: Arc::new(Notify::new()),
