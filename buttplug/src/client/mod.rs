@@ -283,7 +283,7 @@ impl ButtplugClient {
   /// `run()` method to pass it in.
   #[cfg(feature = "server")]
   pub async fn connect_in_process(
-    &mut self,
+    &self,
     options: &crate::server::ButtplugServerOptions,
   ) -> Result<(), ButtplugClientError> {
     use crate::connector::ButtplugInProcessClientConnector;
