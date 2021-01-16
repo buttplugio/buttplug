@@ -11,7 +11,7 @@ use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFu
   }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
 use tokio::sync::{mpsc, broadcast, Mutex};
 use async_trait::async_trait;
-use futures::{Stream, future::BoxFuture};
+use futures::{Stream, future::BoxFuture, FutureExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
 use std::{
   io::ErrorKind,
@@ -205,7 +205,7 @@ impl DeviceImpl for SerialPortDeviceImpl {
       Ok(RawReading::new(
         0,
         Endpoint::Rx,
-        recv_mut.recv().await.unwrap(),
+        recv_mut.recv().now_or_never().unwrap_or(Some(vec![])).unwrap(),
       ))
     })
   }
