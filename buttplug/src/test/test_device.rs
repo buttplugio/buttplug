@@ -14,7 +14,7 @@ use crate::{core::{
     DeviceWriteCmd,
     Endpoint,
   }, util::stream::convert_broadcast_receiver_to_stream};
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc};
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{Stream, future::{self, BoxFuture}};

@@ -1,6 +1,5 @@
 use async_stream::stream;
 use tokio::sync::{broadcast, mpsc};
-use std::sync::{Arc, Mutex};
 use futures::{Stream, FutureExt};
 
 pub fn convert_broadcast_receiver_to_stream<T>(receiver: broadcast::Receiver<T>) -> impl Stream<Item = T>
