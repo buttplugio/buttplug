@@ -127,7 +127,6 @@ fn test_ping_timeout() {
 }
 
 #[test]
-#[ignore]
 fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();

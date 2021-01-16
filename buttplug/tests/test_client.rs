@@ -185,7 +185,6 @@ fn test_client_scanning_finished() {
 
 #[cfg(feature = "server")]
 #[test]
-#[ignore]
 fn test_client_ping() {
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
