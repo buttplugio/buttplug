@@ -9,7 +9,7 @@
 
 use super::{
   client_message_sorter::ClientMessageSorter,
-  device::ButtplugClientDevice,
+  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
 };
@@ -179,12 +179,10 @@ where
       trace!("Message future found, returning");
       return;
     }
+    trace!("Message future not found, assuming server event.");
     match msg_result {
       Ok(msg) => {
-        trace!("Message received from connector, sending to clients.");
-
-        trace!("Message future not found, assuming server event.");
-        match &msg {
+        match msg {
           ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
             trace!("Device added, updating map and sending to client");
             let info = DeviceMessageInfo::from(dev);
@@ -209,6 +207,12 @@ where
             trace!("Scanning finished event received, forwarding to client.");
             self
               .send_client_event(ButtplugClientEvent::ScanningFinished);
+          }
+          ButtplugCurrentSpecServerMessage::RawReading(msg) => {
+            let device_idx = msg.device_index;
+            if let Some(device) = self.device_map.get(&device_idx) {
+              device.value().queue_event(ButtplugClientDeviceEvent::Message(ButtplugCurrentSpecServerMessage::from(msg)));
+            }
           }
           _ => error!("Cannot process message, dropping: {:?}", msg),
         }
@@ -283,6 +287,7 @@ where
           Err(_) => {
             info!("Client disconnected, exiting loop.");
             self.connected_status.store(false, Ordering::SeqCst);
+            self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
             if self.to_client_sender.send(ButtplugClientEvent::ServerDisconnect).is_err() {
               error!("Cannot send disconnection event.");
             }
