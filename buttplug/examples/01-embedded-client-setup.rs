@@ -55,7 +55,8 @@ async fn embedded_connector_example() {
   //
   // connect() can also return an error in certain situations, like not being
   // able to connect to the server.
-  let (client, _) = ButtplugClient::connect("Example Client", connector)
+  let client = ButtplugClient::new("Example Client");
+  client.connect(connector)
     .await
     .unwrap();
   println!("Is the client connected? {}", client.connected());

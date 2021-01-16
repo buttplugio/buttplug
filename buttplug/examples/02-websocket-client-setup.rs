@@ -12,8 +12,8 @@ use buttplug::{
   core::messages::serializer::ButtplugClientJSONSerializer,
   util::async_manager,
 };
-use futures::StreamExt;
 use tracing_subscriber;
+use futures::StreamExt;
 
 #[cfg(feature = "websockets")]
 async fn websocket_connector_example() {
@@ -55,18 +55,21 @@ async fn websocket_connector_example() {
     "ws://127.0.0.1:12345",
   ));
 
+  let client = ButtplugClient::new("exmaple client");
   // ButtplugClient creation is the same as the last example. From here on
   // out, things look basically the same, EXCEPT for the fact that, unlike the
   // mebedded connector, this can fail! If it does, the unwrap on run() will
   // panic and you'll get an error message about not being able to connect.
-  let (client, mut event_stream) = ButtplugClient::connect("Example Client", connector)
+  client.connect(connector)
     .await
     .unwrap();
   println!("Is the client connected? {}", client.connected());
   println!("Waiting for server disconnect...");
+  let mut event_stream = client.event_stream();
   while let Some(event) = event_stream.next().await {
     match event {
       ButtplugClientEvent::ServerDisconnect => {
+        println!("Received server disconnect event.");
         break;
       }
       _ => {}
