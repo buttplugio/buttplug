@@ -8,10 +8,10 @@
 //! Communications API for accessing Buttplug Servers
 mod client_message_sorter;
 pub mod device;
-pub mod internal;
+pub mod client_event_loop;
 
 use device::ButtplugClientDevice;
-use internal::{ButtplugClientEventLoop, ButtplugClientRequest};
+use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 
 use crate::{connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture}, core::{
     errors::{ButtplugError, ButtplugHandshakeError},
