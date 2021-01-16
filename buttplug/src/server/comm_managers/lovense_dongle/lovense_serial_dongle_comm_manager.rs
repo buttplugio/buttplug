@@ -15,9 +15,7 @@ use crate::{
   },
   util::async_manager,
 };
-use async_channel::{bounded, Receiver, Sender};
-use tokio::sync::Mutex;
-use futures::StreamExt;
+use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
 use serde_json::Deserializer;
 use serialport::{
   available_ports,
@@ -45,7 +43,7 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
     // all sorts of trouble.
     port.write_all(&data.into_bytes()).unwrap();
   };
-  while let Some(data) = async_manager::block_on(async { receiver.next().await }) {
+  while let Some(data) = async_manager::block_on(async { receiver.recv().await }) {
     match data {
       OutgoingLovenseData::Raw(s) => {
         port_write(s);
@@ -109,6 +107,7 @@ pub struct LovenseSerialDongleCommunicationManager {
   //port: Arc<Mutex<Option<Box<dyn SerialPort>>>>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
+  is_scanning: Arc<AtomicBool>
 }
 
 impl LovenseSerialDongleCommunicationManager {
@@ -139,8 +138,8 @@ impl LovenseSerialDongleCommunicationManager {
                 settings.timeout = Duration::from_millis(500);
                 match open_with_settings(&p.port_name, &settings) {
                   Ok(dongle_port) => {
-                    let (writer_sender, writer_receiver) = bounded(256);
-                    let (reader_sender, reader_receiver) = bounded(256);
+                    let (writer_sender, writer_receiver) = channel(256);
+                    let (reader_sender, reader_receiver) = channel(256);
 
                     let read_port = (*dongle_port).try_clone().unwrap();
                     let read_thread = thread::Builder::new()
@@ -186,11 +185,12 @@ impl LovenseSerialDongleCommunicationManager {
 impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     info!("Lovense dongle serial port created!");
-    let (machine_sender, machine_receiver) = bounded(256);
+    let (machine_sender, machine_receiver) = channel(256);
     let mgr = Self {
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
+      is_scanning: Arc::new(AtomicBool::new(false))
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
@@ -200,9 +200,8 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       }
     })
     .unwrap();
-    async_manager::spawn(
-      async move {
-        let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
+    let mut machine = create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(async move {
         while let Some(next) = machine.transition().await {
           machine = next;
         }

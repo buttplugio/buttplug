@@ -1,19 +1,16 @@
 use super::{lovense_dongle_device_impl::*, lovense_dongle_messages::*};
-use crate::{
-  core::{errors::ButtplugError, ButtplugResult},
-  server::comm_managers::DeviceCommunicationEvent,
-};
+use crate::server::comm_managers::DeviceCommunicationEvent;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use std::sync::Arc;
 use async_trait::async_trait;
-use futures::{select, FutureExt, StreamExt};
+use futures::{select, FutureExt};
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 // I found this hot dog on the ground at
 // https://news.ycombinator.com/item?id=22752907 and dusted it off. It still
 // tastes fine.
 #[async_trait]
-pub trait LovenseDongleState: std::fmt::Debug + Sync + Send {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>>;
+pub trait LovenseDongleState: std::fmt::Debug + Send {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>>;
 }
 
 #[derive(Debug)]
@@ -24,47 +21,43 @@ enum IncomingMessage {
   Disconnect,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct ChannelHub {
-  comm_manager_outgoing: Sender<ButtplugResult>,
-  comm_manager_incoming: Arc<Receiver<LovenseDeviceCommand>>,
+  comm_manager_incoming: Receiver<LovenseDeviceCommand>,
   dongle_outgoing: Sender<OutgoingLovenseData>,
-  dongle_incoming: Arc<Receiver<LovenseDongleIncomingMessage>>,
+  dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
   event_outgoing: Sender<DeviceCommunicationEvent>,
+  is_scanning: Arc<AtomicBool>
 }
 
 impl ChannelHub {
   pub fn new(
-    comm_manager_outgoing: Sender<ButtplugResult>,
     comm_manager_incoming: Receiver<LovenseDeviceCommand>,
     dongle_outgoing: Sender<OutgoingLovenseData>,
     dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
     event_outgoing: Sender<DeviceCommunicationEvent>,
+    is_scanning: Arc<AtomicBool>
   ) -> Self {
     Self {
-      comm_manager_outgoing,
       comm_manager_incoming,
       dongle_outgoing,
       dongle_incoming,
       event_outgoing,
+      is_scanning
     }
   }
 
-  pub fn create_new_wait_for_dongle_state(&self) -> Option<Box<dyn LovenseDongleState>> {
+  pub fn create_new_wait_for_dongle_state(self) -> Option<Box<dyn LovenseDongleState>> {
     Some(Box::new(LovenseDongleWaitForDongle::new(
-      self.comm_manager_incoming.clone(),
-      self.comm_manager_outgoing.clone(),
-      self.event_outgoing.clone(),
+      self.comm_manager_incoming,
+      self.event_outgoing,
+      self.is_scanning
     )))
   }
 
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
-    let mut comm_incoming = self.comm_manager_incoming.clone();
-    let mut dongle_incoming = self.dongle_incoming.clone();
-    pin_mut!(comm_incoming);
-    pin_mut!(dongle_incoming);
     select! {
-      comm_res = comm_incoming.recv().fuse() => {
+      comm_res = self.comm_manager_incoming.recv().fuse() => {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
@@ -73,7 +66,7 @@ impl ChannelHub {
           }
         }
       }
-      dongle_res = dongle_incoming.recv().fuse() => {
+      dongle_res = self.dongle_incoming.recv().fuse() => {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
@@ -87,15 +80,11 @@ impl ChannelHub {
 
   pub async fn wait_for_device_input(
     &mut self,
-    mut device_incoming: Receiver<OutgoingLovenseData>,
+    device_incoming: &mut Receiver<OutgoingLovenseData>,
   ) -> IncomingMessage {
-    let mut comm_incoming = self.comm_manager_incoming.clone();
-    let mut dongle_incoming = self.dongle_incoming.clone();
-    pin_mut!(comm_incoming);
-    pin_mut!(dongle_incoming);
     pin_mut!(device_incoming);
     select! {
-      comm_res = comm_incoming.recv().fuse() => {
+      comm_res = self.comm_manager_incoming.recv().fuse() => {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
@@ -104,7 +93,7 @@ impl ChannelHub {
           }
         }
       }
-      dongle_res = dongle_incoming.recv().fuse() => {
+      dongle_res = self.dongle_incoming.recv().fuse() => {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
@@ -132,25 +121,23 @@ impl ChannelHub {
   pub async fn send_event(&self, msg: DeviceCommunicationEvent) {
     self.event_outgoing.send(msg).await.unwrap();
   }
+
+  pub fn set_scanning_status(&self, is_scanning: bool) {
+    self.is_scanning.store(is_scanning, Ordering::SeqCst);
+  }
 }
 
 pub fn create_lovense_dongle_machine(
   event_outgoing: Sender<DeviceCommunicationEvent>,
   comm_incoming_receiver: Receiver<LovenseDeviceCommand>,
-) -> (
-  Box<dyn LovenseDongleState>,
-  Receiver<Result<(), ButtplugError>>,
-) {
-  let (comm_outgoing_sender, comm_outgoing_receiver) = channel(256);
-  (
+  is_scanning: Arc<AtomicBool>
+) -> Box<dyn LovenseDongleState> {
     Box::new(LovenseDongleWaitForDongle::new(
       comm_incoming_receiver,
-      comm_outgoing_sender,
       event_outgoing,
-    )),
-    comm_outgoing_receiver,
-  )
-}
+      is_scanning,
+    ))
+  }
 
 macro_rules! state_definition {
   ($name:ident) => {
@@ -185,39 +172,39 @@ macro_rules! device_state_definition {
 
 #[derive(Debug)]
 struct LovenseDongleWaitForDongle {
-  comm_receiver: Arc<Receiver<LovenseDeviceCommand>>,
-  comm_sender: Sender<ButtplugResult>,
+  comm_receiver: Receiver<LovenseDeviceCommand>,
   event_sender: Sender<DeviceCommunicationEvent>,
+  is_scanning: Arc<AtomicBool>
 }
 
 impl LovenseDongleWaitForDongle {
   pub fn new(
-    comm_receiver: Arc<Receiver<LovenseDeviceCommand>>,
-    comm_sender: Sender<ButtplugResult>,
+    comm_receiver: Receiver<LovenseDeviceCommand>,
     event_sender: Sender<DeviceCommunicationEvent>,
+    is_scanning: Arc<AtomicBool>
   ) -> Self {
     Self {
       comm_receiver,
-      comm_sender,
       event_sender,
+      is_scanning
     }
   }
 }
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleWaitForDongle {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("Running wait for dongle step");
     let mut should_scan = false;
-    while let Some(msg) = self.comm_receiver.next().await {
+    while let Some(msg) = self.comm_receiver.recv().await {
       match msg {
         LovenseDeviceCommand::DongleFound(sender, receiver) => {
           let hub = ChannelHub::new(
-            self.comm_sender.clone(),
-            self.comm_receiver.clone(),
+            self.comm_receiver,
             sender,
             receiver,
             self.event_sender.clone(),
+            self.is_scanning
           );
           if should_scan {
             return Some(Box::new(LovenseDongleStartScanning::new(hub)));
@@ -240,7 +227,7 @@ state_definition!(LovenseDongleIdle);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleIdle {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("Running idle step");
 
     // Check to see if any toy is already connected.
@@ -268,7 +255,7 @@ impl LovenseDongleState for LovenseDongleIdle {
               if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
                 info!("Lovense dongle already connected to a device, registering in system.");
                 return Some(Box::new(LovenseDongleDeviceLoop::new(
-                  self.hub.clone(),
+                  self.hub,
                   incoming_data.id.unwrap(),
                 )));
               }
@@ -278,10 +265,10 @@ impl LovenseDongleState for LovenseDongleIdle {
         },
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {
           LovenseDeviceCommand::StartScanning => {
-            return Some(Box::new(LovenseDongleStartScanning::new(self.hub.clone())));
+            return Some(Box::new(LovenseDongleStartScanning::new(self.hub)));
           }
           LovenseDeviceCommand::StopScanning => {
-            return Some(Box::new(LovenseDongleStopScanning::new(self.hub.clone())));
+            return Some(Box::new(LovenseDongleStopScanning::new(self.hub)));
           }
           _ => {
             error!(
@@ -306,7 +293,7 @@ state_definition!(LovenseDongleStartScanning);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleStartScanning {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("scanning for devices");
 
     let scan_msg = LovenseDongleOutgoingMessage {
@@ -318,9 +305,12 @@ impl LovenseDongleState for LovenseDongleStartScanning {
     };
     self
       .hub
+      .set_scanning_status(true);
+    self
+      .hub
       .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
-    Some(Box::new(LovenseDongleScanning::new(self.hub.clone())))
+    Some(Box::new(LovenseDongleScanning::new(self.hub)))
   }
 }
 
@@ -328,7 +318,7 @@ state_definition!(LovenseDongleScanning);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleScanning {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("scanning for devices");
     loop {
       let msg = self.hub.wait_for_input().await;
@@ -341,12 +331,12 @@ impl LovenseDongleState for LovenseDongleScanning {
             LovenseDongleMessageFunc::ToyData => {
               if let Some(data) = device_msg.data {
                 return Some(Box::new(LovenseDongleStopScanningAndConnect::new(
-                  self.hub.clone(),
+                  self.hub,
                   data.id.unwrap(),
                 )));
               } else if device_msg.result.is_some() {
                 // emit and return to idle
-                return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
+                return Some(Box::new(LovenseDongleIdle::new(self.hub)));
               }
             }
             _ => error!("Cannot handle dongle function {:?}", device_msg),
@@ -366,7 +356,7 @@ state_definition!(LovenseDongleStopScanning);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleStopScanning {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("stopping search");
     let scan_msg = LovenseDongleOutgoingMessage {
       message_type: LovenseDongleMessageType::USB,
@@ -381,6 +371,9 @@ impl LovenseDongleState for LovenseDongleStopScanning {
       .await;
     self
       .hub
+      .set_scanning_status(false);
+    self
+      .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
       .await;
     None
@@ -391,7 +384,7 @@ device_state_definition!(LovenseDongleStopScanningAndConnect);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("stopping search and connecting to device");
     let scan_msg = LovenseDongleOutgoingMessage {
       message_type: LovenseDongleMessageType::USB,
@@ -423,13 +416,16 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         }
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
-    }
+    } 
+    self
+      .hub
+      .set_scanning_status(false);
     self
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
       .await;
     Some(Box::new(LovenseDongleDeviceLoop::new(
-      self.hub.clone(),
+      self.hub,
       self.device_id.clone(),
     )))
   }
@@ -439,9 +435,9 @@ device_state_definition!(LovenseDongleDeviceLoop);
 
 #[async_trait]
 impl LovenseDongleState for LovenseDongleDeviceLoop {
-  async fn transition(&mut self) -> Option<Box<dyn LovenseDongleState>> {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("Running Lovense Dongle Device Event Loop");
-    let (device_write_sender, device_write_receiver) = channel(256);
+    let (device_write_sender, mut device_write_receiver) = channel(256);
     let (device_read_sender, device_read_receiver) = channel(256);
     self
       .hub
@@ -456,7 +452,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
     loop {
       let msg = self
         .hub
-        .wait_for_device_input(device_write_receiver.clone())
+        .wait_for_device_input(&mut device_write_receiver)
         .await;
       match msg {
         IncomingMessage::Device(device_msg) => {
@@ -468,7 +464,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
               if let Some(data) = dongle_msg.data {
                 if data.status == Some(LovenseDongleResultCode::DeviceDisconnected) {
                   // Device disconnected, emit and return to idle.
-                  return Some(Box::new(LovenseDongleIdle::new(self.hub.clone())));
+                  return Some(Box::new(LovenseDongleIdle::new(self.hub)));
                 }
               }
             }

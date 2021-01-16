@@ -16,11 +16,10 @@ use crate::{
   util::async_manager,
 };
 use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
-use futures::StreamExt;
 use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
 use std::{
-  sync::{atomic::AtomicBool, Arc},
+  sync::{atomic::{AtomicBool, Ordering}, Arc},
   thread,
 };
 use tracing_futures::Instrument;
@@ -116,6 +115,7 @@ pub struct LovenseHIDDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
+  is_scanning: Arc<AtomicBool>
 }
 
 impl LovenseHIDDongleCommunicationManager {
@@ -171,6 +171,10 @@ impl LovenseHIDDongleCommunicationManager {
       Ok(())
     })
   }
+
+  pub fn scanning_status(&self) -> Arc<AtomicBool> {
+    self.is_scanning.clone()
+  }
 }
 
 impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
@@ -181,6 +185,7 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
+      is_scanning: Arc::new(AtomicBool::new(false))
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(
@@ -190,9 +195,8 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
     )
     .unwrap();
-    async_manager::spawn(
-      async move {
-        let (mut machine, _) = create_lovense_dongle_machine(event_sender, machine_receiver);
+    let mut machine = create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(async move {
         while let Some(next) = machine.transition().await {
           machine = next;
         }
@@ -212,6 +216,7 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
   fn start_scanning(&self) -> ButtplugResultFuture {
     info!("Lovense Dongle Manager scanning ports!");
     let sender = self.machine_sender.clone();
+    self.is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async move {
       sender
         .send(LovenseDeviceCommand::StartScanning)
@@ -233,6 +238,6 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
   }
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
-    Arc::new(AtomicBool::new(false))
+    self.is_scanning.clone()
   }
 }

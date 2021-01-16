@@ -308,7 +308,6 @@ impl ButtplugClient {
         .add_comm_manager::<SerialPortCommunicationManager>()
         .unwrap();
     }
-    /*
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{
@@ -324,7 +323,6 @@ impl ButtplugClient {
         .add_comm_manager::<LovenseSerialDongleCommunicationManager>()
         .unwrap();
     }
-     */
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
       use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;

@@ -5,15 +5,12 @@ use super::lovense_dongle_messages::{
   LovenseDongleOutgoingMessage,
   OutgoingLovenseData,
 };
-use crate::{
-  core::{
+use crate::{core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  },
-  device::{
+  }, device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    BoundedDeviceEventBroadcaster,
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -22,15 +19,12 @@ use crate::{
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  },
-  util::async_manager,
-};
-use async_channel::{Receiver, Sender};
+  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
+use tokio::sync::{mpsc, broadcast};
 use async_trait::async_trait;
-use broadcaster::BroadcastChannel;
 use futures::{
+  Stream,
   future::{self, BoxFuture},
-  StreamExt,
 };
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -41,8 +35,8 @@ use std::fmt::{self, Debug};
 pub struct LovenseDongleDeviceImplCreator {
   specifier: DeviceSpecifier,
   id: String,
-  device_outgoing: Sender<OutgoingLovenseData>,
-  device_incoming: Receiver<LovenseDongleIncomingMessage>,
+  device_outgoing: mpsc::Sender<OutgoingLovenseData>,
+  device_incoming: Option<mpsc::Receiver<LovenseDongleIncomingMessage>>,
 }
 
 impl Debug for LovenseDongleDeviceImplCreator {
@@ -57,8 +51,8 @@ impl Debug for LovenseDongleDeviceImplCreator {
 impl LovenseDongleDeviceImplCreator {
   pub fn new(
     id: &str,
-    device_outgoing: Sender<OutgoingLovenseData>,
-    device_incoming: Receiver<LovenseDongleIncomingMessage>,
+    device_outgoing: mpsc::Sender<OutgoingLovenseData>,
+    device_incoming: mpsc::Receiver<LovenseDongleIncomingMessage>,
   ) -> Self {
     Self {
       // We know the only thing we'll ever get from a lovense dongle is a
@@ -73,7 +67,7 @@ impl LovenseDongleDeviceImplCreator {
       )),
       id: id.to_string(),
       device_outgoing,
-      device_incoming,
+      device_incoming: Some(device_incoming),
     }
   }
 }
@@ -91,7 +85,7 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
     Ok(Box::new(LovenseDongleDeviceImpl::new(
       &self.id,
       self.device_outgoing.clone(),
-      self.device_incoming.clone(),
+      self.device_incoming.take().unwrap(),
     )))
   }
 }
@@ -100,39 +94,37 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
 pub struct LovenseDongleDeviceImpl {
   name: String,
   address: String,
-  device_outgoing: Sender<OutgoingLovenseData>,
+  device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   connected: Arc<AtomicBool>,
-  event_receiver: BoundedDeviceEventBroadcaster,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 impl LovenseDongleDeviceImpl {
   pub fn new(
     address: &str,
-    device_outgoing: Sender<OutgoingLovenseData>,
-    mut device_incoming: Receiver<LovenseDongleIncomingMessage>,
+    device_outgoing: mpsc::Sender<OutgoingLovenseData>,
+    mut device_incoming: mpsc::Receiver<LovenseDongleIncomingMessage>,
   ) -> Self {
-    let event_broadcaster = BroadcastChannel::with_cap(256);
-    let event_broadcaster_clone = event_broadcaster.clone();
+    let (event_sender, _) = broadcast::channel(256);
+    let event_sender_clone = event_sender.clone();
     async_manager::spawn(async move {
-      while let Some(msg) = device_incoming.next().await {
+      while let Some(msg) = device_incoming.recv().await {
         if msg.func != LovenseDongleMessageFunc::ToyData {
           continue;
         }
         let data_str = msg.data.unwrap().data.unwrap();
-        event_broadcaster_clone
-          .send(&ButtplugDeviceEvent::Notification(
+        event_sender_clone
+          .send(ButtplugDeviceEvent::Notification(
             Endpoint::Rx,
             data_str.into_bytes(),
           ))
-          .await
           .unwrap();
       }
       info!("Lovense dongle device disconnected",);
       // This should always succeed, as it'll relay up to the device manager,
       // and that's what owns us.
-      event_broadcaster_clone
-        .send(&ButtplugDeviceEvent::Removed)
-        .await
+      event_sender_clone
+        .send(ButtplugDeviceEvent::Removed)
         .unwrap();
     })
     .unwrap();
@@ -141,7 +133,7 @@ impl LovenseDongleDeviceImpl {
       address: address.to_string(),
       device_outgoing,
       connected: Arc::new(AtomicBool::new(true)),
-      event_receiver: event_broadcaster,
+      event_sender
     }
   }
 }
@@ -171,8 +163,8 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
     })
   }
 
-  fn get_event_receiver(&self) -> BoundedDeviceEventBroadcaster {
-    self.event_receiver.clone()
+  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Send + Unpin> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(
