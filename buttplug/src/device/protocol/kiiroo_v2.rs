@@ -110,7 +110,7 @@ mod test {
   use crate::{
     core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
+    test::{check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
