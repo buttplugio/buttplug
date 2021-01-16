@@ -1,0 +1,5 @@
+{
+  "rust-analyzer.diagnostics.disabled": [
+   "macro-error"
+  ]
+}
