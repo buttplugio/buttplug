@@ -35,7 +35,7 @@ impl ButtplugProtocol for Realov {
 impl ButtplugProtocolCommandHandler for Realov {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager

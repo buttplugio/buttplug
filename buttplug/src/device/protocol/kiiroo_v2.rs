@@ -54,7 +54,7 @@ impl ButtplugProtocol for KiirooV2 {
   }
 
   fn initialize(
-    device_impl: &dyn DeviceImpl,
+    device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
@@ -68,7 +68,7 @@ impl ButtplugProtocol for KiirooV2 {
 impl ButtplugProtocolCommandHandler for KiirooV2 {
   fn handle_linear_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = message.vectors[0].clone();
@@ -86,7 +86,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();

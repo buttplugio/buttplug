@@ -38,7 +38,7 @@ pub struct BtlePlugInternalEventLoop<T: Peripheral> {
   protocol: BluetoothLESpecifier,
   write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
   event_receiver: mpsc::Receiver<CentralEvent>,
-  output_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  output_sender: mpsc::Sender<ButtplugDeviceEvent>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
@@ -54,7 +54,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    output_sender: broadcast::Sender<ButtplugDeviceEvent>,
+    output_sender: mpsc::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     let (event_sender, event_receiver) = mpsc::channel(256);
     let device_address = device.address();
@@ -177,6 +177,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     }
     let os = self.output_sender.clone();
     let mut error_notification = false;
+    let address = self.device.properties().address.to_string();
+
     self
       .device
       .on_notification(Box::new(move |notification: ValueNotification| {
@@ -193,12 +195,15 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           return;
         };
         let sender = os.clone();
+        let address_clone = address.clone();
         async_manager::spawn(async move {
           if let Err(err) = sender
             .send(ButtplugDeviceEvent::Notification(
+              address_clone,
               endpoint,
               notification.value,
             ))
+            .await
           {
             error!(
               "Cannot send notification, device object disappeared: {:?}",
@@ -354,7 +359,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         // and that's what owns us.
         self
           .output_sender
-          .send(ButtplugDeviceEvent::Removed)
+          .send(ButtplugDeviceEvent::Removed(self.device.address().to_string()))
+          .await
           .unwrap();
         return true;
       }

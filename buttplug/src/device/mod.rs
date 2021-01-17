@@ -7,7 +7,7 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{convert::TryFrom, fmt, str::FromStr, string::ToString, sync::Arc};
+use std::{convert::TryFrom, fmt::{self, Debug}, str::FromStr, string::ToString, sync::Arc};
 
 use crate::{
   core::{
@@ -33,8 +33,9 @@ use crate::{
 use async_trait::async_trait;
 use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
-use futures::{Stream, future::BoxFuture};
-use std::fmt::Debug;
+use futures::future::BoxFuture;
+use tokio::sync::{broadcast, mpsc};
+use dashmap::DashMap;
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature
@@ -296,22 +297,69 @@ pub enum ButtplugDeviceReturn {
   Error(ButtplugError),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum ButtplugDeviceEvent {
-  Notification(Endpoint, Vec<u8>),
-  Removed,
+  Connected(ButtplugDevice),
+  Notification(String, Endpoint, Vec<u8>),
+  Removed(String),
+}
+pub struct DeviceImpl {
+  name: String,
+  address: String,
+  endpoints: Vec<Endpoint>,
+  internal_impl: Box<dyn DeviceImplInternal>,
 }
 
-pub trait DeviceImpl: Sync + Send {
-  fn name(&self) -> &str;
-  fn address(&self) -> &str;
-  fn connected(&self) -> bool;
-  fn endpoints(&self) -> Vec<Endpoint>;
-  // Not super thrilled with this being dynamic dispatch, but it's either that
-  // or hardcode it to tokio, and since this is a public trait that other people
-  // may someday use, I'd rather not. Can't use impl trait in trait defs yet tho.
-  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send>;
+impl DeviceImpl {
+  pub fn new(name: &str, address: &str, endpoints: &Vec<Endpoint>, internal_impl: Box<dyn DeviceImplInternal>) -> Self {
+    Self {
+      name: name.to_owned(),
+      address: address.to_owned(), 
+      endpoints: endpoints.clone(),
+      internal_impl,
+    }
+  }
 
+  pub fn name(&self) -> &str {
+    &self.name
+  }
+
+  pub fn address(&self) -> &str {
+    &self.address
+  }
+
+  pub fn connected(&self) -> bool {
+    self.internal_impl.connected()
+  }
+
+  pub fn endpoints(&self) -> Vec<Endpoint> {
+    self.endpoints.clone()
+  }
+
+  pub fn disconnect(&self) -> ButtplugResultFuture {
+    self.internal_impl.disconnect()
+  }
+
+  pub fn read_value(&self, msg: DeviceReadCmd)
+    -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+    self.internal_impl.read_value(msg)
+  }
+
+  pub fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+    self.internal_impl.write_value(msg)
+  }
+
+  pub fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+    self.internal_impl.subscribe(msg)
+  }
+
+  pub fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+    self.internal_impl.unsubscribe(msg)
+  }
+}
+
+pub trait DeviceImplInternal: Sync + Send {
+  fn connected(&self) -> bool;
   fn disconnect(&self) -> ButtplugResultFuture;
   fn read_value(&self, msg: DeviceReadCmd)
     -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
@@ -326,12 +374,22 @@ pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-  ) -> Result<Box<dyn DeviceImpl>, ButtplugError>;
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  ) -> Result<DeviceImpl, ButtplugError>;
 }
 
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
-  device: Arc<Box<dyn DeviceImpl>>,
+  device: Arc<DeviceImpl>,
+}
+
+impl Debug for ButtplugDevice {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("ButtplugDevice")
+      .field("name", &self.name())
+      .field("address", &self.address())
+      .finish()
+  }
 }
 
 impl Hash for ButtplugDevice {
@@ -350,7 +408,7 @@ impl PartialEq for ButtplugDevice {
 }
 
 impl ButtplugDevice {
-  pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Box<dyn DeviceImpl>) -> Self {
+  pub fn new(protocol: Box<dyn ButtplugProtocol>, device: DeviceImpl) -> Self {
     Self {
       protocol,
       device: Arc::new(device),
@@ -364,6 +422,7 @@ impl ButtplugDevice {
   pub async fn try_create_device(
     device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
     // First off, we need to see if we even have a configuration available
     // for the device we're trying to create. If we don't, return Ok(None),
@@ -383,7 +442,7 @@ impl ButtplugDevice {
           config.configurations.clone(),
         );
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
-          match device_creator.try_create_device_impl(config).await {
+          match device_creator.try_create_device_impl(config, device_event_sender).await {
             Ok(device_impl) => {
               info!("Found Buttplug Device {}", device_impl.name());
               // If we've made it this far, we now have a connected device
@@ -395,7 +454,7 @@ impl ButtplugDevice {
               // complicated.
               match protocol::try_create_protocol(
                 &proto_type,
-                &*device_impl,
+                &device_impl,
                 device_protocol_config,
               )
               .await
@@ -447,10 +506,6 @@ impl ButtplugDevice {
     message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugDeviceResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
-  }
-
-  pub fn event_stream(&self) -> impl Stream<Item = ButtplugDeviceEvent> {
-    self.device.event_stream()
   }
 
   // TODO Handle raw messages here.

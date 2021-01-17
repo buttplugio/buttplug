@@ -1,18 +1,18 @@
-use super::xinput_device_comm_manager::{XInputConnectionTracker, XInputControllerIndex};
+use super::xinput_device_comm_manager::{XInputConnectionTracker, XInputControllerIndex, create_address};
 use crate::{core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier}}, server::comm_managers::ButtplugDeviceSpecificError, util::stream::convert_broadcast_receiver_to_stream};
+  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier}}, server::comm_managers::ButtplugDeviceSpecificError};
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
-use futures::{Stream, future::{self, BoxFuture}};
+use futures::future::{self, BoxFuture};
 use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::{
   io::Cursor,
   fmt::{self, Debug}
 };
-use tokio::sync::broadcast;
+use tokio::sync::mpsc;
 
 pub struct XInputDeviceImplCreator {
   index: XInputControllerIndex,
@@ -43,9 +43,17 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     _protocol: ProtocolDefinition,
-  ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
-    debug!("Emitting a new xbox device impl!");
-    Ok(Box::new(XInputDeviceImpl::new(self.index)))
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  ) -> Result<DeviceImpl, ButtplugError> {
+    debug!("Emitting a new xbox device impl.");
+    let device_impl_internal = XInputDeviceImpl::new(self.index, device_event_sender);
+    let device_impl = DeviceImpl::new(
+      &format!("XBox Compatible Gamepad #{}", self.index),
+      &create_address(self.index),
+      &vec![Endpoint::Tx],
+      Box::new(device_impl_internal)
+    );
+    Ok(device_impl)
   }
 }
 
@@ -53,51 +61,30 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
 pub struct XInputDeviceImpl {
   handle: XInputHandle,
   index: XInputControllerIndex,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
-  address: String,
+  event_sender: mpsc::Sender<ButtplugDeviceEvent>,
   connection_tracker: XInputConnectionTracker,
 }
 
 impl XInputDeviceImpl {
-  pub fn new(index: XInputControllerIndex) -> Self {
-    let (event_sender, _) = broadcast::channel(256);
+  pub fn new(index: XInputControllerIndex, device_event_sender: mpsc::Sender<ButtplugDeviceEvent>) -> Self {
     let connection_tracker = XInputConnectionTracker::default();
-    connection_tracker.add_with_sender(index, event_sender.clone());
+    connection_tracker.add_with_sender(index, device_event_sender.clone());
     Self {
       handle: rusty_xinput::XInputHandle::load_default().unwrap(),
       index,
-      event_sender,
-      address: format!("XInput Controller {}", index),
+      event_sender: device_event_sender,
       connection_tracker,
     }
   }
 }
 
-impl DeviceImpl for XInputDeviceImpl {
-  fn name(&self) -> &str {
-    // This has to match the xinput identifier entry in the configuration
-    // file, otherwise things will explode.
-    "XInput Gamepad"
-  }
-
-  fn address(&self) -> &str {
-    &self.address
-  }
-
+impl DeviceImplInternal for XInputDeviceImpl {
   fn connected(&self) -> bool {
     self.connection_tracker.connected(self.index)
   }
 
-  fn endpoints(&self) -> Vec<Endpoint> {
-    vec![Endpoint::Tx]
-  }
-
   fn disconnect(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
-  }
-
-  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
-    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(

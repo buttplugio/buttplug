@@ -38,7 +38,7 @@ impl ButtplugProtocol for LeloF1s {
   }
 
   fn initialize(
-    device_impl: &dyn DeviceImpl,
+    device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
@@ -55,7 +55,7 @@ impl ButtplugProtocol for LeloF1s {
 impl ButtplugProtocolCommandHandler for LeloF1s {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

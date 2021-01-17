@@ -37,7 +37,7 @@ impl ButtplugProtocol for PrettyLove {
   }
 
   fn initialize(
-    _device_impl: &dyn DeviceImpl,
+    _device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // Pretty Love devices have wildcarded names of Aogu BLE *
     // Force the identifier lookup to "Aogu BLE"
@@ -48,7 +48,7 @@ impl ButtplugProtocol for PrettyLove {
 impl ButtplugProtocolCommandHandler for PrettyLove {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

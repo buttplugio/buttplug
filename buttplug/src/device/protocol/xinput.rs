@@ -42,7 +42,7 @@ impl ButtplugProtocol for XInput {
 impl ButtplugProtocolCommandHandler for XInput {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();

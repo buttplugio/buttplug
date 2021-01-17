@@ -38,7 +38,7 @@ impl ButtplugProtocol for LiboShark {
 impl ButtplugProtocolCommandHandler for LiboShark {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

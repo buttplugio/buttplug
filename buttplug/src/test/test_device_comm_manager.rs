@@ -11,8 +11,7 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use tokio::sync::mpsc::Sender;
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc::{Sender, self}, Mutex};
 use futures::future;
 use std::{
   sync::Arc,
@@ -22,7 +21,7 @@ use std::{
 type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
 
 #[allow(dead_code)]
-pub fn new_uninitialized_ble_test_device(
+fn new_uninitialized_ble_test_device(
   name: &str,
   address: Option<String>,
 ) -> (Arc<TestDeviceInternal>, TestDeviceImplCreator) {
@@ -42,7 +41,7 @@ pub fn new_uninitialized_ble_test_device(
   (device_impl_clone, device_impl_creator)
 }
 
-pub async fn new_bluetoothle_test_device_with_cfg(
+async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
@@ -50,8 +49,9 @@ pub async fn new_bluetoothle_test_device_with_cfg(
     device_config_mgr.unwrap_or_else(|| Arc::new(DeviceConfigurationManager::default()));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
+  let (dummy_event_sender, _) = mpsc::channel(256);
   let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
+    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator), dummy_event_sender)
       .await
       .unwrap()
       .unwrap();

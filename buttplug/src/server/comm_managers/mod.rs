@@ -27,7 +27,7 @@ pub enum DeviceCommunicationEvent {
 }
 
 // Storing this in a Vec<Box<dyn T>> causes a associated method issue due to
-// the lack of new. Just create an extra trait for defining comm managers.
+// the lack of self. Just create an extra trait for defining comm managers.
 pub trait DeviceCommunicationManagerCreator: Send {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;
 }

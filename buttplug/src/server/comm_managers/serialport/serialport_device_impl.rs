@@ -3,15 +3,17 @@ use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFu
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
+    DeviceImplInternal,
     DeviceReadCmd,
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
-use tokio::sync::{mpsc, broadcast, Mutex};
+  }, util::async_manager
+};
+use tokio::sync::{mpsc, Mutex};
 use async_trait::async_trait;
-use futures::{Stream, future::BoxFuture, FutureExt};
+use futures::{future::BoxFuture, FutureExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
 use std::{
   io::ErrorKind,
@@ -55,11 +57,16 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-  ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
-    match SerialPortDeviceImpl::new(&self.port_info, protocol) {
-      Ok(port) => Ok(Box::new(port)),
-      Err(e) => Err(e),
-    }
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  ) -> Result<DeviceImpl, ButtplugError> {
+    let device_impl_internal = SerialPortDeviceImpl::new(&self.port_info, protocol, device_event_sender)?;
+    let device_impl = DeviceImpl::new(
+      &self.port_info.port_name,
+      &self.port_info.port_name,
+      &vec![Endpoint::Rx, Endpoint::Tx],
+      Box::new(device_impl_internal)
+    );
+    Ok(device_impl)
   }
 }
 
@@ -93,12 +100,11 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: mpsc::Sender<Vec<u8
 }
 
 pub struct SerialPortDeviceImpl {
-  name: String,
   address: String,
   port_receiver: Arc<Mutex<mpsc::Receiver<Vec<u8>>>>,
   port_sender: mpsc::Sender<Vec<u8>>,
   connected: Arc<AtomicBool>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  device_event_sender: mpsc::Sender<ButtplugDeviceEvent>,
   // TODO These aren't actually read, do we need to hold them?
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
@@ -109,6 +115,7 @@ impl SerialPortDeviceImpl {
   pub fn new(
     port_info: &SerialPortInfo,
     protocol_def: ProtocolDefinition,
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<Self, ButtplugError> {
     // If we've gotten this far, we can expect we have a serial port definition.
     let port_def = protocol_def
@@ -150,9 +157,7 @@ impl SerialPortDeviceImpl {
       })
       .unwrap();
 
-    let (event_sender, _) = broadcast::channel(256);
     Ok(Self {
-      name: port.name().unwrap(),
       address: port.name().unwrap(),
       _read_thread: read_thread,
       _write_thread: write_thread,
@@ -160,26 +165,14 @@ impl SerialPortDeviceImpl {
       port_sender: writer_sender,
       _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
-      event_sender
+      device_event_sender
     })
   }
 }
 
-impl DeviceImpl for SerialPortDeviceImpl {
-  fn name(&self) -> &str {
-    &self.name
-  }
-
-  fn address(&self) -> &str {
-    &self.address
-  }
-
+impl DeviceImplInternal for SerialPortDeviceImpl {
   fn connected(&self) -> bool {
     self.connected.load(Ordering::SeqCst)
-  }
-
-  fn endpoints(&self) -> Vec<Endpoint> {
-    vec![Endpoint::Rx, Endpoint::Tx]
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
@@ -188,10 +181,6 @@ impl DeviceImpl for SerialPortDeviceImpl {
       connected.store(false, Ordering::SeqCst);
       Ok(())
     })
-  }
-
-  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
-    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(
@@ -222,7 +211,8 @@ impl DeviceImpl for SerialPortDeviceImpl {
   fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
     // TODO Should check endpoint validity
     let data_receiver = self.port_receiver.clone();
-    let event_sender = self.event_sender.clone();
+    let event_sender = self.device_event_sender.clone();
+    let address = self.address.clone();
     Box::pin(async move {
       async_manager::spawn(async move {
         // TODO There's only one subscribable endpoint on a serial port, so we
@@ -234,7 +224,8 @@ impl DeviceImpl for SerialPortDeviceImpl {
             Some(data) => {
               info!("Got serial data! {:?}", data);
               event_sender
-                .send(ButtplugDeviceEvent::Notification(Endpoint::Tx, data))
+                .send(ButtplugDeviceEvent::Notification(address.clone(), Endpoint::Tx, data))
+                .await
                 .unwrap();
             }
             None => {

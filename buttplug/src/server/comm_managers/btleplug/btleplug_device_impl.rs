@@ -14,17 +14,18 @@ use crate::{core::{
     ButtplugDeviceEvent,
     ButtplugDeviceReturn,
     DeviceImpl,
+    DeviceImplInternal,
     DeviceReadCmd,
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
-    Endpoint,
-  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
+  }, util::async_manager
+};
 use async_trait::async_trait;
 use btleplug::api::{CentralEvent, Peripheral};
-use futures::{Stream, future::BoxFuture};
+use futures::future::BoxFuture;
 use tokio::sync::{mpsc, broadcast};
-use std::fmt::{self, Debug};
+use std::{sync::{Arc, atomic::{AtomicBool, Ordering}}, fmt::{self, Debug}};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
@@ -65,7 +66,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-  ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  ) -> Result<DeviceImpl, ButtplugError> {
     if self.device.is_none() {
       return Err(
         ButtplugDeviceError::DeviceConnectionError(
@@ -77,18 +79,15 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     let device = self.device.take().unwrap();
     if let Some(ref proto) = protocol.btle {
       let (device_sender, device_receiver) = mpsc::channel(256);
-      let (output_broadcaster, _) = broadcast::channel(256);
-      let p = proto.clone();
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
       // rumble calls, so this will block whatever thread it's spawned to.
-      let broadcaster_clone = output_broadcaster.clone();
       let mut event_loop = BtlePlugInternalEventLoop::new(
         self.broadcaster.subscribe(),
         device,
-        p,
+        proto.clone(),
         device_receiver,
-        broadcaster_clone,
+        device_event_sender.clone(),
       );
       async_manager::spawn(async move { event_loop.run().await }).unwrap();
       let fut = DeviceReturnFuture::default();
@@ -106,13 +105,19 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         );
       };
       match fut.await {
-        ButtplugDeviceReturn::Connected(info) => Ok(Box::new(BtlePlugDeviceImpl::new(
-          &name,
-          &address,
-          info.endpoints,
-          device_sender,
-          output_broadcaster.clone(),
-        ))),
+        ButtplugDeviceReturn::Connected(info) => {
+          let device_internal_impl = BtlePlugDeviceImpl::new(
+            device_sender,
+            device_event_sender
+          );
+          let device_impl = DeviceImpl::new(
+            &name,
+            &address,
+            &info.endpoints,
+            Box::new(device_internal_impl)
+          );
+          Ok(device_impl)
+        },
         // TODO It'd be nice to carry this error through as a source.
         ButtplugDeviceReturn::Error(err) => Err(
           ButtplugDeviceError::DeviceConnectionError(format!(
@@ -136,11 +141,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 
 //#[derive(Clone)]
 pub struct BtlePlugDeviceImpl {
-  name: String,
-  address: String,
-  endpoints: Vec<Endpoint>,
   thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  connected: Arc<AtomicBool>,
 }
 
 unsafe impl Send for BtlePlugDeviceImpl {
@@ -150,18 +152,12 @@ unsafe impl Sync for BtlePlugDeviceImpl {
 
 impl BtlePlugDeviceImpl {
   pub fn new(
-    name: &str,
-    address: &str,
-    endpoints: Vec<Endpoint>,
     thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+    _: mpsc::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     Self {
-      name: name.to_string(),
-      address: address.to_string(),
-      endpoints,
       thread_sender,
-      event_sender,
+      connected: Arc::new(AtomicBool::new(true))
     }
   }
 
@@ -210,27 +206,9 @@ impl BtlePlugDeviceImpl {
   }
 }
 
-impl DeviceImpl for BtlePlugDeviceImpl {
-  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Unpin + Send> {
-    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
-  }
-
-  fn name(&self) -> &str {
-    &self.name
-  }
-
-  fn address(&self) -> &str {
-    &self.address
-  }
-
+impl DeviceImplInternal for BtlePlugDeviceImpl {
   fn connected(&self) -> bool {
-    // TODO Should figure out how we wanna deal with this across the
-    // representation and inner loop.
-    true
-  }
-
-  fn endpoints(&self) -> Vec<Endpoint> {
-    self.endpoints.clone()
+    self.connected.load(Ordering::SeqCst)
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {

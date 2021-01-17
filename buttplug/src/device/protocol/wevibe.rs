@@ -41,7 +41,7 @@ impl ButtplugProtocol for WeVibe {
   }
 
   fn initialize(
-    device_impl: &dyn DeviceImpl,
+    device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
@@ -66,7 +66,7 @@ impl ButtplugProtocol for WeVibe {
 impl ButtplugProtocolCommandHandler for WeVibe {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

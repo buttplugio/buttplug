@@ -55,7 +55,7 @@ impl ButtplugProtocol for MysteryVibe {
   }
 
   fn initialize(
-    device_impl: &dyn DeviceImpl,
+    device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     let info_fut = device_impl.write_value(msg);
@@ -67,7 +67,7 @@ impl ButtplugProtocol for MysteryVibe {
 }
 
 async fn vibration_update_handler(
-  device: Arc<Box<dyn DeviceImpl>>,
+  device: Arc<DeviceImpl>,
   command_holder: Arc<RwLock<Vec<u8>>>,
 ) {
   info!("Entering Mysteryvibe Control Loop");
@@ -91,7 +91,7 @@ async fn vibration_update_handler(
 impl ButtplugProtocolCommandHandler for MysteryVibe {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();

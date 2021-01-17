@@ -51,7 +51,7 @@ enum VorzeActions {
 impl ButtplugProtocolCommandHandler for VorzeSA {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -80,7 +80,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     msg: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();

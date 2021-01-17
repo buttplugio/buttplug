@@ -44,7 +44,7 @@ impl ButtplugProtocol for Vibratissimo {
 impl ButtplugProtocolCommandHandler for Vibratissimo {
   fn handle_stop_device_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::StopDeviceCmd,
   ) -> ButtplugDeviceResultFuture {
     self.handle_vibrate_cmd(
@@ -55,7 +55,7 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
 
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.

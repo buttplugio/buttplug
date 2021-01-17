@@ -56,7 +56,7 @@ impl ButtplugProtocol for KiirooV21 {
   }
 
   fn initialize(
-    device_impl: &dyn DeviceImpl,
+    device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling Onyx+ init");
     let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
@@ -81,7 +81,7 @@ impl ButtplugProtocol for KiirooV21 {
 impl ButtplugProtocolCommandHandler for KiirooV21 {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -103,7 +103,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = message.vectors[0].clone();
@@ -121,7 +121,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();

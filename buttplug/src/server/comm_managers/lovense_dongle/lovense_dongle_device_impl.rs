@@ -14,18 +14,17 @@ use crate::{core::{
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
+    DeviceImplInternal,
     DeviceReadCmd,
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  }, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
-use tokio::sync::{mpsc, broadcast};
-use async_trait::async_trait;
-use futures::{
-  Stream,
-  future::{self, BoxFuture},
+  }, util::async_manager
 };
+use tokio::sync::mpsc;
+use async_trait::async_trait;
+use futures::future::{self, BoxFuture};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -81,22 +80,27 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     _protocol: ProtocolDefinition,
-  ) -> Result<Box<dyn DeviceImpl>, ButtplugError> {
-    Ok(Box::new(LovenseDongleDeviceImpl::new(
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  ) -> Result<DeviceImpl, ButtplugError> {
+    let device_impl_internal = LovenseDongleDeviceImpl::new(
       &self.id,
       self.device_outgoing.clone(),
       self.device_incoming.take().unwrap(),
-    )))
+      device_event_sender
+    );
+    let device = DeviceImpl::new("Lovense Dongle Device", 
+    &self.id, 
+    &vec![Endpoint::Rx, Endpoint::Tx], 
+    Box::new(device_impl_internal));
+    Ok(device)
   }
 }
 
 #[derive(Clone)]
 pub struct LovenseDongleDeviceImpl {
-  name: String,
   address: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
-  connected: Arc<AtomicBool>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  connected: Arc<AtomicBool>
 }
 
 impl LovenseDongleDeviceImpl {
@@ -104,55 +108,44 @@ impl LovenseDongleDeviceImpl {
     address: &str,
     device_outgoing: mpsc::Sender<OutgoingLovenseData>,
     mut device_incoming: mpsc::Receiver<LovenseDongleIncomingMessage>,
+    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Self {
-    let (event_sender, _) = broadcast::channel(256);
-    let event_sender_clone = event_sender.clone();
+    let address_clone = address.to_owned().clone();
     async_manager::spawn(async move {
       while let Some(msg) = device_incoming.recv().await {
         if msg.func != LovenseDongleMessageFunc::ToyData {
           continue;
         }
         let data_str = msg.data.unwrap().data.unwrap();
-        event_sender_clone
+        device_event_sender
           .send(ButtplugDeviceEvent::Notification(
+            address_clone.clone(),
             Endpoint::Rx,
             data_str.into_bytes(),
           ))
+          .await
           .unwrap();
       }
       info!("Lovense dongle device disconnected",);
       // This should always succeed, as it'll relay up to the device manager,
       // and that's what owns us.
-      event_sender_clone
-        .send(ButtplugDeviceEvent::Removed)
+      device_event_sender
+        .send(ButtplugDeviceEvent::Removed(address_clone.clone()))
+        .await
         .unwrap();
     })
     .unwrap();
     Self {
-      name: "Lovense Dongle Device".to_owned(),
-      address: address.to_string(),
+      address: address.to_owned(),
       device_outgoing,
       connected: Arc::new(AtomicBool::new(true)),
-      event_sender
     }
   }
 }
 
-impl DeviceImpl for LovenseDongleDeviceImpl {
-  fn name(&self) -> &str {
-    &self.name
-  }
-
-  fn address(&self) -> &str {
-    &self.address
-  }
-
+impl DeviceImplInternal for LovenseDongleDeviceImpl {
   fn connected(&self) -> bool {
     self.connected.load(Ordering::SeqCst)
-  }
-
-  fn endpoints(&self) -> Vec<Endpoint> {
-    vec![Endpoint::Rx, Endpoint::Tx]
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
@@ -161,10 +154,6 @@ impl DeviceImpl for LovenseDongleDeviceImpl {
       connected.store(false, Ordering::SeqCst);
       Ok(())
     })
-  }
-
-  fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugDeviceEvent> + Send + Unpin> {
-    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.event_sender.subscribe())))
   }
 
   fn read_value(

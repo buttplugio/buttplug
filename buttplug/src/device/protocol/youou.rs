@@ -39,7 +39,7 @@ impl ButtplugProtocol for Youou {
   }
 
   fn initialize(
-    _device_impl: &dyn DeviceImpl,
+    _device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
@@ -50,7 +50,7 @@ impl ButtplugProtocol for Youou {
 impl ButtplugProtocolCommandHandler for Youou {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Box<dyn DeviceImpl>>,
+    device: Arc<DeviceImpl>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager

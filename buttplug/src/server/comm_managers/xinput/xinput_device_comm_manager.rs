@@ -18,7 +18,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{broadcast, Notify, mpsc};
+use tokio::sync::{Notify, mpsc};
 
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]
@@ -39,10 +39,14 @@ pub(super) struct XInputConnectionTracker {
   check_running: Arc<AtomicBool>,
 }
 
+pub(super) fn create_address(index: XInputControllerIndex) -> String {
+  format!("XBox Compatible Gamepad #{}", index)
+}
+
 async fn check_gamepad_connectivity(
   connected_gamepads: Arc<AtomicU8>,
   check_running: Arc<AtomicBool>,
-  sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
+  sender: Option<mpsc::Sender<ButtplugDeviceEvent>>,
 ) {
   check_running.store(true, Ordering::SeqCst);
   let handle = rusty_xinput::XInputHandle::load_default().unwrap();
@@ -69,7 +73,7 @@ async fn check_gamepad_connectivity(
         if let Some(send) = &sender {
           // This should always succeed, as it'll relay up to the device manager,
           // and that's what owns us.
-          send.send(ButtplugDeviceEvent::Removed).unwrap();
+          send.send(ButtplugDeviceEvent::Removed(create_address(*index))).await.unwrap();
         }
         // If we're out of gamepads to track, return immediately.
         if new_connected_gamepads == 0 {
@@ -102,7 +106,7 @@ impl XInputConnectionTracker {
   pub fn add_with_sender(
     &self,
     index: XInputControllerIndex,
-    sender: broadcast::Sender<ButtplugDeviceEvent>,
+    sender: mpsc::Sender<ButtplugDeviceEvent>,
   ) {
     let mut connected = self.connected_gamepads.load(Ordering::SeqCst);
     let should_start = connected == 0;
