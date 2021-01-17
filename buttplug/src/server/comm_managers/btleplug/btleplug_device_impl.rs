@@ -66,7 +66,6 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<DeviceImpl, ButtplugError> {
     if self.device.is_none() {
       return Err(
@@ -81,6 +80,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       let (device_sender, device_receiver) = mpsc::channel(256);
       let name = device.properties().local_name.unwrap();
       let address = device.properties().address.to_string();
+      let (device_event_sender, _) = broadcast::channel(256);
       // rumble calls, so this will block whatever thread it's spawned to.
       let mut event_loop = BtlePlugInternalEventLoop::new(
         self.broadcaster.subscribe(),
@@ -141,6 +141,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 
 //#[derive(Clone)]
 pub struct BtlePlugDeviceImpl {
+  event_stream: broadcast::Sender<ButtplugDeviceEvent>,
   thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
   connected: Arc<AtomicBool>,
 }
@@ -153,11 +154,12 @@ unsafe impl Sync for BtlePlugDeviceImpl {
 impl BtlePlugDeviceImpl {
   pub fn new(
     thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    _: mpsc::Sender<ButtplugDeviceEvent>,
+    event_stream: broadcast::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     Self {
       thread_sender,
-      connected: Arc::new(AtomicBool::new(true))
+      connected: Arc::new(AtomicBool::new(true)),
+      event_stream
     }
   }
 
@@ -207,6 +209,11 @@ impl BtlePlugDeviceImpl {
 }
 
 impl DeviceImplInternal for BtlePlugDeviceImpl {
+
+  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.event_stream.subscribe()
+  }
+
   fn connected(&self) -> bool {
     self.connected.load(Ordering::SeqCst)
   }

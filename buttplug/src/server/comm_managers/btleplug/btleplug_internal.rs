@@ -38,7 +38,7 @@ pub struct BtlePlugInternalEventLoop<T: Peripheral> {
   protocol: BluetoothLESpecifier,
   write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
   event_receiver: mpsc::Receiver<CentralEvent>,
-  output_sender: mpsc::Sender<ButtplugDeviceEvent>,
+  output_sender: broadcast::Sender<ButtplugDeviceEvent>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
@@ -54,7 +54,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     device: T,
     protocol: BluetoothLESpecifier,
     write_receiver: mpsc::Receiver<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    output_sender: mpsc::Sender<ButtplugDeviceEvent>,
+    output_sender: broadcast::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     let (event_sender, event_receiver) = mpsc::channel(256);
     let device_address = device.address();
@@ -203,7 +203,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               endpoint,
               notification.value,
             ))
-            .await
           {
             error!(
               "Cannot send notification, device object disappeared: {:?}",
@@ -360,7 +359,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         self
           .output_sender
           .send(ButtplugDeviceEvent::Removed(self.device.address().to_string()))
-          .await
           .unwrap();
         return true;
       }

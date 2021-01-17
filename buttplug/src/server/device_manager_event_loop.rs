@@ -22,7 +22,7 @@ use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
 pub struct DeviceManagerEventLoop {
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_index_generator: u32,
-  device_map: Arc<DashMap<u32, ButtplugDevice>>,
+  device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
   ping_timer: Arc<PingTimer>,
   /// Maps device addresses to indexes, so they can be reused on reconnect.
   device_index_map: Arc<DashMap<String, u32>>,
@@ -47,7 +47,7 @@ impl DeviceManagerEventLoop {
   pub fn new(
     device_config_manager: Arc<DeviceConfigurationManager>,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
-    device_map: Arc<DashMap<u32, ButtplugDevice>>,
+    device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
     ping_timer: Arc<PingTimer>,
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>
   ) -> Self {
@@ -72,15 +72,14 @@ impl DeviceManagerEventLoop {
     let create_device_future = 
       ButtplugDevice::try_create_device(
         self.device_config_manager.clone(), 
-        device_creator, 
-        self.device_event_sender.clone()
+        device_creator
       );
     async_manager::spawn(async move {
       match create_device_future.await
       {
         Ok(option_dev) => match option_dev {
           Some(device) => {
-            device_event_sender_clone.send(ButtplugDeviceEvent::Connected(device)).await.unwrap();
+            device_event_sender_clone.send(ButtplugDeviceEvent::Connected(Arc::new(device))).await.unwrap();
           }
           None => debug!("Device could not be matched to a protocol."),
         },
@@ -158,7 +157,7 @@ impl DeviceManagerEventLoop {
           info!("Device map contains key!");
           // We just checked that the key exists, so we can unwrap
           // here.
-          let (_, old_device): (_, ButtplugDevice) =
+          let (_, old_device) =
             self.device_map.remove(&device_index).unwrap();
           // After removing the device from the array, manually disconnect it to
           // make sure the event is thrown.
@@ -170,6 +169,16 @@ impl DeviceManagerEventLoop {
         } else {
           info!("Device map does not contain key!");
         }
+
+        // Create event loop for forwarding device events into our selector.
+        let mut event_listener = device.event_stream();
+        let event_sender = self.device_event_sender.clone();
+        async_manager::spawn(async move {
+          while let Ok(event) = event_listener.recv().await {
+            event_sender.send(event).await.unwrap();
+          }
+        }).unwrap();
+        
         info!("Assigning index {} to {}", device_index, device.name());
         let device_added_message = DeviceAdded::new(
           device_index,

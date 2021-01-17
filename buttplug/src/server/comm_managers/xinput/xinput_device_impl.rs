@@ -12,7 +12,7 @@ use std::{
   io::Cursor,
   fmt::{self, Debug}
 };
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, broadcast};
 
 pub struct XInputDeviceImplCreator {
   index: XInputControllerIndex,
@@ -43,10 +43,9 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     _protocol: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<DeviceImpl, ButtplugError> {
     debug!("Emitting a new xbox device impl.");
-    let device_impl_internal = XInputDeviceImpl::new(self.index, device_event_sender);
+    let device_impl_internal = XInputDeviceImpl::new(self.index);
     let device_impl = DeviceImpl::new(
       &format!("XBox Compatible Gamepad #{}", self.index),
       &create_address(self.index),
@@ -61,12 +60,13 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
 pub struct XInputDeviceImpl {
   handle: XInputHandle,
   index: XInputControllerIndex,
-  event_sender: mpsc::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   connection_tracker: XInputConnectionTracker,
 }
 
 impl XInputDeviceImpl {
-  pub fn new(index: XInputControllerIndex, device_event_sender: mpsc::Sender<ButtplugDeviceEvent>) -> Self {
+  pub fn new(index: XInputControllerIndex) -> Self {
+    let (device_event_sender, _) = broadcast::channel(256);
     let connection_tracker = XInputConnectionTracker::default();
     connection_tracker.add_with_sender(index, device_event_sender.clone());
     Self {
@@ -79,6 +79,10 @@ impl XInputDeviceImpl {
 }
 
 impl DeviceImplInternal for XInputDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.event_sender.subscribe()
+  }
+
   fn connected(&self) -> bool {
     self.connection_tracker.connected(self.index)
   }

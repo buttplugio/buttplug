@@ -49,9 +49,8 @@ async fn new_bluetoothle_test_device_with_cfg(
     device_config_mgr.unwrap_or_else(|| Arc::new(DeviceConfigurationManager::default()));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
-  let (dummy_event_sender, _) = mpsc::channel(256);
   let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator), dummy_event_sender)
+    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
       .await
       .unwrap()
       .unwrap();

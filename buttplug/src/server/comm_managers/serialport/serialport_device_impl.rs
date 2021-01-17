@@ -11,7 +11,7 @@ use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFu
     Endpoint,
   }, util::async_manager
 };
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{mpsc, Mutex, broadcast};
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
@@ -57,9 +57,8 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device_impl_internal = SerialPortDeviceImpl::new(&self.port_info, protocol, device_event_sender)?;
+    let device_impl_internal = SerialPortDeviceImpl::new(&self.port_info, protocol)?;
     let device_impl = DeviceImpl::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
@@ -104,7 +103,7 @@ pub struct SerialPortDeviceImpl {
   port_receiver: Arc<Mutex<mpsc::Receiver<Vec<u8>>>>,
   port_sender: mpsc::Sender<Vec<u8>>,
   connected: Arc<AtomicBool>,
-  device_event_sender: mpsc::Sender<ButtplugDeviceEvent>,
+  device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   // TODO These aren't actually read, do we need to hold them?
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
@@ -115,8 +114,8 @@ impl SerialPortDeviceImpl {
   pub fn new(
     port_info: &SerialPortInfo,
     protocol_def: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<Self, ButtplugError> {
+    let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.
     let port_def = protocol_def
       .serial
@@ -171,6 +170,10 @@ impl SerialPortDeviceImpl {
 }
 
 impl DeviceImplInternal for SerialPortDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.device_event_sender.subscribe()
+  }
+
   fn connected(&self) -> bool {
     self.connected.load(Ordering::SeqCst)
   }
@@ -225,7 +228,6 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
               info!("Got serial data! {:?}", data);
               event_sender
                 .send(ButtplugDeviceEvent::Notification(address.clone(), Endpoint::Tx, data))
-                .await
                 .unwrap();
             }
             None => {

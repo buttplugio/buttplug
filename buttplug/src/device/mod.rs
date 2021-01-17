@@ -297,9 +297,9 @@ pub enum ButtplugDeviceReturn {
   Error(ButtplugError),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ButtplugDeviceEvent {
-  Connected(ButtplugDevice),
+  Connected(Arc<ButtplugDevice>),
   Notification(String, Endpoint, Vec<u8>),
   Removed(String),
 }
@@ -332,6 +332,10 @@ impl DeviceImpl {
     self.internal_impl.connected()
   }
 
+  pub fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.internal_impl.event_stream()
+  }
+
   pub fn endpoints(&self) -> Vec<Endpoint> {
     self.endpoints.clone()
   }
@@ -361,6 +365,9 @@ impl DeviceImpl {
 pub trait DeviceImplInternal: Sync + Send {
   fn connected(&self) -> bool;
   fn disconnect(&self) -> ButtplugResultFuture;
+  // Ugh. Don't want to have to pass these around internally, but don't have a
+  // better solution yet.
+  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent>;
   fn read_value(&self, msg: DeviceReadCmd)
     -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture;
@@ -374,7 +381,6 @@ pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<DeviceImpl, ButtplugError>;
 }
 
@@ -422,7 +428,6 @@ impl ButtplugDevice {
   pub async fn try_create_device(
     device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
     // First off, we need to see if we even have a configuration available
     // for the device we're trying to create. If we don't, return Ok(None),
@@ -442,7 +447,7 @@ impl ButtplugDevice {
           config.configurations.clone(),
         );
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
-          match device_creator.try_create_device_impl(config, device_event_sender).await {
+          match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
               info!("Found Buttplug Device {}", device_impl.name());
               // If we've made it this far, we now have a connected device
@@ -506,6 +511,10 @@ impl ButtplugDevice {
     message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugDeviceResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
+  }
+
+  pub fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.device.event_stream()
   }
 
   // TODO Handle raw messages here.

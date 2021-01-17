@@ -19,7 +19,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Lovense {
@@ -31,6 +31,11 @@ pub struct Lovense {
 }
 
 impl ButtplugProtocol for Lovense {
+    // Due to this lacking the ability to take extra fields, we can't pass in our
+    // event receiver from the subscription, which we'll need for things like
+    // battery readings. Therefore, we expect initialize() to return the protocol
+    // itself instead of calling this, which is simply a convenience method for
+    // the default implementation anyways.
     fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
         let manager = GenericCommandManager::new(&attrs);
         Box::new(Self {
@@ -48,19 +53,24 @@ impl ButtplugProtocol for Lovense {
         let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
         let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
         let info_fut = device_impl.write_value(msg);
+        let mut event_receiver = device_impl.event_stream();
         Box::pin(async move {
             let identifier;
-            let mut event_receiver: broadcast::Receiver<Vec<u8>> = subscribe_fut.await?;
+            subscribe_fut.await?;
             info_fut.await?;
             // TODO Put some sort of very quick timeout here, we should just fail if
             // we don't get something back quickly.
-            if let Ok(data) = event_receiver.recv().await {
-                let type_response = std::str::from_utf8(&data).unwrap().to_owned();
+            if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event_receiver.recv().await {
+                let type_response = std::str::from_utf8(&n).unwrap().to_owned();
                 info!("Lovense Device Type Response: {}", type_response);
                 identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
                 Ok(Some(identifier))
             } else {
-              Err(ButtplugDeviceError::DeviceConnectionError("Cannot retreive Lovense device information.".to_owned()).into())
+                Err(ButtplugDeviceError::ProtocolSpecificError(
+                    "Lovense",
+                    "Lovense Device disconnected while getting DeviceType info.",
+                )
+                .into())
             }
         })
     }
@@ -148,30 +158,32 @@ impl ButtplugProtocolCommandHandler for Lovense {
         device: Arc<DeviceImpl>,
         message: messages::BatteryLevelCmd,
     ) -> ButtplugDeviceResultFuture {
-        let mut subscribe_fut = device.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
+        let mut device_notification_receiver = device.event_stream();
         Box::pin(async move {
-            let mut device_notification_receiver = subscribe_fut.await?;
             let write_fut = device.write_value(DeviceWriteCmd::new(
                 Endpoint::Tx,
                 b"Battery;".to_vec(),
                 false,
             ));
             write_fut.await?;
-            if let Ok(data) = device_notification_receiver.recv().await {
-                if let Ok(data_str) = std::str::from_utf8(&data) {
-                    let len = data_str.len();
-                    // Chop the semicolon at the end of the received line.
-                    if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
-                        return Ok(messages::BatteryLevelReading::new(
-                            message.device_index,
-                            level as f64 / 100f64,
-                        )
-                        .into());
+            while let Ok(event) = device_notification_receiver.recv().await {
+                if let ButtplugDeviceEvent::Notification(_, _, data) = event {
+                    if let Ok(data_str) = std::str::from_utf8(&data) {
+                        let len = data_str.len();
+                        // Chop the semicolon at the end of the received line.
+                        if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
+                            return Ok(messages::BatteryLevelReading::new(
+                                message.device_index,
+                                level as f64 / 100f64,
+                            )
+                            .into());
+                        }
                     }
                 }
             }
-            Err(ButtplugDeviceError::DeviceNotConnected(
-                "Device disconnected while waiting for battery message.".to_owned(),
+            Err(ButtplugDeviceError::ProtocolSpecificError(
+                "Lovense",
+                "Lovense Device disconnected while getting Battery info.",
             )
             .into())
         })

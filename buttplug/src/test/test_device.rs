@@ -16,7 +16,7 @@ use crate::{core::{
     Endpoint,
   }
 };
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc, Mutex};
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
@@ -57,10 +57,8 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
-    device_event_sender: mpsc::Sender<ButtplugDeviceEvent>
   ) -> Result<DeviceImpl, ButtplugError> {
     let device = self.device_impl.take().unwrap();
-    device.set_event_sender(device_event_sender).await;
     if let Some(btle) = &protocol.btle {
       for endpoint_map in btle.services.values() {
         for endpoint in endpoint_map.keys() {
@@ -101,28 +99,26 @@ pub struct TestDeviceInternal {
   name: String,
   address: String,
   endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  event_sender: Arc<Mutex<mpsc::Sender<ButtplugDeviceEvent>>>
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>
 }
 
 impl TestDeviceInternal {
   pub fn new(name: &str, address: &str) -> Self {
-    // Create a dummy event sender, will be replaced when device is emitted via
-    // the device manager.
-    let (event_sender, _) = mpsc::channel(256);
+    let (event_sender, _) = broadcast::channel(256);
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoint_channels: Arc::new(DashMap::new()),
-      event_sender: Arc::new(Mutex::new(event_sender))
+      event_sender
     }
   }
 
-  pub async fn set_event_sender(&self, event_sender: mpsc::Sender<ButtplugDeviceEvent>) {
-    *self.event_sender.lock().await = event_sender;
+  pub fn sender(&self) -> broadcast::Sender<ButtplugDeviceEvent> {
+    self.event_sender.clone()
   }
 
-  pub async fn send_event(&self, event: ButtplugDeviceEvent) {
-    self.event_sender.lock().await.send(event).await.unwrap();
+  pub fn send_event(&self, event: ButtplugDeviceEvent) {
+    self.event_sender.send(event).unwrap();
   }
 
   pub fn name(&self) -> String {
@@ -154,10 +150,7 @@ impl TestDeviceInternal {
     let address = self.address.clone();
     Box::pin(async move {
       sender
-        .lock()
-        .await
         .send(ButtplugDeviceEvent::Removed(address))
-        .await
         .unwrap();
       Ok(())
     })
@@ -171,7 +164,7 @@ pub struct TestDevice {
   // for creation in ButtplugDevice, so initialization and cloning order
   // matters here.
   pub endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  pub event_sender: mpsc::Sender<ButtplugDeviceEvent>
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>
 }
 
 impl TestDevice {
@@ -180,12 +173,16 @@ impl TestDevice {
     Self {
       address: internal_device.address(),
       endpoint_channels: internal_device.endpoint_channels.clone(),
-      event_sender: internal_device.event_sender.try_lock().unwrap().clone(),
+      event_sender: internal_device.sender()
     }
   }
 }
 
 impl DeviceImplInternal for TestDevice {
+  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+    self.event_sender.subscribe()
+  }
+
   fn connected(&self) -> bool {
     true
   }
@@ -196,7 +193,6 @@ impl DeviceImplInternal for TestDevice {
     Box::pin(async move {
       sender
         .send(ButtplugDeviceEvent::Removed(address))
-        .await
         .unwrap();
       Ok(())
     })
