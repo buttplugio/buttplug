@@ -31,7 +31,7 @@ where
   WasmBindgenAsyncManager::default().spawn_with_handle(future)
 }
 
-pub fn block_on<F>(future: F) -> <F as Future>::Output
+pub fn block_on<F>(_: F) -> <F as Future>::Output
 where
   F: Future,
 {
