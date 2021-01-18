@@ -58,6 +58,16 @@ impl ChannelHub {
     )))
   }
 
+  pub async fn wait_for_dongle_input(&mut self) -> IncomingMessage {
+    match self.dongle_incoming.recv().await {
+      Some(msg) => IncomingMessage::Dongle(msg),
+      None => {
+        error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+        IncomingMessage::Disconnect
+      }
+    }
+  }
+
   pub async fn wait_for_input(&mut self) -> IncomingMessage {
     select! {
       comm_res = self.comm_manager_incoming.recv().fuse() => {
@@ -209,10 +219,7 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
             self.event_sender.clone(),
             self.is_scanning,
           );
-          if should_scan {
-            return Some(Box::new(LovenseDongleStartScanning::new(hub)));
-          }
-          return Some(Box::new(LovenseDongleIdle::new(hub)));
+          return Some(Box::new(LovenseCheckForAlreadyConnectedDevice::new(hub, should_scan)));
         }
         LovenseDeviceCommand::StartScanning => {
           should_scan = true;
@@ -226,13 +233,25 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
   }
 }
 
-state_definition!(LovenseDongleIdle);
+#[derive(Debug)]
+struct LovenseCheckForAlreadyConnectedDevice {
+  hub: ChannelHub,
+  should_scan: bool
+}
+
+impl LovenseCheckForAlreadyConnectedDevice {
+  pub fn new (hub: ChannelHub, should_scan: bool) -> Self {
+    Self {
+      hub,
+      should_scan
+    }
+  }
+}
 
 #[async_trait]
-impl LovenseDongleState for LovenseDongleIdle {
+impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
   async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
-    info!("Running idle step");
-
+    info!("Lovense dongle checking for already connected devices");
     // Check to see if any toy is already connected.
     let autoconnect_msg = LovenseDongleOutgoingMessage {
       func: LovenseDongleMessageFunc::Statuss,
@@ -241,17 +260,58 @@ impl LovenseDongleState for LovenseDongleIdle {
       command: None,
       eager: None,
     };
-    self
-      .hub
-      .send_output(OutgoingLovenseData::Message(autoconnect_msg))
-      .await;
+    self.hub.send_output(OutgoingLovenseData::Message(autoconnect_msg)).await;
+    // This sleep is REQUIRED. If we send something too soon after this, the
+    // dongle locks up. The query for already connected devices just returns
+    // nothing if there's no device currently connected, so all we can do is wait.
+    let mut id = None;
+    let fut = self.hub.wait_for_dongle_input();
+    select! {
+      incoming_msg = fut.fuse() => {
+        match incoming_msg {
+          IncomingMessage::Dongle(device_msg) => 
+            match device_msg.func {
+              LovenseDongleMessageFunc::IncomingStatus => {
+                if let Some(incoming_data) = device_msg.data {
+                  if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
+                    info!("Lovense dongle already connected to a device, registering in system.");
+                    id = incoming_data.id;
+                  }
+                }
+              }
+              func => error!("Cannot handle dongle function {:?}", func),
+            }
+            _ => error!("Cannot handle incoming message {:?}", incoming_msg),
+        }    
+      },
+      _ = futures_timer::Delay::new(std::time::Duration::from_millis(250)).fuse() => {
+        // noop, just fall thru.
+      }
+    }
+    if id.is_some() {
+      info!("Lovense dongle found already connected devices");
+      return Some(Box::new(LovenseDongleDeviceLoop::new(
+        self.hub,
+        id.unwrap(),
+      )));
+    }
+    if self.should_scan {
+      info!("No devices connected to lovense dongle, scanning.");
+      return Some(Box::new(LovenseDongleStartScanning::new(self.hub)));
+    }
+    info!("No devices connected to lovense dongle, idling.");
+    return Some(Box::new(LovenseDongleIdle::new(self.hub)));
+  }
+}
 
-    // This sleep is REQUIRED. If we send too soon after this, the dongle locks up.
-    futures_timer::Delay::new(std::time::Duration::from_millis(250)).await;
+state_definition!(LovenseDongleIdle);
+#[async_trait]
+impl LovenseDongleState for LovenseDongleIdle {
+  async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
+    info!("Running idle step");
 
     loop {
-      let msg = self.hub.wait_for_input().await;
-      match msg {
+      match self.hub.wait_for_input().await {
         IncomingMessage::Dongle(device_msg) => match device_msg.func {
           LovenseDongleMessageFunc::IncomingStatus => {
             if let Some(incoming_data) = device_msg.data {
@@ -284,7 +344,7 @@ impl LovenseDongleState for LovenseDongleIdle {
           error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();
         }
-        _ => {
+        msg => {
           error!("Unhandled message to lovense dongle: {:?}", msg);
         }
       }
@@ -329,6 +389,17 @@ impl LovenseDongleState for LovenseDongleScanning {
         }
         IncomingMessage::Dongle(device_msg) => {
           match device_msg.func {
+            LovenseDongleMessageFunc::IncomingStatus => {
+              if let Some(incoming_data) = device_msg.data {
+                if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
+                  info!("Lovense dongle already connected to a device, registering in system.");
+                  return Some(Box::new(LovenseDongleDeviceLoop::new(
+                    self.hub,
+                    incoming_data.id.unwrap(),
+                  )));
+                }
+              }
+            }
             LovenseDongleMessageFunc::ToyData => {
               if let Some(data) = device_msg.data {
                 return Some(Box::new(LovenseDongleStopScanningAndConnect::new(
