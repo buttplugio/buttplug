@@ -39,7 +39,6 @@ use crate::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, Stream};
-use parking_lot::RwLock;
 use std::{
   collections::HashMap,
   fmt,
@@ -147,7 +146,7 @@ pub struct ButtplugClientDevice {
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
   event_loop_sender: broadcast::Sender<ButtplugClientRequest>,
-  internal_event_sender: Arc<RwLock<Option<broadcast::Sender<ButtplugClientDeviceEvent>>>>,
+  internal_event_sender: broadcast::Sender<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
   device_connected: Arc<AtomicBool>,
@@ -195,7 +194,7 @@ impl ButtplugClientDevice {
       index,
       allowed_messages,
       event_loop_sender: message_sender,
-      internal_event_sender: Arc::new(RwLock::new(Some(event_sender))),
+      internal_event_sender: event_sender,
       device_connected,
       client_connected,
     }
@@ -259,13 +258,8 @@ impl ButtplugClientDevice {
     )
   }
 
-  pub fn event_stream(&self) -> Option<impl Stream<Item = ButtplugClientDeviceEvent>> {
-    if let Some(sender) = &*self.internal_event_sender.read() {
-      let receiver = sender.subscribe();
-      Some(convert_broadcast_receiver_to_stream(receiver))
-    } else {
-      None
-    }
+  pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.internal_event_sender.subscribe())))
   }
 
   fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T>
@@ -567,9 +561,6 @@ impl ButtplugClientDevice {
 
   pub(super) fn set_device_connected(&self, connected: bool) {
     self.device_connected.store(connected, Ordering::SeqCst);
-    if !connected {
-      let _ = self.internal_event_sender.write().take();
-    }
   }
 
   pub(super) fn set_client_connected(&self, connected: bool) {
@@ -577,12 +568,8 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {
-    if let Some(sender) = &*self.internal_event_sender.read() {
-      if sender.send(event.clone()).is_err() {
-        error!("No handlers for device event, dropping event: {:?}", event);
-      }
-    } else {
-      error!("Cannot send event to disconnected device: {:?}", event);
+    if self.internal_event_sender.send(event.clone()).is_err() {
+      error!("No handlers for device event, dropping event: {:?}", event);
     }
   }
 }

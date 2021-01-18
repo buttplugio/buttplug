@@ -61,13 +61,14 @@ pub struct PingTimer {
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    if self
-      .ping_msg_sender
-      .blocking_send(PingMessage::End)
-      .is_err()
-    {
-      debug!("Receiver does not exist, assuming ping timer event loop already dead.");
-    }
+    // This cannot block, otherwise it will throw in WASM contexts on
+    // destruction. We must use send(), not blocking_send().
+    let sender = self.ping_msg_sender.clone();
+    async_manager::spawn(async move {
+      if sender.send(PingMessage::End).await.is_err() {
+        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
+      }
+    }).unwrap();
   }
 }
 

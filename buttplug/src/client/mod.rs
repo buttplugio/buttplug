@@ -40,24 +40,15 @@ use futures::{
   future::{self, BoxFuture},
   Stream,
 };
-use parking_lot::RwLock;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use thiserror::Error;
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, Mutex};
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
-/// Result type used inside the client module.
-///
-/// When communicating inside the client module, we'll usually only receive
-/// errors related to the connector. Buttplug
-/// [Error][crate::core::messages::Error] messages will still be valid, because
-/// they're coming from the server.
-// TODO This is not longer used since we return errors at the point of deserialization. Remove.
-type ButtplugInternalClientResult<T = ()> = Result<T, ButtplugClientError>;
 /// Result type used for public APIs.
 ///
 /// Allows us to differentiate between an issue with the connector (as a
@@ -68,7 +59,7 @@ type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResul
 
 /// Result type used for passing server responses.
 pub type ButtplugInternalClientMessageResult =
-  ButtplugInternalClientResult<ButtplugCurrentSpecServerMessage>;
+  ButtplugClientResult<ButtplugCurrentSpecServerMessage>;
 pub type ButtplugInternalClientMessageResultFuture =
   BoxFuture<'static, ButtplugInternalClientMessageResult>;
 /// Future state type for returning server responses across futures.
@@ -178,12 +169,12 @@ pub struct ButtplugClient {
   /// this name is sometimes shown on the server logs or GUI.
   client_name: String,
   /// The server name that we're current connected to.
-  server_name: Arc<RwLock<Option<String>>>,
+  server_name: Arc<Mutex<Option<String>>>,
   event_stream: broadcast::Sender<ButtplugClientEvent>,
   // Sender to relay messages to the internal client loop
   message_sender: broadcast::Sender<ButtplugClientRequest>,
   connected: Arc<AtomicBool>,
-  _client_span: Arc<RwLock<Option<Span>>>,
+  _client_span: Arc<Mutex<Option<Span>>>,
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
@@ -200,10 +191,10 @@ impl ButtplugClient {
     let (event_stream, _) = broadcast::channel(256);
     Self {
       client_name: name.to_owned(),
-      server_name: Arc::new(RwLock::new(None)),
+      server_name: Arc::new(Mutex::new(None)),
       event_stream,
       message_sender,
-      _client_span: Arc::new(RwLock::new(None)),
+      _client_span: Arc::new(Mutex::new(None)),
       connected: Arc::new(AtomicBool::new(false)),
       device_map: Arc::new(DashMap::new()),
     }
@@ -224,7 +215,7 @@ impl ButtplugClient {
       ));
     }
 
-    *self._client_span.write() = {
+    *self._client_span.lock().await = {
       let span = span!(Level::INFO, "Client");
       let _ = span.enter();
       Some(span)
@@ -362,7 +353,7 @@ impl ButtplugClient {
     debug!("Got ServerInfo return.");
     if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
       info!("Connected to {}", server_info.server_name);
-      *self.server_name.write() = Some(server_info.server_name);
+      *self.server_name.lock().await = Some(server_info.server_name);
       // TODO Handle ping time in the internal event loop
 
       // Get currently connected devices. The event loop will
@@ -516,6 +507,16 @@ impl ButtplugClient {
   }
 
   pub fn server_name(&self) -> Option<String> {
-    (*self.server_name.read()).clone()
+    // We'd have to be calling server_name in an extremely tight, asynchronous
+    // loop for this to return None, so we'll treat this as lockless.
+    //
+    // Dear users actually reading this code: This is not an invitation for you
+    // to get the server name in a tight, asynchronous loop. This will never
+    // change throughout the life to the connection.
+    if let Ok(name) = self.server_name.try_lock() {
+      name.clone()
+    } else {
+      None
+    }
   }
 }
