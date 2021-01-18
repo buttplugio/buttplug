@@ -34,9 +34,9 @@ impl From<Level> for LogLevel {
   }
 }
 
-impl Into<Level> for LogLevel {
-  fn into(self) -> Level {
-    match self {
+impl From<LogLevel> for Level {
+  fn from(level: LogLevel) -> Level {
+    match level {
       // Rust doesn't have a Fatal level, and we never use it in code, so
       // just convert to Error.
       LogLevel::Fatal => Level::ERROR,
