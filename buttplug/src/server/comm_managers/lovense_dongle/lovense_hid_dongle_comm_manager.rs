@@ -15,12 +15,18 @@ use crate::{
   },
   util::async_manager,
 };
-use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
 use hidapi::{HidApi, HidDevice};
 use serde_json::Deserializer;
 use std::{
-  sync::{atomic::{AtomicBool, Ordering}, Arc},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
   thread,
+};
+use tokio::sync::{
+  mpsc::{channel, Receiver, Sender},
+  Mutex,
 };
 use tracing_futures::Instrument;
 
@@ -115,7 +121,7 @@ pub struct LovenseHIDDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl LovenseHIDDongleCommunicationManager {
@@ -185,7 +191,7 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
-      is_scanning: Arc::new(AtomicBool::new(false))
+      is_scanning: Arc::new(AtomicBool::new(false)),
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(
@@ -195,8 +201,10 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
     )
     .unwrap();
-    let mut machine = create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    async_manager::spawn(async move {
+    let mut machine =
+      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(
+      async move {
         while let Some(next) = machine.transition().await {
           machine = next;
         }

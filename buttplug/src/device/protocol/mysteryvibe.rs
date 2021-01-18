@@ -12,8 +12,8 @@ use crate::{
   },
   util::async_manager,
 };
-use tokio::sync::{Mutex, RwLock};
 use futures::future::BoxFuture;
+use tokio::sync::{Mutex, RwLock};
 // use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -66,10 +66,7 @@ impl ButtplugProtocol for MysteryVibe {
   }
 }
 
-async fn vibration_update_handler(
-  device: Arc<DeviceImpl>,
-  command_holder: Arc<RwLock<Vec<u8>>>,
-) {
+async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Mysteryvibe Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device

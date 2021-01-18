@@ -12,9 +12,9 @@ pub mod lovense_dongle;
 pub mod serialport;
 
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
-use tokio::sync::mpsc::Sender;
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
+use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
 pub enum DeviceCommunicationEvent {

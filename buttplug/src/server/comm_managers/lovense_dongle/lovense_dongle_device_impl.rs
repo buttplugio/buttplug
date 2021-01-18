@@ -5,11 +5,13 @@ use super::lovense_dongle_messages::{
   LovenseDongleOutgoingMessage,
   OutgoingLovenseData,
 };
-use crate::{core::{
+use crate::{
+  core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{
+  },
+  device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
@@ -20,16 +22,17 @@ use crate::{core::{
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  }, util::async_manager
+  },
+  util::async_manager,
 };
-use tokio::sync::{mpsc, broadcast};
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
+use std::fmt::{self, Debug};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use std::fmt::{self, Debug};
+use tokio::sync::{broadcast, mpsc};
 
 pub struct LovenseDongleDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -86,10 +89,12 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
       self.device_outgoing.clone(),
       self.device_incoming.take().unwrap(),
     );
-    let device = DeviceImpl::new("Lovense Dongle Device", 
-    &self.id, 
-    &[Endpoint::Rx, Endpoint::Tx], 
-    Box::new(device_impl_internal));
+    let device = DeviceImpl::new(
+      "Lovense Dongle Device",
+      &self.id,
+      &[Endpoint::Rx, Endpoint::Tx],
+      Box::new(device_impl_internal),
+    );
     Ok(device)
   }
 }
@@ -99,7 +104,7 @@ pub struct LovenseDongleDeviceImpl {
   address: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   connected: Arc<AtomicBool>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 impl LovenseDongleDeviceImpl {
@@ -137,7 +142,7 @@ impl LovenseDongleDeviceImpl {
       address: address.to_owned(),
       device_outgoing,
       connected: Arc::new(AtomicBool::new(true)),
-      event_sender: device_event_sender
+      event_sender: device_event_sender,
     }
   }
 }

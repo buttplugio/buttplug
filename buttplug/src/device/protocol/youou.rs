@@ -99,7 +99,7 @@ impl ButtplugProtocolCommandHandler for Youou {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
@@ -116,9 +116,7 @@ mod test {
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

@@ -1,9 +1,13 @@
 use async_stream::stream;
+use futures::{FutureExt, Stream};
 use tokio::sync::{broadcast, mpsc};
-use futures::{Stream, FutureExt};
 
-pub fn convert_broadcast_receiver_to_stream<T>(receiver: broadcast::Receiver<T>) -> impl Stream<Item = T>
-where T: Unpin + Clone {
+pub fn convert_broadcast_receiver_to_stream<T>(
+  receiver: broadcast::Receiver<T>,
+) -> impl Stream<Item = T>
+where
+  T: Unpin + Clone,
+{
   stream! {
     pin_mut!(receiver);
     while let Ok(val) = receiver.recv().await {

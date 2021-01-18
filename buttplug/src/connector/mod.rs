@@ -98,10 +98,10 @@ use crate::{
   },
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
-use tokio::sync::mpsc::Receiver;
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 use thiserror::Error;
+use tokio::sync::mpsc::Receiver;
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorStateShared =

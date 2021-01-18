@@ -1,16 +1,35 @@
-use super::xinput_device_comm_manager::{XInputConnectionTracker, XInputControllerIndex, create_address};
-use crate::{core::{
+use super::xinput_device_comm_manager::{
+  create_address,
+  XInputConnectionTracker,
+  XInputControllerIndex,
+};
+use crate::{
+  core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier}}, server::comm_managers::ButtplugDeviceSpecificError};
+  },
+  device::{
+    configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
+  },
+  server::comm_managers::ButtplugDeviceSpecificError,
+};
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
 use futures::future::{self, BoxFuture};
 use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::{
+  fmt::{self, Debug},
   io::Cursor,
-  fmt::{self, Debug}
 };
 use tokio::sync::broadcast;
 
@@ -50,7 +69,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
       &format!("XBox Compatible Gamepad #{}", self.index),
       &create_address(self.index),
       &[Endpoint::Tx],
-      Box::new(device_impl_internal)
+      Box::new(device_impl_internal),
     );
     Ok(device_impl)
   }

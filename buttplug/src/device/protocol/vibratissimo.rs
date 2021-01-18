@@ -14,8 +14,8 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Vibratissimo {
@@ -90,12 +90,12 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
+    test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 

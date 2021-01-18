@@ -1,6 +1,6 @@
-use tokio::sync::mpsc::{Receiver, Sender};
 use serde::{Deserialize, Serialize};
 use serde_repr::*;
+use tokio::sync::mpsc::{Receiver, Sender};
 
 #[derive(Debug)]
 pub enum OutgoingLovenseData {

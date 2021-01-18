@@ -11,7 +11,6 @@ use crate::{
   server::{ButtplugServer, ButtplugServerOptions},
   util::async_manager,
 };
-use tokio::sync::mpsc::{channel, Receiver, Sender};
 use futures::{
   future::{self, BoxFuture},
   StreamExt,
@@ -23,6 +22,7 @@ use std::{
     Arc,
   },
 };
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector

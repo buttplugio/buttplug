@@ -25,13 +25,13 @@ use crate::{
     },
   },
 };
-use tokio::sync::{
-  mpsc,
-  broadcast
-};
 use dashmap::DashMap;
 use futures::FutureExt;
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
+use tokio::sync::{broadcast, mpsc};
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]
@@ -86,7 +86,8 @@ where
   /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
-  from_connector_receiver: mpsc::Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
+  from_connector_receiver:
+    mpsc::Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
   /// Map of devices shared between the client and the event loop
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   /// Sends events to the [ButtplugClient] instance.
@@ -112,7 +113,9 @@ where
   pub fn new(
     connected_status: Arc<AtomicBool>,
     connector: ConnectorType,
-    from_connector_receiver: mpsc::Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
+    from_connector_receiver: mpsc::Receiver<
+      Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>,
+    >,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
     from_client_sender: broadcast::Sender<ButtplugClientRequest>,
     device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
@@ -149,12 +152,11 @@ where
       // If it doesn't, insert it.
       None => {
         debug!("Device does not exist, creating new entry.");
-        let device =
-          Arc::new(ButtplugClientDevice::new_from_device_info(info, self.from_client_sender.clone()));
-        self.device_map.insert(
-          info.device_index,
-          device.clone() 
-        );
+        let device = Arc::new(ButtplugClientDevice::new_from_device_info(
+          info,
+          self.from_client_sender.clone(),
+        ));
+        self.device_map.insert(info.device_index, device.clone());
         device
       }
     }
@@ -187,8 +189,7 @@ where
             trace!("Device added, updating map and sending to client");
             let info = DeviceMessageInfo::from(dev);
             let device = self.create_client_device(&info);
-            self
-              .send_client_event(ButtplugClientEvent::DeviceAdded(device));
+            self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
           }
           ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
             if self.device_map.contains_key(&dev.device_index) {
@@ -197,29 +198,30 @@ where
               device.set_device_connected(false);
               // Then remove it from our storage map
               self.device_map.remove(&dev.device_index);
-              self
-                .send_client_event(ButtplugClientEvent::DeviceRemoved(device));
+              self.send_client_event(ButtplugClientEvent::DeviceRemoved(device));
             } else {
               error!("Received DeviceRemoved for non-existent device index");
             }
           }
           ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
             trace!("Scanning finished event received, forwarding to client.");
-            self
-              .send_client_event(ButtplugClientEvent::ScanningFinished);
+            self.send_client_event(ButtplugClientEvent::ScanningFinished);
           }
           ButtplugCurrentSpecServerMessage::RawReading(msg) => {
             let device_idx = msg.device_index;
             if let Some(device) = self.device_map.get(&device_idx) {
-              device.value().queue_event(ButtplugClientDeviceEvent::Message(ButtplugCurrentSpecServerMessage::from(msg)));
+              device
+                .value()
+                .queue_event(ButtplugClientDeviceEvent::Message(
+                  ButtplugCurrentSpecServerMessage::from(msg),
+                ));
             }
           }
           _ => error!("Cannot process message, dropping: {:?}", msg),
         }
       }
       Err(err) => {
-        self
-          .send_client_event(ButtplugClientEvent::Error(err.into()));
+        self.send_client_event(ButtplugClientEvent::Error(err.into()));
       }
     }
   }
@@ -259,8 +261,8 @@ where
             continue;
           }
           let device = self.create_client_device(&d);
-          self
-            .send_client_event(ButtplugClientEvent::DeviceAdded(device));        }
+          self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
+        }
         true
       }
     }

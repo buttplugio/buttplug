@@ -197,13 +197,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         let sender = os.clone();
         let address_clone = address.clone();
         async_manager::spawn(async move {
-          if let Err(err) = sender
-            .send(ButtplugDeviceEvent::Notification(
-              address_clone,
-              endpoint,
-              notification.value,
-            ))
-          {
+          if let Err(err) = sender.send(ButtplugDeviceEvent::Notification(
+            address_clone,
+            endpoint,
+            notification.value,
+          )) {
             error!(
               "Cannot send notification, device object disappeared: {:?}",
               err
@@ -358,7 +356,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         // and that's what owns us.
         self
           .output_sender
-          .send(ButtplugDeviceEvent::Removed(self.device.address().to_string()))
+          .send(ButtplugDeviceEvent::Removed(
+            self.device.address().to_string(),
+          ))
           .unwrap();
         return true;
       }

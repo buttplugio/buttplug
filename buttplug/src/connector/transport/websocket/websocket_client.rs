@@ -22,14 +22,14 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use tokio::sync::mpsc::{channel, Sender};
-use tokio::sync::Mutex;
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
 use futures::{SinkExt, StreamExt};
 use std::sync::Arc;
+use tokio::sync::mpsc::{channel, Sender};
+use tokio::sync::Mutex;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {

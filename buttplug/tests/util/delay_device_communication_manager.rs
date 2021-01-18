@@ -1,4 +1,3 @@
-use tokio::sync::mpsc::Sender;
 use buttplug::{
   core::ButtplugResultFuture,
   server::comm_managers::{
@@ -11,6 +10,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use tokio::sync::mpsc::Sender;
 
 pub struct DelayDeviceCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,

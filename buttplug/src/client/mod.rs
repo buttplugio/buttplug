@@ -6,14 +6,16 @@
 // for full license information.
 
 //! Communications API for accessing Buttplug Servers
+pub mod client_event_loop;
 mod client_message_sorter;
 pub mod device;
-pub mod client_event_loop;
 
-use device::ButtplugClientDevice;
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
+use device::ButtplugClientDevice;
 
-use crate::{connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture}, core::{
+use crate::{
+  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
+  core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
       ButtplugCurrentSpecClientMessage,
@@ -26,21 +28,27 @@ use crate::{connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConne
       StopAllDevices,
       StopScanning,
     },
-  }, util::{async_manager, future::{ButtplugFuture, ButtplugFutureStateShared}, stream::convert_broadcast_receiver_to_stream}};
+  },
+  util::{
+    async_manager,
+    future::{ButtplugFuture, ButtplugFutureStateShared},
+    stream::convert_broadcast_receiver_to_stream,
+  },
+};
 use dashmap::DashMap;
 use futures::{
   future::{self, BoxFuture},
   Stream,
 };
+use parking_lot::RwLock;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use thiserror::Error;
+use tokio::sync::broadcast;
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
-use parking_lot::RwLock;
-use tokio::sync::broadcast;
 
 /// Result type used inside the client module.
 ///
@@ -146,7 +154,8 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {}
+impl Unpin for ButtplugClientEvent {
+}
 
 /// Struct used by applications to communicate with a Buttplug Server.
 ///
@@ -186,7 +195,6 @@ unsafe impl Sync for ButtplugClient {
 }
 
 impl ButtplugClient {
-
   pub fn new(name: &str) -> Self {
     let (message_sender, _) = broadcast::channel(256);
     let (event_stream, _) = broadcast::channel(256);
@@ -197,7 +205,7 @@ impl ButtplugClient {
       message_sender,
       _client_span: Arc::new(RwLock::new(None)),
       connected: Arc::new(AtomicBool::new(false)),
-      device_map: Arc::new(DashMap::new())
+      device_map: Arc::new(DashMap::new()),
     }
   }
 
@@ -211,9 +219,11 @@ impl ButtplugClient {
         + 'static,
   {
     if self.connected() {
-      return Err(ButtplugClientError::ButtplugConnectorError(ButtplugConnectorError::ConnectorAlreadyConnected));
+      return Err(ButtplugClientError::ButtplugConnectorError(
+        ButtplugConnectorError::ConnectorAlreadyConnected,
+      ));
     }
- 
+
     *self._client_span.write() = {
       let span = span!(Level::INFO, "Client");
       let _ = span.enter();
@@ -226,15 +236,14 @@ impl ButtplugClient {
       err
     })?;
     info!("Connection to server succeeded.");
-    let mut client_event_loop =
-      ButtplugClientEventLoop::new(
-        self.connected.clone(),
-        connector, 
-        connector_receiver,
-        self.event_stream.clone(),
-        self.message_sender.clone(),
-        self.device_map.clone(),
-      );
+    let mut client_event_loop = ButtplugClientEventLoop::new(
+      self.connected.clone(),
+      connector,
+      connector_receiver,
+      self.event_stream.clone(),
+      self.message_sender.clone(),
+      self.device_map.clone(),
+    );
 
     // Start the event loop before we run the handshake.
     async_manager::spawn(
@@ -340,9 +349,7 @@ impl ButtplugClient {
   /// the struct, then tries to run connect and execute the Buttplug protocol
   /// handshake. Will return a connected and ready to use ButtplugClient is all
   /// goes well.
-  async fn run_handshake(
-    &self
-  ) -> ButtplugClientResult {
+  async fn run_handshake(&self) -> ButtplugClientResult {
     self.connected.store(true, Ordering::SeqCst);
     // Run our handshake
     info!("Running handshake with server.");
@@ -424,7 +431,7 @@ impl ButtplugClient {
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
     self.send_message_expect_ok(StopAllDevices::default().into())
-  } 
+  }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
     let stream = convert_broadcast_receiver_to_stream(self.event_stream.subscribe());
@@ -444,7 +451,9 @@ impl ButtplugClient {
     msg: ButtplugClientRequest,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
-      return Box::pin(future::ready(Err(ButtplugConnectorError::ConnectorNotConnected)))
+      return Box::pin(future::ready(Err(
+        ButtplugConnectorError::ConnectorNotConnected,
+      )));
     }
     // If we're running the event loop, we should have a message_sender.
     // Being connected to the server doesn't matter here yet because we use
@@ -494,7 +503,11 @@ impl ButtplugClient {
 
   /// Retreives a list of currently connected devices.
   pub fn devices(&self) -> Vec<Arc<ButtplugClientDevice>> {
-    self.device_map.iter().map(|map_pair| map_pair.value().clone()).collect()
+    self
+      .device_map
+      .iter()
+      .map(|map_pair| map_pair.value().clone())
+      .collect()
   }
 
   pub fn ping(&self) -> ButtplugClientResultFuture {

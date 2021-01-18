@@ -1,11 +1,14 @@
 use crate::util::async_manager;
-use tokio::sync::{mpsc, Notify};
 use futures::{Future, FutureExt};
 use futures_timer::Delay;
 use std::{
-  sync::{Arc, atomic::{AtomicBool, Ordering}},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
   time::Duration,
 };
+use tokio::sync::{mpsc, Notify};
 
 pub enum PingMessage {
   Ping,
@@ -14,7 +17,12 @@ pub enum PingMessage {
   End,
 }
 
-async fn ping_timer(max_ping_time: u64, mut ping_msg_receiver: mpsc::Receiver<PingMessage>, notifier: Arc<Notify>, pinged_out_status: Arc<AtomicBool>) {
+async fn ping_timer(
+  max_ping_time: u64,
+  mut ping_msg_receiver: mpsc::Receiver<PingMessage>,
+  notifier: Arc<Notify>,
+  pinged_out_status: Arc<AtomicBool>,
+) {
   let mut started = false;
   let mut pinged = false;
   loop {
@@ -48,13 +56,17 @@ pub struct PingTimer {
   max_ping_time: u64,
   ping_msg_sender: mpsc::Sender<PingMessage>,
   ping_timeout_notifier: Arc<Notify>,
-  pinged_out: Arc<AtomicBool>
+  pinged_out: Arc<AtomicBool>,
 }
 
 impl Drop for PingTimer {
   fn drop(&mut self) {
-    if self.ping_msg_sender.blocking_send(PingMessage::End).is_err() {
-        debug!("Receiver does not exist, assuming ping timer event loop already dead.");
+    if self
+      .ping_msg_sender
+      .blocking_send(PingMessage::End)
+      .is_err()
+    {
+      debug!("Receiver does not exist, assuming ping timer event loop already dead.");
     }
   }
 }
@@ -65,14 +77,19 @@ impl PingTimer {
     let (sender, receiver) = mpsc::channel(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
     if max_ping_time > 0 {
-      let fut = ping_timer(max_ping_time,receiver, ping_timeout_notifier.clone(), pinged_out.clone());
+      let fut = ping_timer(
+        max_ping_time,
+        receiver,
+        ping_timeout_notifier.clone(),
+        pinged_out.clone(),
+      );
       async_manager::spawn(async move { fut.await }).unwrap();
     }
     Self {
       max_ping_time,
       ping_msg_sender: sender,
       ping_timeout_notifier,
-      pinged_out
+      pinged_out,
     }
   }
 

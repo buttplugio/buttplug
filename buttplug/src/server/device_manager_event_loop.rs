@@ -1,23 +1,27 @@
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
-use super::{
-  comm_managers::DeviceCommunicationEvent,
-  ping_timer::PingTimer
-};
+use super::{comm_managers::DeviceCommunicationEvent, ping_timer::PingTimer};
 use crate::{
+  core::messages::{
+    ButtplugServerMessage,
+    DeviceAdded,
+    DeviceRemoved,
+    ScanningFinished,
+    StopDeviceCmd,
+  },
   device::{
     configuration_manager::DeviceConfigurationManager,
     ButtplugDevice,
     ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator
+    ButtplugDeviceImplCreator,
   },
-  core::{
-    messages::{ButtplugServerMessage, ScanningFinished, DeviceAdded, DeviceRemoved, StopDeviceCmd},
-  },
-  util::async_manager
+  util::async_manager,
 };
-use tokio::sync::{mpsc, broadcast};
 use dashmap::DashMap;
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
+use tokio::sync::{broadcast, mpsc};
 
 pub struct DeviceManagerEventLoop {
   device_config_manager: Arc<DeviceConfigurationManager>,
@@ -49,7 +53,7 @@ impl DeviceManagerEventLoop {
     server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
     ping_timer: Arc<PingTimer>,
-    device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>
+    device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -69,17 +73,16 @@ impl DeviceManagerEventLoop {
 
   fn try_create_new_device(&mut self, device_creator: Box<dyn ButtplugDeviceImplCreator>) {
     let device_event_sender_clone = self.device_event_sender.clone();
-    let create_device_future = 
-      ButtplugDevice::try_create_device(
-        self.device_config_manager.clone(), 
-        device_creator
-      );
+    let create_device_future =
+      ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
     async_manager::spawn(async move {
-      match create_device_future.await
-      {
+      match create_device_future.await {
         Ok(option_dev) => match option_dev {
           Some(device) => {
-            device_event_sender_clone.send(ButtplugDeviceEvent::Connected(Arc::new(device))).await.unwrap();
+            device_event_sender_clone
+              .send(ButtplugDeviceEvent::Connected(Arc::new(device)))
+              .await
+              .unwrap();
           }
           None => debug!("Device could not be matched to a protocol."),
         },
@@ -95,11 +98,11 @@ impl DeviceManagerEventLoop {
         self.scanning_in_progress = true;
       }
       DeviceCommunicationEvent::ScanningFinished => {
-        debug!("System signaled that scanning was finished, check to see if all managers are finished.");
+        debug!(
+          "System signaled that scanning was finished, check to see if all managers are finished."
+        );
         if !self.scanning_in_progress {
-          debug!(
-            "Manager finished before scanning was fully started, continuing event loop."
-          );
+          debug!("Manager finished before scanning was fully started, continuing event loop.");
           return;
         }
         if self
@@ -128,7 +131,6 @@ impl DeviceManagerEventLoop {
         self.comm_manager_scanning_statuses.push(status);
       }
     }
-
   }
 
   async fn handle_device_event(&mut self, device_event: ButtplugDeviceEvent) {
@@ -138,14 +140,14 @@ impl DeviceManagerEventLoop {
         let generated_device_index = self.device_index_generator;
         self.device_index_generator += 1;
         // See if we have a reusable device index here.
-        let device_index =
-          if let Some(id) = self.device_index_map.get(device.address()) {
-            *id.value()
-          } else {
-            self.device_index_map
-              .insert(device.address().to_owned(), generated_device_index);
-            generated_device_index
-          };
+        let device_index = if let Some(id) = self.device_index_map.get(device.address()) {
+          *id.value()
+        } else {
+          self
+            .device_index_map
+            .insert(device.address().to_owned(), generated_device_index);
+          generated_device_index
+        };
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -157,8 +159,7 @@ impl DeviceManagerEventLoop {
           info!("Device map contains key!");
           // We just checked that the key exists, so we can unwrap
           // here.
-          let (_, old_device) =
-            self.device_map.remove(&device_index).unwrap();
+          let (_, old_device) = self.device_map.remove(&device_index).unwrap();
           // After removing the device from the array, manually disconnect it to
           // make sure the event is thrown.
           if let Err(err) = old_device.disconnect().await {
@@ -177,18 +178,17 @@ impl DeviceManagerEventLoop {
           while let Ok(event) = event_listener.recv().await {
             event_sender.send(event).await.unwrap();
           }
-        }).unwrap();
-        
+        })
+        .unwrap();
+
         info!("Assigning index {} to {}", device_index, device.name());
-        let device_added_message = DeviceAdded::new(
-          device_index,
-          &device.name(),
-          &device.message_attributes(),
-        );
+        let device_added_message =
+          DeviceAdded::new(device_index, &device.name(), &device.message_attributes());
         self.device_map.insert(device_index, device);
         // After that, we can send out to the server's event listeners to let
         // them know a device has been added.
-        if self.server_sender
+        if self
+          .server_sender
           .send(device_added_message.into())
           .is_err()
         {
@@ -206,7 +206,7 @@ impl DeviceManagerEventLoop {
           error!("Server disappeared.");
         }
       }
-      ButtplugDeviceEvent::Notification(_address, _endpoint, _data ) => {
+      ButtplugDeviceEvent::Notification(_address, _endpoint, _data) => {
         // TODO At some point here we need to fill this in for RawSubscribe and
         // other sensor subscriptions.
       }
@@ -216,13 +216,10 @@ impl DeviceManagerEventLoop {
   async fn handle_ping_timeout(&self) {
     error!("Pinged out, stopping devices");
     let mut fut_vec = FuturesUnordered::new();
-    self
-      .device_map
-      .iter()
-      .for_each(|dev| {
-        let device = dev.value();
-        fut_vec.push(device.parse_message(StopDeviceCmd::new(1).into()))
-      });
+    self.device_map.iter().for_each(|dev| {
+      let device = dev.value();
+      fut_vec.push(device.parse_message(StopDeviceCmd::new(1).into()))
+    });
     async_manager::spawn(async move {
       while let Some(val) = fut_vec.next().await {
         // Device index doesn't matter here, since we're sending the
@@ -231,7 +228,8 @@ impl DeviceManagerEventLoop {
           error!("Error stopping device on ping timeout: {}", e);
         }
       }
-    }).unwrap();
+    })
+    .unwrap();
   }
 
   pub async fn run(&mut self) {

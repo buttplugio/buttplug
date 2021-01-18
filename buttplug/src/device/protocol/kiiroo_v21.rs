@@ -21,12 +21,12 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
+use tokio::sync::Mutex;
 // use futures_timer::Delay;
 // use std::time::Duration;
 
@@ -140,7 +140,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{
@@ -152,7 +152,7 @@ mod test {
       VibrateSubcommand,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, check_test_recv_empty, new_bluetoothle_test_device},
+    test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
@@ -160,9 +160,7 @@ mod test {
   pub fn test_kiiroov21_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -199,9 +197,7 @@ mod test {
   pub fn test_kiiroov21_linearcmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -237,9 +233,7 @@ mod test {
   pub fn test_kiiroov21_vibratecmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Cliona").await.unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

@@ -22,7 +22,7 @@ use std::matches;
 #[test]
 fn test_capabilities_exposure() {
   async_manager::block_on(async {
-    let server= ButtplugServer::default();
+    let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
     let helper = server.add_test_comm_manager().unwrap();

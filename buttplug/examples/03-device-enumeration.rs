@@ -99,9 +99,10 @@ async fn device_enumeration_example() {
   // With that out of the way, let's build our client.
   let client = ButtplugClient::new("test client");
   let mut event_stream = client.event_stream();
-  client.connect_in_process( &ButtplugServerOptions::default())
-      .await
-      .unwrap();
+  client
+    .connect_in_process(&ButtplugServerOptions::default())
+    .await
+    .unwrap();
   // First, we'll start the server looking for devices.
   if let Err(err) = client.start_scanning().await {
     // If the server disconnected between the time we spun up the

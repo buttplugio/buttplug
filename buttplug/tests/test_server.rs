@@ -15,7 +15,7 @@ use buttplug::{
   test::check_test_recv_value,
   util::async_manager,
 };
-use futures::{Stream, pin_mut, StreamExt};
+use futures::{pin_mut, Stream, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
 

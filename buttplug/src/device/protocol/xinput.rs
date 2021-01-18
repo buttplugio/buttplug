@@ -11,9 +11,9 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct XInput {

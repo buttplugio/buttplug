@@ -7,9 +7,9 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use tokio::sync::mpsc::Sender;
 use futures::future;
 use serialport::available_ports;
+use tokio::sync::mpsc::Sender;
 
 pub struct SerialPortCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,

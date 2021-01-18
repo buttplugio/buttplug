@@ -11,12 +11,12 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use tokio::sync::{mpsc::Sender, Mutex};
 use futures::future;
 use std::{
   sync::Arc,
   time::{SystemTime, UNIX_EPOCH},
 };
+use tokio::sync::{mpsc::Sender, Mutex};
 
 type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
 

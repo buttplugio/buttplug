@@ -10,7 +10,6 @@ use crate::{
   },
   util::async_manager,
 };
-use tokio::sync::{broadcast, Notify, mpsc::Sender};
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -18,6 +17,7 @@ use std::{
   },
   thread,
 };
+use tokio::sync::{broadcast, mpsc::Sender, Notify};
 
 use btleplug::api::{BDAddr, Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]

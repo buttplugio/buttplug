@@ -1,12 +1,18 @@
 use super::{ButtplugServer, ButtplugServerOptions, ButtplugServerStartupError};
-use crate::{connector::ButtplugConnector, core::{
+use crate::{
+  connector::ButtplugConnector,
+  core::{
     errors::{ButtplugError, ButtplugServerError},
     messages::{self, ButtplugClientMessage, ButtplugServerMessage},
-  }, server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator}, test::TestDeviceCommunicationManagerHelper, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
-use tokio::sync::{Mutex, mpsc, broadcast};
-use futures::{future::Future, select, FutureExt, StreamExt, Stream};
+  },
+  server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
+  test::TestDeviceCommunicationManagerHelper,
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+};
+use futures::{future::Future, select, FutureExt, Stream, StreamExt};
 use std::sync::Arc;
 use thiserror::Error;
+use tokio::sync::{broadcast, mpsc, Mutex};
 
 // Clone derived here to satisfy tokio broadcast requirements.
 #[derive(Clone, Debug)]
@@ -124,15 +130,13 @@ async fn run_server<ConnectorType>(
 }
 
 impl Default for ButtplugRemoteServer {
-  fn default() -> Self{
+  fn default() -> Self {
     Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
   }
 }
 
 impl ButtplugRemoteServer {
-  pub fn new_with_options(
-    options: &ButtplugServerOptions,
-  ) -> Result<Self, ButtplugError> {
+  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
     let server = ButtplugServer::new_with_options(options)?;
     let (event_sender, _) = broadcast::channel(256);
     Ok(Self {

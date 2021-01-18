@@ -18,7 +18,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{Notify, mpsc, broadcast};
+use tokio::sync::{broadcast, mpsc, Notify};
 
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]
@@ -73,7 +73,9 @@ async fn check_gamepad_connectivity(
         if let Some(send) = &sender {
           // This should always succeed, as it'll relay up to the device manager,
           // and that's what owns us.
-          send.send(ButtplugDeviceEvent::Removed(create_address(*index))).unwrap();
+          send
+            .send(ButtplugDeviceEvent::Removed(create_address(*index)))
+            .unwrap();
         }
         // If we're out of gamepads to track, return immediately.
         if new_connected_gamepads == 0 {

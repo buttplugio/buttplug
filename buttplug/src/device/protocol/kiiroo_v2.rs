@@ -21,12 +21,12 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV2 {
@@ -105,7 +105,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
@@ -118,9 +118,7 @@ mod test {
   pub fn test_kiiroov2_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
@@ -136,9 +134,7 @@ mod test {
   pub fn test_kiiroov2_linearcmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await

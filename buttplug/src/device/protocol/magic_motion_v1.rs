@@ -8,8 +8,8 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct MagicMotionV1 {
@@ -72,12 +72,12 @@ impl ButtplugProtocolCommandHandler for MagicMotionV1 {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
+    test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
@@ -87,9 +87,7 @@ mod test {
       let (device, test_device) = new_bluetoothle_test_device("Smart Mini Vibe")
         .await
         .unwrap();
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await

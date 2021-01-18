@@ -120,7 +120,7 @@ impl SerialSpecifier {
   pub fn new_from_name(port: &str) -> Self {
     SerialSpecifier {
       port: port.to_owned(),
-      .. Default::default()
+      ..Default::default()
     }
   }
 }
@@ -280,7 +280,7 @@ impl DeviceProtocolConfiguration {
         if self.allow_raw_messages {
           let endpoint_attributes = MessageAttributes {
             endpoints: Some(endpoints.to_owned()),
-            .. Default::default()
+            ..Default::default()
           };
           attributes.insert(
             ButtplugDeviceMessageType::RawReadCmd,

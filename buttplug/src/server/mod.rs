@@ -9,13 +9,14 @@
 
 pub mod comm_managers;
 pub mod device_manager;
-mod ping_timer;
 mod device_manager_event_loop;
+mod ping_timer;
 pub mod remote_server;
 
 pub use remote_server::ButtplugRemoteServer;
 
-use crate::{core::{
+use crate::{
+  core::{
     errors::*,
     messages::{
       self,
@@ -28,8 +29,10 @@ use crate::{core::{
       StopScanning,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  }, test::TestDeviceCommunicationManagerHelper, util::{async_manager, stream::convert_broadcast_receiver_to_stream}};
-use tokio::sync::broadcast;
+  },
+  test::TestDeviceCommunicationManagerHelper,
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+};
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
 use futures::{future::BoxFuture, Stream};
@@ -42,6 +45,7 @@ use std::{
   },
 };
 use thiserror::Error;
+use tokio::sync::broadcast;
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
@@ -81,7 +85,7 @@ pub struct ButtplugServer {
   device_manager: DeviceManager,
   ping_timer: Arc<PingTimer>,
   connected: Arc<AtomicBool>,
-  output_sender: broadcast::Sender<ButtplugServerMessage>
+  output_sender: broadcast::Sender<ButtplugServerMessage>,
 }
 
 impl Default for ButtplugServer {
@@ -92,9 +96,7 @@ impl Default for ButtplugServer {
 }
 
 impl ButtplugServer {
-  pub fn new_with_options(
-    options: &ButtplugServerOptions,
-  ) -> Result<Self, ButtplugError> {
+  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
     let (send, _) = broadcast::channel(256);
     let output_sender_clone = send.clone();
     let connected = Arc::new(AtomicBool::new(false));
@@ -129,7 +131,7 @@ impl ButtplugServer {
       device_manager,
       ping_timer,
       connected,
-      output_sender: send
+      output_sender: send,
     })
   }
 

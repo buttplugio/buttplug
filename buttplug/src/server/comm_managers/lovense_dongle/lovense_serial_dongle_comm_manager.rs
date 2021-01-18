@@ -15,7 +15,6 @@ use crate::{
   },
   util::async_manager,
 };
-use tokio::sync::{Mutex, mpsc::{channel, Receiver, Sender}};
 use serde_json::Deserializer;
 use serialport::{
   available_ports,
@@ -29,6 +28,10 @@ use std::{
   sync::{atomic::AtomicBool, Arc},
   thread,
   time::Duration,
+};
+use tokio::sync::{
+  mpsc::{channel, Receiver, Sender},
+  Mutex,
 };
 use tracing_futures::Instrument;
 
@@ -107,7 +110,7 @@ pub struct LovenseSerialDongleCommunicationManager {
   //port: Arc<Mutex<Option<Box<dyn SerialPort>>>>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl LovenseSerialDongleCommunicationManager {
@@ -192,7 +195,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
-      is_scanning: Arc::new(AtomicBool::new(false))
+      is_scanning: Arc::new(AtomicBool::new(false)),
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
@@ -202,8 +205,10 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       }
     })
     .unwrap();
-    let mut machine = create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    async_manager::spawn(async move {
+    let mut machine =
+      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(
+      async move {
         while let Some(next) = machine.transition().await {
           machine = next;
         }

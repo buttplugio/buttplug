@@ -8,8 +8,8 @@ use crate::{
     Endpoint,
   },
 };
-use tokio::sync::Mutex;
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct LiboVibes {
@@ -84,12 +84,12 @@ impl ButtplugProtocolCommandHandler for LiboVibes {
   }
 }
 
-#[cfg(all(test, feature="server"))]
+#[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, new_bluetoothle_test_device, check_test_recv_empty},
+    test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
@@ -97,9 +97,7 @@ mod test {
   pub fn test_libo_vibes_protocol_1vibe() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Yuyi").await.unwrap();
-      let command_receiver_tx = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
         .unwrap();
@@ -142,9 +140,7 @@ mod test {
   pub fn test_libo_vibes_protocol_2vibe() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Gugudai").await.unwrap();
-      let command_receiver_tx = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .unwrap();
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
         .unwrap();

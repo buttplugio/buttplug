@@ -3,15 +3,17 @@ use super::btleplug_internal::{
   DeviceReturnFuture,
   DeviceReturnStateShared,
 };
-use crate::{core::{
+use crate::{
+  core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{
+  },
+  device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
     ButtplugDeviceCommand,
-    ButtplugDeviceImplCreator,
     ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
     ButtplugDeviceReturn,
     DeviceImpl,
     DeviceImplInternal,
@@ -19,13 +21,20 @@ use crate::{core::{
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
-  }, util::async_manager
+  },
+  util::async_manager,
 };
 use async_trait::async_trait;
 use btleplug::api::{CentralEvent, Peripheral};
 use futures::future::BoxFuture;
-use tokio::sync::{mpsc, broadcast};
-use std::{sync::{Arc, atomic::{AtomicBool, Ordering}}, fmt::{self, Debug}};
+use std::{
+  fmt::{self, Debug},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+};
+use tokio::sync::{broadcast, mpsc};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
@@ -106,18 +115,15 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => {
-          let device_internal_impl = BtlePlugDeviceImpl::new(
-            device_sender,
-            device_event_sender
-          );
+          let device_internal_impl = BtlePlugDeviceImpl::new(device_sender, device_event_sender);
           let device_impl = DeviceImpl::new(
             &name,
             &address,
             &info.endpoints,
-            Box::new(device_internal_impl)
+            Box::new(device_internal_impl),
           );
           Ok(device_impl)
-        },
+        }
         // TODO It'd be nice to carry this error through as a source.
         ButtplugDeviceReturn::Error(err) => Err(
           ButtplugDeviceError::DeviceConnectionError(format!(
@@ -159,7 +165,7 @@ impl BtlePlugDeviceImpl {
     Self {
       thread_sender,
       connected: Arc::new(AtomicBool::new(true)),
-      event_stream
+      event_stream,
     }
   }
 
@@ -209,7 +215,6 @@ impl BtlePlugDeviceImpl {
 }
 
 impl DeviceImplInternal for BtlePlugDeviceImpl {
-
   fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
     self.event_stream.subscribe()
   }

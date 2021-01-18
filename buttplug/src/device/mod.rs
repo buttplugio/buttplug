@@ -7,7 +7,13 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::{convert::TryFrom, fmt::{self, Debug}, str::FromStr, string::ToString, sync::Arc};
+use std::{
+  convert::TryFrom,
+  fmt::{self, Debug},
+  str::FromStr,
+  string::ToString,
+  sync::Arc,
+};
 
 use crate::{
   core::{
@@ -310,10 +316,15 @@ pub struct DeviceImpl {
 }
 
 impl DeviceImpl {
-  pub fn new(name: &str, address: &str, endpoints: &[Endpoint], internal_impl: Box<dyn DeviceImplInternal>) -> Self {
+  pub fn new(
+    name: &str,
+    address: &str,
+    endpoints: &[Endpoint],
+    internal_impl: Box<dyn DeviceImplInternal>,
+  ) -> Self {
     Self {
       name: name.to_owned(),
-      address: address.to_owned(), 
+      address: address.to_owned(),
       endpoints: endpoints.into(),
       internal_impl,
     }
@@ -343,8 +354,10 @@ impl DeviceImpl {
     self.internal_impl.disconnect()
   }
 
-  pub fn read_value(&self, msg: DeviceReadCmd)
-    -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  pub fn read_value(
+    &self,
+    msg: DeviceReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     self.internal_impl.read_value(msg)
   }
 
@@ -456,12 +469,8 @@ impl ButtplugDevice {
               // whatever it needs. For most protocols, this is a no-op. However, for
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
-              match protocol::try_create_protocol(
-                &proto_type,
-                &device_impl,
-                device_protocol_config,
-              )
-              .await
+              match protocol::try_create_protocol(&proto_type, &device_impl, device_protocol_config)
+                .await
               {
                 Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, device_impl))),
                 Err(e) => Err(e),

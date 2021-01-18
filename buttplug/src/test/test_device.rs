@@ -1,29 +1,31 @@
-use crate::{core::{
+use crate::{
+  core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{
+  },
+  device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
-    DeviceImplInternal,
     DeviceImplCommand,
+    DeviceImplInternal,
     DeviceReadCmd,
     DeviceSubscribeCmd,
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  }
+  },
 };
-use tokio::sync::{broadcast, mpsc};
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
 use std::{
+  fmt::{self, Debug},
   sync::Arc,
-  fmt::{self, Debug}
 };
+use tokio::sync::{broadcast, mpsc};
 
 pub struct TestDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -76,7 +78,7 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
       &device.name(),
       &device.address(),
       &endpoints,
-      Box::new(device_impl_internal)
+      Box::new(device_impl_internal),
     );
     Ok(device_impl)
   }
@@ -90,8 +92,14 @@ pub struct TestDeviceEndpointChannel {
 }
 
 impl TestDeviceEndpointChannel {
-  pub fn new(sender: mpsc::Sender<DeviceImplCommand>, receiver: mpsc::Receiver<DeviceImplCommand>) -> Self {
-    Self { sender: Arc::new(sender), receiver: Arc::new(std::sync::Mutex::new(receiver)) }
+  pub fn new(
+    sender: mpsc::Sender<DeviceImplCommand>,
+    receiver: mpsc::Receiver<DeviceImplCommand>,
+  ) -> Self {
+    Self {
+      sender: Arc::new(sender),
+      receiver: Arc::new(std::sync::Mutex::new(receiver)),
+    }
   }
 }
 
@@ -99,7 +107,7 @@ pub struct TestDeviceInternal {
   name: String,
   address: String,
   endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 impl TestDeviceInternal {
@@ -109,7 +117,7 @@ impl TestDeviceInternal {
       name: name.to_owned(),
       address: address.to_owned(),
       endpoint_channels: Arc::new(DashMap::new()),
-      event_sender
+      event_sender,
     }
   }
 
@@ -129,7 +137,10 @@ impl TestDeviceInternal {
     self.address.clone()
   }
 
-  pub fn get_endpoint_receiver(&self, endpoint: &Endpoint) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>> {
+  pub fn get_endpoint_receiver(
+    &self,
+    endpoint: &Endpoint,
+  ) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>> {
     self
       .endpoint_channels
       .get(endpoint)
@@ -149,9 +160,7 @@ impl TestDeviceInternal {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender
-        .send(ButtplugDeviceEvent::Removed(address))
-        .unwrap();
+      sender.send(ButtplugDeviceEvent::Removed(address)).unwrap();
       Ok(())
     })
   }
@@ -164,7 +173,7 @@ pub struct TestDevice {
   // for creation in ButtplugDevice, so initialization and cloning order
   // matters here.
   pub endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 impl TestDevice {
@@ -173,7 +182,7 @@ impl TestDevice {
     Self {
       address: internal_device.address(),
       endpoint_channels: internal_device.endpoint_channels.clone(),
-      event_sender: internal_device.sender()
+      event_sender: internal_device.sender(),
     }
   }
 }
@@ -191,9 +200,7 @@ impl DeviceImplInternal for TestDevice {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender
-        .send(ButtplugDeviceEvent::Removed(address))
-        .unwrap();
+      sender.send(ButtplugDeviceEvent::Removed(address)).unwrap();
       Ok(())
     })
   }

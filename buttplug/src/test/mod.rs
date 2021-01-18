@@ -2,12 +2,11 @@ mod test_device;
 #[cfg(feature = "server")]
 mod test_device_comm_manager;
 
-use std::sync::{Arc, Mutex};
 use crate::{
   device::DeviceImplCommand,
-  util::stream::{recv_now, iffy_is_empty_check}
+  util::stream::{iffy_is_empty_check, recv_now},
 };
-use tokio::sync::mpsc::Receiver;
+use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
   TestDeviceEndpointChannel,
@@ -20,10 +19,17 @@ pub use test_device_comm_manager::{
   TestDeviceCommunicationManager,
   TestDeviceCommunicationManagerHelper,
 };
+use tokio::sync::mpsc::Receiver;
 
 #[allow(dead_code)]
-pub fn check_test_recv_value(receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>, command: DeviceImplCommand) {
-  assert_eq!(recv_now(&mut receiver.lock().unwrap()).unwrap().unwrap(), command);
+pub fn check_test_recv_value(
+  receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>,
+  command: DeviceImplCommand,
+) {
+  assert_eq!(
+    recv_now(&mut receiver.lock().unwrap()).unwrap().unwrap(),
+    command
+  );
 }
 
 #[allow(dead_code)]

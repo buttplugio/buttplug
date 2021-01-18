@@ -8,11 +8,16 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use super::{ButtplugServerStartupError, comm_managers::{
+use super::{
+  comm_managers::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerCreator,
-  }, device_manager_event_loop::DeviceManagerEventLoop, ping_timer::PingTimer};
+  },
+  device_manager_event_loop::DeviceManagerEventLoop,
+  ping_timer::PingTimer,
+  ButtplugServerStartupError,
+};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -28,24 +33,18 @@ use crate::{
       DeviceMessageInfo,
     },
   },
-  device::{
-    configuration_manager::DeviceConfigurationManager,
-    ButtplugDevice,
-  },
+  device::{configuration_manager::DeviceConfigurationManager, ButtplugDevice},
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
 };
-use tokio::sync::{mpsc, broadcast};
 use dashmap::DashMap;
 use futures::future;
 use std::{
   convert::TryFrom,
-  sync::{
-    atomic::Ordering,
-    Arc,
-  },
+  sync::{atomic::Ordering, Arc},
 };
+use tokio::sync::{broadcast, mpsc};
 
 pub struct DeviceManager {
   // This uses a map to make sure we don't have 2 comm managers of the same type
@@ -80,10 +79,17 @@ impl DeviceManager {
       wait_for_manager_events(config, output_sender);
     */
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let mut event_loop = DeviceManagerEventLoop::new(config, output_sender, devices.clone(), ping_timer, device_event_receiver);
+    let mut event_loop = DeviceManagerEventLoop::new(
+      config,
+      output_sender,
+      devices.clone(),
+      ping_timer,
+      device_event_receiver,
+    );
     async_manager::spawn(async move {
       event_loop.run().await;
-    }).unwrap();
+    })
+    .unwrap();
     Ok(Self {
       device_event_sender,
       devices,

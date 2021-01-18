@@ -51,10 +51,7 @@ mod websocket_connector_tests {
         ));
 
         let client = ButtplugClient::new("Test Client");
-        if client.connect(connector)
-          .await
-          .is_ok()
-        {
+        if client.connect(connector).await.is_ok() {
           connected = true;
           break;
         }
@@ -96,12 +93,9 @@ mod websocket_connector_tests {
             ws_priv_file: None,
           },
         ));
-        
+
         let client = ButtplugClient::new("Test Client");
-        if client.connect(connector)
-          .await
-          .is_ok()
-        {
+        if client.connect(connector).await.is_ok() {
           connected = true;
           break;
         }

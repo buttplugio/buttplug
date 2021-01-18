@@ -5,8 +5,8 @@ use crate::connector::{
   ButtplugConnectorResultFuture,
   ButtplugSerializedMessage,
 };
-use tokio::sync::mpsc::{Receiver, Sender};
 use futures::future::BoxFuture;
+use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
 pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError};
 #[cfg(all(feature = "websockets", feature = "async-std-runtime"))]

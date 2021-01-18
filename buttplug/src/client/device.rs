@@ -8,7 +8,10 @@
 //! Representation and management of devices connected to the server.
 
 use super::{ButtplugClientError, ButtplugClientRequest, ButtplugClientResultFuture};
-use crate::{client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair}, connector::ButtplugConnectorError, core::{
+use crate::{
+  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
+  connector::ButtplugConnectorError,
+  core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
       BatteryLevelCmd,
@@ -31,21 +34,22 @@ use crate::{client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePai
       VibrateCmd,
       VibrateSubcommand,
     },
-  }, device::Endpoint, util::stream::convert_broadcast_receiver_to_stream};
-use tokio::sync::{
-  broadcast
+  },
+  device::Endpoint,
+  util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, Stream};
+use parking_lot::RwLock;
 use std::{
   collections::HashMap,
+  fmt,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
-  fmt,
 };
+use tokio::sync::broadcast;
 use tracing_futures::Instrument;
-use parking_lot::RwLock;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]
@@ -199,13 +203,13 @@ impl ButtplugClientDevice {
 
   pub(super) fn new_from_device_info(
     info: &DeviceMessageInfo,
-    sender: broadcast::Sender<ButtplugClientRequest>
+    sender: broadcast::Sender<ButtplugClientRequest>,
   ) -> Self {
     ButtplugClientDevice::new(
       &*info.device_name,
       info.device_index,
       info.device_messages.clone(),
-      sender
+      sender,
     )
   }
 
@@ -594,9 +598,9 @@ impl PartialEq for ButtplugClientDevice {
 
 impl fmt::Debug for ButtplugClientDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-      f.debug_struct("ButtplugClientDevice")
-       .field("name", &self.name)
-       .field("index", &self.index)
-       .finish()
+    f.debug_struct("ButtplugClientDevice")
+      .field("name", &self.name)
+      .field("index", &self.index)
+      .finish()
   }
 }

@@ -1,9 +1,12 @@
 use super::{lovense_dongle_device_impl::*, lovense_dongle_messages::*};
 use crate::server::comm_managers::DeviceCommunicationEvent;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
 use async_trait::async_trait;
 use futures::{select, FutureExt};
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 
 // I found this hot dog on the ground at
 // https://news.ycombinator.com/item?id=22752907 and dusted it off. It still
@@ -27,7 +30,7 @@ struct ChannelHub {
   dongle_outgoing: Sender<OutgoingLovenseData>,
   dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
   event_outgoing: Sender<DeviceCommunicationEvent>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl ChannelHub {
@@ -36,14 +39,14 @@ impl ChannelHub {
     dongle_outgoing: Sender<OutgoingLovenseData>,
     dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
     event_outgoing: Sender<DeviceCommunicationEvent>,
-    is_scanning: Arc<AtomicBool>
+    is_scanning: Arc<AtomicBool>,
   ) -> Self {
     Self {
       comm_manager_incoming,
       dongle_outgoing,
       dongle_incoming,
       event_outgoing,
-      is_scanning
+      is_scanning,
     }
   }
 
@@ -51,7 +54,7 @@ impl ChannelHub {
     Some(Box::new(LovenseDongleWaitForDongle::new(
       self.comm_manager_incoming,
       self.event_outgoing,
-      self.is_scanning
+      self.is_scanning,
     )))
   }
 
@@ -130,14 +133,14 @@ impl ChannelHub {
 pub fn create_lovense_dongle_machine(
   event_outgoing: Sender<DeviceCommunicationEvent>,
   comm_incoming_receiver: Receiver<LovenseDeviceCommand>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 ) -> Box<dyn LovenseDongleState> {
-    Box::new(LovenseDongleWaitForDongle::new(
-      comm_incoming_receiver,
-      event_outgoing,
-      is_scanning,
-    ))
-  }
+  Box::new(LovenseDongleWaitForDongle::new(
+    comm_incoming_receiver,
+    event_outgoing,
+    is_scanning,
+  ))
+}
 
 macro_rules! state_definition {
   ($name:ident) => {
@@ -174,19 +177,19 @@ macro_rules! device_state_definition {
 struct LovenseDongleWaitForDongle {
   comm_receiver: Receiver<LovenseDeviceCommand>,
   event_sender: Sender<DeviceCommunicationEvent>,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl LovenseDongleWaitForDongle {
   pub fn new(
     comm_receiver: Receiver<LovenseDeviceCommand>,
     event_sender: Sender<DeviceCommunicationEvent>,
-    is_scanning: Arc<AtomicBool>
+    is_scanning: Arc<AtomicBool>,
   ) -> Self {
     Self {
       comm_receiver,
       event_sender,
-      is_scanning
+      is_scanning,
     }
   }
 }
@@ -204,7 +207,7 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
             sender,
             receiver,
             self.event_sender.clone(),
-            self.is_scanning
+            self.is_scanning,
           );
           if should_scan {
             return Some(Box::new(LovenseDongleStartScanning::new(hub)));
@@ -303,9 +306,7 @@ impl LovenseDongleState for LovenseDongleStartScanning {
       id: None,
       command: None,
     };
-    self
-      .hub
-      .set_scanning_status(true);
+    self.hub.set_scanning_status(true);
     self
       .hub
       .send_output(OutgoingLovenseData::Message(scan_msg))
@@ -369,9 +370,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
       .hub
       .send_output(OutgoingLovenseData::Message(scan_msg))
       .await;
-    self
-      .hub
-      .set_scanning_status(false);
+    self.hub.set_scanning_status(false);
     self
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
@@ -416,10 +415,8 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         }
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
-    } 
-    self
-      .hub
-      .set_scanning_status(false);
+    }
+    self.hub.set_scanning_status(false);
     self
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)

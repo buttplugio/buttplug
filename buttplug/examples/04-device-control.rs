@@ -21,7 +21,7 @@ use buttplug::{
 };
 use futures::StreamExt;
 use futures_timer::Delay;
-use std::{time::Duration, sync::Arc};
+use std::{sync::Arc, time::Duration};
 
 async fn device_control_example() {
   // Onto the final example! Controlling devices.
@@ -32,9 +32,10 @@ async fn device_control_example() {
   // the server it uses. Handy!
   let client = ButtplugClient::new("Example Client");
   let mut event_stream = client.event_stream();
-  client.connect_in_process(&ButtplugServerOptions::default())
-      .await
-      .unwrap();
+  client
+    .connect_in_process(&ButtplugServerOptions::default())
+    .await
+    .unwrap();
 
   // We'll mostly be doing the same thing we did in example #3, up until we get
   // a device.

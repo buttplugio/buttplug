@@ -1,4 +1,6 @@
-use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture}, device::{
+use crate::{
+  core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
+  device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
@@ -9,13 +11,14 @@ use crate::{core::{errors::ButtplugError, messages::RawReading, ButtplugResultFu
     DeviceUnsubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
-  }, util::async_manager
+  },
+  util::async_manager,
 };
-use tokio::sync::{mpsc, Mutex, broadcast};
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
 use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
 use std::{
+  fmt::{self, Debug},
   io::ErrorKind,
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -23,8 +26,8 @@ use std::{
   },
   thread,
   time::Duration,
-  fmt::{self, Debug}
 };
+use tokio::sync::{broadcast, mpsc, Mutex};
 
 pub struct SerialPortDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -63,7 +66,7 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
       &self.port_info.port_name,
       &self.port_info.port_name,
       &[Endpoint::Rx, Endpoint::Tx],
-      Box::new(device_impl_internal)
+      Box::new(device_impl_internal),
     );
     Ok(device_impl)
   }
@@ -126,7 +129,7 @@ impl SerialPortDeviceImpl {
     let settings = SerialPortSettings {
       baud_rate: port_def.baud_rate,
       timeout: Duration::from_millis(100),
-      .. Default::default()
+      ..Default::default()
     };
     // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
     //
@@ -165,7 +168,7 @@ impl SerialPortDeviceImpl {
       port_sender: writer_sender,
       _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
-      device_event_sender
+      device_event_sender,
     })
   }
 }
@@ -198,7 +201,11 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
       Ok(RawReading::new(
         0,
         Endpoint::Rx,
-        recv_mut.recv().now_or_never().unwrap_or_else(|| Some(vec![])).unwrap(),
+        recv_mut
+          .recv()
+          .now_or_never()
+          .unwrap_or_else(|| Some(vec![]))
+          .unwrap(),
       ))
     })
   }
@@ -228,7 +235,11 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
             Some(data) => {
               info!("Got serial data! {:?}", data);
               event_sender
-                .send(ButtplugDeviceEvent::Notification(address.clone(), Endpoint::Tx, data))
+                .send(ButtplugDeviceEvent::Notification(
+                  address.clone(),
+                  Endpoint::Tx,
+                  data,
+                ))
                 .unwrap();
             }
             None => {
