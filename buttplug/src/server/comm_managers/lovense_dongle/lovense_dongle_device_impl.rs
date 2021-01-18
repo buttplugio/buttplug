@@ -88,7 +88,7 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
     );
     let device = DeviceImpl::new("Lovense Dongle Device", 
     &self.id, 
-    &vec![Endpoint::Rx, Endpoint::Tx], 
+    &[Endpoint::Rx, Endpoint::Tx], 
     Box::new(device_impl_internal));
     Ok(device)
   }
@@ -108,7 +108,7 @@ impl LovenseDongleDeviceImpl {
     device_outgoing: mpsc::Sender<OutgoingLovenseData>,
     mut device_incoming: mpsc::Receiver<LovenseDongleIncomingMessage>,
   ) -> Self {
-    let address_clone = address.to_owned().clone();
+    let address_clone = address.to_owned();
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
     async_manager::spawn(async move {

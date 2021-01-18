@@ -16,7 +16,7 @@ use crate::{core::{
     Endpoint,
   }
 };
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc};
 use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};

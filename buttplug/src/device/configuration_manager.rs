@@ -118,9 +118,10 @@ pub struct SerialSpecifier {
 
 impl SerialSpecifier {
   pub fn new_from_name(port: &str) -> Self {
-    let mut specifier = Self::default();
-    specifier.port = port.to_owned();
-    specifier
+    SerialSpecifier {
+      port: port.to_owned(),
+      .. Default::default()
+    }
   }
 }
 
@@ -277,8 +278,10 @@ impl DeviceProtocolConfiguration {
           .entry(ButtplugDeviceMessageType::StopDeviceCmd)
           .or_insert_with(MessageAttributes::default);
         if self.allow_raw_messages {
-          let mut endpoint_attributes = MessageAttributes::default();
-          endpoint_attributes.endpoints = Some(endpoints.to_owned());
+          let endpoint_attributes = MessageAttributes {
+            endpoints: Some(endpoints.to_owned()),
+            .. Default::default()
+          };
           attributes.insert(
             ButtplugDeviceMessageType::RawReadCmd,
             endpoint_attributes.clone(),

@@ -97,7 +97,6 @@ impl ButtplugProtocolCommandHandler for MysteryVibe {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();
-    let device = device.clone();
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, true)?;
       info!("MV Result: {:?}", result);

@@ -34,8 +34,7 @@ use async_trait::async_trait;
 use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
 use futures::future::BoxFuture;
-use tokio::sync::{broadcast, mpsc};
-use dashmap::DashMap;
+use tokio::sync::broadcast;
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature
@@ -311,11 +310,11 @@ pub struct DeviceImpl {
 }
 
 impl DeviceImpl {
-  pub fn new(name: &str, address: &str, endpoints: &Vec<Endpoint>, internal_impl: Box<dyn DeviceImplInternal>) -> Self {
+  pub fn new(name: &str, address: &str, endpoints: &[Endpoint], internal_impl: Box<dyn DeviceImplInternal>) -> Self {
     Self {
       name: name.to_owned(),
       address: address.to_owned(), 
-      endpoints: endpoints.clone(),
+      endpoints: endpoints.into(),
       internal_impl,
     }
   }

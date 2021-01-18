@@ -12,7 +12,7 @@ use std::{
   io::Cursor,
   fmt::{self, Debug}
 };
-use tokio::sync::{mpsc, broadcast};
+use tokio::sync::broadcast;
 
 pub struct XInputDeviceImplCreator {
   index: XInputControllerIndex,
@@ -49,7 +49,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
     let device_impl = DeviceImpl::new(
       &format!("XBox Compatible Gamepad #{}", self.index),
       &create_address(self.index),
-      &vec![Endpoint::Tx],
+      &[Endpoint::Tx],
       Box::new(device_impl_internal)
     );
     Ok(device_impl)

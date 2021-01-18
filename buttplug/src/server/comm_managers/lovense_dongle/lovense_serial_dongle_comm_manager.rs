@@ -131,11 +131,13 @@ impl LovenseSerialDongleCommunicationManager {
               if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
                 // We've found a dongle.
                 info!("Found lovense dongle, connecting");
-                let mut settings = SerialPortSettings::default();
-                // Default is 8/N/1 but we'll need to set the baud rate
-                settings.baud_rate = 115200;
-                // Set our timeout at ~2hz. Would be nice if this was async, but oh well.
-                settings.timeout = Duration::from_millis(500);
+                let settings = SerialPortSettings {
+                  // Default is 8/N/1 but we'll need to set the baud rate
+                  baud_rate: 115200,
+                  // Set our timeout at ~2hz. Would be nice if this was async, but oh well.
+                  timeout: Duration::from_millis(500),
+                  ..Default::default()
+                };
                 match open_with_settings(&p.port_name, &settings) {
                   Ok(dongle_port) => {
                     let (writer_sender, writer_receiver) = channel(256);

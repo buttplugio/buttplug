@@ -80,7 +80,7 @@ impl DeviceManager {
       wait_for_manager_events(config, output_sender);
     */
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let mut event_loop = DeviceManagerEventLoop::new(config, output_sender.clone(), devices.clone(), ping_timer, device_event_receiver);
+    let mut event_loop = DeviceManagerEventLoop::new(config, output_sender, devices.clone(), ping_timer, device_event_receiver);
     async_manager::spawn(async move {
       event_loop.run().await;
     }).unwrap();

@@ -92,7 +92,7 @@ impl PingTimer {
     let max_ping_time = self.max_ping_time;
     async move {
       if max_ping_time == 0 {
-        return ();
+        return;
       }
       if ping_msg_sender.send(msg).await.is_err() {
         error!("Cannot ping, no event loop available.");

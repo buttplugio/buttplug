@@ -62,7 +62,7 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
     let device_impl = DeviceImpl::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
-      &vec![Endpoint::Rx, Endpoint::Tx],
+      &[Endpoint::Rx, Endpoint::Tx],
       Box::new(device_impl_internal)
     );
     Ok(device_impl)
@@ -123,10 +123,11 @@ impl SerialPortDeviceImpl {
       .into_iter()
       .find(|port| port_info.port_name == port.port)
       .unwrap();
-    let mut settings = SerialPortSettings::default();
-    settings.baud_rate = port_def.baud_rate;
-    // Set our timeout at 10hz. Would be nice if this was async, but oh well.
-    settings.timeout = Duration::from_millis(100);
+    let settings = SerialPortSettings {
+      baud_rate: port_def.baud_rate,
+      timeout: Duration::from_millis(100),
+      .. Default::default()
+    };
     // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
     //
     // Mostly just feeling lazy here and don't wanna do the enum conversions.
@@ -197,7 +198,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
       Ok(RawReading::new(
         0,
         Endpoint::Rx,
-        recv_mut.recv().now_or_never().unwrap_or(Some(vec![])).unwrap(),
+        recv_mut.recv().now_or_never().unwrap_or_else(|| Some(vec![])).unwrap(),
       ))
     })
   }

@@ -14,7 +14,6 @@ use crate::{
     },
 };
 use futures::future::BoxFuture;
-use futures::StreamExt;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,

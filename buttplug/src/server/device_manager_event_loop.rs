@@ -206,8 +206,9 @@ impl DeviceManagerEventLoop {
           error!("Server disappeared.");
         }
       }
-      ButtplugDeviceEvent::Notification(address, endpoint, data ) => {
-
+      ButtplugDeviceEvent::Notification(_address, _endpoint, _data ) => {
+        // TODO At some point here we need to fill this in for RawSubscribe and
+        // other sensor subscriptions.
       }
     }
   }

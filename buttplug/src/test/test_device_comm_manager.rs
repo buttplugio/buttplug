@@ -11,7 +11,7 @@ use crate::{
     DeviceCommunicationManagerCreator,
   },
 };
-use tokio::sync::{mpsc::{Sender, self}, Mutex};
+use tokio::sync::{mpsc::Sender, Mutex};
 use futures::future;
 use std::{
   sync::Arc,
