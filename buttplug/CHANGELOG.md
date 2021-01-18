@@ -1,3 +1,21 @@
+# 2.0.0 (2021-01-18)
+
+## Features
+
+- #202, #227, #228, #246: Rebuild the event and channel systems using tokio channels
+  - Switched from using async-channel and the broadcaster crate to tokio's sync module, which has a
+    far more ergonomic channel system. Greatly reduces chances of leaking channels.
+  - Massively changes how the surface API looks, hence rolling major versions.
+- Restructed DeviceImpl objects to reduce boilerplate and centralize check logic.
+- Restructed internal event loops to be slightly less messy.
+- Added device support
+  - Lovense Ferri
+
+## Bugfixes
+
+- #254: Fix issue with devices connected to Lovense Dongle not being picked up on startup
+- #250: Websocket server no longer crashes when started without ports
+
 # 1.0.5 (2021-01-09)
 
 ## Features
