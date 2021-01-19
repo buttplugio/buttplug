@@ -51,6 +51,7 @@ impl ChannelHub {
   }
 
   pub fn create_new_wait_for_dongle_state(self) -> Option<Box<dyn LovenseDongleState>> {
+    self.is_scanning.store(false, Ordering::SeqCst);
     Some(Box::new(LovenseDongleWaitForDongle::new(
       self.comm_manager_incoming,
       self.event_outgoing,
@@ -395,7 +396,14 @@ impl LovenseDongleState for LovenseDongleScanning {
       let msg = self.hub.wait_for_input().await;
       match msg {
         IncomingMessage::CommMgr(comm_msg) => {
-          error!("Not handling comm input: {:?}", comm_msg);
+          match comm_msg {
+            LovenseDeviceCommand::StopScanning => {
+              return Some(Box::new(LovenseDongleStopScanning::new(
+                self.hub
+              )));
+            }
+            msg => error!("Not handling comm input: {:?}", msg)
+          }
         }
         IncomingMessage::Dongle(device_msg) => {
           match device_msg.func {
@@ -457,7 +465,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
       .await;
-    None
+      Some(Box::new(LovenseDongleIdle::new(self.hub)))
   }
 }
 
@@ -554,10 +562,16 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
           LovenseDeviceCommand::StartScanning => {
             self
               .hub
+              .set_scanning_status(false);
+            self
+              .hub
               .send_event(DeviceCommunicationEvent::ScanningFinished)
               .await;
           }
           LovenseDeviceCommand::StopScanning => {
+            self
+              .hub
+              .set_scanning_status(false);
             self
               .hub
               .send_event(DeviceCommunicationEvent::ScanningFinished)
