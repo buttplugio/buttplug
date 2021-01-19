@@ -1,3 +1,9 @@
+# 2.0.2 (2021-01-18)
+
+## Bugfixes
+
+- Fix (another) issue with Lovense dongle device scanning not handling state updates correctly.
+
 # 2.0.1 (2021-01-18)
 
 ## Bugfixes
