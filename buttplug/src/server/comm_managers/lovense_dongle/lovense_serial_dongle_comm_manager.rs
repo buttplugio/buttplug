@@ -249,6 +249,6 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
   }
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
-    Arc::new(AtomicBool::new(false))
+    self.is_scanning.clone()
   }
 }

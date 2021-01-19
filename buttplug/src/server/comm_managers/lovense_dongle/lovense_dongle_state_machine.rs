@@ -222,10 +222,20 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
           return Some(Box::new(LovenseCheckForAlreadyConnectedDevice::new(hub, should_scan)));
         }
         LovenseDeviceCommand::StartScanning => {
+          info!("Lovense dongle not found, storing StartScanning command until found.");
+          self.is_scanning.store(true, Ordering::SeqCst);
           should_scan = true;
         }
         LovenseDeviceCommand::StopScanning => {
+          info!("Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished.");
+          self.is_scanning.store(false, Ordering::SeqCst);
           should_scan = false;
+          // If we were requested to scan and then asked to stop, act like we at least tried.
+          self
+            .event_sender
+            .send(DeviceCommunicationEvent::ScanningFinished)
+            .await
+            .unwrap();
         }
       }
     }
@@ -416,6 +426,7 @@ impl LovenseDongleState for LovenseDongleScanning {
         }
         IncomingMessage::Disconnect => {
           error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          self.hub.set_scanning_status(false);
           return self.hub.create_new_wait_for_dongle_state();
         }
         _ => error!("Cannot handle dongle function {:?}", msg),
@@ -474,6 +485,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
           LovenseDongleMessageFunc::Search => {
             if let Some(result) = device_msg.result {
               if result == LovenseDongleResultCode::SearchStopped {
+                self.hub.set_scanning_status(false);
                 break;
               }
             }
@@ -487,7 +499,6 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
         _ => error!("Cannot handle dongle function {:?}", msg),
       }
     }
-    self.hub.set_scanning_status(false);
     self
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
