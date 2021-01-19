@@ -137,6 +137,7 @@ protocols:
     btle:
       names:
         - LVS-*
+        - LOVE-*
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
@@ -179,7 +180,7 @@ protocols:
           rx: 56300003-0023-4bd4-bbd5-a6920e4c5653
         58300001-0023-4bd4-bbd5-a6920e4c5653: # Ferri
           tx: 58300002-0023-4bd4-bbd5-a6920e4c5653
-          rx: 58300003-0023-4bd4-bbd5-a6920e4c5653          
+          rx: 58300003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       messages:
         VibrateCmd:
@@ -242,6 +243,10 @@ protocols:
           - X
         name:
           en-us: Lovense Ferri
+      - identifier:
+          - ToyS
+        name:
+          en-us: Loveai Dolp
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special
