@@ -1,3 +1,10 @@
+# 2.0.1 (2021-01-18)
+
+## Bugfixes
+
+- Update to btleplug 0.5.5, fixing issue with async-std channel API versioning
+- Fix issue where not having a Lovense Dongle causes the device scanning system to hang forever
+
 # 2.0.0 (2021-01-18)
 
 ## Features
