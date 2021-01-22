@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "2.0.2"
+version = "2.0.3"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -36,7 +36,7 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-buttplug_derive = "0.5.0"
+buttplug_derive = "0.6.1"
 futures = { version = "0.3.12", features = ["thread-pool"] }
 futures-util = "0.3.12"
 async-trait = "0.1.42"

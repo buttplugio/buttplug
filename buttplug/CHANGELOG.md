@@ -1,3 +1,12 @@
+# 2.0.3 (2021-01-21)
+
+## Bugfixes
+
+- #256: Constrain device message types available in clients
+  - Clients shouldn't have to deal with deprecated messages, but sometimes the server will send them
+    in attributes (See #257). Constraint the available messages to those currently live in the spec.
+    Only really affects FFI libraries.
+
 # 2.0.2 (2021-01-18)
 
 ## Bugfixes
