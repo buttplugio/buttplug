@@ -1,5 +1,11 @@
-# v0.5.0 - 2020/10/09
+# v0.6.0 - 2021/01/21
 
+## Changes
+
+- Renamed MessageAttributes to DeviceMessageAttributes, which required an update in the protocol
+  properties derive macro.
+
+# v0.5.0 - 2020/10/09
 ## Features
 
 - Remove ButtplugProtocolCreator and ButtplugProtocol derives
