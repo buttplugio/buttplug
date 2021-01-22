@@ -256,7 +256,7 @@ fn impl_buttplug_protocol_properties_macro(ast: &syn::DeriveInput) -> TokenStrea
             &self.name
           }
 
-          fn message_attributes(&self) -> MessageAttributesMap {
+          fn message_attributes(&self) -> DeviceMessageAttributesMap {
             self.message_attributes.clone()
           }
 

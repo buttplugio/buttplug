@@ -4,7 +4,7 @@ use crate::core::{
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessageType,
     LinearCmd,
-    MessageAttributesMap,
+    DeviceMessageAttributesMap,
     RotateCmd,
     RotationSubcommand,
     VibrateCmd,
@@ -26,7 +26,7 @@ pub struct GenericCommandManager {
 }
 
 impl GenericCommandManager {
-  pub fn new(attributes: &MessageAttributesMap) -> Self {
+  pub fn new(attributes: &DeviceMessageAttributesMap) -> Self {
     let mut vibrations: Vec<u32> = vec![];
     let mut vibration_step_counts: Vec<u32> = vec![];
     let mut rotations: Vec<(u32, bool)> = vec![];
@@ -265,8 +265,8 @@ mod test {
   use super::GenericCommandManager;
   use crate::core::messages::{
     ButtplugDeviceMessageType,
-    MessageAttributes,
-    MessageAttributesMap,
+    DeviceMessageAttributes,
+    DeviceMessageAttributesMap,
     RotateCmd,
     RotationSubcommand,
     VibrateCmd,
@@ -274,9 +274,9 @@ mod test {
   };
   #[test]
   pub fn test_command_generator_vibration() {
-    let mut attributes_map = MessageAttributesMap::new();
+    let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let mut vibrate_attributes = MessageAttributes::default();
+    let mut vibrate_attributes = DeviceMessageAttributes::default();
     vibrate_attributes.feature_count = Some(2);
     vibrate_attributes.step_count = Some(vec![20, 20]);
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
@@ -310,9 +310,9 @@ mod test {
 
   #[test]
   pub fn test_command_generator_rotation() {
-    let mut attributes_map = MessageAttributesMap::new();
+    let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let mut rotate_attributes = MessageAttributes::default();
+    let mut rotate_attributes = DeviceMessageAttributes::default();
     rotate_attributes.feature_count = Some(2);
     rotate_attributes.step_count = Some(vec![20, 20]);
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);

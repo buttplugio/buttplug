@@ -2,7 +2,7 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::{
   core::{
     errors::ButtplugMessageError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -18,7 +18,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct XInput {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
@@ -26,7 +26,7 @@ pub struct XInput {
 impl ButtplugProtocol for XInput {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 

@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 // serialization, because it's used by device configuration files also.
 
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
-pub struct MessageAttributes {
+pub struct DeviceMessageAttributes {
   #[serde(rename = "FeatureCount")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub feature_count: Option<u32>,

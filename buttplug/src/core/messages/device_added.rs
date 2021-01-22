@@ -21,11 +21,11 @@ pub struct DeviceAdded {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: MessageAttributesMap,
+  pub device_messages: DeviceMessageAttributesMap,
 }
 
 impl DeviceAdded {
-  pub fn new(device_index: u32, device_name: &str, device_messages: &MessageAttributesMap) -> Self {
+  pub fn new(device_index: u32, device_name: &str, device_messages: &DeviceMessageAttributesMap) -> Self {
     Self {
       id: 0,
       device_index,
@@ -45,7 +45,7 @@ pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: MessageAttributesMap,
+  pub device_messages: DeviceMessageAttributesMap,
 }
 
 impl From<DeviceAdded> for DeviceAddedV1 {

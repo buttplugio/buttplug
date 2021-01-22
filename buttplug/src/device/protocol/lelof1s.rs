@@ -2,7 +2,7 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::core::errors::ButtplugError;
 use crate::device::DeviceSubscribeCmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -17,7 +17,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct LeloF1s {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
@@ -25,7 +25,7 @@ pub struct LeloF1s {
 impl ButtplugProtocol for LeloF1s {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 

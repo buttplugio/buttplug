@@ -1,6 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -14,13 +14,13 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct Aneros {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
 impl ButtplugProtocol for Aneros {
-  fn new_protocol(name: &str, message_attributes: MessageAttributesMap) -> Box<dyn ButtplugProtocol>
+  fn new_protocol(name: &str, message_attributes: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol>
   where
     Self: Sized,
   {

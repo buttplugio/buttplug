@@ -10,9 +10,9 @@ use super::*;
 use serde::{Deserialize, Serialize, Serializer};
 use std::collections::{BTreeMap, HashMap};
 
-pub type MessageAttributesMap = HashMap<ButtplugDeviceMessageType, MessageAttributes>;
+pub type DeviceMessageAttributesMap = HashMap<ButtplugDeviceMessageType, DeviceMessageAttributes>;
 
-fn ordered_map<S>(value: &MessageAttributesMap, serializer: S) -> Result<S::Ok, S::Error>
+fn ordered_map<S>(value: &DeviceMessageAttributesMap, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
@@ -31,7 +31,23 @@ pub struct DeviceMessageInfo {
     feature = "serialize-json",
     serde(rename = "DeviceMessages", serialize_with = "ordered_map")
   )]
-  pub device_messages: MessageAttributesMap,
+  pub device_messages: DeviceMessageAttributesMap,
+  // We need to store off the original device messages we had passed in, as we
+  // may need to include message attributes in earlier versions that are
+  // deprecated in later versions.
+  #[serde(skip_serializing)]
+  pub original_device_messages: DeviceMessageAttributesMap
+}
+
+impl DeviceMessageInfo {
+  pub fn new(device_index: u32, device_name: &str, device_messages: DeviceMessageAttributesMap) -> Self {
+    Self {
+      device_index,
+      device_name: device_name.to_owned(),
+      device_messages: device_messages.to_owned(),
+      original_device_messages: device_messages
+    }
+  }
 }
 
 impl From<&DeviceAdded> for DeviceMessageInfo {
@@ -40,6 +56,7 @@ impl From<&DeviceAdded> for DeviceMessageInfo {
       device_index: device_added.device_index,
       device_name: device_added.device_name.clone(),
       device_messages: device_added.device_messages.clone(),
+      original_device_messages: device_added.device_messages.clone(),
     }
   }
 }
@@ -49,7 +66,8 @@ impl From<DeviceAdded> for DeviceMessageInfo {
     Self {
       device_index: device_added.device_index,
       device_name: device_added.device_name,
-      device_messages: device_added.device_messages,
+      device_messages: device_added.device_messages.clone(),
+      original_device_messages: device_added.device_messages
     }
   }
 }
@@ -65,7 +83,7 @@ pub struct DeviceMessageInfoV1 {
     feature = "serialize-json",
     serde(rename = "DeviceMessages", serialize_with = "ordered_map")
   )]
-  pub device_messages: MessageAttributesMap,
+  pub device_messages: DeviceMessageAttributesMap,
 }
 
 impl From<DeviceAdded> for DeviceMessageInfoV1 {
@@ -81,7 +99,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
     let mut dmi_v1 = Self {
       device_index: device_message_info.device_index,
       device_name: device_message_info.device_name,
-      device_messages: device_message_info.device_messages,
+      device_messages: device_message_info.original_device_messages,
     };
     // Remove entries that weren't in V1.
     let v2_message_types = [
@@ -91,11 +109,6 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
       ButtplugDeviceMessageType::RawUnsubscribeCmd,
       ButtplugDeviceMessageType::BatteryLevelCmd,
       ButtplugDeviceMessageType::RSSILevelCmd,
-      // PatternCmd
-      // BatteryLevelReading
-      // RSSILevelReading
-      // ShockCmd?
-      // ToneEmitterCmd?
     ];
     for t in &v2_message_types {
       dmi_v1.device_messages.remove(t);
@@ -105,7 +118,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
     // preserve.
     for mut attributes in &mut dmi_v1.device_messages.values_mut() {
       let fc = attributes.feature_count;
-      *attributes = MessageAttributes::default();
+      *attributes = DeviceMessageAttributes::default();
       attributes.feature_count = fc;
     }
 
@@ -116,7 +129,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
     {
       dmi_v1.device_messages.insert(
         ButtplugDeviceMessageType::SingleMotorVibrateCmd,
-        MessageAttributes::default(),
+        DeviceMessageAttributes::default(),
       );
     }
 

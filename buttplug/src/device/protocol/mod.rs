@@ -38,7 +38,7 @@ use crate::{
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessageType,
       ButtplugMessage,
-      MessageAttributesMap,
+      DeviceMessageAttributesMap,
       RawReading,
       VibrateCmd,
       VibrateSubcommand,
@@ -199,14 +199,14 @@ pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
     Box::pin(future::ready(Ok(None)))
   }
 
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol>
+  fn new_protocol(name: &str, attrs: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol>
   where
     Self: Sized;
 }
 
 fn check_message_support(
   message_type: &ButtplugDeviceMessageType,
-  message_attributes: &MessageAttributesMap,
+  message_attributes: &DeviceMessageAttributesMap,
 ) -> Result<(), ButtplugError> {
   if !message_attributes.contains_key(message_type) {
     Err(ButtplugDeviceError::MessageNotSupported(*message_type).into())
@@ -217,7 +217,7 @@ fn check_message_support(
 
 pub trait ButtplugProtocolProperties {
   fn name(&self) -> &str;
-  fn message_attributes(&self) -> MessageAttributesMap;
+  fn message_attributes(&self) -> DeviceMessageAttributesMap;
   fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion>;
 
   fn supports_message(

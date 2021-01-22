@@ -1,6 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -14,7 +14,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct MagicMotionV1 {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
@@ -22,7 +22,7 @@ pub struct MagicMotionV1 {
 impl ButtplugProtocol for MagicMotionV1 {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 

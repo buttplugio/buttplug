@@ -11,7 +11,7 @@ use crate::{
       self,
       ButtplugDeviceCommandMessageUnion,
       FleshlightLaunchFW12Cmd,
-      MessageAttributesMap,
+      DeviceMessageAttributesMap,
     },
   },
   device::{
@@ -31,7 +31,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV2 {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   _manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
@@ -40,7 +40,7 @@ pub struct KiirooV2 {
 impl ButtplugProtocol for KiirooV2 {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 

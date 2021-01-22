@@ -10,7 +10,7 @@
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{ButtplugDeviceMessageType, MessageAttributes, MessageAttributesMap},
+    messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap},
   },
   device::Endpoint,
   util::json::JSONValidator,
@@ -152,7 +152,7 @@ pub enum DeviceSpecifier {
 pub struct ProtocolAttributes {
   identifier: Option<Vec<String>>,
   name: Option<HashMap<String, String>>,
-  messages: Option<MessageAttributesMap>,
+  messages: Option<DeviceMessageAttributesMap>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -255,8 +255,8 @@ impl DeviceProtocolConfiguration {
     &self,
     identifier: &str,
     endpoints: &[Endpoint],
-  ) -> Result<(HashMap<String, String>, MessageAttributesMap), ButtplugError> {
-    let mut attributes = MessageAttributesMap::new();
+  ) -> Result<(HashMap<String, String>, DeviceMessageAttributesMap), ButtplugError> {
+    let mut attributes = DeviceMessageAttributesMap::new();
     // If we find defaults, set those up first.
     if let Some(ref attrs) = self.defaults {
       if let Some(ref msg_attrs) = attrs.messages {
@@ -276,9 +276,9 @@ impl DeviceProtocolConfiguration {
         }
         attributes
           .entry(ButtplugDeviceMessageType::StopDeviceCmd)
-          .or_insert_with(MessageAttributes::default);
+          .or_insert_with(DeviceMessageAttributes::default);
         if self.allow_raw_messages {
-          let endpoint_attributes = MessageAttributes {
+          let endpoint_attributes = DeviceMessageAttributes {
             endpoints: Some(endpoints.to_owned()),
             ..Default::default()
           };

@@ -6,7 +6,7 @@ use crate::{
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -25,7 +25,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct Lovense {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   rotation_direction: Arc<AtomicBool>,
@@ -37,7 +37,7 @@ impl ButtplugProtocol for Lovense {
   // battery readings. Therefore, we expect initialize() to return the protocol
   // itself instead of calling this, which is simply a convenience method for
   // the default implementation anyways.
-  fn new_protocol(name: &str, attrs: MessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new_protocol(name: &str, attrs: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&attrs);
     Box::new(Self {
       name: name.to_owned(),

@@ -2,7 +2,7 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, MessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -30,7 +30,7 @@ use std::sync::{
 #[derive(ButtplugProtocolProperties)]
 pub struct MysteryVibe {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   current_command: Arc<RwLock<Vec<u8>>>,
@@ -40,7 +40,7 @@ pub struct MysteryVibe {
 impl ButtplugProtocol for MysteryVibe {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 

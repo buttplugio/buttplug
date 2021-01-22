@@ -22,7 +22,7 @@ use crate::{
       self,
       ButtplugDeviceCommandMessageUnion,
       ButtplugServerMessage,
-      MessageAttributesMap,
+      DeviceMessageAttributesMap,
       RawReadCmd,
       RawReading,
       RawSubscribeCmd,
@@ -510,7 +510,7 @@ impl ButtplugDevice {
     self.device.disconnect()
   }
 
-  pub fn message_attributes(&self) -> MessageAttributesMap {
+  pub fn message_attributes(&self) -> DeviceMessageAttributesMap {
     self.protocol.message_attributes()
   }
 

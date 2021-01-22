@@ -3,7 +3,7 @@ use crate::{
   core::messages::{
     self,
     ButtplugDeviceCommandMessageUnion,
-    MessageAttributesMap,
+    DeviceMessageAttributesMap,
     VibrateCmd,
     VibrateSubcommand,
   },
@@ -20,7 +20,7 @@ use tokio::sync::Mutex;
 #[derive(ButtplugProtocolProperties)]
 pub struct Vibratissimo {
   name: String,
-  message_attributes: MessageAttributesMap,
+  message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
@@ -28,7 +28,7 @@ pub struct Vibratissimo {
 impl ButtplugProtocol for Vibratissimo {
   fn new_protocol(
     name: &str,
-    message_attributes: MessageAttributesMap,
+    message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol> {
     let manager = GenericCommandManager::new(&message_attributes);
 
