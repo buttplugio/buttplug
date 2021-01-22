@@ -214,12 +214,12 @@ impl DeviceManager {
           .iter()
           .map(|device| {
             let dev = device.value();
-            DeviceMessageInfo {
-              device_index: *device.key(),
-              device_name: dev.name(),
-              device_messages: dev.message_attributes(),
+            DeviceMessageInfo::new(
+              *device.key(),
+              &dev.name(),
+              dev.message_attributes())
             }
-          })
+          )
           .collect();
         let mut device_list = DeviceList::new(devices);
         device_list.set_id(msg.get_id());

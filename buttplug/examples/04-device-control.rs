@@ -10,12 +10,12 @@
 
 use buttplug::{
   client::{
-    device::ButtplugClientDevice,
-    device::VibrateCommand,
     ButtplugClient,
     ButtplugClientEvent,
+    ButtplugClientDeviceMessageType,
+    ButtplugClientDevice,
+    VibrateCommand,
   },
-  core::messages::ButtplugDeviceMessageType,
   server::ButtplugServerOptions,
   util::async_manager,
 };
@@ -91,7 +91,7 @@ async fn device_control_example() {
       // For this example, we'll use the simple single value.
       if dev
         .allowed_messages
-        .contains_key(&ButtplugDeviceMessageType::VibrateCmd)
+        .contains_key(&ButtplugClientDeviceMessageType::VibrateCmd)
       {
         dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
         println!("{} should start vibrating!", dev.name);

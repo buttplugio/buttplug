@@ -11,7 +11,7 @@ mod client_message_sorter;
 pub mod device;
 
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
-use device::ButtplugClientDevice;
+pub use device::{ButtplugClientDevice, ButtplugClientDeviceMessageType, VibrateCommand, RotateCommand, LinearCommand, ButtplugClientDeviceEvent};
 
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},

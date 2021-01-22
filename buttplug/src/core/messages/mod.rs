@@ -144,12 +144,6 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
 /// capabilties.
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
-  // Generic commands
-  //
-  // If you add to or change this, make sure to update the
-  // ServerMessage.MessageAttributeType enum in buttplug-rs-ffi repo, including
-  // the try_from trait, otherwise conversion will always fail and we won't see
-  // the new messages in the FFI layers.
   VibrateCmd,
   LinearCmd,
   RotateCmd,
@@ -167,12 +161,6 @@ pub enum ButtplugDeviceMessageType {
   LovenseCmd,
   KiirooCmd,
   VorzeA10CycloneCmd,
-  // To Add:
-  // PatternCmd
-  // BatteryLevelReading
-  // RSSILevelReading
-  // ShockCmd?
-  // ToneEmitterCmd?
 }
 
 // Ordering for ButtplugDeviceMessageType should be lexicographic, for
@@ -186,6 +174,77 @@ impl PartialOrd for ButtplugDeviceMessageType {
 impl Ord for ButtplugDeviceMessageType {
   fn cmp(&self, other: &ButtplugDeviceMessageType) -> Ordering {
     self.to_string().cmp(&other.to_string())
+  }
+}
+/// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
+/// capabilties. Only contains message that are valid in the current version of the spec.
+#[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
+pub enum ButtplugCurrentSpecDeviceMessageType {
+  // Generic commands
+  //
+  // If you add to or change this, make sure to update the
+  // ServerMessage.MessageAttributeType enum in buttplug-rs-ffi repo, including
+  // the try_from trait, otherwise conversion will always fail and we won't see
+  // the new messages in the FFI layers.
+  VibrateCmd,
+  LinearCmd,
+  RotateCmd,
+  StopDeviceCmd,
+  RawWriteCmd,
+  RawReadCmd,
+  RawSubscribeCmd,
+  RawUnsubscribeCmd,
+  BatteryLevelCmd,
+  RSSILevelCmd,
+}
+
+// Ordering for ButtplugCurrentDeviceMessageType should be lexicographic, for
+// serialization reasons.
+impl PartialOrd for ButtplugCurrentSpecDeviceMessageType {
+  fn partial_cmp(&self, other: &ButtplugCurrentSpecDeviceMessageType) -> Option<Ordering> {
+    Some(self.cmp(other))
+  }
+}
+
+impl Ord for ButtplugCurrentSpecDeviceMessageType {
+  fn cmp(&self, other: &ButtplugCurrentSpecDeviceMessageType) -> Ordering {
+    self.to_string().cmp(&other.to_string())
+  }
+}
+
+impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType {
+  type Error = ButtplugMessageError;
+  fn try_from(value: ButtplugDeviceMessageType) -> Result<Self, Self::Error> {
+    match value {
+      ButtplugDeviceMessageType::VibrateCmd => Ok(ButtplugCurrentSpecDeviceMessageType::VibrateCmd),
+      ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugCurrentSpecDeviceMessageType::LinearCmd),
+      ButtplugDeviceMessageType::RotateCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RotateCmd),
+      ButtplugDeviceMessageType::StopDeviceCmd => Ok(ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd),
+      ButtplugDeviceMessageType::RawWriteCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawWriteCmd),
+      ButtplugDeviceMessageType::RawReadCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawReadCmd),
+      ButtplugDeviceMessageType::RawSubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd),
+      ButtplugDeviceMessageType::RawUnsubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd),
+      ButtplugDeviceMessageType::BatteryLevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd),
+      ButtplugDeviceMessageType::RSSILevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd),
+      _ => Err(ButtplugMessageError::MessageConversionError("Device message deprecated, does not exist in current version of protocol."))
+    }
+  }
+}
+
+impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
+  fn from(value: ButtplugCurrentSpecDeviceMessageType) -> Self {
+    match value {
+      ButtplugCurrentSpecDeviceMessageType::VibrateCmd => ButtplugDeviceMessageType::VibrateCmd,
+      ButtplugCurrentSpecDeviceMessageType::LinearCmd => ButtplugDeviceMessageType::LinearCmd,
+      ButtplugCurrentSpecDeviceMessageType::RotateCmd => ButtplugDeviceMessageType::RotateCmd,
+      ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd => ButtplugDeviceMessageType::StopDeviceCmd,
+      ButtplugCurrentSpecDeviceMessageType::RawWriteCmd => ButtplugDeviceMessageType::RawWriteCmd,
+      ButtplugCurrentSpecDeviceMessageType::RawReadCmd => ButtplugDeviceMessageType::RawReadCmd,
+      ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd => ButtplugDeviceMessageType::RawSubscribeCmd,
+      ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd => ButtplugDeviceMessageType::RawUnsubscribeCmd,
+      ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd => ButtplugDeviceMessageType::BatteryLevelCmd,
+      ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
+    }
   }
 }
 
