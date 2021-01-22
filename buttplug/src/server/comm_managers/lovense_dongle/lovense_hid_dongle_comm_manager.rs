@@ -92,7 +92,7 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
             match msg {
               Ok(m) => {
                 debug!("Read message: {:?}", m);
-                sender_clone.blocking_send(m);
+                sender_clone.blocking_send(m).unwrap();
               }
               Err(e) => {
                 error!("Error reading: {:?}", e);
