@@ -1,3 +1,9 @@
+# v0.6.1 - 2021/01/21
+
+## Changes
+
+- Update dependencies since this library almost never changes anyways.
+
 # v0.6.0 - 2021/01/21
 
 ## Changes
