@@ -17,6 +17,7 @@ use std::{
     Arc,
   },
   time::Duration,
+  string::ToString
 };
 use tokio::sync::{broadcast, mpsc, Notify};
 
@@ -40,7 +41,7 @@ pub(super) struct XInputConnectionTracker {
 }
 
 pub(super) fn create_address(index: XInputControllerIndex) -> String {
-  format!("XBox Compatible Gamepad #{}", index)
+  index.to_string()
 }
 
 async fn check_gamepad_connectivity(
@@ -67,7 +68,7 @@ async fn check_gamepad_connectivity(
       }
       // If we can't get state, assume we have disconnected.
       if handle.get_state(*index as u32).is_err() {
-        info!("XInput gamepad {} has disconnected.", *index as u8);
+        info!("XInput gamepad {} has disconnected.", index);
         let new_connected_gamepads = gamepads & !(1 << *index as u8);
         connected_gamepads.store(new_connected_gamepads, Ordering::SeqCst);
         if let Some(send) = &sender {

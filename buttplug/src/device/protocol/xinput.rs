@@ -1,7 +1,7 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors::ButtplugMessageError,
+    errors::{ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
@@ -13,6 +13,7 @@ use crate::{
 };
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::sync::Arc;
+use futures::future::{self, BoxFuture};
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
@@ -36,6 +37,13 @@ impl ButtplugProtocol for XInput {
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
     })
+  }
+  
+  fn initialize(_device_impl: &DeviceImpl) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
+  where
+      Self: Sized, {
+    // This must match the identifier in the device config, otherwise we'll fail to load controllers.
+    Box::pin(future::ready(Ok(Some("XInput Gamepad".to_owned()))))
   }
 }
 

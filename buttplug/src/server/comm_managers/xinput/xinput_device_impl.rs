@@ -66,7 +66,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
     debug!("Emitting a new xbox device impl.");
     let device_impl_internal = XInputDeviceImpl::new(self.index);
     let device_impl = DeviceImpl::new(
-      &format!("XBox Compatible Gamepad #{}", self.index),
+      &self.index.to_string(),
       &create_address(self.index),
       &[Endpoint::Tx],
       Box::new(device_impl_internal),
