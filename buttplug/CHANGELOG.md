@@ -1,3 +1,10 @@
+# 2.0.5 (2021-01-24)
+
+## Bugfixes
+
+- #260: original_device_messages shouldn't be deserialized.
+  - Put the wrong decorator on the field. :(
+
 # 2.0.4 (2021-01-24)
 
 ## Bugfixes
