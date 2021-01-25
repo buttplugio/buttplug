@@ -220,7 +220,10 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
             self.event_sender.clone(),
             self.is_scanning,
           );
-          return Some(Box::new(LovenseCheckForAlreadyConnectedDevice::new(hub, should_scan)));
+          return Some(Box::new(LovenseCheckForAlreadyConnectedDevice::new(
+            hub,
+            should_scan,
+          )));
         }
         LovenseDeviceCommand::StartScanning => {
           info!("Lovense dongle not found, storing StartScanning command until found.");
@@ -247,15 +250,12 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
 #[derive(Debug)]
 struct LovenseCheckForAlreadyConnectedDevice {
   hub: ChannelHub,
-  should_scan: bool
+  should_scan: bool,
 }
 
 impl LovenseCheckForAlreadyConnectedDevice {
-  pub fn new (hub: ChannelHub, should_scan: bool) -> Self {
-    Self {
-      hub,
-      should_scan
-    }
+  pub fn new(hub: ChannelHub, should_scan: bool) -> Self {
+    Self { hub, should_scan }
   }
 }
 
@@ -271,7 +271,10 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
       command: None,
       eager: None,
     };
-    self.hub.send_output(OutgoingLovenseData::Message(autoconnect_msg)).await;
+    self
+      .hub
+      .send_output(OutgoingLovenseData::Message(autoconnect_msg))
+      .await;
     // This sleep is REQUIRED. If we send something too soon after this, the
     // dongle locks up. The query for already connected devices just returns
     // nothing if there's no device currently connected, so all we can do is wait.
@@ -280,7 +283,7 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
     select! {
       incoming_msg = fut.fuse() => {
         match incoming_msg {
-          IncomingMessage::Dongle(device_msg) => 
+          IncomingMessage::Dongle(device_msg) =>
             match device_msg.func {
               LovenseDongleMessageFunc::IncomingStatus => {
                 if let Some(incoming_data) = device_msg.data {
@@ -293,7 +296,7 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
               func => error!("Cannot handle dongle function {:?}", func),
             }
             _ => error!("Cannot handle incoming message {:?}", incoming_msg),
-        }    
+        }
       },
       _ = futures_timer::Delay::new(std::time::Duration::from_millis(250)).fuse() => {
         // noop, just fall thru.
@@ -395,16 +398,12 @@ impl LovenseDongleState for LovenseDongleScanning {
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
-        IncomingMessage::CommMgr(comm_msg) => {
-          match comm_msg {
-            LovenseDeviceCommand::StopScanning => {
-              return Some(Box::new(LovenseDongleStopScanning::new(
-                self.hub
-              )));
-            }
-            msg => error!("Not handling comm input: {:?}", msg)
+        IncomingMessage::CommMgr(comm_msg) => match comm_msg {
+          LovenseDeviceCommand::StopScanning => {
+            return Some(Box::new(LovenseDongleStopScanning::new(self.hub)));
           }
-        }
+          msg => error!("Not handling comm input: {:?}", msg),
+        },
         IncomingMessage::Dongle(device_msg) => {
           match device_msg.func {
             LovenseDongleMessageFunc::IncomingStatus => {
@@ -465,7 +464,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
       .hub
       .send_event(DeviceCommunicationEvent::ScanningFinished)
       .await;
-      Some(Box::new(LovenseDongleIdle::new(self.hub)))
+    Some(Box::new(LovenseDongleIdle::new(self.hub)))
   }
 }
 
@@ -560,18 +559,14 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
         }
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {
           LovenseDeviceCommand::StartScanning => {
-            self
-              .hub
-              .set_scanning_status(false);
+            self.hub.set_scanning_status(false);
             self
               .hub
               .send_event(DeviceCommunicationEvent::ScanningFinished)
               .await;
           }
           LovenseDeviceCommand::StopScanning => {
-            self
-              .hub
-              .set_scanning_status(false);
+            self.hub.set_scanning_status(false);
             self
               .hub
               .send_event(DeviceCommunicationEvent::ScanningFinished)

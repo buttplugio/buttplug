@@ -12,12 +12,12 @@ use crate::{
 use futures::{future, FutureExt};
 use futures_timer::Delay;
 use std::{
+  string::ToString,
   sync::{
     atomic::{AtomicBool, AtomicU8, Ordering},
     Arc,
   },
   time::Duration,
-  string::ToString
 };
 use tokio::sync::{broadcast, mpsc, Notify};
 

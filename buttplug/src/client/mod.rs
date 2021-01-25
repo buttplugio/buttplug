@@ -11,7 +11,14 @@ mod client_message_sorter;
 pub mod device;
 
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
-pub use device::{ButtplugClientDevice, ButtplugClientDeviceMessageType, VibrateCommand, RotateCommand, LinearCommand, ButtplugClientDeviceEvent};
+pub use device::{
+  ButtplugClientDevice,
+  ButtplugClientDeviceEvent,
+  ButtplugClientDeviceMessageType,
+  LinearCommand,
+  RotateCommand,
+  VibrateCommand,
+};
 
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
@@ -205,9 +212,8 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> Result<(), ButtplugClientError>
   where
-    ConnectorType:
-      ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
-        + 'static,
+    ConnectorType: ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
+      + 'static,
   {
     if self.connected() {
       return Err(ButtplugClientError::ButtplugConnectorError(

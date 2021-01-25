@@ -3,8 +3,8 @@ use crate::core::{
   messages::{
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessageType,
-    LinearCmd,
     DeviceMessageAttributesMap,
+    LinearCmd,
     RotateCmd,
     RotationSubcommand,
     VibrateCmd,

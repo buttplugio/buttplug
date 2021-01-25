@@ -58,7 +58,7 @@ pub use battery_level_cmd::BatteryLevelCmd;
 pub use battery_level_reading::BatteryLevelReading;
 pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
-pub use device_message_info::{DeviceMessageInfo, DeviceMessageAttributesMap};
+pub use device_message_info::{DeviceMessageAttributesMap, DeviceMessageInfo};
 pub use device_removed::DeviceRemoved;
 pub use error::{Error, ErrorCode};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
@@ -219,14 +219,28 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
       ButtplugDeviceMessageType::VibrateCmd => Ok(ButtplugCurrentSpecDeviceMessageType::VibrateCmd),
       ButtplugDeviceMessageType::LinearCmd => Ok(ButtplugCurrentSpecDeviceMessageType::LinearCmd),
       ButtplugDeviceMessageType::RotateCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RotateCmd),
-      ButtplugDeviceMessageType::StopDeviceCmd => Ok(ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd),
-      ButtplugDeviceMessageType::RawWriteCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawWriteCmd),
+      ButtplugDeviceMessageType::StopDeviceCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd)
+      }
+      ButtplugDeviceMessageType::RawWriteCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::RawWriteCmd)
+      }
       ButtplugDeviceMessageType::RawReadCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawReadCmd),
-      ButtplugDeviceMessageType::RawSubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd),
-      ButtplugDeviceMessageType::RawUnsubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd),
-      ButtplugDeviceMessageType::BatteryLevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd),
-      ButtplugDeviceMessageType::RSSILevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd),
-      _ => Err(ButtplugMessageError::MessageConversionError("Device message deprecated, does not exist in current version of protocol."))
+      ButtplugDeviceMessageType::RawSubscribeCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd)
+      }
+      ButtplugDeviceMessageType::RawUnsubscribeCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd)
+      }
+      ButtplugDeviceMessageType::BatteryLevelCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd)
+      }
+      ButtplugDeviceMessageType::RSSILevelCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
+      }
+      _ => Err(ButtplugMessageError::MessageConversionError(
+        "Device message deprecated, does not exist in current version of protocol.",
+      )),
     }
   }
 }
@@ -237,12 +251,20 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
       ButtplugCurrentSpecDeviceMessageType::VibrateCmd => ButtplugDeviceMessageType::VibrateCmd,
       ButtplugCurrentSpecDeviceMessageType::LinearCmd => ButtplugDeviceMessageType::LinearCmd,
       ButtplugCurrentSpecDeviceMessageType::RotateCmd => ButtplugDeviceMessageType::RotateCmd,
-      ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd => ButtplugDeviceMessageType::StopDeviceCmd,
+      ButtplugCurrentSpecDeviceMessageType::StopDeviceCmd => {
+        ButtplugDeviceMessageType::StopDeviceCmd
+      }
       ButtplugCurrentSpecDeviceMessageType::RawWriteCmd => ButtplugDeviceMessageType::RawWriteCmd,
       ButtplugCurrentSpecDeviceMessageType::RawReadCmd => ButtplugDeviceMessageType::RawReadCmd,
-      ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd => ButtplugDeviceMessageType::RawSubscribeCmd,
-      ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd => ButtplugDeviceMessageType::RawUnsubscribeCmd,
-      ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd => ButtplugDeviceMessageType::BatteryLevelCmd,
+      ButtplugCurrentSpecDeviceMessageType::RawSubscribeCmd => {
+        ButtplugDeviceMessageType::RawSubscribeCmd
+      }
+      ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd => {
+        ButtplugDeviceMessageType::RawUnsubscribeCmd
+      }
+      ButtplugCurrentSpecDeviceMessageType::BatteryLevelCmd => {
+        ButtplugDeviceMessageType::BatteryLevelCmd
+      }
       ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
     }
   }

@@ -68,7 +68,8 @@ impl Drop for PingTimer {
       if sender.send(PingMessage::End).await.is_err() {
         debug!("Receiver does not exist, assuming ping timer event loop already dead.");
       }
-    }).unwrap();
+    })
+    .unwrap();
   }
 }
 

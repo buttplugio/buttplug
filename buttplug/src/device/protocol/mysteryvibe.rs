@@ -10,18 +10,18 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::async_manager
+  util::async_manager,
 };
 use futures::future::BoxFuture;
-use tokio::sync::{Mutex, RwLock};
 use futures_timer::Delay;
 use std::{
-  time::Duration,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }
+  },
+  time::Duration,
 };
+use tokio::sync::{Mutex, RwLock};
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
 // a best guess derived from watching packet timing a few years ago.

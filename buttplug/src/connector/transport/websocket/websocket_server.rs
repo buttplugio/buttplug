@@ -379,7 +379,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     Box::pin(async move {
       *disconnect_sender.lock().await = request_sender.clone();
       if tasks.len() == 0 {
-        Err(ButtplugConnectorError::ConnectorGenericError("No ports specified for listening in websocket server connector.".to_owned()))
+        Err(ButtplugConnectorError::ConnectorGenericError(
+          "No ports specified for listening in websocket server connector.".to_owned(),
+        ))
       } else if let Err(connector_err) = select_all(tasks).await.0 {
         Err(connector_err)
       } else {

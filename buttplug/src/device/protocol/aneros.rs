@@ -20,7 +20,10 @@ pub struct Aneros {
 }
 
 impl ButtplugProtocol for Aneros {
-  fn new_protocol(name: &str, message_attributes: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol>
+  fn new_protocol(
+    name: &str,
+    message_attributes: DeviceMessageAttributesMap,
+  ) -> Box<dyn ButtplugProtocol>
   where
     Self: Sized,
   {

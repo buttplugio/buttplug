@@ -25,7 +25,11 @@ pub struct DeviceAdded {
 }
 
 impl DeviceAdded {
-  pub fn new(device_index: u32, device_name: &str, device_messages: &DeviceMessageAttributesMap) -> Self {
+  pub fn new(
+    device_index: u32,
+    device_name: &str,
+    device_messages: &DeviceMessageAttributesMap,
+  ) -> Self {
     Self {
       id: 0,
       device_index,

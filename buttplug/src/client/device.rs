@@ -14,16 +14,15 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      
       BatteryLevelCmd,
       ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
       ButtplugCurrentSpecDeviceMessageType,
+      ButtplugCurrentSpecServerMessage,
       ButtplugMessage,
-      DeviceMessageInfo,
-      LinearCmd,
       DeviceMessageAttributes,
       DeviceMessageAttributesMap,
+      DeviceMessageInfo,
+      LinearCmd,
       RSSILevelCmd,
       RawReadCmd,
       RawSubscribeCmd,
@@ -122,16 +121,20 @@ pub enum LinearCommand {
 macro_rules! check_message_support {
   ($self:ident, $msg:expr) => {
     if !$self.allowed_messages.contains_key(&$msg) {
-      return $self
-        .create_boxed_future_client_error(ButtplugDeviceError::MessageNotSupported($msg.into()).into());
+      return $self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported($msg.into()).into(),
+      );
     }
   };
 }
 
 pub type ButtplugClientDeviceMessageType = ButtplugCurrentSpecDeviceMessageType;
-pub type ClientDeviceMessageAttributesMap = HashMap<ButtplugCurrentSpecDeviceMessageType, DeviceMessageAttributes>;
+pub type ClientDeviceMessageAttributesMap =
+  HashMap<ButtplugCurrentSpecDeviceMessageType, DeviceMessageAttributes>;
 
-fn convert_to_client_device_map(device_map: &DeviceMessageAttributesMap) -> ClientDeviceMessageAttributesMap {
+fn convert_to_client_device_map(
+  device_map: &DeviceMessageAttributesMap,
+) -> ClientDeviceMessageAttributesMap {
   let mut current_map = ClientDeviceMessageAttributesMap::new();
   for (k, v) in device_map.iter() {
     if let Ok(current_type) = ButtplugCurrentSpecDeviceMessageType::try_from(*k) {
@@ -275,7 +278,9 @@ impl ButtplugClientDevice {
   }
 
   pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
-    Box::new(Box::pin(convert_broadcast_receiver_to_stream(self.internal_event_sender.subscribe())))
+    Box::new(Box::pin(convert_broadcast_receiver_to_stream(
+      self.internal_event_sender.subscribe(),
+    )))
   }
 
   fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T>
@@ -556,7 +561,10 @@ impl ButtplugClientDevice {
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    check_message_support!(self, ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd);
+    check_message_support!(
+      self,
+      ButtplugCurrentSpecDeviceMessageType::RawUnsubscribeCmd
+    );
     let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(
       self.index, endpoint,
     ));

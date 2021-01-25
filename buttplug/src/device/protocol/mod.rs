@@ -182,8 +182,7 @@ pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
         Ok(maybe_ident) => maybe_ident.unwrap_or(name),
         Err(err) => return Err(err),
       };
-      let (names, attrs) = config
-        .get_attributes(&device_identifier, &endpoints)?;
+      let (names, attrs) = config.get_attributes(&device_identifier, &endpoints)?;
       let name = names.get("en-us").unwrap().clone();
       Ok(Self::new_protocol(&name, attrs))
     })

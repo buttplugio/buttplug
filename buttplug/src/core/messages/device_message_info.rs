@@ -36,16 +36,20 @@ pub struct DeviceMessageInfo {
   // may need to include message attributes in earlier versions that are
   // deprecated in later versions.
   #[serde(skip_serializing)]
-  pub original_device_messages: DeviceMessageAttributesMap
+  pub original_device_messages: DeviceMessageAttributesMap,
 }
 
 impl DeviceMessageInfo {
-  pub fn new(device_index: u32, device_name: &str, device_messages: DeviceMessageAttributesMap) -> Self {
+  pub fn new(
+    device_index: u32,
+    device_name: &str,
+    device_messages: DeviceMessageAttributesMap,
+  ) -> Self {
     Self {
       device_index,
       device_name: device_name.to_owned(),
       device_messages: device_messages.to_owned(),
-      original_device_messages: device_messages
+      original_device_messages: device_messages,
     }
   }
 }
@@ -67,7 +71,7 @@ impl From<DeviceAdded> for DeviceMessageInfo {
       device_index: device_added.device_index,
       device_name: device_added.device_name,
       device_messages: device_added.device_messages.clone(),
-      original_device_messages: device_added.device_messages
+      original_device_messages: device_added.device_messages,
     }
   }
 }

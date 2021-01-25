@@ -10,8 +10,8 @@ use crate::{
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
-      FleshlightLaunchFW12Cmd,
       DeviceMessageAttributesMap,
+      FleshlightLaunchFW12Cmd,
     },
   },
   device::{
@@ -22,13 +22,13 @@ use crate::{
   },
 };
 use futures::future::BoxFuture;
+use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
-use tokio::sync::Mutex;
-use futures_timer::Delay;
 use std::time::Duration;
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV21 {

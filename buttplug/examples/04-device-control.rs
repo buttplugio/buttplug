@@ -11,9 +11,9 @@
 use buttplug::{
   client::{
     ButtplugClient,
-    ButtplugClientEvent,
-    ButtplugClientDeviceMessageType,
     ButtplugClientDevice,
+    ButtplugClientDeviceMessageType,
+    ButtplugClientEvent,
     VibrateCommand,
   },
   server::ButtplugServerOptions,
