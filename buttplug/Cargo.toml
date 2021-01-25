@@ -29,7 +29,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 thread-pool-runtime=[]
 async-std-runtime=["async-std/default"]
 tokio-runtime=[]
-wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
+wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures", "futures-timer/wasm-bindgen"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]

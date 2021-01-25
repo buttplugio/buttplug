@@ -10,14 +10,17 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::async_manager,
+  util::async_manager
 };
 use futures::future::BoxFuture;
 use tokio::sync::{Mutex, RwLock};
-// use futures_timer::Delay;
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use futures_timer::Delay;
+use std::{
+  time::Duration,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  }
 };
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
@@ -25,7 +28,7 @@ use std::sync::{
 //
 // Thelemic vibrator. Neat.
 //
-// const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 23;
+const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct MysteryVibe {
@@ -78,7 +81,7 @@ async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<R
     .await
     .is_ok()
   {
-    //Delay::new(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
+    Delay::new(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
     current_command = command_holder.read().await.clone();
     info!("MV Command: {:?}", current_command);
   }

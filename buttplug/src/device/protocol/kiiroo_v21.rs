@@ -27,8 +27,8 @@ use std::sync::{
   Arc,
 };
 use tokio::sync::Mutex;
-// use futures_timer::Delay;
-// use std::time::Duration;
+use futures_timer::Delay;
+use std::time::Duration;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV21 {
@@ -71,7 +71,7 @@ impl ButtplugProtocol for KiirooV21 {
     ));
     Box::pin(async move {
       init_fut1.await?;
-      // Delay::new(Duration::from_millis(100)).await;
+      Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
       Ok(None)
     })
