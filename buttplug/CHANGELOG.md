@@ -1,3 +1,11 @@
+# 2.0.4 (2021-01-24)
+
+## Bugfixes
+
+- #258: XInput devices no longer cause panic on discovery due to address/identifier mismatches
+- #259: Make sure futures-timer works with WASM
+  - Also fixes #253 (Onyx+ issues) because I can readd the init delay between packets for WASM
+
 # 2.0.3 (2021-01-21)
 
 ## Bugfixes
