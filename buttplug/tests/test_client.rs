@@ -104,6 +104,23 @@ fn test_connect_init() {
 
 #[cfg(feature = "server")]
 #[test]
+fn test_client_connected_status() {
+  async_manager::block_on(async {
+    let client = ButtplugClient::new("Test Client");
+    assert!(!client.connected());
+    client
+      .connect(ButtplugInProcessClientConnector::default())
+      .await
+      .unwrap();
+    assert!(client.connected());
+    client.disconnect().await.unwrap();
+    assert!(!client.connected());
+  });
+}
+
+
+#[cfg(feature = "server")]
+#[test]
 fn test_start_scanning() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();

@@ -167,6 +167,15 @@ where
     self.to_client_sender.send(event).unwrap();
   }
 
+  fn disconnect_device(&mut self, device_index: u32) {
+    let device = (*self.device_map.get(&device_index).unwrap()).clone();
+    device.set_device_connected(false);
+    device.queue_event(ButtplugClientDeviceEvent::DeviceRemoved);
+    // Then remove it from our storage map
+    self.device_map.remove(&device_index);
+    self.send_client_event(ButtplugClientEvent::DeviceRemoved(device));
+  }
+
   /// Parse device messages from the connector.
   ///
   /// Since the event loop maintains the state of all devices reported from the
@@ -194,11 +203,7 @@ where
           ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
             if self.device_map.contains_key(&dev.device_index) {
               trace!("Device removed, updating map and sending to client");
-              let device = (*self.device_map.get(&dev.device_index).unwrap()).clone();
-              device.set_device_connected(false);
-              // Then remove it from our storage map
-              self.device_map.remove(&dev.device_index);
-              self.send_client_event(ButtplugClientEvent::DeviceRemoved(device));
+              self.disconnect_device(dev.device_index);
             } else {
               error!("Received DeviceRemoved for non-existent device index");
             }
@@ -303,6 +308,10 @@ where
         },
       };
     }
+
+    let device_indexes: Vec<u32> = self.device_map.iter().map(|k| *k.key()).collect();
+    device_indexes.iter().for_each(|k| self.disconnect_device(*k));
+
     if self
       .to_client_sender
       .send(ButtplugClientEvent::ServerDisconnect)

@@ -56,7 +56,7 @@ use tracing_futures::Instrument;
 #[derive(Clone, Debug)]
 pub enum ButtplugClientDeviceEvent {
   /// Device has disconnected from server.
-  DeviceDisconnect,
+  DeviceRemoved,
   /// Client has disconnected from server.
   ClientDisconnect,
   /// Message was received from server for that specific device.
@@ -229,6 +229,10 @@ impl ButtplugClientDevice {
       convert_to_client_device_map(&info.device_messages),
       sender,
     )
+  }
+  
+  pub fn connected(&self) -> bool {
+    self.device_connected.load(Ordering::SeqCst)
   }
 
   /// Sends a message through the owning
@@ -592,6 +596,7 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {
+    info!("Queuing message!");
     if self.internal_event_sender.send(event.clone()).is_err() {
       error!("No handlers for device event, dropping event: {:?}", event);
     }

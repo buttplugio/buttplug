@@ -197,7 +197,7 @@ impl DeviceManagerEventLoop {
       }
       ButtplugDeviceEvent::Removed(address) => {
         let device_index = *self.device_index_map.get(&address).unwrap().value();
-        self.device_map.remove(&device_index);
+        self.device_map.remove(&device_index).unwrap();
         if self
           .server_sender
           .send(DeviceRemoved::new(device_index).into())
