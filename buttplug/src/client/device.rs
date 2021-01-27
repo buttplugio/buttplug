@@ -596,10 +596,13 @@ impl ButtplugClientDevice {
   }
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {
-    info!("Queuing message!");
-    if self.internal_event_sender.send(event.clone()).is_err() {
+    if self.internal_event_sender.receiver_count() == 0 {
       error!("No handlers for device event, dropping event: {:?}", event);
+      return;
     }
+    // The only reason a send will fail is if we have no receivers. Since we
+    // already checked for receivers here, we can unwrap without issue.
+    self.internal_event_sender.send(event.clone()).unwrap();
   }
 }
 

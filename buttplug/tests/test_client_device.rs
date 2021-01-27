@@ -5,7 +5,8 @@ use buttplug::{
   util::async_manager
 };
 use futures::{pin_mut, StreamExt};
-use tracing_subscriber;
+use futures_timer::Delay;
+use std::time::Duration;
 
 #[cfg(feature = "server")]
 #[test]
@@ -88,5 +89,29 @@ fn test_client_device_client_disconnected_status() {
         break;
       }
     }
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_client_device_connected_no_event_listener() {
+  async_manager::block_on(async {
+    let client = ButtplugClient::new("Test Client");
+    let connector = ButtplugInProcessClientConnector::default();
+    let helper = connector.server_ref().add_test_comm_manager().unwrap();
+    let device = helper.add_ble_device("Massage Demo").await;
+    assert!(!client.connected());
+    client
+      .connect(connector)
+      .await
+      .unwrap();
+    assert!(client.connected());
+    client.start_scanning().await.unwrap();
+    Delay::new(Duration::from_millis(100)).await;
+    device.disconnect().await.unwrap();
+    Delay::new(Duration::from_millis(100)).await;
+    client.disconnect().await.unwrap();
+    assert!(!client.connected());
+    Delay::new(Duration::from_millis(100)).await;
   });
 }

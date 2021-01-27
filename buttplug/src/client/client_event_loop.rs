@@ -163,8 +163,16 @@ where
   }
 
   fn send_client_event(&mut self, event: ButtplugClientEvent) {
-    trace!("Forwarding event to client");
-    self.to_client_sender.send(event).unwrap();
+    trace!("Forwarding event {:?} to client", event);
+
+    if self.to_client_sender.receiver_count() == 0 {
+      error!("Client event {:?} dropped, no client event listener available.", event);
+      return;
+    }
+
+    // The only reason a send will fail is if we have no receivers. Since we
+    // already checked for receivers here, we can unwrap without issue.
+    self.to_client_sender.send(event.clone()).unwrap();
   }
 
   fn disconnect_device(&mut self, device_index: u32) {
@@ -193,6 +201,7 @@ where
     trace!("Message future not found, assuming server event.");
     match msg_result {
       Ok(msg) => {
+        info!("{:?}", msg);
         match msg {
           ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
             trace!("Device added, updating map and sending to client");
@@ -281,9 +290,7 @@ where
         event = self.from_connector_receiver.recv().fuse() => match event {
           None => {
             info!("Connector disconnected, exiting loop.");
-            if self.to_client_sender.send(ButtplugClientEvent::ServerDisconnect).is_err() {
-              error!("Cannot send disconnection event.");
-            }
+            self.send_client_event(ButtplugClientEvent::ServerDisconnect);
             return;
           }
           Some(msg) => {
@@ -295,9 +302,7 @@ where
             info!("Client disconnected, exiting loop.");
             self.connected_status.store(false, Ordering::SeqCst);
             self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
-            if self.to_client_sender.send(ButtplugClientEvent::ServerDisconnect).is_err() {
-              error!("Cannot send disconnection event.");
-            }
+            self.send_client_event(ButtplugClientEvent::ServerDisconnect);
             return;
           }
           Ok(msg) => {
@@ -312,13 +317,8 @@ where
     let device_indexes: Vec<u32> = self.device_map.iter().map(|k| *k.key()).collect();
     device_indexes.iter().for_each(|k| self.disconnect_device(*k));
 
-    if self
-      .to_client_sender
-      .send(ButtplugClientEvent::ServerDisconnect)
-      .is_err()
-    {
-      error!("Cannot send disconnection event.");
-    }
+    self.send_client_event(ButtplugClientEvent::ServerDisconnect);
+
     debug!("Exiting client event loop.");
   }
 }
