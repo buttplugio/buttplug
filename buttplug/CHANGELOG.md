@@ -1,3 +1,12 @@
+# 2.0.6 (2021-01-26)
+
+## Bugfixes
+
+- #261: Fix crates URL in README
+- #262: Client device status nows updates to disconnected on client disconnect
+- #263: Client now clears held devices on disconnect
+- #264: System no longer panics on client events when client event stream has no listeners
+
 # 2.0.5 (2021-01-24)
 
 ## Bugfixes
