@@ -89,7 +89,6 @@ fn test_server_version_gt() {
 
 #[test]
 fn test_ping_timeout() {
-  tracing_subscriber::fmt::init();
   let mut options = ButtplugServerOptions::default();
   options.max_ping_time = 100;
   let server = ButtplugServer::new_with_options(&options).unwrap();
