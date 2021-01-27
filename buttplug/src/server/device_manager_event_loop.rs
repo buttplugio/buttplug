@@ -79,10 +79,12 @@ impl DeviceManagerEventLoop {
       match create_device_future.await {
         Ok(option_dev) => match option_dev {
           Some(device) => {
-            device_event_sender_clone
+            if device_event_sender_clone
               .send(ButtplugDeviceEvent::Connected(Arc::new(device)))
               .await
-              .unwrap();
+              .is_err() {
+              error!("Device manager disappeared before connection established, device will be dropped.");
+            }
           }
           None => debug!("Device could not be matched to a protocol."),
         },
