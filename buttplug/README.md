@@ -94,7 +94,7 @@ from being requires.
 ## Usage
 
 To use Buttplug in your rust application or library, check out the
-[buttplug package on crates.io](https://crates.io/buttplug).
+[buttplug package on crates.io](https://crates.io/crates/buttplug).
 
 The following crate features are available
 
