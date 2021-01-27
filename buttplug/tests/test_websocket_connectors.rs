@@ -106,3 +106,5 @@ mod websocket_connector_tests {
     });
   }
 }
+
+// TODO Test disconnection event from server side

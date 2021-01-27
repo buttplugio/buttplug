@@ -115,3 +115,11 @@ fn test_client_device_connected_no_event_listener() {
     Delay::new(Duration::from_millis(100)).await;
   });
 }
+
+// TODO Test invalid messages to device
+// TODO Test invalid parameters in message
+// TODO Test device invalidation across client connections (i.e. a device shouldn't be allowed to reconnect even if index is the same)
+// TODO Test DeviceAdded being sent multiple times w/ same index
+// TODO Test DeviceRemoved being sent multiple times
+// TODO Test DeviceList being sent followed by repeat DeviceAdded
+// TODO Test DeviceList being sent multiple times

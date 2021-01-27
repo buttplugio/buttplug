@@ -205,6 +205,17 @@ fn test_client_ping() {
     client.connect(connector).await.unwrap();
     assert!(client.ping().await.is_ok());
     Delay::new(Duration::from_millis(800)).await;
+    // TODO Watch for ping events
     assert!(client.ping().await.is_err());
   });
 }
+
+// TODO Test calling connect twice
+// TODO Test calling disconnect twice w/o connection
+// TODO Test invalid return on RequestServerInfo
+// TODO Test invalid return on DeviceList
+// TODO Test receiving unmatched Ok (should emit error)
+// TODO Test receiving unmatched DeviceRemoved
+// TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
+// TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
+
