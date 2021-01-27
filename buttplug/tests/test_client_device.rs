@@ -58,7 +58,7 @@ fn test_client_device_client_disconnected_status() {
     let helper = connector.server_ref().add_test_comm_manager().unwrap();
     let recv = client.event_stream();
     pin_mut!(recv);
-    let device = helper.add_ble_device("Massage Demo").await;
+    let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client
       .connect(connector)
