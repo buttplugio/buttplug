@@ -123,3 +123,4 @@ fn test_client_device_connected_no_event_listener() {
 // TODO Test DeviceRemoved being sent multiple times
 // TODO Test DeviceList being sent followed by repeat DeviceAdded
 // TODO Test DeviceList being sent multiple times
+// TODO Test sending device return for device that doesn't exist (in client)

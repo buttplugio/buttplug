@@ -312,3 +312,11 @@ fn test_server_scanning_finished() {
       .is_ok());
   });
 }
+
+
+// TODO Test sending system message (Id 0)
+// TODO Test sending system message (Ok but Id > 0)
+// TODO Test repeated handshake
+// TODO Test scan with no comm managers
+// TODO Test message with no RequestServerInfo first
+// TODO Test sending device command for device that doesn't exist (in server)
