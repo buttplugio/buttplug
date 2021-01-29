@@ -9,6 +9,9 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
+// As this message is considered deprecated and is not actually implemented for
+// Lovense devices even on spec v1 connections, we can put a null validator on
+// it.
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
@@ -27,5 +30,11 @@ impl LovenseCmd {
       device_index,
       command: command.to_owned(),
     }
+  }
+}
+
+impl ButtplugMessageValidator for LovenseCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
   }
 }

@@ -29,3 +29,9 @@ impl Log {
     }
   }
 }
+
+impl ButtplugMessageValidator for Log {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}

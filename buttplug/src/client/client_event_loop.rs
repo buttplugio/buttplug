@@ -16,8 +16,9 @@ use super::{
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
-    errors::ButtplugServerError,
+    errors::{ButtplugError, ButtplugServerError},
     messages::{
+      ButtplugMessageValidator,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       DeviceList,
@@ -176,6 +177,10 @@ where
   }
 
   fn disconnect_device(&mut self, device_index: u32) {
+    if !self.device_map.contains_key(&device_index) {
+      return;
+    }
+    // Checked for device index existence, can unwrap here.
     let device = (*self.device_map.get(&device_index).unwrap()).clone();
     device.set_device_connected(false);
     device.queue_event(ButtplugClientDeviceEvent::DeviceRemoved);
@@ -242,6 +247,11 @@ where
 
   /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
   async fn send_message(&mut self, mut msg_fut: ButtplugClientMessageFuturePair) {
+    if let Err(e) = &msg_fut.msg.is_valid() {
+      msg_fut.waker.set_reply(Err(ButtplugError::from(e.clone()).into()));
+      return;
+    }
+
     trace!("Sending message to connector: {:?}", msg_fut.msg);
     self.sorter.register_future(&mut msg_fut);
     // TODO What happens if the connector isn't connected?

@@ -50,3 +50,13 @@ impl LinearCmd {
     }
   }
 }
+
+impl ButtplugMessageValidator for LinearCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)?;
+    for vec in &self.vectors {
+      self.is_in_command_range(vec.position, format!("VectorSubcommand position {} for index {} is invalid, should be between 0.0 and 1.0", vec.position, vec.index))?;
+    }
+    Ok(())
+  }
+}

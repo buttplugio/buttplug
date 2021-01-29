@@ -120,7 +120,7 @@ pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and various message enums, serialization, etc...
-pub trait ButtplugMessage: Send + Sync + Clone {
+pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
   /// Returns the id number of the message
   fn get_id(&self) -> u32;
   /// Sets the id number of the message.
@@ -128,6 +128,42 @@ pub trait ButtplugMessage: Send + Sync + Clone {
   /// True if the message is an event (message id of 0) from the server.
   fn is_server_event(&self) -> bool {
     self.get_id() == BUTTPLUG_SERVER_EVENT_ID
+  }
+}
+
+/// Validation function for message contents. Can be run before message is
+/// transmitted, as message may be formed and mutated at multiple points in the
+/// library, or may need to be checked after deserialization. Message enums will
+/// run this on whatever their variant is.
+pub trait ButtplugMessageValidator {
+  /// Returns () if the message is valid, otherwise returns a message error.
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    // By default, return Ok, as many messages won't have any checks.
+    Ok(())
+  }
+
+  fn is_system_id(&self, id: u32) -> Result<(), ButtplugMessageError> {
+    if id == 0 {
+      Ok(())
+    } else {
+      Err(ButtplugMessageError::InvalidMessageContents("Message should have id of 0, as it is a system message.".to_string()))
+    }
+  }
+
+  fn is_not_system_id(&self, id: u32) -> Result<(), ButtplugMessageError> {
+    if id == 0 {
+      Err(ButtplugMessageError::InvalidMessageContents("Message should not have 0 for an Id. Id of 0 is reserved for system messages.".to_string()))
+    } else {
+      Ok(())
+    }
+  }
+
+  fn is_in_command_range(&self, value: f64, error_msg: String) -> Result<(), ButtplugMessageError> {
+    if !(0.0..1.0).contains(&value) {
+      Err(ButtplugMessageError::InvalidMessageContents(error_msg))
+    } else {
+      Ok(())
+    }
   }
 }
 
@@ -274,7 +310,7 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
 /// [ButtplugClient][crate::client::ButtplugClient] can send to a
 /// [ButtplugServer][crate::server::ButtplugServer].
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, FromSpecificButtplugMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, FromSpecificButtplugMessage,
 )]
 pub enum ButtplugClientMessage {
   Ping(Ping),
@@ -315,7 +351,7 @@ pub enum ButtplugClientMessage {
 /// [ButtplugServer][crate::server::ButtplugServer] can send to a
 /// [ButtplugClient][crate::client::ButtplugClient].
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType, FromSpecificButtplugMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType, FromSpecificButtplugMessage,
 )]
 pub enum ButtplugServerMessage {
   // Status messages
@@ -348,6 +384,7 @@ pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
   Clone,
   PartialEq,
   ButtplugMessage,
+  ButtplugMessageValidator,
   ButtplugClientMessageType,
   FromSpecificButtplugMessage,
   TryFromButtplugClientMessage,
@@ -382,6 +419,7 @@ pub enum ButtplugSpecV2ClientMessage {
   Clone,
   PartialEq,
   ButtplugMessage,
+  ButtplugMessageValidator,
   ButtplugServerMessageType,
   FromSpecificButtplugMessage,
   TryFromButtplugServerMessage,
@@ -407,7 +445,7 @@ pub enum ButtplugSpecV2ServerMessage {
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, TryFromButtplugClientMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ClientMessage {
@@ -434,7 +472,7 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ServerMessage {
   // Status messages
@@ -450,10 +488,9 @@ pub(crate) enum ButtplugSpecV1ServerMessage {
   ScanningFinished(ScanningFinished),
 }
 
-// TODO This was implementated as a derive, but for some reason the .into()
-// calls wouldn't work correctly when used as a device. If the actual
-// implementation is here, things work fine. Luckily it won't ever be changed
-// much.
+// This was implementated as a derive, but for some reason the .into() calls
+// wouldn't work correctly when used as a device. If the actual implementation
+// is here, things work fine. Luckily it won't ever be changed much.
 impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
   type Error = ButtplugMessageError;
   fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
@@ -487,7 +524,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugClientMessageType, TryFromButtplugClientMessage,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ClientMessage {
@@ -512,7 +549,7 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
 }
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugServerMessageType)]
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ServerMessage {
   // Status messages
@@ -528,10 +565,9 @@ pub(crate) enum ButtplugSpecV0ServerMessage {
   ScanningFinished(ScanningFinished),
 }
 
-// TODO This was implementated as a derive, but for some reason the .into()
-// calls wouldn't work correctly when used as a device. If the actual
-// implementation is here, things work fine. Luckily it won't ever be changed
-// much.
+// This was implementated as a derive, but for some reason the .into() calls
+// wouldn't work correctly when used as a device. If the actual implementation
+// is here, things work fine. Luckily it won't ever be changed much.
 impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
   type Error = ButtplugMessageError;
   fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
@@ -570,6 +606,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
   Clone,
   PartialEq,
   ButtplugMessage,
+  ButtplugMessageValidator,
   ButtplugClientMessageType,
   FromSpecificButtplugMessage,
   TryFromButtplugClientMessage,
@@ -587,6 +624,7 @@ pub enum ButtplugDeviceManagerMessageUnion {
   Clone,
   PartialEq,
   ButtplugDeviceMessage,
+  ButtplugMessageValidator,
   ButtplugClientMessageType,
   FromSpecificButtplugMessage,
   TryFromButtplugClientMessage,

@@ -1,6 +1,6 @@
 mod util;
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent},
+  client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent, VibrateCommand},
   connector::ButtplugInProcessClientConnector, 
   util::async_manager
 };
@@ -113,6 +113,36 @@ fn test_client_device_connected_no_event_listener() {
     client.disconnect().await.unwrap();
     assert!(!client.connected());
     Delay::new(Duration::from_millis(100)).await;
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_client_device_invalid_command() {
+  async_manager::block_on(async {
+    let client = ButtplugClient::new("Test Client");
+    let mut event_stream = client.event_stream();
+    let connector = ButtplugInProcessClientConnector::default();
+    let helper = connector.server_ref().add_test_comm_manager().unwrap();
+    let recv = client.event_stream();
+    pin_mut!(recv);
+    let device = helper.add_ble_device("Massage Demo").await;
+    assert!(!client.connected());
+    client
+      .connect(connector)
+      .await
+      .unwrap();
+    assert!(client.connected());
+    client.start_scanning().await.unwrap();
+    let mut client_device = None;
+    while let Some(msg) = event_stream.next().await {
+      if let ButtplugClientEvent::DeviceAdded(da) = msg {
+        client_device = Some(da);
+        break;
+      }
+    }
+    let test_device = client_device.unwrap();
+    assert!(test_device.vibrate(VibrateCommand::Speed(2.0)).await.is_err());
   });
 }
 

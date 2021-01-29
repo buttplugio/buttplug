@@ -26,3 +26,9 @@ impl DeviceRemoved {
     }
   }
 }
+
+impl ButtplugMessageValidator for DeviceRemoved {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}

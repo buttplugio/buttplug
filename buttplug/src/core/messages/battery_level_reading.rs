@@ -29,3 +29,10 @@ impl BatteryLevelReading {
     }
   }
 }
+
+impl ButtplugMessageValidator for BatteryLevelReading {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)?;
+    self.is_in_command_range(self.battery_level, "BatteryLevelReading must be between 0.0 and 1.0".to_string())
+  }
+}

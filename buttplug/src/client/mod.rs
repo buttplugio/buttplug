@@ -221,6 +221,7 @@ impl ButtplugClient {
       ));
     }
 
+    // TODO I cannot remember why this is here or what it does.
     *self._client_span.lock().await = {
       let span = span!(Level::INFO, "Client");
       let _ = span.enter();
@@ -446,12 +447,11 @@ impl ButtplugClient {
   fn send_internal_message(
     &self,
     msg: ButtplugClientRequest,
-  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+  ) -> BoxFuture<'static, Result<(), ButtplugClientError>> {
     if !self.connected.load(Ordering::SeqCst) {
-      return Box::pin(future::ready(Err(
-        ButtplugConnectorError::ConnectorNotConnected,
-      )));
+      return Box::pin(future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())));
     }
+
     // If we're running the event loop, we should have a message_sender.
     // Being connected to the server doesn't matter here yet because we use
     // this function in order to connect also.
@@ -459,7 +459,7 @@ impl ButtplugClient {
     // The message sender doesn't require an async send now, but we still want
     // to delay execution as part of our future in order to keep task coherency.
     let message_sender = self.message_sender.clone();
-    Box::pin(async move {
+    Box::pin(async move  {
       message_sender
         .send(msg)
         .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;

@@ -50,3 +50,13 @@ impl RotateCmd {
     }
   }
 }
+
+impl ButtplugMessageValidator for RotateCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)?;
+    for rotation in &self.rotations {
+      self.is_in_command_range(rotation.speed, format!("Speed {} for RotateCmd index {} is invalid. Speed should be a value between 0.0 and 1.0", rotation.speed, rotation.index))?;
+    }
+    Ok(())
+  }
+}

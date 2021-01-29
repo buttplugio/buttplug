@@ -44,3 +44,13 @@ impl VibrateCmd {
     }
   }
 }
+
+impl ButtplugMessageValidator for VibrateCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)?;
+    for speed in &self.speeds {
+      self.is_in_command_range(speed.speed, format!("Speed {} for VibrateCmd index {} is invalid. Speed should be a value between 0.0 and 1.0", speed.speed, speed.index))?;
+    }
+    Ok(())
+  }
+}

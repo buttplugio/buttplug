@@ -39,6 +39,12 @@ impl DeviceAdded {
   }
 }
 
+impl ButtplugMessageValidator for DeviceAdded {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}
+
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV1 {
@@ -64,6 +70,12 @@ impl From<DeviceAdded> for DeviceAddedV1 {
       device_name: dmiv1.device_name,
       device_messages: dmiv1.device_messages,
     }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceAddedV1 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
   }
 }
 
@@ -95,3 +107,11 @@ impl From<DeviceAdded> for DeviceAddedV0 {
     }
   }
 }
+
+impl ButtplugMessageValidator for DeviceAddedV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}
+
+// TODO Test repeated message type in attributes in JSON

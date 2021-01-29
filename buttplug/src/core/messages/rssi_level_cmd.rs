@@ -26,3 +26,9 @@ impl RSSILevelCmd {
     }
   }
 }
+
+impl ButtplugMessageValidator for RSSILevelCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}

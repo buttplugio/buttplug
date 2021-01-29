@@ -15,3 +15,9 @@ pub struct StopAllDevices {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
 }
+
+impl ButtplugMessageValidator for StopAllDevices {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}

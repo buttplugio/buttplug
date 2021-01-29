@@ -21,3 +21,9 @@ impl Default for StartScanning {
     Self { id: 1 }
   }
 }
+
+impl ButtplugMessageValidator for StartScanning {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}

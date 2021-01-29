@@ -36,6 +36,13 @@ impl ServerInfo {
     }
   }
 }
+
+impl ButtplugMessageValidator for ServerInfo {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}
+
 #[derive(Debug, ButtplugMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
@@ -78,5 +85,11 @@ impl From<ServerInfo> for ServerInfoV0 {
     let mut out_msg = Self::new(&msg.server_name, msg.message_version, msg.max_ping_time);
     out_msg.set_id(msg.get_id());
     out_msg
+  }
+}
+
+impl ButtplugMessageValidator for ServerInfoV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
   }
 }

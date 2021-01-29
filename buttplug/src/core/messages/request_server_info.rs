@@ -12,7 +12,6 @@ use serde::{Deserialize, Serialize};
 fn return_version0() -> ButtplugMessageSpecVersion {
   ButtplugMessageSpecVersion::Version0
 }
-
 #[derive(Debug, ButtplugMessage, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
@@ -37,6 +36,12 @@ impl RequestServerInfo {
       client_name: client_name.to_string(),
       message_version,
     }
+  }
+}
+
+impl ButtplugMessageValidator for RequestServerInfo {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
   }
 }
 

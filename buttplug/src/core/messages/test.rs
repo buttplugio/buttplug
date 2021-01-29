@@ -29,3 +29,11 @@ impl Test {
     }
   }
 }
+
+impl ButtplugMessageValidator for Test {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    // Test could have any Id. There's really no validity check for this. What a
+    // horrible message. So glad it's deprecated. :|
+    Ok(())
+  }
+}

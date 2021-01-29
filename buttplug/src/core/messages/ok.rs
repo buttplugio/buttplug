@@ -32,6 +32,12 @@ impl Default for Ok {
   }
 }
 
+impl ButtplugMessageValidator for Ok {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}
+
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {

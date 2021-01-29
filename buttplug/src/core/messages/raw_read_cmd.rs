@@ -36,3 +36,10 @@ impl RawReadCmd {
     }
   }
 }
+
+impl ButtplugMessageValidator for RawReadCmd {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+    // TODO Should expected_length always be > 0?
+  }
+}

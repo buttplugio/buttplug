@@ -22,3 +22,9 @@ impl Default for Ping {
     Self { id: 1 }
   }
 }
+
+impl ButtplugMessageValidator for Ping {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}

@@ -71,6 +71,8 @@ pub enum ButtplugMessageError {
   VersionError(&'static str, String, &'static str),
   /// Message conversion error: {0}
   MessageConversionError(&'static str),
+  /// Invalid message contents: {0}
+  InvalidMessageContents(String),
   /// Unhandled message type: {0}
   UnhandledMessage(String),
   /// Message validation error(s): {0}

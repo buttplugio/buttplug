@@ -25,6 +25,12 @@ impl DeviceList {
   }
 }
 
+impl ButtplugMessageValidator for DeviceList {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}
+
 #[derive(Default, Clone, Debug, PartialEq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV1 {
@@ -44,6 +50,12 @@ impl From<DeviceList> for DeviceListV1 {
       id: msg.id,
       devices,
     }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceListV1 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
   }
 }
 
@@ -67,5 +79,11 @@ impl From<DeviceList> for DeviceListV0 {
       id: msg.id,
       devices,
     }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceListV0 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
   }
 }

@@ -27,7 +27,10 @@ pub enum ErrorCode {
 
 /// Represents the Buttplug Protocol Error message, as documented in the [Buttplug
 /// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#error).
-#[derive(Debug, Clone, PartialEq, ButtplugMessage)]
+// Error is one of the few things that can have either a System ID or message
+// ID, so there's really not much to check here. Use the default trait impl for
+// ButtplugMessageValidator.
+#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Error {
   /// Message Id, used for matching message pairs in remote connection instances.
