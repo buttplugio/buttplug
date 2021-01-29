@@ -9,7 +9,7 @@
 
 use super::{ButtplugClientError, ButtplugClientRequest, ButtplugClientResultFuture};
 use crate::{
-  client::{ButtplugClientMessageFuture, ButtplugClientMessageFuturePair},
+  client::{ButtplugServerMessageFuture, ButtplugClientMessageFuturePair},
   connector::ButtplugConnectorError,
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
@@ -260,7 +260,7 @@ impl ButtplugClientDevice {
             ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
           );
         }
-        let fut = ButtplugClientMessageFuture::default();
+        let fut = ButtplugServerMessageFuture::default();
         message_sender
           .send(ButtplugClientRequest::Message(
             ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()),

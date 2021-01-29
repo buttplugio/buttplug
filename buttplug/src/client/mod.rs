@@ -65,15 +65,15 @@ type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
-pub type ButtplugInternalClientMessageResult =
+pub type ButtplugServerMessageResult =
   ButtplugClientResult<ButtplugCurrentSpecServerMessage>;
-pub type ButtplugInternalClientMessageResultFuture =
-  BoxFuture<'static, ButtplugInternalClientMessageResult>;
+pub type ButtplugServerMessageResultFuture =
+  ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage>;
 /// Future state type for returning server responses across futures.
-pub(crate) type ButtplugClientMessageStateShared =
-  ButtplugFutureStateShared<ButtplugInternalClientMessageResult>;
+pub(crate) type ButtplugServerMessageStateShared =
+  ButtplugFutureStateShared<ButtplugServerMessageResult>;
 /// Future type that expects server responses.
-pub(crate) type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalClientMessageResult>;
+pub(crate) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessageResult>;
 
 /// Future state for messages sent from the client that expect a server
 /// response.
@@ -94,13 +94,13 @@ pub(crate) type ButtplugClientMessageFuture = ButtplugFuture<ButtplugInternalCli
 #[derive(Clone)]
 pub struct ButtplugClientMessageFuturePair {
   pub msg: ButtplugCurrentSpecClientMessage,
-  pub waker: ButtplugClientMessageStateShared,
+  pub waker: ButtplugServerMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {
   pub fn new(
     msg: ButtplugCurrentSpecClientMessage,
-    waker: ButtplugClientMessageStateShared,
+    waker: ButtplugServerMessageStateShared,
   ) -> Self {
     Self { msg, waker }
   }
@@ -472,9 +472,9 @@ impl ButtplugClient {
   fn send_message(
     &self,
     msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugInternalClientMessageResultFuture {
+  ) -> ButtplugServerMessageResultFuture {
     // Create a future to pair with the message being resolved.
-    let fut = ButtplugClientMessageFuture::default();
+    let fut = ButtplugServerMessageFuture::default();
     let internal_msg = ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
       msg,
       fut.get_state_clone(),

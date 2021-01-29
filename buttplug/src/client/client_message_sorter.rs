@@ -8,7 +8,7 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-  client::{ButtplugClientMessageFuturePair, ButtplugClientMessageStateShared},
+  client::{ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
   core::{
     errors::{ButtplugError, ButtplugServerError},
     messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
@@ -61,7 +61,7 @@ pub struct ClientMessageSorter {
   /// the server. Once we get back a response with a matching `id`, we remove
   /// the entry from this map, and use the waker to complete the future with the
   /// received response message.
-  future_map: HashMap<u32, ButtplugClientMessageStateShared>,
+  future_map: HashMap<u32, ButtplugServerMessageStateShared>,
 
   /// Message `id` counter
   ///
@@ -125,7 +125,7 @@ impl Default for ClientMessageSorter {
   /// 0 (0 is reserved for system incoming messages).
   fn default() -> Self {
     Self {
-      future_map: HashMap::<u32, ButtplugClientMessageStateShared>::new(),
+      future_map: HashMap::<u32, ButtplugServerMessageStateShared>::new(),
       current_id: 1,
     }
   }
