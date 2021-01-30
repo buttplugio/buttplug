@@ -16,7 +16,7 @@ use super::{
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
-    errors::{ButtplugError, ButtplugServerError},
+    errors::ButtplugError,
     messages::{
       ButtplugMessageValidator,
       ButtplugCurrentSpecClientMessage,
@@ -88,7 +88,7 @@ where
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
   from_connector_receiver:
-    mpsc::Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
+    mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
   /// Map of devices shared between the client and the event loop
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   /// Sends events to the [ButtplugClient] instance.
@@ -114,9 +114,7 @@ where
   pub fn new(
     connected_status: Arc<AtomicBool>,
     connector: ConnectorType,
-    from_connector_receiver: mpsc::Receiver<
-      Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>,
-    >,
+    from_connector_receiver: mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
     from_client_sender: broadcast::Sender<ButtplugClientRequest>,
     device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
@@ -197,51 +195,47 @@ where
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
   async fn parse_connector_message(
     &mut self,
-    msg_result: Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>,
+    msg: ButtplugCurrentSpecServerMessage
   ) {
-    if self.sorter.maybe_resolve_result(&msg_result).await {
+    if self.sorter.maybe_resolve_result(&msg) {
       trace!("Message future found, returning");
       return;
     }
     trace!("Message future not found, assuming server event.");
-    match msg_result {
-      Ok(msg) => {
-        info!("{:?}", msg);
-        match msg {
-          ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
-            trace!("Device added, updating map and sending to client");
-            let info = DeviceMessageInfo::from(dev);
-            let device = self.create_client_device(&info);
-            self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
-          }
-          ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
-            if self.device_map.contains_key(&dev.device_index) {
-              trace!("Device removed, updating map and sending to client");
-              self.disconnect_device(dev.device_index);
-            } else {
-              error!("Received DeviceRemoved for non-existent device index");
-            }
-          }
-          ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
-            trace!("Scanning finished event received, forwarding to client.");
-            self.send_client_event(ButtplugClientEvent::ScanningFinished);
-          }
-          ButtplugCurrentSpecServerMessage::RawReading(msg) => {
-            let device_idx = msg.device_index;
-            if let Some(device) = self.device_map.get(&device_idx) {
-              device
-                .value()
-                .queue_event(ButtplugClientDeviceEvent::Message(
-                  ButtplugCurrentSpecServerMessage::from(msg),
-                ));
-            }
-          }
-          _ => error!("Cannot process message, dropping: {:?}", msg),
+    info!("{:?}", msg);
+    match msg {
+      ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
+        trace!("Device added, updating map and sending to client");
+        let info = DeviceMessageInfo::from(dev);
+        let device = self.create_client_device(&info);
+        self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
+      }
+      ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
+        if self.device_map.contains_key(&dev.device_index) {
+          trace!("Device removed, updating map and sending to client");
+          self.disconnect_device(dev.device_index);
+        } else {
+          error!("Received DeviceRemoved for non-existent device index");
         }
       }
-      Err(err) => {
-        self.send_client_event(ButtplugClientEvent::Error(err.into()));
+      ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
+        trace!("Scanning finished event received, forwarding to client.");
+        self.send_client_event(ButtplugClientEvent::ScanningFinished);
       }
+      ButtplugCurrentSpecServerMessage::RawReading(msg) => {
+        let device_idx = msg.device_index;
+        if let Some(device) = self.device_map.get(&device_idx) {
+          device
+            .value()
+            .queue_event(ButtplugClientDeviceEvent::Message(
+              ButtplugCurrentSpecServerMessage::from(msg),
+            ));
+        }
+      }
+      ButtplugCurrentSpecServerMessage::Error(e) => {
+        self.send_client_event(ButtplugClientEvent::Error(e.into()));
+      }
+      _ => error!("Cannot process message, dropping: {:?}", msg),
     }
   }
 

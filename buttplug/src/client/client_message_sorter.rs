@@ -10,7 +10,7 @@
 use crate::{
   client::{ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
   core::{
-    errors::{ButtplugError, ButtplugServerError},
+    errors::ButtplugError,
     messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
   },
 };
@@ -91,23 +91,24 @@ impl ClientMessageSorter {
   /// Returns true if the response message was resolved to a future via matching
   /// `id`, otherwise returns false. False returns mean the message should be
   /// considered as an *event*.
-  pub async fn maybe_resolve_result(
+  pub fn maybe_resolve_result(
     &mut self,
-    msg_result: &Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>,
+    msg: &ButtplugCurrentSpecServerMessage,
   ) -> bool {
-    let id = match msg_result {
-      Ok(msg) => msg.get_id(),
-      Err(err) => err.id(),
-    };
+    let id = msg.get_id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
       Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
-        _state.set_reply(
-          msg_result
-            .clone()
-            .map_err(|err| ButtplugError::from(err).into()),
-        );
+        if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
+          if let Some(original_error) = &e.original_error {
+            _state.set_reply(Err(original_error.clone().into()))
+          } else {
+            _state.set_reply(Err(ButtplugError::from(e.clone()).into()))
+          }
+        } else {
+          _state.set_reply(Ok(msg.clone()))
+        }
         true
       }
       None => {

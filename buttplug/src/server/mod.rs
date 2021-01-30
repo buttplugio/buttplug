@@ -35,7 +35,7 @@ use crate::{
 };
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
-use futures::{future::BoxFuture, Stream};
+use futures::{future::{self, BoxFuture}, Stream};
 use ping_timer::PingTimer;
 use std::{
   convert::{TryFrom, TryInto},
@@ -110,7 +110,7 @@ impl ButtplugServer {
       connected_clone.store(false, Ordering::SeqCst);
       // TODO Should the event sender return a result instead of an error message?
       if output_sender_clone
-        .send(messages::Error::new(messages::ErrorCode::ErrorPing, "Ping Timeout").into())
+        .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
         .is_err()
       {
         error!("Server disappeared, cannot update about ping out.");
@@ -162,7 +162,7 @@ impl ButtplugServer {
     self.connected.load(Ordering::SeqCst)
   }
 
-  pub fn disconnect(&self) -> BoxFuture<Result<(), ButtplugServerError>> {
+  pub fn disconnect(&self) -> BoxFuture<Result<(), messages::Error>> {
     let ping_timer = self.ping_timer.clone();
     let stop_scanning_fut =
       self.parse_message(ButtplugClientMessage::StopScanning(StopScanning::default()));
@@ -188,21 +188,24 @@ impl ButtplugServer {
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessage,
-  ) -> BoxFuture<'static, Result<ButtplugServerMessage, ButtplugServerError>> {
+  ) -> BoxFuture<'static, Result<ButtplugServerMessage, messages::Error>> {
     let id = msg.get_id();
     if !self.connected() {
       // Check for ping timeout first! There's no way we should've pinged out if
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
-      if self.ping_timer.pinged_out() {
-        return ButtplugServerError::new_message_error(
-          msg.get_id(),
-          ButtplugPingError::PingedOut.into(),
-        )
-        .into();
-      } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
-        return ButtplugServerError::from(ButtplugHandshakeError::RequestServerInfoExpected).into();
+      let error = if self.ping_timer.pinged_out() {
+          Some(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)))
+        } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
+          Some(messages::Error::from(ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected)))
+        } else {
+          None
+        };
+      if let Some(mut return_error) = error {
+        return_error.set_id(msg.get_id());
+        return Box::pin(future::ready(Err(return_error)));
       }
+      // If we haven't pinged out and we got an RSI message, fall thru.
     }
     // Produce whatever future is needed to reply to the message, this may be a
     // device command future, or something the server handles. All futures will
@@ -229,7 +232,11 @@ impl ButtplugServer {
           ok_msg.set_id(id);
           ok_msg
         })
-        .map_err(|err| ButtplugServerError::new_message_error(id, err))
+        .map_err(|err| {
+          let mut error = messages::Error::from(err);
+          error.set_id(id);
+          error
+        })
     })
   }
 

@@ -30,7 +30,7 @@ pub enum ErrorCode {
 // Error is one of the few things that can have either a System ID or message
 // ID, so there's really not much to check here. Use the default trait impl for
 // ButtplugMessageValidator.
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Error {
   /// Message Id, used for matching message pairs in remote connection instances.
@@ -42,15 +42,24 @@ pub struct Error {
   /// Description of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
   pub error_message: String,
+  #[cfg_attr(feature = "serialize-json", serde(skip))]
+  pub original_error: Option<ButtplugError>
+}
+
+impl PartialEq for Error {
+  fn eq(&self, other: &Self) -> bool {
+      self.id == other.id && self.error_code == other.error_code && self.error_message == other.error_message
+  }
 }
 
 impl Error {
   /// Creates a new error object.
-  pub fn new(error_code: ErrorCode, error_message: &str) -> Self {
+  pub fn new(error_code: ErrorCode, error_message: &str, original_error: Option<ButtplugError>) -> Self {
     Self {
       id: 0,
       error_code,
       error_message: error_message.to_string(),
+      original_error
     }
   }
 }
@@ -67,25 +76,7 @@ impl From<ButtplugError> for Error {
       ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
     let msg = error.to_string();
-    Error::new(code, &msg)
-  }
-}
-
-impl From<ButtplugServerError> for Error {
-  /// Converts a [ButtplugError] object into a Buttplug Protocol
-  /// [Error] message.
-  fn from(error: ButtplugServerError) -> Self {
-    let code = match error.error() {
-      ButtplugError::ButtplugDeviceError { .. } => ErrorCode::ErrorDevice,
-      ButtplugError::ButtplugMessageError { .. } => ErrorCode::ErrorMessage,
-      ButtplugError::ButtplugPingError { .. } => ErrorCode::ErrorPing,
-      ButtplugError::ButtplugHandshakeError { .. } => ErrorCode::ErrorHandshake,
-      ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
-    };
-    let msg = error.to_string();
-    let mut err_msg = Error::new(code, &msg);
-    err_msg.set_id(error.id());
-    err_msg
+    Error::new(code, &msg, Some(error))
   }
 }
 
@@ -99,7 +90,7 @@ mod test {
   #[test]
   fn test_error_serialize() {
     let error =
-      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error"));
+      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error", None));
     let js = serde_json::to_string(&error).unwrap();
     assert_eq!(ERROR_STR, js);
   }
@@ -108,7 +99,7 @@ mod test {
   fn test_error_deserialize() {
     let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&ERROR_STR).unwrap();
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error")),
+      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error", None)),
       union
     );
   }

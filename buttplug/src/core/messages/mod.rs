@@ -275,7 +275,7 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
       _ => Err(ButtplugMessageError::MessageConversionError(
-        "Device message deprecated, does not exist in current version of protocol.",
+        "Device message deprecated, does not exist in current version of protocol.".to_owned()
       )),
     }
   }
@@ -514,9 +514,9 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
         Ok(ButtplugSpecV1ServerMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::VersionError(
-        "ButtplugServerMessage",
+        "ButtplugServerMessage".to_owned(),
         format!("{:?}", msg),
-        "ButtplugSpecV1ServerMessage",
+        "ButtplugSpecV1ServerMessage".to_owned(),
       )),
     }
   }
@@ -591,9 +591,9 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
         Ok(ButtplugSpecV0ServerMessage::ScanningFinished(msg))
       }
       _ => Err(ButtplugMessageError::VersionError(
-        "ButtplugServerMessage",
+        "ButtplugServerMessage".to_owned(),
         format!("{:?}", msg),
-        "ButtplugSpecV0ServerMessage",
+        "ButtplugSpecV0ServerMessage".to_owned(),
       )),
     }
   }

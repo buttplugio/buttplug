@@ -10,7 +10,7 @@ use buttplug::{
     ButtplugInProcessClientConnector,
   },
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugServerError},
+    errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::ButtplugServerOptions,
@@ -19,7 +19,7 @@ use buttplug::{
 use futures::{future::BoxFuture, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
-use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
 use util::DelayDeviceCommunicationManager;
 
 #[derive(Default)]
@@ -30,13 +30,8 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<
-    'static,
-    Result<
-      Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
-      ButtplugConnectorError,
-    >,
-  > {
+    _: Sender<ButtplugCurrentSpecServerMessage>
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
 
@@ -134,6 +129,7 @@ fn test_start_scanning() {
 
 #[cfg(feature = "server")]
 #[test]
+#[ignore]
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();

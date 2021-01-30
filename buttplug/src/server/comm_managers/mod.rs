@@ -2,15 +2,12 @@
 pub mod btleplug;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
-#[cfg(feature = "btleplug-manager")]
-use ::btleplug::Error as BtleplugError;
-#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-use rusty_xinput::XInputUsageError;
 #[cfg(feature = "lovense-dongle-manager")]
 pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
 
+use serde::{Serialize, Deserialize};
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
@@ -42,14 +39,14 @@ pub trait DeviceCommunicationManager: Send + Sync {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, Serialize, Deserialize)]
 pub enum ButtplugDeviceSpecificError {
   // XInput library doesn't derive error on its error enum. :(
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-  #[error("XInput usage error: {0:?}")]
-  XInputError(XInputUsageError),
+  #[error("XInput usage error: {0}")]
+  XInputError(String),
   // Btleplug library uses Failure, not Error, on its error enum. :(
   #[cfg(feature = "btleplug-manager")]
-  #[error("Btleplug error: {0:?}")]
-  BtleplugError(BtleplugError),
+  #[error("Btleplug error: {0}")]
+  BtleplugError(String),
 }

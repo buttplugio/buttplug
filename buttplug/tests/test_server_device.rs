@@ -186,7 +186,7 @@ fn test_reject_on_no_raw_message() {
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
-          should_be_err.err().unwrap().error(),
+          should_be_err.unwrap_err().original_error.unwrap(),
           ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
         ));
 
@@ -195,7 +195,7 @@ fn test_reject_on_no_raw_message() {
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
-          should_be_err.err().unwrap().error(),
+          should_be_err.unwrap_err().original_error.unwrap(),
           ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
         ));
 
@@ -204,7 +204,7 @@ fn test_reject_on_no_raw_message() {
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
-          should_be_err.err().unwrap().error(),
+          should_be_err.unwrap_err().original_error.unwrap(),
           ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
         ));
 
@@ -213,7 +213,7 @@ fn test_reject_on_no_raw_message() {
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
-          should_be_err.err().unwrap().error(),
+          should_be_err.unwrap_err().original_error.unwrap(),
           ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
         ));
         return;

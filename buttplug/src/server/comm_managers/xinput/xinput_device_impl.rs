@@ -127,7 +127,7 @@ impl DeviceImplInternal for XInputDeviceImpl {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(ButtplugDeviceSpecificError::XInputError(e)).into()
+          ButtplugDeviceError::from(ButtplugDeviceSpecificError::XInputError(format!("{:?}", e))).into()
         })
     })
   }

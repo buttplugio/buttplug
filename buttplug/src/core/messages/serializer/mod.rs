@@ -3,10 +3,11 @@ mod json_serializer;
 #[cfg(feature = "serialize-json")]
 pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
 
+use serde::{Serialize, Deserialize};
 use thiserror::Error;
 pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
 
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, Serialize, Deserialize)]
 pub enum ButtplugSerializerError {
   // Valico hands back a vector of errors that isn't easy to encase, so we just
   // turn it into a big string and pass that back.

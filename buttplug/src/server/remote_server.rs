@@ -2,7 +2,7 @@ use super::{ButtplugServer, ButtplugServerOptions, ButtplugServerStartupError};
 use crate::{
   connector::ButtplugConnector,
   core::{
-    errors::{ButtplugError, ButtplugServerError},
+    errors::ButtplugError,
     messages::{self, ButtplugClientMessage, ButtplugServerMessage},
   },
   server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
@@ -43,7 +43,7 @@ async fn run_server<ConnectorType>(
   server: Arc<ButtplugServer>,
   remote_event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
   connector: ConnectorType,
-  mut connector_receiver: mpsc::Receiver<Result<ButtplugClientMessage, ButtplugServerError>>,
+  mut connector_receiver: mpsc::Receiver<ButtplugClientMessage>,
   mut controller_receiver: mpsc::Receiver<ButtplugServerCommand>,
 ) where
   ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
@@ -59,13 +59,12 @@ async fn run_server<ConnectorType>(
           info!("Connector disconnected, exiting loop.");
           break;
         }
-        Some(msg) => {
-          debug!("Got message from connector: {:?}", msg);
+        Some(client_message) => {
+          debug!("Got message from connector: {:?}", client_message);
           let server_clone = server.clone();
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
           async_manager::spawn(async move {
-            let client_message = msg.unwrap();
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 if let ButtplugClientMessage::RequestServerInfo(rsi) = client_message {
@@ -161,8 +160,9 @@ impl ButtplugRemoteServer {
     let server_clone = self.server.clone();
     let event_sender_clone = self.event_sender.clone();
     async move {
-      let connector_receiver = connector
-        .connect()
+      let (connector_sender, connector_receiver) = mpsc::channel(256);
+      connector
+        .connect(connector_sender)
         .await
         .map_err(|_| ButtplugServerConnectorError::ConnectorError)?;
       let (controller_sender, controller_receiver) = mpsc::channel(256);

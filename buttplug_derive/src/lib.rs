@@ -203,7 +203,7 @@ fn impl_try_from_buttplug_server_message_derive_macro(ast: &syn::DeriveInput) ->
             fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
                 match msg {
                     #( ButtplugServerMessage::#idents(msg) => Ok(#name::#idents(msg.into())),)*
-                    _ => Err(ButtplugMessageError::MessageConversionError("ButtplugServerMessage cannot be converted to #name"))
+                    _ => Err(ButtplugMessageError::MessageConversionError("ButtplugServerMessage cannot be converted to #name".to_owned()))
                 }
             }
         }

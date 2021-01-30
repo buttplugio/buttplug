@@ -52,7 +52,7 @@ use std::sync::{
   Arc,
 };
 use thiserror::Error;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, mpsc, Mutex};
 use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
@@ -228,10 +228,10 @@ impl ButtplugClient {
       Some(span)
     };
     info!("Connecting to server.");
-    let connector_receiver = connector.connect().await.map_err(|e| {
+    let (connector_sender, connector_receiver) = mpsc::channel(256);
+    connector.connect(connector_sender).await.map_err(|e| {
       error!("Connection to server failed: {:?}", e);
-      let err: ButtplugClientError = e.into();
-      err
+      ButtplugClientError::from(e)
     })?;
     info!("Connection to server succeeded.");
     let mut client_event_loop = ButtplugClientEventLoop::new(

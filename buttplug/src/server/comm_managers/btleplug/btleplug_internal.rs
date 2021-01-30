@@ -109,16 +109,9 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   async fn handle_connection(&mut self, state: &mut DeviceReturnStateShared) -> ButtplugResult {
     info!("Connecting to BTLEPlug device");
     if let Err(err) = self.device.connect() {
-      state.set_reply(ButtplugDeviceReturn::Error(
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
-          err.clone(),
-        ))
-        .into(),
-      ));
-      return Err(
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(err))
-          .into(),
-      );
+      let return_err = ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", err)));
+      state.set_reply(ButtplugDeviceReturn::Error(return_err.clone().into()));
+      return Err(return_err.into());
     }
     loop {
       let event = self.event_receiver.recv().await;
@@ -251,7 +244,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           error!("BTLEPlug device read error: {:?}", err);
           state.set_reply(ButtplugDeviceReturn::Error(
             ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
-              err,
+              format!("{:?}", err)
             ))
             .into(),
           ));

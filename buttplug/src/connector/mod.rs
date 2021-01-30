@@ -92,16 +92,13 @@ pub use transport::ButtplugWebsocketClientTransport;
 pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use crate::{
-  core::{
-    errors::ButtplugServerError,
-    messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
-  },
+  core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 use thiserror::Error;
-use tokio::sync::mpsc::Receiver;
+use tokio::sync::mpsc::Sender;
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorStateShared =
@@ -173,9 +170,10 @@ where
   /// connections, this trait method is marked async.
   fn connect(
     &mut self,
+    message_receiver: Sender<InboundMessageType>
   ) -> BoxFuture<
     'static,
-    Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>,
+    Result<(), ButtplugConnectorError>,
   >;
   /// Disconnects the client from the server.
   ///

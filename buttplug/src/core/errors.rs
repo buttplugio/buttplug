@@ -11,7 +11,6 @@ use super::messages::serializer::ButtplugSerializerError;
 use super::messages::{
   self,
   ButtplugDeviceMessageType,
-  ButtplugMessage,
   ButtplugMessageSpecVersion,
   ErrorCode,
 };
@@ -19,9 +18,9 @@ use crate::device::Endpoint;
 #[cfg(feature = "server")]
 use crate::server::comm_managers::ButtplugDeviceSpecificError;
 use displaydoc::Display;
-use futures::future::{self, BoxFuture};
-use std::fmt;
+use futures::future::BoxFuture;
 use thiserror::Error;
+use serde::{Serialize, Deserialize};
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 
@@ -39,6 +38,7 @@ where
 }
 
 #[derive(Debug, Error, Display, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugHandshakeError {
   /// Expected either a ServerInfo or Error message, received {0}
   UnexpectedHandshakeMessageReceived(String),
@@ -64,19 +64,20 @@ where
 }
 
 #[derive(Debug, Error, Display, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
   UnexpectedMessageType(String),
   /// {0} {1} cannot be converted to {2}
-  VersionError(&'static str, String, &'static str),
+  VersionError(String, String, String),
   /// Message conversion error: {0}
-  MessageConversionError(&'static str),
+  MessageConversionError(String),
   /// Invalid message contents: {0}
   InvalidMessageContents(String),
   /// Unhandled message type: {0}
   UnhandledMessage(String),
   /// Message validation error(s): {0}
-  ValidationError(&'static str),
+  ValidationError(String),
   /// Message serialization error
   #[error(transparent)]
   MessageSerializationError(#[from] ButtplugSerializerError),
@@ -97,6 +98,7 @@ where
 }
 
 #[derive(Debug, Error, Display, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugPingError {
   /// Pinged timer exhausted, system has shut down.
   PingedOut,
@@ -120,6 +122,7 @@ where
   }
 }
 #[derive(Debug, Error, Display, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceError {
   /// Device {0} not connected
   DeviceNotConnected(String),
@@ -157,7 +160,7 @@ pub enum ButtplugDeviceError {
   /// Protocol {0} not implemented in library
   ProtocolNotImplemented(String),
   /// {0} protocol specific error: {1}
-  ProtocolSpecificError(&'static str, &'static str),
+  ProtocolSpecificError(String, String),
   /// {0}
   ProtocolRequirementError(String),
   /// Untyped Deserialized Error: {0}
@@ -178,6 +181,7 @@ where
 }
 
 #[derive(Debug, Error, Display, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugUnknownError {
   /// Cannot start scanning, no device communication managers available to use for scanning.
   NoDeviceCommManagers,
@@ -189,6 +193,7 @@ pub enum ButtplugUnknownError {
 
 /// Aggregation enum for protocol error types.
 #[derive(Debug, Error, Clone)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugError {
   #[error(transparent)]
   ButtplugHandshakeError(#[from] ButtplugHandshakeError),
@@ -200,101 +205,6 @@ pub enum ButtplugError {
   ButtplugDeviceError(#[from] ButtplugDeviceError),
   #[error(transparent)]
   ButtplugUnknownError(#[from] ButtplugUnknownError),
-}
-
-impl From<ButtplugServerError> for ButtplugError {
-  fn from(error: ButtplugServerError) -> Self {
-    error.error().clone()
-  }
-}
-
-#[derive(Debug, Display, Clone)]
-pub struct ButtplugServerError {
-  msg_id: u32,
-  error: ButtplugError,
-}
-
-impl ButtplugServerError {
-  pub fn new_message_error(msg_id: u32, error: ButtplugError) -> Self {
-    Self { msg_id, error }
-  }
-
-  pub fn new_system_error(error: ButtplugError) -> Self {
-    Self { msg_id: 0, error }
-  }
-
-  pub fn id(&self) -> u32 {
-    self.msg_id
-  }
-
-  pub fn error(&self) -> &ButtplugError {
-    &self.error
-  }
-}
-
-impl From<ButtplugError> for ButtplugServerError {
-  fn from(error: ButtplugError) -> Self {
-    ButtplugServerError::new_system_error(error)
-  }
-}
-
-impl From<ButtplugMessageError> for ButtplugServerError {
-  fn from(err: ButtplugMessageError) -> Self {
-    ButtplugServerError::new_system_error(err.into())
-  }
-}
-
-impl From<ButtplugUnknownError> for ButtplugServerError {
-  fn from(err: ButtplugUnknownError) -> Self {
-    ButtplugServerError::new_system_error(err.into())
-  }
-}
-
-impl From<ButtplugDeviceError> for ButtplugServerError {
-  fn from(err: ButtplugDeviceError) -> Self {
-    ButtplugServerError::new_system_error(err.into())
-  }
-}
-
-impl From<ButtplugPingError> for ButtplugServerError {
-  fn from(err: ButtplugPingError) -> Self {
-    ButtplugServerError::new_system_error(err.into())
-  }
-}
-
-impl From<ButtplugHandshakeError> for ButtplugServerError {
-  fn from(err: ButtplugHandshakeError) -> Self {
-    ButtplugServerError::new_system_error(err.into())
-  }
-}
-
-impl std::fmt::Display for ButtplugServerError {
-  // This trait requires `fmt` with this exact signature.
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    self.error.fmt(f)
-  }
-}
-
-impl std::error::Error for ButtplugServerError {
-  fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-    self.error.source()
-  }
-}
-
-impl From<messages::Error> for ButtplugServerError {
-  /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
-  fn from(error: messages::Error) -> Self {
-    ButtplugServerError::new_message_error(error.get_id(), ButtplugError::from(error))
-  }
-}
-
-impl<T> From<ButtplugServerError> for BoxFuture<'static, Result<T, ButtplugServerError>>
-where
-  T: Send + 'static,
-{
-  fn from(err: ButtplugServerError) -> BoxFuture<'static, Result<T, ButtplugServerError>> {
-    Box::pin(future::ready(Err(err)))
-  }
 }
 
 impl From<messages::Error> for ButtplugError {

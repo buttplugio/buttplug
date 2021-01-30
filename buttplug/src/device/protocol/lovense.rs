@@ -69,8 +69,8 @@ impl ButtplugProtocol for Lovense {
       } else {
         Err(
           ButtplugDeviceError::ProtocolSpecificError(
-            "Lovense",
-            "Lovense Device disconnected while getting DeviceType info.",
+            "Lovense".to_owned(),
+            "Lovense Device disconnected while getting DeviceType info.".to_owned(),
           )
           .into(),
         )
@@ -179,8 +179,8 @@ impl ButtplugProtocolCommandHandler for Lovense {
       }
       Err(
         ButtplugDeviceError::ProtocolSpecificError(
-          "Lovense",
-          "Lovense Device disconnected while getting Battery info.",
+          "Lovense".to_owned(),
+          "Lovense Device disconnected while getting Battery info.".to_owned(),
         )
         .into(),
       )

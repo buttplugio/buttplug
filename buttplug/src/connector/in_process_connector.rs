@@ -1,11 +1,11 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugError, ButtplugMessageError, ButtplugServerError},
+    errors::ButtplugError,
     messages::{
+      self,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
-      ButtplugMessage,
     },
   },
   server::{ButtplugServer, ButtplugServerOptions},
@@ -22,7 +22,7 @@ use std::{
     Arc,
   },
 };
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{channel, Sender};
 use tracing_futures::Instrument;
 
 /// In-process Buttplug Server Connector
@@ -52,11 +52,8 @@ use tracing_futures::Instrument;
 #[cfg(feature = "server")]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
-  server: ButtplugServer,
-  server_outbound_sender: Sender<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
-  /// Event receiver for the internal server.
-  connector_outbound_recv:
-    Option<Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>>,
+  server: Arc<ButtplugServer>,
+  server_outbound_sender: Sender<ButtplugCurrentSpecServerMessage>,
   connected: Arc<AtomicBool>,
 }
 
@@ -76,24 +73,10 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
   pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    let server = ButtplugServer::new_with_options(options)?;
-    let server_recv = server.event_stream();
-    let (send, recv) = channel(256);
-    let server_outbound_sender = send.clone();
-    async_manager::spawn(async move {
-      info!("Starting In Process Client Connector Event Sender Loop");
-      pin_mut!(server_recv);
-      while let Some(event) = server_recv.next().await {
-        // If we get an error back, it means the client dropped our event handler, so just stop trying.
-        if send.send(Ok(event.try_into().unwrap())).await.is_err() {
-          break;
-        }
-      }
-      info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-    }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();
-
+    let server = Arc::new(ButtplugServer::new_with_options(options)?);
+    // Create a dummy channel, will just be overwritten on connect.
+    let (server_outbound_sender, _) = channel(256);
     Ok(Self {
-      connector_outbound_recv: Some(recv),
       server_outbound_sender,
       server,
       connected: Arc::new(AtomicBool::new(false)),
@@ -117,17 +100,32 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<
-    'static,
-    Result<
-      Receiver<Result<ButtplugCurrentSpecServerMessage, ButtplugServerError>>,
-      ButtplugConnectorError,
-    >,
-  > {
-    if self.connector_outbound_recv.is_some() {
-      let recv = self.connector_outbound_recv.take().unwrap();
-      self.connected.store(true, Ordering::SeqCst);
-      Box::pin(future::ready(Ok(recv)))
+    message_sender: Sender<ButtplugCurrentSpecServerMessage>
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+    if !self.connected.load(Ordering::SeqCst) {
+      let connected = self.connected.clone();
+      let send = message_sender.clone();
+      self.server_outbound_sender = message_sender;
+      let server_recv = self.server.event_stream();
+      Box::pin(async move {
+        async_manager::spawn(async move {
+          info!("Starting In Process Client Connector Event Sender Loop");
+          pin_mut!(server_recv);
+          while let Some(event) = server_recv.next().await {
+            // If we get an error back, it means the client dropped our event
+            // handler, so just stop trying. Otherwise, since this is an
+            // in-process conversion, we can unwrap because we know our
+            // try_into() will always succeed (which may not be the case with
+            // remote connections that have different spec versions).
+            if send.send(event.try_into().unwrap()).await.is_err() {
+              break;
+            }
+          }
+          info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
+        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();    
+        connected.store(true, Ordering::SeqCst);
+        Ok(())
+      })
     } else {
       ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
@@ -146,22 +144,15 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     if !self.connected.load(Ordering::SeqCst) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
-    let out_id = msg.get_id();
     let input = msg.try_into().unwrap();
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {
-      let output = output_fut.await.and_then(|msg| {
-        msg.try_into().map_err(|_| {
-          ButtplugServerError::new_message_error(
-            out_id,
-            ButtplugMessageError::MessageConversionError(
-              "Cannot convert server message to client spec.",
-            )
-            .into(),
-          )
-        })
-      });
+      // Once again, this is an in process server, so we know we'll always be
+      // running on the same spec version. Therefore we can just unwrap after
+      // the try_into() conversion.
+      let output: ButtplugCurrentSpecServerMessage = 
+        output_fut.await.unwrap_or_else(|e| messages::Error::from(e).into()).try_into().unwrap();
       sender
         .send(output)
         .await

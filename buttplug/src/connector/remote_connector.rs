@@ -15,8 +15,9 @@ use super::transport::{
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugMessageError, ButtplugServerError},
+    errors::{ButtplugMessageError, ButtplugError},
     messages::{
+      self,
       serializer::{ButtplugClientJSONSerializer, ButtplugMessageSerializer},
       ButtplugClientMessage,
       ButtplugCurrentSpecClientMessage,
@@ -57,7 +58,7 @@ async fn remote_connector_event_loop<
   // Takes messages from the client
   mut connector_outgoing_recv: Receiver<ButtplugRemoteConnectorMessage<OutboundMessageType>>,
   // Sends messages not matched in the sorter to the client.
-  connector_incoming_sender: Sender<Result<InboundMessageType, ButtplugServerError>>,
+  connector_incoming_sender: Sender<InboundMessageType>,
   transport: TransportType,
   // Sends sorter processed messages to the transport.
   transport_outgoing_sender: Sender<ButtplugTransportOutgoingMessage>,
@@ -68,7 +69,7 @@ async fn remote_connector_event_loop<
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static, //From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + From<messages::Error> + 'static,
 {
   // Message sorter that receives messages that come in from the client.
   let mut serializer = SerializerType::default();
@@ -105,8 +106,8 @@ async fn remote_connector_event_loop<
             match serializer.deserialize(serialized_msg) {
               Ok(array) => {
                 for smsg in array {
-                  // TODO THIS SHOULD CONVERT ERROR MESSAGES FIRST.
-                  if connector_incoming_sender.send(Ok(smsg)).await.is_err() {
+                  // TODO Test validity here.
+                  if connector_incoming_sender.send(smsg).await.is_err() {
                     error!("Connector has disconnected, ending remote connector loop.");
                     return;
                   }
@@ -116,11 +117,7 @@ async fn remote_connector_event_loop<
                 let error_str =
                   format!("Got invalid messages from remote Buttplug Server: {:?}", e);
                 error!("{}", error_str);
-                let _ = connector_incoming_sender
-                  .send(Err(
-                    ButtplugMessageError::MessageSerializationError(e).into(),
-                  ))
-                  .await;
+                let _ = connector_incoming_sender.send(messages::Error::from(ButtplugError::from(ButtplugMessageError::MessageSerializationError(e))).into()).await;
               }
             }
           }
@@ -239,14 +236,12 @@ where
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + 'static, //+ From<Error> + 'static,
+  InboundMessageType: ButtplugMessage + From<messages::Error> + 'static,
 {
   fn connect(
     &mut self,
-  ) -> BoxFuture<
-    'static,
-    Result<Receiver<Result<InboundMessageType, ButtplugServerError>>, ButtplugConnectorError>,
-  > {
+    connector_incoming_sender: Sender<InboundMessageType>
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
       let transport = self.transport.take().unwrap();
@@ -257,7 +252,6 @@ where
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
-            let (connector_incoming_sender, connector_incoming_receiver) = channel(256);
             async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
@@ -274,7 +268,7 @@ where
               .await
             })
             .unwrap();
-            Ok(connector_incoming_receiver)
+            Ok(())
           }
           Err(e) => Err(e),
         }

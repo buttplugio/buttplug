@@ -79,7 +79,7 @@ impl ButtplugProtocolCommandHandler for XInput {
             {
               return Err(
                 ButtplugMessageError::MessageConversionError(
-                  "Cannot convert XInput value for processing",
+                  "Cannot convert XInput value for processing".to_owned(),
                 )
                 .into(),
               );
