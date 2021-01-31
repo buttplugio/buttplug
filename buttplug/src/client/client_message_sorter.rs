@@ -9,10 +9,7 @@
 
 use crate::{
   client::{ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
-  core::{
-    errors::ButtplugError,
-    messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
-  },
+  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
 };
 use std::collections::HashMap;
 
@@ -101,11 +98,7 @@ impl ClientMessageSorter {
       Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
         if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
-          if let Some(original_error) = &e.original_error {
-            _state.set_reply(Err(original_error.clone().into()))
-          } else {
-            _state.set_reply(Err(ButtplugError::from(e.clone()).into()))
-          }
+          _state.set_reply(Err(e.original_error().into()))
         } else {
           _state.set_reply(Ok(msg.clone()))
         }

@@ -60,7 +60,7 @@ pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
 pub use device_message_info::{DeviceMessageAttributesMap, DeviceMessageInfo};
 pub use device_removed::DeviceRemoved;
-pub use error::{Error, ErrorCode};
+pub use error::{Error, ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
 pub use kiiroo_cmd::KiirooCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
@@ -477,7 +477,7 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
 pub(crate) enum ButtplugSpecV1ServerMessage {
   // Status messages
   Ok(Ok),
-  Error(Error),
+  Error(ErrorV0),
   Log(Log),
   // Handshake messages
   ServerInfo(ServerInfoV0),
@@ -496,7 +496,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
   fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
       ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV1ServerMessage::Ok(msg)),
-      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV1ServerMessage::Error(msg)),
+      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV1ServerMessage::Error(msg.into())),
       ButtplugServerMessage::Log(msg) => Ok(ButtplugSpecV1ServerMessage::Log(msg)),
       ButtplugServerMessage::ServerInfo(msg) => {
         Ok(ButtplugSpecV1ServerMessage::ServerInfo(msg.into()))
@@ -554,7 +554,7 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
 pub(crate) enum ButtplugSpecV0ServerMessage {
   // Status messages
   Ok(Ok),
-  Error(Error),
+  Error(ErrorV0),
   Log(Log),
   // Handshake messages
   ServerInfo(ServerInfoV0),
@@ -573,7 +573,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
   fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
     match msg {
       ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV0ServerMessage::Ok(msg)),
-      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV0ServerMessage::Error(msg)),
+      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV0ServerMessage::Error(msg.into())),
       ButtplugServerMessage::Log(msg) => Ok(ButtplugSpecV0ServerMessage::Log(msg)),
       ButtplugServerMessage::ServerInfo(msg) => {
         Ok(ButtplugSpecV0ServerMessage::ServerInfo(msg.into()))
