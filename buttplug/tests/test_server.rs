@@ -54,7 +54,7 @@ fn test_server_handshake_not_done_first() {
     let result = server.parse_message(msg).await;
     assert!(result.is_err());
     assert!(matches!(
-      result.unwrap_err().original_error.unwrap(),
+      result.unwrap_err().original_error(),
       ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected)
     ));
     assert!(!server.connected());
@@ -110,7 +110,7 @@ fn test_ping_timeout() {
     let pingmsg = messages::Ping::default();
     let result = server.parse_message(pingmsg.into()).await;
     let err = result.unwrap_err();
-    if !matches!(err.original_error.unwrap(), ButtplugError::ButtplugPingError(_)) {
+    if !matches!(err.original_error(), ButtplugError::ButtplugPingError(_)) {
       panic!("Got wrong type of error back!");
     }
     // Check that we got an event back about the ping out.
@@ -198,7 +198,7 @@ fn test_repeated_handshake() {
     assert!(server.connected());
     let err = server.parse_message(msg.into()).await.unwrap_err();
     assert!(matches!(
-      err.original_error.unwrap(),
+      err.original_error(),
       ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
     ));
   });
@@ -215,7 +215,7 @@ fn test_invalid_device_index() {
       .await;
     assert!(reply.is_err());
     assert!(matches!(
-      reply.unwrap_err().original_error.unwrap(),
+      reply.unwrap_err().original_error(),
       ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))
     ));
   });

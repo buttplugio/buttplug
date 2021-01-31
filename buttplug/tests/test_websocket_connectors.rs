@@ -2,22 +2,17 @@
 
 #[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
 mod websocket_connector_tests {
-  use buttplug::{
-    client::ButtplugClient,
-    connector::{
+  use buttplug::{client::ButtplugClient, connector::{
       ButtplugRemoteClientConnector,
       ButtplugRemoteServerConnector,
       ButtplugWebsocketClientTransport,
       ButtplugWebsocketServerTransport,
       ButtplugWebsocketServerTransportOptions,
-    },
-    core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
-    server::ButtplugRemoteServer,
-    util::async_manager,
-  };
+    }, core::{messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer}}, server::ButtplugRemoteServer, util::async_manager};
   use futures_timer::Delay;
   use std::sync::Arc;
   use std::time::Duration;
+
 
   #[test]
   fn test_client_ws_client_server_ws_server_insecure() {
@@ -42,7 +37,7 @@ mod websocket_connector_tests {
       })
       .unwrap();
       let mut connected = false;
-      for _ in 0..10 {
+      for _ in 0..10u8 {
         let connector = ButtplugRemoteClientConnector::<
           ButtplugWebsocketClientTransport,
           ButtplugClientJSONSerializer,
@@ -80,7 +75,7 @@ mod websocket_connector_tests {
       .unwrap();
 
       let mut connected = false;
-      for _ in 0..10 {
+      for _ in 0..10u8 {
         let connector = ButtplugRemoteClientConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugClientJSONSerializer,
