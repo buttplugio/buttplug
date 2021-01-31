@@ -24,7 +24,7 @@ pub enum ButtplugSerializerError {
   MessageSpecVersionNotReceived,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Display, Clone, PartialEq)]
 pub enum ButtplugSerializedMessage {
   Text(String),
   Binary(Vec<u8>),
@@ -46,8 +46,8 @@ pub trait ButtplugMessageSerializer: Default + Sync + Send {
   type Inbound;
   type Outbound;
   fn deserialize(
-    &mut self,
+    &self,
     msg: ButtplugSerializedMessage,
   ) -> ButtplugSerializerResult<Vec<Self::Inbound>>;
-  fn serialize(&mut self, msg: Vec<Self::Outbound>) -> ButtplugSerializedMessage;
+  fn serialize(&self, msg: Vec<Self::Outbound>) -> ButtplugSerializedMessage;
 }
