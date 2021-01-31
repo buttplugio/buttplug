@@ -11,10 +11,8 @@ use crate::{
   connector::{
     transport::{
       ButtplugConnectorTransport,
-      ButtplugConnectorTransportConnectResult,
       ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
-      ButtplugTransportOutgoingMessage,
     },
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
@@ -26,10 +24,10 @@ use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
-use futures::{SinkExt, StreamExt};
+use futures::{SinkExt, StreamExt, future::BoxFuture, FutureExt};
+use tracing::Instrument;
 use std::sync::Arc;
-use tokio::sync::mpsc::{channel, Sender};
-use tokio::sync::Mutex;
+use tokio::sync::{Notify, mpsc::{Sender, Receiver}};
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
@@ -41,19 +39,16 @@ pub struct ButtplugWebsocketClientTransport {
   /// certs.
   bypass_cert_verify: bool,
   /// Internally held sender, used for when disconnect is called.
-  disconnect_sender: Arc<Mutex<Sender<ButtplugTransportOutgoingMessage>>>,
+  disconnect_notifier: Arc<Notify>,
 }
 
 impl ButtplugWebsocketClientTransport {
   fn create(address: &str, should_use_tls: bool, bypass_cert_verify: bool) -> Self {
-    // Create a dummy channel here. Saves us having to check option on every
-    // call, and if it fails it means we're disconnected anyways, which is fine.
-    let (unused_sender, _) = channel(256);
     Self {
       should_use_tls,
       address: address.to_owned(),
       bypass_cert_verify,
-      disconnect_sender: Arc::new(Mutex::new(unused_sender)),
+      disconnect_notifier: Arc::new(Notify::new())
     }
   }
 
@@ -79,11 +74,8 @@ impl ButtplugWebsocketClientTransport {
 }
 
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
-  fn connect(&self) -> ButtplugConnectorTransportConnectResult {
-    let (request_sender, mut request_receiver) = channel(256);
-    let (response_sender, response_receiver) = channel(256);
-
-    let disconnect_sender_clone = self.disconnect_sender.clone();
+  fn connect(&self, mut outgoing_receiver: Receiver<ButtplugSerializedMessage>, incoming_sender: Sender<ButtplugTransportIncomingMessage>) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+    let disconnect_notifier = self.disconnect_notifier.clone();
 
     // If we're supposed to be a secure connection, generate a TLS connector
     // based on our certificate verfication needs. Otherwise, just pass None in
@@ -126,31 +118,37 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     let address = self.address.clone();
 
     Box::pin(async move {
-      *disconnect_sender_clone.lock().await = request_sender.clone();
       match connect_async_with_tls_connector(&address, tls_connector).await {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
-          // TODO Do we want to store/join these tasks anywhere?
           async_manager::spawn(async move {
-            while let Some(msg) = request_receiver.recv().await {
-              let out_msg = match msg {
-                ButtplugTransportOutgoingMessage::Message(outgoing_msg) => match outgoing_msg {
-                  ButtplugSerializedMessage::Text(text) => Message::Text(text),
-                  ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
+            loop {
+              select! {
+                msg = outgoing_receiver.recv().fuse() => {
+                  if let Some(msg) = msg {
+                    let out_msg = match msg {
+                      ButtplugSerializedMessage::Text(text) => Message::Text(text),
+                      ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
+                    };
+                    // TODO see what happens when we try to send to a remote that's closed connection.
+                    writer.send(out_msg).await.expect("This should never fail?");
+                  } else {
+                    info!("Connector holding websocket dropped, returning");
+                    return;
+                  }
                 },
-                ButtplugTransportOutgoingMessage::Close => {
+                _ = disconnect_notifier.notified().fuse() => {
                   // If we can't close, just print the error to the logs but
                   // still break out of the loop.
                   //
                   // TODO Emit a full error here that should bubble up to the client.
+                  info!("Websocket requested to disconnect.");
                   writer.close().await.unwrap_or_else(|err| error!("{}", err));
                   return;
                 }
-              };
-              // TODO see what happens when we try to send to a remote that's closed connection.
-              writer.send(out_msg).await.expect("This should never fail?");
+              }
             }
-          })
+          }.instrument(tracing::info_span!("Websocket Send Task")))
           .unwrap();
           async_manager::spawn(async move {
             while let Some(response) = reader.next().await {
@@ -158,7 +156,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
               match response {
                 Ok(msg) => match msg {
                   Message::Text(t) => {
-                    if response_sender
+                    if incoming_sender
                       .send(ButtplugTransportIncomingMessage::Message(
                         ButtplugSerializedMessage::Text(t.to_string()),
                       ))
@@ -170,7 +168,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                     }
                   }
                   Message::Binary(v) => {
-                    if response_sender
+                    if incoming_sender
                       .send(ButtplugTransportIncomingMessage::Message(
                         ButtplugSerializedMessage::Binary(v),
                       ))
@@ -197,9 +195,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                 }
               }
             }
-          })
+          }.instrument(tracing::info_span!("Websocket Receive Task")))
           .unwrap();
-          Ok((request_sender, response_receiver))
+          Ok(())
         }
         Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(
           ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error),
@@ -209,20 +207,11 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    let disconnect_sender = self.disconnect_sender;
+    let disconnect_notifier = self.disconnect_notifier.clone();
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
-      if disconnect_sender
-        .lock()
-        .await
-        .send(ButtplugTransportOutgoingMessage::Close)
-        .await
-        .is_err()
-      {
-        Err(ButtplugConnectorError::ConnectorNotConnected)
-      } else {
-        Ok(())
-      }
+      disconnect_notifier.notify_waiters();
+      Ok(())
     })
   }
 }

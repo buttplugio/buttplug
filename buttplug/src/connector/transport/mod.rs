@@ -14,15 +14,8 @@ pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTra
 
 use thiserror::Error;
 
-/// Messages we can send thru the connector.
-pub enum ButtplugTransportOutgoingMessage {
-  /// Text version of message we are sending to the remote server.
-  Message(ButtplugSerializedMessage),
-  /// Request for connector to close the connection
-  Close,
-}
-
 /// Messages we can receive from a connector.
+#[derive(Clone, Debug, Display)]
 pub enum ButtplugTransportIncomingMessage {
   /// Send when connection is established.
   Connected,
@@ -35,19 +28,8 @@ pub enum ButtplugTransportIncomingMessage {
   Close(String),
 }
 
-pub type ButtplugConnectorTransportConnectResult = BoxFuture<
-  'static,
-  Result<
-    (
-      Sender<ButtplugTransportOutgoingMessage>,
-      Receiver<ButtplugTransportIncomingMessage>,
-    ),
-    ButtplugConnectorError,
-  >,
->;
-
 pub trait ButtplugConnectorTransport: Send + Sync {
-  fn connect(&self) -> ButtplugConnectorTransportConnectResult;
+  fn connect(&self, outgoing_receiver: Receiver<ButtplugSerializedMessage>, incoming_sender: Sender<ButtplugTransportIncomingMessage>) -> BoxFuture<'static, Result<(), ButtplugConnectorError>>;
   fn disconnect(self) -> ButtplugConnectorResultFuture;
 }
 

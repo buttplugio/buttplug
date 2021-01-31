@@ -10,15 +10,12 @@
 use super::transport::{
   ButtplugConnectorTransport,
   ButtplugTransportIncomingMessage,
-  ButtplugTransportOutgoingMessage,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::{ButtplugMessageError, ButtplugError},
     messages::{
-      self,
-      serializer::{ButtplugClientJSONSerializer, ButtplugMessageSerializer},
+      serializer::{ButtplugClientJSONSerializer, ButtplugMessageSerializer, ButtplugSerializedMessage},
       ButtplugClientMessage,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
@@ -61,7 +58,7 @@ async fn remote_connector_event_loop<
   connector_incoming_sender: Sender<InboundMessageType>,
   transport: TransportType,
   // Sends sorter processed messages to the transport.
-  transport_outgoing_sender: Sender<ButtplugTransportOutgoingMessage>,
+  transport_outgoing_sender: Sender<ButtplugSerializedMessage>,
   // Takes data coming in from the transport.
   mut transport_incoming_recv: Receiver<ButtplugTransportIncomingMessage>,
 ) where
@@ -69,10 +66,10 @@ async fn remote_connector_event_loop<
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + From<messages::Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static,
 {
   // Message sorter that receives messages that come in from the client.
-  let mut serializer = SerializerType::default();
+  let serializer = SerializerType::default();
   loop {
     // We use two Options instead of an enum because we may never get anything.
     //
@@ -114,10 +111,8 @@ async fn remote_connector_event_loop<
                 }
               }
               Err(e) => {
-                let error_str =
-                  format!("Got invalid messages from remote Buttplug Server: {:?}", e);
-                error!("{}", error_str);
-                let _ = connector_incoming_sender.send(messages::Error::from(ButtplugError::from(ButtplugMessageError::MessageSerializationError(e))).into()).await;
+                // TODO Not sure where to relay this.
+                error!("{}", format!("Got invalid messages from remote Buttplug connection: {:?}", e));
               }
             }
           }
@@ -139,7 +134,7 @@ async fn remote_connector_event_loop<
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
             let serialized_msg =
-              ButtplugTransportOutgoingMessage::Message(serializer.serialize(vec![msg.clone()]));
+              serializer.serialize(vec![msg.clone()]);
             if transport_outgoing_sender
               .send(serialized_msg)
               .await
@@ -236,7 +231,7 @@ where
   SerializerType: ButtplugMessageSerializer<Inbound = InboundMessageType, Outbound = OutboundMessageType>
     + 'static,
   OutboundMessageType: ButtplugMessage + 'static,
-  InboundMessageType: ButtplugMessage + From<messages::Error> + 'static,
+  InboundMessageType: ButtplugMessage + 'static,
 {
   fn connect(
     &mut self,
@@ -248,10 +243,12 @@ where
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       Box::pin(async move {
-        match transport.connect().await {
+        let (transport_outgoing_sender, transport_outgoing_receiver) = channel(256);
+        let (transport_incoming_sender, transport_incoming_receiver) = channel(256);
+        match transport.connect(transport_outgoing_receiver, transport_incoming_sender).await {
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
-          Ok((transport_outgoing_sender, transport_incoming_receiver)) => {
+          Ok(()) => {
             async_manager::spawn(async move {
               remote_connector_event_loop::<
                 TransportType,
