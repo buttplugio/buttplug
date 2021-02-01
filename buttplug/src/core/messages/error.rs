@@ -10,8 +10,6 @@ use crate::core::errors::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
-use serde_json;
-#[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// Error codes pertaining to error classes that can be represented in the

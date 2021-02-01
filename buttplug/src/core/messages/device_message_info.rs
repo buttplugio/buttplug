@@ -113,7 +113,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
     // preserve.
     for attributes in &mut dmi_v1.device_messages.values_mut() {
       *attributes = DeviceMessageAttributes {
-        feature_count: attributes.feature_count.clone(),
+        feature_count: attributes.feature_count,
         ..Default::default()
       };
     }

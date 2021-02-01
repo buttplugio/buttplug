@@ -1,7 +1,7 @@
 mod util;
 use buttplug::{
   core::{
-    messages::{ButtplugClientMessage, ButtplugServerMessage, self},
+    messages::{ButtplugClientMessage, self},
     errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError},
   },
   client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent, VibrateCommand, ButtplugClientError},
@@ -146,8 +146,6 @@ fn test_client_device_invalid_command() {
       }
     }
     let test_device = client_device.unwrap();
-    use tracing::*;
-    tracing_subscriber::fmt::init();
     assert!(matches!(test_device.vibrate(VibrateCommand::Speed(2.0)).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError::InvalidMessageContents(..)))));
     assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!(0.5, 0.5, 0.5))).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceFeatureCountMismatch(..)))));
     assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!())).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolRequirementError(..)))));

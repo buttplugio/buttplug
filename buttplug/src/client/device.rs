@@ -602,7 +602,7 @@ impl ButtplugClientDevice {
     }
     // The only reason a send will fail is if we have no receivers. Since we
     // already checked for receivers here, we can unwrap without issue.
-    self.internal_event_sender.send(event.clone()).unwrap();
+    self.internal_event_sender.send(event).unwrap();
   }
 }
 

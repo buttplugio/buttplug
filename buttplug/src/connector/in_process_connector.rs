@@ -3,7 +3,6 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
     },
@@ -152,7 +151,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       // running on the same spec version. Therefore we can just unwrap after
       // the try_into() conversion.
       let output: ButtplugCurrentSpecServerMessage = 
-        output_fut.await.unwrap_or_else(|e| messages::Error::from(e).into()).try_into().unwrap();
+        output_fut.await.unwrap_or_else(|e| e.into()).try_into().unwrap();
       sender
         .send(output)
         .await

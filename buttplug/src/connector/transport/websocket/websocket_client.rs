@@ -207,7 +207,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    let disconnect_notifier = self.disconnect_notifier.clone();
+    let disconnect_notifier = self.disconnect_notifier;
     Box::pin(async move {
       // If we can't send the message, we have no loop, so we're not connected.
       disconnect_notifier.notify_waiters();

@@ -37,6 +37,6 @@ impl SingleMotorVibrateCmd {
 impl ButtplugMessageValidator for SingleMotorVibrateCmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
-    self.is_in_command_range(self.speed, format!("SingleMotorVibrateCmd Speed {} is invalid. Valid speeds are 0.0-1.0.", self.speed).to_string())
+    self.is_in_command_range(self.speed, format!("SingleMotorVibrateCmd Speed {} is invalid. Valid speeds are 0.0-1.0.", self.speed))
   }
 }

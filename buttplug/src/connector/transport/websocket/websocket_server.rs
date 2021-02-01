@@ -175,7 +175,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       "127.0.0.1"
     };
 
-    let request_receiver = Arc::new(Mutex::new(Some(outgoing_receiver))).clone();
+    let request_receiver = Arc::new(Mutex::new(Some(outgoing_receiver)));
 
     if let Some(ws_insecure_port) = self.options.ws_insecure_port {
       let addr = format!("{}:{}", base_addr, ws_insecure_port);
@@ -228,9 +228,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
     if let Some(ws_secure_port) = self.options.ws_secure_port {
       let options = self.options.clone();
-      let request_receiver_clone = request_receiver.clone();
-      let response_sender_clone = incoming_sender.clone();
-      let disconnect_notifier_clone = disconnect_notifier.clone();
+      let request_receiver_clone = request_receiver;
+      let response_sender_clone = incoming_sender;
+      let disconnect_notifier_clone = disconnect_notifier;
 
       let fut = async move {
         if options.ws_cert_file.is_none() {
@@ -382,7 +382,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     Box::pin(async move {
       // Use select_all on the tasks, returning the first one to resolves.
       // Dropping the rest of them means we
-      if tasks.len() == 0 {
+      if tasks.is_empty() {
         Err(ButtplugConnectorError::ConnectorGenericError(
           "No ports specified for listening in websocket server connector.".to_owned(),
         ))
@@ -396,7 +396,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
-    let disconnect_notifier = self.disconnect_notifier.clone();
+    let disconnect_notifier = self.disconnect_notifier;
     Box::pin(async move {
       disconnect_notifier.notify_waiters();
       Ok(())

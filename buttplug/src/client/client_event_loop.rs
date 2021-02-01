@@ -166,7 +166,7 @@ where
 
     // The only reason a send will fail is if we have no receivers. Since we
     // already checked for receivers here, we can unwrap without issue.
-    self.to_client_sender.send(event.clone()).unwrap();
+    self.to_client_sender.send(event).unwrap();
   }
 
   fn disconnect_device(&mut self, device_index: u32) {
