@@ -39,7 +39,7 @@ impl DeviceAdded {
   }
 
   pub fn device_index(&self) -> u32 {
-    self.id
+    self.device_index
   }
 
   pub fn device_name(&self) -> &String {
