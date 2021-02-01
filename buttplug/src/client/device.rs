@@ -9,7 +9,7 @@
 
 use super::{ButtplugClientError, ButtplugClientRequest, ButtplugClientResultFuture};
 use crate::{
-  client::{ButtplugServerMessageFuture, ButtplugClientMessageFuturePair},
+  client::{ButtplugClientMessageFuturePair, ButtplugServerMessageFuture},
   connector::ButtplugConnectorError,
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
@@ -230,7 +230,7 @@ impl ButtplugClientDevice {
       sender,
     )
   }
-  
+
   pub fn connected(&self) -> bool {
     self.device_connected.load(Ordering::SeqCst)
   }
@@ -480,7 +480,9 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level()),
+        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => {
+          Ok(reading.battery_level())
+        }
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(

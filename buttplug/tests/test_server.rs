@@ -313,7 +313,6 @@ fn test_server_scanning_finished() {
   });
 }
 
-
 // TODO Test sending system message (Id 0)
 // TODO Test sending system message (Ok but Id > 0)
 // TODO Test repeated handshake

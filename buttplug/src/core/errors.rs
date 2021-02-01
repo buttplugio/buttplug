@@ -8,19 +8,14 @@
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
 use super::messages::serializer::ButtplugSerializerError;
-use super::messages::{
-  self,
-  ButtplugDeviceMessageType,
-  ButtplugMessageSpecVersion,
-  ErrorCode,
-};
+use super::messages::{self, ButtplugDeviceMessageType, ButtplugMessageSpecVersion, ErrorCode};
 use crate::device::Endpoint;
 #[cfg(feature = "server")]
 use crate::server::comm_managers::ButtplugDeviceSpecificError;
 use displaydoc::Display;
 use futures::future::BoxFuture;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use serde::{Serialize, Deserialize};
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 

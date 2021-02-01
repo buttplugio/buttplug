@@ -9,8 +9,8 @@ use crate::{
     errors::ButtplugError,
     messages::{
       self,
-      ButtplugDeviceMessage,
       ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
       DeviceMessageAttributesMap,
       FleshlightLaunchFW12Cmd,
     },

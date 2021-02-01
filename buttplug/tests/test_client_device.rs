@@ -1,16 +1,22 @@
 mod util;
 use buttplug::{
-  core::{
-    messages::{ButtplugClientMessage, self},
-    errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError},
+  client::{
+    ButtplugClient,
+    ButtplugClientDeviceEvent,
+    ButtplugClientError,
+    ButtplugClientEvent,
+    VibrateCommand,
   },
-  client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent, VibrateCommand, ButtplugClientError},
-  connector::ButtplugInProcessClientConnector, 
-  util::async_manager
+  connector::ButtplugInProcessClientConnector,
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
+    messages::{self, ButtplugClientMessage},
+  },
+  util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
 use futures_timer::Delay;
-use std::{sync::Arc, collections::HashMap, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 #[cfg(feature = "server")]
 #[test]
@@ -24,10 +30,7 @@ fn test_client_device_connected_status() {
     pin_mut!(recv);
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .unwrap();
+    client.connect(connector).await.unwrap();
     assert!(client.connected());
     client.start_scanning().await.unwrap();
     let mut client_device = None;
@@ -64,10 +67,7 @@ fn test_client_device_client_disconnected_status() {
     pin_mut!(recv);
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .unwrap();
+    client.connect(connector).await.unwrap();
     assert!(client.connected());
     client.start_scanning().await.unwrap();
     let mut client_device = None;
@@ -84,7 +84,7 @@ fn test_client_device_client_disconnected_status() {
     while let Some(msg) = event_stream.next().await {
       if let ButtplugClientEvent::ServerDisconnect = msg {
         assert!(!client.connected());
-        assert!(!test_device.connected());        
+        assert!(!test_device.connected());
         break;
       }
     }
@@ -105,10 +105,7 @@ fn test_client_device_connected_no_event_listener() {
     let helper = connector.server_ref().add_test_comm_manager().unwrap();
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .unwrap();
+    client.connect(connector).await.unwrap();
     assert!(client.connected());
     client.start_scanning().await.unwrap();
     Delay::new(Duration::from_millis(100)).await;
@@ -132,10 +129,7 @@ fn test_client_device_invalid_command() {
     pin_mut!(recv);
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .unwrap();
+    client.connect(connector).await.unwrap();
     assert!(client.connected());
     client.start_scanning().await.unwrap();
     let mut client_device = None;
@@ -146,9 +140,33 @@ fn test_client_device_invalid_command() {
       }
     }
     let test_device = client_device.unwrap();
-    assert!(matches!(test_device.vibrate(VibrateCommand::Speed(2.0)).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError::InvalidMessageContents(..)))));
-    assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!(0.5, 0.5, 0.5))).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceFeatureCountMismatch(..)))));
-    assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!())).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolRequirementError(..)))));
+    assert!(matches!(
+      test_device
+        .vibrate(VibrateCommand::Speed(2.0))
+        .await
+        .unwrap_err(),
+      ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(
+        ButtplugMessageError::InvalidMessageContents(..)
+      ))
+    ));
+    assert!(matches!(
+      test_device
+        .vibrate(VibrateCommand::SpeedVec(vec!(0.5, 0.5, 0.5)))
+        .await
+        .unwrap_err(),
+      ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
+        ButtplugDeviceError::DeviceFeatureCountMismatch(..)
+      ))
+    ));
+    assert!(matches!(
+      test_device
+        .vibrate(VibrateCommand::SpeedVec(vec!()))
+        .await
+        .unwrap_err(),
+      ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
+        ButtplugDeviceError::ProtocolRequirementError(..)
+      ))
+    ));
   });
 }
 
@@ -161,15 +179,29 @@ fn test_client_repeated_deviceadded_message() {
     let helper_clone = helper.clone();
     let mut event_stream = helper.client().event_stream();
     async_manager::spawn(async move {
-      assert!(matches!(helper_clone.get_next_client_message().await, ButtplugClientMessage::StartScanning(..)));
-      helper_clone.send_client_incoming(messages::Ok::new(3).into()).await;
+      assert!(matches!(
+        helper_clone.get_next_client_message().await,
+        ButtplugClientMessage::StartScanning(..)
+      ));
+      helper_clone
+        .send_client_incoming(messages::Ok::new(3).into())
+        .await;
       let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
-      helper_clone.send_client_incoming(device_added.clone().into()).await;
+      helper_clone
+        .send_client_incoming(device_added.clone().into())
+        .await;
       helper_clone.send_client_incoming(device_added.into()).await;
-    }).unwrap();
+    })
+    .unwrap();
     helper.client().start_scanning().await.unwrap();
-    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceAdded(..)));
-    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::Error(..)));
+    assert!(matches!(
+      event_stream.next().await.unwrap(),
+      ButtplugClientEvent::DeviceAdded(..)
+    ));
+    assert!(matches!(
+      event_stream.next().await.unwrap(),
+      ButtplugClientEvent::Error(..)
+    ));
   });
 }
 
@@ -182,18 +214,37 @@ fn test_client_repeated_deviceremoved_message() {
     let helper_clone = helper.clone();
     let mut event_stream = helper.client().event_stream();
     async_manager::spawn(async move {
-      assert!(matches!(helper_clone.get_next_client_message().await, ButtplugClientMessage::StartScanning(..)));
-      helper_clone.send_client_incoming(messages::Ok::new(3).into()).await;
+      assert!(matches!(
+        helper_clone.get_next_client_message().await,
+        ButtplugClientMessage::StartScanning(..)
+      ));
+      helper_clone
+        .send_client_incoming(messages::Ok::new(3).into())
+        .await;
       let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
       let device_removed = messages::DeviceRemoved::new(1);
       helper_clone.send_client_incoming(device_added.into()).await;
-      helper_clone.send_client_incoming(device_removed.clone().into()).await;
-      helper_clone.send_client_incoming(device_removed.into()).await;
-    }).unwrap();
+      helper_clone
+        .send_client_incoming(device_removed.clone().into())
+        .await;
+      helper_clone
+        .send_client_incoming(device_removed.into())
+        .await;
+    })
+    .unwrap();
     helper.client().start_scanning().await.unwrap();
-    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceAdded(..)));
-    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceRemoved(..)));
-    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::Error(..)));
+    assert!(matches!(
+      event_stream.next().await.unwrap(),
+      ButtplugClientEvent::DeviceAdded(..)
+    ));
+    assert!(matches!(
+      event_stream.next().await.unwrap(),
+      ButtplugClientEvent::DeviceRemoved(..)
+    ));
+    assert!(matches!(
+      event_stream.next().await.unwrap(),
+      ButtplugClientEvent::Error(..)
+    ));
   });
 }
 

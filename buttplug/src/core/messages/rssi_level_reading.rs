@@ -38,7 +38,10 @@ impl ButtplugMessageValidator for RSSILevelReading {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if self.rssi_level > 0 {
-      Err(ButtplugMessageError::InvalidMessageContents(format!("RSSI level {} is invalid. RSSI Levels are always negative.", self.rssi_level)))
+      Err(ButtplugMessageError::InvalidMessageContents(format!(
+        "RSSI level {} is invalid. RSSI Levels are always negative.",
+        self.rssi_level
+      )))
     } else {
       Ok(())
     }

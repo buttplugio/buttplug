@@ -7,21 +7,20 @@
 
 //! Handling of websockets using async-tungstenite
 
-use super::transport::{
-  ButtplugConnectorTransport,
-  ButtplugTransportIncomingMessage,
-};
+use super::transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage};
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-  core::{
-    messages::{
-      serializer::{ButtplugClientJSONSerializer, ButtplugMessageSerializer, ButtplugSerializedMessage},
-      ButtplugClientMessage,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugMessage,
-      ButtplugServerMessage,
+  core::messages::{
+    serializer::{
+      ButtplugClientJSONSerializer,
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
     },
+    ButtplugClientMessage,
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
+    ButtplugServerMessage,
   },
   util::async_manager,
 };
@@ -112,7 +111,13 @@ async fn remote_connector_event_loop<
               }
               Err(e) => {
                 // TODO Not sure where to relay this.
-                error!("{}", format!("Got invalid messages from remote Buttplug connection: {:?}", e));
+                error!(
+                  "{}",
+                  format!(
+                    "Got invalid messages from remote Buttplug connection: {:?}",
+                    e
+                  )
+                );
               }
             }
           }
@@ -133,8 +138,7 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg =
-              serializer.serialize(vec![msg.clone()]);
+            let serialized_msg = serializer.serialize(vec![msg.clone()]);
             if transport_outgoing_sender
               .send(serialized_msg)
               .await
@@ -235,7 +239,7 @@ where
 {
   fn connect(
     &mut self,
-    connector_incoming_sender: Sender<InboundMessageType>
+    connector_incoming_sender: Sender<InboundMessageType>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if self.transport.is_some() {
       // We can unwrap this because we just proved we had it.
@@ -245,7 +249,10 @@ where
       Box::pin(async move {
         let (transport_outgoing_sender, transport_outgoing_receiver) = channel(256);
         let (transport_incoming_sender, transport_incoming_receiver) = channel(256);
-        match transport.connect(transport_outgoing_receiver, transport_incoming_sender).await {
+        match transport
+          .connect(transport_outgoing_receiver, transport_incoming_sender)
+          .await
+        {
           // If we connect successfully, we get back the channel from the transport
           // to send outgoing messages and receieve incoming events, all serialized.
           Ok(()) => {

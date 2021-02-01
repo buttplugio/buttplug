@@ -2,10 +2,7 @@ use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
     errors::ButtplugError,
-    messages::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-    },
+    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::{ButtplugServer, ButtplugServerOptions},
   util::async_manager,
@@ -99,7 +96,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-    message_sender: Sender<ButtplugCurrentSpecServerMessage>
+    message_sender: Sender<ButtplugCurrentSpecServerMessage>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if !self.connected.load(Ordering::SeqCst) {
       let connected = self.connected.clone();
@@ -121,7 +118,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
             }
           }
           info!("Stopping In Process Client Connector Event Sender Loop, due to channel receiver being dropped.");
-        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();    
+        }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop"))).unwrap();
         connected.store(true, Ordering::SeqCst);
         Ok(())
       })
@@ -150,8 +147,11 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       // Once again, this is an in process server, so we know we'll always be
       // running on the same spec version. Therefore we can just unwrap after
       // the try_into() conversion.
-      let output: ButtplugCurrentSpecServerMessage = 
-        output_fut.await.unwrap_or_else(|e| e.into()).try_into().unwrap();
+      let output: ButtplugCurrentSpecServerMessage = output_fut
+        .await
+        .unwrap_or_else(|e| e.into())
+        .try_into()
+        .unwrap();
       sender
         .send(output)
         .await

@@ -146,13 +146,17 @@ pub trait ButtplugMessageValidator {
     if id == 0 {
       Ok(())
     } else {
-      Err(ButtplugMessageError::InvalidMessageContents("Message should have id of 0, as it is a system message.".to_string()))
+      Err(ButtplugMessageError::InvalidMessageContents(
+        "Message should have id of 0, as it is a system message.".to_string(),
+      ))
     }
   }
 
   fn is_not_system_id(&self, id: u32) -> Result<(), ButtplugMessageError> {
     if id == 0 {
-      Err(ButtplugMessageError::InvalidMessageContents("Message should not have 0 for an Id. Id of 0 is reserved for system messages.".to_string()))
+      Err(ButtplugMessageError::InvalidMessageContents(
+        "Message should not have 0 for an Id. Id of 0 is reserved for system messages.".to_string(),
+      ))
     } else {
       Ok(())
     }
@@ -275,7 +279,7 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
       _ => Err(ButtplugMessageError::MessageConversionError(
-        "Device message deprecated, does not exist in current version of protocol.".to_owned()
+        "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),
     }
   }
@@ -310,7 +314,13 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
 /// [ButtplugClient][crate::client::ButtplugClient] can send to a
 /// [ButtplugServer][crate::server::ButtplugServer].
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, FromSpecificButtplugMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugClientMessageType,
+  FromSpecificButtplugMessage,
 )]
 pub enum ButtplugClientMessage {
   Ping(Ping),
@@ -351,7 +361,13 @@ pub enum ButtplugClientMessage {
 /// [ButtplugServer][crate::server::ButtplugServer] can send to a
 /// [ButtplugClient][crate::client::ButtplugClient].
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType, FromSpecificButtplugMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugServerMessageType,
+  FromSpecificButtplugMessage,
 )]
 pub enum ButtplugServerMessage {
   // Status messages
@@ -445,7 +461,13 @@ pub enum ButtplugSpecV2ServerMessage {
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, TryFromButtplugClientMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugClientMessageType,
+  TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ClientMessage {
@@ -472,7 +494,9 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
 }
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType)]
+#[derive(
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ServerMessage {
   // Status messages
@@ -524,7 +548,13 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
 
 /// Represents all client-to-server messages in v0 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugClientMessageType, TryFromButtplugClientMessage,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugClientMessageType,
+  TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ClientMessage {
@@ -549,7 +579,9 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
 }
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType)]
+#[derive(
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ServerMessage {
   // Status messages

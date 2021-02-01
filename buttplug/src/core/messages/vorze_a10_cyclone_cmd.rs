@@ -45,7 +45,10 @@ impl ButtplugMessageValidator for VorzeA10CycloneCmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if self.speed > 99 {
-      Err(ButtplugMessageError::InvalidMessageContents(format!("Speed {} for VorzeA10CycloneCmd is invalid. Speed should be a value between 0.0 and 1.0", self.speed)))
+      Err(ButtplugMessageError::InvalidMessageContents(format!(
+        "Speed {} for VorzeA10CycloneCmd is invalid. Speed should be a value between 0.0 and 1.0",
+        self.speed
+      )))
     } else {
       Ok(())
     }

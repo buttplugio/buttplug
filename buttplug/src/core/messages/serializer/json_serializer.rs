@@ -21,8 +21,8 @@ use crate::{
   util::json::JSONValidator,
 };
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
 use std::cell::RefCell;
+use std::convert::TryFrom;
 
 static MESSAGE_JSON_SCHEMA: &str =
   include_str!("../../../../dependencies/buttplug-schema/schema/buttplug-schema.json");
@@ -86,7 +86,9 @@ fn serialize_to_version(
         .cloned()
         .map(|msg| match ButtplugSpecV0ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
-          Err(err) => ButtplugSpecV0ServerMessage::Error(messages::Error::from(ButtplugError::from(err)).into()),
+          Err(err) => ButtplugSpecV0ServerMessage::Error(
+            messages::Error::from(ButtplugError::from(err)).into(),
+          ),
         })
         .collect();
       vec_to_protocol_json(msg_vec)
@@ -97,7 +99,9 @@ fn serialize_to_version(
         .cloned()
         .map(|msg| match ButtplugSpecV1ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
-          Err(err) => ButtplugSpecV1ServerMessage::Error(messages::Error::from(ButtplugError::from(err)).into()),
+          Err(err) => ButtplugSpecV1ServerMessage::Error(
+            messages::Error::from(ButtplugError::from(err)).into(),
+          ),
         })
         .collect();
       vec_to_protocol_json(msg_vec)

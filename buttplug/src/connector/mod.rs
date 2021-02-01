@@ -170,11 +170,8 @@ where
   /// connections, this trait method is marked async.
   fn connect(
     &mut self,
-    message_receiver: Sender<InboundMessageType>
-  ) -> BoxFuture<
-    'static,
-    Result<(), ButtplugConnectorError>,
-  >;
+    message_receiver: Sender<InboundMessageType>,
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>>;
   /// Disconnects the client from the server.
   ///
   /// Returns a [ButtplugClientConnectorError] if there is a problem with the

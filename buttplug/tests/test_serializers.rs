@@ -1,17 +1,23 @@
 mod util;
 
-use util::ChannelClientTestHelper;
 use buttplug::{
   client::ButtplugClientError,
   connector::transport::ButtplugTransportIncomingMessage,
   core::{
     errors::{ButtplugError, ButtplugUnknownError},
-    messages::{self, serializer::ButtplugSerializedMessage, ButtplugMessage, ButtplugServerMessage, ButtplugClientMessage},
+    messages::{
+      self,
+      serializer::ButtplugSerializedMessage,
+      ButtplugClientMessage,
+      ButtplugMessage,
+      ButtplugServerMessage,
+    },
   },
   util::async_manager,
 };
 use std::sync::Arc;
 use tokio::sync::Notify;
+use util::ChannelClientTestHelper;
 
 #[test]
 fn test_garbled_client_rsi_response() {
@@ -58,17 +64,23 @@ fn test_serialized_error_relay() {
     helper.simulate_successful_connect().await;
     let helper_clone = helper.clone();
     async_manager::spawn(async move {
-      assert!(matches!(helper_clone.get_next_client_message().await, ButtplugClientMessage::StartScanning(..)));
-      let mut error_msg = ButtplugServerMessage::Error(messages::Error::from(ButtplugError::from(ButtplugUnknownError::NoDeviceCommManagers)));
+      assert!(matches!(
+        helper_clone.get_next_client_message().await,
+        ButtplugClientMessage::StartScanning(..)
+      ));
+      let mut error_msg = ButtplugServerMessage::Error(messages::Error::from(ButtplugError::from(
+        ButtplugUnknownError::NoDeviceCommManagers,
+      )));
       error_msg.set_id(3);
       helper_clone.send_client_incoming(error_msg).await;
-    }).unwrap();
+    })
+    .unwrap();
     assert!(matches!(
       helper.client().start_scanning().await.unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugUnknownError(
         buttplug::core::errors::ButtplugUnknownError::NoDeviceCommManagers
       ))
-    )); 
+    ));
   });
 }
 

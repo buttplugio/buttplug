@@ -3,7 +3,7 @@ mod json_serializer;
 #[cfg(feature = "serialize-json")]
 pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
 

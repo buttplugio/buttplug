@@ -30,7 +30,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 {
   fn connect(
     &mut self,
-    _: Sender<ButtplugCurrentSpecServerMessage>
+    _: Sender<ButtplugCurrentSpecServerMessage>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     ButtplugConnectorError::ConnectorNotConnected.into()
   }
@@ -112,7 +112,6 @@ fn test_client_connected_status() {
     assert!(!client.connected());
   });
 }
-
 
 #[cfg(feature = "server")]
 #[test]
@@ -214,4 +213,3 @@ fn test_client_ping() {
 // TODO Test receiving unmatched DeviceRemoved
 // TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
 // TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
-

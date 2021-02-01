@@ -27,7 +27,7 @@ impl VibrateSubcommand {
     self.index
   }
 
-  pub fn speed (&self) -> f64 {
+  pub fn speed(&self) -> f64 {
     self.speed
   }
 }

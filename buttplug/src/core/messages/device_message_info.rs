@@ -35,9 +35,7 @@ pub struct DeviceMessageInfo {
   // We need to store off the original device messages we had passed in, as we
   // may need to include message attributes in earlier versions that are
   // deprecated in later versions.
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(skip))]
+  #[cfg_attr(feature = "serialize-json", serde(skip))]
   pub original_device_messages: DeviceMessageAttributesMap,
 }
 

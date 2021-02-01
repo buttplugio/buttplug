@@ -9,7 +9,11 @@
 // servers can access certain types of devices, and how clients can ask servers
 // which devices are available.
 use async_std::io;
-use buttplug::{client::{ButtplugClient, ButtplugClientEvent}, connector::ButtplugInProcessClientConnector, util::async_manager};
+use buttplug::{
+  client::{ButtplugClient, ButtplugClientEvent},
+  connector::ButtplugInProcessClientConnector,
+  util::async_manager,
+};
 // use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},  core::messages::serializer::ButtplugClientJSONSerializer};
 use futures::StreamExt;
 use tracing::{info, span, Level};

@@ -36,9 +36,9 @@ use crate::{
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
       ButtplugDeviceMessageType,
       ButtplugMessage,
-      ButtplugDeviceMessage,
       DeviceMessageAttributesMap,
       RawReading,
       VibrateCmd,

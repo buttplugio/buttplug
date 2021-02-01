@@ -4,29 +4,37 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientError},
   connector::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-    ButtplugConnectorError, ButtplugRemoteClientConnector, ButtplugRemoteServerConnector
+    ButtplugConnectorError,
+    ButtplugRemoteClientConnector,
+    ButtplugRemoteServerConnector,
   },
-  core::{
-    messages::{
-      self,
-      serializer::{
-        ButtplugClientJSONSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
-      },
-      ButtplugMessage, ButtplugServerMessage, ButtplugClientMessage,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, ButtplugCurrentSpecClientMessage, serializer::ButtplugMessageSerializer
+  core::messages::{
+    self,
+    serializer::ButtplugMessageSerializer,
+    serializer::{
+      ButtplugClientJSONSerializer,
+      ButtplugSerializedMessage,
+      ButtplugServerJSONSerializer,
     },
+    ButtplugClientMessage,
+    ButtplugCurrentSpecClientMessage,
+    ButtplugMessage,
+    ButtplugServerMessage,
+    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
   },
-  server::{ButtplugRemoteServer},
+  server::ButtplugRemoteServer,
   util::async_manager,
 };
 use futures::{
   future::{self, BoxFuture},
-  select, FutureExt,
+  select,
+  FutureExt,
 };
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
-  Mutex, Notify,
+  Mutex,
+  Notify,
 };
 use tracing::*;
 
@@ -155,7 +163,10 @@ impl ChannelClientTestHelper {
     })
     .unwrap();
     // Wait for RequestServerInfo message
-    assert!(matches!(self.get_next_client_message().await, ButtplugClientMessage::RequestServerInfo(..)));
+    assert!(matches!(
+      self.get_next_client_message().await,
+      ButtplugClientMessage::RequestServerInfo(..)
+    ));
     // Just assume we get an RSI message
     self
       .send_client_incoming(
@@ -168,7 +179,10 @@ impl ChannelClientTestHelper {
       )
       .await;
     // Wait for RequestDeviceList message.
-    assert!(matches!(self.get_next_client_message().await, ButtplugClientMessage::RequestDeviceList(..)));
+    assert!(matches!(
+      self.get_next_client_message().await,
+      ButtplugClientMessage::RequestDeviceList(..)
+    ));
     let mut dl = messages::DeviceList::new(vec![]);
     dl.set_id(2);
     self.send_client_incoming(dl.into()).await;
@@ -176,7 +190,11 @@ impl ChannelClientTestHelper {
   }
 
   pub async fn get_next_client_message(&self) -> ButtplugClientMessage {
-    self.server_serializer.deserialize(self.recv_outgoing().await.unwrap()).unwrap()[0].clone()
+    self
+      .server_serializer
+      .deserialize(self.recv_outgoing().await.unwrap())
+      .unwrap()[0]
+      .clone()
   }
 
   pub async fn recv_outgoing(&self) -> Option<ButtplugSerializedMessage> {
@@ -209,7 +227,9 @@ pub struct ChannelServerTestHelper {
   server: Arc<ButtplugRemoteServer>,
   sender: Sender<ButtplugTransportIncomingMessage>,
   receiver: Arc<Mutex<Receiver<ButtplugSerializedMessage>>>,
-  connector: Arc<Mutex<Option<ButtplugRemoteServerConnector<ChannelTransport, ButtplugServerJSONSerializer>>>>,
+  connector: Arc<
+    Mutex<Option<ButtplugRemoteServerConnector<ChannelTransport, ButtplugServerJSONSerializer>>>,
+  >,
   server_serializer: ButtplugServerJSONSerializer,
   client_serializer: ButtplugClientJSONSerializer,
 }
@@ -220,7 +240,8 @@ impl ChannelServerTestHelper {
     let (incoming_sender, incoming_receiver) = channel(256);
     let (outgoing_sender, outgoing_receiver) = channel(256);
     let connector = Arc::new(Mutex::new(Some(ButtplugRemoteServerConnector::<
-      ChannelTransport, ButtplugServerJSONSerializer
+      ChannelTransport,
+      ButtplugServerJSONSerializer,
     >::new(ChannelTransport::new(
       incoming_receiver,
       outgoing_sender,

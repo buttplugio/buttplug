@@ -24,10 +24,13 @@ use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
-use futures::{SinkExt, StreamExt, future::BoxFuture, FutureExt};
-use tracing::Instrument;
+use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::sync::Arc;
-use tokio::sync::{Notify, mpsc::{Sender, Receiver}};
+use tokio::sync::{
+  mpsc::{Receiver, Sender},
+  Notify,
+};
+use tracing::Instrument;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
@@ -48,7 +51,7 @@ impl ButtplugWebsocketClientTransport {
       should_use_tls,
       address: address.to_owned(),
       bypass_cert_verify,
-      disconnect_notifier: Arc::new(Notify::new())
+      disconnect_notifier: Arc::new(Notify::new()),
     }
   }
 
@@ -74,7 +77,11 @@ impl ButtplugWebsocketClientTransport {
 }
 
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
-  fn connect(&self, mut outgoing_receiver: Receiver<ButtplugSerializedMessage>, incoming_sender: Sender<ButtplugTransportIncomingMessage>) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+  fn connect(
+    &self,
+    mut outgoing_receiver: Receiver<ButtplugSerializedMessage>,
+    incoming_sender: Sender<ButtplugTransportIncomingMessage>,
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
 
     // If we're supposed to be a secure connection, generate a TLS connector
@@ -121,81 +128,87 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
       match connect_async_with_tls_connector(&address, tls_connector).await {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
-          async_manager::spawn(async move {
-            loop {
-              select! {
-                msg = outgoing_receiver.recv().fuse() => {
-                  if let Some(msg) = msg {
-                    let out_msg = match msg {
-                      ButtplugSerializedMessage::Text(text) => Message::Text(text),
-                      ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
-                    };
-                    // TODO see what happens when we try to send to a remote that's closed connection.
-                    writer.send(out_msg).await.expect("This should never fail?");
-                  } else {
-                    info!("Connector holding websocket dropped, returning");
+          async_manager::spawn(
+            async move {
+              loop {
+                select! {
+                  msg = outgoing_receiver.recv().fuse() => {
+                    if let Some(msg) = msg {
+                      let out_msg = match msg {
+                        ButtplugSerializedMessage::Text(text) => Message::Text(text),
+                        ButtplugSerializedMessage::Binary(bin) => Message::Binary(bin),
+                      };
+                      // TODO see what happens when we try to send to a remote that's closed connection.
+                      writer.send(out_msg).await.expect("This should never fail?");
+                    } else {
+                      info!("Connector holding websocket dropped, returning");
+                      return;
+                    }
+                  },
+                  _ = disconnect_notifier.notified().fuse() => {
+                    // If we can't close, just print the error to the logs but
+                    // still break out of the loop.
+                    //
+                    // TODO Emit a full error here that should bubble up to the client.
+                    info!("Websocket requested to disconnect.");
+                    writer.close().await.unwrap_or_else(|err| error!("{}", err));
                     return;
                   }
-                },
-                _ = disconnect_notifier.notified().fuse() => {
-                  // If we can't close, just print the error to the logs but
-                  // still break out of the loop.
-                  //
-                  // TODO Emit a full error here that should bubble up to the client.
-                  info!("Websocket requested to disconnect.");
-                  writer.close().await.unwrap_or_else(|err| error!("{}", err));
-                  return;
                 }
               }
             }
-          }.instrument(tracing::info_span!("Websocket Send Task")))
+            .instrument(tracing::info_span!("Websocket Send Task")),
+          )
           .unwrap();
-          async_manager::spawn(async move {
-            while let Some(response) = reader.next().await {
-              trace!("Websocket receiving: {:?}", response);
-              match response {
-                Ok(msg) => match msg {
-                  Message::Text(t) => {
-                    if incoming_sender
-                      .send(ButtplugTransportIncomingMessage::Message(
-                        ButtplugSerializedMessage::Text(t.to_string()),
-                      ))
-                      .await
-                      .is_err()
-                    {
-                      error!("Websocket holder has closed, exiting websocket loop.");
+          async_manager::spawn(
+            async move {
+              while let Some(response) = reader.next().await {
+                trace!("Websocket receiving: {:?}", response);
+                match response {
+                  Ok(msg) => match msg {
+                    Message::Text(t) => {
+                      if incoming_sender
+                        .send(ButtplugTransportIncomingMessage::Message(
+                          ButtplugSerializedMessage::Text(t.to_string()),
+                        ))
+                        .await
+                        .is_err()
+                      {
+                        error!("Websocket holder has closed, exiting websocket loop.");
+                        return;
+                      }
+                    }
+                    Message::Binary(v) => {
+                      if incoming_sender
+                        .send(ButtplugTransportIncomingMessage::Message(
+                          ButtplugSerializedMessage::Binary(v),
+                        ))
+                        .await
+                        .is_err()
+                      {
+                        error!("Websocket holder has closed, exiting websocket loop.");
+                        return;
+                      }
+                    }
+                    Message::Ping(_) => {}
+                    Message::Pong(_) => {}
+                    Message::Close(_) => {
+                      info!("Websocket has requested close.");
                       return;
                     }
+                  },
+                  Err(err) => {
+                    error!(
+                      "Error in websocket client loop (assuming disconnect): {}",
+                      err
+                    );
+                    break;
                   }
-                  Message::Binary(v) => {
-                    if incoming_sender
-                      .send(ButtplugTransportIncomingMessage::Message(
-                        ButtplugSerializedMessage::Binary(v),
-                      ))
-                      .await
-                      .is_err()
-                    {
-                      error!("Websocket holder has closed, exiting websocket loop.");
-                      return;
-                    }
-                  }
-                  Message::Ping(_) => {}
-                  Message::Pong(_) => {}
-                  Message::Close(_) => {
-                    info!("Websocket has requested close.");
-                    return;
-                  }
-                },
-                Err(err) => {
-                  error!(
-                    "Error in websocket client loop (assuming disconnect): {}",
-                    err
-                  );
-                  break;
                 }
               }
             }
-          }.instrument(tracing::info_span!("Websocket Receive Task")))
+            .instrument(tracing::info_span!("Websocket Receive Task")),
+          )
           .unwrap();
           Ok(())
         }

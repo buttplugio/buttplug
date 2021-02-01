@@ -10,9 +10,9 @@ use crate::{
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
       DeviceMessageAttributesMap,
       FleshlightLaunchFW12Cmd,
-      ButtplugDeviceMessage
     },
   },
   device::{

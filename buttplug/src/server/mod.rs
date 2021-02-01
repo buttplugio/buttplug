@@ -35,7 +35,10 @@ use crate::{
 };
 use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
 use device_manager::DeviceManager;
-use futures::{future::{self, BoxFuture}, Stream};
+use futures::{
+  future::{self, BoxFuture},
+  Stream,
+};
 use ping_timer::PingTimer;
 use std::{
   convert::{TryFrom, TryInto},
@@ -195,12 +198,16 @@ impl ButtplugServer {
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
       let error = if self.ping_timer.pinged_out() {
-          Some(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)))
-        } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
-          Some(messages::Error::from(ButtplugError::from(ButtplugHandshakeError::RequestServerInfoExpected)))
-        } else {
-          None
-        };
+        Some(messages::Error::from(ButtplugError::from(
+          ButtplugPingError::PingedOut,
+        )))
+      } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
+        Some(messages::Error::from(ButtplugError::from(
+          ButtplugHandshakeError::RequestServerInfoExpected,
+        )))
+      } else {
+        None
+      };
       if let Some(mut return_error) = error {
         return_error.set_id(msg.id());
         return Box::pin(future::ready(Err(return_error)));

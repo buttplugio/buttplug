@@ -8,10 +8,10 @@ use buttplug::{
       ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-  }, 
-  device::Endpoint, 
-  server::{ButtplugServer, ButtplugServerOptions}, 
-  util::async_manager
+  },
+  device::Endpoint,
+  server::{ButtplugServer, ButtplugServerOptions},
+  util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
 use std::matches;

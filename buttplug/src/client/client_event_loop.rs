@@ -13,14 +13,20 @@ use super::{
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
 };
-use crate::{connector::{ButtplugConnector, ButtplugConnectorStateShared}, core::{errors::{ButtplugDeviceError, ButtplugError}, messages::{
-      ButtplugMessageValidator,
+use crate::{
+  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError},
+    messages::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
+      ButtplugDeviceMessage,
+      ButtplugMessageValidator,
       DeviceList,
       DeviceMessageInfo,
-      ButtplugDeviceMessage,
-    }}};
+    },
+  },
+};
 use dashmap::DashMap;
 use futures::FutureExt;
 use std::sync::{
@@ -82,8 +88,7 @@ where
   /// Connector the event loop will use to communicate with the [ButtplugServer]
   connector: ConnectorType,
   /// Receiver for messages send from the [ButtplugServer] via the connector.
-  from_connector_receiver:
-    mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
+  from_connector_receiver: mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
   /// Map of devices shared between the client and the event loop
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   /// Sends events to the [ButtplugClient] instance.
@@ -160,7 +165,10 @@ where
     trace!("Forwarding event {:?} to client", event);
 
     if self.to_client_sender.receiver_count() == 0 {
-      error!("Client event {:?} dropped, no client event listener available.", event);
+      error!(
+        "Client event {:?} dropped, no client event listener available.",
+        event
+      );
       return;
     }
 
@@ -188,10 +196,7 @@ where
   /// server, it will catch [DeviceAdded]/[DeviceList]/[DeviceRemoved] messages
   /// and update its map accordingly. After that, it will pass the information
   /// on as a [ButtplugClientEvent] to the [ButtplugClient].
-  async fn parse_connector_message(
-    &mut self,
-    msg: ButtplugCurrentSpecServerMessage
-  ) {
+  async fn parse_connector_message(&mut self, msg: ButtplugCurrentSpecServerMessage) {
     if self.sorter.maybe_resolve_result(&msg) {
       trace!("Message future found, returning");
       return;
@@ -209,7 +214,12 @@ where
         // We already have this device. Emit an error to let the client know the
         // server is being weird.
         if self.device_map.get(&dev.device_index()).is_some() {
-          self.send_client_event(ButtplugClientEvent::Error(ButtplugDeviceError::DeviceConnectionError("Device already exists in client. Server may be in a weird state.".to_owned()).into()));
+          self.send_client_event(ButtplugClientEvent::Error(
+            ButtplugDeviceError::DeviceConnectionError(
+              "Device already exists in client. Server may be in a weird state.".to_owned(),
+            )
+            .into(),
+          ));
           return;
         }
         let info = DeviceMessageInfo::from(dev);
@@ -250,7 +260,9 @@ where
   async fn send_message(&mut self, mut msg_fut: ButtplugClientMessageFuturePair) {
     if let Err(e) = &msg_fut.msg.is_valid() {
       error!("Message not valid: {:?} - Error: {}", msg_fut.msg, e);
-      msg_fut.waker.set_reply(Err(ButtplugError::from(e.clone()).into()));
+      msg_fut
+        .waker
+        .set_reply(Err(ButtplugError::from(e.clone()).into()));
       return;
     }
 
@@ -327,7 +339,9 @@ where
     }
 
     let device_indexes: Vec<u32> = self.device_map.iter().map(|k| *k.key()).collect();
-    device_indexes.iter().for_each(|k| self.disconnect_device(*k));
+    device_indexes
+      .iter()
+      .for_each(|k| self.disconnect_device(*k));
 
     self.send_client_event(ButtplugClientEvent::ServerDisconnect);
 

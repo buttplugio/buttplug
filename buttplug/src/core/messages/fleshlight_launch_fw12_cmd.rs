@@ -45,9 +45,15 @@ impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     if !(0..99).contains(&self.speed) {
-      Err(ButtplugMessageError::InvalidMessageContents(format!("FleshlightFW12Cmd speed {} invalid, should be between 0 and 99", self.speed)))
+      Err(ButtplugMessageError::InvalidMessageContents(format!(
+        "FleshlightFW12Cmd speed {} invalid, should be between 0 and 99",
+        self.speed
+      )))
     } else if !(0..99).contains(&self.position) {
-      Err(ButtplugMessageError::InvalidMessageContents(format!("FleshlightFW12Cmd position {} invalid, should be between 0 and 99", self.position)))
+      Err(ButtplugMessageError::InvalidMessageContents(format!(
+        "FleshlightFW12Cmd position {} invalid, should be between 0 and 99",
+        self.position
+      )))
     } else {
       Ok(())
     }

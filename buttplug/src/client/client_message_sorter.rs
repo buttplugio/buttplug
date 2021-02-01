@@ -8,10 +8,12 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-  client::{ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
-  core::{
-    messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
-  }
+  client::{
+    ButtplugClientError,
+    ButtplugClientMessageFuturePair,
+    ButtplugServerMessageStateShared,
+  },
+  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use std::collections::HashMap;
 
@@ -90,10 +92,7 @@ impl ClientMessageSorter {
   /// Returns true if the response message was resolved to a future via matching
   /// `id`, otherwise returns false. False returns mean the message should be
   /// considered as an *event*.
-  pub fn maybe_resolve_result(
-    &mut self,
-    msg: &ButtplugCurrentSpecServerMessage,
-  ) -> bool {
+  pub fn maybe_resolve_result(&mut self, msg: &ButtplugCurrentSpecServerMessage) -> bool {
     let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
@@ -102,8 +101,7 @@ impl ClientMessageSorter {
         if let Err(e) = msg.is_valid() {
           error!("Message not valid: {:?} - Error: {}", msg, e);
           _state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
-        }
-        else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
+        } else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
           _state.set_reply(Err(e.original_error().into()))
         } else {
           _state.set_reply(Ok(msg.clone()))

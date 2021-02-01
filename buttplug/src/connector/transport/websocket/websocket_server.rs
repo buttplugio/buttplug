@@ -29,9 +29,9 @@ use rustls::{
 };
 use std::{fs::File, io::BufReader, sync::Arc};
 use tokio::sync::{
-  Notify,
   mpsc::{Receiver, Sender},
   Mutex,
+  Notify,
 };
 
 #[derive(Default, Clone, Debug)]
@@ -57,7 +57,7 @@ async fn run_connection_loop<S>(
   ws_stream: async_tungstenite::WebSocketStream<S>,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
-  disconnect_notifier: Arc<Notify>
+  disconnect_notifier: Arc<Notify>,
 ) where
   S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -152,7 +152,7 @@ async fn run_connection_loop<S>(
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
   options: ButtplugWebsocketServerTransportOptions,
-  disconnect_notifier: Arc<Notify>
+  disconnect_notifier: Arc<Notify>,
 }
 
 impl ButtplugWebsocketServerTransport {
@@ -165,7 +165,11 @@ impl ButtplugWebsocketServerTransport {
 }
 
 impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
-  fn connect(&self, outgoing_receiver: Receiver<ButtplugSerializedMessage>, incoming_sender: Sender<ButtplugTransportIncomingMessage>) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
+  fn connect(
+    &self,
+    outgoing_receiver: Receiver<ButtplugSerializedMessage>,
+    incoming_sender: Sender<ButtplugTransportIncomingMessage>,
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
 
@@ -211,7 +215,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ws_stream,
               (*request_receiver_clone.lock().await).take().unwrap(),
               response_sender_clone,
-              disconnect_notifier_clone
+              disconnect_notifier_clone,
             )
             .await;
           })
@@ -364,7 +368,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
               ws_stream,
               (*request_receiver_clone.lock().await).take().unwrap(),
               response_sender_clone,
-              disconnect_notifier_clone
+              disconnect_notifier_clone,
             )
             .await;
           })
@@ -387,7 +391,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
           "No ports specified for listening in websocket server connector.".to_owned(),
         ))
       } else if let Err(connector_err) = select_all(tasks).await.0 {
-        
         Err(connector_err)
       } else {
         Ok(())

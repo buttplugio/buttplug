@@ -1,14 +1,14 @@
 #[cfg(feature = "btleplug-manager")]
 pub mod btleplug;
-#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-pub mod xinput;
 #[cfg(feature = "lovense-dongle-manager")]
 pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
+#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
+pub mod xinput;
 
-use serde::{Serialize, Deserialize};
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
+use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;

@@ -3,7 +3,13 @@ use crate::{
   connector::ButtplugConnector,
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugMessage, ButtplugClientMessage, ButtplugServerMessage, ButtplugMessageValidator},
+    messages::{
+      self,
+      ButtplugClientMessage,
+      ButtplugMessage,
+      ButtplugMessageValidator,
+      ButtplugServerMessage,
+    },
   },
   server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
   test::TestDeviceCommunicationManagerHelper,
@@ -36,7 +42,7 @@ pub enum ButtplugServerCommand {
 pub struct ButtplugRemoteServer {
   server: Arc<ButtplugServer>,
   event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
-  disconnect_notifier: Arc<Notify>
+  disconnect_notifier: Arc<Notify>,
 }
 
 async fn run_server<ConnectorType>(
@@ -44,7 +50,7 @@ async fn run_server<ConnectorType>(
   remote_event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
   connector: ConnectorType,
   mut connector_receiver: mpsc::Receiver<ButtplugClientMessage>,
-  disconnect_notifier: Arc<Notify>
+  disconnect_notifier: Arc<Notify>,
 ) where
   ConnectorType: ButtplugConnector<ButtplugServerMessage, ButtplugClientMessage> + 'static,
 {
@@ -142,7 +148,7 @@ impl ButtplugRemoteServer {
     Ok(Self {
       event_sender,
       server: Arc::new(server),
-      disconnect_notifier: Arc::new(Notify::new())
+      disconnect_notifier: Arc::new(Notify::new()),
     })
   }
 
@@ -171,7 +177,7 @@ impl ButtplugRemoteServer {
         event_sender_clone,
         connector,
         connector_receiver,
-        disconnect_notifier
+        disconnect_notifier,
       )
       .await;
       Ok(())

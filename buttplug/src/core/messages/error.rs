@@ -43,23 +43,29 @@ pub struct Error {
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
   pub error_message: String,
   #[cfg_attr(feature = "serialize-json", serde(skip))]
-  original_error: Option<ButtplugError>
+  original_error: Option<ButtplugError>,
 }
 
 impl PartialEq for Error {
   fn eq(&self, other: &Self) -> bool {
-      self.id == other.id && self.error_code == other.error_code && self.error_message == other.error_message
+    self.id == other.id
+      && self.error_code == other.error_code
+      && self.error_message == other.error_message
   }
 }
 
 impl Error {
   /// Creates a new error object.
-  pub fn new(error_code: ErrorCode, error_message: &str, original_error: Option<ButtplugError>) -> Self {
+  pub fn new(
+    error_code: ErrorCode,
+    error_message: &str,
+    original_error: Option<ButtplugError>,
+  ) -> Self {
     Self {
       id: 0,
       error_code,
       error_message: error_message.to_string(),
-      original_error
+      original_error,
     }
   }
 
@@ -68,7 +74,7 @@ impl Error {
       self.original_error.clone().unwrap()
     } else {
       // Try deserializing what's in the error_message field
-      #[cfg(feature = "serialize-json")] 
+      #[cfg(feature = "serialize-json")]
       {
         if let Ok(deserialized_msg) = serde_json::from_str(&self.error_message) {
           return deserialized_msg;
@@ -131,7 +137,6 @@ impl From<Error> for ErrorV0 {
   }
 }
 
-
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
@@ -141,8 +146,11 @@ mod test {
 
   #[test]
   fn test_error_serialize() {
-    let error =
-      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error", None));
+    let error = ButtplugCurrentSpecServerMessage::Error(Error::new(
+      ErrorCode::ErrorHandshake,
+      "Test Error",
+      None,
+    ));
     let js = serde_json::to_string(&error).unwrap();
     assert_eq!(ERROR_STR, js);
   }
@@ -151,7 +159,11 @@ mod test {
   fn test_error_deserialize() {
     let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&ERROR_STR).unwrap();
     assert_eq!(
-      ButtplugCurrentSpecServerMessage::Error(Error::new(ErrorCode::ErrorHandshake, "Test Error", None)),
+      ButtplugCurrentSpecServerMessage::Error(Error::new(
+        ErrorCode::ErrorHandshake,
+        "Test Error",
+        None
+      )),
       union
     );
   }

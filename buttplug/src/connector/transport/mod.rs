@@ -29,7 +29,11 @@ pub enum ButtplugTransportIncomingMessage {
 }
 
 pub trait ButtplugConnectorTransport: Send + Sync {
-  fn connect(&self, outgoing_receiver: Receiver<ButtplugSerializedMessage>, incoming_sender: Sender<ButtplugTransportIncomingMessage>) -> BoxFuture<'static, Result<(), ButtplugConnectorError>>;
+  fn connect(
+    &self,
+    outgoing_receiver: Receiver<ButtplugSerializedMessage>,
+    incoming_sender: Sender<ButtplugTransportIncomingMessage>,
+  ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>>;
   fn disconnect(self) -> ButtplugConnectorResultFuture;
 }
 

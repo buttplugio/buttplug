@@ -65,8 +65,7 @@ type ButtplugClientResult<T = ()> = Result<T, ButtplugClientError>;
 type ButtplugClientResultFuture<T = ()> = BoxFuture<'static, ButtplugClientResult<T>>;
 
 /// Result type used for passing server responses.
-pub type ButtplugServerMessageResult =
-  ButtplugClientResult<ButtplugCurrentSpecServerMessage>;
+pub type ButtplugServerMessageResult = ButtplugClientResult<ButtplugCurrentSpecServerMessage>;
 pub type ButtplugServerMessageResultFuture =
   ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage>;
 /// Future state type for returning server responses across futures.
@@ -449,7 +448,9 @@ impl ButtplugClient {
     msg: ButtplugClientRequest,
   ) -> BoxFuture<'static, Result<(), ButtplugClientError>> {
     if !self.connected.load(Ordering::SeqCst) {
-      return Box::pin(future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())));
+      return Box::pin(future::ready(Err(
+        ButtplugConnectorError::ConnectorNotConnected.into(),
+      )));
     }
 
     // If we're running the event loop, we should have a message_sender.
@@ -459,7 +460,7 @@ impl ButtplugClient {
     // The message sender doesn't require an async send now, but we still want
     // to delay execution as part of our future in order to keep task coherency.
     let message_sender = self.message_sender.clone();
-    Box::pin(async move  {
+    Box::pin(async move {
       message_sender
         .send(msg)
         .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;

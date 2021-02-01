@@ -6,7 +6,12 @@ use crate::{
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap, ButtplugDeviceMessage},
+    messages::{
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      DeviceMessageAttributesMap,
+    },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
