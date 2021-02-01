@@ -14,14 +14,18 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceList {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  pub devices: Vec<DeviceMessageInfo>,
+  devices: Vec<DeviceMessageInfo>,
 }
 
 impl DeviceList {
   pub fn new(devices: Vec<DeviceMessageInfo>) -> Self {
     Self { id: 1, devices }
+  }
+
+  pub fn devices(&self) -> &Vec<DeviceMessageInfo> {
+    &self.devices
   }
 }
 
@@ -35,9 +39,9 @@ impl ButtplugMessageValidator for DeviceList {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  pub devices: Vec<DeviceMessageInfoV1>,
+  devices: Vec<DeviceMessageInfoV1>,
 }
 
 impl From<DeviceList> for DeviceListV1 {
@@ -63,9 +67,9 @@ impl ButtplugMessageValidator for DeviceListV1 {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  pub devices: Vec<DeviceMessageInfoV0>,
+  devices: Vec<DeviceMessageInfoV0>,
 }
 
 impl From<DeviceList> for DeviceListV0 {

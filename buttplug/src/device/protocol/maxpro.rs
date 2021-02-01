@@ -42,7 +42,7 @@ impl ButtplugProtocolCommandHandler for Maxpro {
 
     // Speed range for Maxpro toys are 10-100 for some reason.
     let max_value: f64 = 100.0;
-    let speed: u8 = (msg.speeds[0].speed * max_value) as u8;
+    let speed: u8 = (msg.speeds()[0].speed() * max_value) as u8;
     let mut data = vec![0x55, 0x04, 0x07, 0xff, 0xff, 0x3f, speed, 0x5f, speed, 0x00];
     let mut crc: u8 = 0;
 

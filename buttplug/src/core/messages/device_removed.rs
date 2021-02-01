@@ -13,9 +13,9 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceRemoved {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
 }
 
 impl DeviceRemoved {
@@ -24,6 +24,10 @@ impl DeviceRemoved {
       id: 0,
       device_index,
     }
+  }
+
+  pub fn device_index(&self) -> u32 {
+    self.device_index
   }
 }
 

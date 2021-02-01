@@ -193,13 +193,13 @@ impl DeviceManager {
     &self,
     device_msg: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
-    match self.devices.get(&device_msg.get_device_index()) {
+    match self.devices.get(&device_msg.device_index()) {
       Some(device) => {
         let fut = device.parse_message(device_msg);
         // Create a future to run the message through the device, then handle adding the id to the result.
         Box::pin(async move { fut.await })
       }
-      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.get_device_index()).into(),
+      None => ButtplugDeviceError::DeviceNotAvailable(device_msg.device_index()).into(),
     }
   }
 
@@ -218,7 +218,7 @@ impl DeviceManager {
           })
           .collect();
         let mut device_list = DeviceList::new(devices);
-        device_list.set_id(msg.get_id());
+        device_list.set_id(msg.id());
         Box::pin(future::ready(Ok(device_list.into())))
       }
       ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => self.stop_all_devices(),

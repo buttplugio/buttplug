@@ -151,8 +151,8 @@ fn test_device_stop_on_ping_timeout() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
-        device_index = da.device_index;
+        assert_eq!(da.device_name(), "Aneros Vivi");
+        device_index = da.device_index();
         break;
       } else {
         panic!(format!(
@@ -247,11 +247,11 @@ fn test_device_index_generation() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
+        assert_eq!(da.device_name(), "Aneros Vivi");
         // Devices aren't guaranteed to be added in any specific order, the
         // scheduler will do whatever it wants. So check boundaries instead of
         // exact.
-        assert!(da.device_index < 2);
+        assert!(da.device_index() < 2);
         index += 1;
         // Found both devices we're looking for, finish test.
         if index == 2 {

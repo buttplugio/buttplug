@@ -38,6 +38,7 @@ use crate::{
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessageType,
       ButtplugMessage,
+      ButtplugDeviceMessage,
       DeviceMessageAttributesMap,
       RawReading,
       VibrateCmd,
@@ -336,7 +337,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::StopDeviceCmd,
   ) -> ButtplugDeviceResultFuture {
-    let ok_return = messages::Ok::new(message.get_id());
+    let ok_return = messages::Ok::new(message.id());
     let fut_vec: Vec<ButtplugDeviceResultFuture> = self
       .stop_commands()
       .iter()
@@ -387,13 +388,13 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       ))
       .into();
     }
-    let speed = message.speed;
+    let speed = message.speed();
     let mut cmds = vec![];
     for i in 0..vibrator_count {
       cmds.push(VibrateSubcommand::new(i as u32, speed));
     }
-    let mut vibrate_cmd = VibrateCmd::new(message.device_index, cmds);
-    vibrate_cmd.set_id(message.get_id());
+    let mut vibrate_cmd = VibrateCmd::new(message.device_index(), cmds);
+    vibrate_cmd.set_id(message.id());
     self.handle_command(device, vibrate_cmd.into())
   }
 
@@ -402,7 +403,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::RawWriteCmd,
   ) -> ButtplugDeviceResultFuture {
-    let id = message.get_id();
+    let id = message.id();
     let fut = device.write_value(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
@@ -412,7 +413,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::RawReadCmd,
   ) -> ButtplugDeviceResultFuture {
-    let id = message.get_id();
+    let id = message.id();
     let fut = device.read_value(message.into());
     Box::pin(async move {
       fut.await.map(|mut msg| {
@@ -427,7 +428,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::RawUnsubscribeCmd,
   ) -> ButtplugDeviceResultFuture {
-    let id = message.get_id();
+    let id = message.id();
     let fut = device.unsubscribe(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
@@ -437,7 +438,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::RawSubscribeCmd,
   ) -> ButtplugDeviceResultFuture {
-    let id = message.get_id();
+    let id = message.id();
     let fut = device.subscribe(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
@@ -513,9 +514,9 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       let fut = device.read_value(msg);
       Box::pin(async move {
         let raw_msg: RawReading = fut.await?;
-        let battery_level = raw_msg.data[0] as f64 / 100f64;
+        let battery_level = raw_msg.data()[0] as f64 / 100f64;
         let battery_reading =
-          messages::BatteryLevelReading::new(message.device_index, battery_level);
+          messages::BatteryLevelReading::new(message.device_index(), battery_level);
         info!("Got battery reading: {}", battery_level);
         Ok(battery_reading.into())
       })

@@ -122,12 +122,12 @@ pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
 /// between message structs and various message enums, serialization, etc...
 pub trait ButtplugMessage: ButtplugMessageValidator + Send + Sync + Clone {
   /// Returns the id number of the message
-  fn get_id(&self) -> u32;
+  fn id(&self) -> u32;
   /// Sets the id number of the message.
   fn set_id(&mut self, id: u32);
   /// True if the message is an event (message id of 0) from the server.
   fn is_server_event(&self) -> bool {
-    self.get_id() == BUTTPLUG_SERVER_EVENT_ID
+    self.id() == BUTTPLUG_SERVER_EVENT_ID
   }
 }
 
@@ -172,7 +172,7 @@ pub trait ButtplugServerMessageType: ButtplugMessage {}
 
 /// Adds device index handling to the [ButtplugMessage] trait.
 pub trait ButtplugDeviceMessage: ButtplugMessage {
-  fn get_device_index(&self) -> u32;
+  fn device_index(&self) -> u32;
   fn set_device_index(&mut self, id: u32);
 }
 

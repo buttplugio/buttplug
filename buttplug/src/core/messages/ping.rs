@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 pub struct Ping {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
 }
 
 impl Default for Ping {

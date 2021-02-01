@@ -23,6 +23,7 @@ use crate::{
       ButtplugCurrentSpecServerMessage,
       DeviceList,
       DeviceMessageInfo,
+      ButtplugDeviceMessage,
     },
   },
 };
@@ -201,6 +202,10 @@ where
       trace!("Message future found, returning");
       return;
     }
+    if let Err(e) = msg.is_valid() {
+      self.send_client_event(ButtplugClientEvent::Error(ButtplugError::from(e)));
+      return;
+    }
     trace!("Message future not found, assuming server event.");
     info!("{:?}", msg);
     match msg {
@@ -211,9 +216,9 @@ where
         self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
       }
       ButtplugCurrentSpecServerMessage::DeviceRemoved(dev) => {
-        if self.device_map.contains_key(&dev.device_index) {
+        if self.device_map.contains_key(&dev.device_index()) {
           trace!("Device removed, updating map and sending to client");
-          self.disconnect_device(dev.device_index);
+          self.disconnect_device(dev.device_index());
         } else {
           error!("Received DeviceRemoved for non-existent device index");
         }
@@ -223,7 +228,7 @@ where
         self.send_client_event(ButtplugClientEvent::ScanningFinished);
       }
       ButtplugCurrentSpecServerMessage::RawReading(msg) => {
-        let device_idx = msg.device_index;
+        let device_idx = msg.device_index();
         if let Some(device) = self.device_map.get(&device_idx) {
           device
             .value()
@@ -274,7 +279,7 @@ where
       }
       ButtplugClientRequest::HandleDeviceList(device_list) => {
         trace!("Device list received, updating map.");
-        for d in &device_list.devices {
+        for d in device_list.devices() {
           if self.device_map.contains_key(&d.device_index) {
             continue;
           }

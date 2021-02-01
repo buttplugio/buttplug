@@ -6,7 +6,7 @@ use crate::{
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap, ButtplugDeviceMessage},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -170,7 +170,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
             // Chop the semicolon at the end of the received line.
             if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
               return Ok(
-                messages::BatteryLevelReading::new(message.device_index, level as f64 / 100f64)
+                messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)
                   .into(),
               );
             }

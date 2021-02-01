@@ -13,11 +13,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RSSILevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "RSSILevel"))]
-  pub rssi_level: i32,
+  rssi_level: i32,
 }
 
 impl RSSILevelReading {
@@ -27,6 +27,10 @@ impl RSSILevelReading {
       device_index,
       rssi_level,
     }
+  }
+
+  pub fn rssi_level(&self) -> i32 {
+    self.rssi_level
   }
 }
 

@@ -8,8 +8,10 @@
 //! Handling of remote message pairing and future resolution.
 
 use crate::{
-  client::{ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
-  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage},
+  client::{ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared},
+  core::{
+    messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
+  }
 };
 use std::collections::HashMap;
 
@@ -92,12 +94,15 @@ impl ClientMessageSorter {
     &mut self,
     msg: &ButtplugCurrentSpecServerMessage,
   ) -> bool {
-    let id = msg.get_id();
+    let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
       Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
-        if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
+        if let Err(e) = msg.is_valid() {
+          _state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
+        }
+        else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
           _state.set_reply(Err(e.original_error().into()))
         } else {
           _state.set_reply(Ok(msg.clone()))

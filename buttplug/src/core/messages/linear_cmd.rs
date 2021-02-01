@@ -28,17 +28,29 @@ impl VectorSubcommand {
       position,
     }
   }
+
+  pub fn index(&self) -> u32 {
+    self.index
+  }
+
+  pub fn duration(&self) -> u32 {
+    self.duration
+  }
+
+  pub fn position(&self) -> &f64 {
+    &self.position
+  }
 }
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
-  pub vectors: Vec<VectorSubcommand>,
+  vectors: Vec<VectorSubcommand>,
 }
 
 impl LinearCmd {
@@ -48,6 +60,10 @@ impl LinearCmd {
       device_index,
       vectors,
     }
+  }
+
+  pub fn vectors(&self) -> &Vec<VectorSubcommand> {
+    &self.vectors
   }
 }
 

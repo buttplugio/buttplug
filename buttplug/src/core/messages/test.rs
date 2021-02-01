@@ -14,10 +14,10 @@ use serde::{Deserialize, Serialize};
 pub struct Test {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   /// Test string, which will be echoed back to client when sent to server.
   #[cfg_attr(feature = "serialize-json", serde(rename = "TestString"))]
-  pub test_string: String,
+  test_string: String,
 }
 
 impl Test {

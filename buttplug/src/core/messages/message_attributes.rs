@@ -10,6 +10,11 @@ use serde::{Deserialize, Serialize};
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
+//
+// Also, unlike all other device messages, DeviceMessageAttributes are simply a
+// message component. Since they're accessed via messages, and messages are
+// immutable, we can leave the fields as public, versus trying to build
+// accessors to everything.
 
 #[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
 pub struct DeviceMessageAttributes {
@@ -25,14 +30,17 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "MaxDuration")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub max_duration: Option<Vec<u32>>,
+  /*
+  // Unimplemented attributes
   #[serde(rename = "Patterns")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub patterns: Option<Vec<Vec<String>>>,
+  patterns: Option<Vec<Vec<String>>>,
   #[serde(rename = "ActuatorType")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub actuator_type: Option<Vec<String>>,
+  actuator_type: Option<Vec<String>>,
+  */
   // Never serialize this, its for internal use only
   #[serde(rename = "FeatureOrder")]
-  #[serde(skip_serializing)]
+  #[serde(skip)]
   pub feature_order: Option<Vec<u32>>,
 }

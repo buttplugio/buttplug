@@ -39,7 +39,7 @@ impl ButtplugProtocolCommandHandler for Svakom {
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
-    let speed = (msg.speeds[0].speed * 19.0) as u8;
+    let speed = (msg.speeds()[0].speed() * 19.0) as u8;
     let multiplier: u8 = if speed == 0x00 { 0x00 } else { 0x01 };
     let msg = DeviceWriteCmd::new(
       Endpoint::Tx,

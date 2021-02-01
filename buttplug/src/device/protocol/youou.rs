@@ -61,7 +61,7 @@ impl ButtplugProtocolCommandHandler for Youou {
     //
     // Anything above that sets a pattern which isn't what we want here.
     let max_value: f64 = 247.0;
-    let speed: u8 = (msg.speeds[0].speed * max_value) as u8;
+    let speed: u8 = (msg.speeds()[0].speed() * max_value) as u8;
     let state: u8 = if speed > 0 { 1 } else { 0 };
 
     let mut data;

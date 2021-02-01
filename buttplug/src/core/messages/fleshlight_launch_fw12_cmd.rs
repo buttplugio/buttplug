@@ -13,13 +13,13 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
-  pub position: u8,
+  position: u8,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  pub speed: u8,
+  speed: u8,
 }
 
 impl FleshlightLaunchFW12Cmd {
@@ -30,6 +30,14 @@ impl FleshlightLaunchFW12Cmd {
       position,
       speed,
     }
+  }
+
+  pub fn position(&self) -> u8 {
+    self.position
+  }
+
+  pub fn speed(&self) -> u8 {
+    self.speed
   }
 }
 

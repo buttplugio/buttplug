@@ -178,8 +178,8 @@ mod test {
       let mut device_index = 0;
       while let Some(msg) = recv.next().await {
         if let ButtplugServerMessage::DeviceAdded(da) = msg {
-          assert_eq!(da.device_name, "Aneros Vivi");
-          device_index = da.device_index;
+          assert_eq!(da.device_name(), "Aneros Vivi");
+          device_index = da.device_index();
           break;
         }
       }
@@ -188,7 +188,7 @@ mod test {
       while let Some(msg) = recv.next().await {
         match msg {
           ButtplugServerMessage::DeviceRemoved(da) => {
-            assert_eq!(da.device_index, device_index);
+            assert_eq!(da.device_index(), device_index);
             return;
           }
           ButtplugServerMessage::ScanningFinished(_) => continue,

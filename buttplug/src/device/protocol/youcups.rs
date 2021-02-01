@@ -41,7 +41,7 @@ impl ButtplugProtocolCommandHandler for Youcups {
     // TODO Convert to using generic command manager
     let msg = DeviceWriteCmd::new(
       Endpoint::Tx,
-      format!("$SYS,{}?", (msg.speeds[0].speed * 8.0) as u8)
+      format!("$SYS,{}?", (msg.speeds()[0].speed() * 8.0) as u8)
         .as_bytes()
         .to_vec(),
       false,

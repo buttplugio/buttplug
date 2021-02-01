@@ -99,7 +99,7 @@ impl GenericCommandManager {
   ) -> Result<Option<Vec<Option<u32>>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
-    if msg.speeds.is_empty() {
+    if msg.speeds().is_empty() {
       return Err(
         ButtplugDeviceError::ProtocolRequirementError(
           "VibrateCmd has 0 commands, will not do anything.".to_owned(),
@@ -123,15 +123,15 @@ impl GenericCommandManager {
         result[index] = Some(*speed);
       }
     }
-    for speed_command in &msg.speeds {
-      let index = speed_command.index as usize;
+    for speed_command in msg.speeds() {
+      let index = speed_command.index() as usize;
       // Since we're going to iterate here anyways, we do our index check
       // here instead of in a filter above.
       if index >= self.vibrations.len() {
         return Err(
           ButtplugDeviceError::ProtocolRequirementError(format!(
             "VibrateCmd has {} commands, device has {} vibrators.",
-            msg.speeds.len(),
+            msg.speeds().len(),
             self.vibrations.len()
           ))
           .into(),
@@ -141,7 +141,7 @@ impl GenericCommandManager {
       // When calculating speeds, round up. This follows how we calculated
       // things in buttplug-js and buttplug-csharp, so it's more for history
       // than anything, but it's what users will expect.
-      let speed = (speed_command.speed * self.vibration_step_counts[index] as f64).ceil() as u32;
+      let speed = (speed_command.speed() * self.vibration_step_counts[index] as f64).ceil() as u32;
 
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
@@ -195,7 +195,7 @@ impl GenericCommandManager {
     // going to send.
     let mut result: Vec<Option<(u32, bool)>> = vec![None; self.rotations.len()];
     for rotate_command in &msg.rotations {
-      let index = rotate_command.index as usize;
+      let index = rotate_command.index() as usize;
       // Since we're going to iterate here anyways, we do our index check
       // here instead of in a filter above.
       if index >= self.rotations.len() {
@@ -212,8 +212,8 @@ impl GenericCommandManager {
       // When calculating speeds, round up. This follows how we calculated
       // things in buttplug-js and buttplug-csharp, so it's more for history
       // than anything, but it's what users will expect.
-      let speed = (rotate_command.speed * self.rotation_step_counts[index] as f64).ceil() as u32;
-      let clockwise = rotate_command.clockwise;
+      let speed = (rotate_command.speed() * self.rotation_step_counts[index] as f64).ceil() as u32;
+      let clockwise = rotate_command.clockwise();
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
@@ -276,9 +276,11 @@ mod test {
   pub fn test_command_generator_vibration() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let mut vibrate_attributes = DeviceMessageAttributes::default();
-    vibrate_attributes.feature_count = Some(2);
-    vibrate_attributes.step_count = Some(vec![20, 20]);
+    let vibrate_attributes = DeviceMessageAttributes {
+      feature_count: Some(2),
+      step_count: Some(vec![20, 20]),
+      ..Default::default()
+    };
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
     let mut mgr = GenericCommandManager::new(&attributes_map);
     let vibrate_msg = VibrateCmd::new(
@@ -312,9 +314,11 @@ mod test {
   pub fn test_command_generator_rotation() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let mut rotate_attributes = DeviceMessageAttributes::default();
-    rotate_attributes.feature_count = Some(2);
-    rotate_attributes.step_count = Some(vec![20, 20]);
+    let rotate_attributes = DeviceMessageAttributes {
+      feature_count: Some(2),
+      step_count: Some(vec![20, 20]),
+      ..Default::default()
+    };
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
     let mut mgr = GenericCommandManager::new(&attributes_map);
     let rotate_msg = RotateCmd::new(

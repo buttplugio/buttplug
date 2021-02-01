@@ -247,7 +247,7 @@ impl ButtplugClientDevice {
     let message_sender = self.event_loop_sender.clone();
     let client_connected = self.client_connected.clone();
     let device_connected = self.device_connected.clone();
-    let id = msg.get_id();
+    let id = msg.id();
     let device_name = self.name.clone();
     Box::pin(
       async move {
@@ -480,7 +480,7 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level),
+        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level()),
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
@@ -499,7 +499,7 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level),
+        ButtplugCurrentSpecServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level()),
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
@@ -544,7 +544,7 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data),
+        ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data().clone()),
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(

@@ -56,24 +56,13 @@ impl DeviceMessageInfo {
   }
 }
 
-impl From<&DeviceAdded> for DeviceMessageInfo {
-  fn from(device_added: &DeviceAdded) -> Self {
-    Self {
-      device_index: device_added.device_index,
-      device_name: device_added.device_name.clone(),
-      device_messages: device_added.device_messages.clone(),
-      original_device_messages: device_added.device_messages.clone(),
-    }
-  }
-}
-
 impl From<DeviceAdded> for DeviceMessageInfo {
   fn from(device_added: DeviceAdded) -> Self {
     Self {
-      device_index: device_added.device_index,
-      device_name: device_added.device_name,
-      device_messages: device_added.device_messages.clone(),
-      original_device_messages: device_added.device_messages,
+      device_index: device_added.device_index(),
+      device_name: device_added.device_name().clone(),
+      device_messages: device_added.device_messages().clone(),
+      original_device_messages: device_added.device_messages().clone(),
     }
   }
 }
@@ -122,10 +111,11 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
 
     // The only attribute in v1 was feature count, so that's all we should
     // preserve.
-    for mut attributes in &mut dmi_v1.device_messages.values_mut() {
-      let fc = attributes.feature_count;
-      *attributes = DeviceMessageAttributes::default();
-      attributes.feature_count = fc;
+    for attributes in &mut dmi_v1.device_messages.values_mut() {
+      *attributes = DeviceMessageAttributes {
+        feature_count: attributes.feature_count.clone(),
+        ..Default::default()
+      };
     }
 
     // If VibrateCmd is listed, append SingleMotorVibrateCmd

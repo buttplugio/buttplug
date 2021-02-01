@@ -16,9 +16,9 @@ fn return_version0() -> ButtplugMessageSpecVersion {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
-  pub client_name: String,
+  client_name: String,
   // Default for this message is set to 0, as this field didn't exist in the
   // first version of the protocol.
   #[cfg_attr(
@@ -26,7 +26,7 @@ pub struct RequestServerInfo {
     serde(rename = "MessageVersion"),
     serde(default = "return_version0")
   )]
-  pub message_version: ButtplugMessageSpecVersion,
+  message_version: ButtplugMessageSpecVersion,
 }
 
 impl RequestServerInfo {
@@ -36,6 +36,14 @@ impl RequestServerInfo {
       client_name: client_name.to_string(),
       message_version,
     }
+  }
+
+  pub fn client_name(&self) -> &String {
+    &self.client_name
+  }
+
+  pub fn message_version(&self) -> ButtplugMessageSpecVersion {
+    self.message_version
   }
 }
 

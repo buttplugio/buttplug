@@ -359,8 +359,8 @@ impl ButtplugClient {
 
     debug!("Got ServerInfo return.");
     if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
-      info!("Connected to {}", server_info.server_name);
-      *self.server_name.lock().await = Some(server_info.server_name);
+      info!("Connected to {}", server_info.server_name());
+      *self.server_name.lock().await = Some(server_info.server_name().clone());
       // TODO Handle ping time in the internal event loop
 
       // Get currently connected devices. The event loop will

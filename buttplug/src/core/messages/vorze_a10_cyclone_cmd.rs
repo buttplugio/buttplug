@@ -13,13 +13,13 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  pub speed: u32,
+  speed: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Clockwise"))]
-  pub clockwise: bool,
+  clockwise: bool,
 }
 
 impl VorzeA10CycloneCmd {
@@ -30,6 +30,14 @@ impl VorzeA10CycloneCmd {
       speed,
       clockwise,
     }
+  }
+
+  pub fn speed(&self) -> u32 {
+    self.speed
+  }
+
+  pub fn clockwise(&self) -> bool {
+    self.clockwise
   }
 }
 

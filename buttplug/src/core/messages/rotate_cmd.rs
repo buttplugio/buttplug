@@ -13,11 +13,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RotationSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
-  pub index: u32,
+  index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  pub speed: f64,
+  speed: f64,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Clockwise"))]
-  pub clockwise: bool,
+  clockwise: bool,
 }
 
 impl RotationSubcommand {
@@ -27,6 +27,18 @@ impl RotationSubcommand {
       speed,
       clockwise,
     }
+  }
+
+  pub fn index(&self) -> u32 {
+    self.index
+  }
+
+  pub fn speed(&self) -> f64 {
+    self.speed
+  }
+
+  pub fn clockwise(&self) -> bool {
+    self.clockwise
   }
 }
 

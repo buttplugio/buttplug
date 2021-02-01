@@ -154,9 +154,9 @@ impl DeviceReadCmd {
 impl From<RawReadCmd> for DeviceReadCmd {
   fn from(msg: RawReadCmd) -> Self {
     Self {
-      endpoint: msg.endpoint,
-      length: msg.expected_length,
-      timeout_ms: msg.timeout,
+      endpoint: msg.endpoint(),
+      length: msg.expected_length(),
+      timeout_ms: msg.timeout(),
     }
   }
 }
@@ -181,9 +181,9 @@ impl DeviceWriteCmd {
 impl From<RawWriteCmd> for DeviceWriteCmd {
   fn from(msg: RawWriteCmd) -> Self {
     Self {
-      endpoint: msg.endpoint,
-      data: msg.data,
-      write_with_response: msg.write_with_response,
+      endpoint: msg.endpoint(),
+      data: msg.data().clone(),
+      write_with_response: msg.write_with_response(),
     }
   }
 }
@@ -202,7 +202,7 @@ impl DeviceSubscribeCmd {
 impl From<RawSubscribeCmd> for DeviceSubscribeCmd {
   fn from(msg: RawSubscribeCmd) -> Self {
     Self {
-      endpoint: msg.endpoint,
+      endpoint: msg.endpoint(),
     }
   }
 }
@@ -221,7 +221,7 @@ impl DeviceUnsubscribeCmd {
 impl From<RawUnsubscribeCmd> for DeviceUnsubscribeCmd {
   fn from(msg: RawUnsubscribeCmd) -> Self {
     Self {
-      endpoint: msg.endpoint,
+      endpoint: msg.endpoint(),
     }
   }
 }

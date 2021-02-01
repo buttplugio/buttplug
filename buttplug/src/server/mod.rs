@@ -189,7 +189,7 @@ impl ButtplugServer {
     &self,
     msg: ButtplugClientMessage,
   ) -> BoxFuture<'static, Result<ButtplugServerMessage, messages::Error>> {
-    let id = msg.get_id();
+    let id = msg.id();
     if !self.connected() {
       // Check for ping timeout first! There's no way we should've pinged out if
       // we haven't received RequestServerInfo first, but we do want to know if
@@ -202,7 +202,7 @@ impl ButtplugServer {
           None
         };
       if let Some(mut return_error) = error {
-        return_error.set_id(msg.get_id());
+        return_error.set_id(msg.id());
         return Box::pin(future::ready(Err(return_error)));
       }
       // If we haven't pinged out and we got an RSI message, fall thru.
@@ -244,10 +244,10 @@ impl ButtplugServer {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
-    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version {
+    if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-        msg.message_version,
+        msg.message_version(),
       )
       .into();
     }
@@ -277,7 +277,7 @@ impl ButtplugServer {
     let fut = self.ping_timer.update_ping_time();
     Box::pin(async move {
       fut.await;
-      Result::Ok(messages::Ok::new(msg.get_id()).into())
+      Result::Ok(messages::Ok::new(msg.id()).into())
     })
   }
 }

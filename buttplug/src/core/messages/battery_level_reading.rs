@@ -15,9 +15,9 @@ pub struct BatteryLevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   pub(super) id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "BatteryLevel"))]
-  pub battery_level: f64,
+  battery_level: f64,
 }
 
 impl BatteryLevelReading {
@@ -27,6 +27,10 @@ impl BatteryLevelReading {
       device_index,
       battery_level,
     }
+  }
+
+  pub fn battery_level(&self) -> f64 {
+    self.battery_level
   }
 }
 

@@ -13,14 +13,22 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VibrateSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
-  pub index: u32,
+  index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  pub speed: f64,
+  speed: f64,
 }
 
 impl VibrateSubcommand {
   pub fn new(index: u32, speed: f64) -> Self {
     Self { index, speed }
+  }
+
+  pub fn index(&self) -> u32 {
+    self.index
+  }
+
+  pub fn speed (&self) -> f64 {
+    self.speed
   }
 }
 
@@ -28,11 +36,11 @@ impl VibrateSubcommand {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speeds"))]
-  pub speeds: Vec<VibrateSubcommand>,
+  speeds: Vec<VibrateSubcommand>,
 }
 
 impl VibrateCmd {
@@ -42,6 +50,10 @@ impl VibrateCmd {
       device_index,
       speeds,
     }
+  }
+
+  pub fn speeds(&self) -> &Vec<VibrateSubcommand> {
+    &self.speeds
   }
 }
 

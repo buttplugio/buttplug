@@ -128,7 +128,7 @@ impl ErrorV0 {
 impl From<Error> for ErrorV0 {
   fn from(error: Error) -> Self {
     let mut err = ErrorV0::new(error.error_code, &error.error_message);
-    err.set_id(error.get_id());
+    err.set_id(error.id());
     err
   }
 }

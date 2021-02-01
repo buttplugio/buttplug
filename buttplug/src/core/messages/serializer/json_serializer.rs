@@ -169,9 +169,9 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     if let ButtplugSpecV2ClientMessage::RequestServerInfo(rsi) = &msg_union[0] {
       info!(
         "Setting JSON Wrapper message version to {}",
-        rsi.message_version
+        rsi.message_version()
       );
-      *self.message_version.borrow_mut() = Some(rsi.message_version);
+      *self.message_version.borrow_mut() = Some(rsi.message_version());
     } else {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }

@@ -14,11 +14,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawSubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
-  pub endpoint: Endpoint,
+  endpoint: Endpoint,
 }
 
 impl RawSubscribeCmd {
@@ -28,6 +28,10 @@ impl RawSubscribeCmd {
       device_index,
       endpoint,
     }
+  }
+
+  pub fn endpoint(&self) -> Endpoint {
+    self.endpoint
   }
 }
 

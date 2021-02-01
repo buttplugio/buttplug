@@ -41,16 +41,16 @@ fn test_capabilities_exposure() {
     while let Some(msg) = recv.next().await {
       if let ButtplugServerMessage::DeviceAdded(device) = msg {
         assert!(!device
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::VibrateCmd));
         assert!(!device
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::SingleMotorVibrateCmd));
         assert!(device
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::LinearCmd));
         assert!(device
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::StopDeviceCmd));
         return;
       }
@@ -83,18 +83,18 @@ fn test_server_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi (Raw)");
+        assert_eq!(da.device_name(), "Aneros Vivi (Raw)");
         assert!(da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
         assert!(da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
         assert!(da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
         assert!(da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
         return;
       } else {
@@ -130,18 +130,18 @@ fn test_server_no_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
+        assert_eq!(da.device_name(), "Aneros Vivi");
         assert!(!da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
         assert!(!da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
         assert!(!da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
         assert!(!da
-          .device_messages
+          .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
         return;
       } else {
@@ -177,11 +177,11 @@ fn test_reject_on_no_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name, "Aneros Vivi");
+        assert_eq!(da.device_name(), "Aneros Vivi");
         let mut should_be_err;
         should_be_err = server
           .parse_message(
-            messages::RawWriteCmd::new(da.device_index, Endpoint::Tx, vec![0x0], false).into(),
+            messages::RawWriteCmd::new(da.device_index(), Endpoint::Tx, vec![0x0], false).into(),
           )
           .await;
         assert!(should_be_err.is_err());
@@ -191,7 +191,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawReadCmd::new(da.device_index, Endpoint::Tx, 0, 0).into())
+          .parse_message(messages::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
@@ -200,7 +200,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawSubscribeCmd::new(da.device_index, Endpoint::Tx).into())
+          .parse_message(messages::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
@@ -209,7 +209,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawUnsubscribeCmd::new(da.device_index, Endpoint::Tx).into())
+          .parse_message(messages::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
@@ -257,17 +257,17 @@ fn test_repeated_address_additions() {
       match msg {
         ButtplugServerMessage::ScanningFinished(_) => continue,
         ButtplugServerMessage::DeviceAdded(da) => {
-          assert_eq!(da.device_name, "Aneros Vivi");
+          assert_eq!(da.device_name(), "Aneros Vivi");
           if device_index.is_none() {
-            device_index = Some(da.device_index);
+            device_index = Some(da.device_index());
           } else {
             assert!(device_removed_called);
-            assert_eq!(da.device_index, device_index.unwrap());
+            assert_eq!(da.device_index(), device_index.unwrap());
             return;
           }
         }
         ButtplugServerMessage::DeviceRemoved(dr) => {
-          assert_eq!(dr.device_index, device_index.unwrap());
+          assert_eq!(dr.device_index(), device_index.unwrap());
           device_removed_called = true;
         }
         _ => {

@@ -13,13 +13,13 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
-  pub message_version: ButtplugMessageSpecVersion,
+  message_version: ButtplugMessageSpecVersion,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
-  pub max_ping_time: u32,
+  max_ping_time: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
-  pub server_name: String,
+  server_name: String,
 }
 
 impl ServerInfo {
@@ -35,6 +35,18 @@ impl ServerInfo {
       server_name: server_name.to_string(),
     }
   }
+
+  pub fn message_version(&self) -> ButtplugMessageSpecVersion {
+    self.message_version
+  }
+
+  pub fn max_ping_time(&self) -> u32 {
+    self.max_ping_time
+  }
+
+  pub fn server_name(&self) -> &String {
+    &self.server_name
+  }
 }
 
 impl ButtplugMessageValidator for ServerInfo {
@@ -47,19 +59,19 @@ impl ButtplugMessageValidator for ServerInfo {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MajorVersion"))]
-  pub major_version: u32,
+  major_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MinorVersion"))]
-  pub minor_version: u32,
+  minor_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "BuildVersion"))]
-  pub build_version: u32,
+  build_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
-  pub message_version: ButtplugMessageSpecVersion,
+  message_version: ButtplugMessageSpecVersion,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
-  pub max_ping_time: u32,
+  max_ping_time: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
-  pub server_name: String,
+  server_name: String,
 }
 
 impl ServerInfoV0 {
@@ -83,7 +95,7 @@ impl ServerInfoV0 {
 impl From<ServerInfo> for ServerInfoV0 {
   fn from(msg: ServerInfo) -> Self {
     let mut out_msg = Self::new(&msg.server_name, msg.message_version, msg.max_ping_time);
-    out_msg.set_id(msg.get_id());
+    out_msg.set_id(msg.id());
     out_msg
   }
 }

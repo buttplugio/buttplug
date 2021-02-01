@@ -39,7 +39,7 @@ impl ButtplugProtocolCommandHandler for Realov {
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
-    let speed = (msg.speeds[0].speed * 50.0) as u8;
+    let speed = (msg.speeds()[0].speed() * 50.0) as u8;
     let msg = DeviceWriteCmd::new(Endpoint::Tx, [0xc5, 0x55, speed, 0xaa].to_vec(), false);
     let fut = device.write_value(msg);
     Box::pin(async {

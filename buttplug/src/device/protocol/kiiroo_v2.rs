@@ -9,6 +9,7 @@ use crate::{
     errors::ButtplugError,
     messages::{
       self,
+      ButtplugDeviceMessage,
       ButtplugDeviceCommandMessageUnion,
       DeviceMessageAttributesMap,
       FleshlightLaunchFW12Cmd,
@@ -71,13 +72,13 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
     device: Arc<DeviceImpl>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
-    let v = message.vectors[0].clone();
+    let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(SeqCst);
     let distance = (previous_position as f64 - (v.position * 99f64)).abs() / 99f64;
     let fl_cmd = FleshlightLaunchFW12Cmd::new(
-      message.device_index,
+      message.device_index(),
       (v.position * 99f64) as u8,
       (get_speed(distance, v.duration) * 99f64) as u8,
     );
@@ -90,10 +91,10 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();
-    let position = message.position;
+    let position = message.position();
     let msg = DeviceWriteCmd::new(
       Endpoint::Tx,
-      [message.position, message.speed].to_vec(),
+      [message.position(), message.speed()].to_vec(),
       false,
     );
     let fut = device.write_value(msg);

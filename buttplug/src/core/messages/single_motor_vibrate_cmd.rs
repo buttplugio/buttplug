@@ -13,11 +13,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  pub speed: f64,
+  speed: f64,
 }
 
 impl SingleMotorVibrateCmd {
@@ -27,6 +27,10 @@ impl SingleMotorVibrateCmd {
       device_index,
       speed,
     }
+  }
+
+  pub fn speed(&self) -> f64 {
+    self.speed
   }
 }
 

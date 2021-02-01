@@ -2,6 +2,7 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::{
   core::messages::{
     self,
+    ButtplugDeviceMessage,
     ButtplugDeviceCommandMessageUnion,
     DeviceMessageAttributesMap,
     VibrateCmd,
@@ -49,7 +50,7 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
   ) -> ButtplugDeviceResultFuture {
     self.handle_vibrate_cmd(
       device,
-      VibrateCmd::new(message.device_index, vec![VibrateSubcommand::new(0, 0f64)]),
+      VibrateCmd::new(message.device_index(), vec![VibrateSubcommand::new(0, 0f64)]),
     )
   }
 

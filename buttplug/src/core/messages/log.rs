@@ -13,11 +13,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Log {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "LogLevel"))]
-  pub log_level: LogLevel,
+  log_level: LogLevel,
   #[cfg_attr(feature = "serialize-json", serde(rename = "LogMessage"))]
-  pub log_message: String,
+  log_message: String,
 }
 
 impl Log {
