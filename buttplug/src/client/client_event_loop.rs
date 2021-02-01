@@ -203,6 +203,7 @@ where
       return;
     }
     if let Err(e) = msg.is_valid() {
+      error!("Message not valid: {:?} - Error: {}", msg, e);
       self.send_client_event(ButtplugClientEvent::Error(ButtplugError::from(e)));
       return;
     }
@@ -247,6 +248,7 @@ where
   /// Send a message from the [ButtplugClient] to the [ButtplugClientConnector].
   async fn send_message(&mut self, mut msg_fut: ButtplugClientMessageFuturePair) {
     if let Err(e) = &msg_fut.msg.is_valid() {
+      error!("Message not valid: {:?} - Error: {}", msg_fut.msg, e);
       msg_fut.waker.set_reply(Err(ButtplugError::from(e.clone()).into()));
       return;
     }

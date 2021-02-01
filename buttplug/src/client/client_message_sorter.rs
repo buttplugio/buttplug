@@ -100,6 +100,7 @@ impl ClientMessageSorter {
       Some(mut _state) => {
         trace!("Resolved id {} to a future.", id);
         if let Err(e) = msg.is_valid() {
+          error!("Message not valid: {:?} - Error: {}", msg, e);
           _state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
         }
         else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {

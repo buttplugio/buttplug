@@ -3,7 +3,7 @@ use crate::{
   connector::ButtplugConnector,
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugClientMessage, ButtplugServerMessage},
+    messages::{self, ButtplugMessage, ButtplugClientMessage, ButtplugServerMessage, ButtplugMessageValidator},
   },
   server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
   test::TestDeviceCommunicationManagerHelper,
@@ -65,6 +65,13 @@ async fn run_server<ConnectorType>(
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();
           async_manager::spawn(async move {
+            if let Err(e) = client_message.is_valid() {
+              error!("Message not valid: {:?} - Error: {}", client_message, e);
+              let mut err_msg = messages::Error::from(ButtplugError::from(e));
+              err_msg.set_id(client_message.id());
+              connector_clone.send(err_msg.into());
+              return;
+            }
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 if let ButtplugClientMessage::RequestServerInfo(rsi) = client_message {

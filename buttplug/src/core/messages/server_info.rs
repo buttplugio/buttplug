@@ -51,7 +51,7 @@ impl ServerInfo {
 
 impl ButtplugMessageValidator for ServerInfo {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
-    self.is_system_id(self.id)
+    self.is_not_system_id(self.id)
   }
 }
 
