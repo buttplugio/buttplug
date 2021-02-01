@@ -1,12 +1,16 @@
 mod util;
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent, VibrateCommand},
+  core::{
+    messages::{ButtplugClientMessage, ButtplugServerMessage, self},
+    errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError},
+  },
+  client::{ButtplugClient, ButtplugClientEvent, ButtplugClientDeviceEvent, VibrateCommand, ButtplugClientError},
   connector::ButtplugInProcessClientConnector, 
   util::async_manager
 };
 use futures::{pin_mut, StreamExt};
 use futures_timer::Delay;
-use std::time::Duration;
+use std::{sync::Arc, collections::HashMap, time::Duration};
 
 #[cfg(feature = "server")]
 #[test]
@@ -142,15 +146,62 @@ fn test_client_device_invalid_command() {
       }
     }
     let test_device = client_device.unwrap();
-    assert!(test_device.vibrate(VibrateCommand::Speed(2.0)).await.is_err());
+    use tracing::*;
+    tracing_subscriber::fmt::init();
+    assert!(matches!(test_device.vibrate(VibrateCommand::Speed(2.0)).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(ButtplugMessageError::InvalidMessageContents(..)))));
+    assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!(0.5, 0.5, 0.5))).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceFeatureCountMismatch(..)))));
+    assert!(matches!(test_device.vibrate(VibrateCommand::SpeedVec(vec!())).await.unwrap_err(), ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolRequirementError(..)))));
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_client_repeated_deviceadded_message() {
+  async_manager::block_on(async move {
+    let helper = Arc::new(util::ChannelClientTestHelper::new());
+    helper.simulate_successful_connect().await;
+    let helper_clone = helper.clone();
+    let mut event_stream = helper.client().event_stream();
+    async_manager::spawn(async move {
+      assert!(matches!(helper_clone.get_next_client_message().await, ButtplugClientMessage::StartScanning(..)));
+      helper_clone.send_client_incoming(messages::Ok::new(3).into()).await;
+      let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
+      helper_clone.send_client_incoming(device_added.clone().into()).await;
+      helper_clone.send_client_incoming(device_added.into()).await;
+    }).unwrap();
+    helper.client().start_scanning().await.unwrap();
+    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceAdded(..)));
+    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::Error(..)));
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_client_repeated_deviceremoved_message() {
+  async_manager::block_on(async move {
+    let helper = Arc::new(util::ChannelClientTestHelper::new());
+    helper.simulate_successful_connect().await;
+    let helper_clone = helper.clone();
+    let mut event_stream = helper.client().event_stream();
+    async_manager::spawn(async move {
+      assert!(matches!(helper_clone.get_next_client_message().await, ButtplugClientMessage::StartScanning(..)));
+      helper_clone.send_client_incoming(messages::Ok::new(3).into()).await;
+      let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
+      let device_removed = messages::DeviceRemoved::new(1);
+      helper_clone.send_client_incoming(device_added.into()).await;
+      helper_clone.send_client_incoming(device_removed.clone().into()).await;
+      helper_clone.send_client_incoming(device_removed.into()).await;
+    }).unwrap();
+    helper.client().start_scanning().await.unwrap();
+    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceAdded(..)));
+    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::DeviceRemoved(..)));
+    assert!(matches!(event_stream.next().await.unwrap(), ButtplugClientEvent::Error(..)));
   });
 }
 
 // TODO Test invalid messages to device
 // TODO Test invalid parameters in message
 // TODO Test device invalidation across client connections (i.e. a device shouldn't be allowed to reconnect even if index is the same)
-// TODO Test DeviceAdded being sent multiple times w/ same index
-// TODO Test DeviceRemoved being sent multiple times
 // TODO Test DeviceList being sent followed by repeat DeviceAdded
 // TODO Test DeviceList being sent multiple times
 // TODO Test sending device return for device that doesn't exist (in client)

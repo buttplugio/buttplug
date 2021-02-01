@@ -13,20 +13,14 @@ use super::{
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
 };
-use crate::{
-  connector::{ButtplugConnector, ButtplugConnectorStateShared},
-  core::{
-    errors::ButtplugError,
-    messages::{
+use crate::{connector::{ButtplugConnector, ButtplugConnectorStateShared}, core::{errors::{ButtplugDeviceError, ButtplugError}, messages::{
       ButtplugMessageValidator,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       DeviceList,
       DeviceMessageInfo,
       ButtplugDeviceMessage,
-    },
-  },
-};
+    }}};
 use dashmap::DashMap;
 use futures::FutureExt;
 use std::sync::{
@@ -212,6 +206,12 @@ where
     match msg {
       ButtplugCurrentSpecServerMessage::DeviceAdded(dev) => {
         trace!("Device added, updating map and sending to client");
+        // We already have this device. Emit an error to let the client know the
+        // server is being weird.
+        if self.device_map.get(&dev.device_index()).is_some() {
+          self.send_client_event(ButtplugClientEvent::Error(ButtplugDeviceError::DeviceConnectionError("Device already exists in client. Server may be in a weird state.".to_owned()).into()));
+          return;
+        }
         let info = DeviceMessageInfo::from(dev);
         let device = self.create_client_device(&info);
         self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
@@ -222,6 +222,7 @@ where
           self.disconnect_device(dev.device_index());
         } else {
           error!("Received DeviceRemoved for non-existent device index");
+          self.send_client_event(ButtplugClientEvent::Error(ButtplugDeviceError::DeviceConnectionError("Device removal requested for a device the client does not know about. Server may be in a weird state.".to_owned()).into()));
         }
       }
       ButtplugCurrentSpecServerMessage::ScanningFinished(_) => {
