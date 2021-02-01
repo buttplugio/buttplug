@@ -1571,37 +1571,6 @@
         }
       ]
     },
-    "erostek-et312": {
-      "serial": [
-        {
-          "port": "default",
-          "baud-rate": 19200,
-          "data-bits": 8,
-          "parity": "N",
-          "stop-bits": 1
-        }
-      ],
-      "defaults": {
-        "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              99
-            ]
-          }
-        }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "et312"
-          ],
-          "name": {
-            "en-us": "Erostek ET312"
-          }
-        }
-      ]
-    },
     "vorze-cyclone-x": {
       "hid": [
         {
@@ -2291,6 +2260,37 @@
           ],
           "name": {
             "en-us": "MaxPro 2"
+          }
+        }
+      ]
+    },
+    "nobra": {
+      "serial": [
+        {
+          "port": "default",
+          "baud-rate": 19200,
+          "data-bits": 8,
+          "parity": "N",
+          "stop-bits": 1
+        }
+      ],
+      "defaults": {
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              15
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "default"
+          ],
+          "name": {
+            "en-us": "Nobra's Silicone Dreams Toy"
           }
         }
       ]
