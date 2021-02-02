@@ -1,5 +1,5 @@
 {
-  "version": 47,
+  "version": 48,
   "protocols": {
     "lovense": {
       "btle": {
@@ -67,6 +67,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Lovense Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -191,6 +194,9 @@
         "exists": true
       },
       "defaults": {
+        "name": {
+          "en-us": "XBox (XInput) Compatible Gamepad"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -200,17 +206,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "XInput Gamepad"
-          ],
-          "name": {
-            "en-us": "XBox (XInput) Compatible Gamepad"
-          }
-        }
-      ]
+      }
     },
     "kiiroo-v2": {
       "btle": {
@@ -232,6 +228,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Kiiroo v2 Device"
+        },
         "messages": {
           "LinearCmd": {
             "FeatureCount": 1,
@@ -275,6 +274,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Libo Elle Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -317,6 +319,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Libo Shark"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -326,17 +331,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "ShaYu"
-          ],
-          "name": {
-            "en-us": "Libo Shark"
-          }
-        }
-      ]
+      }
     },
     "libo-karen": {
       "btle": {
@@ -354,18 +349,11 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Libo Karen"
+        },
         "messages": {}
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "SuoYinQiu"
-          ],
-          "name": {
-            "en-us": "Libo Karen"
-          }
-        }
-      ]
+      }
     },
     "libo-vibes": {
       "btle": {
@@ -390,6 +378,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Libo Vibes Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -528,6 +519,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Magic Motion V1 Device"
+        },
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
@@ -621,6 +615,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Magic Motion V2 Device"
+        },
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
@@ -688,6 +685,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "LoveLife Krush"
+        },
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
@@ -698,17 +698,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Krush"
-          ],
-          "name": {
-            "en-us": "LoveLife Krush"
-          }
-        }
-      ]
+      }
     },
     "mysteryvibe": {
       "btle": {
@@ -724,6 +714,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Mysteryvibe Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 6,
@@ -778,6 +771,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Picobong Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -842,6 +838,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Vibratissimo Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -850,17 +849,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Vibratissimo"
-          ],
-          "name": {
-            "en-us": "Vibratissimo"
-          }
-        }
-      ]
+      }
     },
     "wevibe": {
       "btle": {
@@ -892,6 +881,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "WeVibe Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1059,6 +1051,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "WeVibe 8-bit Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1161,21 +1156,11 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "WeVibe Realm Reina"
+        },
         "messages": {}
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Reina",
-            "imassager",
-            "Interactive Massager",
-            "03"
-          ],
-          "name": {
-            "en-us": "WeVibe Realm Reina"
-          }
-        }
-      ]
+      }
     },
     "youcups": {
       "btle": {
@@ -1189,6 +1174,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Youcups Warrior II"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1197,17 +1185,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Youcups"
-          ],
-          "name": {
-            "en-us": "Youcups Warrior II"
-          }
-        }
-      ]
+      }
     },
     "cueme": {
       "btle": {
@@ -1221,6 +1199,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Cueme Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 8,
@@ -1293,6 +1274,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Kiiroo V2 Vibrator Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 3,
@@ -1426,6 +1410,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Kiiroo V2.1 Device"
+        },
         "messages": {}
       },
       "configurations": [
@@ -1579,6 +1566,9 @@
         }
       ],
       "defaults": {
+        "name": {
+          "en-us": "Vorze Cyclone X10 Device"
+        },
         "messages": {
           "RotateCmd": {
             "FeatureCount": 1,
@@ -1587,17 +1577,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "CycloneX10"
-          ],
-          "name": {
-            "en-us": "Rends Cyclone X10"
-          }
-        }
-      ]
+      }
     },
     "rez-trancevibrator": {
       "usb": [
@@ -1607,6 +1587,9 @@
         }
       ],
       "defaults": {
+        "name": {
+          "en-us": "Rez TranceVibrator"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1615,17 +1598,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Trancevibrator"
-          ],
-          "name": {
-            "en-us": "Rez Trancevibrator"
-          }
-        }
-      ]
+      }
     },
     "kiiroo-v1": {
       "btle": {
@@ -1642,6 +1615,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Kiiroo V1 Device"
+        },
         "messages": {}
       },
       "configurations": [
@@ -1694,6 +1670,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Vorze Device"
+        },
         "messages": {}
       },
       "configurations": [
@@ -1775,6 +1754,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Youou Wand Vibrator"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1783,17 +1765,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "VX001_"
-          ],
-          "name": {
-            "en-us": "Youou Wand Vibrator"
-          }
-        }
-      ]
+      }
     },
     "realtouch": {
       "hid": [
@@ -1803,6 +1775,9 @@
         }
       ],
       "defaults": {
+        "name": {
+          "en-us": "RealTouch"
+        },
         "messages": {
           "LinearCmd": {
             "FeatureCount": 1,
@@ -1811,17 +1786,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "RealTouch"
-          ],
-          "name": {
-            "en-us": "RealTouch"
-          }
-        }
-      ]
+      }
     },
     "prettylove": {
       "btle": {
@@ -1836,6 +1801,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Pretty Love Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1844,17 +1812,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Aogu BLE"
-          ],
-          "name": {
-            "en-us": "Pretty Love Device"
-          }
-        }
-      ]
+      }
     },
     "svakom": {
       "btle": {
@@ -1869,6 +1827,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Svakom Ella"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1877,17 +1838,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Aogu SCB"
-          ],
-          "name": {
-            "en-us": "Svakom Ella"
-          }
-        }
-      ]
+      }
     },
     "realov": {
       "btle": {
@@ -1901,6 +1852,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Realov Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1909,17 +1863,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "REALOV_VIBE"
-          ],
-          "name": {
-            "en-us": "Realov Device"
-          }
-        }
-      ]
+      }
     },
     "motorbunny": {
       "btle": {
@@ -1934,6 +1878,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Motorbunny Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -1980,6 +1927,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Zalo Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -2015,6 +1965,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "SayberX Device"
+        },
         "messages": {}
       },
       "configurations": [
@@ -2057,6 +2010,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Muse Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -2098,6 +2054,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Lelo F1s"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -2107,17 +2066,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "F1s"
-          ],
-          "name": {
-            "en-us": "Lelo F1s"
-          }
-        }
-      ]
+      }
     },
     "aneros": {
       "btle": {
@@ -2131,6 +2080,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Aneros Vivi"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -2140,17 +2092,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "Massage Demo"
-          ],
-          "name": {
-            "en-us": "Aneros Vivi"
-          }
-        }
-      ]
+      }
     },
     "lovehoney-desire": {
       "btle": {
@@ -2165,6 +2107,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Lovehoney Device"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 2,
@@ -2217,20 +2162,11 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "Twerking Butt"
+        },
         "messages": {}
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "BODIKANG",
-            "Twerking Butt",
-            "TwerkingButt"
-          ],
-          "name": {
-            "en-us": "Twerking Butt"
-          }
-        }
-      ]
+      }
     },
     "maxpro": {
       "btle": {
@@ -2244,6 +2180,9 @@
         }
       },
       "defaults": {
+        "name": {
+          "en-us": "MaxPro 2"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -2252,17 +2191,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "M2"
-          ],
-          "name": {
-            "en-us": "MaxPro 2"
-          }
-        }
-      ]
+      }
     },
     "nobra": {
       "serial": [
@@ -2275,6 +2204,9 @@
         }
       ],
       "defaults": {
+        "name": {
+          "en-us": "Nobra's Silicone Dreams Toy"
+        },
         "messages": {
           "VibrateCmd": {
             "FeatureCount": 1,
@@ -2283,17 +2215,7 @@
             ]
           }
         }
-      },
-      "configurations": [
-        {
-          "identifier": [
-            "default"
-          ],
-          "name": {
-            "en-us": "Nobra's Silicone Dreams Toy"
-          }
-        }
-      ]
+      }
     }
   }
 }

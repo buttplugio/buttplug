@@ -307,6 +307,7 @@
         }
       },
       "required": [
+        "name",
         "messages"
       ]
     },
@@ -372,10 +373,7 @@
             "configurations": {
               "$ref": "#/components/configurations-definition"
             }
-          },
-          "required": [
-            "configurations"
-          ]
+          }
         }
       },
       "additionalProperties": false

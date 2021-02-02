@@ -166,6 +166,7 @@ pub struct ProtocolDefinition {
   pub hid: Option<Vec<HIDSpecifier>>,
   pub xinput: Option<XInputSpecifier>,
   pub defaults: Option<ProtocolAttributes>,
+  #[serde(default)]
   pub configurations: Vec<ProtocolAttributes>,
 }
 
@@ -257,69 +258,76 @@ impl DeviceProtocolConfiguration {
     endpoints: &[Endpoint],
   ) -> Result<(HashMap<String, String>, DeviceMessageAttributesMap), ButtplugError> {
     let mut attributes = DeviceMessageAttributesMap::new();
+
     // If we find defaults, set those up first.
     if let Some(ref attrs) = self.defaults {
       if let Some(ref msg_attrs) = attrs.messages {
         attributes = msg_attrs.clone();
       }
     }
-    match self.configurations.iter().find(|attrs| {
+
+    // If we're allowing raw messages, tack those on beforehand also.
+    if self.allow_raw_messages {
+      let endpoint_attributes = DeviceMessageAttributes {
+        endpoints: Some(endpoints.to_owned()),
+        ..Default::default()
+      };
+      attributes.insert(
+        ButtplugDeviceMessageType::RawReadCmd,
+        endpoint_attributes.clone(),
+      );
+      attributes.insert(
+        ButtplugDeviceMessageType::RawWriteCmd,
+        endpoint_attributes.clone(),
+      );
+      attributes.insert(
+        ButtplugDeviceMessageType::RawSubscribeCmd,
+        endpoint_attributes.clone(),
+      );
+      attributes.insert(
+        ButtplugDeviceMessageType::RawUnsubscribeCmd,
+        endpoint_attributes,
+      );
+    }
+
+    let device_attrs = if let Some(attrs) = self.configurations.iter().find(|attrs| {
       attrs
         .identifier
         .as_ref()
         .unwrap()
         .contains(&identifier.to_owned())
     }) {
-      Some(ref attrs) => {
-        if let Some(ref msg_attrs) = attrs.messages {
-          attributes.extend(msg_attrs.clone());
-        }
-        attributes
-          .entry(ButtplugDeviceMessageType::StopDeviceCmd)
-          .or_insert_with(DeviceMessageAttributes::default);
-        if self.allow_raw_messages {
-          let endpoint_attributes = DeviceMessageAttributes {
-            endpoints: Some(endpoints.to_owned()),
-            ..Default::default()
-          };
-          attributes.insert(
-            ButtplugDeviceMessageType::RawReadCmd,
-            endpoint_attributes.clone(),
-          );
-          attributes.insert(
-            ButtplugDeviceMessageType::RawWriteCmd,
-            endpoint_attributes.clone(),
-          );
-          attributes.insert(
-            ButtplugDeviceMessageType::RawSubscribeCmd,
-            endpoint_attributes.clone(),
-          );
-          attributes.insert(
-            ButtplugDeviceMessageType::RawUnsubscribeCmd,
-            endpoint_attributes,
-          );
-        }
-        Ok((attrs.name.as_ref().unwrap().clone(), attributes))
-      }
-      None => Err(
+      attrs
+    } else if let Some(attrs) = &self.defaults {
+      // If we can't find an identifier but we have a default block, return that.
+      attrs
+    } else {
+      // If we can't find anything, give up.
+      return Err(
         ButtplugDeviceError::ProtocolAttributesNotFound(format!(
           "Cannot find identifier {} in protocol.",
           identifier
         ))
-        .into(),
-      ),
+      .into());
+    };
+
+    if let Some(ref msg_attrs) = device_attrs.messages {
+      attributes.extend(msg_attrs.clone());
     }
+    
+    // Everything needs to be able to stop.
+    attributes
+      .entry(ButtplugDeviceMessageType::StopDeviceCmd)
+      .or_insert_with(DeviceMessageAttributes::default);
+
+    // The device config JSON schema requires us to have a name map, so we can unwrap this.
+    Ok((device_attrs.name.as_ref().unwrap().clone(), attributes))
   }
 }
 
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   pub(self) config: ProtocolConfiguration,
-}
-
-unsafe impl Send for DeviceConfigurationManager {
-}
-unsafe impl Sync for DeviceConfigurationManager {
 }
 
 impl Default for DeviceConfigurationManager {
@@ -404,14 +412,14 @@ impl DeviceConfigurationManager {
     &self,
     specifier: &DeviceSpecifier,
   ) -> Option<(bool, String, ProtocolDefinition)> {
-    info!("Looking for protocol that matches spec: {:?}", specifier);
+    info!("Looking for protocol that matches specifier: {:?}", specifier);
     for (name, def) in self.config.protocols.iter() {
       if def == specifier {
-        debug!("Found protocol for spec!");
+        debug!("Found protocol {:?} for specifier {:?}.", name, specifier);
         return Some((self.allow_raw_messages, name.clone(), def.clone()));
       }
     }
-    info!("No protocol found for spec!");
+    info!("No protocol found for specifier {:?}.", specifier);
     None
   }
 
@@ -525,11 +533,11 @@ mod test {
   #[test]
   fn test_user_config_loading() {
     let mut config = DeviceConfigurationManager::default();
-    assert!(config.config.protocols.contains_key("erostek-et312"));
+    assert!(config.config.protocols.contains_key("nobra"));
     assert!(config
       .config
       .protocols
-      .get("erostek-et312")
+      .get("nobra")
       .unwrap()
       .serial
       .as_ref()
@@ -538,7 +546,7 @@ mod test {
       config
         .config
         .protocols
-        .get("erostek-et312")
+        .get("nobra")
         .unwrap()
         .serial
         .as_ref()
@@ -553,7 +561,7 @@ mod test {
         r#"
         { 
             "protocols": {
-                "erostek-et312": {
+                "nobra": {
                     "serial": [
                         {
                             "port": "COM1",
@@ -571,11 +579,11 @@ mod test {
       ),
     )
     .unwrap();
-    assert!(config.config.protocols.contains_key("erostek-et312"));
+    assert!(config.config.protocols.contains_key("nobra"));
     assert!(config
       .config
       .protocols
-      .get("erostek-et312")
+      .get("nobra")
       .unwrap()
       .serial
       .as_ref()
@@ -584,7 +592,7 @@ mod test {
       config
         .config
         .protocols
-        .get("erostek-et312")
+        .get("nobra")
         .unwrap()
         .serial
         .as_ref()
@@ -595,7 +603,7 @@ mod test {
     assert!(config
       .config
       .protocols
-      .get("erostek-et312")
+      .get("nobra")
       .unwrap()
       .serial
       .as_ref()
