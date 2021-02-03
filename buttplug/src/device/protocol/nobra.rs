@@ -57,7 +57,6 @@ impl ButtplugProtocolCommandHandler for Nobra {
               } else {
                 0x60 + speed
             };
-            info!("Protocl writing {}", output_speed);
             fut_vec.push(device.write_value(DeviceWriteCmd::new(
               Endpoint::Tx,
               vec![output_speed as u8],

@@ -18,9 +18,7 @@ use crate::{
 use serde_json::Deserializer;
 use serialport::{
   available_ports,
-  open_with_settings,
   SerialPort,
-  SerialPortSettings,
   SerialPortType,
 };
 use std::{
@@ -134,14 +132,9 @@ impl LovenseSerialDongleCommunicationManager {
               if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
                 // We've found a dongle.
                 info!("Found lovense dongle, connecting");
-                let settings = SerialPortSettings {
-                  // Default is 8/N/1 but we'll need to set the baud rate
-                  baud_rate: 115200,
-                  // Set our timeout at ~2hz. Would be nice if this was async, but oh well.
-                  timeout: Duration::from_millis(500),
-                  ..Default::default()
-                };
-                match open_with_settings(&p.port_name, &settings) {
+                let serial_port = serialport::new(&p.port_name, 115200)
+                  .timeout(Duration::from_millis(500));
+                match serial_port.open() {
                   Ok(dongle_port) => {
                     let (writer_sender, writer_receiver) = channel(256);
                     let (reader_sender, reader_receiver) = channel(256);

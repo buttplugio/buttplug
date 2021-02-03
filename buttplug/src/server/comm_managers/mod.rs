@@ -49,4 +49,7 @@ pub enum ButtplugDeviceSpecificError {
   #[cfg(feature = "btleplug-manager")]
   #[error("Btleplug error: {0}")]
   BtleplugError(String),
+  #[cfg(feature = "serial-manager")]
+  #[error("Serial error: {0}")]
+  SerialError(String),
 }

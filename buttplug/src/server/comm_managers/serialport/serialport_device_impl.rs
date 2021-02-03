@@ -1,5 +1,5 @@
 use crate::{
-  core::{errors::ButtplugError, messages::RawReading, ButtplugResultFuture},
+  core::{errors::{ButtplugError, ButtplugDeviceError}, messages::RawReading, ButtplugResultFuture},
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
     ButtplugDeviceEvent,
@@ -12,11 +12,12 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
+  server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
-use serialport::{open_with_settings, SerialPort, SerialPortInfo, SerialPortSettings};
+use serialport::{SerialPort, SerialPortInfo};
 use std::{
   fmt::{self, Debug},
   io::ErrorKind,
@@ -126,20 +127,18 @@ impl SerialPortDeviceImpl {
       .into_iter()
       .find(|port| port_info.port_name == port.port)
       .unwrap();
-    let settings = SerialPortSettings {
-      baud_rate: port_def.baud_rate,
-      timeout: Duration::from_millis(100),
-      ..Default::default()
-    };
-    // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
-    //
+
     // Mostly just feeling lazy here and don't wanna do the enum conversions.
     /*
     settings.stop_bits = port_def.stop_bits;
     settings.data_bits = port_def.data_bits;
     settings.parity = port_def.parity;
     */
-    let port = open_with_settings(&port_info.port_name, &settings).unwrap();
+    // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
+    let port = serialport::new(&port_info.port_name, port_def.baud_rate)
+      .timeout(Duration::from_millis(100))
+      .open()
+      .map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::SerialError(e.to_string()))))?;
 
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);

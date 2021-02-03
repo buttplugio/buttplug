@@ -71,7 +71,7 @@ tracing-futures = "0.2.4"
 tracing-subscriber = { version = "0.2.15", features = ["json"] }
 dashmap = "4.0.2"
 displaydoc = "0.1.7"
-serialport = { version = "3.3.0", optional = true }
+serialport = { version = "4.0.0", optional = true }
 hidapi = { version = "1.2.5", optional = true }
 wasm-bindgen = { version = "0.2.69", optional = true }
 tokio = { version = "1.1.0", features = ["sync"] }
