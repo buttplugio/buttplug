@@ -104,24 +104,6 @@
       "additionalProperties": false,
       "minProperties": 0
     },
-    "ShockMessageAttributes": {
-      "description": "Attributes for ShockCmd.",
-      "type": "object",
-      "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" },
-        "MaxDuration": {
-          "description": "Maximum duration of shock for each actuator",
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
-      },
-      "additionalProperties": false,
-      "minProperties": 0
-    },
     "DeviceMessagesEx": {
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "object",
@@ -140,10 +122,7 @@
         "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
         "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
         "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "PatternPlaybackCmd": { "$ref": "#/components/PatternMessageAttributes" },
-        "ShockCmd": { "$ref": "#/components/ShockMessageAttributes" },
-        "ToneEmitterCmd": { "$ref": "#/components/GenericMessageAttributes" }
+        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" }
       },
       "additionalProperties": false
     },
@@ -860,136 +839,6 @@
         "DeviceIndex",
         "Vectors"
       ]
-    },
-    "PatternPlaybackCmd": {
-      "type": "object",
-      "description": "Sends a pattern command to a device that supports pattern playback.",
-      "properties": {
-        "Id": { "$ref": "#/components/Id" },
-        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-        "Patterns": {
-          "description": "List of patterns to play across actuators",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "Index": {
-                "description": "actuator number.",
-                "type": "integer",
-                "minimum": 0
-              },
-              "Pattern": {
-                "description": "Name of pattern of play.",
-                "type": "string"
-              },
-              "Strength": {
-                "description": "Strength/scaling to play pattern at.",
-                "type": "number"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "Index",
-              "Pattern",
-              "Strength"
-            ]
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "Id",
-        "DeviceIndex",
-        "Patterns"
-      ]
-    },
-    "ShockCmd": {
-      "type": "object",
-      "description": "Sends a shock to devices that support them (Shock collars/bracelets, possibly estim).",
-      "properties": {
-        "Id": { "$ref": "#/components/Id" },
-        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-        "Shocks": {
-          "description": "List of shocks to run across actuators",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "Index": {
-                "description": "Actuator number.",
-                "type": "integer",
-                "minimum": 0
-              },
-              "Strength": {
-                "description": "Strength of shock.",
-                "type": "number",
-                "minimum": 0
-              },
-              "Duration": {
-                "description": "Duration of shock (not to exceed MaxDuration defined in MessageAttributes).",
-                "type": "integer",
-                "minimum": 0
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "Index",
-              "Strength",
-              "Duration"
-            ]
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "Id",
-        "DeviceIndex",
-        "Shocks"
-      ]
-    },
-    "ToneEmitterCmd": {
-      "type": "object",
-      "description": "Make a device emit a tone (assuming it has a beeper/speaker)",
-      "properties": {
-        "Id": { "$ref": "#/components/Id" },
-        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-        "Tones": {
-          "description": "List of tones to run across beepers/speakers",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "Index": {
-                "description": "Actuator number.",
-                "type": "integer",
-                "minimum": 0
-              },
-              "Volume": {
-                "description": "Volume level (as denoted by StepCount in MessageAttributes).",
-                "type": "number",
-                "minimum": 0
-              },
-              "Duration": {
-                "description": "Duration of tone in milliseconds.",
-                "type": "integer",
-                "minimum": 0
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "Index",
-              "Volume",
-              "Duration"
-            ]
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "Id",
-        "DeviceIndex",
-        "Tones"
-      ]
     }
   },
   "type": "array",
@@ -1031,10 +880,7 @@
       "BatteryLevelCmd": { "$ref": "#/messages/BatteryLevelCmd" },
       "BatteryLevelReading": { "$ref": "#/messages/BatteryLevelReading" },
       "RSSILevelCmd": { "$ref": "#/messages/RSSILevelCmd" },
-      "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" },
-      "PatternPlaybackCmd": { "$ref": "#/messages/PatternPlaybackCmd" },
-      "ShockCmd": { "$ref": "#/messages/ShockCmd" },
-      "ToneEmitterCmd": { "$ref": "#/messages/ToneEmitterCmd" }
+      "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" }
     },
     "additionalProperties": false,
     "minProperties": 1,
