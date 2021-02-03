@@ -25,7 +25,7 @@ use std::cell::RefCell;
 use std::convert::TryFrom;
 
 static MESSAGE_JSON_SCHEMA: &str =
-  include_str!("../../../../dependencies/buttplug-schema/schema/buttplug-schema.json");
+  include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
 
 /// Creates a [Valico][valico] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> JSONValidator {
