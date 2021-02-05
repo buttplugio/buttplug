@@ -1,3 +1,26 @@
+# 2.1.0 (2021-02-04)
+
+## Features
+
+- Hardware Support
+  - Nobra's Silicone Dreams (All bluetooth 2/RFCOMM controllable toys)
+  - Lovense Diamo
+- Add message validation 
+  - We were only checking messages via the JSON schema, which wasn't handling a lot of invalid
+    content. Things should now throw more useful errors on invalid content.
+  - Outside of message ids, messages are now immutable, meaning we don't have to check validity
+    multiple times. 
+- Clean up connector and transport code
+  - Fix a lot of weird return types and trait bounds.
+- Add more tests, as well as testing capabilities
+  - Thanks to the connector/transport cleanup we can now test connectors and serializers easier.
+- Consolidate support repos into main repo
+  - buttplug-rs now has both device config and schema repos in it.
+
+## Bugfixes
+
+- #265: Drop devices that are connecting when there is no device manager
+
 # 2.0.6 (2021-01-26)
 
 ## Bugfixes
