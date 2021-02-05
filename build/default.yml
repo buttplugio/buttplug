@@ -37,9 +37,6 @@ jobs:
      - script: cargo +nightly clippy --all
        displayName: cargo clippy
  - job: main
-   variables:
-     VCPKGRS_DYNAMIC: 1
-     VCPKG_ROOT: "c:/vcpkg"
    displayName: Compile and test
    dependsOn: []
    ${{ if eq('true', parameters.cross) }}:
