@@ -1,3 +1,9 @@
+# v0.6.2 - 2021/02/04
+
+## Changes
+
+- Update buttplug message and device message with simplified getter method names.
+
 # v0.6.1 - 2021/01/21
 
 ## Changes
