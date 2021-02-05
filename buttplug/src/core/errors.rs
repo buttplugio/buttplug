@@ -137,7 +137,7 @@ pub enum ButtplugDeviceError {
   UnhandledCommand(String),
   #[cfg(feature = "server")]
   #[error(transparent)]
-  /// Device type specific error.
+  /// Device type specific error: {0}.
   DeviceSpecificError(#[from] ButtplugDeviceSpecificError),
   #[cfg(not(feature = "server"))]
   /// Device type specific error: {0}.
