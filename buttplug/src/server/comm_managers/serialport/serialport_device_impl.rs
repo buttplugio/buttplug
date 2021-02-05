@@ -62,7 +62,7 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device_impl_internal = SerialPortDeviceImpl::new(&self.port_info, protocol)?;
+    let device_impl_internal = SerialPortDeviceImpl::try_create(&self.port_info, protocol).await?;
     let device_impl = DeviceImpl::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
@@ -115,7 +115,7 @@ pub struct SerialPortDeviceImpl {
 }
 
 impl SerialPortDeviceImpl {
-  pub fn new(
+  pub async fn try_create(
     port_info: &SerialPortInfo,
     protocol_def: ProtocolDefinition,
   ) -> Result<Self, ButtplugError> {
@@ -128,6 +128,9 @@ impl SerialPortDeviceImpl {
       .find(|port| port_info.port_name == port.port)
       .unwrap();
 
+    // This seems like it should be a oneshot, but there's no way to await a
+    // value on those?
+    let (port_sender, mut port_receiver) = mpsc::channel(1);
     // Mostly just feeling lazy here and don't wanna do the enum conversions.
     /*
     settings.stop_bits = port_def.stop_bits;
@@ -135,11 +138,28 @@ impl SerialPortDeviceImpl {
     settings.parity = port_def.parity;
     */
     // TODO for now, assume 8/N/1. Not really sure when/if this would ever change.
-    let port = serialport::new(&port_info.port_name, port_def.baud_rate)
-      .timeout(Duration::from_millis(100))
-      .open()
-      .map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::SerialError(e.to_string()))))?;
+    let port_name = port_info.port_name.clone();
+    thread::Builder::new()
+      .name("Serial Port Connection Thread".to_string())
+      .spawn(move || {
+        debug!("Starting serial port connection thread for {}", port_name);
+        let port_result = serialport::new(&port_name, port_def.baud_rate)
+          .timeout(Duration::from_millis(100))
+          .open();
+        if port_sender.blocking_send(port_result)
+          .is_err() {
+            warn!("Serial port open thread did not return before serial device was dropped. Dropping port.");
+          }
+        debug!("Exiting serial port connection thread for {}", port_name);
+      })
+      .unwrap();
 
+    let port = port_receiver
+      .recv()
+      .await
+      .unwrap()
+      .map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::SerialError(e.to_string()))))?;
+    debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);
 
