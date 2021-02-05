@@ -14,7 +14,7 @@ exclude = ["examples/**"]
 [features]
 # Basic features
 default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
-#default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
+# default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 client=[]
 server=[]
 serialize-json=[]
@@ -36,7 +36,7 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-buttplug_derive = "0.6.1"
+buttplug_derive = "0.6.2"
 futures = { version = "0.3.12", features = ["thread-pool"] }
 futures-util = "0.3.12"
 async-trait = "0.1.42"
@@ -45,7 +45,7 @@ serde_json = "1.0.61"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.2", features = ["serde"] }
 url = "2.2.0"
-btleplug = { version = "0.5.5", optional = true }
+btleplug = { version = "0.6.0", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.20.1"
