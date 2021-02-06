@@ -12,6 +12,7 @@ use async_std::io;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::ButtplugInProcessClientConnector,
+  server::ButtplugServerOptions,
   util::async_manager,
 };
 // use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},  core::messages::serializer::ButtplugClientJSONSerializer};
@@ -29,8 +30,8 @@ async fn device_enumeration_example() {
 
   // Since we're going to need to manage our server and client, this example
   // will use an embedded connector.
-  let connector = ButtplugInProcessClientConnector::default();
-  //let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
+  // let connector = ButtplugInProcessClientConnector::default();
+  // let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
 
   // This example will also work with a WebsocketConnector if you want to
   // connect to Intiface Desktop or an intiface-cli instance.
@@ -102,8 +103,7 @@ async fn device_enumeration_example() {
   let client = ButtplugClient::new("test client");
   let mut event_stream = client.event_stream();
   client
-    //.connect_in_process(&ButtplugServerOptions::default())
-    .connect(connector)
+    .connect_in_process(&ButtplugServerOptions::default())
     .await
     .unwrap();
   // First, we'll start the server looking for devices.
