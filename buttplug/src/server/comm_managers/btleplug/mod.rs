@@ -21,7 +21,7 @@ use tokio::sync::{broadcast, mpsc::Sender, Notify};
 
 use btleplug::api::{BDAddr, Central, CentralEvent, Peripheral};
 #[cfg(target_os = "linux")]
-use btleplug::bluez::{adapter::ConnectedAdapter as Adapter, manager::Manager};
+use btleplug::bluez::{adapter::Adapter, manager::Manager};
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 #[cfg(target_os = "windows")]
@@ -51,13 +51,7 @@ impl BtlePlugCommunicationManager {
 
     let adapter = adapters.into_iter().next().unwrap();
 
-    // Have to use return statements here due to multiple cfg calls, otherwise
-    // parser gets unhappy?
-    #[cfg(not(target_os = "linux"))]
     return Some(adapter);
-
-    #[cfg(target_os = "linux")]
-    return Some(adapter.connect().unwrap());
   }
 
   fn setup_adapter(&mut self) {
