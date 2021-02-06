@@ -181,6 +181,9 @@ protocols:
         58300001-0023-4bd4-bbd5-a6920e4c5653: # Ferri
           tx: 58300002-0023-4bd4-bbd5-a6920e4c5653
           rx: 58300003-0023-4bd4-bbd5-a6920e4c5653
+        52300001-0023-4bd4-bbd5-a6920e4c5653: # Diamo
+          tx: 52300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 52300003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name:
         en-us: Lovense Device
