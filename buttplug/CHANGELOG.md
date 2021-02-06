@@ -1,3 +1,10 @@
+# 2.1.1 (2021-02-06)
+
+## Bugfixes
+
+- Fix compilation issue with btleplug in Linux and on CI
+- Fix device enumeration example to use all comm managers by default
+
 # 2.1.0 (2021-02-04)
 
 ## Features
