@@ -1,3 +1,9 @@
+# 2.1.2 (2021-02-07)
+
+## Bugfixes
+
+- #276: Fix StopAllDevices default id so it will still send in in-process situations.
+
 # 2.1.1 (2021-02-06)
 
 ## Bugfixes

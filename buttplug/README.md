@@ -152,7 +152,7 @@ latest and greatest hardware. We have multiple ways to donate!
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016-2020, Nonpolynomial, LLC
+    Copyright (c) 2016-2021, Nonpolynomial, LLC
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
