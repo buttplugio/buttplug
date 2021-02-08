@@ -9,11 +9,17 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct StopAllDevices {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
+}
+
+impl Default for StopAllDevices {
+  fn default() -> Self {
+    Self { id: 1 }
+  }
 }
 
 impl ButtplugMessageValidator for StopAllDevices {

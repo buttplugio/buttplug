@@ -2,7 +2,7 @@ mod util;
 extern crate buttplug;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent},
+  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
   connector::{
     ButtplugConnector,
     ButtplugConnectorError,
@@ -13,7 +13,9 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
+  device::{Endpoint, DeviceImplCommand, DeviceWriteCmd},
   server::ButtplugServerOptions,
+  test::check_test_recv_value,
   util::async_manager,
 };
 use futures::{future::BoxFuture, StreamExt};
@@ -202,6 +204,47 @@ fn test_client_ping() {
     Delay::new(Duration::from_millis(800)).await;
     // TODO Watch for ping events
     assert!(client.ping().await.is_err());
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_stop_all_devices() {
+  async_manager::block_on(async {
+    let connector = ButtplugInProcessClientConnector::default();
+    let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
+    let test_device = test_mgr_helper.add_ble_device("Massage Demo").await;
+    let client = ButtplugClient::new("Test Client");
+    let mut event_stream = client.event_stream();
+    client.connect(connector).await.unwrap();
+    assert!(client.start_scanning().await.is_ok());
+    while let Some(event) = event_stream.next().await {
+      if let ButtplugClientEvent::DeviceAdded(dev) = event {
+        assert!(dev.vibrate(VibrateCommand::Speed(0.5)).await.is_ok());
+        // Unlike protocol unit tests, here the endpoint doesn't exist until
+        // after device creation, so create the test receiver later.
+        let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
+        );
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
+        );
+        assert!(client.stop_all_devices().await.is_ok());
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+        );
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
+        );
+        break;
+      }
+    }
+    assert!(client.stop_all_devices().await.is_ok());
   });
 }
 
