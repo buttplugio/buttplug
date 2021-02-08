@@ -21,9 +21,13 @@ use crate::{
   },
 };
 use futures::future::BoxFuture;
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  thread,
+  time::Duration,
 };
 use tokio::sync::Mutex;
 
@@ -57,6 +61,10 @@ impl ButtplugProtocol for Lovense {
     device_impl: &DeviceImpl,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
+
+    // Need the 150ms delay here for some devices
+    thread::sleep(Duration::from_millis(150));
+
     let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
     let info_fut = device_impl.write_value(msg);
     let mut event_receiver = device_impl.event_stream();
