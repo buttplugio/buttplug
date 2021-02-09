@@ -20,11 +20,15 @@ use crate::{
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use futures::{FutureExt, future::BoxFuture};
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  time::Duration,
 };
+use futures_timer::Delay;
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
@@ -56,29 +60,41 @@ impl ButtplugProtocol for Lovense {
   fn initialize(
     device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
-    let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
-    let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
-    let info_fut = device_impl.write_value(msg);
-    let mut event_receiver = device_impl.event_stream();
     Box::pin(async move {
+      let mut event_receiver = device_impl.event_stream();
       let identifier;
-      subscribe_fut.await?;
-      info_fut.await?;
-      // TODO Put some sort of very quick timeout here, we should just fail if
-      // we don't get something back quickly.
-      if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event_receiver.recv().await {
-        let type_response = std::str::from_utf8(&n).unwrap().to_owned();
-        info!("Lovense Device Type Response: {}", type_response);
-        identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-        Ok(Some(identifier))
-      } else {
-        Err(
-          ButtplugDeviceError::ProtocolSpecificError(
-            "Lovense".to_owned(),
-            "Lovense Device disconnected while getting DeviceType info.".to_owned(),
+      device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx)).await?;
+      // Some knockoff devices need a small bit of time between subscription and
+      // queries, otherwise they never return after the query is sent.
+      Delay::new(Duration::from_millis(150)).await;
+      let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+      device_impl.write_value(msg).await?;
+      select! {
+        event = event_receiver.recv().fuse() => {
+          if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+            let type_response = std::str::from_utf8(&n).unwrap().to_owned();
+            info!("Lovense Device Type Response: {}", type_response);
+            identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
+            Ok(Some(identifier))
+          } else {
+            Err(
+              ButtplugDeviceError::ProtocolSpecificError(
+                "Lovense".to_owned(),
+                "Lovense Device disconnected while getting DeviceType info.".to_owned(),
+              )
+              .into(),
+            )
+          }
+        }
+        _ = Delay::new(Duration::from_millis(500)).fuse() => {
+          Err(
+            ButtplugDeviceError::ProtocolSpecificError(
+              "Lovense".to_owned(),
+              "Lovense Device timed out while getting DeviceType info.".to_owned(),
+            )
+            .into()
           )
-          .into(),
-        )
+        }
       }
     })
   }
