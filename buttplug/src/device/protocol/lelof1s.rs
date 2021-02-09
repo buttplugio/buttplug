@@ -38,7 +38,7 @@ impl ButtplugProtocol for LeloF1s {
   }
 
   fn initialize(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on

@@ -40,7 +40,7 @@ impl ButtplugProtocol for XInput {
   }
 
   fn initialize(
-    _device_impl: &DeviceImpl,
+    _device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
   where
     Self: Sized,

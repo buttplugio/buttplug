@@ -133,7 +133,7 @@ impl TryFrom<&str> for ProtocolTypes {
 
 pub fn try_create_protocol(
   protocol_type: &ProtocolTypes,
-  device: &DeviceImpl,
+  device: Arc<DeviceImpl>,
   config: DeviceProtocolConfiguration,
 ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
   match protocol_type {
@@ -173,7 +173,7 @@ pub fn try_create_protocol(
 
 pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
   fn try_create(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
     config: DeviceProtocolConfiguration,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
   where
@@ -194,7 +194,7 @@ pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
   }
 
   fn initialize(
-    _device_impl: &DeviceImpl,
+    _device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
   where
     Self: Sized,

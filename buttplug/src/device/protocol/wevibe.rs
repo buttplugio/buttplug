@@ -41,7 +41,7 @@ impl ButtplugProtocol for WeVibe {
   }
 
   fn initialize(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(

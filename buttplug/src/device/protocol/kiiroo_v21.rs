@@ -57,7 +57,7 @@ impl ButtplugProtocol for KiirooV21 {
   }
 
   fn initialize(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     debug!("calling Onyx+ init");
     let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(

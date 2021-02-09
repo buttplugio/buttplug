@@ -58,7 +58,7 @@ impl ButtplugProtocol for MysteryVibe {
   }
 
   fn initialize(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     let info_fut = device_impl.write_value(msg);

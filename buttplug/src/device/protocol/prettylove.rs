@@ -37,7 +37,7 @@ impl ButtplugProtocol for PrettyLove {
   }
 
   fn initialize(
-    _device_impl: &DeviceImpl,
+    _device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // Pretty Love devices have wildcarded names of Aogu BLE *
     // Force the identifier lookup to "Aogu BLE"

@@ -426,10 +426,10 @@ impl PartialEq for ButtplugDevice {
 }
 
 impl ButtplugDevice {
-  pub fn new(protocol: Box<dyn ButtplugProtocol>, device: DeviceImpl) -> Self {
+  pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
     Self {
       protocol,
-      device: Arc::new(device),
+      device,
     }
   }
 
@@ -469,10 +469,11 @@ impl ButtplugDevice {
               // whatever it needs. For most protocols, this is a no-op. However, for
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
-              match protocol::try_create_protocol(&proto_type, &device_impl, device_protocol_config)
+              let sharable_device_impl = Arc::new(device_impl);
+              match protocol::try_create_protocol(&proto_type, sharable_device_impl.clone(), device_protocol_config)
                 .await
               {
-                Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, device_impl))),
+                Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, sharable_device_impl))),
                 Err(e) => Err(e),
               }
             }

@@ -55,7 +55,7 @@ impl ButtplugProtocol for KiirooV2 {
   }
 
   fn initialize(
-    device_impl: &DeviceImpl,
+    device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);

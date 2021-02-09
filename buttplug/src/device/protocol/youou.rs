@@ -39,7 +39,7 @@ impl ButtplugProtocol for Youou {
   }
 
   fn initialize(
-    _device_impl: &DeviceImpl,
+    _device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
