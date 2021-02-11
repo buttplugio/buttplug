@@ -31,6 +31,10 @@ use std::{
 use futures_timer::Delay;
 use tokio::sync::Mutex;
 
+// Constants for dealing with the Lovense subscript/write race condition
+const LOVENSE_COMMAND_TIMEOUT_MS: u64 = 150;
+const LOVENSE_COMMAND_RETRY: u64 = 5;
+
 #[derive(ButtplugProtocolProperties)]
 pub struct Lovense {
   name: String,
@@ -63,37 +67,44 @@ impl ButtplugProtocol for Lovense {
     Box::pin(async move {
       let mut event_receiver = device_impl.event_stream();
       let identifier;
-      device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx)).await?;
-      // Some knockoff devices need a small bit of time between subscription and
-      // queries, otherwise they never return after the query is sent.
-      Delay::new(Duration::from_millis(150)).await;
-      let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
-      device_impl.write_value(msg).await?;
-      select! {
-        event = event_receiver.recv().fuse() => {
-          if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
-            let type_response = std::str::from_utf8(&n).unwrap().to_owned();
-            info!("Lovense Device Type Response: {}", type_response);
-            identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-            Ok(Some(identifier))
-          } else {
-            Err(
-              ButtplugDeviceError::ProtocolSpecificError(
-                "Lovense".to_owned(),
-                "Lovense Device disconnected while getting DeviceType info.".to_owned(),
-              )
-              .into(),
-            )
+      let mut count = 0;
+      device_impl
+        .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx))
+        .await?;
+
+      loop {
+        let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+        device_impl.write_value(msg).await?;
+
+        select! {
+          event = event_receiver.recv().fuse() => {
+            if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+              let type_response = std::str::from_utf8(&n).unwrap().to_owned();
+              info!("Lovense Device Type Response: {}", type_response);
+              identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
+              return Ok(Some(identifier));
+            } else {
+              return Err(
+                ButtplugDeviceError::ProtocolSpecificError(
+                  "Lovense".to_owned(),
+                  "Lovense Device disconnected while getting DeviceType info.".to_owned(),
+                )
+                .into(),
+              );
+            }
           }
-        }
-        _ = Delay::new(Duration::from_millis(500)).fuse() => {
-          Err(
-            ButtplugDeviceError::ProtocolSpecificError(
-              "Lovense".to_owned(),
-              "Lovense Device timed out while getting DeviceType info.".to_owned(),
-            )
-            .into()
-          )
+          _ = Delay::new(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
+            count += 1;
+            if count > LOVENSE_COMMAND_RETRY {
+              return Err(
+                ButtplugDeviceError::ProtocolSpecificError(
+                  "Lovense".to_owned(),
+                  format!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY).to_owned(),
+                )
+                .into()
+              );
+            }
+          }
         }
       }
     })
