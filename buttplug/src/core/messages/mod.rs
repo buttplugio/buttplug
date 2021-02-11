@@ -163,7 +163,7 @@ pub trait ButtplugMessageValidator {
   }
 
   fn is_in_command_range(&self, value: f64, error_msg: String) -> Result<(), ButtplugMessageError> {
-    if !(0.0..1.0).contains(&value) {
+    if !(0.0..=1.0).contains(&value) {
       Err(ButtplugMessageError::InvalidMessageContents(error_msg))
     } else {
       Ok(())

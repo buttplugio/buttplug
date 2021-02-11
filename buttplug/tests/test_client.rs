@@ -207,9 +207,11 @@ fn test_client_ping() {
   });
 }
 
+// Tests both the stop all devices functionality, as well as both ends of the
+// command range for is_in_command_range message validation.
 #[cfg(feature = "server")]
 #[test]
-fn test_stop_all_devices() {
+fn test_stop_all_devices_and_device_command_range() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();
     let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
@@ -231,6 +233,15 @@ fn test_stop_all_devices() {
         check_test_recv_value(
           &command_receiver,
           DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
+        );
+        assert!(dev.vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 127], false)),
+        );
+        check_test_recv_value(
+          &command_receiver,
+          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 127], false)),
         );
         assert!(client.stop_all_devices().await.is_ok());
         check_test_recv_value(
