@@ -76,6 +76,7 @@ hidapi = { version = "1.2.5", optional = true }
 wasm-bindgen = { version = "0.2.70", optional = true }
 tokio = { version = "1.2.0", features = ["sync"] }
 async-stream = "0.3.0"
+prost = "0.7.0"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
@@ -102,3 +103,6 @@ doc = true
 targets = []
 # Features to pass to Cargo (default: [])
 features = ["default", "unstable"]
+
+[build-dependencies]
+prost-build = "0.6.1"

@@ -22,6 +22,7 @@ mod prettylove;
 mod raw_protocol;
 mod realov;
 mod svakom;
+mod thehandy;
 mod vibratissimo;
 mod vorze_sa;
 mod wevibe;
@@ -80,6 +81,7 @@ pub enum ProtocolTypes {
   RawProtocol,
   Realov,
   Svakom,
+  TheHandy,
   Vibratissimo,
   VorzeSA,
   WeVibe,
@@ -116,6 +118,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "raw" => Ok(ProtocolTypes::RawProtocol),
       "realov" => Ok(ProtocolTypes::Realov),
       "svakom" => Ok(ProtocolTypes::Svakom),
+      "thehandy" => Ok(ProtocolTypes::TheHandy),
       "vibratissimo" => Ok(ProtocolTypes::Vibratissimo),
       "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
       "wevibe" => Ok(ProtocolTypes::WeVibe),
@@ -161,6 +164,7 @@ pub fn try_create_protocol(
     ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
     ProtocolTypes::Realov => realov::Realov::try_create(device, config),
     ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
+    ProtocolTypes::TheHandy => thehandy::TheHandy::try_create(device, config),
     ProtocolTypes::Vibratissimo => vibratissimo::Vibratissimo::try_create(device, config),
     ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
     ProtocolTypes::WeVibe => wevibe::WeVibe::try_create(device, config),

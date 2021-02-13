@@ -1,0 +1,138 @@
+syntax = "proto3";
+package handyplug;
+
+/*
+[
+  {
+    "Ok": {
+      "Id": 1
+    }
+  }
+]
+*/
+
+message Ok {
+    uint32 Id = 1;
+}
+
+/*
+[
+  {
+    "Error": {
+      "Id": 1,
+      "ErrorMessage": "Server received invalid JSON.",
+      "ErrorCode": 3
+    }
+  }
+]
+*/
+
+message Error {
+    uint32 Id = 1;
+    string ErrorMessage = 2;
+    int32 ErrorCode = 3;
+}
+
+/*
+[
+  {
+    "Ping": {
+      "Id": 1
+    }
+  }
+]
+*/
+
+message Ping {
+    uint32 Id = 1;
+}
+
+/*
+[
+  {
+    "RequestServerInfo": {
+      "Id": 1,
+      "ClientName": "Test Client",
+      "MessageVersion": 1
+    }
+  }
+]
+*/
+
+message RequestServerInfo {
+  uint32 Id = 1;
+  string ClientName = 2;
+  uint32 MessageVersion = 3;
+}
+
+/*
+[
+  {
+    "ServerInfo": {
+      "Id": 1,
+      "ServerName": "Test Server",
+      "MessageVersion": 1,
+      "MaxPingTime": 100
+    }
+  }
+]
+*/
+
+message ServerInfo {
+  uint32 Id = 1;
+  string ServerName = 2;
+  uint32 MessageVersion = 3;
+  uint32 MaxPingTime = 4;
+}
+
+/*
+[
+  {
+    "LinearCmd": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "Vectors": [
+        {
+          "Index": 0,
+          "Duration": 500,
+          "Position": 0.3
+        },
+        {
+          "Index": 1,
+          "Duration": 1000,
+          "Position": 0.8
+        }
+      ]
+    }
+  }
+]
+*/
+
+message LinearCmd {
+    uint32 Id = 1;
+    uint32 DeviceIndex = 2;
+    message Vector {
+        uint32 Index = 1;
+        uint32 Duration = 2;
+        double Position = 3;
+    }
+    repeated Vector Vectors = 3;
+}
+
+message Message {
+    oneof Message {
+        /* Status Messages */
+        Ok Ok = 100;
+        Error Error = 101;
+        Ping Ping = 102;
+        /* Handshake Messages */
+        RequestServerInfo RequestServerInfo = 200;
+        ServerInfo ServerInfo = 201;
+        /* Generic Device Messages */
+        LinearCmd LinearCmd = 403;
+    }
+}
+
+message Payload { 
+    repeated Message Messages = 1;
+}

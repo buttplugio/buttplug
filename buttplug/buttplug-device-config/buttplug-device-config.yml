@@ -1524,6 +1524,26 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 15
+  thehandy:
+    btle:
+      names:
+        - The Handy
+      services:
+        1775244d-6b43-439b-877c-060f2d9bed07:
+          # This is 'prov-session' in protocomm, required for establishing the
+          # connection session.
+          firmware: 1775ff51-6b43-439b-877c-060f2d9bed07
+          # This is both the main tx AND rx. God damnit, handy.
+          tx: 1775ff55-6b43-439b-877c-060f2d9bed07
+          # There are 5 other characteristics, all of which seem to be unused.
+    defaults:
+      name:
+        en-us: The Handy         
+      messages:
+        LinearCmd:
+          FeatureCount: 1
+          StepCount:
+            - 100        
   # lovenuts:
   #   btle:
   #     names:

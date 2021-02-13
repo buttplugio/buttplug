@@ -1,0 +1,100 @@
+syntax = "proto3";
+package protocomm;
+
+/* Allowed values for the status
+ * of a protocomm instance */
+ enum Status {
+  Success = 0;
+  InvalidSecScheme = 1;
+  InvalidProto = 2;
+  TooManySessions = 3;
+  InvalidArgument = 4;
+  InternalError = 5;
+  CryptoError = 6;
+  InvalidSession = 7;
+}
+
+/* Data structure of Session command/request packet */
+message S0SessionCmd {
+
+}
+
+/* Data structure of Session response packet */
+message S0SessionResp {
+    Status status = 1;
+}
+
+/* A message must be of type Cmd or Resp */
+enum Sec0MsgType {
+    S0_Session_Command = 0;
+    S0_Session_Response = 1;
+}
+
+/* Payload structure of session data */
+message Sec0Payload {
+    Sec0MsgType msg = 1;        /*!< Type of message */
+    oneof payload {
+        S0SessionCmd sc = 20;   /*!< Payload data interpreted as Cmd */
+        S0SessionResp sr = 21;  /*!< Payload data interpreted as Resp */
+    }
+}
+
+/* Data structure of Session command1 packet */
+message SessionCmd1 {
+  bytes client_verify_data = 2;
+}
+
+/* Data structure of Session response1 packet */
+message SessionResp1 {
+  Status status = 1;
+  bytes device_verify_data = 3;
+}
+
+/* Data structure of Session command0 packet */
+message SessionCmd0 {
+  bytes client_pubkey = 1;
+}
+
+/* Data structure of Session response0 packet */
+message SessionResp0 {
+  Status status = 1;
+  bytes device_pubkey = 2;
+  bytes device_random = 3;
+}
+
+/* A message must be of type Cmd0 / Cmd1 / Resp0 / Resp1 */
+enum Sec1MsgType {
+  Session_Command0 = 0;
+  Session_Response0 = 1;
+  Session_Command1 = 2;
+  Session_Response1 = 3;
+}
+
+/* Payload structure of session data */
+message Sec1Payload {
+  Sec1MsgType msg = 1;        /*!< Type of message */
+  oneof payload {
+      SessionCmd0 sc0 = 20;   /*!< Payload data interpreted as Cmd0 */
+      SessionResp0 sr0 = 21;  /*!< Payload data interpreted as Resp0 */
+      SessionCmd1 sc1 = 22;   /*!< Payload data interpreted as Cmd1 */
+      SessionResp1 sr1 = 23;  /*!< Payload data interpreted as Resp1 */
+  }
+}
+
+
+/* Allowed values for the type of security
+ * being used in a protocomm session */
+enum SecSchemeVersion {
+    SecScheme0 = 0; /*!< Unsecured - plaintext communication */
+    SecScheme1 = 1; /*!< Security scheme 1 - Curve25519 + AES-256-CTR*/
+}
+
+/* Data structure exchanged when establishing
+ * secure session between Host and Client */
+message SessionData {
+    SecSchemeVersion sec_ver = 2;   /*!< Type of security */
+    oneof proto {
+        Sec0Payload sec0 = 10;      /*!< Payload data in case of security 0 */
+        Sec1Payload sec1 = 11;      /*!< Payload data in case of security 1 */
+    }
+}
