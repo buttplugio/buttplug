@@ -122,13 +122,18 @@ impl LovenseDongleDeviceImpl {
           continue;
         }
         let data_str = msg.data.unwrap().data.unwrap();
-        device_event_sender_clone
+        if device_event_sender_clone
           .send(ButtplugDeviceEvent::Notification(
             address_clone.clone(),
             Endpoint::Rx,
             data_str.into_bytes(),
-          ))
-          .unwrap();
+          )).is_err() {
+            // This sometimes happens with the serial dongle, not sure why. I
+            // think it may have to do some sort of connection timing. It seems
+            // like we can continue through it and be fine? Who knows. God I
+            // hate the lovense dongle.
+            error!("Can't send to device event sender, continuing Lovense dongle loop.");
+          }
       }
       info!("Lovense dongle device disconnected",);
       // This should always succeed, as it'll relay up to the device manager,
