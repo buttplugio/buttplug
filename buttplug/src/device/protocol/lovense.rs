@@ -31,8 +31,12 @@ use std::{
 use futures_timer::Delay;
 use tokio::sync::Mutex;
 
-// Constants for dealing with the Lovense subscript/write race condition
-const LOVENSE_COMMAND_TIMEOUT_MS: u64 = 150;
+// Constants for dealing with the Lovense subscript/write race condition. The
+// timeout needs to be VERY long, otherwise this trips up old lovense serial
+// adapters.
+//
+// Just buy new adapters, people.
+const LOVENSE_COMMAND_TIMEOUT_MS: u64 = 500;
 const LOVENSE_COMMAND_RETRY: u64 = 5;
 
 #[derive(ButtplugProtocolProperties)]
