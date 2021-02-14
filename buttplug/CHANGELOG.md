@@ -1,3 +1,15 @@
+# 2.1.4 (2021-02-13)
+
+## Features
+
+- Additional Hardware Support
+  - The Handy
+
+## Bugfixes
+
+- #280 - Lovense Serial Dongle had some timing issues that caused a thread panic
+- #277 - Add retry loop for communicating with LoveAi Dolp and other toys 
+
 # 2.1.3 (2021-02-10)
 
 ## Bugfixes
