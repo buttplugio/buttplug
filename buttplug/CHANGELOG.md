@@ -1,3 +1,12 @@
+# 2.1.5 (2021-02-20)
+
+## Bugfixes
+
+- #283: Fix timing to connection status update in Client, reducing the possibility of races with the
+  server handshake.
+- #284: Fix issue where devices can cause panics if they disconnect in
+  ButtplugProtocol::initialize()
+
 # 2.1.4 (2021-02-13)
 
 ## Features
