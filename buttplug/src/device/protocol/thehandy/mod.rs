@@ -14,7 +14,7 @@ use crate::{
 };
 use futures::future::{self, BoxFuture};
 use std::sync::Arc;
-use tokio::sync::Mutex;
+// use tokio::sync::Mutex;
 use prost::Message;
 
 mod protocomm {
@@ -29,7 +29,7 @@ mod handyplug {
 pub struct TheHandy {
   name: String,
   message_attributes: DeviceMessageAttributesMap,
-  manager: Arc<Mutex<GenericCommandManager>>,
+  //_manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
@@ -48,7 +48,7 @@ impl ButtplugProtocol for TheHandy {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
+      //_manager: Arc::new(Mutex::new(manager)),
     })
   }
 
