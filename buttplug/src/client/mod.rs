@@ -347,11 +347,10 @@ impl ButtplugClient {
   /// handshake. Will return a connected and ready to use ButtplugClient is all
   /// goes well.
   async fn run_handshake(&self) -> ButtplugClientResult {
-    self.connected.store(true, Ordering::SeqCst);
     // Run our handshake
     info!("Running handshake with server.");
     let msg = self
-      .send_message(
+      .send_message_ignore_connect_status(
         RequestServerInfo::new(&self.client_name, ButtplugMessageSpecVersion::Version2).into(),
       )
       .await?;
@@ -360,7 +359,10 @@ impl ButtplugClient {
     if let ButtplugCurrentSpecServerMessage::ServerInfo(server_info) = msg {
       info!("Connected to {}", server_info.server_name());
       *self.server_name.lock().await = Some(server_info.server_name().clone());
-      // TODO Handle ping time in the internal event loop
+      // Don't set ourselves as connected until after ServerInfo has been
+      // received. This means we avoid possible races with the RequestServerInfo
+      // handshake.
+      self.connected.store(true, Ordering::SeqCst);
 
       // Get currently connected devices. The event loop will
       // handle sending the message and getting the return, and
@@ -370,7 +372,7 @@ impl ButtplugClient {
         .await?;
       if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
         self
-          .send_internal_message(ButtplugClientRequest::HandleDeviceList(m))
+          .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))
           .await?;
       }
       Ok(())
@@ -392,12 +394,17 @@ impl ButtplugClient {
   /// Returns Err(ButtplugClientError) if disconnection fails. It can be assumed
   /// that even on failure, the client will be disconnected.
   pub fn disconnect(&self) -> ButtplugClientResultFuture {
+    if !self.connected() {
+      return Box::pin(future::ready(Err(
+        ButtplugConnectorError::ConnectorNotConnected.into(),
+      )));
+    }
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
     // further communications with the server, if connection is successful.
     let fut = ButtplugConnectorFuture::default();
     let msg = ButtplugClientRequest::Disconnect(fut.get_state_clone());
-    let send_fut = self.send_internal_message(msg);
+    let send_fut = self.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
     Box::pin(async move {
       send_fut.await?;
@@ -443,16 +450,10 @@ impl ButtplugClient {
   /// Send message to the internal event loop.
   ///
   /// Mostly for handling boilerplate around possible send errors.
-  fn send_internal_message(
+  fn send_message_to_event_loop(
     &self,
     msg: ButtplugClientRequest,
   ) -> BoxFuture<'static, Result<(), ButtplugClientError>> {
-    if !self.connected.load(Ordering::SeqCst) {
-      return Box::pin(future::ready(Err(
-        ButtplugConnectorError::ConnectorNotConnected.into(),
-      )));
-    }
-
     // If we're running the event loop, we should have a message_sender.
     // Being connected to the server doesn't matter here yet because we use
     // this function in order to connect also.
@@ -468,9 +469,22 @@ impl ButtplugClient {
     })
   }
 
+  fn send_message(
+    &self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugServerMessageResultFuture {
+    if !self.connected() {
+      Box::pin(future::ready(Err(
+        ButtplugConnectorError::ConnectorNotConnected.into(),
+      )))
+    } else {
+      self.send_message_ignore_connect_status(msg)
+    }
+  }
+
   /// Sends a ButtplugMessage from client to server. Expects to receive a
   /// ButtplugMessage back from the server.
-  fn send_message(
+  fn send_message_ignore_connect_status(
     &self,
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugServerMessageResultFuture {
@@ -482,7 +496,7 @@ impl ButtplugClient {
     ));
 
     // Send message to internal loop and wait for return.
-    let send_fut = self.send_internal_message(internal_msg);
+    let send_fut = self.send_message_to_event_loop(internal_msg);
     Box::pin(async move {
       send_fut.await?;
       fut.await
