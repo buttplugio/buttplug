@@ -347,8 +347,15 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           "Device {:?} disconnected",
           self.device.properties().local_name
         );
-        // This should always succeed, as it'll relay up to the device manager,
-        // and that's what owns us.
+
+        // If output_sender isn't hooked up to anything (for instance, if we
+        // disconnect while initializing), we have no one to relay this info to.
+        // However, that doesn't really matter because we won't have emitted the
+        // device as connected yet.
+        if self.output_sender.receiver_count() == 0 {
+          return true;
+        }
+
         self
           .output_sender
           .send(ButtplugDeviceEvent::Removed(
