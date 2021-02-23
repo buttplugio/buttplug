@@ -2110,7 +2110,8 @@
       "btle": {
         "names": [
           "PROSTATE VIBE",
-          "KNICKER VIBE"
+          "KNICKER VIBE",
+          "LOVE EGG"
         ],
         "services": {
           "0000ff00-0000-1000-8000-00805f9b34fb": {
@@ -2147,6 +2148,22 @@
           ],
           "name": {
             "en-us": "Lovehoney Desire Knicker Vibrator"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                127
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "LOVE EGG"
+          ],
+          "name": {
+            "en-us": "Lovehoney Desire Love Egg"
           },
           "messages": {
             "VibrateCmd": {
