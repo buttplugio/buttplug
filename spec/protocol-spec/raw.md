@@ -74,7 +74,7 @@ sequenceDiagram
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "tx",
-      "Data": [0x0, 0x1, 0x0],
+      "Data": [0, 1, 0],
       "WriteWithResponse": false
     }
   }
@@ -154,7 +154,7 @@ endpoint.
       "Id": 1,
       "DeviceIndex": 0,
       "Endpoint": "rx",
-      "Data": [0x0, 0x1, 0x0]
+      "Data": [0, 1, 0]
     }
   }
 ]
