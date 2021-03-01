@@ -136,7 +136,7 @@ impl DeviceManagerEventLoop {
   }
 
   async fn handle_device_event(&mut self, device_event: ButtplugDeviceEvent) {
-    info!("Got device event: {:?}", device_event);
+    trace!("Got device event: {:?}", device_event);
     match device_event {
       ButtplugDeviceEvent::Connected(device) => {
         let generated_device_index = self.device_index_generator;
