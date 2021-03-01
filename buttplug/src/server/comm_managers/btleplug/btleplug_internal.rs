@@ -138,7 +138,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
             break;
           }
         }
-        _ => warn!("Got unexpected message {:?}", event),
+        wrong_event => warn!("Got unexpected message {:?}", wrong_event),
       }
     }
     // Map UUIDs to endpoints
