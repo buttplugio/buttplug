@@ -1,3 +1,14 @@
+# 2.1.6 (2021-02-28)
+
+## Features
+
+- Update to btleplug v0.7
+  - Mostly bugfixes and cleanup
+
+## Bugfixes
+
+- Remove info level message that fires on every btle characteristic notification.
+
 # 2.1.5 (2021-02-20)
 
 ## Bugfixes
