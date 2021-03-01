@@ -4,6 +4,7 @@
 
 - Update to btleplug v0.7
   - Mostly bugfixes and cleanup
+- Add device support for the Lovehoney Desire Love Egg
 
 ## Bugfixes
 
