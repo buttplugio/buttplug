@@ -45,7 +45,7 @@ serde_json = "1.0.62"
 serde_repr = "0.1.6"
 uuid = { version = "0.8.2", features = ["serde"] }
 url = "2.2.0"
-btleplug = { version = "0.6.0", optional = true }
+btleplug = { version = "0.7.0", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.20.1"
@@ -57,7 +57,7 @@ byteorder = "1.4.2"
 # Slam valico to 3.4.0 until they update their dependencies to not use old
 # libraries. 3.5.0 breaks a lot, including WASM.
 valico = "=3.4.0"
-thiserror = "1.0.23"
+thiserror = "1.0"
 async-tungstenite = { version = "0.12.0", features = ["async-std-runtime", "async-tls"], optional = true }
 # Needs to stay in line with async-tungstenite's version
 async-tls = { version = "0.11.0", optional = true }

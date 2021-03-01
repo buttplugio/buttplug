@@ -19,7 +19,8 @@ use crate::{
     future::{ButtplugFuture, ButtplugFutureStateShared},
   },
 };
-use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, UUID};
+use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType};
+use uuid::Uuid;
 use futures::FutureExt;
 use std::collections::HashMap;
 use tokio::sync::{broadcast, mpsc};
@@ -40,12 +41,6 @@ pub struct BtlePlugInternalEventLoop<T: Peripheral> {
   event_receiver: mpsc::Receiver<CentralEvent>,
   output_sender: broadcast::Sender<ButtplugDeviceEvent>,
   endpoints: HashMap<Endpoint, Characteristic>,
-}
-
-fn uuid_to_rumble(uuid: &uuid::Uuid) -> UUID {
-  let mut rumble_uuid = *uuid.as_bytes();
-  rumble_uuid.reverse();
-  UUID::B128(rumble_uuid)
 }
 
 impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
@@ -147,7 +142,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       }
     }
     // Map UUIDs to endpoints
-    let mut uuid_map = HashMap::<UUID, Endpoint>::new();
+    let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let chars = match self.device.discover_characteristics() {
       Ok(chars) => chars,
       Err(err) => {
@@ -163,10 +158,10 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     };
     for proto_service in self.protocol.services.values() {
       for (chr_name, chr_uuid) in proto_service.iter() {
-        let maybe_chr = chars.iter().find(|c| c.uuid == uuid_to_rumble(chr_uuid));
+        let maybe_chr = chars.iter().find(|c| c.uuid == *chr_uuid);
         if let Some(chr) = maybe_chr {
           self.endpoints.insert(*chr_name, chr.clone());
-          uuid_map.insert(uuid_to_rumble(chr_uuid), *chr_name);
+          uuid_map.insert(*chr_uuid, *chr_name);
         }
       }
     }
@@ -219,7 +214,12 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
   fn handle_write(&mut self, write_msg: &DeviceWriteCmd, state: &mut DeviceReturnStateShared) {
     match self.endpoints.get(&write_msg.endpoint) {
       Some(chr) => {
-        if let Err(err) = self.device.command(&chr, &write_msg.data) {
+        let write_type = if write_msg.write_with_response {
+          WriteType::WithResponse
+        } else {
+          WriteType::WithoutResponse
+        };
+        if let Err(err) = self.device.write(&chr, &write_msg.data, write_type) {
           error!("BTLEPlug device write error: {:?}", err);
         } else {
           state.set_reply(ButtplugDeviceReturn::Ok(messages::Ok::default()));
