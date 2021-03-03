@@ -214,7 +214,6 @@ sequenceDiagram
           "DeviceName": "TestDevice 1",
           "DeviceIndex": 0,
           "DeviceMessages": {
-            "SingleMotorVibrateCmd": {},
             "VibrateCmd": { "FeatureCount": 2 },
             "StopDeviceCmd": {}
           }
@@ -223,7 +222,6 @@ sequenceDiagram
           "DeviceName": "TestDevice 2",
           "DeviceIndex": 1,
           "DeviceMessages": {
-            "FleshlightLaunchFW12Cmd": {},
             "LinearCmd": { "FeatureCount": 1 },
             "StopDeviceCmd": {}
           }
@@ -282,7 +280,6 @@ sequenceDiagram
       "DeviceName": "TestDevice 1",
       "DeviceIndex": 0,
       "DeviceMessages": {
-        "SingleMotorVibrateCmd": {},
         "VibrateCmd": { "FeatureCount": 2 },
         "StopDeviceCmd": {}
       }
