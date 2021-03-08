@@ -1210,6 +1210,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
+          VorzeA10CycloneCmd: {}
       - identifier:
           - UFOSA
         name:
@@ -1219,6 +1220,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
+          VorzeA10CycloneCmd: {}
       - identifier:
           - VorzePiston
         name:
