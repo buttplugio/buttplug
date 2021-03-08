@@ -1010,15 +1010,10 @@ protocols:
   kiiroo-v21:
     btle:
       names:
-        - Rey # Branded Realm
-        - We-Vibe Rocketman # Rey alias
-        - Onyx2.1
-        - Onyx+
         - Titan1.1
         - Cliona
         - Pearl2.1
         - OhMiBod 4.0
-        - KEON
       services:
         00001900-0000-1000-8000-00805f9b34fb:
           # Used to clear the whitelist
@@ -1074,6 +1069,25 @@ protocols:
             StepCount:
               - 99
           FleshlightLaunchFW12Cmd: {}
+  kiiroo-v21-initialized:
+    btle:
+      names:
+        - Rey # Branded Realm
+        - We-Vibe Rocketman # Rey alias
+        - Onyx2.1
+        - Onyx+
+        - KEON
+      services:
+        00001900-0000-1000-8000-00805f9b34fb:
+          # Used to clear the whitelist
+          whitelist: 00001901-0000-1000-8000-00805f9b34fb
+          tx: 00001902-0000-1000-8000-00805f9b34fb
+          rx: 00001903-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Kiiroo V2.1 Initialized Device
+      messages: { }
+    configurations:
       - identifier:
           - Onyx2.1
         name:
@@ -1083,7 +1097,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
-          FleshlightLaunchFW12Cmd: {}
+          FleshlightLaunchFW12Cmd: { }
       - identifier:
           - Onyx+
         name:
@@ -1093,7 +1107,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
-          FleshlightLaunchFW12Cmd: {}
+          FleshlightLaunchFW12Cmd: { }
       - identifier:
           - KEON
         name:
@@ -1103,7 +1117,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
-          FleshlightLaunchFW12Cmd: {}
+          FleshlightLaunchFW12Cmd: { }
       - identifier:
           - Rey
           - We-Vibe Rocketman
@@ -1114,7 +1128,7 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 99
-          FleshlightLaunchFW12Cmd: {}
+          FleshlightLaunchFW12Cmd: { }
   vorze-cyclone-x:
     hid:
       - vendor-id: 0x0483
