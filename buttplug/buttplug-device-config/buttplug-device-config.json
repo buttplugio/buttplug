@@ -1399,15 +1399,10 @@
     "kiiroo-v21": {
       "btle": {
         "names": [
-          "Rey",
-          "We-Vibe Rocketman",
-          "Onyx2.1",
-          "Onyx+",
           "Titan1.1",
           "Cliona",
           "Pearl2.1",
-          "OhMiBod 4.0",
-          "KEON"
+          "OhMiBod 4.0"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -1498,7 +1493,33 @@
             },
             "FleshlightLaunchFW12Cmd": {}
           }
+        }
+      ]
+    },
+    "kiiroo-v21-initialized": {
+      "btle": {
+        "names": [
+          "Rey",
+          "We-Vibe Rocketman",
+          "Onyx2.1",
+          "Onyx+",
+          "KEON"
+        ],
+        "services": {
+          "00001900-0000-1000-8000-00805f9b34fb": {
+            "whitelist": "00001901-0000-1000-8000-00805f9b34fb",
+            "tx": "00001902-0000-1000-8000-00805f9b34fb",
+            "rx": "00001903-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Kiiroo V2.1 Initialized Device"
         },
+        "messages": {}
+      },
+      "configurations": [
         {
           "identifier": [
             "Onyx2.1"

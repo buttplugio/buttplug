@@ -3,6 +3,7 @@ mod fleshlight_launch_helper;
 mod generic_command_manager;
 mod kiiroo_v2;
 mod kiiroo_v21;
+mod kiiroo_v21_initialized;
 mod kiiroo_v2_vibrator;
 mod lelof1s;
 mod libo_elle;
@@ -63,6 +64,7 @@ pub enum ProtocolTypes {
   KiirooV2,
   KiirooV2Vibrator,
   KiirooV21,
+  KiirooV21Initialized,
   LeloF1s,
   LiboElle,
   LiboShark,
@@ -100,6 +102,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
       "kiiroo-v2-vibrator" => Ok(ProtocolTypes::KiirooV2Vibrator),
       "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
+      "kiiroo-v21-initialized" => Ok(ProtocolTypes::KiirooV21Initialized),
       "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
       "libo-elle" => Ok(ProtocolTypes::LiboElle),
       "libo-shark" => Ok(ProtocolTypes::LiboShark),
@@ -144,8 +147,11 @@ pub fn try_create_protocol(
     ProtocolTypes::KiirooV2 => kiiroo_v2::KiirooV2::try_create(device, config),
     ProtocolTypes::KiirooV2Vibrator => {
       kiiroo_v2_vibrator::KiirooV2Vibrator::try_create(device, config)
-    }
+    },
     ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
+    ProtocolTypes::KiirooV21Initialized => {
+      kiiroo_v21_initialized::KiirooV21Initialized::try_create(device, config)
+    },
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LiboElle => libo_elle::LiboElle::try_create(device, config),
     ProtocolTypes::LiboShark => libo_shark::LiboShark::try_create(device, config),

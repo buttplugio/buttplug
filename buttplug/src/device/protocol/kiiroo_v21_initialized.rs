@@ -6,6 +6,7 @@ use super::{
 };
 use crate::{
   core::{
+    errors::ButtplugError,
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
@@ -21,14 +22,17 @@ use crate::{
     Endpoint,
   },
 };
+use futures::future::BoxFuture;
+use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
 };
+use std::time::Duration;
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
-pub struct KiirooV21 {
+pub struct KiirooV21Initialized {
   name: String,
   message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -36,7 +40,7 @@ pub struct KiirooV21 {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for KiirooV21 {
+impl ButtplugProtocol for KiirooV21Initialized {
   fn new_protocol(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
@@ -51,9 +55,31 @@ impl ButtplugProtocol for KiirooV21 {
       previous_position: Arc::new(AtomicU8::new(0)),
     })
   }
+
+  fn initialize(
+    device_impl: Arc<DeviceImpl>,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+    debug!("calling Onyx+ init");
+    let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+      true,
+    ));
+    let init_fut2 = device_impl.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+      true,
+    ));
+    Box::pin(async move {
+      init_fut1.await?;
+      Delay::new(Duration::from_millis(100)).await;
+      init_fut2.await?;
+      Ok(None)
+    })
+  }
 }
 
-impl ButtplugProtocolCommandHandler for KiirooV21 {
+impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<DeviceImpl>,
@@ -132,12 +158,27 @@ mod test {
   };
 
   #[test]
-  #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
-  pub fn test_kiiroov21_fleshlight_fw12cmd() {
+  pub fn test_kiiroov21initialized_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
-      assert!(check_test_recv_empty(&command_receiver));
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      );
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      );
+
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
@@ -154,12 +195,26 @@ mod test {
   }
 
   #[test]
-  #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
-  pub fn test_kiiroov21_linearcmd() {
+  pub fn test_kiiroov21initialized_linearcmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
-      assert!(check_test_recv_empty(&command_receiver));
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      );
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      );
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await
@@ -176,11 +231,27 @@ mod test {
   }
 
   #[test]
-  pub fn test_kiiroov21_vibratecmd() {
+  #[ignore] // Disabled since none of the vibrator devices need initialisation yet
+  pub fn test_kiiroov21initialized_vibratecmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Cliona").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
-      assert!(check_test_recv_empty(&command_receiver));
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+          true,
+        )),
+      );
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+          true,
+        )),
+      );
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
