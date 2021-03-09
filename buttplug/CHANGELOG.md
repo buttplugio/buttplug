@@ -1,3 +1,17 @@
+# 2.1.7 (2021-03-08)
+
+## Features
+
+- Added LoveHoney Desire Egg hardware support
+- Handy now supports FleshlightLaunchFW12Cmd when using <= v1 of the protocol, meaning it will work
+  with ScriptPlayer and Syncydink
+- Vorze now supports VorzeA10CycloneCmd when using <= v1 of the protocol, meaning it will work with
+  ScriptPlayer and Syncydink
+
+# Bugfixes
+
+- #281: Split the Kiiroo v2.1 protocols into toys that require init, versus those that don't.
+
 # 2.1.6 (2021-02-28)
 
 ## Features
