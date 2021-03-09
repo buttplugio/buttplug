@@ -2291,7 +2291,8 @@
             "StepCount": [
               100
             ]
-          }
+          },
+          "FleshlightLaunchFW12Cmd": {}
         }
       }
     }

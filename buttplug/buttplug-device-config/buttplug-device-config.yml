@@ -1569,7 +1569,8 @@ protocols:
         LinearCmd:
           FeatureCount: 1
           StepCount:
-            - 100        
+            - 100
+        FleshlightLaunchFW12Cmd: {}    
   # lovenuts:
   #   btle:
   #     names:

@@ -1,8 +1,8 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler, fleshlight_launch_helper};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugDeviceError},
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap, ButtplugDeviceMessage},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -13,7 +13,7 @@ use crate::{
   },
 };
 use futures::future::{self, BoxFuture};
-use std::sync::Arc;
+use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
 // use tokio::sync::Mutex;
 use prost::Message;
 
@@ -31,6 +31,11 @@ pub struct TheHandy {
   message_attributes: DeviceMessageAttributesMap,
   //_manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  // The generic command manager would normally handle this storage, but the
+  // only reason we're retaining tracking information is to build our fucking
+  // timing calculation for the fleshlight command backport. I am so mad right
+  // now.
+  previous_position: Arc<AtomicU8>
 }
 
 
@@ -49,6 +54,7 @@ impl ButtplugProtocol for TheHandy {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       //_manager: Arc::new(Mutex::new(manager)),
+      previous_position: Arc::new(AtomicU8::new(0))
     })
   }
 
@@ -112,8 +118,22 @@ impl ButtplugProtocol for TheHandy {
 }
 
 impl ButtplugProtocolCommandHandler for TheHandy {
+  fn handle_fleshlight_launch_fw12_cmd(&self, device: Arc<DeviceImpl>, message: messages::FleshlightLaunchFW12Cmd) -> ButtplugDeviceResultFuture {
+    // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
+    // work backward from fleshlight to my own Linear format that Handy uses.
+    //
+    // Building this library was a mistake.
+    let goal_position = message.position() as f64 / 100f64;
+    let previous_position = self.previous_position.load(Ordering::SeqCst) as f64 / 100f64;
+    self.previous_position.store(message.position(), Ordering::SeqCst);
+    let distance = (goal_position - previous_position).abs();
+    let duration = fleshlight_launch_helper::get_duration(distance, message.speed() as f64 / 99f64) as u32;
+    self.handle_linear_cmd(device, messages::LinearCmd::new(message.device_index(), vec![messages::VectorSubcommand::new(0, duration, goal_position)]))
+  }
+
   fn handle_linear_cmd(&self, device: Arc<DeviceImpl>, message: messages::LinearCmd) -> ButtplugDeviceResultFuture {
-    // What is "How not to implement a command structure for your device that does one thing", Alex?
+    // What is "How not to implement a command structure for your device that
+    // does one thing", Alex?
 
     // First make sure we only have one vector.
     //

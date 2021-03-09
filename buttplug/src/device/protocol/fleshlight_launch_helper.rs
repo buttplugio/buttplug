@@ -33,10 +33,9 @@ pub fn get_speed(mut distance: f64, duration: u32) -> f64 {
   250f64 * scalar
 }
 
-#[allow(dead_code)]
-pub fn get_duration(mut distance: f64, mut speed: f64) -> f64 {
+pub fn get_duration(mut distance: f64, mut speed: f64) -> u32 {
   if distance <= 0f64 || speed <= 0f64 {
-    return 0f64;
+    return 0;
   }
 
   if distance > 1f64 {
@@ -48,5 +47,5 @@ pub fn get_duration(mut distance: f64, mut speed: f64) -> f64 {
   }
 
   let mil = (speed / 250f64).powf(-0.95);
-  mil / (90f64 / (distance * 100f64))
+  (mil / (90f64 / (distance * 100f64))) as u32
 }
