@@ -1571,6 +1571,24 @@ protocols:
           StepCount:
             - 100
         FleshlightLaunchFW12Cmd: {}    
+  estimsystems2b:
+    serial:
+      - port: default
+        baud-rate: 9600
+        data-bits: 8
+        parity: N
+        stop-bits: 1
+    defaults:
+      name:
+        en-us: Estim Systems 2B
+      messages:
+        VibrateCmd:
+          FeatureCount: 4
+          StepCount:
+            - 100
+            - 100
+            - 100
+            - 100
   # lovenuts:
   #   btle:
   #     names:

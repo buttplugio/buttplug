@@ -1,4 +1,5 @@
 mod aneros;
+mod estimsystems2b;
 mod fleshlight_launch_helper;
 mod generic_command_manager;
 mod kiiroo_v2;
@@ -61,6 +62,7 @@ use std::sync::Arc;
 
 pub enum ProtocolTypes {
   Aneros,
+  EstimSystems2B,
   KiirooV2,
   KiirooV2Vibrator,
   KiirooV21,
@@ -99,6 +101,7 @@ impl TryFrom<&str> for ProtocolTypes {
   fn try_from(protocol_name: &str) -> Result<Self, Self::Error> {
     match protocol_name {
       "aneros" => Ok(ProtocolTypes::Aneros),
+      "estimsystems2b" => Ok(ProtocolTypes::EstimSystems2B),
       "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
       "kiiroo-v2-vibrator" => Ok(ProtocolTypes::KiirooV2Vibrator),
       "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
@@ -144,6 +147,7 @@ pub fn try_create_protocol(
 ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
   match protocol_type {
     ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
+    ProtocolTypes::EstimSystems2B => estimsystems2b::EstimSystems2B::try_create(device, config),
     ProtocolTypes::KiirooV2 => kiiroo_v2::KiirooV2::try_create(device, config),
     ProtocolTypes::KiirooV2Vibrator => {
       kiiroo_v2_vibrator::KiirooV2Vibrator::try_create(device, config)
