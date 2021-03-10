@@ -1,7 +1,12 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::errors::{ButtplugDeviceError, ButtplugError},
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugMessage,
+    DeviceMessageAttributesMap,
+  },
   core::ButtplugResult,
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -173,6 +178,34 @@ impl ButtplugProtocol for EstimSystems2B {
 }
 
 impl ButtplugProtocolCommandHandler for EstimSystems2B {
+  fn handle_stop_device_cmd(
+    &self,
+    device: Arc<DeviceImpl>,
+    message: messages::StopDeviceCmd,
+  ) -> ButtplugDeviceResultFuture {
+    let ok_return = messages::Ok::new(message.id());
+
+    Box::pin(async move {
+      const ESTIMSYSTEMS2B_STOP_COMMAND: &str = "K\n\r";
+
+      info!(
+        "Sending stop command to powerbox ({})",
+        ESTIMSYSTEMS2B_STOP_COMMAND
+      );
+      device
+        .write_value(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          ESTIMSYSTEMS2B_STOP_COMMAND.as_bytes().to_vec(),
+          false,
+        ))
+        .await?;
+
+      EstimSystems2B::retrieve_status(device.clone()).await?;
+
+      Ok(ok_return.into())
+    })
+  }
+
   fn handle_vibrate_cmd(
     &self,
     device: Arc<DeviceImpl>,
