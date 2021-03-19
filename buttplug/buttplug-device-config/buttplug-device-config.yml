@@ -582,9 +582,8 @@ protocols:
     btle:
       names:
         - MV Crescendo
-        # Tenuto contains trailing spaces, so just deal with that
-        # using a wildcard.
         - "MV Tenuto   "
+        - "MV Poco     "
       services:
         f0006900-110c-478b-b74b-6f403b364a9c:
           txmode: f0006901-110c-478b-b74b-6f403b364a9c
@@ -611,6 +610,16 @@ protocols:
           - "MV Tenuto   "
         name:
           en-us: MysteryVibe Tenuto
+      - identifier:
+          - "MV Poco     "
+        name:
+          en-us: MysteryVibe Poco
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 56
+              - 56
   picobong:
     btle:
       names:

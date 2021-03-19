@@ -716,7 +716,8 @@
       "btle": {
         "names": [
           "MV Crescendo",
-          "MV Tenuto   "
+          "MV Tenuto   ",
+          "MV Poco     "
         ],
         "services": {
           "f0006900-110c-478b-b74b-6f403b364a9c": {
@@ -758,6 +759,23 @@
           ],
           "name": {
             "en-us": "MysteryVibe Tenuto"
+          }
+        },
+        {
+          "identifier": [
+            "MV Poco     "
+          ],
+          "name": {
+            "en-us": "MysteryVibe Poco"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                56,
+                56
+              ]
+            }
           }
         }
       ]
