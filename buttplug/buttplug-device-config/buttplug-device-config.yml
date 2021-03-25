@@ -389,6 +389,7 @@ protocols:
           - QingTing # Lucy - Dragonfly egg
           - Huohu # Lara/Sexy Fox - Rabbit
           - Yuyi # Feather
+          - Haima # Selina - Suction Seahorse
         services:
           # Write Service
           00006000-0000-1000-8000-00805f9b34fb:
@@ -454,6 +455,16 @@ protocols:
             - Gugudai
           name:
             en-us: Libo Carlos
+          messages:
+            VibrateCmd:
+              FeatureCount: 2
+              StepCount:
+                - 100
+                - 3
+        - identifier:
+            - Haima
+          name:
+            en-us: Libo Selina
           messages:
             VibrateCmd:
               FeatureCount: 2
