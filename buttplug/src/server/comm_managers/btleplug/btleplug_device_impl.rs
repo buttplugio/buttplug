@@ -115,7 +115,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => {
-          let device_internal_impl = BtlePlugDeviceImpl::new(device_sender, device_event_sender);
+          let device_internal_impl = BtlePlugDeviceImpl::new(&address, device_sender, device_event_sender);
           let device_impl = DeviceImpl::new(
             &name,
             &address,
@@ -147,6 +147,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 
 //#[derive(Clone)]
 pub struct BtlePlugDeviceImpl {
+  address: String,
   event_stream: broadcast::Sender<ButtplugDeviceEvent>,
   thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
   connected: Arc<AtomicBool>,
@@ -159,10 +160,12 @@ unsafe impl Sync for BtlePlugDeviceImpl {
 
 impl BtlePlugDeviceImpl {
   pub fn new(
+    address: &str,
     thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
     event_stream: broadcast::Sender<ButtplugDeviceEvent>,
   ) -> Self {
     Self {
+      address: address.to_owned(),
       thread_sender,
       connected: Arc::new(AtomicBool::new(true)),
       event_stream,
@@ -174,11 +177,22 @@ impl BtlePlugDeviceImpl {
     cmd: ButtplugDeviceCommand,
   ) -> ButtplugResultFuture<ButtplugDeviceReturn> {
     let sender = self.thread_sender.clone();
+    let connected = self.connected.clone();
+    let event_stream = self.event_stream.clone();
+    let address = self.address.clone();
     Box::pin(async move {
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       if sender.send((cmd, waker)).await.is_err() {
         error!("Device event loop shut down, cannot send command.");
+        if connected.load(Ordering::SeqCst) {
+          connected.store(false, Ordering::SeqCst);
+          event_stream
+            .send(ButtplugDeviceEvent::Removed(
+              address
+            ))
+          .unwrap();
+        }
         return Err(
           ButtplugDeviceError::DeviceNotConnected(
             "Device event loop shut down, cannot send command.".to_owned(),

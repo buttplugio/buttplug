@@ -334,14 +334,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
 
   pub async fn handle_device_event(&mut self, event: CentralEvent) -> bool {
     if let CentralEvent::DeviceDisconnected(addr) = event {
-      // TODO Ok. Great. We can disconnect, but output_sender doesn't
-      // really *go* anywhere right now. We're just using it in the
-      // Lovense protocol and that's it. We need to be watching for this
-      // up in the device manager too, which is going to be...
-      // interesting, as I have no idea how we'll deal with instances
-      // where we disconnect while waiting in a protocol (for instance, if
-      // the device disconnects while we're doing Lovense init). I may
-      // need to rethink this.
       if self.device.address() == addr {
         info!(
           "Device {:?} disconnected",
