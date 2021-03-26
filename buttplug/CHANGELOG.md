@@ -1,3 +1,10 @@
+# 2.1.8 (2021-03-25)
+
+## Bugfixes
+
+- #296: Fix issue with bluetooth devices not registering disconnects correctly on some instances in
+  windows.
+
 # 2.1.7 (2021-03-08)
 
 ## Features
