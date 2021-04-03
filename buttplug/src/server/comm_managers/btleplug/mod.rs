@@ -147,7 +147,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     debug!("Bringing up adapter.");
     // TODO What happens if we don't have a radio?
     if self.adapter.is_none() {
-      error!("No adapter, can't scan.");
+      warn!("No adapter, can't scan.");
       return ButtplugDeviceError::UnhandledCommand(
         "Cannot scan, no bluetooth adapters found".to_owned(),
       )

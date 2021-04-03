@@ -329,16 +329,37 @@ impl LovenseDongleState for LovenseDongleIdle {
         IncomingMessage::Dongle(device_msg) => match device_msg.func {
           LovenseDongleMessageFunc::IncomingStatus => {
             if let Some(incoming_data) = device_msg.data {
-              if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
-                info!("Lovense dongle already connected to a device, registering in system.");
-                return Some(Box::new(LovenseDongleDeviceLoop::new(
-                  self.hub,
-                  incoming_data.id.unwrap(),
-                )));
+              if let Some(status) = incoming_data.status {
+                match status {
+                  LovenseDongleResultCode::DeviceConnectSuccess => {
+                    info!("Lovense dongle already connected to a device, registering in system.");
+                    return Some(Box::new(LovenseDongleDeviceLoop::new(
+                      self.hub,
+                      incoming_data.id.unwrap(),
+                    )));
+                  }
+                  _ => error!("LovenseDongleIdle State cannot handle dongle status {:?}", status)
+                } 
               }
             }
           }
-          _ => error!("Cannot handle dongle function {:?}", device_msg),
+          LovenseDongleMessageFunc::Search => {
+            if let Some(result) = device_msg.result {
+              match result {
+                LovenseDongleResultCode::SearchStopped => debug!("Lovense dongle search stopped."),
+                _ => error!("LovenseDongleIdle State cannot handle search result {:?}", result)
+              }
+            }
+          }
+          LovenseDongleMessageFunc::StopSearch => {
+            if let Some(result) = device_msg.result {
+              match result {
+                LovenseDongleResultCode::CommandSuccess => debug!("Lovense dongle search stop command successful."),
+                _ => error!("LovenseDongleIdle State cannot handle stop search result {:?}", result)
+              }
+            }
+          }
+          _ => error!("LovenseDongleIdle State cannot handle dongle function {:?}", device_msg),
         },
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {
           LovenseDeviceCommand::StartScanning => {
@@ -408,12 +429,27 @@ impl LovenseDongleState for LovenseDongleScanning {
           match device_msg.func {
             LovenseDongleMessageFunc::IncomingStatus => {
               if let Some(incoming_data) = device_msg.data {
-                if Some(LovenseDongleResultCode::DeviceConnectSuccess) == incoming_data.status {
-                  info!("Lovense dongle already connected to a device, registering in system.");
-                  return Some(Box::new(LovenseDongleDeviceLoop::new(
-                    self.hub,
-                    incoming_data.id.unwrap(),
-                  )));
+                if let Some(status) = incoming_data.status {
+                  match status {
+                    LovenseDongleResultCode::DeviceConnectSuccess => {
+                      info!("Lovense dongle already connected to a device, registering in system.");
+                      return Some(Box::new(LovenseDongleDeviceLoop::new(
+                        self.hub,
+                        incoming_data.id.unwrap(),
+                      )));
+                    }
+                    _ => {
+                      error!("LovenseDongleScanning state cannot handle dongle status {:?}", status)
+                    }
+                  }
+                }
+              }
+            }
+            LovenseDongleMessageFunc::Search => {
+              if let Some(result) = device_msg.result {
+                match result {
+                  LovenseDongleResultCode::SearchStarted => debug!("Lovense dongle search started."),
+                  _ => error!("LovenseDongleIdle State cannot handle search result {:?}", result)
                 }
               }
             }
@@ -428,7 +464,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                 return Some(Box::new(LovenseDongleIdle::new(self.hub)));
               }
             }
-            _ => error!("Cannot handle dongle function {:?}", device_msg),
+            _ => error!("LovenseDongleScanning state cannot handle dongle function {:?}", device_msg),
           }
         }
         IncomingMessage::Disconnect => {
@@ -436,7 +472,7 @@ impl LovenseDongleState for LovenseDongleScanning {
           self.hub.set_scanning_status(false);
           return self.hub.create_new_wait_for_dongle_state();
         }
-        _ => error!("Cannot handle dongle function {:?}", msg),
+        _ => error!("LovenseDongleScanning state cannot handle dongle function {:?}", msg),
       }
     }
   }
