@@ -200,16 +200,30 @@ impl ButtplugProtocolCommandHandler for Lovense {
       ));
       write_fut.await?;
       while let Ok(event) = device_notification_receiver.recv().await {
-        if let ButtplugDeviceEvent::Notification(_, _, data) = event {
-          if let Ok(data_str) = std::str::from_utf8(&data) {
-            let len = data_str.len();
-            // Chop the semicolon at the end of the received line.
-            if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
-              return Ok(
-                messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)
-                  .into(),
-              );
+        match event {
+          ButtplugDeviceEvent::Notification(_, _, data) => {
+            if let Ok(data_str) = std::str::from_utf8(&data) {
+              let len = data_str.len();
+              // Chop the semicolon at the end of the received line.
+              if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
+                return Ok(
+                  messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)
+                    .into(),
+                );
+              }
             }
+          },
+          ButtplugDeviceEvent::Removed(_) => {
+            return Err(
+              ButtplugDeviceError::ProtocolSpecificError(
+                "Lovense".to_owned(),
+                "Lovense Device disconnected while getting Battery info.".to_owned(),
+              )
+              .into(),
+            )
+          },
+          ButtplugDeviceEvent::Connected(_) => {
+            unimplemented!("Shouldn't get here as device will always be connected.");
           }
         }
       }
