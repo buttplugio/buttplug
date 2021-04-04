@@ -1,3 +1,14 @@
+# 2.1.9 (2021-04-04)
+
+## Bugfixes
+
+- #305: Updated btleplug to not panic on read/write failures on Windows UWP, which may fix some
+  issues with bluetooth disconnections.
+- #302: Lovense devices no longer stall forever when device disconnects while reading battery
+- #300: Error logs changed to warn when bluetooth dongle not present
+- #299: Lovense dongle state machine now handles more state/status transfers, resulting in less
+  error messages.
+
 # 2.1.8 (2021-03-25)
 
 ## Bugfixes
