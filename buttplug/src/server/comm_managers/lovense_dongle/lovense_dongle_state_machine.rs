@@ -533,7 +533,15 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
               }
             }
           }
-          _ => error!("Cannot handle dongle function {:?}", device_msg),
+          LovenseDongleMessageFunc::StopSearch => {
+            if let Some(result) = device_msg.result {
+              if result == LovenseDongleResultCode::CommandSuccess {
+                // Just log and continue here.
+                debug!("Lovense dongle stop search command succeeded.");
+              }
+            }
+          }
+          _ => error!("LovenseDongleStopScanningAndConnect cannot handle dongle function {:?}", device_msg),
         },
         IncomingMessage::Disconnect => {
           error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
