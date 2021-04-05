@@ -1438,7 +1438,8 @@
           "Titan1.1",
           "Cliona",
           "Pearl2.1",
-          "OhMiBod 4.0"
+          "OhMiBod 4.0",
+          "OhMiBod LUMEN"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -1528,6 +1529,22 @@
               ]
             },
             "FleshlightLaunchFW12Cmd": {}
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod LUMEN"
+          ],
+          "name": {
+            "en-us": "OhMiBod Lumen"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
           }
         }
       ]
