@@ -21,11 +21,11 @@ mod test {
 
   #[test]
   fn test_version0_connection() {
-    let server = ButtplugServer::default();
-    let serializer = ButtplugServerJSONSerializer::default();
-    let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
-    let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
+      let serializer = ButtplugServerJSONSerializer::default();
+      let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
+      let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
       let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
@@ -40,12 +40,13 @@ mod test {
 
   #[test]
   fn test_version2_connection() {
-    let server = ButtplugServer::default();
-    let serializer = ButtplugServerJSONSerializer::default();
-    let rsi =
-      r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
-    let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
+
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
+      let serializer = ButtplugServerJSONSerializer::default();
+      let rsi =
+        r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
+      let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
       let incoming = server.parse_message(output[0].clone()).await.unwrap();
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
@@ -60,12 +61,11 @@ mod test {
 
   #[test]
   fn test_version0_device_added_device_list() {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
-    let serializer = ButtplugServerJSONSerializer::default();
-
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
+      let recv = server.event_stream();
+      pin_mut!(recv);
+      let serializer = ButtplugServerJSONSerializer::default();
       let helper = server.add_test_comm_manager().unwrap();
       helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -108,11 +108,11 @@ mod test {
 
   #[test]
   fn test_version0_singlemotorvibratecmd() {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
-    let serializer = ButtplugServerJSONSerializer::default();
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
+      let recv = server.event_stream();
+      pin_mut!(recv);
+      let serializer = ButtplugServerJSONSerializer::default();
       let helper = server.add_test_comm_manager().unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
 

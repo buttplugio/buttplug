@@ -160,10 +160,10 @@ mod test {
 
   #[test]
   fn test_test_device_comm_manager() {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
+      let recv = server.event_stream();
+      pin_mut!(recv);
       let helper = server.add_test_comm_manager().unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =

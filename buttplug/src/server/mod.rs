@@ -299,28 +299,29 @@ mod test {
 
   #[test]
   fn test_server_reuse() {
-    let server = ButtplugServer::default();
     async_manager::block_on(async {
+      let server = ButtplugServer::default();
       let msg =
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(msg.clone().into()).await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
+      
       reply = server.parse_message(msg.clone().into()).await;
       assert!(
         reply.is_err(),
-        format!("Should get back err on double handshake: {:?}", reply)
+        "Should get back err on double handshake: {:?}",
+        reply
       );
       assert!(
         server.disconnect().await.is_ok(),
-        format!("Should disconnect ok")
+        "Should disconnect ok"
       );
+      
       reply = server.parse_message(msg.clone().into()).await;
       assert!(
         reply.is_ok(),
-        format!(
-          "Should get back ok on handshake after disconnect: {:?}",
-          reply
-        )
+        "Should get back ok on handshake after disconnect: {:?}",
+        reply
       );
     });
   }

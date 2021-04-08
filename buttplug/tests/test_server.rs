@@ -89,12 +89,13 @@ fn test_server_version_gt() {
 
 #[test]
 fn test_ping_timeout() {
-  let mut options = ButtplugServerOptions::default();
-  options.max_ping_time = 100;
-  let server = ButtplugServer::new_with_options(&options).unwrap();
-  let recv = server.event_stream();
-  pin_mut!(recv);
+
   async_manager::block_on(async {
+    let mut options = ButtplugServerOptions::default();
+    options.max_ping_time = 100;
+    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     Delay::new(Duration::from_millis(150)).await;
