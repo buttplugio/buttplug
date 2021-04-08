@@ -23,7 +23,7 @@ use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification,
 use uuid::Uuid;
 use futures::FutureExt;
 use std::collections::HashMap;
-use tokio::sync::{broadcast, mpsc};
+use tokio::{runtime::Handle, sync::{broadcast, mpsc}};
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;
@@ -168,7 +168,8 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     let os = self.output_sender.clone();
     let mut error_notification = false;
     let address = self.device.properties().address.to_string();
-
+    #[cfg(feature = "tokio-runtime")]
+    let handle = Handle::current();
     self
       .device
       .on_notification(Box::new(move |notification: ValueNotification| {
@@ -186,7 +187,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
         };
         let sender = os.clone();
         let address_clone = address.clone();
-        async_manager::spawn(async move {
+        let fut = async move {
           if let Err(err) = sender.send(ButtplugDeviceEvent::Notification(
             address_clone,
             endpoint,
@@ -197,8 +198,11 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               err
             );
           }
-        })
-        .unwrap();
+        };
+        #[cfg(feature = "tokio-runtime")]
+        handle.spawn(fut);
+        #[cfg(not(feature = "tokio-runtime"))]
+        async_manager::spawn(fut).unwrap();
       }));
     let device_info = ButtplugDeviceImplInfo {
       endpoints: self.endpoints.keys().cloned().collect(),

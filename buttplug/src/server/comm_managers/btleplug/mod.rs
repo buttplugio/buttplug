@@ -28,7 +28,8 @@ use btleplug::corebluetooth::{adapter::Adapter, manager::Manager};
 use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
-
+#[cfg(feature = "tokio-runtime")]
+use tokio::runtime::Handle;
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
   // manager hold it.
@@ -63,6 +64,8 @@ impl BtlePlugCommunicationManager {
     let receiver = adapter.event_receiver().unwrap();
     self.adapter = Some(adapter);
     let event_sender = self.adapter_event_sender.clone();
+    #[cfg(feature = "tokio-runtime")]
+    let handle = Handle::current();
     thread::spawn(move || {
       // Since this is an std channel receiver, it's mpsc. That means we don't
       // have clone or sync. Therefore we have to wrap it in its own thread for
@@ -70,10 +73,15 @@ impl BtlePlugCommunicationManager {
       while let Ok(event) = receiver.recv() {
         let event_broadcaster_clone = event_sender.clone();
         if event_broadcaster_clone.receiver_count() > 0 {
+          #[cfg(not(feature = "tokio-runtime"))]
           async_manager::spawn(async move {
             let _ = event_broadcaster_clone.send(event);
           })
           .unwrap();
+          #[cfg(feature = "tokio-runtime")]
+          handle.spawn(async move {
+            let _ = event_broadcaster_clone.send(event);
+          });
         }
       }
     });
