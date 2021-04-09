@@ -122,7 +122,7 @@ impl DeviceManagerEventLoop {
           .send(ScanningFinished::default().into())
           .is_err()
         {
-          error!("Server disappeared, exiting loop.");
+          info!("Server disappeared, exiting loop.");
           return;
         }
       }
@@ -158,7 +158,7 @@ impl DeviceManagerEventLoop {
         // should also trigger a disconnect event before our new DeviceAdded
         // message goes out, so timing matters here.
         if self.device_map.contains_key(&device_index) {
-          info!("Device map contains key!");
+          info!("Device map contains key {}.", device_index);
           // We just checked that the key exists, so we can unwrap
           // here.
           let (_, old_device) = self.device_map.remove(&device_index).unwrap();
@@ -170,7 +170,7 @@ impl DeviceManagerEventLoop {
             error!("Error during index collision disconnect: {:?}", err);
           }
         } else {
-          info!("Device map does not contain key!");
+          info!("Device map does not contain key {}.", device_index);
         }
 
         // Create event loop for forwarding device events into our selector.
@@ -194,7 +194,7 @@ impl DeviceManagerEventLoop {
           .send(device_added_message.into())
           .is_err()
         {
-          error!("Server disappeared.");
+          debug!("Server not currently available, dropping Device Added event.");
         }
       }
       ButtplugDeviceEvent::Removed(address) => {
@@ -205,7 +205,7 @@ impl DeviceManagerEventLoop {
           .send(DeviceRemoved::new(device_index).into())
           .is_err()
         {
-          error!("Server disappeared.");
+          debug!("Server not currently available, dropping Device Removed event.");
         }
       }
       ButtplugDeviceEvent::Notification(_address, _endpoint, _data) => {

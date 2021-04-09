@@ -63,7 +63,7 @@ impl ChannelHub {
     match self.dongle_incoming.recv().await {
       Some(msg) => IncomingMessage::Dongle(msg),
       None => {
-        error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+        info!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
         IncomingMessage::Disconnect
       }
     }
@@ -75,7 +75,7 @@ impl ChannelHub {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
-            error!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
+            info!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
             IncomingMessage::Disconnect
           }
         }
@@ -84,7 +84,7 @@ impl ChannelHub {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
-            error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+            info!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
             IncomingMessage::Disconnect
           }
         }
@@ -102,7 +102,7 @@ impl ChannelHub {
         match comm_res {
           Some(msg) => IncomingMessage::CommMgr(msg),
           None => {
-            error!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
+            info!("Disconnect in comm manager channel, assuming shutdown or catastrophic error, exiting loop");
             IncomingMessage::Disconnect
           }
         }
@@ -111,7 +111,7 @@ impl ChannelHub {
         match dongle_res {
           Some(msg) => IncomingMessage::Dongle(msg),
           None => {
-            error!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
+            info!("Disconnect in dongle channel, assuming shutdown or disconnect, exiting loop");
             IncomingMessage::Disconnect
           }
         }
@@ -120,7 +120,7 @@ impl ChannelHub {
         match device_res {
           Some(msg) => IncomingMessage::Device(msg),
           None => {
-            error!("Disconnect in device channel, assuming shutdown or disconnect, exiting loop");
+            info!("Disconnect in device channel, assuming shutdown or disconnect, exiting loop");
             IncomingMessage::Disconnect
           }
         }
@@ -243,6 +243,7 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
         }
       }
     }
+    info!("Lovense dongle receiver dropped, exiting state machine.");
     None
   }
 }
@@ -376,7 +377,7 @@ impl LovenseDongleState for LovenseDongleIdle {
           }
         },
         IncomingMessage::Disconnect => {
-          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          info!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();
         }
         msg => {
@@ -468,7 +469,7 @@ impl LovenseDongleState for LovenseDongleScanning {
           }
         }
         IncomingMessage::Disconnect => {
-          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          info!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           self.hub.set_scanning_status(false);
           return self.hub.create_new_wait_for_dongle_state();
         }
@@ -544,7 +545,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
           _ => error!("LovenseDongleStopScanningAndConnect cannot handle dongle function {:?}", device_msg),
         },
         IncomingMessage::Disconnect => {
-          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          info!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();
         }
         _ => error!("Cannot handle dongle function {:?}", msg),
@@ -622,7 +623,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
           ),
         },
         IncomingMessage::Disconnect => {
-          error!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
+          info!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();
         }
       }
