@@ -84,7 +84,7 @@ mod test {
       let reply = server
         .parse_message(messages::StartScanning::default().into())
         .await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about scanning finishing.
       let mut msg = recv.next().await.unwrap();
       // We should receive ScanningFinished and DeviceAdded, but the order may change.
@@ -132,7 +132,7 @@ mod test {
       let reply = server
         .parse_message(messages::StartScanning::default().into())
         .await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about scanning finishing.
       let mut msg = recv.next().await.unwrap();
       // We should receive ScanningFinished and DeviceAdded, but the order may change.

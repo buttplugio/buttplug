@@ -102,10 +102,8 @@ fn test_ping_timeout() {
     let reply = server.parse_message(msg.into()).await;
     assert!(
       reply.is_ok(),
-      format!(
-        "ping timer shouldn't start until handshake finished. {:?}",
-        reply
-      )
+      "ping timer shouldn't start until handshake finished. {:?}",
+      reply
     );
     Delay::new(Duration::from_millis(300)).await;
     let pingmsg = messages::Ping::default();
@@ -156,10 +154,10 @@ fn test_device_stop_on_ping_timeout() {
         device_index = da.device_index();
         break;
       } else {
-        panic!(format!(
+        panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
-        ));
+        );
       }
     }
     server
@@ -259,10 +257,10 @@ fn test_device_index_generation() {
           break;
         }
       } else {
-        panic!(format!(
+        panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
-        ));
+        );
       }
     }
   });

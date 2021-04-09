@@ -98,10 +98,10 @@ fn test_server_raw_message() {
           .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
         return;
       } else {
-        panic!(format!(
+        panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
-        ));
+        );
       }
     }
   });
@@ -145,10 +145,10 @@ fn test_server_no_raw_message() {
           .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
         return;
       } else {
-        panic!(format!(
+        panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
-        ));
+        );
       }
     }
   });
@@ -218,10 +218,10 @@ fn test_reject_on_no_raw_message() {
         ));
         return;
       } else {
-        panic!(format!(
+        panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",
           msg
-        ));
+        );
       }
     }
   });
@@ -271,10 +271,10 @@ fn test_repeated_address_additions() {
           device_removed_called = true;
         }
         _ => {
-          panic!(format!(
+          panic!(
             "Returned message was not a DeviceAdded message or timed out: {:?}",
             msg
-          ));
+          );
         }
       }
     }

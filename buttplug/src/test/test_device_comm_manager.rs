@@ -169,11 +169,11 @@ mod test {
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
       let mut reply = server.parse_message(msg.into()).await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       reply = server
         .parse_message(messages::StartScanning::default().into())
         .await;
-      assert!(reply.is_ok(), format!("Should get back ok: {:?}", reply));
+      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about a new device.
       let mut device_index = 0;
       while let Some(msg) = recv.next().await {
@@ -192,10 +192,10 @@ mod test {
             return;
           }
           ButtplugServerMessage::ScanningFinished(_) => continue,
-          _ => panic!(format!(
+          _ => panic!(
             "Returned message was not a DeviceRemoved message or timed out: {:?}",
             msg
-          )),
+          ),
         }
       }
       panic!("Shouldn't get here!");
