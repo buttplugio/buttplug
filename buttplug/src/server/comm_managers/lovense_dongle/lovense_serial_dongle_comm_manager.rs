@@ -131,9 +131,10 @@ impl LovenseSerialDongleCommunicationManager {
     let token = self.thread_cancellation_token.child_token();
     Box::pin(async move {
       // TODO Does this block? Should it run in one of our threads?
+      let found_dongle = false;
       match available_ports() {
         Ok(ports) => {
-          info!("Got {} serial ports back", ports.len());
+          debug!("Got {} serial ports back", ports.len());
           for p in ports {if let SerialPortType::UsbPort(usb_info) = p.port_type {
               // Hardcode the dongle VID/PID for now. We can't really do protocol
               // detection here because this is a comm bus to us, not a device.
@@ -185,14 +186,17 @@ impl LovenseSerialDongleCommunicationManager {
           info!("No serial ports found");
         }
       }
+      if !found_dongle {
+        warn!("Cannot find Lovense Serial dongle.");
+      }
       Ok(())
-    })
+    }.instrument(tracing::info_span!("Lovense Serial Dongle Finder")))
   }
 }
 
 impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    info!("Lovense dongle serial port created!");
+    trace!("Lovense dongle serial port created");
     let (machine_sender, machine_receiver) = channel(256);
     let mgr = Self {
       machine_sender,
@@ -205,7 +209,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
     // TODO If we don't find a dongle before scanning, what happens?
     async_manager::spawn(async move {
       if let Err(err) = dongle_fut.await {
-        error!("Error finding dongle: {:?}", err);
+        error!("Error finding serial dongle: {:?}", err);
       }
     })
     .unwrap();
@@ -217,7 +221,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
           machine = next;
         }
       }
-      .instrument(tracing::info_span!("Lovense Dongle State Machine")),
+      .instrument(tracing::info_span!("Lovense Serial Dongle State Machine")),
     )
     .unwrap();
     mgr

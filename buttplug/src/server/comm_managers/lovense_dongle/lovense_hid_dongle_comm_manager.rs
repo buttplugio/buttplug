@@ -195,7 +195,7 @@ impl LovenseHIDDongleCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    info!("Lovense dongle HID Manager created!");
+    trace!("Lovense dongle HID Manager created");
     let (machine_sender, machine_receiver) = channel(256);
     let mgr = Self {
       machine_sender,

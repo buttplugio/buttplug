@@ -10,6 +10,7 @@ use crate::{
 use futures::future;
 use serialport::available_ports;
 use tokio::sync::mpsc::Sender;
+use tracing_futures::Instrument;
 
 pub struct SerialPortCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,
@@ -17,7 +18,7 @@ pub struct SerialPortCommunicationManager {
 
 impl DeviceCommunicationManagerCreator for SerialPortCommunicationManager {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
-    info!("Serial port created!");
+    trace!("Serial port created.");
     Self { sender }
   }
 }
@@ -28,15 +29,15 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {
-    info!("Scanning ports!");
+    trace!("Serial port device scanning initiated.");
     // TODO Does this block? Should it run in one of our threads?
     let sender = self.sender.clone();
     Box::pin(async move {
       match available_ports() {
         Ok(ports) => {
-          info!("Got {} serial ports back", ports.len());
+          debug!("Got {} serial ports back", ports.len());
           for p in ports {
-            info!("{:?}", p);
+            trace!("Sending serial port {:?} for possible device connection.", p);
             if sender
               .send(DeviceCommunicationEvent::DeviceFound(Box::new(
                 SerialPortDeviceImplCreator::new(&p),
@@ -44,13 +45,13 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
               .await
               .is_err()
             {
-              error!("Device manager disappeared, exiting.");
+              debug!("Device manager disappeared, exiting.");
               break;
             }
           }
         }
         Err(_) => {
-          info!("No serial ports found");
+          debug!("No serial ports found");
         }
       }
       if sender
@@ -58,10 +59,10 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
         .await
         .is_err()
       {
-        error!("Error sending scanning finished from Xinput.");
+        error!("Error sending scanning finished.");
       }
       Ok(())
-    })
+    }.instrument(tracing::info_span!("Serial Port Device Comm Manager Scanning.")))
   }
 
   fn stop_scanning(&self) -> ButtplugResultFuture {
