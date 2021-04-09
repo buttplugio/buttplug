@@ -69,6 +69,7 @@ wasm-bindgen = { version = "0.2.73", optional = true }
 tokio = { version = "1.4.0", features = ["sync"] }
 async-stream = "0.3.0"
 prost = "0.7.0"
+tokio-util = "0.6.5"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
