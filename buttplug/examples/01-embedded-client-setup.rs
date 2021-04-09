@@ -19,7 +19,6 @@
 use buttplug::{
   client::ButtplugClient,
   connector::ButtplugInProcessClientConnector,
-  util::async_manager,
 };
 
 async fn embedded_connector_example() {
@@ -67,9 +66,8 @@ async fn embedded_connector_example() {
   // That's it for the basics of setting up, connecting, and disconnecting a client.
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
   // Setup a client, and wait until everything is done before exiting.
-  async_manager::block_on(async {
-    embedded_connector_example().await;
-  });
+  embedded_connector_example().await;
 }

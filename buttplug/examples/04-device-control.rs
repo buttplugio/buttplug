@@ -17,7 +17,6 @@ use buttplug::{
     VibrateCommand,
   },
   server::ButtplugServerOptions,
-  util::async_manager,
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -112,10 +111,9 @@ async fn device_control_example() {
       ButtplugClientEvent::DeviceAdded(dev) => {
         println!("We got a device: {}", dev.name);
         let fut = vibrate_device(dev);
-        async_manager::spawn(async move {
+        tokio::spawn(async move {
           fut.await;
-        })
-        .unwrap();
+        });
         // break;
       }
       ButtplugClientEvent::ServerDisconnect => {
@@ -136,8 +134,7 @@ async fn device_control_example() {
   println!("Exiting example");
 }
 
-fn main() {
-  async_manager::block_on(async {
-    device_control_example().await;
-  });
+#[tokio::main]
+async fn main() {
+  device_control_example().await;
 }

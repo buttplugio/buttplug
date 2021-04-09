@@ -10,7 +10,6 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
   core::messages::serializer::ButtplugClientJSONSerializer,
-  util::async_manager,
 };
 use futures::StreamExt;
 use tracing_subscriber;
@@ -82,10 +81,9 @@ async fn websocket_connector_example() {
   // least with two processes on the same machine, but hey, that's remote, right?
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
   // Setup a client, and wait until everything is done before exiting.
   #[cfg(feature = "websockets")]
-  async_manager::block_on(async {
-    websocket_connector_example().await;
-  });
+  websocket_connector_example().await;
 }

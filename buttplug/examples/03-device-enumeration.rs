@@ -8,7 +8,7 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask servers
 // which devices are available.
-use tokio::io;
+use tokio::io::{self, AsyncBufReadExt, BufReader};
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent, VibrateCommand},
   // connector::ButtplugInProcessClientConnector,
@@ -173,8 +173,7 @@ async fn device_enumeration_example() {
   .unwrap();
 
   println!("Hit enter to continue...");
-  let mut line = String::new();
-  //io::stdin().read_line(&mut line).await.unwrap();
+  BufReader::new(io::stdin()).lines().next_line().await.unwrap();
 
   // Hypothetical situation: We've now exited our match block, and
   // realized that hey, we actually wanted that device object we
@@ -195,8 +194,7 @@ async fn device_enumeration_example() {
   println!("Exiting example");
 }
 
-fn main() {
-  async_manager::block_on(async {
-    device_enumeration_example().await;
-  })
+#[tokio::main]
+async fn main() {
+  device_enumeration_example().await;
 }
