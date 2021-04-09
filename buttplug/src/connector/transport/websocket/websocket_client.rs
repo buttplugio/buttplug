@@ -20,8 +20,14 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
+#[cfg(feature = "async-std-runtime")]
 use async_tungstenite::{
   async_std::connect_async_with_tls_connector,
+  tungstenite::protocol::Message,
+};
+#[cfg(feature = "tokio-runtime")]
+use async_tungstenite::{
+  tokio::connect_async_with_tls_connector,
   tungstenite::protocol::Message,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
@@ -88,34 +94,11 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // based on our certificate verfication needs. Otherwise, just pass None in
     // which case we won't wrap.
     let tls_connector = if self.should_use_tls {
-      use async_tls::TlsConnector;
+      use native_tls::TlsConnector;
       if self.bypass_cert_verify {
-        // If we need to connect to self signed cert using servers, we'll need
-        // to create a validator that always passes. Got this one from
-        // https://github.com/sdroege/async-tungstenite/issues/4#issuecomment-566923534
-        use rustls::ClientConfig;
-
-        pub struct NoCertificateVerification {}
-
-        impl rustls::ServerCertVerifier for NoCertificateVerification {
-          fn verify_server_cert(
-            &self,
-            _roots: &rustls::RootCertStore,
-            _presented_certs: &[rustls::Certificate],
-            _dns_name: webpki::DNSNameRef<'_>,
-            _ocsp: &[u8],
-          ) -> Result<rustls::ServerCertVerified, rustls::TLSError> {
-            Ok(rustls::ServerCertVerified::assertion())
-          }
-        }
-
-        let mut config = ClientConfig::new();
-        config
-          .dangerous()
-          .set_certificate_verifier(Arc::new(NoCertificateVerification {}));
-        Some(TlsConnector::from(Arc::new(config)))
+        Some(TlsConnector::builder().danger_accept_invalid_certs(true).build().unwrap().into())
       } else {
-        Some(TlsConnector::new())
+        Some(TlsConnector::new().unwrap().into())
       }
     } else {
       // If we're not using a secure connection, just return None, at which

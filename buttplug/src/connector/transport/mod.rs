@@ -9,7 +9,7 @@ use futures::future::BoxFuture;
 use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
 pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError};
-#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
+#[cfg(any(all(feature = "websockets", feature = "async-std-runtime"), all(feature = "websockets", feature = "tokio-runtime")))]
 pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use thiserror::Error;
@@ -42,7 +42,4 @@ pub enum ButtplugConnectorTransportSpecificError {
   #[cfg(feature = "websockets")]
   #[error("Tungstenite specific error: {0}")]
   TungsteniteError(#[from] TungsteniteError),
-
-  #[error("Secure server error: %s")]
-  SecureServerError(String),
 }

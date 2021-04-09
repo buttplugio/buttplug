@@ -13,21 +13,17 @@ use crate::{
 };
 #[cfg(feature = "async-std-runtime")]
 use async_std::net::TcpListener;
-use async_tls::TlsAcceptor;
+#[cfg(feature = "tokio-runtime")]
+use tokio::net::TcpListener;
 use futures::{
-  future::{select_all, BoxFuture},
+  future::BoxFuture,
   AsyncRead,
   AsyncWrite,
   FutureExt,
   SinkExt,
   StreamExt,
 };
-use rustls::{
-  internal::pemfile::{certs, pkcs8_private_keys, rsa_private_keys},
-  NoClientAuth,
-  ServerConfig,
-};
-use std::{fs::File, io::BufReader, sync::Arc};
+use std::sync::Arc;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
   Mutex,
@@ -38,19 +34,9 @@ use tokio::sync::{
 pub struct ButtplugWebsocketServerTransportOptions {
   /// If true, listens all on available interfaces. Otherwise, only listens on 127.0.0.1.
   pub ws_listen_on_all_interfaces: bool,
-  /// Insecure port for listening for websocket connections.
-  pub ws_insecure_port: Option<u16>,
-  /// Secure port for listen for websocket connections. Requires cert and key
-  /// file options to be passed in also. For secure connections to localhost
-  /// (i.e. from browsers that require secure localhost context to native
-  /// buttplug-rs), certs should work for 127.0.0.1. Certs signed to "localhost"
-  /// may work, but many Buttplug apps default to 127.0.0.1.
-  pub ws_secure_port: Option<u16>,
-  /// Certificate file for secure connections.
-  pub ws_cert_file: Option<String>,
-  /// Private key file for secure connections. Key must be > 1024 bit, and in
-  /// either RSA or PKCS8 format.
-  pub ws_priv_file: Option<String>,
+  /// Insecure port for listening for websocket connections. Secure ports were
+  /// removed, but this name was left as is to minimize code breakage.
+  pub ws_insecure_port: u16,
 }
 
 async fn run_connection_loop<S>(
@@ -171,7 +157,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     incoming_sender: Sender<ButtplugTransportIncomingMessage>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
-    let mut tasks: Vec<BoxFuture<'static, Result<(), ButtplugConnectorError>>> = vec![];
 
     let base_addr = if self.options.ws_listen_on_all_interfaces {
       "0.0.0.0"
@@ -181,220 +166,52 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
     let request_receiver = Arc::new(Mutex::new(Some(outgoing_receiver)));
 
-    if let Some(ws_insecure_port) = self.options.ws_insecure_port {
-      let addr = format!("{}:{}", base_addr, ws_insecure_port);
-
-      debug!("Websocket Insecure: Trying to listen on {}", addr);
-      let request_receiver_clone = request_receiver.clone();
-      let response_sender_clone = incoming_sender.clone();
-      let disconnect_notifier_clone = disconnect_notifier.clone();
-
-      let fut = async move {
-        // Create the event loop and TCP listener we'll accept connections on.
-        let try_socket = TcpListener::bind(&addr).await;
-        debug!("Websocket Insecure: Socket bound.");
-        let listener = try_socket.expect("Failed to bind");
-        debug!("Websocket Insecure: Listening on: {}", addr);
-
-        if let Ok((stream, _)) = listener.accept().await {
-          info!("Websocket Insecure: Got connection");
-          let ws_stream = async_tungstenite::accept_async(stream)
-            .await
-            .map_err(|err| {
-              error!("Websocket server accept error: {:?}", err);
-              ButtplugConnectorError::TransportSpecificError(
-                ButtplugConnectorTransportSpecificError::SecureServerError(format!(
-                  "Error occurred during the websocket handshake: {:?}",
-                  err
-                )),
-              )
-            })?;
-
-          async_manager::spawn(async move {
-            run_connection_loop(
-              ws_stream,
-              (*request_receiver_clone.lock().await).take().unwrap(),
-              response_sender_clone,
-              disconnect_notifier_clone,
-            )
-            .await;
-          })
-          .unwrap();
-          Ok(())
-        } else {
-          Err(ButtplugConnectorError::ConnectorGenericError(
-            "Could not run accept for insecure port".to_owned(),
-          ))
-        }
-      };
-      tasks.push(Box::pin(fut));
-    }
-
-    if let Some(ws_secure_port) = self.options.ws_secure_port {
-      let options = self.options.clone();
-      let request_receiver_clone = request_receiver;
-      let response_sender_clone = incoming_sender;
-      let disconnect_notifier_clone = disconnect_notifier;
-
-      let fut = async move {
-        if options.ws_cert_file.is_none() {
-          return Err(ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "No cert file provided".to_owned(),
-            ),
-          ));
-        }
-
-        info!("Loading cert file {:?}", options.ws_cert_file);
-        let cert_file = File::open(options.ws_cert_file.unwrap()).map_err(|_| {
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "Specified cert file does not exist or cannot be opened".to_owned(),
-            ),
-          )
-        })?;
-        let certs = certs(&mut BufReader::new(cert_file)).map_err(|_| {
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "Specified cert file cannot load correctly".to_owned(),
-            ),
-          )
-        })?;
-        info!("Loaded certificate file");
-
-        if options.ws_priv_file.is_none() {
-          return Err(ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "No private key file provided".to_owned(),
-            ),
-          ));
-        }
-
-        info!("Loading RSA private key file {:?}", options.ws_priv_file);
-        let rsa_key_file = File::open(options.ws_priv_file.clone().unwrap()).map_err(|_| {
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "Specified private key file does not exist or cannot be opened".to_owned(),
-            ),
-          )
-        })?;
-
-        let mut rsa_key_buf = BufReader::new(rsa_key_file);
-        let mut keys = rsa_private_keys(&mut rsa_key_buf).map_err(|e| {
-          error!("Cannot load RSA keys: {:?}", e);
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::SecureServerError(
-              "Specified private key file cannot load correctly".to_owned(),
-            ),
-          )
-        })?;
-
-        if keys.is_empty() {
-          let pkcs8_key_file = File::open(options.ws_priv_file.unwrap()).map_err(|_| {
+    let addr = format!("{}:{}", base_addr, self.options.ws_insecure_port);
+    debug!("Websocket Insecure: Trying to listen on {}", addr);
+    let request_receiver_clone = request_receiver.clone();
+    let response_sender_clone = incoming_sender.clone();
+    let disconnect_notifier_clone = disconnect_notifier.clone();
+    let fut = async move {
+      // Create the event loop and TCP listener we'll accept connections on.
+      let try_socket = TcpListener::bind(&addr).await;
+      debug!("Websocket Insecure: Socket bound.");
+      let listener = try_socket.expect("Failed to bind");
+      debug!("Websocket Insecure: Listening on: {}", addr);
+      if let Ok((stream, _)) = listener.accept().await {
+        info!("Websocket Insecure: Got connection");
+        #[cfg(feature="async-std-runtime")]
+        let ws_fut = async_tungstenite::accept_async(stream);
+        #[cfg(feature="tokio-runtime")]
+        let ws_fut = async_tungstenite::tokio::accept_async(stream);
+        let ws_stream = ws_fut
+          .await
+          .map_err(|err| {
+            error!("Websocket server accept error: {:?}", err);
             ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(
-                "Specified private key file does not exist or cannot be opened".to_owned(),
-              ),
+              ButtplugConnectorTransportSpecificError::TungsteniteError(err),
             )
           })?;
-
-          let mut pkcs8_key_buf = BufReader::new(pkcs8_key_file);
-          keys = pkcs8_private_keys(&mut pkcs8_key_buf).map_err(|e| {
-            error!("Cannot load PKCS8 keys: {:?}", e);
-            ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(
-                "Specified private key file cannot load correctly".to_owned(),
-              ),
-            )
-          })?;
-          if keys.is_empty() {
-            error!("No keys were loaded, cannot start secure server.");
-            return Err(ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(
-                "Could not load private keys from file".to_owned(),
-              ),
-            ));
-          }
-        }
-        info!("Loaded private key file");
-
-        // we don't use client authentication
-        let mut config = ServerConfig::new(NoClientAuth::new());
-        config
-          // set this server to use one cert together with the loaded private key
-          .set_single_cert(certs, keys.remove(0))
-          .map_err(|e| {
-            error!("Secure cert config cannot set up: {:?}", e);
-            ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(
-                "Cannot set up cert with provided cert/key pair due to TLS Error".to_owned(),
-              ),
-            )
-          })?;
-        let acceptor = TlsAcceptor::from(Arc::new(config));
-        let addr = format!("{}:{}", base_addr, ws_secure_port);
-
-        debug!("Websocket Secure: Trying to listen on {}", addr);
-        // Create the event loop and TCP listener we'll accept connections on.
-        let try_socket = TcpListener::bind(&addr).await;
-        debug!("Websocket Secure: Socket bound.");
-        let listener = try_socket.expect("Failed to bind");
-        debug!("Websocket Secure: Listening on: {}", addr);
-
-        if let Ok((stream, _)) = listener.accept().await {
-          let handshake = acceptor.accept(stream);
-          // The handshake is a future we can await to get an encrypted
-          // stream back.
-          let tls_stream = handshake.await.map_err(|e| {
-            error!("Secure cert config cannot run handshake: {:?}", e);
-            ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::SecureServerError(format!("{:?}", e)),
-            )
-          })?;
-          info!("Websocket Secure: Got connection");
-          let ws_stream = async_tungstenite::accept_async(tls_stream)
-            .await
-            .map_err(|err| {
-              error!("Websocket server accept error: {:?}", err);
-              ButtplugConnectorError::TransportSpecificError(
-                ButtplugConnectorTransportSpecificError::SecureServerError(format!(
-                  "Error occurred during the websocket handshake: {:?}",
-                  err
-                )),
-              )
-            })?;
-          async_manager::spawn(async move {
-            run_connection_loop(
-              ws_stream,
-              (*request_receiver_clone.lock().await).take().unwrap(),
-              response_sender_clone,
-              disconnect_notifier_clone,
-            )
-            .await;
-          })
-          .unwrap();
-          Ok(())
-        } else {
-          Err(ButtplugConnectorError::ConnectorGenericError(
-            "Could not run accept for insecure port".to_owned(),
-          ))
-        }
-      };
-      tasks.push(Box::pin(fut));
-    }
+        async_manager::spawn(async move {
+          run_connection_loop(
+            ws_stream,
+            (*request_receiver_clone.lock().await).take().unwrap(),
+            response_sender_clone,
+            disconnect_notifier_clone,
+          )
+          .await;
+        })
+        .unwrap();
+        Ok(())
+      } else {
+        Err(ButtplugConnectorError::ConnectorGenericError(
+          "Could not run accept for insecure port".to_owned(),
+        ))
+      }
+    };
 
     Box::pin(async move {
-      // Use select_all on the tasks, returning the first one to resolves.
-      // Dropping the rest of them means we
-      if tasks.is_empty() {
-        Err(ButtplugConnectorError::ConnectorGenericError(
-          "No ports specified for listening in websocket server connector.".to_owned(),
-        ))
-      } else if let Err(connector_err) = select_all(tasks).await.0 {
-        Err(connector_err)
-      } else {
-        Ok(())
-      }
+      fut.await?;
+      Ok(())
     })
   }
 
