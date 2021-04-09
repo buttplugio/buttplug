@@ -13,7 +13,6 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-default=["thread-pool-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 # default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 client=[]
 server=[]
