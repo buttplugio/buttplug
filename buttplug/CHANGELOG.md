@@ -1,3 +1,32 @@
+# 3.0.0 (2021-04-08)
+
+## Features
+
+- Added hardware support:
+  - Lovelife (OhMiBod) Lumen
+  - Mysteryvibe Poco
+  - Libo Selina
+- #311: Reduce runtime support to simplify library
+  - Added tokio runtime support
+    - Needed for Unity support of buttplug-rs.
+  - Removed async-std runtime support
+    - We don't really have the resources to keep supporting multiple runtimes, and async-std has
+      tokio compat.
+  - Removed futures::ThreadPool runtime support
+    - This was easy to support when the library started, but seems silly now.
+- #310: Removed Secure Sockets as on option on Websocket Servers
+  - Our original reason for implementing this was for browsers that didn't handle connecting to
+    mixed content (i.e. https website connecting via websockets to http localhost). Firefox resolved
+    this a few months ago, and Chrome and Edge both support it too. Safari has always been a weird
+    mess, so we don't really care there. If users still need this functionality, they can set up their own reverse proxy, but this frees us from having to support this for them, which took a ton of code and time.
+
+## Breaking Changes
+
+- ButtplugWebsocketServerConnectorOptions no longer has secure options, and the insecure port option
+  is now mandatory.
+- Removed build features for no longer supported runtimes, native programs using Buttplug as an
+  executable will need to spin up a tokio runtime, either via the tokio::main macro or manually.
+
 # 2.1.9 (2021-04-04)
 
 ## Bugfixes

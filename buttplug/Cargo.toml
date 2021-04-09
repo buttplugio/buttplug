@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "2.1.9"
+version = "3.0.0"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -76,7 +76,7 @@ prost = "0.7.0"
 rusty-xinput = "1.2.0"
 
 [dev-dependencies]
-tokio = { version = "1.4.0", features = ["io-std"] }
+tokio = { version = "1.4.0", features = ["io-std", "io-util", "macros"] }
 tracing-log = { version = "0.1.2", features = ["env_logger"] }
 
 [lib]
