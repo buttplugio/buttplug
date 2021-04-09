@@ -103,20 +103,20 @@ The following crate features are available
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
 | `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `websockets` | `async-std-runtime` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
+| `websockets` | `tokio-runtime` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
 | `btleplug-manager` | `server` | Bluetooth hardware support on Windows 10, macOS, Linux, iOS |
 | `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows 7/10, macOS, Linux |
 | `serial-manager` | `server` | Serial Port hardware support on Windows 7/10, macOS, Linux |
 | `xinput-manager` | `server` | XInput Gamepad support on Windows 7/10 |
-| `async-std-runtime` | None | Uses async-std/smol executor for futures |
 | `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
-| `thread-pool-runtime` | None | Uses default thread pool executor for futures |
+| `tokio-runtime` | None | Uses tokio for futures |
+| `wasm-bindgen-runtime` | None | Uses the wasm-bindgen executor as a runtime (WASM only) |
 
 (Tokio coming soon)
 
 Default features are enough to build a full desktop system:
 
-- `thread-pool-runtime`
+- `tokio-runtime`
 - `client`
 - `server`
 - `serialize-json` 

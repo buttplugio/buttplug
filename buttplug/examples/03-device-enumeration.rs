@@ -8,13 +8,15 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask servers
 // which devices are available.
-use async_std::io;
+use tokio::io;
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientEvent},
+  client::{ButtplugClient, ButtplugClientEvent, VibrateCommand},
   // connector::ButtplugInProcessClientConnector,
   server::ButtplugServerOptions,
   util::async_manager,
 };
+use std::time::Duration;
+use futures_timer::Delay;
 // use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},  core::messages::serializer::ButtplugClientJSONSerializer};
 use futures::StreamExt;
 use tracing::{info, span, Level};
@@ -142,6 +144,14 @@ async fn device_enumeration_example() {
           // in a later example. For now, we'll just print the
           // device name then drop our instance of it.
           println!("We got a device: {}", device.name);
+          device.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
+          println!("{} should start vibrating!", device.name);
+          Delay::new(Duration::from_secs(1)).await;
+          // All devices also have a "stop" command that will make
+          // them stop whatever they're doing.
+          device.stop().await.unwrap();
+          println!("{} should stop vibrating!", device.name);
+          Delay::new(Duration::from_secs(1)).await;
         }
         ButtplugClientEvent::ScanningFinished => {
           println!("Scanning finished signaled.");
@@ -164,7 +174,7 @@ async fn device_enumeration_example() {
 
   println!("Hit enter to continue...");
   let mut line = String::new();
-  io::stdin().read_line(&mut line).await.unwrap();
+  //io::stdin().read_line(&mut line).await.unwrap();
 
   // Hypothetical situation: We've now exited our match block, and
   // realized that hey, we actually wanted that device object we

@@ -11,9 +11,6 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-#[cfg(feature = "async-std-runtime")]
-use async_std::net::TcpListener;
-#[cfg(feature = "tokio-runtime")]
 use tokio::net::TcpListener;
 use futures::{
   future::BoxFuture,
@@ -179,9 +176,6 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket Insecure: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket Insecure: Got connection");
-        #[cfg(feature="async-std-runtime")]
-        let ws_fut = async_tungstenite::accept_async(stream);
-        #[cfg(feature="tokio-runtime")]
         let ws_fut = async_tungstenite::tokio::accept_async(stream);
         let ws_stream = ws_fut
           .await

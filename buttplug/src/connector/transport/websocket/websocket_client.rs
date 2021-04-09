@@ -20,12 +20,6 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-#[cfg(feature = "async-std-runtime")]
-use async_tungstenite::{
-  async_std::connect_async_with_tls_connector,
-  tungstenite::protocol::Message,
-};
-#[cfg(feature = "tokio-runtime")]
 use async_tungstenite::{
   tokio::connect_async_with_tls_connector,
   tungstenite::protocol::Message,

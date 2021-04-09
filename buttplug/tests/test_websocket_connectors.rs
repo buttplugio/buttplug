@@ -1,6 +1,6 @@
 // The tests in this file can fail on CI if there isn't a timed retry.
 
-#[cfg(all(feature = "websockets", feature = "async-std-runtime"))]
+#[cfg(feature = "websockets")]
 mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
@@ -32,10 +32,7 @@ mod websocket_connector_tests {
         >::new(ButtplugWebsocketServerTransport::new(
           ButtplugWebsocketServerTransportOptions {
             ws_listen_on_all_interfaces: false,
-            ws_insecure_port: Some(12345u16),
-            ws_secure_port: None,
-            ws_cert_file: None,
-            ws_priv_file: None,
+            ws_insecure_port: 12345u16,
           },
         ));
         server_clone.start(connector).await.unwrap();
@@ -87,10 +84,7 @@ mod websocket_connector_tests {
         >::new(ButtplugWebsocketServerTransport::new(
           ButtplugWebsocketServerTransportOptions {
             ws_listen_on_all_interfaces: false,
-            ws_insecure_port: Some(12347u16),
-            ws_secure_port: None,
-            ws_cert_file: None,
-            ws_priv_file: None,
+            ws_insecure_port: 12347u16,
           },
         ));
 

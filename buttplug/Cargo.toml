@@ -13,7 +13,7 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-# default=["async-std-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
+default=["tokio-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
 client=[]
 server=[]
 serialize-json=[]
@@ -25,8 +25,6 @@ btleplug-manager=["server", "btleplug"]
 serial-manager=["server", "serialport"]
 lovense-dongle-manager=["server", "serialport", "hidapi"]
 # Runtime managers
-thread-pool-runtime=[]
-async-std-runtime=["async-std/default", "async-tungstenite/async-std-runtime", "async-tungstenite/async-native-tls"]
 tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures", "futures-timer/wasm-bindgen"]
 dummy-runtime=[]
@@ -37,7 +35,7 @@ unstable=[]
 # buttplug_derive = { path = "../buttplug_derive" }
 native-tls = "0.2"
 buttplug_derive = "0.6.2"
-futures = { version = "0.3.13", features = ["thread-pool"] }
+futures = "0.3.13"
 futures-util = "0.3.13"
 async-trait = "0.1.48"
 serde = { version = "1.0.125", features = ["derive"] }
@@ -76,12 +74,6 @@ prost = "0.7.0"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
-
-[dependencies.async-std]
-version = "1.9.0"
-default-features = false
-features = ["std"]
-optional = true
 
 [dev-dependencies]
 tokio = { version = "1.4.0", features = ["io-std"] }

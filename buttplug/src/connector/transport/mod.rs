@@ -9,7 +9,7 @@ use futures::future::BoxFuture;
 use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
 pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError};
-#[cfg(any(all(feature = "websockets", feature = "async-std-runtime"), all(feature = "websockets", feature = "tokio-runtime")))]
+#[cfg(feature = "websockets")]
 pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use thiserror::Error;
