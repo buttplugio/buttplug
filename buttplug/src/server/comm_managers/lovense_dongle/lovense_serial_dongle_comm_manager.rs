@@ -31,9 +31,11 @@ use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
   Mutex,
 };
+use futures::FutureExt;
 use tracing_futures::Instrument;
+use tokio_util::sync::CancellationToken;
 
-fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<OutgoingLovenseData>) {
+fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<OutgoingLovenseData>, token: CancellationToken) {
   let mut port_write = |mut data: String| {
     data += "\r\n";
     info!("Writing message: {}", data);
@@ -44,7 +46,12 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
     // all sorts of trouble.
     port.write_all(&data.into_bytes()).unwrap();
   };
-  while let Some(data) = async_manager::block_on(async { receiver.recv().await }) {
+  while let Some(data) = async_manager::block_on(async { 
+    select! {
+      _ = token.cancelled().fuse() => None,
+      data = receiver.recv().fuse() => data
+    }
+  }) {
     match data {
       OutgoingLovenseData::Raw(s) => {
         port_write(s);
@@ -54,12 +61,12 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
       }
     }
   }
-  info!("EXITING LOVENSE DONGLE WRITE THREAD.");
+  debug!("Exiting lovense dongle write thread.");
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongleIncomingMessage>) {
+fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongleIncomingMessage>, token: CancellationToken) {
   let mut data: String = String::default();
-  loop {
+  while !token.is_cancelled() {
     let mut buf: [u8; 1024] = [0; 1024];
     match port.read(&mut buf) {
       Ok(len) => {
@@ -101,7 +108,7 @@ fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongl
       }
     }
   }
-  info!("EXITING LOVENSE DONGLE READ THREAD.");
+  debug!("Exiting lovense dongle read thread.");
 }
 pub struct LovenseSerialDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
@@ -109,6 +116,7 @@ pub struct LovenseSerialDongleCommunicationManager {
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
+  thread_cancellation_token: CancellationToken
 }
 
 impl LovenseSerialDongleCommunicationManager {
@@ -120,13 +128,13 @@ impl LovenseSerialDongleCommunicationManager {
     let machine_sender_clone = self.machine_sender.clone();
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
+    let token = self.thread_cancellation_token.child_token();
     Box::pin(async move {
       // TODO Does this block? Should it run in one of our threads?
       match available_ports() {
         Ok(ports) => {
           info!("Got {} serial ports back", ports.len());
-          for p in ports {
-            if let SerialPortType::UsbPort(usb_info) = p.port_type {
+          for p in ports {if let SerialPortType::UsbPort(usb_info) = p.port_type {
               // Hardcode the dongle VID/PID for now. We can't really do protocol
               // detection here because this is a comm bus to us, not a device.
               if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
@@ -136,6 +144,8 @@ impl LovenseSerialDongleCommunicationManager {
                   .timeout(Duration::from_millis(500));
                 match serial_port.open() {
                   Ok(dongle_port) => {
+                    let read_token = token.child_token();
+                    let write_token = token.child_token();                
                     let (writer_sender, writer_receiver) = channel(256);
                     let (reader_sender, reader_receiver) = channel(256);
 
@@ -143,7 +153,7 @@ impl LovenseSerialDongleCommunicationManager {
                     let read_thread = thread::Builder::new()
                       .name("Serial Reader Thread".to_string())
                       .spawn(move || {
-                        serial_read_thread(read_port, reader_sender);
+                        serial_read_thread(read_port, reader_sender, read_token);
                       })
                       .unwrap();
 
@@ -151,7 +161,7 @@ impl LovenseSerialDongleCommunicationManager {
                     let write_thread = thread::Builder::new()
                       .name("Serial Writer Thread".to_string())
                       .spawn(move || {
-                        serial_write_thread(write_port, writer_receiver);
+                        serial_write_thread(write_port, writer_receiver, write_token);
                       })
                       .unwrap();
 
@@ -189,6 +199,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
+      thread_cancellation_token: CancellationToken::new()
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
@@ -243,5 +254,11 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
+  }
+}
+
+impl Drop for LovenseSerialDongleCommunicationManager {
+  fn drop(&mut self) {
+    self.thread_cancellation_token.cancel();
   }
 }

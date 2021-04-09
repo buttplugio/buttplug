@@ -24,13 +24,15 @@ use std::{
   },
   thread,
 };
+use futures::FutureExt;
 use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
   Mutex,
 };
+use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
 
-fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseData>) {
+fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseData>, token: CancellationToken) {
   info!("Starting HID dongle write thread");
   let port_write = |mut data: String| {
     data += "\r\n";
@@ -50,7 +52,12 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
     }
   };
 
-  while let Some(data) = async_manager::block_on(async { receiver.recv().await }) {
+  while let Some(data) = async_manager::block_on(async { 
+    select! {
+      _ = token.cancelled().fuse() => None,
+      data = receiver.recv().fuse() => data
+    }
+  }) {
     match data {
       OutgoingLovenseData::Raw(s) => {
         port_write(s);
@@ -63,12 +70,12 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
   info!("Leaving HID dongle write thread");
 }
 
-fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessage>) {
+fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessage>, token: CancellationToken) {
   info!("Starting HID dongle read thread");
   dongle.set_blocking_mode(true).unwrap();
   let mut data: String = String::default();
   let mut buf = [0u8; 1024];
-  loop {
+  while !token.is_cancelled() {
     match dongle.read_timeout(&mut buf, 100) {
       Ok(len) => {
         if len == 0 {
@@ -122,6 +129,7 @@ pub struct LovenseHIDDongleCommunicationManager {
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
+  thread_cancellation_token: CancellationToken,
 }
 
 impl LovenseHIDDongleCommunicationManager {
@@ -133,6 +141,8 @@ impl LovenseHIDDongleCommunicationManager {
     let machine_sender_clone = self.machine_sender.clone();
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
+    let read_token = self.thread_cancellation_token.child_token();
+    let write_token = self.thread_cancellation_token.child_token();
     Box::pin(async move {
       let (writer_sender, writer_receiver) = channel(256);
       let (reader_sender, reader_receiver) = channel(256);
@@ -153,14 +163,14 @@ impl LovenseHIDDongleCommunicationManager {
       let read_thread = thread::Builder::new()
         .name("Lovense Dongle HID Reader Thread".to_string())
         .spawn(move || {
-          hid_read_thread(dongle1, reader_sender);
+          hid_read_thread(dongle1, reader_sender, read_token);
         })
         .unwrap();
 
       let write_thread = thread::Builder::new()
         .name("Lovense Dongle HID Writer Thread".to_string())
         .spawn(move || {
-          hid_write_thread(dongle2, writer_receiver);
+          hid_write_thread(dongle2, writer_receiver, write_token);
         })
         .unwrap();
 
@@ -192,6 +202,7 @@ impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager 
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
+      thread_cancellation_token: CancellationToken::new()
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(
@@ -247,5 +258,11 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
+  }
+}
+
+impl Drop for LovenseHIDDongleCommunicationManager {
+  fn drop (&mut self) {
+    self.thread_cancellation_token.cancel();
   }
 }

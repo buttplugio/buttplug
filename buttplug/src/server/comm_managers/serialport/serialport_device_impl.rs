@@ -29,6 +29,7 @@ use std::{
   time::Duration,
 };
 use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio_util::sync::CancellationToken;
 
 pub struct SerialPortDeviceImplCreator {
   specifier: DeviceSpecifier,
@@ -75,13 +76,17 @@ impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
 
 fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: mpsc::Receiver<Vec<u8>>) {
   let mut recv = receiver;
+  // Instead of waiting on a token here, we'll expect that we'll break on our
+  // channel going away.
+  //
+  // This is a blocking recv so we don't have to worry about the port.
   while let Some(v) = recv.blocking_recv() {
     port.write_all(&v).unwrap();
   }
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: mpsc::Sender<Vec<u8>>) {
-  loop {
+fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: mpsc::Sender<Vec<u8>>, token: CancellationToken) {
+  while !token.is_cancelled() {
     // TODO This is probably too small
     let mut buf: [u8; 1024] = [0; 1024];
     match port.read(&mut buf) {
@@ -112,6 +117,7 @@ pub struct SerialPortDeviceImpl {
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
   _port: Arc<Mutex<Box<dyn SerialPort>>>,
+  thread_cancellation_token: CancellationToken
 }
 
 impl SerialPortDeviceImpl {
@@ -163,11 +169,13 @@ impl SerialPortDeviceImpl {
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);
 
+    let token = CancellationToken::new();
+    let read_token = token.child_token();
     let read_port = (*port).try_clone().unwrap();
     let read_thread = thread::Builder::new()
       .name("Serial Reader Thread".to_string())
       .spawn(move || {
-        serial_read_thread(read_port, reader_sender);
+        serial_read_thread(read_port, reader_sender, read_token);
       })
       .unwrap();
 
@@ -188,6 +196,7 @@ impl SerialPortDeviceImpl {
       _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
       device_event_sender,
+      thread_cancellation_token: token
     })
   }
 }
@@ -275,5 +284,11 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
 
   fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
     unimplemented!();
+  }
+}
+
+impl Drop for SerialPortDeviceImpl {
+  fn drop(&mut self) {
+    self.thread_cancellation_token.cancel();
   }
 }
