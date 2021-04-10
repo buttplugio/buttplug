@@ -93,7 +93,7 @@ mod test {
         .unwrap();
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x02], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x02], true)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -110,7 +110,7 @@ mod test {
         .unwrap();
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x00], false)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00, 0x00], true)),
       );
       assert!(check_test_recv_empty(&command_receiver));
     });
