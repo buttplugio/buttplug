@@ -60,8 +60,8 @@ impl ButtplugProtocolCommandHandler for PrettyLove {
           device
             .write_value(DeviceWriteCmd::new(
               Endpoint::Tx,
-              vec![0x00, speed as u8],
-              false,
+              vec![0x00u8, speed as u8],
+              true,
             ))
             .await?;
         }
