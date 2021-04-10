@@ -289,7 +289,7 @@ mod test {
       mgr.start_scanning().await.unwrap();
       loop {
         match receiver.recv().await.unwrap() {
-          DeviceCommunicationEvent::DeviceFound{name, address, creator: _device} => {
+          DeviceCommunicationEvent::DeviceFound{name: _, address: _, creator: _device} => {
             info!("Got device!");
             info!("Sending message!");
             // TODO since we don't return full devices as this point
