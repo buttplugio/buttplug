@@ -40,6 +40,10 @@ impl TestDeviceImplCreator {
       device_impl: Some(device_impl),
     }
   }
+
+  pub fn device(&self) -> &Option<Arc<TestDeviceInternal>> {
+    &self.device_impl
+  }
 }
 
 impl Debug for TestDeviceImplCreator {

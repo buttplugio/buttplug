@@ -88,7 +88,7 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
     let tried_addresses = Arc::new(DashMap::new());
     let tried_addresses_clone = tried_addresses.clone();
     let mut adapter_event_handler = adapter_event_sender.subscribe();
-    info!("Setting bluetooth device event handler.");
+    debug!("Setting bluetooth device event handler.");
     let connected_addresses = Arc::new(DashMap::new());
     let connected_addresses_clone = connected_addresses.clone();
     let scanning_notifier = Arc::new(Notify::new());
@@ -176,6 +176,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             // If a device has no discernable name, we can't do anything
             // with it, just ignore it.
             if let Some(name) = p.properties().local_name {
+              let span = info_span!("btleplug enumeration", address = tracing::field::display(p.properties().address), name = tracing::field::display(&name));
+              let _enter = span.enter();
               //debug!("Found device {}", name);
               // Names are the only way we really have to test devices
               // at the moment. Most devices don't send services on
@@ -184,20 +186,23 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                 && !tried_addresses_handler.contains_key(&p.properties().address)
                 && !connected_addresses_handler.contains_key(&p.properties().address)
               {
+                let name = p.properties()
+                  .local_name
+                  .unwrap_or_else(|| "[NAME UNKNOWN]".to_owned());
+                let address = p.properties().address;
                 debug!(
                   "Found new bluetooth device: {} {}",
-                  p.properties()
-                    .local_name
-                    .unwrap_or_else(|| "[NAME UNKNOWN]".to_owned()),
-                  p.properties().address
+                  name, address
                 );
-                tried_addresses_handler.insert(p.properties().address, ());
+                tried_addresses_handler.insert(address, ());
+                
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
                   p,
                   adapter_event_sender_clone.clone(),
                 ));
+
                 if device_sender
-                  .send(DeviceCommunicationEvent::DeviceFound(device_creator))
+                  .send(DeviceCommunicationEvent::DeviceFound{name, address: address.to_string(), creator: device_creator})
                   .await
                   .is_err()
                 {
@@ -215,7 +220,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           scanning_notifier.notified().await;
         }
         central.stop_scan().unwrap();
-        info!("BTLEPlug scanning finished.");
+        debug!("BTLEPlug scanning finished.");
         if device_sender
           .send(DeviceCommunicationEvent::ScanningFinished)
           .await
@@ -224,7 +229,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           error!("Error sending scanning finished from btleplug.");
         }
         tried_addresses_handler.clear();
-        info!("Exiting btleplug scanning");
+        debug!("Exiting btleplug scanning");
       })
       .unwrap();
       Ok(())
@@ -252,7 +257,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
 impl Drop for BtlePlugCommunicationManager {
   fn drop(&mut self) {
-    info!("Dropping Comm Manager!");
+    info!("Dropping btleplug comm manager.");
     if self.adapter.is_some() {
       if let Err(e) = self.adapter.as_ref().unwrap().stop_scan() {
         info!("Error on scanning shutdown for bluetooth: {:?}", e);
@@ -284,7 +289,7 @@ mod test {
       mgr.start_scanning().await.unwrap();
       loop {
         match receiver.recv().await.unwrap() {
-          DeviceCommunicationEvent::DeviceFound(_device) => {
+          DeviceCommunicationEvent::DeviceFound{name, address, creator: _device} => {
             info!("Got device!");
             info!("Sending message!");
             // TODO since we don't return full devices as this point

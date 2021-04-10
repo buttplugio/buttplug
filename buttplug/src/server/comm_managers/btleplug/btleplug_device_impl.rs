@@ -34,6 +34,7 @@ use std::{
     Arc,
   },
 };
+use tracing_futures::Instrument;
 use tokio::sync::{broadcast, mpsc};
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
@@ -98,7 +99,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         device_receiver,
         device_event_sender.clone(),
       );
-      async_manager::spawn(async move { event_loop.run().await }).unwrap();
+      async_manager::spawn(async move { event_loop.run().await }.instrument(tracing::info_span!("btleplug Event Loop", device = tracing::field::display(&name), address = tracing::field::display(&address)))).unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       if device_sender

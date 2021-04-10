@@ -221,7 +221,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
           machine = next;
         }
       }
-      .instrument(tracing::info_span!("Lovense Serial Dongle State Machine")),
+      .instrument(tracing::info_span!(parent: tracing::Span::current(), "Lovense Serial Dongle State Machine")),
     )
     .unwrap();
     mgr

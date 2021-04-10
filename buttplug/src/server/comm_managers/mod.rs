@@ -17,7 +17,7 @@ use tokio::sync::mpsc::Sender;
 pub enum DeviceCommunicationEvent {
   // This event only means that a device has been found. The work still needs
   // to be done to make sure we can use it.
-  DeviceFound(Box<dyn ButtplugDeviceImplCreator>),
+  DeviceFound{name: String, address: String, creator: Box<dyn ButtplugDeviceImplCreator>},
   DeviceManagerAdded(Arc<AtomicBool>),
   ScanningStarted,
   ScanningFinished,

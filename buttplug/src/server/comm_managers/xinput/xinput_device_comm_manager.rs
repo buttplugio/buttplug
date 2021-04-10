@@ -152,7 +152,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {
-    info!("XInput manager scanning!");
+    debug!("XInput manager scanning for devices");
     let sender = self.sender.clone();
     let scanning_notifier = self.scanning_notifier.clone();
     let connected_gamepads = self.connected_gamepads.clone();
@@ -177,7 +177,10 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
               let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
               connected_gamepads.add(*i);
               if sender
-                .send(DeviceCommunicationEvent::DeviceFound(device_creator))
+                .send(DeviceCommunicationEvent::DeviceFound{
+                    name: i.to_string(),
+                    address: i.to_string(),
+                    creator: device_creator})
                 .await
                 .is_err()
               {
@@ -194,7 +197,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
         select! {
           _ = Delay::new(Duration::from_secs(1)).fuse() => {},
           _ = scanning_notifier.notified().fuse() => {
-            info!("XInput stop scanning notifier notified, ending scanning loop");
+            debug!("XInput stop scanning notifier notified, ending scanning loop");
             stop = true;
           }
         }

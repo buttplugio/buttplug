@@ -29,7 +29,7 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {
-    trace!("Serial port device scanning initiated.");
+    debug!("Serial port manager scanning for devices.");
     // TODO Does this block? Should it run in one of our threads?
     let sender = self.sender.clone();
     Box::pin(async move {
@@ -39,9 +39,11 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
           for p in ports {
             trace!("Sending serial port {:?} for possible device connection.", p);
             if sender
-              .send(DeviceCommunicationEvent::DeviceFound(Box::new(
-                SerialPortDeviceImplCreator::new(&p),
-              )))
+              .send(DeviceCommunicationEvent::DeviceFound {
+                name: format!("Serial Port Device {}", p.port_name),
+                address: p.port_name.clone(),
+                creator: Box::new(SerialPortDeviceImplCreator::new(&p)),
+              })
               .await
               .is_err()
             {

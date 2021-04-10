@@ -572,13 +572,16 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
     let (device_read_sender, device_read_receiver) = channel(256);
     self
       .hub
-      .send_event(DeviceCommunicationEvent::DeviceFound(Box::new(
+      .send_event(DeviceCommunicationEvent::DeviceFound{
+        name: "Lovense Dongle Device".to_owned(),
+        address: self.device_id.clone(),
+        creator: Box::new(
         LovenseDongleDeviceImplCreator::new(
           &self.device_id,
           device_write_sender,
           device_read_receiver,
-        ),
-      )))
+        ))
+      })
       .await;
     loop {
       let msg = self

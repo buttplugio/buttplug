@@ -461,7 +461,7 @@ impl ButtplugDevice {
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
-              info!("Found Buttplug Device {}", device_impl.name());
+              info!(address = tracing::field::display(device_impl.address()), "Found Buttplug Device {}", device_impl.name());
               // If we've made it this far, we now have a connected device
               // implementation with endpoints set up. We now need to run whatever
               // protocol initialization might need to happen. We'll fetch a protocol

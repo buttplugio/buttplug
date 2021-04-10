@@ -49,6 +49,7 @@ use std::{
 };
 use thiserror::Error;
 use tokio::sync::broadcast;
+use tracing_futures::Instrument;
 
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
@@ -83,7 +84,6 @@ impl Default for ButtplugServerOptions {
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
-  client_name: String,
   max_ping_time: u64,
   device_manager: DeviceManager,
   ping_timer: Arc<PingTimer>,
@@ -119,8 +119,7 @@ impl ButtplugServer {
       {
         error!("Server disappeared, cannot update about ping out.");
       };
-    })
-    .unwrap();
+    }.instrument(tracing::info_span!("Buttplug Server Ping Timeout Task"))).unwrap();
     let device_manager = DeviceManager::try_new(
       send.clone(),
       ping_timer.clone(),
@@ -130,7 +129,6 @@ impl ButtplugServer {
     )?;
     Ok(Self {
       server_name: options.name.clone(),
-      client_name: String::default(),
       max_ping_time: options.max_ping_time,
       device_manager,
       ping_timer,
@@ -143,10 +141,6 @@ impl ButtplugServer {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
-  }
-
-  pub fn client_name(&self) -> String {
-    self.client_name.clone()
   }
 
   pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>
@@ -246,7 +240,7 @@ impl ButtplugServer {
           error.set_id(id);
           error
         })
-    })
+    }.instrument(info_span!("Buttplug Server Message", id = id)))
   }
 
   fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
@@ -261,9 +255,6 @@ impl ButtplugServer {
       )
       .into();
     }
-    info!("Performing server handshake check");
-    // self.client_name = Some(msg.client_name.clone());
-    // self.client_spec_version = Some(msg.message_version);
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
     let out_msg = messages::ServerInfo::new(

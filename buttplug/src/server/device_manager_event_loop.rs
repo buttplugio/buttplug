@@ -21,6 +21,8 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use tracing_futures::Instrument;
+use tracing;
 use tokio::sync::{broadcast, mpsc};
 
 pub struct DeviceManagerEventLoop {
@@ -90,7 +92,7 @@ impl DeviceManagerEventLoop {
         },
         Err(e) => error!("Device errored while trying to connect: {}", e),
       }
-    })
+    }.instrument(tracing::Span::current()))
     .unwrap();
   }
 
@@ -126,8 +128,10 @@ impl DeviceManagerEventLoop {
           return;
         }
       }
-      DeviceCommunicationEvent::DeviceFound(device_creator) => {
-        self.try_create_new_device(device_creator);
+      DeviceCommunicationEvent::DeviceFound{name, address, creator} => {
+        let span = info_span!("device creation", name = tracing::field::display(name), address = tracing::field::display(address));
+        let _enter = span.enter();
+        self.try_create_new_device(creator);
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
@@ -139,6 +143,8 @@ impl DeviceManagerEventLoop {
     trace!("Got device event: {:?}", device_event);
     match device_event {
       ButtplugDeviceEvent::Connected(device) => {
+        let span = info_span!("device registration", name = tracing::field::display(device.name()), address = tracing::field::display(device.address()));
+        let _enter = span.enter();
         let generated_device_index = self.device_index_generator;
         self.device_index_generator += 1;
         // See if we have a reusable device index here.
