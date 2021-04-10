@@ -168,7 +168,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
     let os = self.output_sender.clone();
     let mut error_notification = false;
     let address = self.device.properties().address.to_string();
-    #[cfg(feature = "tokio-runtime")]
     let handle = Handle::current();
     self
       .device
@@ -199,10 +198,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
             );
           }
         };
-        #[cfg(feature = "tokio-runtime")]
         handle.spawn(fut);
-        #[cfg(not(feature = "tokio-runtime"))]
-        async_manager::spawn(fut).unwrap();
       }));
     let device_info = ButtplugDeviceImplInfo {
       endpoints: self.endpoints.keys().cloned().collect(),

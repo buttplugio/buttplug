@@ -88,7 +88,7 @@ pub use remote_connector::{
 };
 #[cfg(feature = "websockets")]
 pub use transport::ButtplugWebsocketClientTransport;
-#[cfg(all(feature = "websockets", feature = "tokio-runtime"))]
+#[cfg(feature = "websockets")]
 pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
 
 use crate::{
