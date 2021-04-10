@@ -234,7 +234,7 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {
-    info!("Lovense Dongle Manager scanning ports!");
+    debug!("Lovense Dongle Manager scanning for devices.");
     let sender = self.machine_sender.clone();
     Box::pin(async move {
       sender

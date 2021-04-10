@@ -412,19 +412,19 @@ impl DeviceConfigurationManager {
     &self,
     specifier: &DeviceSpecifier,
   ) -> Option<(bool, String, ProtocolDefinition)> {
-    info!("Looking for protocol that matches specifier: {:?}", specifier);
+    debug!("Looking for protocol that matches specifier: {:?}", specifier);
     for (name, def) in self.config.protocols.iter() {
       if def == specifier {
-        debug!("Found protocol {:?} for specifier {:?}.", name, specifier);
+        info!("Found protocol {:?} for specifier {:?}.", name, specifier);
         return Some((self.allow_raw_messages, name.clone(), def.clone()));
       }
     }
-    info!("No protocol found for specifier {:?}.", specifier);
+    debug!("No protocol found for specifier {:?}.", specifier);
     None
   }
 
   pub fn get_protocol_config(&self, name: &str) -> Option<DeviceProtocolConfiguration> {
-    info!("Looking for protocol {}", name);
+    debug!("Looking for protocol {}", name);
     // TODO It feels like maybe there should be a cleaner way to do this,
     // but I'm not really sure what it is?
     if let Some(proto) = self.config.protocols.get(name) {

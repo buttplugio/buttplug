@@ -61,7 +61,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               debug!("Device {} connect event received, but instance device address is {}, ignoring", ev, device_address);
               continue;
             } else {
-              info!("Device {} connect event received, matches instance device address, notifying event loop", ev);
+              debug!("Device {} connect event received, matches instance device address, notifying event loop", ev);
             }
             let s = event_sender.clone();
             let e = event;
@@ -75,7 +75,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
               debug!("Device {} disconnect event received, but instance device address is {}, ignoring", ev, device_address);
               continue;
             } else {
-              info!("Device {} disconnect event received, matches instance device address, exiting", ev);
+              debug!("Device {} disconnect event received, matches instance device address, exiting", ev);
             }
             let s = event_sender.clone();
             let e = event;
@@ -131,10 +131,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       match event.unwrap() {
         CentralEvent::DeviceConnected(addr) => {
           if addr == self.device.address() {
-            info!(
-              "Device {:?} connected!",
-              self.device.properties().local_name
-            );
+            info!("Device connected.");
             break;
           }
         }
@@ -206,7 +203,6 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
       product_name: None,
       serial_number: None,
     };
-    info!("Device connected!");
     state.set_reply(ButtplugDeviceReturn::Connected(device_info));
     Ok(())
   }
@@ -386,7 +382,7 @@ impl<T: Peripheral> BtlePlugInternalEventLoop<T> {
           }
         }
         BtlePlugCommLoopChannelValue::ChannelClosed => {
-          info!("CHANNEL CLOSED");
+          debug!("Channel closed, assuming device event loop should exit.");
           return;
         }
       }

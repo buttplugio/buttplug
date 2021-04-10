@@ -36,16 +36,16 @@ fn hid_write_thread(dongle: HidDevice, mut receiver: Receiver<OutgoingLovenseDat
   info!("Starting HID dongle write thread");
   let port_write = |mut data: String| {
     data += "\r\n";
-    debug!("Writing message: {}", data);
+    trace!("Writing message: {}", data);
 
     // For HID, we have to append the null report id before writing.
     let data_bytes = data.into_bytes();
-    debug!("Writing length: {}", data_bytes.len());
+    trace!("Writing length: {}", data_bytes.len());
     // We need to keep the first and last byte of our HID report 0, and we're
     // packing 65 bytes (1 report id, 64 bytes data). We can chunk into 63 byte
     // pieces and iterate.
     for chunk in data_bytes.chunks(63) {
-      debug!("bytes: {:?}", chunk);
+      trace!("bytes: {:?}", chunk);
       let mut byte_array = [0u8; 65];
       byte_array[1..chunk.len() + 1].copy_from_slice(&chunk);
       dongle.write(&byte_array).unwrap();
@@ -81,7 +81,7 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
         if len == 0 {
           continue;
         }
-        debug!("Got {} hid bytes", len);
+        trace!("Got {} hid bytes", len);
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
         data += std::str::from_utf8(&buf[0..len - 1]).unwrap();
@@ -98,7 +98,7 @@ fn hid_read_thread(dongle: HidDevice, sender: Sender<LovenseDongleIncomingMessag
           for msg in stream {
             match msg {
               Ok(m) => {
-                debug!("Read message: {:?}", m);
+                trace!("Read message: {:?}", m);
                 sender_clone.blocking_send(m).unwrap();
               }
               Err(e) => {
@@ -233,7 +233,7 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
   }
 
   fn start_scanning(&self) -> ButtplugResultFuture {
-    info!("Lovense Dongle Manager scanning ports!");
+    debug!("Lovense Dongle Manager scanning for devices");
     let sender = self.machine_sender.clone();
     self.is_scanning.store(true, Ordering::SeqCst);
     Box::pin(async move {

@@ -226,12 +226,12 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
           )));
         }
         LovenseDeviceCommand::StartScanning => {
-          info!("Lovense dongle not found, storing StartScanning command until found.");
+          debug!("Lovense dongle not found, storing StartScanning command until found.");
           self.is_scanning.store(true, Ordering::SeqCst);
           should_scan = true;
         }
         LovenseDeviceCommand::StopScanning => {
-          info!("Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished.");
+          debug!("Lovense dongle not found, clearing StartScanning command and emitting ScanningFinished.");
           self.is_scanning.store(false, Ordering::SeqCst);
           should_scan = false;
           // If we were requested to scan and then asked to stop, act like we at least tried.

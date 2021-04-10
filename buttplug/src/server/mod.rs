@@ -100,6 +100,7 @@ impl Default for ButtplugServer {
 
 impl ButtplugServer {
   pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
+    debug!("Creating server '{}'", options.name);
     let (send, _) = broadcast::channel(256);
     let output_sender_clone = send.clone();
     let connected = Arc::new(AtomicBool::new(false));
@@ -166,6 +167,7 @@ impl ButtplugServer {
   }
 
   pub fn disconnect(&self) -> BoxFuture<Result<(), messages::Error>> {
+    debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
     let stop_scanning_fut =
       self.parse_message(ButtplugClientMessage::StopScanning(StopScanning::default()));
@@ -174,14 +176,13 @@ impl ButtplugServer {
     ));
     let connected = self.connected.clone();
     Box::pin(async move {
-      // TODO We should really log more here.
       connected.store(false, Ordering::SeqCst);
       ping_timer.stop_ping_timer().await;
       // Ignore returns here, we just want to stop.
-      info!("Server disconnected, stopping all devices...");
-      let _ = stop_fut.await;
       info!("Server disconnected, stopping device scanning if it was started...");
       let _ = stop_scanning_fut.await;
+      info!("Server disconnected, stopping all devices...");
+      let _ = stop_fut.await;
       Ok(())
     })
   }
@@ -192,6 +193,7 @@ impl ButtplugServer {
     &self,
     msg: ButtplugClientMessage,
   ) -> BoxFuture<'static, Result<ButtplugServerMessage, messages::Error>> {
+    trace!("Buttplug Server {} received message to client parse: {:?}", self.server_name, msg);
     let id = msg.id();
     if !self.connected() {
       // Check for ping timeout first! There's no way we should've pinged out if
@@ -251,6 +253,7 @@ impl ButtplugServer {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
+    info!("Performing server handshake check with client {} at message version {}.", msg.client_name(), msg.message_version());
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -272,7 +275,7 @@ impl ButtplugServer {
     Box::pin(async move {
       ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
-      info!("Server handshake check successful.");
+      debug!("Server handshake check successful.");
       Result::Ok(out_msg.into())
     })
   }

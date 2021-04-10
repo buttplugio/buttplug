@@ -74,10 +74,6 @@ impl DeviceManager {
       user_device_config_json,
     )?);
     let devices = Arc::new(DashMap::new());
-    /*
-    let (event_loop_fut, device_map, device_event_sender) =
-      wait_for_manager_events(config, output_sender);
-    */
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut event_loop = DeviceManagerEventLoop::new(
       config,
@@ -137,7 +133,7 @@ impl DeviceManager {
             .await
             .is_err()
         {
-          error!("Device manager event loop shut down, cannot send ScanningStarted");
+          debug!("Device manager event loop shut down, cannot send ScanningStarted");
         }
         Ok(messages::Ok::default().into())
       })

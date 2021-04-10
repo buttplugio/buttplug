@@ -66,7 +66,7 @@ async fn run_server<ConnectorType>(
           break;
         }
         Some(client_message) => {
-          debug!("Got message from connector: {:?}", client_message);
+          trace!("Got message from connector: {:?}", client_message);
           let server_clone = server.clone();
           let connector_clone = shared_connector.clone();
           let remote_event_sender_clone = remote_event_sender.clone();

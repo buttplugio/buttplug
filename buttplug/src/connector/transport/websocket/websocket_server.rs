@@ -93,7 +93,7 @@ async fn run_connection_loop<S>(
             Ok(msg) => {
               match msg {
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
-                  debug!("Got text: {}", text_msg);
+                  trace!("Got text: {}", text_msg);
                   if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
                     error!("Connector that owns transport no longer available, exiting.");
                     break;
