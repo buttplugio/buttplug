@@ -83,8 +83,8 @@ async fn run_connection_loop<S>(
           info!("Websocket server connector owner dropped, disconnecting websocket connection.");
           if websocket_server_sender.close().await.is_err() {
             error!("Cannot close, assuming connection already closed");
-            return;
           }
+          return;
         }
       }
       websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
