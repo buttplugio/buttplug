@@ -1,7 +1,5 @@
 use super::xinput_device_comm_manager::{
-  create_address,
-  XInputConnectionTracker,
-  XInputControllerIndex,
+  create_address, XInputConnectionTracker, XInputControllerIndex,
 };
 use crate::{
   core::{
@@ -11,15 +9,8 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
 };

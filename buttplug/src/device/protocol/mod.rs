@@ -37,21 +37,12 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      DeviceMessageAttributesMap,
-      RawReading,
-      VibrateCmd,
-      VibrateSubcommand,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugDeviceMessageType,
+      ButtplugMessage, DeviceMessageAttributesMap, RawReading, VibrateCmd, VibrateSubcommand,
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration,
-    ButtplugDeviceResultFuture,
-    DeviceReadCmd,
+    configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture, DeviceReadCmd,
     Endpoint,
   },
 };
@@ -147,11 +138,11 @@ pub fn try_create_protocol(
     ProtocolTypes::KiirooV2 => kiiroo_v2::KiirooV2::try_create(device, config),
     ProtocolTypes::KiirooV2Vibrator => {
       kiiroo_v2_vibrator::KiirooV2Vibrator::try_create(device, config)
-    },
+    }
     ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
     ProtocolTypes::KiirooV21Initialized => {
       kiiroo_v21_initialized::KiirooV21Initialized::try_create(device, config)
-    },
+    }
     ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
     ProtocolTypes::LiboElle => libo_elle::LiboElle::try_create(device, config),
     ProtocolTypes::LiboShark => libo_shark::LiboShark::try_create(device, config),

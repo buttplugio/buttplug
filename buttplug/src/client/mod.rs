@@ -12,12 +12,8 @@ pub mod device;
 
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 pub use device::{
-  ButtplugClientDevice,
-  ButtplugClientDeviceEvent,
-  ButtplugClientDeviceMessageType,
-  LinearCommand,
-  RotateCommand,
-  VibrateCommand,
+  ButtplugClientDevice, ButtplugClientDeviceEvent, ButtplugClientDeviceMessageType, LinearCommand,
+  RotateCommand, VibrateCommand,
 };
 
 use crate::{
@@ -25,15 +21,9 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugMessageSpecVersion,
-      Ping,
-      RequestDeviceList,
-      RequestServerInfo,
-      StartScanning,
-      StopAllDevices,
-      StopScanning,
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+      ButtplugMessageSpecVersion, Ping, RequestDeviceList, RequestServerInfo, StartScanning,
+      StopAllDevices, StopScanning,
     },
   },
   util::{
@@ -151,8 +141,7 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {
-}
+impl Unpin for ButtplugClientEvent {}
 
 /// Struct used by applications to communicate with a Buttplug Server.
 ///
@@ -184,12 +173,10 @@ pub struct ButtplugClient {
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
-unsafe impl Send for ButtplugClient {
-}
+unsafe impl Send for ButtplugClient {}
 // Not actually sure this should be sync, but trying to call handshake breaks
 // without it.
-unsafe impl Sync for ButtplugClient {
-}
+unsafe impl Sync for ButtplugClient {}
 
 impl ButtplugClient {
   pub fn new(name: &str) -> Self {
@@ -317,8 +304,7 @@ impl ButtplugClient {
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{
-        LovenseHIDDongleCommunicationManager,
-        LovenseSerialDongleCommunicationManager,
+        LovenseHIDDongleCommunicationManager, LovenseSerialDongleCommunicationManager,
       };
       connector
         .server_ref()

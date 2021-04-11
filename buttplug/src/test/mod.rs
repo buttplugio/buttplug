@@ -8,16 +8,11 @@ use crate::{
 };
 use std::sync::{Arc, Mutex};
 pub use test_device::{
-  TestDevice,
-  TestDeviceEndpointChannel,
-  TestDeviceImplCreator,
-  TestDeviceInternal,
+  TestDevice, TestDeviceEndpointChannel, TestDeviceImplCreator, TestDeviceInternal,
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
-  new_bluetoothle_test_device,
-  TestDeviceCommunicationManager,
-  TestDeviceCommunicationManagerHelper,
+  new_bluetoothle_test_device, TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper,
 };
 use tokio::sync::mpsc::Receiver;
 

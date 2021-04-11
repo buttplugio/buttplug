@@ -1,9 +1,6 @@
 use super::lovense_dongle_messages::{
-  LovenseDongleIncomingMessage,
-  LovenseDongleMessageFunc,
-  LovenseDongleMessageType,
-  LovenseDongleOutgoingMessage,
-  OutgoingLovenseData,
+  LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
+  LovenseDongleOutgoingMessage, OutgoingLovenseData,
 };
 use crate::{
   core::{
@@ -13,15 +10,8 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   util::async_manager,
 };
@@ -127,13 +117,15 @@ impl LovenseDongleDeviceImpl {
             address_clone.clone(),
             Endpoint::Rx,
             data_str.into_bytes(),
-          )).is_err() {
-            // This sometimes happens with the serial dongle, not sure why. I
-            // think it may have to do some sort of connection timing. It seems
-            // like we can continue through it and be fine? Who knows. God I
-            // hate the lovense dongle.
-            error!("Can't send to device event sender, continuing Lovense dongle loop.");
-          }
+          ))
+          .is_err()
+        {
+          // This sometimes happens with the serial dongle, not sure why. I
+          // think it may have to do some sort of connection timing. It seems
+          // like we can continue through it and be fine? Who knows. God I
+          // hate the lovense dongle.
+          error!("Can't send to device event sender, continuing Lovense dongle loop.");
+        }
       }
       info!("Lovense dongle device disconnected",);
       // This should always succeed, as it'll relay up to the device manager,

@@ -1,7 +1,5 @@
 use super::btleplug_internal::{
-  BtlePlugInternalEventLoop,
-  DeviceReturnFuture,
-  DeviceReturnStateShared,
+  BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared,
 };
 use crate::{
   core::{
@@ -11,15 +9,8 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceCommand,
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    ButtplugDeviceReturn,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
+    ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator, ButtplugDeviceReturn,
+    DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
     DeviceWriteCmd,
   },
   util::async_manager,
@@ -34,8 +25,8 @@ use std::{
     Arc,
   },
 };
-use tracing_futures::Instrument;
 use tokio::sync::{broadcast, mpsc};
+use tracing_futures::Instrument;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   device: Option<T>,
@@ -99,7 +90,14 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         device_receiver,
         device_event_sender.clone(),
       );
-      async_manager::spawn(async move { event_loop.run().await }.instrument(tracing::info_span!("btleplug Event Loop", device = tracing::field::display(&name), address = tracing::field::display(&address)))).unwrap();
+      async_manager::spawn(
+        async move { event_loop.run().await }.instrument(tracing::info_span!(
+          "btleplug Event Loop",
+          device = tracing::field::display(&name),
+          address = tracing::field::display(&address)
+        )),
+      )
+      .unwrap();
       let fut = DeviceReturnFuture::default();
       let waker = fut.get_state_clone();
       if device_sender
@@ -116,7 +114,8 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       };
       match fut.await {
         ButtplugDeviceReturn::Connected(info) => {
-          let device_internal_impl = BtlePlugDeviceImpl::new(&address, device_sender, device_event_sender);
+          let device_internal_impl =
+            BtlePlugDeviceImpl::new(&address, device_sender, device_event_sender);
           let device_impl = DeviceImpl::new(
             &name,
             &address,
@@ -154,10 +153,8 @@ pub struct BtlePlugDeviceImpl {
   connected: Arc<AtomicBool>,
 }
 
-unsafe impl Send for BtlePlugDeviceImpl {
-}
-unsafe impl Sync for BtlePlugDeviceImpl {
-}
+unsafe impl Send for BtlePlugDeviceImpl {}
+unsafe impl Sync for BtlePlugDeviceImpl {}
 
 impl BtlePlugDeviceImpl {
   pub fn new(
@@ -189,10 +186,8 @@ impl BtlePlugDeviceImpl {
         if connected.load(Ordering::SeqCst) {
           connected.store(false, Ordering::SeqCst);
           event_stream
-            .send(ButtplugDeviceEvent::Removed(
-              address
-            ))
-          .unwrap();
+            .send(ButtplugDeviceEvent::Removed(address))
+            .unwrap();
         }
         return Err(
           ButtplugDeviceError::DeviceNotConnected(

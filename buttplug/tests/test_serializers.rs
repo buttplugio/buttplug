@@ -6,10 +6,7 @@ use buttplug::{
   core::{
     errors::{ButtplugError, ButtplugUnknownError},
     messages::{
-      self,
-      serializer::ButtplugSerializedMessage,
-      ButtplugClientMessage,
-      ButtplugMessage,
+      self, serializer::ButtplugSerializedMessage, ButtplugClientMessage, ButtplugMessage,
       ButtplugServerMessage,
     },
   },

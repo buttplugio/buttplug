@@ -1,10 +1,7 @@
 mod util;
 use buttplug::{
   client::{
-    ButtplugClient,
-    ButtplugClientDeviceEvent,
-    ButtplugClientError,
-    ButtplugClientEvent,
+    ButtplugClient, ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent,
     VibrateCommand,
   },
   connector::ButtplugInProcessClientConnector,

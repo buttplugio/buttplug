@@ -6,9 +6,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
   util::async_manager,
 };

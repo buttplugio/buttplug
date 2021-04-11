@@ -1,24 +1,15 @@
 use super::{
-  fleshlight_launch_helper::get_speed,
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
+  fleshlight_launch_helper::get_speed, ButtplugDeviceResultFuture, ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
-  core::{
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
-      FleshlightLaunchFW12Cmd,
-    },
+  core::messages::{
+    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
 use std::sync::{
@@ -119,11 +110,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
 mod test {
   use crate::{
     core::messages::{
-      FleshlightLaunchFW12Cmd,
-      LinearCmd,
-      StopDeviceCmd,
-      VectorSubcommand,
-      VibrateCmd,
+      FleshlightLaunchFW12Cmd, LinearCmd, StopDeviceCmd, VectorSubcommand, VibrateCmd,
       VibrateSubcommand,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},

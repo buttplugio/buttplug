@@ -1,18 +1,12 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
-    VibrateCmd,
-    VibrateSubcommand,
+    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    VibrateCmd, VibrateSubcommand,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
 use std::sync::Arc;

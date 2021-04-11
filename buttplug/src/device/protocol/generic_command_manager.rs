@@ -1,14 +1,8 @@
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError},
   messages::{
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessageType,
-    DeviceMessageAttributesMap,
-    LinearCmd,
-    RotateCmd,
-    RotationSubcommand,
-    VibrateCmd,
-    VibrateSubcommand,
+    ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, DeviceMessageAttributesMap,
+    LinearCmd, RotateCmd, RotationSubcommand, VibrateCmd, VibrateSubcommand,
   },
 };
 
@@ -264,13 +258,8 @@ mod test {
 
   use super::GenericCommandManager;
   use crate::core::messages::{
-    ButtplugDeviceMessageType,
-    DeviceMessageAttributes,
-    DeviceMessageAttributesMap,
-    RotateCmd,
-    RotationSubcommand,
-    VibrateCmd,
-    VibrateSubcommand,
+    ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap, RotateCmd,
+    RotationSubcommand, VibrateCmd, VibrateSubcommand,
   };
   #[test]
   pub fn test_command_generator_vibration() {

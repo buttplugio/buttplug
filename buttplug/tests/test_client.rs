@@ -4,16 +4,14 @@ extern crate buttplug;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
   connector::{
-    ButtplugConnector,
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
     ButtplugInProcessClientConnector,
   },
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
-  device::{Endpoint, DeviceImplCommand, DeviceWriteCmd},
+  device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
   server::ButtplugServerOptions,
   test::check_test_recv_value,
   util::async_manager,

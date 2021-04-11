@@ -4,11 +4,7 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugMessage,
-      ButtplugMessageValidator,
-      ButtplugServerMessage,
+      self, ButtplugClientMessage, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessage,
     },
   },
   server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},

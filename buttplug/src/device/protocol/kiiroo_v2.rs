@@ -1,25 +1,18 @@
 use super::{
-  fleshlight_launch_helper::get_speed,
-  ButtplugDeviceResultFuture,
-  ButtplugProtocol,
+  fleshlight_launch_helper::get_speed, ButtplugDeviceResultFuture, ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
       FleshlightLaunchFW12Cmd,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
 use futures::future::BoxFuture;

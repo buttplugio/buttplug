@@ -19,15 +19,9 @@ use crate::{
   core::{
     errors::*,
     messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugMessage,
-      ButtplugServerMessage,
-      StopAllDevices,
-      StopScanning,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
+      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   test::TestDeviceCommunicationManagerHelper,
@@ -107,19 +101,23 @@ impl ButtplugServer {
     let ping_timer = Arc::new(PingTimer::new(options.max_ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
     let connected_clone = connected.clone();
-    async_manager::spawn(async move {
-      // This will only exit if we've pinged out.
-      ping_timeout_notifier.await;
-      error!("Ping out signal received, stopping server");
-      connected_clone.store(false, Ordering::SeqCst);
-      // TODO Should the event sender return a result instead of an error message?
-      if output_sender_clone
-        .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
-        .is_err()
-      {
-        error!("Server disappeared, cannot update about ping out.");
-      };
-    }.instrument(tracing::info_span!("Buttplug Server Ping Timeout Task"))).unwrap();
+    async_manager::spawn(
+      async move {
+        // This will only exit if we've pinged out.
+        ping_timeout_notifier.await;
+        error!("Ping out signal received, stopping server");
+        connected_clone.store(false, Ordering::SeqCst);
+        // TODO Should the event sender return a result instead of an error message?
+        if output_sender_clone
+          .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
+          .is_err()
+        {
+          error!("Server disappeared, cannot update about ping out.");
+        };
+      }
+      .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
+    )
+    .unwrap();
     let device_manager = DeviceManager::try_new(
       send.clone(),
       ping_timer.clone(),
@@ -187,7 +185,11 @@ impl ButtplugServer {
     &self,
     msg: ButtplugClientMessage,
   ) -> BoxFuture<'static, Result<ButtplugServerMessage, messages::Error>> {
-    trace!("Buttplug Server {} received message to client parse: {:?}", self.server_name, msg);
+    trace!(
+      "Buttplug Server {} received message to client parse: {:?}",
+      self.server_name,
+      msg
+    );
     let id = msg.id();
     if !self.connected() {
       // Check for ping timeout first! There's no way we should've pinged out if
@@ -228,26 +230,33 @@ impl ButtplugServer {
     };
     // Simple way to set the ID on the way out. Just rewrap
     // the returned future to make sure it happens.
-    Box::pin(async move {
-      out_fut
-        .await
-        .map(|mut ok_msg| {
-          ok_msg.set_id(id);
-          ok_msg
-        })
-        .map_err(|err| {
-          let mut error = messages::Error::from(err);
-          error.set_id(id);
-          error
-        })
-    }.instrument(info_span!("Buttplug Server Message", id = id)))
+    Box::pin(
+      async move {
+        out_fut
+          .await
+          .map(|mut ok_msg| {
+            ok_msg.set_id(id);
+            ok_msg
+          })
+          .map_err(|err| {
+            let mut error = messages::Error::from(err);
+            error.set_id(id);
+            error
+          })
+      }
+      .instrument(info_span!("Buttplug Server Message", id = id)),
+    )
   }
 
   fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
-    info!("Performing server handshake check with client {} at message version {}.", msg.client_name(), msg.message_version());
+    info!(
+      "Performing server handshake check with client {} at message version {}.",
+      msg.client_name(),
+      msg.message_version()
+    );
     if BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION < msg.message_version() {
       return ButtplugHandshakeError::MessageSpecVersionMismatch(
         BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
@@ -299,18 +308,15 @@ mod test {
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(msg.clone().into()).await;
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
-      
+
       reply = server.parse_message(msg.clone().into()).await;
       assert!(
         reply.is_err(),
         "Should get back err on double handshake: {:?}",
         reply
       );
-      assert!(
-        server.disconnect().await.is_ok(),
-        "Should disconnect ok"
-      );
-      
+      assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
+
       reply = server.parse_message(msg.clone().into()).await;
       assert!(
         reply.is_ok(),

@@ -12,15 +12,10 @@ use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::messages::{
     serializer::{
-      ButtplugClientJSONSerializer,
-      ButtplugMessageSerializer,
-      ButtplugSerializedMessage,
+      ButtplugClientJSONSerializer, ButtplugMessageSerializer, ButtplugSerializedMessage,
     },
-    ButtplugClientMessage,
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
-    ButtplugMessage,
-    ButtplugServerMessage,
+    ButtplugClientMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
+    ButtplugMessage, ButtplugServerMessage,
   },
   util::async_manager,
 };

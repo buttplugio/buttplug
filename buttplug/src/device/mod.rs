@@ -2,10 +2,7 @@ pub mod configuration_manager;
 pub mod protocol;
 use serde::{
   de::{self, Visitor},
-  Deserialize,
-  Deserializer,
-  Serialize,
-  Serializer,
+  Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::{
   convert::TryFrom,
@@ -19,15 +16,8 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugServerMessage,
-      DeviceMessageAttributesMap,
-      RawReadCmd,
-      RawReading,
-      RawSubscribeCmd,
-      RawUnsubscribeCmd,
-      RawWriteCmd,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugServerMessage, DeviceMessageAttributesMap,
+      RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd,
     },
     ButtplugResultFuture,
   },
@@ -416,8 +406,7 @@ impl Hash for ButtplugDevice {
   }
 }
 
-impl Eq for ButtplugDevice {
-}
+impl Eq for ButtplugDevice {}
 
 impl PartialEq for ButtplugDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -427,10 +416,7 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
-    Self {
-      protocol,
-      device,
-    }
+    Self { protocol, device }
   }
 
   pub fn address(&self) -> &str {
@@ -461,7 +447,11 @@ impl ButtplugDevice {
         if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
-              info!(address = tracing::field::display(device_impl.address()), "Found Buttplug Device {}", device_impl.name());
+              info!(
+                address = tracing::field::display(device_impl.address()),
+                "Found Buttplug Device {}",
+                device_impl.name()
+              );
               // If we've made it this far, we now have a connected device
               // implementation with endpoints set up. We now need to run whatever
               // protocol initialization might need to happen. We'll fetch a protocol
@@ -470,10 +460,17 @@ impl ButtplugDevice {
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
               let sharable_device_impl = Arc::new(device_impl);
-              match protocol::try_create_protocol(&proto_type, sharable_device_impl.clone(), device_protocol_config)
-                .await
+              match protocol::try_create_protocol(
+                &proto_type,
+                sharable_device_impl.clone(),
+                device_protocol_config,
+              )
+              .await
               {
-                Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(protocol_impl, sharable_device_impl))),
+                Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(
+                  protocol_impl,
+                  sharable_device_impl,
+                ))),
                 Err(e) => Err(e),
               }
             }

@@ -1,26 +1,19 @@
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand,
-    LovenseDongleIncomingMessage,
-    OutgoingLovenseData,
+    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
+use futures::FutureExt;
 use serde_json::Deserializer;
-use serialport::{
-  available_ports,
-  SerialPort,
-  SerialPortType,
-};
+use serialport::{available_ports, SerialPort, SerialPortType};
 use std::{
   io::ErrorKind,
   sync::{atomic::AtomicBool, Arc},
@@ -31,11 +24,14 @@ use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
   Mutex,
 };
-use futures::FutureExt;
-use tracing_futures::Instrument;
 use tokio_util::sync::CancellationToken;
+use tracing_futures::Instrument;
 
-fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<OutgoingLovenseData>, token: CancellationToken) {
+fn serial_write_thread(
+  mut port: Box<dyn SerialPort>,
+  mut receiver: Receiver<OutgoingLovenseData>,
+  token: CancellationToken,
+) {
   let mut port_write = |mut data: String| {
     data += "\r\n";
     info!("Writing message: {}", data);
@@ -46,7 +42,7 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
     // all sorts of trouble.
     port.write_all(&data.into_bytes()).unwrap();
   };
-  while let Some(data) = async_manager::block_on(async { 
+  while let Some(data) = async_manager::block_on(async {
     select! {
       _ = token.cancelled().fuse() => None,
       data = receiver.recv().fuse() => data
@@ -64,7 +60,11 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, mut receiver: Receiver<Out
   debug!("Exiting lovense dongle write thread.");
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: Sender<LovenseDongleIncomingMessage>, token: CancellationToken) {
+fn serial_read_thread(
+  mut port: Box<dyn SerialPort>,
+  sender: Sender<LovenseDongleIncomingMessage>,
+  token: CancellationToken,
+) {
   let mut data: String = String::default();
   while !token.is_cancelled() {
     let mut buf: [u8; 1024] = [0; 1024];
@@ -116,7 +116,7 @@ pub struct LovenseSerialDongleCommunicationManager {
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
-  thread_cancellation_token: CancellationToken
+  thread_cancellation_token: CancellationToken,
 }
 
 impl LovenseSerialDongleCommunicationManager {
@@ -129,68 +129,72 @@ impl LovenseSerialDongleCommunicationManager {
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
     let token = self.thread_cancellation_token.child_token();
-    Box::pin(async move {
-      // TODO Does this block? Should it run in one of our threads?
-      let found_dongle = false;
-      match available_ports() {
-        Ok(ports) => {
-          debug!("Got {} serial ports back", ports.len());
-          for p in ports {if let SerialPortType::UsbPort(usb_info) = p.port_type {
-              // Hardcode the dongle VID/PID for now. We can't really do protocol
-              // detection here because this is a comm bus to us, not a device.
-              if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
-                // We've found a dongle.
-                info!("Found lovense dongle, connecting");
-                let serial_port = serialport::new(&p.port_name, 115200)
-                  .timeout(Duration::from_millis(500));
-                match serial_port.open() {
-                  Ok(dongle_port) => {
-                    let read_token = token.child_token();
-                    let write_token = token.child_token();                
-                    let (writer_sender, writer_receiver) = channel(256);
-                    let (reader_sender, reader_receiver) = channel(256);
+    Box::pin(
+      async move {
+        // TODO Does this block? Should it run in one of our threads?
+        let found_dongle = false;
+        match available_ports() {
+          Ok(ports) => {
+            debug!("Got {} serial ports back", ports.len());
+            for p in ports {
+              if let SerialPortType::UsbPort(usb_info) = p.port_type {
+                // Hardcode the dongle VID/PID for now. We can't really do protocol
+                // detection here because this is a comm bus to us, not a device.
+                if usb_info.vid == 0x1a86 && usb_info.pid == 0x7523 {
+                  // We've found a dongle.
+                  info!("Found lovense dongle, connecting");
+                  let serial_port =
+                    serialport::new(&p.port_name, 115200).timeout(Duration::from_millis(500));
+                  match serial_port.open() {
+                    Ok(dongle_port) => {
+                      let read_token = token.child_token();
+                      let write_token = token.child_token();
+                      let (writer_sender, writer_receiver) = channel(256);
+                      let (reader_sender, reader_receiver) = channel(256);
 
-                    let read_port = (*dongle_port).try_clone().unwrap();
-                    let read_thread = thread::Builder::new()
-                      .name("Serial Reader Thread".to_string())
-                      .spawn(move || {
-                        serial_read_thread(read_port, reader_sender, read_token);
-                      })
-                      .unwrap();
+                      let read_port = (*dongle_port).try_clone().unwrap();
+                      let read_thread = thread::Builder::new()
+                        .name("Serial Reader Thread".to_string())
+                        .spawn(move || {
+                          serial_read_thread(read_port, reader_sender, read_token);
+                        })
+                        .unwrap();
 
-                    let write_port = (*dongle_port).try_clone().unwrap();
-                    let write_thread = thread::Builder::new()
-                      .name("Serial Writer Thread".to_string())
-                      .spawn(move || {
-                        serial_write_thread(write_port, writer_receiver, write_token);
-                      })
-                      .unwrap();
+                      let write_port = (*dongle_port).try_clone().unwrap();
+                      let write_thread = thread::Builder::new()
+                        .name("Serial Writer Thread".to_string())
+                        .spawn(move || {
+                          serial_write_thread(write_port, writer_receiver, write_token);
+                        })
+                        .unwrap();
 
-                    *(held_read_thread.lock().await) = Some(read_thread);
-                    *(held_write_thread.lock().await) = Some(write_thread);
-                    machine_sender_clone
-                      .send(LovenseDeviceCommand::DongleFound(
-                        writer_sender,
-                        reader_receiver,
-                      ))
-                      .await
-                      .unwrap();
-                  }
-                  Err(e) => error!("{:?}", e),
-                };
+                      *(held_read_thread.lock().await) = Some(read_thread);
+                      *(held_write_thread.lock().await) = Some(write_thread);
+                      machine_sender_clone
+                        .send(LovenseDeviceCommand::DongleFound(
+                          writer_sender,
+                          reader_receiver,
+                        ))
+                        .await
+                        .unwrap();
+                    }
+                    Err(e) => error!("{:?}", e),
+                  };
+                }
               }
             }
           }
+          Err(_) => {
+            info!("No serial ports found");
+          }
         }
-        Err(_) => {
-          info!("No serial ports found");
+        if !found_dongle {
+          warn!("Cannot find Lovense Serial dongle.");
         }
+        Ok(())
       }
-      if !found_dongle {
-        warn!("Cannot find Lovense Serial dongle.");
-      }
-      Ok(())
-    }.instrument(tracing::info_span!("Lovense Serial Dongle Finder")))
+      .instrument(tracing::info_span!("Lovense Serial Dongle Finder")),
+    )
   }
 }
 
@@ -203,7 +207,7 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
-      thread_cancellation_token: CancellationToken::new()
+      thread_cancellation_token: CancellationToken::new(),
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
@@ -221,7 +225,10 @@ impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManag
           machine = next;
         }
       }
-      .instrument(tracing::info_span!(parent: tracing::Span::current(), "Lovense Serial Dongle State Machine")),
+      .instrument(tracing::info_span!(
+        parent: tracing::Span::current(),
+        "Lovense Serial Dongle State Machine"
+      )),
     )
     .unwrap();
     mgr

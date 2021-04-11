@@ -3,9 +3,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
 use std::sync::Arc;
@@ -52,11 +50,7 @@ impl ButtplugProtocolCommandHandler for Nobra {
       if let Some(cmds) = result {
         for (_, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            let output_speed = if *speed == 0 {
-                0x70
-              } else {
-                0x60 + speed
-            };
+            let output_speed = if *speed == 0 { 0x70 } else { 0x60 + speed };
             fut_vec.push(device.write_value(DeviceWriteCmd::new(
               Endpoint::Tx,
               vec![output_speed as u8],

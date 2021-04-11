@@ -1,8 +1,8 @@
-use tokio;
 use futures::{
   future::{Future, RemoteHandle},
   task::{FutureObj, Spawn, SpawnError, SpawnExt},
 };
+use tokio;
 
 #[derive(Default)]
 pub struct TokioAsyncManager {}
@@ -34,10 +34,8 @@ where
   F: Future,
 {
   // Create the runtime
-  let rt  = tokio::runtime::Runtime::new().unwrap();
+  let rt = tokio::runtime::Runtime::new().unwrap();
 
   // Execute the future, blocking the current thread until completion
-  rt.block_on(async move {
-    f.await
-  })
+  rt.block_on(async move { f.await })
 }

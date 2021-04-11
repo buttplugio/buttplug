@@ -1,16 +1,10 @@
 use super::{comm_managers::DeviceCommunicationEvent, ping_timer::PingTimer};
 use crate::{
   core::messages::{
-    ButtplugServerMessage,
-    DeviceAdded,
-    DeviceRemoved,
-    ScanningFinished,
-    StopDeviceCmd,
+    ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished, StopDeviceCmd,
   },
   device::{
-    configuration_manager::DeviceConfigurationManager,
-    ButtplugDevice,
-    ButtplugDeviceEvent,
+    configuration_manager::DeviceConfigurationManager, ButtplugDevice, ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
   },
   util::async_manager,
@@ -21,9 +15,9 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tracing_futures::Instrument;
-use tracing;
 use tokio::sync::{broadcast, mpsc};
+use tracing;
+use tracing_futures::Instrument;
 
 pub struct DeviceManagerEventLoop {
   device_config_manager: Arc<DeviceConfigurationManager>,
@@ -128,8 +122,16 @@ impl DeviceManagerEventLoop {
           return;
         }
       }
-      DeviceCommunicationEvent::DeviceFound{name, address, creator} => {
-        let span = info_span!("device creation", name = tracing::field::display(name), address = tracing::field::display(address));
+      DeviceCommunicationEvent::DeviceFound {
+        name,
+        address,
+        creator,
+      } => {
+        let span = info_span!(
+          "device creation",
+          name = tracing::field::display(name),
+          address = tracing::field::display(address)
+        );
         let _enter = span.enter();
         self.try_create_new_device(creator);
       }
@@ -143,7 +145,11 @@ impl DeviceManagerEventLoop {
     trace!("Got device event: {:?}", device_event);
     match device_event {
       ButtplugDeviceEvent::Connected(device) => {
-        let span = info_span!("device registration", name = tracing::field::display(device.name()), address = tracing::field::display(device.address()));
+        let span = info_span!(
+          "device registration",
+          name = tracing::field::display(device.name()),
+          address = tracing::field::display(device.address())
+        );
         let _enter = span.enter();
         let generated_device_index = self.device_index_generator;
         self.device_index_generator += 1;

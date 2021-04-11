@@ -4,9 +4,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugHandshakeError},
     messages::{
-      self,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessage,
+      self, ButtplugMessageSpecVersion, ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -89,7 +87,6 @@ fn test_server_version_gt() {
 
 #[test]
 fn test_ping_timeout() {
-
   async_manager::block_on(async {
     let mut options = ButtplugServerOptions::default();
     options.max_ping_time = 100;

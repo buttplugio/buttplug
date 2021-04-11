@@ -6,9 +6,7 @@ mod test {
     core::messages::{
       self,
       serializer::{
-        ButtplugMessageSerializer,
-        ButtplugSerializedMessage,
-        ButtplugServerJSONSerializer,
+        ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
       },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
@@ -40,7 +38,6 @@ mod test {
 
   #[test]
   fn test_version2_connection() {
-
     async_manager::block_on(async {
       let server = ButtplugServer::default();
       let serializer = ButtplugServerJSONSerializer::default();

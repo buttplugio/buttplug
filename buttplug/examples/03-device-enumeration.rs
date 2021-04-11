@@ -8,15 +8,15 @@
 // Time to see what devices are available! In this example, we'll see how
 // servers can access certain types of devices, and how clients can ask servers
 // which devices are available.
-use tokio::io::{self, AsyncBufReadExt, BufReader};
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent, VibrateCommand},
   // connector::ButtplugInProcessClientConnector,
   server::ButtplugServerOptions,
   util::async_manager,
 };
-use std::time::Duration;
 use futures_timer::Delay;
+use std::time::Duration;
+use tokio::io::{self, AsyncBufReadExt, BufReader};
 // use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},  core::messages::serializer::ButtplugClientJSONSerializer};
 use futures::StreamExt;
 use tracing::{info, span, Level};
@@ -173,7 +173,11 @@ async fn device_enumeration_example() {
   .unwrap();
 
   println!("Hit enter to continue...");
-  BufReader::new(io::stdin()).lines().next_line().await.unwrap();
+  BufReader::new(io::stdin())
+    .lines()
+    .next_line()
+    .await
+    .unwrap();
 
   // Hypothetical situation: We've now exited our match block, and
   // realized that hey, we actually wanted that device object we

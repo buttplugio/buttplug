@@ -5,10 +5,8 @@ mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
     connector::{
-      ButtplugRemoteClientConnector,
-      ButtplugRemoteServerConnector,
-      ButtplugWebsocketClientTransport,
-      ButtplugWebsocketServerTransport,
+      ButtplugRemoteClientConnector, ButtplugRemoteServerConnector,
+      ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport,
       ButtplugWebsocketServerTransportOptions,
     },
     core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},

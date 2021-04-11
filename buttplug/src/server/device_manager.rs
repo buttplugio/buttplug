@@ -10,9 +10,7 @@
 
 use super::{
   comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
   device_manager_event_loop::DeviceManagerEventLoop,
   ping_timer::PingTimer,
@@ -22,15 +20,9 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugMessage,
-      ButtplugServerMessage,
-      DeviceList,
-      DeviceMessageInfo,
+      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
+      ButtplugServerMessage, DeviceList, DeviceMessageInfo,
     },
   },
   device::{configuration_manager::DeviceConfigurationManager, ButtplugDevice},
@@ -54,11 +46,9 @@ pub struct DeviceManager {
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
 }
 
-unsafe impl Send for DeviceManager {
-}
+unsafe impl Send for DeviceManager {}
 
-unsafe impl Sync for DeviceManager {
-}
+unsafe impl Sync for DeviceManager {}
 
 impl DeviceManager {
   pub fn try_new(

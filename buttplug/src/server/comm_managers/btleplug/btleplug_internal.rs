@@ -1,17 +1,9 @@
 use crate::{
   core::{errors::ButtplugDeviceError, messages, ButtplugResult},
   device::{
-    configuration_manager::BluetoothLESpecifier,
-    ButtplugDeviceCommand,
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplInfo,
-    ButtplugDeviceReturn,
-    DeviceImplCommand,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    configuration_manager::BluetoothLESpecifier, ButtplugDeviceCommand, ButtplugDeviceEvent,
+    ButtplugDeviceImplInfo, ButtplugDeviceReturn, DeviceImplCommand, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::{
@@ -20,10 +12,13 @@ use crate::{
   },
 };
 use btleplug::api::{CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType};
-use uuid::Uuid;
 use futures::FutureExt;
 use std::collections::HashMap;
-use tokio::{runtime::Handle, sync::{broadcast, mpsc}};
+use tokio::{
+  runtime::Handle,
+  sync::{broadcast, mpsc},
+};
+use uuid::Uuid;
 
 pub type DeviceReturnStateShared = ButtplugFutureStateShared<ButtplugDeviceReturn>;
 pub type DeviceReturnFuture = ButtplugFuture<ButtplugDeviceReturn>;

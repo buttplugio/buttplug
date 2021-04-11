@@ -10,10 +10,7 @@
 
 use buttplug::{
   client::{
-    ButtplugClient,
-    ButtplugClientDevice,
-    ButtplugClientDeviceMessageType,
-    ButtplugClientEvent,
+    ButtplugClient, ButtplugClientDevice, ButtplugClientDeviceMessageType, ButtplugClientEvent,
     VibrateCommand,
   },
   server::ButtplugServerOptions,

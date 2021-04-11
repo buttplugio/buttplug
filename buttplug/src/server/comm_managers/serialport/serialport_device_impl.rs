@@ -1,16 +1,13 @@
 use crate::{
-  core::{errors::{ButtplugError, ButtplugDeviceError}, messages::RawReading, ButtplugResultFuture},
+  core::{
+    errors::{ButtplugDeviceError, ButtplugError},
+    messages::RawReading,
+    ButtplugResultFuture,
+  },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
@@ -85,7 +82,11 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: mpsc::Receiver<V
   }
 }
 
-fn serial_read_thread(mut port: Box<dyn SerialPort>, sender: mpsc::Sender<Vec<u8>>, token: CancellationToken) {
+fn serial_read_thread(
+  mut port: Box<dyn SerialPort>,
+  sender: mpsc::Sender<Vec<u8>>,
+  token: CancellationToken,
+) {
   while !token.is_cancelled() {
     // TODO This is probably too small
     let mut buf: [u8; 1024] = [0; 1024];
@@ -117,7 +118,7 @@ pub struct SerialPortDeviceImpl {
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
   _port: Arc<Mutex<Box<dyn SerialPort>>>,
-  thread_cancellation_token: CancellationToken
+  thread_cancellation_token: CancellationToken,
 }
 
 impl SerialPortDeviceImpl {
@@ -160,11 +161,11 @@ impl SerialPortDeviceImpl {
       })
       .unwrap();
 
-    let port = port_receiver
-      .recv()
-      .await
-      .unwrap()
-      .map_err(|e| ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::SerialError(e.to_string()))))?;
+    let port = port_receiver.recv().await.unwrap().map_err(|e| {
+      ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
+        ButtplugDeviceSpecificError::SerialError(e.to_string()),
+      ))
+    })?;
     debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);
@@ -196,7 +197,7 @@ impl SerialPortDeviceImpl {
       _port: Arc::new(Mutex::new(port)),
       connected: Arc::new(AtomicBool::new(true)),
       device_event_sender,
-      thread_cancellation_token: token
+      thread_cancellation_token: token,
     })
   }
 }

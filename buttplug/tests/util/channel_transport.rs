@@ -4,37 +4,28 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientError},
   connector::{
     transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-    ButtplugConnectorError,
-    ButtplugRemoteClientConnector,
-    ButtplugRemoteServerConnector,
+    ButtplugConnectorError, ButtplugRemoteClientConnector, ButtplugRemoteServerConnector,
   },
   core::messages::{
     self,
     serializer::ButtplugMessageSerializer,
     serializer::{
-      ButtplugClientJSONSerializer,
-      ButtplugSerializedMessage,
-      ButtplugServerJSONSerializer,
+      ButtplugClientJSONSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
     },
-    ButtplugClientMessage,
-    ButtplugCurrentSpecClientMessage,
-    ButtplugMessage,
-    ButtplugServerMessage,
-    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+    ButtplugClientMessage, ButtplugCurrentSpecClientMessage, ButtplugMessage,
+    ButtplugServerMessage, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
   },
   server::ButtplugRemoteServer,
   util::async_manager,
 };
 use futures::{
   future::{self, BoxFuture},
-  select,
-  FutureExt,
+  select, FutureExt,
 };
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{channel, Receiver, Sender},
-  Mutex,
-  Notify,
+  Mutex, Notify,
 };
 use tracing::*;
 

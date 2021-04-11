@@ -10,20 +10,15 @@
 use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
-  ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
+  ButtplugClientEvent, ButtplugClientMessageFuturePair,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugDeviceMessage,
-      ButtplugMessageValidator,
-      DeviceList,
-      DeviceMessageInfo,
+      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugDeviceMessage,
+      ButtplugMessageValidator, DeviceList, DeviceMessageInfo,
     },
   },
 };

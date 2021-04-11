@@ -9,9 +9,7 @@
 
 use crate::{
   client::{
-    ButtplugClientError,
-    ButtplugClientMessageFuturePair,
-    ButtplugServerMessageStateShared,
+    ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared,
   },
   core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
 };

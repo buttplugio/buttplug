@@ -1,9 +1,7 @@
 use buttplug::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
 use std::sync::{

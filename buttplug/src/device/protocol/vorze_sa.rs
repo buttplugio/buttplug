@@ -1,11 +1,11 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap, ButtplugDeviceMessage},
+  core::messages::{
+    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+  },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
 use std::sync::Arc;
@@ -111,9 +111,19 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
   fn handle_vorze_a10_cyclone_cmd(
     &self,
     device: Arc<DeviceImpl>,
-    msg: messages::VorzeA10CycloneCmd
+    msg: messages::VorzeA10CycloneCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.handle_rotate_cmd(device, messages::RotateCmd::new(msg.device_index(), vec![messages::RotationSubcommand::new(0, msg.speed() as f64 / 99f64, msg.clockwise())]))
+    self.handle_rotate_cmd(
+      device,
+      messages::RotateCmd::new(
+        msg.device_index(),
+        vec![messages::RotationSubcommand::new(
+          0,
+          msg.speed() as f64 / 99f64,
+          msg.clockwise(),
+        )],
+      ),
+    )
   }
 }
 

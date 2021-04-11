@@ -7,20 +7,16 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    Endpoint,
+    DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
-use futures::{FutureExt, future::BoxFuture};
+use futures::{future::BoxFuture, FutureExt};
+use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -28,7 +24,6 @@ use std::{
   },
   time::Duration,
 };
-use futures_timer::Delay;
 use tokio::sync::Mutex;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
@@ -212,7 +207,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
                 );
               }
             }
-          },
+          }
           ButtplugDeviceEvent::Removed(_) => {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -221,7 +216,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
               )
               .into(),
             )
-          },
+          }
           ButtplugDeviceEvent::Connected(_) => {
             unimplemented!("Shouldn't get here as device will always be connected.");
           }

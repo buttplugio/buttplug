@@ -1,30 +1,20 @@
 use crate::{
   connector::{
     transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use tokio::net::TcpListener;
-use futures::{
-  future::BoxFuture,
-  AsyncRead,
-  AsyncWrite,
-  FutureExt,
-  SinkExt,
-  StreamExt,
-};
+use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
 use std::sync::Arc;
+use tokio::net::TcpListener;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
-  Mutex,
-  Notify,
+  Mutex, Notify,
 };
 
 #[derive(Default, Clone, Debug)]
@@ -177,14 +167,12 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket Insecure: Got connection");
         let ws_fut = async_tungstenite::tokio::accept_async(stream);
-        let ws_stream = ws_fut
-          .await
-          .map_err(|err| {
-            error!("Websocket server accept error: {:?}", err);
-            ButtplugConnectorError::TransportSpecificError(
-              ButtplugConnectorTransportSpecificError::TungsteniteError(err),
-            )
-          })?;
+        let ws_stream = ws_fut.await.map_err(|err| {
+          error!("Websocket server accept error: {:?}", err);
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::TungsteniteError(err),
+          )
+        })?;
         async_manager::spawn(async move {
           run_connection_loop(
             ws_stream,

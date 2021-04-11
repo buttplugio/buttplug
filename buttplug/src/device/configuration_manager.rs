@@ -308,13 +308,14 @@ impl DeviceProtocolConfiguration {
           "Cannot find identifier {} in protocol.",
           identifier
         ))
-      .into());
+        .into(),
+      );
     };
 
     if let Some(ref msg_attrs) = device_attrs.messages {
       attributes.extend(msg_attrs.clone());
     }
-    
+
     // Everything needs to be able to stop.
     attributes
       .entry(ButtplugDeviceMessageType::StopDeviceCmd)
@@ -412,7 +413,10 @@ impl DeviceConfigurationManager {
     &self,
     specifier: &DeviceSpecifier,
   ) -> Option<(bool, String, ProtocolDefinition)> {
-    debug!("Looking for protocol that matches specifier: {:?}", specifier);
+    debug!(
+      "Looking for protocol that matches specifier: {:?}",
+      specifier
+    );
     for (name, def) in self.config.protocols.iter() {
       if def == specifier {
         info!("Found protocol {:?} for specifier {:?}.", name, specifier);
@@ -444,10 +448,7 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    BluetoothLESpecifier,
-    DeviceConfigurationManager,
-    DeviceProtocolConfiguration,
-    DeviceSpecifier,
+    BluetoothLESpecifier, DeviceConfigurationManager, DeviceProtocolConfiguration, DeviceSpecifier,
   };
   use crate::core::messages::ButtplugDeviceMessageType;
 

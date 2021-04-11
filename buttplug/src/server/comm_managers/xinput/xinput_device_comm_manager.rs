@@ -3,9 +3,7 @@ use crate::{
   core::ButtplugResultFuture,
   device::ButtplugDeviceEvent,
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
@@ -177,10 +175,11 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
               let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
               connected_gamepads.add(*i);
               if sender
-                .send(DeviceCommunicationEvent::DeviceFound{
-                    name: i.to_string(),
-                    address: i.to_string(),
-                    creator: device_creator})
+                .send(DeviceCommunicationEvent::DeviceFound {
+                  name: i.to_string(),
+                  address: i.to_string(),
+                  creator: device_creator,
+                })
                 .await
                 .is_err()
               {

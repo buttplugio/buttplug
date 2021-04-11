@@ -1,9 +1,7 @@
 #[cfg(feature = "websockets")]
 mod websocket;
 use crate::connector::{
-  ButtplugConnectorError,
-  ButtplugConnectorResultFuture,
-  ButtplugSerializedMessage,
+  ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
 use tokio::sync::mpsc::{Receiver, Sender};

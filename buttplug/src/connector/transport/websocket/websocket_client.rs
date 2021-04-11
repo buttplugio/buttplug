@@ -10,20 +10,15 @@
 use crate::{
   connector::{
     transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use async_tungstenite::{
-  tokio::connect_async_with_tls_connector,
-  tungstenite::protocol::Message,
-};
+use async_tungstenite::{tokio::connect_async_with_tls_connector, tungstenite::protocol::Message};
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::sync::Arc;
 use tokio::sync::{
@@ -90,7 +85,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     let tls_connector = if self.should_use_tls {
       use native_tls::TlsConnector;
       if self.bypass_cert_verify {
-        Some(TlsConnector::builder().danger_accept_invalid_certs(true).build().unwrap().into())
+        Some(
+          TlsConnector::builder()
+            .danger_accept_invalid_certs(true)
+            .build()
+            .unwrap()
+            .into(),
+        )
       } else {
         Some(TlsConnector::new().unwrap().into())
       }

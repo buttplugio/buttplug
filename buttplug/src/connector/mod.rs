@@ -82,9 +82,7 @@ pub mod transport;
 #[cfg(all(feature = "server", feature = "client"))]
 pub use in_process_connector::ButtplugInProcessClientConnector;
 pub use remote_connector::{
-  ButtplugRemoteClientConnector,
-  ButtplugRemoteConnector,
-  ButtplugRemoteServerConnector,
+  ButtplugRemoteClientConnector, ButtplugRemoteConnector, ButtplugRemoteServerConnector,
 };
 #[cfg(feature = "websockets")]
 pub use transport::ButtplugWebsocketClientTransport;

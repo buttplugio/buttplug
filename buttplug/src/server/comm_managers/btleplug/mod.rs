@@ -4,9 +4,7 @@ mod btleplug_internal;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
   util::async_manager,
 };
@@ -176,7 +174,11 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
             // If a device has no discernable name, we can't do anything
             // with it, just ignore it.
             if let Some(name) = p.properties().local_name {
-              let span = info_span!("btleplug enumeration", address = tracing::field::display(p.properties().address), name = tracing::field::display(&name));
+              let span = info_span!(
+                "btleplug enumeration",
+                address = tracing::field::display(p.properties().address),
+                name = tracing::field::display(&name)
+              );
               let _enter = span.enter();
               //debug!("Found device {}", name);
               // Names are the only way we really have to test devices
@@ -186,23 +188,25 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
                 && !tried_addresses_handler.contains_key(&p.properties().address)
                 && !connected_addresses_handler.contains_key(&p.properties().address)
               {
-                let name = p.properties()
+                let name = p
+                  .properties()
                   .local_name
                   .unwrap_or_else(|| "[NAME UNKNOWN]".to_owned());
                 let address = p.properties().address;
-                debug!(
-                  "Found new bluetooth device: {} {}",
-                  name, address
-                );
+                debug!("Found new bluetooth device: {} {}", name, address);
                 tried_addresses_handler.insert(address, ());
-                
+
                 let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
                   p,
                   adapter_event_sender_clone.clone(),
                 ));
 
                 if device_sender
-                  .send(DeviceCommunicationEvent::DeviceFound{name, address: address.to_string(), creator: device_creator})
+                  .send(DeviceCommunicationEvent::DeviceFound {
+                    name,
+                    address: address.to_string(),
+                    creator: device_creator,
+                  })
                   .await
                   .is_err()
                 {
@@ -271,9 +275,7 @@ mod test {
   use super::BtlePlugCommunicationManager;
   use crate::{
     server::comm_managers::{
-      DeviceCommunicationEvent,
-      DeviceCommunicationManager,
-      DeviceCommunicationManagerCreator,
+      DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
     },
     util::async_manager,
   };
@@ -289,7 +291,11 @@ mod test {
       mgr.start_scanning().await.unwrap();
       loop {
         match receiver.recv().await.unwrap() {
-          DeviceCommunicationEvent::DeviceFound{name: _, address: _, creator: _device} => {
+          DeviceCommunicationEvent::DeviceFound {
+            name: _,
+            address: _,
+            creator: _device,
+          } => {
             info!("Got device!");
             info!("Sending message!");
             // TODO since we don't return full devices as this point

@@ -1,19 +1,24 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler, fleshlight_launch_helper};
+use super::{
+  fleshlight_launch_helper, ButtplugDeviceResultFuture, ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+};
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugDeviceError},
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap, ButtplugDeviceMessage},
+    errors::{ButtplugDeviceError, ButtplugError},
+    messages::{
+      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl,
-    DeviceWriteCmd,
-    DeviceReadCmd,
-    Endpoint,
+    DeviceImpl, DeviceReadCmd, DeviceWriteCmd, Endpoint,
   },
 };
 use futures::future::{self, BoxFuture};
-use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 // use tokio::sync::Mutex;
 use prost::Message;
 
@@ -35,9 +40,8 @@ pub struct TheHandy {
   // only reason we're retaining tracking information is to build our fucking
   // timing calculation for the fleshlight command backport. I am so mad right
   // now.
-  previous_position: Arc<AtomicU8>
+  previous_position: Arc<AtomicU8>,
 }
-
 
 impl ButtplugProtocol for TheHandy {
   fn new_protocol(
@@ -54,13 +58,15 @@ impl ButtplugProtocol for TheHandy {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       //_manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0))
+      previous_position: Arc::new(AtomicU8::new(0)),
     })
   }
 
-  fn initialize(device_impl: Arc<DeviceImpl>) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
+  fn initialize(
+    device_impl: Arc<DeviceImpl>,
+  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
   where
-      Self: Sized, 
+    Self: Sized,
   {
     Box::pin(async move {
       // Ok, here we go. This is an overly-complex nightmare but apparently
@@ -73,7 +79,7 @@ impl ButtplugProtocol for TheHandy {
       // If you are a sex toy manufacturer reading this code: Please, talk to me
       // before implementing your protocol. Buttplug is not made to be a
       // hardware/firmware protocol, and you will regret trying to make it such.
-  
+
       // First we need to set up a session with The Handy. This will require
       // sending the "security initializer" to basically say we're sending
       // plaintext. Due to pb3 making everything optional, we have some Option<T>
@@ -83,11 +89,13 @@ impl ButtplugProtocol for TheHandy {
         proto: Some(protocomm::session_data::Proto::Sec0(
           protocomm::Sec0Payload {
             msg: protocomm::Sec0MsgType::S0SessionCommand as i32,
-            payload: Some(protocomm::sec0_payload::Payload::Sc(protocomm::S0SessionCmd {}))
-          }
-        ))
+            payload: Some(protocomm::sec0_payload::Payload::Sc(
+              protocomm::S0SessionCmd {},
+            )),
+          },
+        )),
       };
-  
+
       // We need to shove this at what we're calling the "firmware" endpoint but
       // is actually the "prov-session" characteristic. These names are stored
       // in characteristic descriptors, which isn't super common on sex toys
@@ -118,20 +126,37 @@ impl ButtplugProtocol for TheHandy {
 }
 
 impl ButtplugProtocolCommandHandler for TheHandy {
-  fn handle_fleshlight_launch_fw12_cmd(&self, device: Arc<DeviceImpl>, message: messages::FleshlightLaunchFW12Cmd) -> ButtplugDeviceResultFuture {
+  fn handle_fleshlight_launch_fw12_cmd(
+    &self,
+    device: Arc<DeviceImpl>,
+    message: messages::FleshlightLaunchFW12Cmd,
+  ) -> ButtplugDeviceResultFuture {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
     // work backward from fleshlight to my own Linear format that Handy uses.
     //
     // Building this library was a mistake.
     let goal_position = message.position() as f64 / 100f64;
     let previous_position = self.previous_position.load(Ordering::SeqCst) as f64 / 100f64;
-    self.previous_position.store(message.position(), Ordering::SeqCst);
+    self
+      .previous_position
+      .store(message.position(), Ordering::SeqCst);
     let distance = (goal_position - previous_position).abs();
-    let duration = fleshlight_launch_helper::get_duration(distance, message.speed() as f64 / 99f64) as u32;
-    self.handle_linear_cmd(device, messages::LinearCmd::new(message.device_index(), vec![messages::VectorSubcommand::new(0, duration, goal_position)]))
+    let duration =
+      fleshlight_launch_helper::get_duration(distance, message.speed() as f64 / 99f64) as u32;
+    self.handle_linear_cmd(
+      device,
+      messages::LinearCmd::new(
+        message.device_index(),
+        vec![messages::VectorSubcommand::new(0, duration, goal_position)],
+      ),
+    )
   }
 
-  fn handle_linear_cmd(&self, device: Arc<DeviceImpl>, message: messages::LinearCmd) -> ButtplugDeviceResultFuture {
+  fn handle_linear_cmd(
+    &self,
+    device: Arc<DeviceImpl>,
+    message: messages::LinearCmd,
+  ) -> ButtplugDeviceResultFuture {
     // What is "How not to implement a command structure for your device that
     // does one thing", Alex?
 
@@ -139,7 +164,9 @@ impl ButtplugProtocolCommandHandler for TheHandy {
     //
     // TODO Use the command manager to check this.
     if message.vectors().len() != 1 {
-      return Box::pin(future::ready(Err(ButtplugDeviceError::DeviceFeatureCountMismatch(1, message.vectors().len() as u32).into())));
+      return Box::pin(future::ready(Err(
+        ButtplugDeviceError::DeviceFeatureCountMismatch(1, message.vectors().len() as u32).into(),
+      )));
     }
 
     let linear = handyplug::LinearCmd {
@@ -160,30 +187,30 @@ impl ButtplugProtocolCommandHandler for TheHandy {
       device_index: 0,
       // AND I'M BACK AND WELL RESTED. You know when multiple axes are
       // important? When you have to support arbitrary devices with multiple
-      // axes. You know what device doesn't have multiple axes? 
+      // axes. You know what device doesn't have multiple axes?
       //
       // Guess.
       //
       // I'll wait.
       //
       // The handy. It's the handy.
-      vectors: vec!(
-        handyplug::linear_cmd::Vector {
-          index: 0,
-          duration: message.vectors()[0].duration(),
-          position: *message.vectors()[0].position()
-        }
-      )
+      vectors: vec![handyplug::linear_cmd::Vector {
+        index: 0,
+        duration: message.vectors()[0].duration(),
+        position: *message.vectors()[0].position(),
+      }],
     };
     let linear_payload = handyplug::Payload {
-      messages: vec!(handyplug::Message {
-        message: Some(handyplug::message::Message::LinearCmd(linear))
-      })
+      messages: vec![handyplug::Message {
+        message: Some(handyplug::message::Message::LinearCmd(linear)),
+      }],
     };
-    let mut linear_buf = vec!();
+    let mut linear_buf = vec![];
     linear_payload.encode(&mut linear_buf).unwrap();
     Box::pin(async move {
-      device.write_value(DeviceWriteCmd::new(Endpoint::Tx, linear_buf, true)).await?;
+      device
+        .write_value(DeviceWriteCmd::new(Endpoint::Tx, linear_buf, true))
+        .await?;
       Ok(messages::Ok::default().into())
     })
   }

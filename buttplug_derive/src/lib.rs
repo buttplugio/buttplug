@@ -132,7 +132,7 @@ fn impl_buttplug_message_validator_macro(ast: &syn::DeriveInput) -> TokenStream 
           }
       };
       gen.into()
-    },
+    }
     syn::Data::Struct(_) => {
       let gen = quote! {
           impl ButtplugMessageValidator for #name {

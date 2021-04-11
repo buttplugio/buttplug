@@ -6,9 +6,7 @@ use crate::{
     ButtplugDevice,
   },
   server::comm_managers::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
   },
 };
 use futures::future;
@@ -126,12 +124,17 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
       }
       while let Some(d) = devices.pop() {
         if device_sender
-          .send(
-            DeviceCommunicationEvent::DeviceFound{
-              name: d.device().as_ref().map_or("Test device".to_owned(), |x| x.name().clone()),
-              address: d.device().as_ref().map_or("Test device address".to_owned(), |x| x.address().clone()),
-              creator: Box::new(d)
-            })
+          .send(DeviceCommunicationEvent::DeviceFound {
+            name: d
+              .device()
+              .as_ref()
+              .map_or("Test device".to_owned(), |x| x.name().clone()),
+            address: d
+              .device()
+              .as_ref()
+              .map_or("Test device address".to_owned(), |x| x.address().clone()),
+            creator: Box::new(d),
+          })
           .await
           .is_err()
         {
