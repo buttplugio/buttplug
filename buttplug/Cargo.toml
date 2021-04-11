@@ -33,10 +33,10 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-native-tls = "0.2"
+native-tls = "^0.2"
 buttplug_derive = "0.6.2"
-futures = "0.3.13"
-futures-util = "0.3.13"
+futures = "0.3.14"
+futures-util = "0.3.14"
 async-trait = "0.1.48"
 serde = { version = "1.0.125", features = ["derive"] }
 serde_json = "1.0.64"
