@@ -80,7 +80,7 @@ jobs:
          rust: $(rust)
      # Run any user-specific setup steps
      - ${{ parameters.setup }}
-     - script: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+     - script: sudo apt-get update && sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
        displayName: Install packages
        condition: eq(variables['Agent.OS'], 'Linux')
      - script: cargo check --all --bins --examples
