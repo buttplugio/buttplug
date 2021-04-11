@@ -1,4 +1,4 @@
-# 3.0.0 (2021-04-08)
+# 3.0.0 (2021-04-11)
 
 ## Features
 
@@ -19,6 +19,12 @@
     mixed content (i.e. https website connecting via websockets to http localhost). Firefox resolved
     this a few months ago, and Chrome and Edge both support it too. Safari has always been a weird
     mess, so we don't really care there. If users still need this functionality, they can set up their own reverse proxy, but this frees us from having to support this for them, which took a ton of code and time.
+- Added more logging, now using fields to track device lifetimes across log contexts
+- #312: Added more Drop implementations to make clean shutdown happen properly
+
+## Bugfixes
+
+- #295: Prettylove devices require WriteWithResponse to control properly.
 
 ## Breaking Changes
 
