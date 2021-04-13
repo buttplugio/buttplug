@@ -198,9 +198,22 @@ impl ButtplugProtocolCommandHandler for Lovense {
         match event {
           ButtplugDeviceEvent::Notification(_, _, data) => {
             if let Ok(data_str) = std::str::from_utf8(&data) {
+              debug!("Lovense event received: {}", data_str);
               let len = data_str.len();
-              // Chop the semicolon at the end of the received line.
-              if let Ok(level) = data_str[0..(len - 1)].parse::<u8>() {
+              // Depending on the state of the toy, we may get an initial
+              // character of some kind, i.e. if the toy is currently vibrating
+              // then battery level comes up as "s89;" versus just "89;". We'll
+              // need to chop the semicolon and make sure we only read the
+              // numbers in the string.
+              //
+              // Contains() is casting a wider net than we need here, but it'll
+              // do for now.
+              let start_pos = if data_str.contains('s') {
+                1
+              } else {
+                0
+              };
+              if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
                   messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)
                     .into(),
