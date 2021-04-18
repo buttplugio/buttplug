@@ -18,7 +18,7 @@ client=[]
 server=[]
 serialize-json=[]
 # Connectors
-websockets=["serialize-json", "async-tungstenite"]
+websockets=["serialize-json", "async-tungstenite", "native-tls"]
 # Device Communication Managers
 xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
@@ -33,7 +33,7 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-native-tls = "^0.2"
+native-tls = {version = "^0.2", optional = true}
 buttplug_derive = "0.6.2"
 futures = "0.3.14"
 futures-util = "0.3.14"
