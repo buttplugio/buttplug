@@ -1,3 +1,10 @@
+# 3.0.1 (2021-04-18)
+
+## Bugfixes
+
+- #313: Fix reading of lovense battery status when device is running
+- Don't try to compile native-tls when not using websockets feature
+
 # 3.0.0 (2021-04-11)
 
 ## Features
