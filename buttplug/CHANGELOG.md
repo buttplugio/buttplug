@@ -1,3 +1,9 @@
+# 3.0.2 (2021-04-22)
+
+## Bugfixes
+
+- Device Config File update to fix a crash in MagicMotion v2 and v3 battery queries.
+
 # 3.0.1 (2021-04-18)
 
 ## Bugfixes
