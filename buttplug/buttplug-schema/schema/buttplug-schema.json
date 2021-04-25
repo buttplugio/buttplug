@@ -479,6 +479,10 @@
             "maximum": 255,
             "minItems": 1
           }
+        },
+        "WriteWithResponse": {
+          "type": "boolean",
+          "description": "If true, BLE writes will use WriteWithResponse. Value ignored for all other types."
         }
       },
       "additionalProperties": false,
@@ -486,7 +490,8 @@
         "Id",
         "Endpoint",
         "DeviceIndex",
-        "Data"
+        "Data",
+        "WriteWithResponse"
       ]
     },
     "RawReadCmd": {
