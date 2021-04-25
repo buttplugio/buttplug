@@ -33,11 +33,11 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-native-tls = {version = "^0.2", optional = true}
+native-tls = { version = "0.2.7", optional = true }
 buttplug_derive = "0.6.2"
 futures = "0.3.14"
 futures-util = "0.3.14"
-async-trait = "0.1.48"
+async-trait = "0.1.50"
 serde = { version = "1.0.125", features = ["derive"] }
 serde_json = "1.0.64"
 serde_repr = "0.1.6"
@@ -63,19 +63,19 @@ tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.2.17", features = ["json"] }
 dashmap = "4.0.2"
 displaydoc = "0.2.1"
-serialport = { version = "4.0.0", optional = true }
+serialport = { version = "4.0.1", optional = true }
 hidapi = { version = "1.2.5", optional = true }
 wasm-bindgen = { version = "0.2.73", optional = true }
-tokio = { version = "1.4.0", features = ["sync"] }
-async-stream = "0.3.0"
+tokio = { version = "1.5.0", features = ["sync"] }
+async-stream = "0.3.1"
 prost = "0.7.0"
-tokio-util = "0.6.5"
+tokio-util = "0.6.6"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
 
 [dev-dependencies]
-tokio = { version = "1.4.0", features = ["io-std", "io-util", "macros"] }
+tokio = { version = "1.5.0", features = ["io-std", "io-util", "macros"] }
 tracing-log = { version = "0.1.2", features = ["env_logger"] }
 
 [lib]
