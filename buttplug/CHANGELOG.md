@@ -1,3 +1,9 @@
+# 3.0.3 (2021-04-24)
+
+## Bugfixes
+
+- Fix RawWriteCmd JSON schema to handle WriteWithResponse field
+
 # 3.0.2 (2021-04-22)
 
 ## Bugfixes
