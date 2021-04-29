@@ -480,6 +480,8 @@ protocols:
         - Magic Cell # Candy/Dante
         - Magic Wand
         - Fugu
+        - Gballs2
+        - FM-LILAC-101
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -488,10 +490,10 @@ protocols:
           rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
     defaults:
       name:
-        en-us: Magic Motion V1 Device      
+        en-us: Magic Motion V1 Device
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+        BatteryLevelCmd: { }
+        RSSILevelCmd: { }
         VibrateCmd:
           FeatureCount: 1
           StepCount:
@@ -529,6 +531,14 @@ protocols:
           - Magic Fugu
         name:
           en-us: MagicMotion Fugu
+      - identifier:
+          - Gballs2
+        name:
+          en-us: G Vibe Gballs 2
+      - identifier:
+          - FM-LILAC-101
+        name:
+          en-us: Femometer Lilac
   magic-motion-2:
     btle:
       names:
