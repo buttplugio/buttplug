@@ -1606,7 +1606,33 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 100
-        FleshlightLaunchFW12Cmd: {}    
+        FleshlightLaunchFW12Cmd: {}
+  cachito:
+    btle:
+      names:
+        - CCTSK
+        - CCTXueGao
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Cachito Device
+      messages:
+        VibrateCmd:
+          FeatureCount: 2
+          StepCount:
+            - 5
+            - 100
+    configurations:
+      - identifier:
+          - CCTSK
+        name:
+          en-us: Cachito Lure Tao
+      - identifier:
+          - CCTXueGao
+        name:
+          en-us: Cachito Ice Cream
   # lovenuts:
   #   btle:
   #     names:
