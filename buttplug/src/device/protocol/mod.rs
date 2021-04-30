@@ -12,6 +12,7 @@ mod libo_shark;
 mod libo_vibes;
 mod lovehoney_desire;
 mod lovense;
+mod lovense_service;
 mod magic_motion_v1;
 mod magic_motion_v2;
 mod magic_motion_v3;
@@ -64,6 +65,7 @@ pub enum ProtocolTypes {
   LiboVibes,
   LovehoneyDesire,
   Lovense,
+  LovenseService,
   MagicMotionV1,
   MagicMotionV2,
   MagicMotionV3,
@@ -103,6 +105,7 @@ impl TryFrom<&str> for ProtocolTypes {
       "libo-vibes" => Ok(ProtocolTypes::LiboVibes),
       "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),
       "lovense" => Ok(ProtocolTypes::Lovense),
+      "lovense-service" => Ok(ProtocolTypes::LovenseService),
       "magic-motion-1" => Ok(ProtocolTypes::MagicMotionV1),
       "magic-motion-2" => Ok(ProtocolTypes::MagicMotionV2),
       "magic-motion-3" => Ok(ProtocolTypes::MagicMotionV3),
@@ -153,6 +156,7 @@ pub fn try_create_protocol(
     ProtocolTypes::LiboVibes => libo_vibes::LiboVibes::try_create(device, config),
     ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
     ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
+    ProtocolTypes::LovenseService => lovense_service::LovenseService::try_create(device, config),
     ProtocolTypes::MagicMotionV1 => magic_motion_v1::MagicMotionV1::try_create(device, config),
     ProtocolTypes::MagicMotionV2 => magic_motion_v2::MagicMotionV2::try_create(device, config),
     ProtocolTypes::MagicMotionV3 => magic_motion_v3::MagicMotionV3::try_create(device, config),

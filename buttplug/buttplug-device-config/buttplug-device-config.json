@@ -201,6 +201,132 @@
         }
       ]
     },
+    "lovense-service": {
+      "lovense-service": {
+        "exists": true
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Lovense Service Device"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              20
+            ]
+          },
+          "BatteryLevelCmd": {}
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "max"
+          ],
+          "name": {
+            "en-us": "Lovense Max"
+          }
+        },
+        {
+          "identifier": [
+            "edge"
+          ],
+          "name": {
+            "en-us": "Lovense Edge"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                20,
+                20
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "nora"
+          ],
+          "name": {
+            "en-us": "Lovense Nora"
+          },
+          "messages": {
+            "RotateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                20
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "ambi"
+          ],
+          "name": {
+            "en-us": "Lovense Ambi"
+          }
+        },
+        {
+          "identifier": [
+            "lush"
+          ],
+          "name": {
+            "en-us": "Lovense Lush"
+          }
+        },
+        {
+          "identifier": [
+            "hush"
+          ],
+          "name": {
+            "en-us": "Lovense Hush"
+          }
+        },
+        {
+          "identifier": [
+            "domi"
+          ],
+          "name": {
+            "en-us": "Lovense Domi"
+          }
+        },
+        {
+          "identifier": [
+            "osci"
+          ],
+          "name": {
+            "en-us": "Lovense Osci"
+          }
+        },
+        {
+          "identifier": [
+            "mission"
+          ],
+          "name": {
+            "en-us": "Lovense Mission"
+          }
+        },
+        {
+          "identifier": [
+            "ferri"
+          ],
+          "name": {
+            "en-us": "Lovense Ferri"
+          }
+        },
+        {
+          "identifier": [
+            "diamo"
+          ],
+          "name": {
+            "en-us": "Lovense Diamo"
+          }
+        }
+      ]
+    },
     "xinput": {
       "xinput": {
         "exists": true

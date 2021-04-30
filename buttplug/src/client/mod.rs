@@ -301,6 +301,14 @@ impl ButtplugClient {
         .add_comm_manager::<SerialPortCommunicationManager>()
         .unwrap();
     }
+    #[cfg(feature = "lovense-service-manager")]
+    {
+      use crate::server::comm_managers::lovense_service::LovenseServiceDeviceCommManager;
+      connector
+        .server_ref()
+        .add_comm_manager::<LovenseServiceDeviceCommManager>()
+        .unwrap();
+    }
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{

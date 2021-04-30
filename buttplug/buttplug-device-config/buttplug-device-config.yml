@@ -256,6 +256,76 @@ protocols:
           - ToyS
         name:
           en-us: Loveai Dolp
+  lovense-service:
+    lovense-service:
+      exists: true
+    defaults:
+      name:
+        en-us: Lovense Service Device
+      messages:
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 20
+        BatteryLevelCmd: {}
+    configurations:
+      # For lovense service, our identifiers are the device names as the service
+      # reports them.
+      - identifier:
+          - max
+        name:
+          en-us: Lovense Max
+      - identifier:
+          - edge
+        name:
+          en-us: Lovense Edge
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 20
+              - 20
+      - identifier:
+          - nora
+        name:
+          en-us: Lovense Nora
+        messages:
+          RotateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 20
+      - identifier:
+          - ambi
+        name:
+          en-us: Lovense Ambi
+      - identifier:
+          - lush
+        name:
+          en-us: Lovense Lush
+      - identifier:
+          - hush
+        name:
+          en-us: Lovense Hush
+      - identifier:
+          - domi
+        name:
+          en-us: Lovense Domi
+      - identifier:
+          - osci
+        name:
+          en-us: Lovense Osci
+      - identifier:
+          - mission
+        name:
+          en-us: Lovense Mission
+      - identifier:
+          - ferri
+        name:
+          en-us: Lovense Ferri
+      - identifier:
+          - diamo
+        name:
+          en-us: Lovense Diamo
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special

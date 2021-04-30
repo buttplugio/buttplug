@@ -13,7 +13,7 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-default=["tokio-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager"]
+default=["tokio-runtime", "client", "server", "serialize-json", "btleplug-manager", "websockets", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-service-manager"]
 client=[]
 server=[]
 serialize-json=[]
@@ -24,6 +24,7 @@ xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
 serial-manager=["server", "serialport"]
 lovense-dongle-manager=["server", "serialport", "hidapi"]
+lovense-service-manager=["reqwest"]
 # Runtime managers
 tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures", "futures-timer/wasm-bindgen"]
@@ -70,6 +71,7 @@ tokio = { version = "1.5.0", features = ["sync"] }
 async-stream = "0.3.1"
 prost = "0.7.0"
 tokio-util = "0.6.6"
+reqwest = { version = "0.11.3", optional = true, features = ["native-tls"] }
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
