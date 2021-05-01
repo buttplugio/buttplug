@@ -138,20 +138,26 @@ async fn device_enumeration_example() {
         ButtplugClientEvent::DeviceAdded(device) => {
           // And we actually got a device!
           //
-          // The device we're given is a real
-          // ButtplugClientDevice object. We could control the
-          // device with it if we wanted, but that's coming up
-          // in a later example. For now, we'll just print the
-          // device name then drop our instance of it.
-          println!("We got a device: {}", device.name);
-          device.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
-          println!("{} should start vibrating!", device.name);
-          Delay::new(Duration::from_secs(1)).await;
-          // All devices also have a "stop" command that will make
-          // them stop whatever they're doing.
-          device.stop().await.unwrap();
-          println!("{} should stop vibrating!", device.name);
-          Delay::new(Duration::from_secs(1)).await;
+          // The device we're given is a real ButtplugClientDevice object. We
+          // could control the device with it if we wanted, but that's coming up
+          // in a later example. For now, we'll just print the device name then
+          // drop our instance of it.
+          //
+          // Spawn off the reaction, so if we get multiple devices they all fire
+          // simultaneously instead of waiting for each other.
+          async_manager::spawn(async move {
+            println!("We got a device: {}", device.name);
+            device.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
+            println!("{} should start vibrating!", device.name);
+            Delay::new(Duration::from_secs(1)).await;
+            // All devices also have a "stop" command that will make
+            // them stop whatever they're doing.
+            device.stop().await.unwrap();
+            println!("Battery: {}", device.battery_level().await.unwrap());
+            println!("{} should stop vibrating!", device.name);
+            Delay::new(Duration::from_secs(1)).await;
+          })
+          .unwrap();
         }
         ButtplugClientEvent::ScanningFinished => {
           println!("Scanning finished signaled.");

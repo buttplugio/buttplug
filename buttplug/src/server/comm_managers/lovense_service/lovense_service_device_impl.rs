@@ -17,30 +17,30 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  server::comm_managers::ButtplugDeviceSpecificError,
+  util::async_manager
 };
+use super::lovense_service_device_comm_manager::LovenseServiceToyInfo;
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
 use std::{
+  sync::Arc,
   fmt::{self, Debug},
+  time::Duration
 };
-use tokio::sync::broadcast;
+use futures_timer::Delay;
+use tokio::sync::{broadcast, RwLock};
 
 pub struct LovenseServiceDeviceImplCreator {
   http_host: String,
-  http_port: u16,
-  toy_name: String,
-  toy_id: String,
+  toy_info: Arc<RwLock<LovenseServiceToyInfo>>
 }
 
 impl LovenseServiceDeviceImplCreator {
-  pub fn new(http_host: &str, http_port: u16, toy_name: &str, toy_id: &str) -> Self {
+  pub(super) fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>) -> Self {
     debug!("Emitting a new lovense service device impl creator!");
     Self { 
       http_host: http_host.to_owned(),
-      http_port,
-      toy_name: toy_name.to_owned(),
-      toy_id: toy_id.to_owned(),
+      toy_info
     }
   }
 }
@@ -62,10 +62,12 @@ impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
     &mut self,
     _protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device_impl_internal = LovenseServiceDeviceImpl::new(&self.http_host, self.http_port, &self.toy_name, &self.toy_id);
+    let toy_info = self.toy_info.read().await;
+
+    let device_impl_internal = LovenseServiceDeviceImpl::new(&self.http_host, self.toy_info.clone(), &toy_info.name, &toy_info.id);
     let device_impl = DeviceImpl::new(
-      &self.toy_name,
-      &self.toy_id,
+      &toy_info.name,
+      &toy_info.id,
       &[Endpoint::Tx],
       Box::new(device_impl_internal),
     );
@@ -77,18 +79,28 @@ impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
 pub struct LovenseServiceDeviceImpl {
   event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   http_host: String,
-  http_port: u16,
+  toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
   toy_name: String,
   toy_id: String,
 }
 
 impl LovenseServiceDeviceImpl {
-  pub fn new(http_host: &str, http_port: u16, toy_name: &str, toy_id: &str) -> Self {
+  fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>, toy_name: &str, toy_id: &str) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
+    let toy_info_clone = toy_info.clone();
+    let sender_clone = device_event_sender.clone();
+    let toy_id_clone = toy_id.to_owned().clone();
+    async_manager::spawn(async move {
+      while toy_info_clone.read().await.connected {
+        Delay::new(Duration::from_secs(1)).await;
+      }
+      let _ = sender_clone.send(ButtplugDeviceEvent::Removed(toy_id_clone));
+      info!("Exiting lovense service device connection check loop.");
+    }).unwrap();
     Self {
       event_sender: device_event_sender,
       http_host: http_host.to_owned(),
-      http_port,
+      toy_info,
       toy_name: toy_name.to_owned(),
       toy_id: toy_id.to_owned(),
     }
@@ -108,15 +120,28 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     Box::pin(future::ready(Ok(())))
   }
 
+  // Assume the only thing we'll read is battery.
   fn read_value(
     &self,
     _msg: DeviceReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
-    panic!("We should never get here!");
+    let toy_info = self.toy_info.clone();
+    Box::pin(async move {
+      Ok(RawReading::new(0, Endpoint::Rx, vec!(toy_info.read().await.battery)))
+    })
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
-    panic!("We should never get here!");
+    let command_url = format!("{}/{}", self.http_host, std::str::from_utf8(&msg.data).unwrap());
+    Box::pin(async move {
+      match reqwest::get(command_url).await {
+        Ok(_) => Ok(()),
+        Err(err) => {
+          error!("Got http error: {}", err);
+          Err(ButtplugDeviceError::UnhandledCommand(err.to_string()).into())
+        }
+      }      
+    })
   }
 
   fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {

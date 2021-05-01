@@ -270,13 +270,15 @@ protocols:
         BatteryLevelCmd: {}
     configurations:
       # For lovense service, our identifiers are the device names as the service
-      # reports them.
+      # reports them. Note that if we're getting device info from the remote
+      # server, the names are all lower case. From the local server, they start
+      # with a capitalized letter.
       - identifier:
-          - max
+          - Max
         name:
           en-us: Lovense Max
       - identifier:
-          - edge
+          - Edge
         name:
           en-us: Lovense Edge
         messages:
@@ -286,7 +288,7 @@ protocols:
               - 20
               - 20
       - identifier:
-          - nora
+          - Nora
         name:
           en-us: Lovense Nora
         messages:
@@ -295,35 +297,35 @@ protocols:
             StepCount:
               - 20
       - identifier:
-          - ambi
+          - Ambi
         name:
           en-us: Lovense Ambi
       - identifier:
-          - lush
+          - Lush
         name:
           en-us: Lovense Lush
       - identifier:
-          - hush
+          - Hush
         name:
           en-us: Lovense Hush
       - identifier:
-          - domi
+          - Domi
         name:
           en-us: Lovense Domi
       - identifier:
-          - osci
+          - Osci
         name:
           en-us: Lovense Osci
       - identifier:
-          - mission
+          - Mission
         name:
           en-us: Lovense Mission
       - identifier:
-          - ferri
+          - Ferri
         name:
           en-us: Lovense Ferri
       - identifier:
-          - diamo
+          - Diamo
         name:
           en-us: Lovense Diamo
   xinput:
