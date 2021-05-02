@@ -407,7 +407,7 @@ state_definition!(LovenseDongleStartScanning);
 #[async_trait]
 impl LovenseDongleState for LovenseDongleStartScanning {
   async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
-    info!("scanning for devices");
+    debug!("starting scan for devices");
 
     let scan_msg = LovenseDongleOutgoingMessage {
       message_type: LovenseDongleMessageType::Toy,
@@ -430,7 +430,7 @@ state_definition!(LovenseDongleScanning);
 #[async_trait]
 impl LovenseDongleState for LovenseDongleScanning {
   async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
-    info!("scanning for devices");
+    debug!("scanning for devices");
     loop {
       let msg = self.hub.wait_for_input().await;
       match msg {
@@ -468,7 +468,11 @@ impl LovenseDongleState for LovenseDongleScanning {
                 match result {
                   LovenseDongleResultCode::SearchStarted => {
                     debug!("Lovense dongle search started.")
-                  }
+                  },
+                  LovenseDongleResultCode::SearchStopped => {
+                    debug!("Lovense dongle stopped scanning before stop was requested, restarting.");
+                    return Some(Box::new(LovenseDongleStartScanning::new(self.hub)));
+                  },
                   _ => error!(
                     "LovenseDongleIdle State cannot handle search result {:?}",
                     result
