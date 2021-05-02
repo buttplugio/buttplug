@@ -1,3 +1,31 @@
+# 4.0.0 (2021-05-02)
+
+## Features
+
+- #293: Protocols can now be added/removed to the system dynamically
+  - This allows addition of outside protocols, instead of having to build everything into the
+    library. Also allows for protocols to be removed to fine tune library usage.
+- #320: Device Communication Managers now use a builder pattern for creation.
+  - This allows addition of extra parameters when creating Device Comm Managers, which will be
+    useful for creating Comm Managers on top of online services that require authentication.
+- #319: Lovense Connect Application support
+  - Allows users to connect to Lovense devices via a local HTTP connection to their phone.
+- Added Hardware Support
+  - GBalls 2
+  - Femtometer Lilac
+  - Cachito Tao
+  - Cachito Ice Cream
+
+## Bugfixes
+
+- #315: Device command not handled message now lists which command type wasn't handled
+- #316: Lovense dongle now restarts scan if scan is stopped by dongle before request
+
+## Breaking Changes
+
+- Signature for ButtplugServer::add_comm_manager changed
+- Signatures/traits for all Device Comm Managers changed
+
 # 3.0.3 (2021-04-24)
 
 ## Bugfixes
