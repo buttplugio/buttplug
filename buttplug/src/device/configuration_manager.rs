@@ -15,7 +15,7 @@ use crate::{
   device::Endpoint,
   util::json::JSONValidator,
 };
-use super::protocol::{TryCreateProtocolFunc, get_default_protocol_map};
+use super::protocol::{ButtplugProtocol, TryCreateProtocolFunc, get_default_protocol_map, add_to_protocol_map};
 use serde::Deserialize;
 use std::{
   collections::{HashMap, HashSet},
@@ -428,6 +428,18 @@ impl DeviceConfigurationManager {
       config,
       protocol_map: Arc::new(get_default_protocol_map())
     })
+  }
+
+  pub fn add_protocol<T>(&self, protocol_name: &str) where T: ButtplugProtocol {
+    add_to_protocol_map::<T>(&self.protocol_map, protocol_name);
+  }
+
+  pub fn remove_protocol(&self, protocol_name: &str) {
+    self.protocol_map.remove(protocol_name);
+  }
+
+  pub fn remove_all_protocols(&self) {
+    self.protocol_map.clear();
   }
 
   pub fn has_protocol(&self, protocol_name: &str) -> bool {

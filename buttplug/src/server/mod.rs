@@ -24,6 +24,7 @@ use crate::{
       StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
+  device::protocol::ButtplugProtocol,
   test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -49,9 +50,13 @@ pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
 #[derive(Error, Debug)]
-pub enum ButtplugServerStartupError {
+pub enum ButtplugServerError {
   #[error("DeviceManager of type {0} has already been added.")]
   DeviceManagerTypeAlreadyAdded(String),
+  #[error("Buttplug Protocol of type {0} has already been added to the system.")]
+  ProtocolAlreadyAdded(String),
+  #[error("Buttplug Protocol of type {0} does not exist in the system and cannot be removed.")]
+  ProtocolDoesNotExist(String),
 }
 
 #[derive(Debug, Clone)]
@@ -141,7 +146,7 @@ impl ButtplugServer {
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
-  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>
+  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerError>
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
@@ -150,8 +155,20 @@ impl ButtplugServer {
 
   pub fn add_test_comm_manager(
     &self,
-  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
+  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerError> {
     self.device_manager.add_test_comm_manager()
+  }
+
+  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError> where T: ButtplugProtocol {
+    self.device_manager.add_protocol::<T>(protocol_name)
+  }
+
+  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
+    self.device_manager.remove_protocol(protocol_name)
+  }
+
+  pub fn remove_all_protocols(&self) {
+    self.device_manager.remove_all_protocols();
   }
 
   pub fn connected(&self) -> bool {

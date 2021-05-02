@@ -14,7 +14,7 @@ use super::{
   },
   device_manager_event_loop::DeviceManagerEventLoop,
   ping_timer::PingTimer,
-  ButtplugServerStartupError,
+  ButtplugServerError,
 };
 use crate::{
   core::{
@@ -25,7 +25,7 @@ use crate::{
       ButtplugServerMessage, DeviceList, DeviceMessageInfo,
     },
   },
-  device::{configuration_manager::DeviceConfigurationManager, ButtplugDevice},
+  device::{configuration_manager::DeviceConfigurationManager, ButtplugDevice, protocol::ButtplugProtocol},
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
@@ -44,6 +44,7 @@ pub struct DeviceManager {
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
+  config: Arc<DeviceConfigurationManager>
 }
 
 unsafe impl Send for DeviceManager {}
@@ -66,7 +67,7 @@ impl DeviceManager {
     let devices = Arc::new(DashMap::new());
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut event_loop = DeviceManagerEventLoop::new(
-      config,
+      config.clone(),
       output_sender,
       devices.clone(),
       ping_timer,
@@ -80,6 +81,7 @@ impl DeviceManager {
       device_event_sender,
       devices,
       comm_managers: Arc::new(DashMap::new()),
+      config
     })
   }
 
@@ -225,13 +227,13 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerStartupError>
+  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerError>
   where
     T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
   {
     let mgr = T::new(self.device_event_sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
+      return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
       ));
     }
@@ -253,10 +255,10 @@ impl DeviceManager {
 
   pub fn add_test_comm_manager(
     &self,
-  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerStartupError> {
+  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerError> {
     let mgr = TestDeviceCommunicationManager::new(self.device_event_sender.clone());
     if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerStartupError::DeviceManagerTypeAlreadyAdded(
+      return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
       ));
     }
@@ -275,6 +277,28 @@ impl DeviceManager {
       .comm_managers
       .insert(mgr.name().to_owned(), Box::new(mgr));
     Ok(helper)
+  }
+
+  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError> where T: ButtplugProtocol {
+    if !self.config.has_protocol(protocol_name) {
+      self.config.add_protocol::<T>(protocol_name);
+      Ok(())
+    } else {
+      Err(ButtplugServerError::ProtocolAlreadyAdded(protocol_name.to_owned()))
+    }
+  }
+
+  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
+    if self.config.has_protocol(protocol_name) {
+      self.config.remove_protocol(protocol_name);
+      Ok(())
+    } else {
+      Err(ButtplugServerError::ProtocolDoesNotExist(protocol_name.to_owned()))
+    }
+  }
+
+  pub fn remove_all_protocols(&self) {
+    self.config.remove_all_protocols();
   }
 }
 
