@@ -216,6 +216,10 @@ pub trait ButtplugProtocolProperties {
   }
 }
 
+fn print_type_of<T>(_: &T) -> &'static str {
+  std::any::type_name::<T>()
+}
+
 pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   // In order to not have to worry about id setting at the protocol level (this
   // should be taken care of in the server's device manager), we return server
@@ -373,12 +377,12 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
-  fn command_unimplemented(&self) -> ButtplugDeviceResultFuture {
+  fn command_unimplemented(&self, command: &str) -> ButtplugDeviceResultFuture {
     #[cfg(build = "debug")]
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
     Box::pin(future::ready(Err(
-      ButtplugDeviceError::UnhandledCommand("Command not implemented for this protocol".to_owned())
+      ButtplugDeviceError::UnhandledCommand(format!("Command not implemented for this protocol: {}", command))
         .into(),
     )))
   }
@@ -386,49 +390,49 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
   fn handle_vorze_a10_cyclone_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::VorzeA10CycloneCmd,
+    message: messages::VorzeA10CycloneCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_kiiroo_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::KiirooCmd,
+    message: messages::KiirooCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::FleshlightLaunchFW12Cmd,
+    message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_vibrate_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::VibrateCmd,
+    message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_rotate_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::RotateCmd,
+    message: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_linear_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::LinearCmd,
+    message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_battery_level_cmd(
@@ -451,15 +455,15 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
         Ok(battery_reading.into())
       })
     } else {
-      self.command_unimplemented()
+      self.command_unimplemented(print_type_of(&message))
     }
   }
 
   fn handle_rssi_level_cmd(
     &self,
     _device: Arc<DeviceImpl>,
-    _message: messages::RSSILevelCmd,
+    message: messages::RSSILevelCmd,
   ) -> ButtplugDeviceResultFuture {
-    self.command_unimplemented()
+    self.command_unimplemented(print_type_of(&message))
   }
 }
