@@ -7,7 +7,7 @@ use super::{
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -128,6 +128,21 @@ fn hid_read_thread(
   info!("Leaving HID dongle read thread");
 }
 
+#[derive(Default)]
+pub struct LovenseHIDDongleCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(LovenseHIDDongleCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
 pub struct LovenseHIDDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
   read_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
@@ -137,6 +152,38 @@ pub struct LovenseHIDDongleCommunicationManager {
 }
 
 impl LovenseHIDDongleCommunicationManager {
+  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
+    trace!("Lovense dongle HID Manager created");
+    let (machine_sender, machine_receiver) = channel(256);
+    let mgr = Self {
+      machine_sender,
+      read_thread: Arc::new(Mutex::new(None)),
+      write_thread: Arc::new(Mutex::new(None)),
+      is_scanning: Arc::new(AtomicBool::new(false)),
+      thread_cancellation_token: CancellationToken::new(),
+    };
+    let dongle_fut = mgr.find_dongle();
+    async_manager::spawn(
+      async move {
+        let _ = dongle_fut.await;
+      }
+      .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
+    )
+    .unwrap();
+    let mut machine =
+      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(
+      async move {
+        while let Some(next) = machine.transition().await {
+          machine = next;
+        }
+      }
+      .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
+    )
+    .unwrap();
+    mgr
+  }
+
   fn find_dongle(&self) -> ButtplugResultFuture {
     // First off, see if we can actually find a Lovense dongle. If we already
     // have one, skip on to scanning. If we can't find one, send message to log
@@ -194,40 +241,6 @@ impl LovenseHIDDongleCommunicationManager {
 
   pub fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
-  }
-}
-
-impl DeviceCommunicationManagerCreator for LovenseHIDDongleCommunicationManager {
-  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    trace!("Lovense dongle HID Manager created");
-    let (machine_sender, machine_receiver) = channel(256);
-    let mgr = Self {
-      machine_sender,
-      read_thread: Arc::new(Mutex::new(None)),
-      write_thread: Arc::new(Mutex::new(None)),
-      is_scanning: Arc::new(AtomicBool::new(false)),
-      thread_cancellation_token: CancellationToken::new(),
-    };
-    let dongle_fut = mgr.find_dongle();
-    async_manager::spawn(
-      async move {
-        let _ = dongle_fut.await;
-      }
-      .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
-    )
-    .unwrap();
-    let mut machine =
-      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    async_manager::spawn(
-      async move {
-        while let Some(next) = machine.transition().await {
-          machine = next;
-        }
-      }
-      .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
-    )
-    .unwrap();
-    mgr
   }
 }
 

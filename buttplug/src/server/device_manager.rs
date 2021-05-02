@@ -10,7 +10,7 @@
 
 use super::{
   comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   device_manager_event_loop::DeviceManagerEventLoop,
   ping_timer::PingTimer,
@@ -227,11 +227,9 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerError>
-  where
-    T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
-  {
-    let mgr = T::new(self.device_event_sender.clone());
+  pub fn add_comm_manager<T>(&self, mut builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder {
+    builder.set_event_sender(self.device_event_sender.clone());
+    let mgr = builder.finish();
     if self.comm_managers.contains_key(mgr.name()) {
       return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
@@ -249,7 +247,7 @@ impl DeviceManager {
     .unwrap();
     self
       .comm_managers
-      .insert(mgr.name().to_owned(), Box::new(mgr));
+      .insert(mgr.name().to_owned(), mgr);
     Ok(())
   }
 

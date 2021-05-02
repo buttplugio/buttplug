@@ -28,7 +28,7 @@ use crate::{
   test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerCreator};
+use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerBuilder};
 use device_manager::DeviceManager;
 use futures::{
   future::{self, BoxFuture},
@@ -146,11 +146,9 @@ impl ButtplugServer {
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
-  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerError>
-  where
-    T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder
   {
-    self.device_manager.add_comm_manager::<T>()
+    self.device_manager.add_comm_manager(builder)
   }
 
   pub fn add_test_comm_manager(

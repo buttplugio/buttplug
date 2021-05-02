@@ -8,7 +8,7 @@ use crate::{
     },
   },
   device::protocol::ButtplugProtocol,
-  server::{DeviceCommunicationManager, DeviceCommunicationManagerCreator},
+  server::DeviceCommunicationManagerBuilder,
   test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
@@ -186,11 +186,9 @@ impl ButtplugRemoteServer {
     Ok(())
   }
 
-  pub fn add_comm_manager<T>(&self) -> Result<(), ButtplugServerError>
-  where
-    T: 'static + DeviceCommunicationManager + DeviceCommunicationManagerCreator,
+  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder
   {
-    self.server.add_comm_manager::<T>()
+    self.server.add_comm_manager(builder)
   }
 
   pub fn add_test_comm_manager(

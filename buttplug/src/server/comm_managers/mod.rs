@@ -29,10 +29,9 @@ pub enum DeviceCommunicationEvent {
   ScanningFinished,
 }
 
-// Storing this in a Vec<Box<dyn T>> causes a associated method issue due to
-// the lack of self. Just create an extra trait for defining comm managers.
-pub trait DeviceCommunicationManagerCreator: Send {
-  fn new(sender: Sender<DeviceCommunicationEvent>) -> Self;
+pub trait DeviceCommunicationManagerBuilder: Send {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>);
+  fn finish(self) -> Box<dyn DeviceCommunicationManager>;
 }
 
 pub trait DeviceCommunicationManager: Send + Sync {

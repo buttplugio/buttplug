@@ -1,5 +1,5 @@
 mod delay_device_communication_manager;
-pub use delay_device_communication_manager::DelayDeviceCommunicationManager;
+pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 mod channel_transport;
 pub use channel_transport::*;
 

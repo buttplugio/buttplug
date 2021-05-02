@@ -287,48 +287,48 @@ impl ButtplugClient {
     };
     #[cfg(feature = "btleplug-manager")]
     {
-      use crate::server::comm_managers::btleplug::BtlePlugCommunicationManager;
+      use crate::server::comm_managers::btleplug::BtlePlugCommunicationManagerBuilder;
       connector
         .server_ref()
-        .add_comm_manager::<BtlePlugCommunicationManager>()
+        .add_comm_manager(BtlePlugCommunicationManagerBuilder::default())
         .unwrap();
     }
     #[cfg(feature = "serial-manager")]
     {
-      use crate::server::comm_managers::serialport::SerialPortCommunicationManager;
+      use crate::server::comm_managers::serialport::SerialPortCommunicationManagerBuilder;
       connector
         .server_ref()
-        .add_comm_manager::<SerialPortCommunicationManager>()
+        .add_comm_manager(SerialPortCommunicationManagerBuilder::default())
         .unwrap();
     }
     #[cfg(feature = "lovense-service-manager")]
     {
-      use crate::server::comm_managers::lovense_service::LovenseServiceDeviceCommManager;
+      use crate::server::comm_managers::lovense_service::LovenseConnectServiceCommunicationManagerBuilder;
       connector
         .server_ref()
-        .add_comm_manager::<LovenseServiceDeviceCommManager>()
+        .add_comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default())
         .unwrap();
     }
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{
-        LovenseHIDDongleCommunicationManager, LovenseSerialDongleCommunicationManager,
+        LovenseHIDDongleCommunicationManagerBuilder, LovenseSerialDongleCommunicationManagerBuilder,
       };
       connector
         .server_ref()
-        .add_comm_manager::<LovenseHIDDongleCommunicationManager>()
+        .add_comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default())
         .unwrap();
       connector
         .server_ref()
-        .add_comm_manager::<LovenseSerialDongleCommunicationManager>()
+        .add_comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default())
         .unwrap();
     }
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
-      use crate::server::comm_managers::xinput::XInputDeviceCommunicationManager;
+      use crate::server::comm_managers::xinput::XInputDeviceCommunicationManagerBuilder;
       connector
         .server_ref()
-        .add_comm_manager::<XInputDeviceCommunicationManager>()
+        .add_comm_manager(XInputDeviceCommunicationManagerBuilder::default())
         .unwrap();
     }
     self.connect(connector).await

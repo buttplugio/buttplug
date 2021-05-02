@@ -3,7 +3,7 @@ use crate::{
   core::ButtplugResultFuture,
   device::ButtplugDeviceEvent,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -128,13 +128,29 @@ impl XInputConnectionTracker {
   }
 }
 
+#[derive(Default)]
+pub struct XInputDeviceCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(XInputDeviceCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
+
 pub struct XInputDeviceCommunicationManager {
   sender: mpsc::Sender<DeviceCommunicationEvent>,
   scanning_notifier: Arc<Notify>,
   connected_gamepads: Arc<XInputConnectionTracker>,
 }
 
-impl DeviceCommunicationManagerCreator for XInputDeviceCommunicationManager {
+impl XInputDeviceCommunicationManager {
   fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,

@@ -7,7 +7,7 @@ use super::{
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -110,6 +110,22 @@ fn serial_read_thread(
   }
   debug!("Exiting lovense dongle read thread.");
 }
+
+#[derive(Default)]
+pub struct LovenseSerialDongleCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(LovenseSerialDongleCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
 pub struct LovenseSerialDongleCommunicationManager {
   machine_sender: Sender<LovenseDeviceCommand>,
   //port: Arc<Mutex<Option<Box<dyn SerialPort>>>>,
@@ -120,6 +136,41 @@ pub struct LovenseSerialDongleCommunicationManager {
 }
 
 impl LovenseSerialDongleCommunicationManager {
+  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
+    trace!("Lovense dongle serial port created");
+    let (machine_sender, machine_receiver) = channel(256);
+    let mgr = Self {
+      machine_sender,
+      read_thread: Arc::new(Mutex::new(None)),
+      write_thread: Arc::new(Mutex::new(None)),
+      is_scanning: Arc::new(AtomicBool::new(false)),
+      thread_cancellation_token: CancellationToken::new(),
+    };
+    let dongle_fut = mgr.find_dongle();
+    // TODO If we don't find a dongle before scanning, what happens?
+    async_manager::spawn(async move {
+      if let Err(err) = dongle_fut.await {
+        error!("Error finding serial dongle: {:?}", err);
+      }
+    })
+    .unwrap();
+    let mut machine =
+      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
+    async_manager::spawn(
+      async move {
+        while let Some(next) = machine.transition().await {
+          machine = next;
+        }
+      }
+      .instrument(tracing::info_span!(
+        parent: tracing::Span::current(),
+        "Lovense Serial Dongle State Machine"
+      )),
+    )
+    .unwrap();
+    mgr
+  }
+
   fn find_dongle(&self) -> ButtplugResultFuture {
     // First off, see if we can actually find a Lovense dongle. If we already
     // have one, skip on to scanning. If we can't find one, send message to log
@@ -195,43 +246,6 @@ impl LovenseSerialDongleCommunicationManager {
       }
       .instrument(tracing::info_span!("Lovense Serial Dongle Finder")),
     )
-  }
-}
-
-impl DeviceCommunicationManagerCreator for LovenseSerialDongleCommunicationManager {
-  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
-    trace!("Lovense dongle serial port created");
-    let (machine_sender, machine_receiver) = channel(256);
-    let mgr = Self {
-      machine_sender,
-      read_thread: Arc::new(Mutex::new(None)),
-      write_thread: Arc::new(Mutex::new(None)),
-      is_scanning: Arc::new(AtomicBool::new(false)),
-      thread_cancellation_token: CancellationToken::new(),
-    };
-    let dongle_fut = mgr.find_dongle();
-    // TODO If we don't find a dongle before scanning, what happens?
-    async_manager::spawn(async move {
-      if let Err(err) = dongle_fut.await {
-        error!("Error finding serial dongle: {:?}", err);
-      }
-    })
-    .unwrap();
-    let mut machine =
-      create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
-    async_manager::spawn(
-      async move {
-        while let Some(next) = machine.transition().await {
-          machine = next;
-        }
-      }
-      .instrument(tracing::info_span!(
-        parent: tracing::Span::current(),
-        "Lovense Serial Dongle State Machine"
-      )),
-    )
-    .unwrap();
-    mgr
   }
 }
 

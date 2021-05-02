@@ -6,7 +6,7 @@ use crate::{
     ButtplugDevice,
   },
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
 };
 use futures::future;
@@ -89,6 +89,21 @@ impl TestDeviceCommunicationManagerHelper {
   }
 }
 
+#[derive(Default)]
+pub struct TestDeviceCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(TestDeviceCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
   devices: WaitingDeviceList,
@@ -98,10 +113,8 @@ impl TestDeviceCommunicationManager {
   pub fn helper(&self) -> TestDeviceCommunicationManagerHelper {
     TestDeviceCommunicationManagerHelper::new(self.devices.clone())
   }
-}
 
-impl DeviceCommunicationManagerCreator for TestDeviceCommunicationManager {
-  fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
+  pub fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       device_sender,
       devices: Arc::new(Mutex::new(vec![])),

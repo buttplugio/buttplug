@@ -2,7 +2,7 @@ use super::SerialPortDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
 };
 use futures::future;
@@ -10,11 +10,26 @@ use serialport::available_ports;
 use tokio::sync::mpsc::Sender;
 use tracing_futures::Instrument;
 
+#[derive(Default)]
+pub struct SerialPortCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(SerialPortCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
 pub struct SerialPortCommunicationManager {
   sender: Sender<DeviceCommunicationEvent>,
 }
 
-impl DeviceCommunicationManagerCreator for SerialPortCommunicationManager {
+impl SerialPortCommunicationManager {
   fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
     trace!("Serial port created.");
     Self { sender }

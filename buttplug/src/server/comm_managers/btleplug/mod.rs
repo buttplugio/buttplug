@@ -4,7 +4,7 @@ mod btleplug_internal;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -27,6 +27,22 @@ use btleplug::winrtble::{adapter::Adapter, manager::Manager};
 use btleplug_device_impl::BtlePlugDeviceImplCreator;
 use dashmap::DashMap;
 use tokio::runtime::Handle;
+
+#[derive(Default)]
+pub struct BtlePlugCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(BtlePlugCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
 pub struct BtlePlugCommunicationManager {
   // BtlePlug says to only have one manager at a time, so we'll have the comm
   // manager hold it.
@@ -41,44 +57,6 @@ pub struct BtlePlugCommunicationManager {
 }
 
 impl BtlePlugCommunicationManager {
-  fn get_central(&self) -> Option<Adapter> {
-    let adapters = self.manager.adapters().unwrap();
-    if adapters.is_empty() {
-      return None;
-    }
-
-    let adapter = adapters.into_iter().next().unwrap();
-
-    return Some(adapter);
-  }
-
-  fn setup_adapter(&mut self) {
-    let maybe_adapter = self.get_central();
-    if maybe_adapter.is_none() {
-      return;
-    }
-    let adapter = maybe_adapter.unwrap();
-    let receiver = adapter.event_receiver().unwrap();
-    self.adapter = Some(adapter);
-    let event_sender = self.adapter_event_sender.clone();
-    let handle = Handle::current();
-    thread::spawn(move || {
-      // Since this is an std channel receiver, it's mpsc. That means we don't
-      // have clone or sync. Therefore we have to wrap it in its own thread for
-      // now and block the async calls instead.
-      while let Ok(event) = receiver.recv() {
-        let event_broadcaster_clone = event_sender.clone();
-        if event_broadcaster_clone.receiver_count() > 0 {
-          handle.spawn(async move {
-            let _ = event_broadcaster_clone.send(event);
-          });
-        }
-      }
-    });
-  }
-}
-
-impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
   fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
     // At this point, no one will be subscribed, so just drop the receiver.
     let (adapter_event_sender, _) = broadcast::channel(256);
@@ -132,6 +110,42 @@ impl DeviceCommunicationManagerCreator for BtlePlugCommunicationManager {
     };
     comm_mgr.setup_adapter();
     comm_mgr
+  }
+
+  fn get_central(&self) -> Option<Adapter> {
+    let adapters = self.manager.adapters().unwrap();
+    if adapters.is_empty() {
+      return None;
+    }
+
+    let adapter = adapters.into_iter().next().unwrap();
+
+    return Some(adapter);
+  }
+
+  fn setup_adapter(&mut self) {
+    let maybe_adapter = self.get_central();
+    if maybe_adapter.is_none() {
+      return;
+    }
+    let adapter = maybe_adapter.unwrap();
+    let receiver = adapter.event_receiver().unwrap();
+    self.adapter = Some(adapter);
+    let event_sender = self.adapter_event_sender.clone();
+    let handle = Handle::current();
+    thread::spawn(move || {
+      // Since this is an std channel receiver, it's mpsc. That means we don't
+      // have clone or sync. Therefore we have to wrap it in its own thread for
+      // now and block the async calls instead.
+      while let Ok(event) = receiver.recv() {
+        let event_broadcaster_clone = event_sender.clone();
+        if event_broadcaster_clone.receiver_count() > 0 {
+          handle.spawn(async move {
+            let _ = event_broadcaster_clone.send(event);
+          });
+        }
+      }
+    });
   }
 }
 
@@ -275,7 +289,7 @@ mod test {
   use super::BtlePlugCommunicationManager;
   use crate::{
     server::comm_managers::{
-      DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+      DeviceCommunicationEvent, DeviceCommunicationManager,
     },
     util::async_manager,
   };

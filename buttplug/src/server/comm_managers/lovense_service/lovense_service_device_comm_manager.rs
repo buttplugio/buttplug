@@ -2,7 +2,7 @@ use super::lovense_service_device_impl::LovenseServiceDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerCreator,
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
   util::async_manager
 };
@@ -151,7 +151,23 @@ async fn lovense_local_service_check(
   }
 }
 
-pub struct LovenseServiceDeviceCommManager {
+
+#[derive(Default)]
+pub struct LovenseConnectServiceCommunicationManagerBuilder {
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+}
+
+impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
+  fn set_event_sender(&mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) {
+    self.sender = Some(sender)
+  }
+
+  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(LovenseConnectServiceCommunicationManager::new(self.sender.take().unwrap()))
+  }
+}
+
+pub struct LovenseConnectServiceCommunicationManager {
   sender: mpsc::Sender<DeviceCommunicationEvent>,
   scanning_notifier: Arc<Notify>,
   known_hosts: Arc<Mutex<Vec<String>>>,
@@ -159,7 +175,7 @@ pub struct LovenseServiceDeviceCommManager {
   has_known_hosts: Arc<AtomicBool>,
 }
 
-impl DeviceCommunicationManagerCreator for LovenseServiceDeviceCommManager {
+impl LovenseConnectServiceCommunicationManager {
   fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,
@@ -171,7 +187,7 @@ impl DeviceCommunicationManagerCreator for LovenseServiceDeviceCommManager {
   }
 }
 
-impl DeviceCommunicationManager for LovenseServiceDeviceCommManager {
+impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseServiceDeviceCommManager"
   }
@@ -219,7 +235,7 @@ impl DeviceCommunicationManager for LovenseServiceDeviceCommManager {
   }
 }
 
-impl Drop for LovenseServiceDeviceCommManager {
+impl Drop for LovenseConnectServiceCommunicationManager {
   fn drop(&mut self) {
     self.is_scanning.store(false, Ordering::SeqCst);
     self.has_known_hosts.store(false, Ordering::SeqCst);

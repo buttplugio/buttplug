@@ -20,7 +20,7 @@ use futures::{future::BoxFuture, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;
-use util::DelayDeviceCommunicationManager;
+use util::DelayDeviceCommunicationManagerBuilder;
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}
@@ -134,7 +134,7 @@ fn test_stop_scanning_when_not_scanning() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
     client.connect(connector).await.unwrap();
@@ -158,7 +158,7 @@ fn test_start_scanning_when_already_scanning() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
     client.connect(connector).await.unwrap();
@@ -174,7 +174,7 @@ fn test_client_scanning_finished() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
-      .add_comm_manager::<DelayDeviceCommunicationManager>()
+      .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
     let mut recv = client.event_stream();
