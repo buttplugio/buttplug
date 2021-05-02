@@ -6,7 +6,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, LovenseServiceSpecifier},
+    configuration_manager::{DeviceSpecifier, ProtocolDefinition, LovenseConnectServiceSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -19,7 +19,7 @@ use crate::{
   },
   util::async_manager
 };
-use super::lovense_service_device_comm_manager::LovenseServiceToyInfo;
+use super::lovense_connect_service_comm_manager::LovenseServiceToyInfo;
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
 use std::{
@@ -55,7 +55,7 @@ impl Debug for LovenseServiceDeviceImplCreator {
 #[async_trait]
 impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
   fn get_specifier(&self) -> DeviceSpecifier {
-    DeviceSpecifier::LovenseService(LovenseServiceSpecifier::default())
+    DeviceSpecifier::LovenseConnectService(LovenseConnectServiceSpecifier::default())
   }
 
   async fn try_create_device_impl(

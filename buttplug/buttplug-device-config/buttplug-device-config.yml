@@ -256,12 +256,12 @@ protocols:
           - ToyS
         name:
           en-us: Loveai Dolp
-  lovense-service:
-    lovense-service:
+  lovense-connect-service:
+    lovense-connect-service:
       exists: true
     defaults:
       name:
-        en-us: Lovense Service Device
+        en-us: Lovense Connect Service Device
       messages:
         VibrateCmd:
           FeatureCount: 1

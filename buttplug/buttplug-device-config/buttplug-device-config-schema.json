@@ -81,6 +81,14 @@
         }
       }
     },
+    "lovense-connect-service-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
     "usb-definition": {
       "type": "array",
       "items": {
@@ -366,6 +374,9 @@
             },
             "xinput": {
               "$ref": "#/components/xinput-definition"
+            },
+            "lovense-connect-service": {
+              "$ref": "#/components/lovense-connect-service-definition"
             },
             "defaults": {
               "$ref": "#/components/defaults-definition"

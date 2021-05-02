@@ -15,7 +15,7 @@ use std::sync::{
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
-pub struct LovenseService {
+pub struct LovenseConnectService {
   name: String,
   message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -23,7 +23,7 @@ pub struct LovenseService {
   rotation_direction: Arc<AtomicBool>,
 }
 
-impl ButtplugProtocol for LovenseService {
+impl ButtplugProtocol for LovenseConnectService {
   // Due to this lacking the ability to take extra fields, we can't pass in our
   // event receiver from the subscription, which we'll need for things like
   // battery readings. Therefore, we expect initialize() to return the protocol
@@ -41,7 +41,7 @@ impl ButtplugProtocol for LovenseService {
   }
 }
 
-impl ButtplugProtocolCommandHandler for LovenseService {
+impl ButtplugProtocolCommandHandler for LovenseConnectService {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<DeviceImpl>,

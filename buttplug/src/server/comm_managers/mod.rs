@@ -6,8 +6,8 @@ pub mod lovense_dongle;
 pub mod serialport;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
-#[cfg(feature = "lovense-service-manager")]
-pub mod lovense_service;
+#[cfg(feature = "lovense-connect-service-manager")]
+pub mod lovense_connect_service;
 
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use serde::{Deserialize, Serialize};

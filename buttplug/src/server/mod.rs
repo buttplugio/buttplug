@@ -28,7 +28,7 @@ use crate::{
   test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use comm_managers::{DeviceCommunicationManager, DeviceCommunicationManagerBuilder};
+use comm_managers::DeviceCommunicationManagerBuilder;
 use device_manager::DeviceManager;
 use futures::{
   future::{self, BoxFuture},

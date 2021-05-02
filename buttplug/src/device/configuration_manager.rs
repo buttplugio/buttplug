@@ -85,17 +85,17 @@ impl BluetoothLESpecifier {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct LovenseServiceSpecifier {
+pub struct LovenseConnectServiceSpecifier {
   exists: bool
 }
 
-impl Default for LovenseServiceSpecifier {
+impl Default for LovenseConnectServiceSpecifier {
   fn default() -> Self {
     Self { exists: true }
   }
 }
 
-impl PartialEq for LovenseServiceSpecifier {
+impl PartialEq for LovenseConnectServiceSpecifier {
   fn eq(&self, _other: &Self) -> bool {
     true
   }
@@ -168,7 +168,7 @@ pub enum DeviceSpecifier {
   USB(USBSpecifier),
   Serial(SerialSpecifier),
   XInput(XInputSpecifier),
-  LovenseService(LovenseServiceSpecifier),
+  LovenseConnectService(LovenseConnectServiceSpecifier),
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -188,8 +188,8 @@ pub struct ProtocolDefinition {
   pub serial: Option<Vec<SerialSpecifier>>,
   pub hid: Option<Vec<HIDSpecifier>>,
   pub xinput: Option<XInputSpecifier>,
-  #[serde(rename = "lovense-service")]
-  pub lovense_service: Option<LovenseServiceSpecifier>,
+  #[serde(rename = "lovense-connect-service")]
+  pub lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
   pub defaults: Option<ProtocolAttributes>,
   #[serde(default)]
   pub configurations: Vec<ProtocolAttributes>,
@@ -225,7 +225,7 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
       DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
       DeviceSpecifier::HID(other_hid) => option_some_eq_vec(&self.hid, other_hid),
       DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput),
-      DeviceSpecifier::LovenseService(other_lovense_service) => option_some_eq(&self.lovense_service, other_lovense_service),
+      DeviceSpecifier::LovenseConnectService(other_lovense_service) => option_some_eq(&self.lovense_connect_service, other_lovense_service),
     }
   }
 }
