@@ -59,13 +59,13 @@ async-tungstenite = { version = "0.13.1", optional = true }
 futures-timer = "3.0.2"
 wasm-bindgen-futures = { version = "0.4.23", optional = true }
 cfg-if = "1.0.0"
-tracing = "0.1.25"
+tracing = "0.1.26"
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.2.17", features = ["json"] }
 dashmap = "4.0.2"
 displaydoc = "0.2.1"
 serialport = { version = "4.0.1", optional = true }
-hidapi = { version = "1.2.5", optional = true }
+hidapi = { version = "1.2.6", optional = true }
 wasm-bindgen = { version = "0.2.73", optional = true }
 tokio = { version = "1.5.0", features = ["sync"] }
 async-stream = "0.3.1"
