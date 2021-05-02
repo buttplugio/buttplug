@@ -15,10 +15,15 @@ use crate::{
   device::Endpoint,
   util::json::JSONValidator,
 };
+use super::protocol::{TryCreateProtocolFunc, get_default_protocol_map};
 use serde::Deserialize;
-use std::collections::{HashMap, HashSet};
-use std::mem;
+use std::{
+  collections::{HashMap, HashSet},
+  mem,
+  sync::Arc
+};
 use uuid::Uuid;
+use dashmap::DashMap;
 
 static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -350,6 +355,7 @@ impl DeviceProtocolConfiguration {
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   pub(self) config: ProtocolConfiguration,
+  protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>
 }
 
 impl Default for DeviceConfigurationManager {
@@ -420,7 +426,16 @@ impl DeviceConfigurationManager {
     Ok(DeviceConfigurationManager {
       allow_raw_messages,
       config,
+      protocol_map: Arc::new(get_default_protocol_map())
     })
+  }
+
+  pub fn has_protocol(&self, protocol_name: &str) -> bool {
+    self.protocol_map.contains_key(protocol_name)
+  }
+
+  pub fn get_protocol_creator(&self, protocol_name: &str) -> TryCreateProtocolFunc {
+    self.protocol_map.get(protocol_name).unwrap().clone()
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly

@@ -49,135 +49,51 @@ use crate::{
   },
 };
 use futures::future::{self, BoxFuture};
-use std::convert::TryFrom;
 use std::sync::Arc;
+use dashmap::DashMap;
 
-pub enum ProtocolTypes {
-  Aneros,
-  Cachito,
-  KiirooV2,
-  KiirooV2Vibrator,
-  KiirooV21,
-  KiirooV21Initialized,
-  LeloF1s,
-  LiboElle,
-  LiboShark,
-  LiboVibes,
-  LovehoneyDesire,
-  Lovense,
-  LovenseService,
-  MagicMotionV1,
-  MagicMotionV2,
-  MagicMotionV3,
-  Maxpro,
-  Motorbunny,
-  MysteryVibe,
-  Nobra,
-  Picobong,
-  PrettyLove,
-  RawProtocol,
-  Realov,
-  Svakom,
-  TheHandy,
-  Vibratissimo,
-  VorzeSA,
-  WeVibe,
-  WeVibe8Bit,
-  XInput,
-  Youcups,
-  Youou,
+pub type TryCreateProtocolFunc = fn(Arc<DeviceImpl>, DeviceProtocolConfiguration) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
+
+pub fn add_to_protocol_map<T>(map: &DashMap<String, TryCreateProtocolFunc>, protocol_name: &str) where T: ButtplugProtocol {
+  map.insert(protocol_name.to_owned(), T::try_create as TryCreateProtocolFunc);
 }
 
-impl TryFrom<&str> for ProtocolTypes {
-  type Error = ButtplugError;
-
-  fn try_from(protocol_name: &str) -> Result<Self, Self::Error> {
-    match protocol_name {
-      "aneros" => Ok(ProtocolTypes::Aneros),
-      "cachito" => Ok(ProtocolTypes::Cachito),
-      "kiiroo-v2" => Ok(ProtocolTypes::KiirooV2),
-      "kiiroo-v2-vibrator" => Ok(ProtocolTypes::KiirooV2Vibrator),
-      "kiiroo-v21" => Ok(ProtocolTypes::KiirooV21),
-      "kiiroo-v21-initialized" => Ok(ProtocolTypes::KiirooV21Initialized),
-      "lelo-f1s" => Ok(ProtocolTypes::LeloF1s),
-      "libo-elle" => Ok(ProtocolTypes::LiboElle),
-      "libo-shark" => Ok(ProtocolTypes::LiboShark),
-      "libo-vibes" => Ok(ProtocolTypes::LiboVibes),
-      "lovehoney-desire" => Ok(ProtocolTypes::LovehoneyDesire),
-      "lovense" => Ok(ProtocolTypes::Lovense),
-      "lovense-service" => Ok(ProtocolTypes::LovenseService),
-      "magic-motion-1" => Ok(ProtocolTypes::MagicMotionV1),
-      "magic-motion-2" => Ok(ProtocolTypes::MagicMotionV2),
-      "magic-motion-3" => Ok(ProtocolTypes::MagicMotionV3),
-      "maxpro" => Ok(ProtocolTypes::Maxpro),
-      "motorbunny" => Ok(ProtocolTypes::Motorbunny),
-      "mysteryvibe" => Ok(ProtocolTypes::MysteryVibe),
-      "nobra" => Ok(ProtocolTypes::Nobra),
-      "picobong" => Ok(ProtocolTypes::Picobong),
-      "prettylove" => Ok(ProtocolTypes::PrettyLove),
-      "raw" => Ok(ProtocolTypes::RawProtocol),
-      "realov" => Ok(ProtocolTypes::Realov),
-      "svakom" => Ok(ProtocolTypes::Svakom),
-      "thehandy" => Ok(ProtocolTypes::TheHandy),
-      "vibratissimo" => Ok(ProtocolTypes::Vibratissimo),
-      "vorze-sa" => Ok(ProtocolTypes::VorzeSA),
-      "wevibe" => Ok(ProtocolTypes::WeVibe),
-      "wevibe-8bit" => Ok(ProtocolTypes::WeVibe8Bit),
-      "xinput" => Ok(ProtocolTypes::XInput),
-      "youcups" => Ok(ProtocolTypes::Youcups),
-      "youou" => Ok(ProtocolTypes::Youou),
-      _ => {
-        error!("Protocol {} not implemented.", protocol_name);
-        Err(ButtplugDeviceError::ProtocolNotImplemented(protocol_name.to_owned()).into())
-      }
-    }
-  }
-}
-
-pub fn try_create_protocol(
-  protocol_type: &ProtocolTypes,
-  device: Arc<DeviceImpl>,
-  config: DeviceProtocolConfiguration,
-) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>> {
-  match protocol_type {
-    ProtocolTypes::Aneros => aneros::Aneros::try_create(device, config),
-    ProtocolTypes::Cachito => cachito::Cachito::try_create(device, config),
-    ProtocolTypes::KiirooV2 => kiiroo_v2::KiirooV2::try_create(device, config),
-    ProtocolTypes::KiirooV2Vibrator => {
-      kiiroo_v2_vibrator::KiirooV2Vibrator::try_create(device, config)
-    }
-    ProtocolTypes::KiirooV21 => kiiroo_v21::KiirooV21::try_create(device, config),
-    ProtocolTypes::KiirooV21Initialized => {
-      kiiroo_v21_initialized::KiirooV21Initialized::try_create(device, config)
-    }
-    ProtocolTypes::LeloF1s => lelof1s::LeloF1s::try_create(device, config),
-    ProtocolTypes::LiboElle => libo_elle::LiboElle::try_create(device, config),
-    ProtocolTypes::LiboShark => libo_shark::LiboShark::try_create(device, config),
-    ProtocolTypes::LiboVibes => libo_vibes::LiboVibes::try_create(device, config),
-    ProtocolTypes::LovehoneyDesire => lovehoney_desire::LovehoneyDesire::try_create(device, config),
-    ProtocolTypes::Lovense => lovense::Lovense::try_create(device, config),
-    ProtocolTypes::LovenseService => lovense_service::LovenseService::try_create(device, config),
-    ProtocolTypes::MagicMotionV1 => magic_motion_v1::MagicMotionV1::try_create(device, config),
-    ProtocolTypes::MagicMotionV2 => magic_motion_v2::MagicMotionV2::try_create(device, config),
-    ProtocolTypes::MagicMotionV3 => magic_motion_v3::MagicMotionV3::try_create(device, config),
-    ProtocolTypes::Maxpro => maxpro::Maxpro::try_create(device, config),
-    ProtocolTypes::Motorbunny => motorbunny::Motorbunny::try_create(device, config),
-    ProtocolTypes::MysteryVibe => mysteryvibe::MysteryVibe::try_create(device, config),
-    ProtocolTypes::Nobra => nobra::Nobra::try_create(device, config),
-    ProtocolTypes::Picobong => picobong::Picobong::try_create(device, config),
-    ProtocolTypes::PrettyLove => prettylove::PrettyLove::try_create(device, config),
-    ProtocolTypes::RawProtocol => raw_protocol::RawProtocol::try_create(device, config),
-    ProtocolTypes::Realov => realov::Realov::try_create(device, config),
-    ProtocolTypes::Svakom => svakom::Svakom::try_create(device, config),
-    ProtocolTypes::TheHandy => thehandy::TheHandy::try_create(device, config),
-    ProtocolTypes::Vibratissimo => vibratissimo::Vibratissimo::try_create(device, config),
-    ProtocolTypes::VorzeSA => vorze_sa::VorzeSA::try_create(device, config),
-    ProtocolTypes::WeVibe => wevibe::WeVibe::try_create(device, config),
-    ProtocolTypes::WeVibe8Bit => wevibe8bit::WeVibe8Bit::try_create(device, config),
-    ProtocolTypes::XInput => xinput::XInput::try_create(device, config),
-    ProtocolTypes::Youcups => youcups::Youcups::try_create(device, config),
-    ProtocolTypes::Youou => youou::Youou::try_create(device, config),
-  }
+pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
+  let map = DashMap::new();
+  add_to_protocol_map::<aneros::Aneros>(&map, "aneros");
+  add_to_protocol_map::<cachito::Cachito>(&map, "cachito");
+  add_to_protocol_map::<kiiroo_v2::KiirooV2>(&map, "kiiroo-v2");
+  add_to_protocol_map::<kiiroo_v2_vibrator::KiirooV2Vibrator>(&map, "kiiroo-v2-vibrator");
+  add_to_protocol_map::<kiiroo_v21::KiirooV21>(&map, "kiiroo-v21");
+  add_to_protocol_map::<kiiroo_v21_initialized::KiirooV21Initialized>(&map, "kiiroo-v21-initialized");
+  add_to_protocol_map::<lelof1s::LeloF1s>(&map, "lelo-f1s");
+  add_to_protocol_map::<libo_elle::LiboElle>(&map, "libo-elle");
+  add_to_protocol_map::<libo_shark::LiboShark>(&map, "libo-shark");
+  add_to_protocol_map::<libo_vibes::LiboVibes>(&map, "libo-vibes");
+  add_to_protocol_map::<lovehoney_desire::LovehoneyDesire>(&map, "lovehoney-desire");
+  add_to_protocol_map::<lovense::Lovense>(&map, "lovense");
+  add_to_protocol_map::<lovense_service::LovenseService>(&map, "lovense-service");
+  add_to_protocol_map::<magic_motion_v1::MagicMotionV1>(&map, "magic-motion-1");
+  add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
+  add_to_protocol_map::<magic_motion_v3::MagicMotionV3>(&map, "magic-motion-3");
+  add_to_protocol_map::<maxpro::Maxpro>(&map, "maxpro");
+  add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
+  add_to_protocol_map::<mysteryvibe::MysteryVibe>(&map, "mysteryvibe");
+  add_to_protocol_map::<nobra::Nobra>(&map, "nobra");
+  add_to_protocol_map::<picobong::Picobong>(&map, "picobong");
+  add_to_protocol_map::<prettylove::PrettyLove>(&map, "prettylove");
+  add_to_protocol_map::<raw_protocol::RawProtocol>(&map, "raw");
+  add_to_protocol_map::<realov::Realov>(&map, "realov");
+  add_to_protocol_map::<svakom::Svakom>(&map, "svakom");
+  add_to_protocol_map::<thehandy::TheHandy>(&map, "thehandy");
+  add_to_protocol_map::<vibratissimo::Vibratissimo>(&map, "vibratissimo");
+  add_to_protocol_map::<vorze_sa::VorzeSA>(&map, "vorze-sa");
+  add_to_protocol_map::<wevibe::WeVibe>(&map, "wevibe");
+  add_to_protocol_map::<wevibe8bit::WeVibe8Bit>(&map, "wevibe-8bit");
+  add_to_protocol_map::<xinput::XInput>(&map, "xinput");
+  add_to_protocol_map::<youcups::Youcups>(&map, "youcups");
+  add_to_protocol_map::<youou::Youou>(&map, "youou");
+  map
 }
 
 pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {

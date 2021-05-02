@@ -5,7 +5,6 @@ use serde::{
   Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::{
-  convert::TryFrom,
   fmt::{self, Debug},
   str::FromStr,
   string::ToString,
@@ -23,7 +22,7 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
-    protocol::{ButtplugProtocol, ProtocolTypes},
+    protocol::ButtplugProtocol,
   },
 };
 use async_trait::async_trait;
@@ -444,7 +443,9 @@ impl ButtplugDevice {
           config.defaults.clone(),
           config.configurations.clone(),
         );
-        if let Ok(proto_type) = ProtocolTypes::try_from(&*config_name) {
+        // TODO Should we even return a config from the device_config_mgr if the
+        // protocol isn't there?
+        if device_config_mgr.has_protocol(&*config_name) {
           match device_creator.try_create_device_impl(config).await {
             Ok(device_impl) => {
               info!(
@@ -460,12 +461,7 @@ impl ButtplugDevice {
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
               let sharable_device_impl = Arc::new(device_impl);
-              match protocol::try_create_protocol(
-                &proto_type,
-                sharable_device_impl.clone(),
-                device_protocol_config,
-              )
-              .await
+              match device_config_mgr.get_protocol_creator(&*config_name)(sharable_device_impl.clone(), device_protocol_config).await
               {
                 Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(
                   protocol_impl,
@@ -477,6 +473,7 @@ impl ButtplugDevice {
             Err(e) => Err(e),
           }
         } else {
+          info!("Protocol {} not available", config_name);
           Ok(None)
         }
       }
