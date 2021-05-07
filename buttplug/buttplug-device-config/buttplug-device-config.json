@@ -2543,6 +2543,32 @@
           }
         }
       ]
+    },
+    "jejoue": {
+      "btle": {
+        "names": [
+          "Je Joue"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Je Joue Device"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              5,
+              5
+            ]
+          }
+        }
+      }
     }
   }
 }
