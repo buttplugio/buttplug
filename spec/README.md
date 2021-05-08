@@ -40,7 +40,8 @@ More information on the Buttplug project can be found at at
 
 If you're interested in Buttplug Development, check out our [discord server](https://discord.buttplug.io)!
 
-There's also a message board for development and support at [metafetish.club](https://metafetish.club).
+We also have a [Github Discussions](https://www.crates.io/crates/buttplug) section of the repo for
+those interested.
 
 ## Building The Protocol Documents
 
@@ -67,10 +68,7 @@ npm run dev
 - [Buttplug Protocol Spec](http://github.com/buttplugio/buttplug): Repo containing
   the specification document for the Buttplug sex toy control
   protocol.
-- [Buttplug Protocol JSON Schema](http://github.com/buttplugio/buttplug-schema):
-  JSON Schema for the Buttplug Protocol Standard. Usually subtree'd
-  into server/client implementations.
-- [Buttplug Developer Guide](http://github.com/buttplugio/buttplug-developer-guide):
+- [Buttplug Developer Guide](http://buttplug-developer-guide.docs.buttplug.io):
   Manual for developing applications that use Buttplug, as well as
   information on Buttplug Client and Server architecture.
 - [STPIHKAL](http://github.com/buttplugio/stpihkal): "Sex Toy
@@ -79,69 +77,36 @@ npm run dev
   as well as movie synchronization formats and other miscellaneous
   information.
 
-### Tutorials
-
-- [how-to-buttplug Glitch.com
-  project](https://glitch.com/edit/#!/how-to-buttplug?path=README.md) -
-  Tutorial project for using buttplug-js for web applications.
-
 ## Buttplug Implementation Repos and Supporting Applications
 
 ### Server Implementations
 
-- [buttplug-csharp](http://github.com/buttplugio/buttplug-csharp):
-  C#/.Net implementation of the Buttplug Server for Win7/10
+- [buttplug-rs](http://github.com/buttplugio/buttplug-rs):
+  Rust implementation of the Buttplug Server for Win7/10
   - Status: Stable
-  - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
-  - Maintainers: Core Buttplug Team
-- [buttplug-js](http://github.com/buttplugio/buttplug-js): Javascript/Typescript 
-  implementation of the Buttplug Server for Web (using WebBluetooth) and Node.js
-  - Status: Stable
-  - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
+  - Packages: [Available on crates.io](https://www.crates.io/crates/buttplug)
   - Maintainers: Core Buttplug Team
 
 ### Client Implementations
 
-- [buttplug-csharp](http://github.com/metafetish/buttplug-csharp):
-  C#/.Net implementation of the Buttplug Client for Win7/10
+- [buttplug-csharp](http://github.com/metafetish/buttplug-rs-ffi):
+  C#/.Net implementation of the Buttplug Client
   - Status: Stable
   - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team 
-- [buttplug-js](http://github.com/metafetish/buttplug-js): Javascript
+- [buttplug-js](http://github.com/metafetish/buttplug-rs-ffi): Javascript/WASM
   implementation of the Buttplug Protocol Client
   - Status: Stable
   - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team 
-- [buttplug-rs](https://github.com/buttplugio/buttplug-rs): Rust
-  - Status: In Development - Not Yet Usable
-  - Packages: [Available on Cargo](https://crates.io/crates/buttplug)
-  - Maintainers: Core Buttplug Team
 - [buttplug-py](https://github.com/buttplugio/buttplug-py): Python
-  - Status: In Development - Not Yet Usable
+  - Status: Beta
   - Packages: [Available on PyPi](https://pypi.org/project/buttplug/)
   - Maintainers: Core Buttplug Team
-- [golibbuttplug](https://github.com/funjack/golibbuttplug): Go
-  implementation of the Buttplug Protocol Client
-  - Status: Stable
-  - Maintainers: Community Maintained
-
 
 ### Supporting Applications
 
-- [Intiface](https://github.com/intiface/intiface-desktop):
-  Win/Mac/Linux Application for running Buttplug Servers on Desktop.
-  Allows users to connect via applications like Syncydink,
-  Scriptplayer, and more.
-- [SyncyDink](http://github.com/metafetish/syncydink):
-  Javascript/Typescript Haptic Video player for the web.
-- [Playground](http://github.com/metafetish/buttplug-playground):
-  Javascript/Typescript device testing web application.
-- [ScriptPlayer](http://github.com/FredTungsten/ScriptPlayer): C#
-  Haptic Video player.
-- [LaunchControl](http://github.com/funjack/launchcontrol): Go Haptic
-  Video Player and Launch Control Scripts.
-- [buttplug-twine](https://github.com/buttplugio/buttplug-twine):
-  Twine v2 macros for using buttplug-js with Twine stories.
+See the [Awesome Buttplug Repo](https://github.com/buttplugio/awesome-buttplug) for lists of applications and development resources.
 
 ## Support The Project
 
@@ -153,7 +118,7 @@ hardware to reverse, document, and write code for!
 
 Buttplug is BSD licensed.
 
-    Copyright (c) 2016-2019, Nonpolynomial Labs, LLC
+    Copyright (c) 2016-2021, Nonpolynomial Labs, LLC
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without
