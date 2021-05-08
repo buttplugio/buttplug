@@ -82,7 +82,7 @@ npm run dev
 ### Server Implementations
 
 - [buttplug-rs](http://github.com/buttplugio/buttplug-rs):
-  Rust implementation of the Buttplug Server for Win7/10
+  Rust implementation of the Buttplug Server for Windows/macOS/Linux
   - Status: Stable
   - Packages: [Available on crates.io](https://www.crates.io/crates/buttplug)
   - Maintainers: Core Buttplug Team
@@ -90,12 +90,12 @@ npm run dev
 ### Client Implementations
 
 - [buttplug-csharp](http://github.com/metafetish/buttplug-rs-ffi):
-  C#/.Net implementation of the Buttplug Client
+  C#/.Net implementation of the Buttplug Client (FFI, built on top of buttplug-rs)
   - Status: Stable
   - Packages: [Available on nuget](https://www.nuget.org/packages?q=buttplug)
   - Maintainers: Core Buttplug Team 
 - [buttplug-js](http://github.com/metafetish/buttplug-rs-ffi): Javascript/WASM
-  implementation of the Buttplug Protocol Client
+  implementation of the Buttplug Protocol Client (FFI, built on top of buttplug-rs)
   - Status: Stable
   - Packages: [Available on npm](https://www.npmjs.com/package/buttplug)
   - Maintainers: Core Buttplug Team 
