@@ -15,6 +15,7 @@ pub mod libo_vibes;
 pub mod lovehoney_desire;
 pub mod lovense;
 pub mod lovense_connect_service;
+pub mod lovenuts;
 pub mod magic_motion_v1;
 pub mod magic_motion_v2;
 pub mod magic_motion_v3;
@@ -76,6 +77,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<lovehoney_desire::LovehoneyDesire>(&map, "lovehoney-desire");
   add_to_protocol_map::<lovense::Lovense>(&map, "lovense");
   add_to_protocol_map::<lovense_connect_service::LovenseConnectService>(&map, "lovense-connect-service");
+  add_to_protocol_map::<lovenuts::LoveNuts>(&map, "lovenuts");
   add_to_protocol_map::<magic_motion_v1::MagicMotionV1>(&map, "magic-motion-1");
   add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
   add_to_protocol_map::<magic_motion_v3::MagicMotionV3>(&map, "magic-motion-3");
