@@ -120,6 +120,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       writer.send(out_msg).await.expect("This should never fail?");
                     } else {
                       info!("Connector holding websocket dropped, returning");
+                      writer.close().await.unwrap_or_else(|err| error!("{}", err));
                       return;
                     }
                   },
