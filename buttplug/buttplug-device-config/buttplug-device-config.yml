@@ -1408,19 +1408,41 @@ protocols:
   svakom:
     btle:
       names:
+        - Aogu SUV # Unknown
         - Aogu SCB # Ella
+        - Ella NEO
+        - Emma NEO
+        - Phoenix NEO
+        - Vick NEO
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
           rx: 0000ffe2-0000-1000-8000-00805f9b34fb
     defaults:
       name:
-        en-us: Svakom Ella
+        en-us: Svakom Device
       messages:
         VibrateCmd:
           FeatureCount: 1
           StepCount:
            - 19
+    configurations:
+      - identifier:
+          - Aogu SCB
+        name:
+          en-us: Svakom Ella
+      - identifier:
+          - Ella NEO
+        name:
+          en-us: Svakom Ella Neo
+      - identifier:
+          - Phoenix NEO
+        name:
+          en-us: Svakom Phoenix Neo
+      - identifier:
+          - Vick NEO
+        name:
+          en-us: Svakom Vick Neo
   realov:
     btle:
       names:
