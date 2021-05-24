@@ -2055,7 +2055,12 @@
     "svakom": {
       "btle": {
         "names": [
-          "Aogu SCB"
+          "Aogu SUV",
+          "Aogu SCB",
+          "Ella NEO",
+          "Emma NEO",
+          "Phoenix NEO",
+          "Vick NEO"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -2066,7 +2071,7 @@
       },
       "defaults": {
         "name": {
-          "en-us": "Svakom Ella"
+          "en-us": "Svakom Device"
         },
         "messages": {
           "VibrateCmd": {
@@ -2076,7 +2081,41 @@
             ]
           }
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Aogu SCB"
+          ],
+          "name": {
+            "en-us": "Svakom Ella"
+          }
+        },
+        {
+          "identifier": [
+            "Ella NEO"
+          ],
+          "name": {
+            "en-us": "Svakom Ella Neo"
+          }
+        },
+        {
+          "identifier": [
+            "Phoenix NEO"
+          ],
+          "name": {
+            "en-us": "Svakom Phoenix Neo"
+          }
+        },
+        {
+          "identifier": [
+            "Vick NEO"
+          ],
+          "name": {
+            "en-us": "Svakom Vick Neo"
+          }
+        }
+      ]
     },
     "realov": {
       "btle": {
