@@ -64,7 +64,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!("Vibrate?v={}", cmds[0].unwrap())
+          let lovense_cmd = format!("Vibrate?v={}&t={}", cmds[0].unwrap(), device.address())
             .as_bytes()
             .to_vec();
           let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
@@ -73,7 +73,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
         }
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            let lovense_cmd = format!("Vibrate{}?v={}", i + 1, speed).as_bytes().to_vec();
+            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address()).as_bytes().to_vec();
             fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
           }
         }
@@ -95,7 +95,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     Box::pin(async move {
       let result = manager.lock().await.update_rotation(&msg)?;
       if let Some((speed, clockwise)) = result[0] {
-        let lovense_cmd = format!("/Rotate?v={};", speed).as_bytes().to_vec();
+        let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address()).as_bytes().to_vec();
         let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
         fut.await?;
         let dir = direction.load(Ordering::SeqCst);
