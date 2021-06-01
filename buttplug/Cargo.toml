@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "4.0.0"
+version = "4.0.1"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"
@@ -36,48 +36,48 @@ unstable=[]
 # buttplug_derive = { path = "../buttplug_derive" }
 native-tls = { version = "0.2.7", optional = true }
 buttplug_derive = "0.6.2"
-futures = "0.3.14"
-futures-util = "0.3.14"
+futures = "0.3.15"
+futures-util = "0.3.15"
 async-trait = "0.1.50"
-serde = { version = "1.0.125", features = ["derive"] }
+serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
-serde_repr = "0.1.6"
+serde_repr = "0.1.7"
 uuid = { version = "0.8.2", features = ["serde"] }
-url = "2.2.1"
+url = "2.2.2"
 btleplug = { version = "0.7.2", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
-strum_macros = "0.20.1"
-strum = "0.20.0"
+strum_macros = "0.21.0"
+strum = "0.21.0"
 once_cell = "1.7.2"
 paste = "1.0.5"
 lazy_static = "1.4.0"
 byteorder = "1.4.3"
 valico = "3.6.0"
-thiserror = "1.0.24"
+thiserror = "1.0.25"
 async-tungstenite = { version = "0.13.1", optional = true }
 futures-timer = "3.0.2"
-wasm-bindgen-futures = { version = "0.4.23", optional = true }
+wasm-bindgen-futures = { version = "0.4.24", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.26"
 tracing-futures = "0.2.5"
-tracing-subscriber = { version = "0.2.17", features = ["json"] }
+tracing-subscriber = { version = "0.2.18", features = ["json"] }
 dashmap = "4.0.2"
 displaydoc = "0.2.1"
 serialport = { version = "4.0.1", optional = true }
 hidapi = { version = "1.2.6", optional = true }
-wasm-bindgen = { version = "0.2.73", optional = true }
-tokio = { version = "1.5.0", features = ["sync"] }
-async-stream = "0.3.1"
+wasm-bindgen = { version = "0.2.74", optional = true }
+tokio = { version = "1.6.1", features = ["sync"] }
+async-stream = "0.3.2"
 prost = "0.7.0"
-tokio-util = "0.6.6"
+tokio-util = "0.6.7"
 reqwest = { version = "0.11.3", optional = true, features = ["native-tls"] }
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
 
 [dev-dependencies]
-tokio = { version = "1.5.0", features = ["io-std", "io-util", "macros"] }
+tokio = { version = "1.6.1", features = ["io-std", "io-util", "macros"] }
 tracing-log = { version = "0.1.2", features = ["env_logger"] }
 
 [lib]
