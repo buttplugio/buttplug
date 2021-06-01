@@ -19,7 +19,7 @@ use std::{
   time::Duration,
 };
 use tracing_futures::Instrument;
-use tokio::sync::{mpsc, Mutex, Notify, RwLock};
+use tokio::sync::{mpsc, Mutex, RwLock};
 
 const LOVENSE_LOCAL_SERVICE_CHECK_INTERVAL: u64 = 1;
 const LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL: u64 = 1;
@@ -169,7 +169,6 @@ impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationMan
 
 pub struct LovenseConnectServiceCommunicationManager {
   sender: mpsc::Sender<DeviceCommunicationEvent>,
-  scanning_notifier: Arc<Notify>,
   known_hosts: Arc<Mutex<Vec<String>>>,
   is_scanning: Arc<AtomicBool>,
   has_known_hosts: Arc<AtomicBool>,
@@ -179,7 +178,6 @@ impl LovenseConnectServiceCommunicationManager {
   fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
     Self {
       sender,
-      scanning_notifier: Arc::new(Notify::new()),
       known_hosts: Arc::new(Mutex::new(vec![])),
       is_scanning: Arc::new(AtomicBool::new(false)),
       has_known_hosts: Arc::new(AtomicBool::new(false))
