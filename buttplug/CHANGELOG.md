@@ -1,3 +1,17 @@
+# 4.0.1 (2021-05-31)
+
+## Features
+
+- Added hardware support:
+  - Lovenuts brand toys
+  - Svakom Neo vibrators
+  - Je Jour Nuo and Dua
+
+## Bugfixes
+
+- Fixed toy addressing when using Lovense Connect Service
+- Fixed issue with websocket writer stream not closing correctly when websocket is dropped.
+
 # 4.0.0 (2021-05-02)
 
 ## Features
