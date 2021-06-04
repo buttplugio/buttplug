@@ -1,6 +1,3 @@
-use super::btleplug_internal::{
-  BtlePlugInternalEventLoop, DeviceReturnFuture, DeviceReturnStateShared,
-};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
@@ -11,33 +8,41 @@ use crate::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
     ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator, ButtplugDeviceReturn,
     DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    DeviceWriteCmd, Endpoint
   },
+  server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
-use btleplug::api::{CentralEvent, Peripheral};
-use futures::future::BoxFuture;
+use btleplug::{api::{BDAddr, CentralEvent, Characteristic, Peripheral, WriteType, ValueNotification}, platform::Manager};
+use uuid::Uuid;
+use futures::{TryFutureExt, Stream, StreamExt, future::{self, BoxFuture}};
 use std::{
   fmt::{self, Debug},
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
+  collections::HashMap,
+  pin::Pin
 };
 use tokio::sync::{broadcast, mpsc};
 use tracing_futures::Instrument;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
-  device: Option<T>,
-  broadcaster: broadcast::Sender<CentralEvent>,
+  name: String,
+  address: BDAddr,
+  manager: Manager,
+  device: T,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
-  pub fn new(device: T, broadcaster: broadcast::Sender<CentralEvent>) -> Self {
+  pub fn new(name: &str, address: &BDAddr, manager: Manager, device: T) -> Self {
     Self {
-      device: Some(device),
-      broadcaster,
+      name: name.to_owned(),
+      address: address.to_owned(),
+      device,
+      manager,
     }
   }
 }
@@ -51,180 +56,117 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 #[async_trait]
 impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   fn get_specifier(&self) -> DeviceSpecifier {
-    if self.device.is_none() {
-      panic!("Cannot call get_specifier after device is taken!");
-    }
-    let name = self
-      .device
-      .as_ref()
-      .unwrap()
-      .properties()
-      .local_name
-      .unwrap();
-    DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&name))
+    DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&self.name))
   }
 
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    if self.device.is_none() {
-      return Err(
-        ButtplugDeviceError::DeviceConnectionError(
-          "Cannot call try_create_device_impl twice!".to_owned(),
-        )
-        .into(),
+    if let Err(err) = self.device.connect().await {
+      let return_err = ButtplugDeviceError::DeviceSpecificError(
+        ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", err)),
       );
+      return Err(return_err.into());
     }
-    let device = self.device.take().unwrap();
-    if let Some(ref proto) = protocol.btle {
-      let (device_sender, device_receiver) = mpsc::channel(256);
-      let name = device.properties().local_name.unwrap();
-      let address = device.properties().address.to_string();
-      let (device_event_sender, _) = broadcast::channel(256);
-      // rumble calls, so this will block whatever thread it's spawned to.
-      let mut event_loop = BtlePlugInternalEventLoop::new(
-        self.broadcaster.subscribe(),
-        device,
-        proto.clone(),
-        device_receiver,
-        device_event_sender.clone(),
-      );
-      async_manager::spawn(
-        async move { event_loop.run().await }.instrument(tracing::info_span!(
-          "btleplug Event Loop",
-          device = tracing::field::display(&name),
-          address = tracing::field::display(&address)
-        )),
-      )
-      .unwrap();
-      let fut = DeviceReturnFuture::default();
-      let waker = fut.get_state_clone();
-      if device_sender
-        .send((ButtplugDeviceCommand::Connect, waker))
-        .await
-        .is_err()
-      {
+    // Map UUIDs to endpoints
+    let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
+    let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
+    let chars = match self.device.discover_characteristics().await {
+      Ok(chars) => chars,
+      Err(err) => {
+        error!("BTLEPlug error discovering characteristics: {:?}", err);
         return Err(
-          ButtplugDeviceError::DeviceConnectionError(
-            "Event loop exited before we could connect.".to_owned(),
-          )
-          .into(),
-        );
-      };
-      match fut.await {
-        ButtplugDeviceReturn::Connected(info) => {
-          let device_internal_impl =
-            BtlePlugDeviceImpl::new(&address, device_sender, device_event_sender);
-          let device_impl = DeviceImpl::new(
-            &name,
-            &address,
-            &info.endpoints,
-            Box::new(device_internal_impl),
-          );
-          Ok(device_impl)
-        }
-        // TODO It'd be nice to carry this error through as a source.
-        ButtplugDeviceReturn::Error(err) => Err(
           ButtplugDeviceError::DeviceConnectionError(format!(
-            "Device connection failed: {:?}",
+            "BTLEPlug error discovering characteristics: {:?}",
             err
           ))
           .into(),
-        ),
-        other => Err(ButtplugUnknownError::UnexpectedType(format!("{:?}", other)).into()),
-      }
-    } else {
-      Err(
-        ButtplugDeviceError::DeviceConnectionError(
-          "Got a protocol with no Bluetooth Definition!".to_owned(),
-        )
-        .into(),
-      )
-    }
-  }
-}
-
-//#[derive(Clone)]
-pub struct BtlePlugDeviceImpl {
-  address: String,
-  event_stream: broadcast::Sender<ButtplugDeviceEvent>,
-  thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-  connected: Arc<AtomicBool>,
-}
-
-unsafe impl Send for BtlePlugDeviceImpl {}
-unsafe impl Sync for BtlePlugDeviceImpl {}
-
-impl BtlePlugDeviceImpl {
-  pub fn new(
-    address: &str,
-    thread_sender: mpsc::Sender<(ButtplugDeviceCommand, DeviceReturnStateShared)>,
-    event_stream: broadcast::Sender<ButtplugDeviceEvent>,
-  ) -> Self {
-    Self {
-      address: address.to_owned(),
-      thread_sender,
-      connected: Arc::new(AtomicBool::new(true)),
-      event_stream,
-    }
-  }
-
-  fn send_to_device_task(
-    &self,
-    cmd: ButtplugDeviceCommand,
-  ) -> ButtplugResultFuture<ButtplugDeviceReturn> {
-    let sender = self.thread_sender.clone();
-    let connected = self.connected.clone();
-    let event_stream = self.event_stream.clone();
-    let address = self.address.clone();
-    Box::pin(async move {
-      let fut = DeviceReturnFuture::default();
-      let waker = fut.get_state_clone();
-      if sender.send((cmd, waker)).await.is_err() {
-        error!("Device event loop shut down, cannot send command.");
-        if connected.load(Ordering::SeqCst) {
-          connected.store(false, Ordering::SeqCst);
-          event_stream
-            .send(ButtplugDeviceEvent::Removed(address))
-            .unwrap();
-        }
-        return Err(
-          ButtplugDeviceError::DeviceNotConnected(
-            "Device event loop shut down, cannot send command.".to_owned(),
-          )
-          .into(),
         );
       }
-      Ok(fut.await)
-    })
-  }
-
-  fn send_to_device_expect_ok(
-    &self,
-    cmd: ButtplugDeviceCommand,
-    err_str: &str,
-  ) -> ButtplugResultFuture {
-    let fut = self.send_to_device_task(cmd);
-    let err_fut_str = err_str.to_owned();
-    Box::pin(async move {
-      match fut.await? {
-        ButtplugDeviceReturn::Ok(_) => Ok(()),
-        ButtplugDeviceReturn::Error(e) => {
-          let err_out = format!("{}: {:?}", err_fut_str, e);
-          error!("{}", err_out);
-          // TODO Need to whittle down what this error actually means.
-          Err(ButtplugDeviceError::DeviceCommunicationError(err_out).into())
-        }
-        other => {
-          Err(ButtplugUnknownError::UnexpectedType(format!("{}: {:?}", err_fut_str, other)).into())
+    };
+    for proto_service in protocol.btle.unwrap().services.values() {
+      for (chr_name, chr_uuid) in proto_service.iter() {
+        let maybe_chr = chars.iter().find(|c| c.uuid == *chr_uuid);
+        if let Some(chr) = maybe_chr {
+          endpoints.insert(*chr_name, chr.clone());
+          uuid_map.insert(*chr_uuid, *chr_name);
         }
       }
-    })
+    }
+    let notification_stream = self.device.notifications().await.unwrap();
+    let device_internal_impl = BtlePlugDeviceImpl::new(self.device.clone(), self.address, notification_stream, endpoints.clone(), uuid_map);
+    let device_impl = DeviceImpl::new(
+      &self.name,
+      &self.address.to_string(),
+      &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
+    Box::new(device_internal_impl),
+    );
+    Ok(device_impl)
   }
 }
 
-impl DeviceImplInternal for BtlePlugDeviceImpl {
+
+//#[derive(Clone)]
+pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
+  device: T,
+  event_stream: broadcast::Sender<ButtplugDeviceEvent>,
+  connected: Arc<AtomicBool>,
+  endpoints: HashMap<Endpoint, Characteristic>
+}
+
+unsafe impl<T: Peripheral + 'static> Send for BtlePlugDeviceImpl<T> {}
+unsafe impl<T: Peripheral + 'static> Sync for BtlePlugDeviceImpl<T> {}
+
+impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
+  pub fn new(
+    device: T,
+    address: BDAddr,
+    mut notification_stream: Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
+    endpoints: HashMap<Endpoint, Characteristic>,
+    uuid_map: HashMap<Uuid, Endpoint>,  
+  ) -> Self {
+    let (event_stream, _) = broadcast::channel(256);
+    let event_stream_clone = event_stream.clone();
+    async_manager::spawn(async move {
+      let mut error_notification = false;
+      while let Some(notification) = notification_stream.next().await {
+        let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
+          *endpoint
+        } else {
+          // Only print the error message once.
+          if !error_notification {
+            error!(
+              "Endpoint for UUID {} not found in map, assuming device has disconnected.",
+              notification.uuid
+            );
+            error_notification = true;
+          }
+          continue;
+        };
+        if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
+          address.to_string(),
+          endpoint,
+          notification.value,
+        )) {
+          error!(
+            "Cannot send notification, device object disappeared: {:?}",
+            err
+          );
+          return;
+        }
+      }
+    });
+    Self {
+      device,
+      endpoints,
+      connected: Arc::new(AtomicBool::new(true)),
+      event_stream
+    }
+  }
+}
+
+impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
   fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
     self.event_stream.subscribe()
   }
@@ -234,17 +176,30 @@ impl DeviceImplInternal for BtlePlugDeviceImpl {
   }
 
   fn disconnect(&self) -> ButtplugResultFuture {
-    self.send_to_device_expect_ok(
-      ButtplugDeviceCommand::Disconnect,
-      "Cannot disconnect device",
-    )
+    let device = self.device.clone();
+    Box::pin(async move {
+      device.disconnect().await;
+      Ok(())
+    })
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
-    self.send_to_device_expect_ok(
-      ButtplugDeviceCommand::Message(msg.into()),
-      "Cannot write to endpoint",
-    )
+    let characteristic = match self.endpoints.get(&msg.endpoint) {
+      Some(chr) => chr.clone(),
+      None => {
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+      }
+    };
+    let device = self.device.clone();
+    let write_type = if msg.write_with_response {
+      WriteType::WithResponse
+    } else {
+      WriteType::WithoutResponse
+    };
+    Box::pin(async move {
+      device.write(&characteristic, &msg.data, write_type).await.unwrap();
+      Ok(())
+    })
   }
 
   fn read_value(
@@ -253,34 +208,58 @@ impl DeviceImplInternal for BtlePlugDeviceImpl {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
-    let task = self.send_to_device_task(ButtplugDeviceCommand::Message(msg.into()));
+    let characteristic = match self.endpoints.get(&msg.endpoint) {
+      Some(chr) => chr.clone(),
+      None => {
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+      }
+    };
+    let device = self.device.clone();
     Box::pin(async move {
-      let val = task.await?;
-      if let ButtplugDeviceReturn::RawReading(reading) = val {
-        Ok(reading)
-      } else {
-        Err(
-          ButtplugUnknownError::UnexpectedType(format!(
-            "Read Error, unexpected return type: {:?}",
-            val
+      match device.read(&characteristic).await {
+        Ok(data) => {
+          trace!("Got reading: {:?}", data);
+          Ok(RawReading::new(
+            0,
+            msg.endpoint,
+            data,
           ))
-          .into(),
-        )
+        }
+        Err(err) => {
+          error!("BTLEPlug device read error: {:?}", err);
+          Err(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+              format!("{:?}", err),
+            ))
+            .into(),
+          )
+        }
       }
     })
   }
 
   fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
-    self.send_to_device_expect_ok(
-      ButtplugDeviceCommand::Message(msg.into()),
-      "Cannot subscribe",
-    )
+    let characteristic = match self.endpoints.get(&msg.endpoint) {
+      Some(chr) => chr.clone(),
+      None => {
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+      }
+    };
+    let device = self.device.clone();
+    Box::pin(async move {
+      device.subscribe(&characteristic).await.map_err(|e| ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", e))).into())
+    })
   }
 
   fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
-    self.send_to_device_expect_ok(
-      ButtplugDeviceCommand::Message(msg.into()),
-      "Cannot unsubscribe",
-    )
+    let characteristic = match self.endpoints.get(&msg.endpoint) {
+      Some(chr) => chr.clone(),
+      None => {
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+      }
+    };
+    let device = self.device.clone();
+    Box::pin(async move {
+      device.unsubscribe(&characteristic).await.map_err(|e| ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", e))).into())
+    })
   }
 }
