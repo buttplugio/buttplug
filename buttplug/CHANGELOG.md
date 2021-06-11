@@ -1,3 +1,10 @@
+# 4.0.2 (2021-06-11)
+
+## Bugfixes
+
+- Implement workaround for Intiface Desktop engine stall issues, via changing log message levels on
+  messages fired from threads.
+
 # 4.0.1 (2021-05-31)
 
 ## Features
