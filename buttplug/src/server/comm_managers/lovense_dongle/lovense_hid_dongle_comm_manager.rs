@@ -33,7 +33,7 @@ fn hid_write_thread(
   mut receiver: Receiver<OutgoingLovenseData>,
   token: CancellationToken,
 ) {
-  info!("Starting HID dongle write thread");
+  trace!("Starting HID dongle write thread");
   let port_write = |mut data: String| {
     data += "\r\n";
     trace!("Writing message: {}", data);
@@ -67,7 +67,7 @@ fn hid_write_thread(
       }
     }
   }
-  info!("Leaving HID dongle write thread");
+  trace!("Leaving HID dongle write thread");
 }
 
 fn hid_read_thread(
@@ -75,7 +75,7 @@ fn hid_read_thread(
   sender: Sender<LovenseDongleIncomingMessage>,
   token: CancellationToken,
 ) {
-  info!("Starting HID dongle read thread");
+  trace!("Starting HID dongle read thread");
   dongle.set_blocking_mode(true).unwrap();
   let mut data: String = String::default();
   let mut buf = [0u8; 1024];
@@ -106,7 +106,7 @@ fn hid_read_thread(
                 sender_clone.blocking_send(m).unwrap();
               }
               Err(e) => {
-                error!("Error reading: {:?}", e);
+                //error!("Error reading: {:?}", e);
                 /*
                 sender_clone
                   .send(IncomingLovenseData::Raw(incoming.clone().to_string()))
@@ -125,7 +125,7 @@ fn hid_read_thread(
       }
     }
   }
-  info!("Leaving HID dongle read thread");
+  trace!("Leaving HID dongle read thread");
 }
 
 #[derive(Default)]

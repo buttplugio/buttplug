@@ -92,7 +92,7 @@ fn serial_read_thread(
     let mut buf: [u8; 1024] = [0; 1024];
     match port.read(&mut buf) {
       Ok(len) => {
-        info!("Got {} serial bytes", len);
+        trace!("Got {} serial bytes", len);
         if sender.blocking_send(buf[0..len].to_vec()).is_err() {
           error!("Serial port implementation disappeared, exiting read thread.");
           break;
