@@ -1,4 +1,4 @@
-# Buttplug (Rust Implementation)
+# Buttplug
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
@@ -34,13 +34,12 @@
   <img src="https://raw.githubusercontent.com/buttplugio/buttplug-rs/dev/buttplug/docs/buttplug_rust_docs.png">
 </p>
 
-Rust implementation of the Buttplug Intimate Hardware Protocol,
-including implementations of the client and, at some point, server.
+Full Rust implementation of the Buttplug Intimate Hardware Protocol.
 
 ## Read Me First!
 
 If you are new to Buttplug, you most likely want to start with the [Buttplug
-Website](https://buttplug.io) or the [Buttplug Core Repo](https://github.com/buttplugio/buttplug).
+Website](https://buttplug.io) for links to documentation, applications, games, and other resources.
 
 For a demo of what this framework can do, [check out this demo
 video](https://www.youtube.com/watch?v=RXD76g5fias).
@@ -58,6 +57,7 @@ Buttplug-rs is currently capable of controlling toys via:
 - Serial Ports
 - USB HID
 - Lovense Devices via the Lovense Dongle (All Versions)
+- Lovense Connect App
 - XInput gamepads (Windows only at the moment)
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
