@@ -270,6 +270,15 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
+impl HIDSpecifier {
+  pub fn new(vendor_id: u16, product_id: u16) -> Self {
+    Self {
+      vendor_id,
+      product_id
+    }
+  }
+}
+
 /// Specifier for Serial devices
 ///
 /// Handles serial port device identification (via port names) and configuration.

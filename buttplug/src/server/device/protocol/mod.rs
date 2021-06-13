@@ -58,7 +58,7 @@ pub mod mizzzee_v2;
 pub mod motorbunny;
 pub mod mysteryvibe;
 pub mod mysteryvibe_v2;
-
+pub mod nintendo_joycon;
 pub mod nobra;
 pub mod patoo;
 pub mod picobong;
@@ -296,6 +296,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     mysteryvibe_v2::setup::MysteryVibeV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());

@@ -36,6 +36,12 @@ pub mod lovense_dongle;
 ))]
 pub mod serialport;
 
+#[cfg(all(
+  feature = "hid-manager",
+  any(target_os = "windows", target_os = "macos", target_os = "linux")
+))]
+pub mod hid;
+
 // XInput is windows only
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
