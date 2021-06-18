@@ -1,3 +1,9 @@
+# 4.0.3 (2021-06-18)
+
+## Bugfixes
+
+- #346 - Fix variations in type returns from the Lovense Connect API when using iOS/Android
+
 # 4.0.2 (2021-06-11)
 
 ## Bugfixes
