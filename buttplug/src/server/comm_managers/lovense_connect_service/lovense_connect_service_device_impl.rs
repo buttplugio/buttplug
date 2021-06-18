@@ -127,7 +127,8 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     let toy_info = self.toy_info.clone();
     Box::pin(async move {
-      Ok(RawReading::new(0, Endpoint::Rx, vec!(toy_info.read().await.battery)))
+      let battery_level = toy_info.read().await.battery.clamp(0, 100) as u8;
+      Ok(RawReading::new(0, Endpoint::Rx, vec!(battery_level)))
     })
   }
 

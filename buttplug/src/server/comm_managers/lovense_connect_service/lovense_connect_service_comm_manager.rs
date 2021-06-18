@@ -35,7 +35,7 @@ pub(super) struct LovenseServiceToyInfo {
   pub connected: bool,
   pub version: String,
   #[serde(deserialize_with = "deserialize_number_from_string")]
-  pub battery: u8,
+  pub battery: i8,
 }
 
 #[derive(Deserialize, Debug)]
