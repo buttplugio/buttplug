@@ -9,7 +9,7 @@ use crate::{
 use dashmap::DashMap;
 use futures::future;
 use futures_timer::Delay;
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize};
 use std::{
   collections::HashMap,
   sync::{
@@ -20,16 +20,10 @@ use std::{
 };
 use tracing_futures::Instrument;
 use tokio::sync::{mpsc, Mutex, RwLock};
+use serde_aux::prelude::*;
 
 const LOVENSE_LOCAL_SERVICE_CHECK_INTERVAL: u64 = 1;
 const LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL: u64 = 1;
-
-fn connected_deserializer<'de, D>(deserializer: D) -> Result<bool, D::Error>
-where
-    D: Deserializer<'de>,
-{
-  Ok(String::deserialize(deserializer)? == "1")
-}
 
 #[derive(Deserialize, Debug, Clone)]
 pub(super) struct LovenseServiceToyInfo {
@@ -37,9 +31,10 @@ pub(super) struct LovenseServiceToyInfo {
   pub name: String,
   #[serde(rename = "nickName")]
   pub nickname: String,
-  #[serde(rename = "status", deserialize_with = "connected_deserializer")]
+  #[serde(rename = "status", deserialize_with = "deserialize_bool_from_anything")]
   pub connected: bool,
   pub version: String,
+  #[serde(deserialize_with = "deserialize_number_from_string")]
   pub battery: u8,
 }
 
@@ -59,8 +54,9 @@ struct LovenseServiceHostInfo {
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceLocalInfo {
-  #[serde(rename = "type")]
+  #[serde(rename = "type", deserialize_with = "deserialize_string_from_number")]
   pub reply_type: String,
+  #[serde(deserialize_with = "deserialize_number_from_string")]
   pub code: u32,
   pub data: HashMap<String, LovenseServiceToyInfo>,
 }
