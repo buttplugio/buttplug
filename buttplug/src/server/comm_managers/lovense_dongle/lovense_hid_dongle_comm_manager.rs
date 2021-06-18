@@ -105,7 +105,7 @@ fn hid_read_thread(
                 trace!("Read message: {:?}", m);
                 sender_clone.blocking_send(m).unwrap();
               }
-              Err(e) => {
+              Err(_e) => {
                 //error!("Error reading: {:?}", e);
                 /*
                 sender_clone
