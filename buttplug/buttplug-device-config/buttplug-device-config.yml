@@ -1316,6 +1316,7 @@ protocols:
         - CycSA
         - UFOSA
         - VorzePiston
+        - ROCKET
       services:
         40ee1111-63ec-4b7f-8ce7-712efd55b90e:
           tx: 40ee2222-63ec-4b7f-8ce7-712efd55b90e
@@ -1332,7 +1333,16 @@ protocols:
           VibrateCmd:
             FeatureCount: 1
             StepCount:
-             - 100
+              - 100
+      - identifier:
+          - ROCKET
+        name:
+          en-us: Adult Festa Rocket
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
       - identifier:
           - CycSA
         name:
