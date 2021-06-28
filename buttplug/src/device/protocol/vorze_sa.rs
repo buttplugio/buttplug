@@ -36,10 +36,12 @@ impl ButtplugProtocol for VorzeSA {
 }
 
 #[repr(u8)]
+#[derive(PartialEq)]
 enum VorzeDevices {
   Bach = 6,
-  UFO = 2,
   Cyclone = 1,
+  Rocket = 7,
+  UFO = 2,
 }
 
 #[repr(u8)]
@@ -55,19 +57,21 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
+    let dev_id = if self.name.to_ascii_lowercase().contains("rocket") {
+      VorzeDevices::Rocket
+    } else {
+      VorzeDevices::Bach
+    };
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&msg, false)?;
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
+          let need_response = dev_id == VorzeDevices::Rocket;
           fut_vec.push(device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
-            vec![
-              VorzeDevices::Bach as u8,
-              VorzeActions::Vibrate as u8,
-              speed as u8,
-            ],
-            false,
+            vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
+            need_response,
           )));
         }
       }
@@ -137,7 +141,7 @@ mod test {
   };
 
   #[test]
-  pub fn test_vorze_sa_vibration_protocol() {
+  pub fn test_vorze_sa_vibration_protocol_bach() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Bach smart").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
@@ -165,6 +169,41 @@ mod test {
           Endpoint::Tx,
           vec![0x06, 0x03, 0x0],
           false,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+    });
+  }
+
+  #[test]
+  pub fn test_vorze_sa_vibration_protocol_rocket() {
+    async_manager::block_on(async move {
+      let (device, test_device) = new_bluetoothle_test_device("ROCKET").await.unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      device
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x07, 0x03, 50],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+
+      device
+        .parse_message(StopDeviceCmd::new(0).into())
+        .await
+        .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x07, 0x03, 0x0],
+          true,
         )),
       );
       assert!(check_test_recv_empty(&command_receiver));
