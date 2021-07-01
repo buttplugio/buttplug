@@ -2650,6 +2650,69 @@
           }
         }
       }
+    },
+    "patoo": {
+      "btle": {
+        "names": [
+          "PTVEA*",
+          "PBT*",
+          "PCS*"
+        ],
+        "services": {
+          "f000aa64-0451-4000-b000-000000000000": {
+            "txmode": "f000aa65-0451-4000-b000-000000000000",
+            "tx": "f000aa68-0451-4000-b000-000000000000"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Patoo Device"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "PTVEA"
+          ],
+          "name": {
+            "en-us": "Patoo Carrot"
+          }
+        },
+        {
+          "identifier": [
+            "PCS"
+          ],
+          "name": {
+            "en-us": "Patoo Vibrator"
+          }
+        },
+        {
+          "identifier": [
+            "PBT"
+          ],
+          "name": {
+            "en-us": "Patoo Devil"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                100
+              ]
+            }
+          }
+        }
+      ]
     }
   }
 }
