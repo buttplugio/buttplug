@@ -23,6 +23,7 @@ pub mod maxpro;
 pub mod motorbunny;
 pub mod mysteryvibe;
 pub mod nobra;
+pub mod patoo;
 pub mod picobong;
 pub mod prettylove;
 pub mod raw_protocol;
@@ -85,6 +86,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
   add_to_protocol_map::<mysteryvibe::MysteryVibe>(&map, "mysteryvibe");
   add_to_protocol_map::<nobra::Nobra>(&map, "nobra");
+  add_to_protocol_map::<patoo::Patoo>(&map, "patoo");
   add_to_protocol_map::<picobong::Picobong>(&map, "picobong");
   add_to_protocol_map::<prettylove::PrettyLove>(&map, "prettylove");
   add_to_protocol_map::<raw_protocol::RawProtocol>(&map, "raw");
