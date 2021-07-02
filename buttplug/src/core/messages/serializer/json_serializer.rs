@@ -160,6 +160,10 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     // instead of using if/else here, return in the if, which drops the borrow.
     // so we can possibly mutate it now.
     let msg_union = deserialize_to_message::<ButtplugSpecV2ClientMessage>(&self.validator, msg)?;
+    // If the message is malformed, just return an spec version not received error.
+    if msg_union.is_empty() {
+      return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
+    }
     if let ButtplugSpecV2ClientMessage::RequestServerInfo(rsi) = &msg_union[0] {
       info!(
         "Setting JSON Wrapper message version to {}",
