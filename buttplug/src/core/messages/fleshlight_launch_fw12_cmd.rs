@@ -44,12 +44,12 @@ impl FleshlightLaunchFW12Cmd {
 impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
-    if !(0..99).contains(&self.speed) {
+    if !(0..100).contains(&self.speed) {
       Err(ButtplugMessageError::InvalidMessageContents(format!(
         "FleshlightFW12Cmd speed {} invalid, should be between 0 and 99",
         self.speed
       )))
-    } else if !(0..99).contains(&self.position) {
+    } else if !(0..100).contains(&self.position) {
       Err(ButtplugMessageError::InvalidMessageContents(format!(
         "FleshlightFW12Cmd position {} invalid, should be between 0 and 99",
         self.position
@@ -57,5 +57,18 @@ impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
     } else {
       Ok(())
     }
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::{ButtplugMessageValidator, FleshlightLaunchFW12Cmd};
+  
+  #[test]
+  pub fn test_legacy_fleshlight_message_bounds() {
+    assert!(FleshlightLaunchFW12Cmd::new(0, 0, 0).is_valid().is_ok());
+    assert!(FleshlightLaunchFW12Cmd::new(0, 99, 99).is_valid().is_ok());
+    assert!(FleshlightLaunchFW12Cmd::new(0, 100, 99).is_valid().is_err());
+    assert!(FleshlightLaunchFW12Cmd::new(0, 99, 100).is_valid().is_err());
   }
 }
