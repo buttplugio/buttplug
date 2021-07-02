@@ -162,7 +162,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       // Create the event loop and TCP listener we'll accept connections on.
       let try_socket = TcpListener::bind(&addr).await;
       debug!("Websocket Insecure: Socket bound.");
-      let listener = try_socket.expect("Failed to bind");
+      let listener = try_socket.map_err(|e| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{:?}", e))))?;
       debug!("Websocket Insecure: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket Insecure: Got connection");

@@ -40,4 +40,6 @@ pub enum ButtplugConnectorTransportSpecificError {
   #[cfg(feature = "websockets")]
   #[error("Tungstenite specific error: {0}")]
   TungsteniteError(#[from] TungsteniteError),
+  #[error("Network error: {0}")]
+  GenericNetworkError(String)
 }
