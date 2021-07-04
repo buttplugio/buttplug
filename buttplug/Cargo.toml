@@ -61,9 +61,9 @@ wasm-bindgen-futures = { version = "0.4.24", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.26"
 tracing-futures = "0.2.5"
-tracing-subscriber = { version = "0.2.18", features = ["json"] }
+tracing-subscriber = { version = "0.2.19", features = ["json"] }
 dashmap = "4.0.2"
-displaydoc = "0.2.1"
+displaydoc = "0.2.2"
 serialport = { version = "4.0.1", optional = true }
 hidapi = { version = "1.2.6", optional = true }
 wasm-bindgen = { version = "0.2.74", optional = true }
@@ -71,7 +71,7 @@ tokio = { version = "1.7.1", features = ["sync"] }
 async-stream = "0.3.2"
 prost = "0.7.0"
 tokio-util = "0.6.7"
-reqwest = { version = "0.11.3", optional = true, features = ["native-tls"] }
+reqwest = { version = "0.11.4", optional = true, features = ["native-tls"] }
 serde-aux = "2.2.0"
 
 [target.'cfg(windows)'.dependencies]
