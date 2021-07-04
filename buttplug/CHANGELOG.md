@@ -1,3 +1,20 @@
+# 4.0.4 (2021-07-04)
+
+## Features
+
+- Added Hardware Support
+  - Adult Festa Rocket+1D
+  - Vorze Piston SA
+  - Patoo Carrot/Vibrator/Devil
+  - TCode v0.3 Devices
+    - Currently only supports L0 Up/Down Axis. More command support coming soon.
+
+## Bugfixes
+
+- Fix bounds for FleshlightLaunchFW12Cmd (Used by legacy programs)
+- Change panic to error return when websocket server can't bind to port
+- Throw error if first message received by a server is invalid (not spec version)
+
 # 4.0.3 (2021-06-18)
 
 ## Bugfixes
