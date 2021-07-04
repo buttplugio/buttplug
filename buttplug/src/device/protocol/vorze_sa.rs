@@ -8,11 +8,9 @@ use crate::{
     DeviceImpl, DeviceWriteCmd, Endpoint,
   },
 };
+use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use std::sync::{
-  atomic::{AtomicU8, Ordering::SeqCst},
-};
 
 #[derive(ButtplugProtocolProperties)]
 pub struct VorzeSA {
@@ -35,7 +33,7 @@ impl ButtplugProtocol for VorzeSA {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-	  previous_position: Arc::new(AtomicU8::new(0)),
+      previous_position: Arc::new(AtomicU8::new(0)),
     })
   }
 }
@@ -64,20 +62,20 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
   if distance > 200f64 {
     distance = 200f64;
   }
-  
+
   // Convert duration to max length
   duration = 200f64 * duration / distance;
 
   let mut speed = (duration / 6658f64).powf(-1.21);
-  
+
   if speed > 200f64 {
-	  speed = 200f64;
+    speed = 200f64;
   }
-  
+
   if speed < 0f64 {
-	  speed = 0f64;
+    speed = 0f64;
   }
-  
+
   return speed as u8;
 }
 
@@ -142,32 +140,32 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       Ok(messages::Ok::default().into())
     })
   }
-  
+
   fn handle_linear_cmd(
     &self,
     device: Arc<DeviceImpl>,
     msg: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
-	let v = msg.vectors()[0].clone();
-		
-	let previous_position = self.previous_position.load(SeqCst);
-	let position = v.position * 200f64;
-	let distance = (previous_position as f64 - position).abs();
-	
-	let speed = get_piston_speed(distance, v.duration as f64);
-	
-	self.previous_position.store(position as u8, SeqCst);
-	
-	let fut = device.write_value(DeviceWriteCmd::new(
-	  Endpoint::Tx,
-	  vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
-	  false,
-	));
-	
+    let v = msg.vectors()[0].clone();
+
+    let previous_position = self.previous_position.load(SeqCst);
+    let position = v.position * 200f64;
+    let distance = (previous_position as f64 - position).abs();
+
+    let speed = get_piston_speed(distance, v.duration as f64);
+
+    self.previous_position.store(position as u8, SeqCst);
+
+    let fut = device.write_value(DeviceWriteCmd::new(
+      Endpoint::Tx,
+      vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
+      false,
+    ));
+
     Box::pin(async move {
-		fut.await?;
-		Ok(messages::Ok::default().into())
-	})
+      fut.await?;
+      Ok(messages::Ok::default().into())
+    })
   }
 
   fn handle_vorze_a10_cyclone_cmd(
