@@ -1,10 +1,10 @@
 {
   "name": "buttplug-device-config",
-  "version": "47.0.0",
+  "version": "53.0.0",
   "description": "Buttplug Device Configuration File",
   "main": "index.js",
   "scripts": {
-    "build": "js-yaml buttplug-device-config.yml > buttplug-device-config.json && ajv validate -s buttplug-device-config-schema.json -d buttplug-device-config.json",
+    "build": "js-yaml buttplug-device-config.yml > buttplug-device-config.json && ajv validate --strict=false -s buttplug-device-config-schema.json -d buttplug-device-config.json",
     "export-version": "node ./export_version.js"
   },
   "repository": {
@@ -22,11 +22,11 @@
   },
   "homepage": "https://github.com/buttplugio/buttplug-device-config#readme",
   "devDependencies": {
-    "ajv": "^6.10.2",
-    "ajv-cli": "^3.0.0",
-    "js-yaml": "^3.13.1"
+    "ajv": "^8.6.1",
+    "ajv-cli": "^5.0.0",
+    "js-yaml": "^4.1.0"
   },
   "dependencies": {
-    "trash-cli": "^1.4.0"
+    "trash-cli": "^4.0.0"
   }
 }
