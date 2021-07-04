@@ -1815,6 +1815,21 @@ protocols:
             StepCount:
               - 100
               - 100
+  tcode-v03:
+    serial:
+      - port: default
+        baud-rate: 115200
+        data-bits: 8
+        parity: N
+        stop-bits: 1
+    defaults:
+      name:
+        en-us: TCode v0.3 (Single Linear Axis)
+      messages:
+        LinearCmd:
+          FeatureCount: 1
+          StepCount:
+            - 100
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
