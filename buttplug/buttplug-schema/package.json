@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/metafetish/buttplug-schema#readme",
   "devDependencies": {
-    "ajv-cli": "^3.0.0"
+    "ajv-cli": "^5.0.0"
   }
 }
