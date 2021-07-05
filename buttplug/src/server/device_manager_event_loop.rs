@@ -130,9 +130,16 @@ impl DeviceManagerEventLoop {
         let span = info_span!(
           "device creation",
           name = tracing::field::display(name),
-          address = tracing::field::display(address)
+          address = tracing::field::display(address.clone())
         );
         let _enter = span.enter();
+        // Check to make sure the device isn't already connected. If it is, drop it.
+        for device_entry in self.device_map.iter() {
+          if device_entry.value().address() == address {
+            debug!("Device {} already connected, ignoring new device emission", address);
+            return;
+          }
+        }
         self.try_create_new_device(creator);
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
