@@ -42,7 +42,6 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     let position = (v.position * 99f64) as u32;
 
     let command = format!("L0{:02}I{}\n", position, v.duration);
-    info!("{}", command);
     let fut = device.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       command.as_bytes().to_vec(),
