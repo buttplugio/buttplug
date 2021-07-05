@@ -55,8 +55,8 @@ enum VorzeActions {
 }
 
 pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
-  if distance < 0f64 {
-    return 0;
+  if distance <= 0f64 {
+    return 100;
   }
 
   if distance > 200f64 {
@@ -68,8 +68,8 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 
   let mut speed = (duration / 6658f64).powf(-1.21);
 
-  if speed > 200f64 {
-    speed = 200f64;
+  if speed > 100f64 {
+    speed = 100f64;
   }
 
   if speed < 0f64 {
@@ -96,11 +96,10 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          let need_response = dev_id == VorzeDevices::Rocket;
           fut_vec.push(device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
             vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
-            need_response,
+            true,
           )));
         }
       }
@@ -131,7 +130,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
         fut_vec.push(device.write_value(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![dev_id as u8, VorzeActions::Rotate as u8, data],
-          false,
+          true,
         )));
       }
       for fut in fut_vec {
@@ -159,7 +158,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     let fut = device.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
-      false,
+      true,
     ));
 
     Box::pin(async move {
@@ -190,7 +189,8 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
-    core::messages::{RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
+    core::messages::{RotateCmd, RotationSubcommand, StopDeviceCmd, VibrateCmd, VibrateSubcommand,
+                     LinearCmd, VectorSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
@@ -210,7 +210,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 50],
-          false,
+          true,
         )),
       );
       assert!(check_test_recv_empty(&command_receiver));
@@ -224,7 +224,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 0x0],
-          false,
+          true,
         )),
       );
       assert!(check_test_recv_empty(&command_receiver));
@@ -272,45 +272,100 @@ mod test {
       let (device, test_device) = new_bluetoothle_test_device("CycSA").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
-        .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into())
-        .await
-        .unwrap();
+          .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into())
+          .await
+          .unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 50],
-          false,
+          true,
         )),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
       device
-        .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true)]).into())
-        .await
-        .unwrap();
+          .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, true)]).into())
+          .await
+          .unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 178],
-          false,
+          true,
         )),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
       device
-        .parse_message(StopDeviceCmd::new(0).into())
-        .await
-        .unwrap();
+          .parse_message(StopDeviceCmd::new(0).into())
+          .await
+          .unwrap();
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 0x0],
-          false,
+          true,
         )),
       );
+      assert!(check_test_recv_empty(&command_receiver));
+    });
+  }
+
+  #[test]
+  pub fn test_vorze_sa_linear_protocol() {
+    async_manager::block_on(async move {
+      let (device, test_device) = new_bluetoothle_test_device("VorzePiston").await.unwrap();
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      device
+          .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 150, 0.95)]).into())
+          .await
+          .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03, 190, 92],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+
+      device
+          .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 150, 0.95)]).into())
+          .await
+          .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03, 190, 100],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+
+      device
+          .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 50, 0.5)]).into())
+          .await
+          .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![0x03, 100, 100],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+
+      device
+          .parse_message(StopDeviceCmd::new(0).into())
+          .await
+          .unwrap();
       assert!(check_test_recv_empty(&command_receiver));
     });
   }
