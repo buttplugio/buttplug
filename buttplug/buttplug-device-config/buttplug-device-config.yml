@@ -1506,23 +1506,47 @@ protocols:
     btle:
       names:
         - ZALO-Queen
+        - ZALO-King
+        - ZALO-Jeanne
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
     defaults:
       name:
-        en-us: Zalo Device      
+        en-us: Zalo Device
       messages:
         VibrateCmd:
-          FeatureCount: 2
+          FeatureCount: 1
           StepCount:
-           - 7
-           - 7
+           - 8
     configurations:
       - identifier:
           - ZALO-Queen
         name:
           en-us: Zalo Queen
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 8 # Oscillator
+              - 8 # Vibe
+            FeatureOrder:
+              - 1
+              - 0
+      - identifier:
+          - ZALO-King
+        name:
+          en-us: Zalo King
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 8 # Vibe
+              - 8 # Oscillator
+      - identifier:
+          - ZALO-Jeanne
+        name:
+          en-us: Zalo Jeanne
   sayberx:
     btle:
       names:
