@@ -38,6 +38,7 @@ pub mod wevibe8bit;
 pub mod xinput;
 pub mod youcups;
 pub mod youou;
+pub mod zalo;
 
 use super::DeviceImpl;
 use crate::{
@@ -102,6 +103,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<xinput::XInput>(&map, "xinput");
   add_to_protocol_map::<youcups::Youcups>(&map, "youcups");
   add_to_protocol_map::<youou::Youou>(&map, "youou");
+  add_to_protocol_map::<zalo::Zalo>(&map, "zalo");
   map
 }
 
