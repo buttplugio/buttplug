@@ -30,6 +30,7 @@ pub mod kiiroo_v2;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
+pub mod kizuna;
 pub mod lelo_harmony;
 pub mod lelof1s;
 pub mod lelof1sv2;
@@ -186,6 +187,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    kizuna::setup::KizunaIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

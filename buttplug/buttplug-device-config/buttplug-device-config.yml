@@ -3229,6 +3229,19 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 3]
             ActuatorType: Vibrate
+  kizuna:
+    serial:
+      - port: default
+        baud-rate: 19200
+        data-bits: 8
+        parity: N
+        stop-bits: 1
+    defaults:
+      name: Kizuna Smart
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 9]
+            ActuatorType: Rotate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
