@@ -1032,6 +1032,12 @@
             "txmode": "00001524-1212-efde-1523-785feabcd123",
             "txvibrate": "00001526-1212-efde-1523-785feabcd123",
             "rx": "00001527-1212-efde-1523-785feabcd123"
+          },
+          "0000180a-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "00002a24-0000-1000-8000-00805f9b34fb"
+          },
+          "0000180f-0000-1000-8000-00805f9b34fb": {
+            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
           }
         }
       },
@@ -1040,6 +1046,8 @@
           "en-us": "Vibratissimo Device"
         },
         "messages": {
+          "BatteryLevelCmd": {},
+          "RSSILevelCmd": {},
           "VibrateCmd": {
             "FeatureCount": 1,
             "StepCount": [
@@ -1047,7 +1055,50 @@
             ]
           }
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Licker",
+            "SecretKiss",
+            "Womenizer"
+          ],
+          "name": {
+            "en-us": "Vibratissimo Licker"
+          },
+          "messages": {
+            "BatteryLevelCmd": {},
+            "RSSILevelCmd": {},
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                255,
+                255
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Rabbit"
+          ],
+          "name": {
+            "en-us": "Vibratissimo Rabbit"
+          },
+          "messages": {
+            "BatteryLevelCmd": {},
+            "RSSILevelCmd": {},
+            "VibrateCmd": {
+              "FeatureCount": 3,
+              "StepCount": [
+                255,
+                255,
+                2
+              ]
+            }
+          }
+        }
+      ]
     },
     "wevibe": {
       "btle": {

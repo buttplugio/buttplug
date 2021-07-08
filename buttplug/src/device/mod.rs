@@ -43,6 +43,7 @@ pub enum Endpoint {
   Rx,
   RxAccel,
   RxBLEBattery,
+  RxBLEModel,
   RxPressure,
   RxTouch,
   Tx,
