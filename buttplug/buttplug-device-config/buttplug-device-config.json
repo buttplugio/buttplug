@@ -2737,6 +2737,33 @@
           }
         }
       }
+    },
+    "fredorch": {
+      "btle": {
+        "names": [
+          "YXlinksSPP"
+        ],
+        "services": {
+          "0000ffb0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffb1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffb1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Fredorch Device"
+        },
+        "messages": {
+          "LinearCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              150
+            ]
+          },
+          "FleshlightLaunchFW12Cmd": {}
+        }
+      }
     }
   }
 }
