@@ -60,7 +60,7 @@ impl BtleplugAdapterTask {
               let peripheral = adapter.peripheral(bd_addr).await.unwrap();
               // If a device has no discernable name, we can't do anything
               // with it, just ignore it.
-              let properties = peripheral.properties().await.unwrap();
+              let properties = peripheral.properties().await.unwrap().unwrap();
               if let Some(name) = properties.local_name {
                 let span = info_span!(
                   "btleplug enumeration",
