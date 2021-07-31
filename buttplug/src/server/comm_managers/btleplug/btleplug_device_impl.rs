@@ -1,22 +1,21 @@
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError, ButtplugUnknownError},
+    errors::{ButtplugDeviceError, ButtplugError},
     messages::RawReading,
     ButtplugResultFuture,
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceCommand, ButtplugDeviceEvent, ButtplugDeviceImplCreator, ButtplugDeviceReturn,
-    DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd,
-    DeviceWriteCmd, Endpoint
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, 
+    DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
-use btleplug::{api::{BDAddr, CentralEvent, Characteristic, Peripheral, WriteType, ValueNotification}, platform::Manager};
+use btleplug::{api::{BDAddr, Characteristic, Peripheral, WriteType, ValueNotification, CentralEvent, Central}, platform::Adapter};
 use uuid::Uuid;
-use futures::{TryFutureExt, Stream, StreamExt, future::{self, BoxFuture}};
+use futures::{Stream, StreamExt, future::{self, BoxFuture, FutureExt}};
 use std::{
   fmt::{self, Debug},
   sync::{
@@ -26,23 +25,22 @@ use std::{
   collections::HashMap,
   pin::Pin
 };
-use tokio::sync::{broadcast, mpsc};
-use tracing_futures::Instrument;
+use tokio::sync::broadcast;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   name: String,
   address: BDAddr,
-  manager: Manager,
   device: T,
+  adapter: Adapter
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
-  pub fn new(name: &str, address: &BDAddr, manager: Manager, device: T) -> Self {
+  pub fn new(name: &str, address: &BDAddr, device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
       device,
-      manager,
+      adapter
     }
   }
 }
@@ -95,7 +93,15 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       }
     }
     let notification_stream = self.device.notifications().await.unwrap();
-    let device_internal_impl = BtlePlugDeviceImpl::new(self.device.clone(), self.address, notification_stream, endpoints.clone(), uuid_map);
+    let device_internal_impl = 
+      BtlePlugDeviceImpl::new(
+        self.device.clone(), 
+        &self.name,
+        self.address,
+        self.adapter.events().await.unwrap(), 
+        notification_stream, 
+        endpoints.clone(), 
+        uuid_map);
     let device_impl = DeviceImpl::new(
       &self.name,
       &self.address.to_string(),
@@ -107,7 +113,6 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 }
 
 
-//#[derive(Clone)]
 pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
   device: T,
   event_stream: broadcast::Sender<ButtplugDeviceEvent>,
@@ -121,42 +126,67 @@ unsafe impl<T: Peripheral + 'static> Sync for BtlePlugDeviceImpl<T> {}
 impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   pub fn new(
     device: T,
+    name: &str,
     address: BDAddr,
+    mut adapter_event_stream: Pin<Box<dyn Stream<Item = CentralEvent> + Send>>,
     mut notification_stream: Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
     endpoints: HashMap<Endpoint, Characteristic>,
     uuid_map: HashMap<Uuid, Endpoint>,  
   ) -> Self {
     let (event_stream, _) = broadcast::channel(256);
     let event_stream_clone = event_stream.clone();
+    let address_clone = address.clone();
+    let name_clone = name.to_owned();
     async_manager::spawn(async move {
       let mut error_notification = false;
-      while let Some(notification) = notification_stream.next().await {
-        let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
-          *endpoint
-        } else {
-          // Only print the error message once.
-          if !error_notification {
-            error!(
-              "Endpoint for UUID {} not found in map, assuming device has disconnected.",
-              notification.uuid
-            );
-            error_notification = true;
+      loop {
+        select! {
+          notification = notification_stream.next().fuse() => {
+            if let Some(notification) = notification {
+              let endpoint = if let Some(endpoint) = uuid_map.get(&notification.uuid) {
+                *endpoint
+              } else {
+                // Only print the error message once.
+                if !error_notification {
+                  error!(
+                    "Endpoint for UUID {} not found in map, assuming device has disconnected.",
+                    notification.uuid
+                  );
+                  error_notification = true;
+                }
+                continue;
+              };
+              if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
+                address.to_string(),
+                endpoint,
+                notification.value,
+              )) {
+                error!(
+                  "Cannot send notification, device object disappeared: {:?}",
+                  err
+                );
+                return;
+              }
+            }
           }
-          continue;
-        };
-        if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
-          address.to_string(),
-          endpoint,
-          notification.value,
-        )) {
-          error!(
-            "Cannot send notification, device object disappeared: {:?}",
-            err
-          );
-          return;
+          adapter_event = adapter_event_stream.next().fuse() => {
+            if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event {
+              if address_clone == addr {
+                info!(
+                  "Device {:?} disconnected",
+                  name_clone
+                );
+                event_stream_clone
+                  .send(ButtplugDeviceEvent::Removed(
+                    address_clone.to_string()
+                  ))
+                  .unwrap();
+              }
+            }
+          }
         }
       }
-    });
+    }).unwrap();
     Self {
       device,
       endpoints,

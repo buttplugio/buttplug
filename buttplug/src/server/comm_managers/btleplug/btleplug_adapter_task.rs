@@ -4,7 +4,7 @@ use btleplug::{
   platform::Manager,
 };
 use futures::{
-  future::{BoxFuture, FutureExt},
+  future::FutureExt,
   StreamExt,
 };
 use super::btleplug_device_impl::BtlePlugDeviceImplCreator;
@@ -56,7 +56,7 @@ impl BtleplugAdapterTask {
       select! {
         event = events.next().fuse() => {
           match event.unwrap() {
-            CentralEvent::DeviceDiscovered(bd_addr) => {
+            CentralEvent::DeviceDiscovered(bd_addr) | CentralEvent::DeviceUpdated(bd_addr) => {
               let peripheral = adapter.peripheral(bd_addr).await.unwrap();
               // If a device has no discernable name, we can't do anything
               // with it, just ignore it.
@@ -68,7 +68,6 @@ impl BtleplugAdapterTask {
                   name = tracing::field::display(&name)
                 );
                 let _enter = span.enter();
-                debug!("Found device {}", name);
                 // Names are the only way we really have to test devices
                 // at the moment. Most devices don't send services on
                 // advertisement.
@@ -79,12 +78,11 @@ impl BtleplugAdapterTask {
                   let address = properties.address;
                   debug!("Found new bluetooth device: {} {}", name, address);
                   tried_addresses.push(address);
-
                   let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
                     &name,
                     &properties.address,
-                    manager.clone(),
-                    peripheral.clone()
+                    peripheral.clone(),
+                    adapter.clone()
                   ));
 
                   if self
@@ -107,6 +105,10 @@ impl BtleplugAdapterTask {
                   properties.address
                 );
               }
+            }
+            CentralEvent::DeviceDisconnected(addr) => {
+              debug!("BTLEPlug Device disconnected: {:?}", addr);
+              tried_addresses.retain(|bd_addr| addr != *bd_addr);
             }
             _ => {}
           }
