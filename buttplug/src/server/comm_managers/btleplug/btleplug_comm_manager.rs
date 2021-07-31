@@ -1,6 +1,6 @@
 
 use crate::{
-  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
+  core::ButtplugResultFuture,
   server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
@@ -9,19 +9,13 @@ use crate::{
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use std::{
   sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::AtomicBool,
     Arc,
   },
-  thread,
 };
 
-use btleplug::api::{BDAddr, bleuuid::uuid_from_u16, CentralEvent, Central, Manager as _, Peripheral as _, WriteType};
-use btleplug::platform::{Adapter, Manager};
-// use btleplug_device_impl::BtlePlugDeviceImplCreator;
-use dashmap::DashMap;
 use tokio::{
   sync::mpsc::{Sender, channel},
-  runtime::Handle,
 };
 
 
@@ -41,20 +35,17 @@ impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
 }
 
 pub struct BtlePlugCommunicationManager {
-  event_sender: Sender<DeviceCommunicationEvent>,
   adapter_event_sender: Sender<BtleplugAdapterCommand>,
 }
 
 impl BtlePlugCommunicationManager {
   pub fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     let (sender, receiver) = channel(256);
-    let event_sender_clone = event_sender.clone();
     async_manager::spawn(async move {
-      let mut task = BtleplugAdapterTask::new(event_sender_clone, receiver);
+      let mut task = BtleplugAdapterTask::new(event_sender, receiver);
       task.run().await;
     }).unwrap();
     Self {
-      event_sender,
       adapter_event_sender: sender
     }
   }
