@@ -30,7 +30,7 @@ pub enum DeviceCommunicationEvent {
 }
 
 pub trait DeviceCommunicationManagerBuilder: Send {
-  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>);
+  fn event_sender(self, sender: Sender<DeviceCommunicationEvent>) -> Self;
   fn finish(self) -> Box<dyn DeviceCommunicationManager>;
 }
 

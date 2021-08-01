@@ -134,8 +134,9 @@ pub struct XInputDeviceCommunicationManagerBuilder {
 }
 
 impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
-  fn set_event_sender(&mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) {
-    self.sender = Some(sender)
+  fn event_sender(mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
+    self.sender = Some(sender);
+    self
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {

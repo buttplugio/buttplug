@@ -18,6 +18,7 @@ use std::{
   },
   time::Duration,
 };
+use tokio::sync::mpsc::Sender;
 use tracing_futures::Instrument;
 use tokio::sync::{mpsc, Mutex, RwLock};
 use serde_aux::prelude::*;
@@ -154,8 +155,9 @@ pub struct LovenseConnectServiceCommunicationManagerBuilder {
 }
 
 impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
-  fn set_event_sender(&mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) {
-    self.sender = Some(sender)
+  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
+    self.sender = Some(sender);
+    self
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {

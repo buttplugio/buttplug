@@ -16,8 +16,9 @@ pub struct SerialPortCommunicationManagerBuilder {
 }
 
 impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
-  fn set_event_sender(&mut self, sender: Sender<DeviceCommunicationEvent>) {
-    self.sender = Some(sender)
+  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
+    self.sender = Some(sender);
+    self
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
