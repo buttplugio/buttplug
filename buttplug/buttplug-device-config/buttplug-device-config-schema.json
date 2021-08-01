@@ -41,6 +41,22 @@
         "services"
       ]
     },
+    "websocket-definition": {
+      "type": "object",
+      "properties": {
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "names"
+      ]
+    },
     "serial-definition": {
       "type": "array",
       "items": {
@@ -365,6 +381,9 @@
             },
             "serial": {
               "$ref": "#/components/serial-definition"
+            },
+            "websocket": {
+              "$ref": "#/components/websocket-definition"
             },
             "usb": {
               "$ref": "#/components/usb-definition"

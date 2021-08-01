@@ -293,6 +293,15 @@ impl ButtplugClient {
         .add_comm_manager(BtlePlugCommunicationManagerBuilder::default())
         .unwrap();
     }
+    #[cfg(feature = "websocket-server-manager")]
+    {
+      use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerCommunicationManagerBuilder;
+      connector
+        .server_ref()
+        .add_comm_manager(WebsocketServerCommunicationManagerBuilder::default())
+        .unwrap();
+    }
+    /*
     #[cfg(feature = "serial-manager")]
     {
       use crate::server::comm_managers::serialport::SerialPortCommunicationManagerBuilder;
@@ -331,6 +340,7 @@ impl ButtplugClient {
         .add_comm_manager(XInputDeviceCommunicationManagerBuilder::default())
         .unwrap();
     }
+    */
     self.connect(connector).await
   }
 

@@ -9,6 +9,9 @@ pub mod xinput;
 #[cfg(feature = "lovense-connect-service-manager")]
 pub mod lovense_connect_service;
 
+#[cfg(feature = "websocket-server-manager")]
+pub mod websocket_server;
+
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};

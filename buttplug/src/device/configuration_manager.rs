@@ -161,6 +161,30 @@ pub struct USBSpecifier {
   product_id: u16,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct WebsocketSpecifier {
+  pub names: HashSet<String>
+}
+
+impl PartialEq for WebsocketSpecifier {
+  fn eq(&self, other: &Self) -> bool {
+    if self.names.intersection(&other.names).count() > 0 {
+      return true;
+    }
+    false
+  }
+}
+
+impl WebsocketSpecifier {
+  pub fn new(name: &str) -> WebsocketSpecifier {
+    let mut set = HashSet::new();
+    set.insert(name.to_string());
+    WebsocketSpecifier {
+      names: set,
+    }
+  }
+}
+
 #[derive(Deserialize, Debug, PartialEq, Clone)]
 pub enum DeviceSpecifier {
   BluetoothLE(BluetoothLESpecifier),
@@ -169,6 +193,7 @@ pub enum DeviceSpecifier {
   Serial(SerialSpecifier),
   XInput(XInputSpecifier),
   LovenseConnectService(LovenseConnectServiceSpecifier),
+  Websocket(WebsocketSpecifier)
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -188,6 +213,7 @@ pub struct ProtocolDefinition {
   pub serial: Option<Vec<SerialSpecifier>>,
   pub hid: Option<Vec<HIDSpecifier>>,
   pub xinput: Option<XInputSpecifier>,
+  pub websocket: Option<WebsocketSpecifier>,
   #[serde(rename = "lovense-connect-service")]
   pub lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
   pub defaults: Option<ProtocolAttributes>,
@@ -225,6 +251,7 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
       DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
       DeviceSpecifier::HID(other_hid) => option_some_eq_vec(&self.hid, other_hid),
       DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput),
+      DeviceSpecifier::Websocket(other_websocket) => option_some_eq(&self.websocket, other_websocket),
       DeviceSpecifier::LovenseConnectService(other_lovense_service) => option_some_eq(&self.lovense_connect_service, other_lovense_service),
     }
   }
