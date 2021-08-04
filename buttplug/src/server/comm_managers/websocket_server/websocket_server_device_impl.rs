@@ -1,19 +1,12 @@
 
-use crate::{
-  core::{
-    errors::ButtplugError,
+use crate::{core::{
+    errors::{ButtplugError, ButtplugDeviceError},
     messages::RawReading,
     ButtplugResultFuture,
-  },
-  device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, WebsocketSpecifier},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
-  },
-  util::async_manager,
-};
+  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, WebsocketSpecifier}, protocol::cachito::Cachito}, util::async_manager};
 use async_trait::async_trait;
-use futures::{future::BoxFuture, FutureExt, AsyncRead, AsyncWrite, StreamExt, SinkExt};
+use futures::{AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt, channel::oneshot::Cancellation, future::{BoxFuture, self}};
+use tokio_util::sync::CancellationToken;
 use std::{
   fmt::{self, Debug},
   sync::{
@@ -22,6 +15,7 @@ use std::{
   },
 };
 use tokio::sync::{
+  Mutex,
   mpsc::{Receiver, Sender, channel},
   broadcast,
 };
@@ -29,9 +23,11 @@ use super::websocket_server_comm_manager::WebsocketCommManagerInitInfo;
 
 
 async fn run_connection_loop<S>(
+  address: &str,
+  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
   ws_stream: async_tungstenite::WebSocketStream<S>,
   mut request_receiver: Receiver<Vec<u8>>,
-  response_sender: Sender<Vec<u8>>,
+  response_sender: broadcast::Sender<Vec<u8>>,
 ) where
   S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -66,9 +62,16 @@ async fn run_connection_loop<S>(
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
                   trace!("Got text: {}", text_msg);
                 }
-                async_tungstenite::tungstenite::Message::Binary(_) => {
+                async_tungstenite::tungstenite::Message::Binary(binary_msg) => {
+                  // If no one is listening, ignore output.
+                  let _ = response_sender.send(binary_msg);
                 }
                 async_tungstenite::tungstenite::Message::Close(_) => {
+                  event_sender
+                  .send(ButtplugDeviceEvent::Removed(
+                    address.to_owned()
+                  ))
+                  .unwrap();
                   break;
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
@@ -94,25 +97,32 @@ async fn run_connection_loop<S>(
       }
     }
   }
+  debug!("Exiting Websocket Server Device control loop.");
 }
 
 pub struct WebsocketServerDeviceImplCreator {
   info: WebsocketCommManagerInitInfo,
   outgoing_sender: Option<Sender<Vec<u8>>>,
-  incoming_receiver: Option<Receiver<Vec<u8>>>,
+  incoming_broadcaster: Option<broadcast::Sender<Vec<u8>>>,
+  device_event_sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
 }
 
 impl WebsocketServerDeviceImplCreator {
   pub fn new<S>(info: WebsocketCommManagerInitInfo, ws_stream: async_tungstenite::WebSocketStream<S>) -> Self where S: 'static + AsyncRead + AsyncWrite + Unpin + Send {
     let (outgoing_sender, outgoing_receiver) = channel(256);
-    let (incoming_sender, incoming_receiver) = channel(256);
+    let (incoming_broadcaster, _) = broadcast::channel(256);
+    let incoming_broadcaster_clone = incoming_broadcaster.clone();
+    let (device_event_sender, _) = broadcast::channel(256);
+    let device_event_sender_clone = device_event_sender.clone();
+    let address = info.address.clone();
     tokio::spawn(async move {
-      run_connection_loop(ws_stream, outgoing_receiver, incoming_sender).await;
+      run_connection_loop(&address, device_event_sender_clone, ws_stream, outgoing_receiver, incoming_broadcaster_clone).await;
     });
     Self {
       info,
       outgoing_sender: Some(outgoing_sender),
-      incoming_receiver: Some(incoming_receiver),
+      incoming_broadcaster: Some(incoming_broadcaster),
+      device_event_sender: Some(device_event_sender)
     }
   }
 }
@@ -133,9 +143,9 @@ impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
 
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    _: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device_impl_internal = WebsocketServerDeviceImpl::new(self.info.clone(), self.outgoing_sender.take().unwrap(), self.incoming_receiver.take().unwrap());
+    let device_impl_internal = WebsocketServerDeviceImpl::new(self.device_event_sender.take().unwrap(), self.info.clone(), self.outgoing_sender.take().unwrap(), self.incoming_broadcaster.take().unwrap());
     let device_impl = DeviceImpl::new(
       &self.info.identifier,
       &self.info.address,
@@ -148,25 +158,30 @@ impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
 
 pub struct WebsocketServerDeviceImpl {
   connected: Arc<AtomicBool>,
+  subscribed: Arc<AtomicBool>,
+  subscribe_token: Arc<Mutex<Option<CancellationToken>>>,
   info: WebsocketCommManagerInitInfo,
   outgoing_sender: Sender<Vec<u8>>,
-  incoming_receiver: Receiver<Vec<u8>>,
+  incoming_broadcaster: broadcast::Sender<Vec<u8>>,
   device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
 }
 
 impl WebsocketServerDeviceImpl {
   pub fn new(
+    device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
     info: WebsocketCommManagerInitInfo,
     outgoing_sender: Sender<Vec<u8>>,
-    incoming_receiver: Receiver<Vec<u8>>
+    incoming_broadcaster: broadcast::Sender<Vec<u8>>
   ) -> Self {
-    let (device_event_sender, _) = broadcast::channel(256);
+    
     Self {
       connected: Arc::new(AtomicBool::new(true)),
       info,
       outgoing_sender,
-      incoming_receiver,
-      device_event_sender
+      incoming_broadcaster,
+      device_event_sender,
+      subscribed: Arc::new(AtomicBool::new(false)),
+      subscribe_token: Arc::new(Mutex::new(None))
     }
   }
 }
@@ -205,44 +220,60 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
   }
 
   fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
-    unimplemented!("Not implemented for websockets");
-    /*
+    if self.subscribed.load(Ordering::SeqCst) {
+      return Box::pin(future::ready(Ok(())));
+    }
     // TODO Should check endpoint validity
-    let data_receiver = self.port_receiver.clone();
+    let mut data_receiver = self.incoming_broadcaster.subscribe();
     let event_sender = self.device_event_sender.clone();
-    let address = self.address.clone();
+    let address = self.info.address.clone();
+    let subscribed = self.subscribed.clone();
+    let subscribed_token = self.subscribe_token.clone();
     Box::pin(async move {
+      subscribed.store(true, Ordering::SeqCst);
+      let token = CancellationToken::new();
+      *(subscribed_token.lock().await) = Some(token.child_token());
       async_manager::spawn(async move {
-        // TODO There's only one subscribable endpoint on a serial port, so we
-        // should check to make sure we don't have multiple subscriptions so we
-        // don't deadlock.
-        let mut data_receiver_mut = data_receiver.lock().await;
         loop {
-          match data_receiver_mut.recv().await {
-            Some(data) => {
-              info!("Got serial data! {:?}", data);
-              event_sender
-                .send(ButtplugDeviceEvent::Notification(
-                  address.clone(),
-                  Endpoint::Tx,
-                  data,
-                ))
-                .unwrap();
-            }
-            None => {
-              info!("Data channel closed, ending serial listener task");
+          select! {
+            result = data_receiver.recv().fuse() => {
+              match result {
+                Ok(data) => {
+                  info!("Got websocket data! {:?}", data);
+                  event_sender
+                    .send(ButtplugDeviceEvent::Notification(
+                      address.clone(),
+                      Endpoint::Tx,
+                      data,
+                    ))
+                    .unwrap();
+                },
+                Err(_) => break,
+              }
+            },
+            _ = token.cancelled().fuse() => {
               break;
             }
           }
         }
-      })
-      .unwrap();
+        info!("Data channel closed, ending websocket server device listener task");
+      }).unwrap();
       Ok(())
     })
-    */
   }
 
   fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
-    unimplemented!("Not implemented for websockets");
+    if self.subscribed.load(Ordering::SeqCst) {
+      let subscribed = self.subscribed.clone();
+      let subscribed_token = self.subscribe_token.clone();
+      Box::pin(async move {
+        subscribed.store(false, Ordering::SeqCst);
+        let token = (subscribed_token.lock().await).take().unwrap();        
+        token.cancel();
+        Ok(())
+      })
+    } else {
+      Box::pin(future::ready(Err(ButtplugDeviceError::DeviceCommunicationError("Device not subscribed.".to_owned()).into())))
+    }
   }
 }
