@@ -227,7 +227,7 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self, mut builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder {    
+  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder {    
     let mgr = builder.event_sender(self.device_event_sender.clone()).finish();
     if self.comm_managers.contains_key(mgr.name()) {
       return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(

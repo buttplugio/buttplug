@@ -208,7 +208,7 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
   fn disconnect(&self) -> ButtplugResultFuture {
     let device = self.device.clone();
     Box::pin(async move {
-      device.disconnect().await;
+      let _ = device.disconnect().await;
       Ok(())
     })
   }
