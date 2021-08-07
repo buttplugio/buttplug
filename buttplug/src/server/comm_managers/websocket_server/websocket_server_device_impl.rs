@@ -3,9 +3,9 @@ use crate::{core::{
     errors::{ButtplugError, ButtplugDeviceError},
     messages::RawReading,
     ButtplugResultFuture,
-  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, WebsocketSpecifier}, protocol::cachito::Cachito}, util::async_manager};
+  }, device::{ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint, configuration_manager::{DeviceSpecifier, ProtocolDefinition, WebsocketSpecifier}}, util::async_manager};
 use async_trait::async_trait;
-use futures::{AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt, channel::oneshot::Cancellation, future::{BoxFuture, self}};
+use futures::{AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt, future::{BoxFuture, self}};
 use tokio_util::sync::CancellationToken;
 use std::{
   fmt::{self, Debug},

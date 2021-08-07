@@ -6,12 +6,10 @@ use crate::{
 };
 use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
 use serde::Deserialize;
-use std::sync::Arc;
 use futures::StreamExt;
 use tokio::net::TcpListener;
 use tokio::sync::{
-  mpsc::{Receiver, Sender},
-  Mutex, Notify,
+  mpsc::Sender,
 };
 
 #[derive(Deserialize, Debug, Clone)]
