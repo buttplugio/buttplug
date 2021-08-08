@@ -10,12 +10,6 @@ pub mod client_event_loop;
 mod client_message_sorter;
 pub mod device;
 
-use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
-pub use device::{
-  ButtplugClientDevice, ButtplugClientDeviceEvent, ButtplugClientDeviceMessageType, LinearCommand,
-  RotateCommand, VibrateCommand,
-};
-
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
   core::{
@@ -32,7 +26,12 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
+use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
+pub use device::{
+  ButtplugClientDevice, ButtplugClientDeviceEvent, ButtplugClientDeviceMessageType, LinearCommand,
+  RotateCommand, VibrateCommand,
+};
 use futures::{
   future::{self, BoxFuture},
   Stream,
@@ -298,7 +297,9 @@ impl ButtplugClient {
       use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerCommunicationManagerBuilder;
       connector
         .server_ref()
-        .add_comm_manager(WebsocketServerCommunicationManagerBuilder::default())
+        .add_comm_manager(
+          WebsocketServerCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
+        )
         .unwrap();
     }
     /*

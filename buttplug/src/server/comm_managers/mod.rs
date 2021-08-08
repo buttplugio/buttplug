@@ -1,13 +1,13 @@
 #[cfg(feature = "btleplug-manager")]
 pub mod btleplug;
+#[cfg(feature = "lovense-connect-service-manager")]
+pub mod lovense_connect_service;
 #[cfg(feature = "lovense-dongle-manager")]
 pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
-#[cfg(feature = "lovense-connect-service-manager")]
-pub mod lovense_connect_service;
 
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;

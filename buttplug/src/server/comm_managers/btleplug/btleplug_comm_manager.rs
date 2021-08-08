@@ -1,4 +1,4 @@
-
+use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
@@ -6,22 +6,13 @@ use crate::{
   },
   util::async_manager,
 };
-use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
-use std::{
-  sync::{
-    atomic::AtomicBool,
-    Arc,
-  },
-};
+use std::sync::{atomic::AtomicBool, Arc};
 
-use tokio::{
-  sync::mpsc::{Sender, channel},
-};
-
+use tokio::sync::mpsc::{channel, Sender};
 
 #[derive(Default)]
 pub struct BtlePlugCommunicationManagerBuilder {
-  sender: Option<Sender<DeviceCommunicationEvent>>
+  sender: Option<Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
@@ -31,7 +22,9 @@ impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(BtlePlugCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(BtlePlugCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 
@@ -45,9 +38,10 @@ impl BtlePlugCommunicationManager {
     async_manager::spawn(async move {
       let mut task = BtleplugAdapterTask::new(event_sender, receiver);
       task.run().await;
-    }).unwrap();
+    })
+    .unwrap();
     Self {
-      adapter_event_sender: sender
+      adapter_event_sender: sender,
     }
   }
 }
@@ -60,7 +54,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
   fn start_scanning(&self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     Box::pin(async move {
-      adapter_event_sender.send(BtleplugAdapterCommand::StartScanning).await.unwrap();
+      adapter_event_sender
+        .send(BtleplugAdapterCommand::StartScanning)
+        .await
+        .unwrap();
       Ok(())
     })
   }
@@ -68,7 +65,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
   fn stop_scanning(&self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     Box::pin(async move {
-      adapter_event_sender.send(BtleplugAdapterCommand::StopScanning).await.unwrap();
+      adapter_event_sender
+        .send(BtleplugAdapterCommand::StopScanning)
+        .await
+        .unwrap();
       Ok(())
     })
   }

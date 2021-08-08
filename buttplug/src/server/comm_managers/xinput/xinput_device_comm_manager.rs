@@ -130,7 +130,7 @@ impl XInputConnectionTracker {
 
 #[derive(Default)]
 pub struct XInputDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
@@ -140,10 +140,11 @@ impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuild
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(XInputDeviceCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(XInputDeviceCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
-
 
 pub struct XInputDeviceCommunicationManager {
   sender: mpsc::Sender<DeviceCommunicationEvent>,

@@ -6,32 +6,38 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, 
-    DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
-use btleplug::{api::{BDAddr, Characteristic, Peripheral, WriteType, ValueNotification, CentralEvent, Central}, platform::Adapter};
-use uuid::Uuid;
-use futures::{Stream, StreamExt, future::{self, BoxFuture, FutureExt}};
+use btleplug::{
+  api::{BDAddr, Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
+  platform::Adapter,
+};
+use futures::{
+  future::{self, BoxFuture, FutureExt},
+  Stream, StreamExt,
+};
 use std::{
+  collections::HashMap,
   fmt::{self, Debug},
+  pin::Pin,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
-  collections::HashMap,
-  pin::Pin
 };
 use tokio::sync::broadcast;
+use uuid::Uuid;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   name: String,
   address: BDAddr,
   device: T,
-  adapter: Adapter
+  adapter: Adapter,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
@@ -40,7 +46,7 @@ impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
       name: name.to_owned(),
       address: address.to_owned(),
       device,
-      adapter
+      adapter,
     }
   }
 }
@@ -93,31 +99,30 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       }
     }
     let notification_stream = self.device.notifications().await.unwrap();
-    let device_internal_impl = 
-      BtlePlugDeviceImpl::new(
-        self.device.clone(), 
-        &self.name,
-        self.address,
-        self.adapter.events().await.unwrap(), 
-        notification_stream, 
-        endpoints.clone(), 
-        uuid_map);
+    let device_internal_impl = BtlePlugDeviceImpl::new(
+      self.device.clone(),
+      &self.name,
+      self.address,
+      self.adapter.events().await.unwrap(),
+      notification_stream,
+      endpoints.clone(),
+      uuid_map,
+    );
     let device_impl = DeviceImpl::new(
       &self.name,
       &self.address.to_string(),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
-    Box::new(device_internal_impl),
+      Box::new(device_internal_impl),
     );
     Ok(device_impl)
   }
 }
 
-
 pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
   device: T,
   event_stream: broadcast::Sender<ButtplugDeviceEvent>,
   connected: Arc<AtomicBool>,
-  endpoints: HashMap<Endpoint, Characteristic>
+  endpoints: HashMap<Endpoint, Characteristic>,
 }
 
 unsafe impl<T: Peripheral + 'static> Send for BtlePlugDeviceImpl<T> {}
@@ -131,7 +136,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
     mut adapter_event_stream: Pin<Box<dyn Stream<Item = CentralEvent> + Send>>,
     mut notification_stream: Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
     endpoints: HashMap<Endpoint, Characteristic>,
-    uuid_map: HashMap<Uuid, Endpoint>,  
+    uuid_map: HashMap<Uuid, Endpoint>,
   ) -> Self {
     let (event_stream, _) = broadcast::channel(256);
     let event_stream_clone = event_stream.clone();
@@ -186,12 +191,13 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
           }
         }
       }
-    }).unwrap();
+    })
+    .unwrap();
     Self {
       device,
       endpoints,
       connected: Arc::new(AtomicBool::new(true)),
-      event_stream
+      event_stream,
     }
   }
 }
@@ -217,7 +223,9 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+        return Box::pin(future::ready(Err(
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+        )));
       }
     };
     let device = self.device.clone();
@@ -227,7 +235,10 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
       WriteType::WithoutResponse
     };
     Box::pin(async move {
-      device.write(&characteristic, &msg.data, write_type).await.unwrap();
+      device
+        .write(&characteristic, &msg.data, write_type)
+        .await
+        .unwrap();
       Ok(())
     })
   }
@@ -241,7 +252,9 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+        return Box::pin(future::ready(Err(
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+        )));
       }
     };
     let device = self.device.clone();
@@ -249,15 +262,12 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
       match device.read(&characteristic).await {
         Ok(data) => {
           trace!("Got reading: {:?}", data);
-          Ok(RawReading::new(
-            0,
-            msg.endpoint,
-            data,
-          ))
+          Ok(RawReading::new(0, msg.endpoint, data))
         }
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);
-          Err(ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+          Err(
+            ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
               format!("{:?}", err),
             ))
             .into(),
@@ -271,12 +281,19 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+        return Box::pin(future::ready(Err(
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+        )));
       }
     };
     let device = self.device.clone();
     Box::pin(async move {
-      device.subscribe(&characteristic).await.map_err(|e| ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", e))).into())
+      device.subscribe(&characteristic).await.map_err(|e| {
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+          format!("{:?}", e),
+        ))
+        .into()
+      })
     })
   }
 
@@ -284,12 +301,19 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into())));
+        return Box::pin(future::ready(Err(
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+        )));
       }
     };
     let device = self.device.clone();
     Box::pin(async move {
-      device.unsubscribe(&characteristic).await.map_err(|e| ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", e))).into())
+      device.unsubscribe(&characteristic).await.map_err(|e| {
+        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+          format!("{:?}", e),
+        ))
+        .into()
+      })
     })
   }
 }

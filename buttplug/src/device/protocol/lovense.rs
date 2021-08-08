@@ -208,11 +208,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
               //
               // Contains() is casting a wider net than we need here, but it'll
               // do for now.
-              let start_pos = if data_str.contains('s') {
-                1
-              } else {
-                0
-              };
+              let start_pos = if data_str.contains('s') { 1 } else { 0 };
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
                   messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)

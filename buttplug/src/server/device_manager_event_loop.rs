@@ -136,7 +136,10 @@ impl DeviceManagerEventLoop {
         // Check to make sure the device isn't already connected. If it is, drop it.
         for device_entry in self.device_map.iter() {
           if device_entry.value().address() == address {
-            debug!("Device {} already connected, ignoring new device emission", address);
+            debug!(
+              "Device {} already connected, ignoring new device emission",
+              address
+            );
             return;
           }
         }

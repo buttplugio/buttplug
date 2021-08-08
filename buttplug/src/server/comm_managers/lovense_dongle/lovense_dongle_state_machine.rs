@@ -468,11 +468,13 @@ impl LovenseDongleState for LovenseDongleScanning {
                 match result {
                   LovenseDongleResultCode::SearchStarted => {
                     debug!("Lovense dongle search started.")
-                  },
+                  }
                   LovenseDongleResultCode::SearchStopped => {
-                    debug!("Lovense dongle stopped scanning before stop was requested, restarting.");
+                    debug!(
+                      "Lovense dongle stopped scanning before stop was requested, restarting."
+                    );
                     return Some(Box::new(LovenseDongleStartScanning::new(self.hub)));
-                  },
+                  }
                   _ => error!(
                     "LovenseDongleIdle State cannot handle search result {:?}",
                     result

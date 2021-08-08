@@ -1,16 +1,14 @@
+use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
 };
-use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
-use serde::Deserialize;
 use futures::StreamExt;
+use serde::Deserialize;
 use tokio::net::TcpListener;
-use tokio::sync::{
-  mpsc::Sender,
-};
+use tokio::sync::mpsc::Sender;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct WebsocketCommManagerInitInfo {
@@ -62,8 +60,7 @@ impl DeviceCommunicationManagerBuilder for WebsocketServerCommunicationManagerBu
   }
 }
 
-pub struct WebsocketServerCommunicationManager {
-}
+pub struct WebsocketServerCommunicationManager {}
 
 impl WebsocketServerCommunicationManager {
   fn new(
@@ -99,16 +96,22 @@ impl WebsocketServerCommunicationManager {
         let sender_clone = sender.clone();
         tokio::spawn(async move {
           // TODO Implement a receive timeout here so we don't wait forever
-          if let Some(Ok(async_tungstenite::tungstenite::Message::Text(info_message))) = ws_stream.next().await {
-            let info_packet: WebsocketCommManagerInitInfo = serde_json::from_str(&info_message).unwrap();
+          if let Some(Ok(async_tungstenite::tungstenite::Message::Text(info_message))) =
+            ws_stream.next().await
+          {
+            let info_packet: WebsocketCommManagerInitInfo =
+              serde_json::from_str(&info_message).unwrap();
             if sender_clone
               .send(DeviceCommunicationEvent::DeviceFound {
-              name: format!("Websocket Device {}", info_packet.identifier),
-              address: info_packet.address.clone(),
-              creator: Box::new(WebsocketServerDeviceImplCreator::new(info_packet, ws_stream)),
-            })
+                name: format!("Websocket Device {}", info_packet.identifier),
+                address: info_packet.address.clone(),
+                creator: Box::new(WebsocketServerDeviceImplCreator::new(
+                  info_packet,
+                  ws_stream,
+                )),
+              })
               .await
-              .is_err() 
+              .is_err()
             {
               error!("Device manager disappeared, exiting.");
               return;
@@ -119,7 +122,7 @@ impl WebsocketServerCommunicationManager {
         });
       }
     });
-    Self { }
+    Self {}
   }
 }
 

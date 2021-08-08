@@ -125,18 +125,18 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver));
 
       device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.1),
-                VibrateSubcommand::new(1, 0.9),
-              ],
-            )
-                .into(),
+        .parse_message(
+          VibrateCmd::new(
+            0,
+            vec![
+              VibrateSubcommand::new(0, 0.1),
+              VibrateSubcommand::new(1, 0.9),
+            ],
           )
-          .await
-          .unwrap();
+          .into(),
+        )
+        .await
+        .unwrap();
       // only vibe 1 changed
       check_test_recv_value(
         &command_receiver,

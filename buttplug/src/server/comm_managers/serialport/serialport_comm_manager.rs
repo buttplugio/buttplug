@@ -12,7 +12,7 @@ use tracing_futures::Instrument;
 
 #[derive(Default)]
 pub struct SerialPortCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
@@ -22,7 +22,9 @@ impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(SerialPortCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(SerialPortCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 

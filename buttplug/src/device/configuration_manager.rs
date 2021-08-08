@@ -7,6 +7,9 @@
 
 //! Device specific identification and protocol implementations.
 
+use super::protocol::{
+  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, TryCreateProtocolFunc,
+};
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -15,14 +18,13 @@ use crate::{
   device::Endpoint,
   util::json::JSONValidator,
 };
-use super::protocol::{ButtplugProtocol, TryCreateProtocolFunc, get_default_protocol_map, add_to_protocol_map};
+use dashmap::DashMap;
 use serde::Deserialize;
 use std::{
   collections::{HashMap, HashSet},
-  sync::Arc
+  sync::Arc,
 };
 use uuid::Uuid;
-use dashmap::DashMap;
 
 static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -90,7 +92,7 @@ impl BluetoothLESpecifier {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
-  exists: bool
+  exists: bool,
 }
 
 impl Default for LovenseConnectServiceSpecifier {
@@ -167,7 +169,7 @@ pub struct USBSpecifier {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct WebsocketSpecifier {
-  pub names: HashSet<String>
+  pub names: HashSet<String>,
 }
 
 impl WebsocketSpecifier {
@@ -190,9 +192,7 @@ impl WebsocketSpecifier {
   pub fn new(name: &str) -> WebsocketSpecifier {
     let mut set = HashSet::new();
     set.insert(name.to_string());
-    WebsocketSpecifier {
-      names: set,
-    }
+    WebsocketSpecifier { names: set }
   }
 }
 
@@ -204,7 +204,7 @@ pub enum DeviceSpecifier {
   Serial(SerialSpecifier),
   XInput(XInputSpecifier),
   LovenseConnectService(LovenseConnectServiceSpecifier),
-  Websocket(WebsocketSpecifier)
+  Websocket(WebsocketSpecifier),
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -255,8 +255,12 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
       DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
       DeviceSpecifier::HID(other_hid) => option_some_eq_vec(&self.hid, other_hid),
       DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput),
-      DeviceSpecifier::Websocket(other_websocket) => option_some_eq(&self.websocket, other_websocket),
-      DeviceSpecifier::LovenseConnectService(other_lovense_service) => option_some_eq(&self.lovense_connect_service, other_lovense_service),
+      DeviceSpecifier::Websocket(other_websocket) => {
+        option_some_eq(&self.websocket, other_websocket)
+      }
+      DeviceSpecifier::LovenseConnectService(other_lovense_service) => {
+        option_some_eq(&self.lovense_connect_service, other_lovense_service)
+      }
     }
   }
 }
@@ -322,7 +326,12 @@ impl ProtocolDefinition {
     // Treat configurations like paths; Extend using the new ones first, so we'll find them first,
     // but leave everything in. Post warning messages if anything repeats after this.
     if other.configurations.len() > 0 {
-      self.configurations = other.configurations.iter().chain(self.configurations.iter()).cloned().collect();
+      self.configurations = other
+        .configurations
+        .iter()
+        .chain(self.configurations.iter())
+        .cloned()
+        .collect();
     }
   }
 }
@@ -445,7 +454,7 @@ impl DeviceProtocolConfiguration {
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   pub(self) config: ProtocolConfiguration,
-  protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>
+  protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>,
 }
 
 impl Default for DeviceConfigurationManager {
@@ -516,11 +525,14 @@ impl DeviceConfigurationManager {
     Ok(DeviceConfigurationManager {
       allow_raw_messages,
       config,
-      protocol_map: Arc::new(get_default_protocol_map())
+      protocol_map: Arc::new(get_default_protocol_map()),
     })
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str) where T: ButtplugProtocol {
+  pub fn add_protocol<T>(&self, protocol_name: &str)
+  where
+    T: ButtplugProtocol,
+  {
     add_to_protocol_map::<T>(&self.protocol_map, protocol_name);
   }
 

@@ -1,15 +1,15 @@
 use super::btleplug_device_impl::BtlePlugDeviceImplCreator;
 use crate::server::comm_managers::DeviceCommunicationEvent;
 use btleplug::{
-  api::{Central, CentralEvent, Manager as _, Peripheral, BDAddr},
-  platform::{Manager, Adapter}
+  api::{BDAddr, Central, CentralEvent, Manager as _, Peripheral},
+  platform::{Adapter, Manager},
 };
 use futures::{future::FutureExt, StreamExt};
-use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(target_os = "linux")]
 use futures_timer::Delay;
 #[cfg(target_os = "linux")]
 use std::time::Duration;
+use tokio::sync::mpsc::{Receiver, Sender};
 
 #[derive(Debug, Clone, Copy)]
 pub enum BtleplugAdapterCommand {
@@ -33,7 +33,12 @@ impl BtleplugAdapterTask {
     }
   }
 
-  async fn maybe_add_peripheral(&self, bd_addr: &BDAddr, adapter: &Adapter, tried_addresses: &mut Vec<BDAddr>, ) {
+  async fn maybe_add_peripheral(
+    &self,
+    bd_addr: &BDAddr,
+    adapter: &Adapter,
+    tried_addresses: &mut Vec<BDAddr>,
+  ) {
     let peripheral = adapter.peripheral(*bd_addr).await.unwrap();
     // If a device has no discernable name, we can't do anything
     // with it, just ignore it.

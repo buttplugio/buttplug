@@ -51,7 +51,7 @@ impl ButtplugProtocolCommandHandler for JeJoue {
         let mut pattern: u8 = 1;
 
         // Use vibe 1 as speed
-        let mut speed =cmds[0].unwrap_or(0) as u8;
+        let mut speed = cmds[0].unwrap_or(0) as u8;
 
         // Unless it's zero, then five vibe 2 a chance
         if speed == 0 {
@@ -68,11 +68,13 @@ impl ButtplugProtocolCommandHandler for JeJoue {
           pattern = 2;
         }
 
-        device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![pattern, speed],
-          false,
-        )).await?;
+        device
+          .write_value(DeviceWriteCmd::new(
+            Endpoint::Tx,
+            vec![pattern, speed],
+            false,
+          ))
+          .await?;
       }
 
       Ok(messages::Ok::default().into())
@@ -133,18 +135,18 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver));
 
       device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.1),
-                VibrateSubcommand::new(1, 0.9),
-              ],
-            )
-                .into(),
+        .parse_message(
+          VibrateCmd::new(
+            0,
+            vec![
+              VibrateSubcommand::new(0, 0.1),
+              VibrateSubcommand::new(1, 0.9),
+            ],
           )
-          .await
-          .unwrap();
+          .into(),
+        )
+        .await
+        .unwrap();
       // only vibe 1 changed, 1 write, same data
       check_test_recv_value(
         &command_receiver,
@@ -153,18 +155,18 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver));
 
       device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.0),
-                VibrateSubcommand::new(1, 0.9),
-              ],
-            )
-                .into(),
+        .parse_message(
+          VibrateCmd::new(
+            0,
+            vec![
+              VibrateSubcommand::new(0, 0.0),
+              VibrateSubcommand::new(1, 0.9),
+            ],
           )
-          .await
-          .unwrap();
+          .into(),
+        )
+        .await
+        .unwrap();
       // turn off vibe 1, 1 write (mode 3)
       check_test_recv_value(
         &command_receiver,

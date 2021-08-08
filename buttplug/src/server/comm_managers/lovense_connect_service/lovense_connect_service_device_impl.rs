@@ -1,4 +1,4 @@
-
+use super::lovense_connect_service_comm_manager::LovenseServiceToyInfo;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -6,49 +6,40 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, LovenseConnectServiceSpecifier},
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    configuration_manager::{DeviceSpecifier, LovenseConnectServiceSpecifier, ProtocolDefinition},
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
-  util::async_manager
+  util::async_manager,
 };
-use super::lovense_connect_service_comm_manager::LovenseServiceToyInfo;
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
-use std::{
-  sync::Arc,
-  fmt::{self, Debug},
-  time::Duration
-};
 use futures_timer::Delay;
+use std::{
+  fmt::{self, Debug},
+  sync::Arc,
+  time::Duration,
+};
 use tokio::sync::{broadcast, RwLock};
 
 pub struct LovenseServiceDeviceImplCreator {
   http_host: String,
-  toy_info: Arc<RwLock<LovenseServiceToyInfo>>
+  toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
 }
 
 impl LovenseServiceDeviceImplCreator {
   pub(super) fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>) -> Self {
     debug!("Emitting a new lovense service device impl creator!");
-    Self { 
+    Self {
       http_host: http_host.to_owned(),
-      toy_info
+      toy_info,
     }
   }
 }
 
 impl Debug for LovenseServiceDeviceImplCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LovenseServiceDeviceImplCreator")
-      .finish()
+    f.debug_struct("LovenseServiceDeviceImplCreator").finish()
   }
 }
 
@@ -64,7 +55,12 @@ impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
   ) -> Result<DeviceImpl, ButtplugError> {
     let toy_info = self.toy_info.read().await;
 
-    let device_impl_internal = LovenseServiceDeviceImpl::new(&self.http_host, self.toy_info.clone(), &toy_info.name, &toy_info.id);
+    let device_impl_internal = LovenseServiceDeviceImpl::new(
+      &self.http_host,
+      self.toy_info.clone(),
+      &toy_info.name,
+      &toy_info.id,
+    );
     let device_impl = DeviceImpl::new(
       &toy_info.name,
       &toy_info.id,
@@ -85,7 +81,12 @@ pub struct LovenseServiceDeviceImpl {
 }
 
 impl LovenseServiceDeviceImpl {
-  fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>, toy_name: &str, toy_id: &str) -> Self {
+  fn new(
+    http_host: &str,
+    toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
+    toy_name: &str,
+    toy_id: &str,
+  ) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let toy_info_clone = toy_info.clone();
     let sender_clone = device_event_sender.clone();
@@ -96,7 +97,8 @@ impl LovenseServiceDeviceImpl {
       }
       let _ = sender_clone.send(ButtplugDeviceEvent::Removed(toy_id_clone));
       info!("Exiting lovense service device connection check loop.");
-    }).unwrap();
+    })
+    .unwrap();
     Self {
       event_sender: device_event_sender,
       http_host: http_host.to_owned(),
@@ -128,12 +130,16 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     let toy_info = self.toy_info.clone();
     Box::pin(async move {
       let battery_level = toy_info.read().await.battery.clamp(0, 100) as u8;
-      Ok(RawReading::new(0, Endpoint::Rx, vec!(battery_level)))
+      Ok(RawReading::new(0, Endpoint::Rx, vec![battery_level]))
     })
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
-    let command_url = format!("{}/{}", self.http_host, std::str::from_utf8(&msg.data).unwrap());
+    let command_url = format!(
+      "{}/{}",
+      self.http_host,
+      std::str::from_utf8(&msg.data).unwrap()
+    );
     Box::pin(async move {
       match reqwest::get(command_url).await {
         Ok(_) => Ok(()),
@@ -141,7 +147,7 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
           error!("Got http error: {}", err);
           Err(ButtplugDeviceError::UnhandledCommand(err.to_string()).into())
         }
-      }      
+      }
     })
   }
 

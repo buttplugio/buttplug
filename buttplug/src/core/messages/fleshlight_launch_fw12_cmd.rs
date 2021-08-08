@@ -63,7 +63,7 @@ impl ButtplugMessageValidator for FleshlightLaunchFW12Cmd {
 #[cfg(test)]
 mod test {
   use super::{ButtplugMessageValidator, FleshlightLaunchFW12Cmd};
-  
+
   #[test]
   pub fn test_legacy_fleshlight_message_bounds() {
     assert!(FleshlightLaunchFW12Cmd::new(0, 0, 0).is_valid().is_ok());

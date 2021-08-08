@@ -53,14 +53,24 @@ use crate::{
     Endpoint,
   },
 };
+use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
 use std::sync::Arc;
-use dashmap::DashMap;
 
-pub type TryCreateProtocolFunc = fn(Arc<DeviceImpl>, DeviceProtocolConfiguration) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
+pub type TryCreateProtocolFunc =
+  fn(
+    Arc<DeviceImpl>,
+    DeviceProtocolConfiguration,
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
 
-pub fn add_to_protocol_map<T>(map: &DashMap<String, TryCreateProtocolFunc>, protocol_name: &str) where T: ButtplugProtocol {
-  map.insert(protocol_name.to_owned(), T::try_create as TryCreateProtocolFunc);
+pub fn add_to_protocol_map<T>(map: &DashMap<String, TryCreateProtocolFunc>, protocol_name: &str)
+where
+  T: ButtplugProtocol,
+{
+  map.insert(
+    protocol_name.to_owned(),
+    T::try_create as TryCreateProtocolFunc,
+  );
 }
 
 pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
@@ -71,14 +81,20 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<kiiroo_v2::KiirooV2>(&map, "kiiroo-v2");
   add_to_protocol_map::<kiiroo_v2_vibrator::KiirooV2Vibrator>(&map, "kiiroo-v2-vibrator");
   add_to_protocol_map::<kiiroo_v21::KiirooV21>(&map, "kiiroo-v21");
-  add_to_protocol_map::<kiiroo_v21_initialized::KiirooV21Initialized>(&map, "kiiroo-v21-initialized");
+  add_to_protocol_map::<kiiroo_v21_initialized::KiirooV21Initialized>(
+    &map,
+    "kiiroo-v21-initialized",
+  );
   add_to_protocol_map::<lelof1s::LeloF1s>(&map, "lelo-f1s");
   add_to_protocol_map::<libo_elle::LiboElle>(&map, "libo-elle");
   add_to_protocol_map::<libo_shark::LiboShark>(&map, "libo-shark");
   add_to_protocol_map::<libo_vibes::LiboVibes>(&map, "libo-vibes");
   add_to_protocol_map::<lovehoney_desire::LovehoneyDesire>(&map, "lovehoney-desire");
   add_to_protocol_map::<lovense::Lovense>(&map, "lovense");
-  add_to_protocol_map::<lovense_connect_service::LovenseConnectService>(&map, "lovense-connect-service");
+  add_to_protocol_map::<lovense_connect_service::LovenseConnectService>(
+    &map,
+    "lovense-connect-service",
+  );
   add_to_protocol_map::<lovenuts::LoveNuts>(&map, "lovenuts");
   add_to_protocol_map::<magic_motion_v1::MagicMotionV1>(&map, "magic-motion-1");
   add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
@@ -390,8 +406,11 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
     Box::pin(future::ready(Err(
-      ButtplugDeviceError::UnhandledCommand(format!("Command not implemented for this protocol: {}", command))
-        .into(),
+      ButtplugDeviceError::UnhandledCommand(format!(
+        "Command not implemented for this protocol: {}",
+        command
+      ))
+      .into(),
     )))
   }
 

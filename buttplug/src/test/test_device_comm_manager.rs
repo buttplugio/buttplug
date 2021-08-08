@@ -91,7 +91,7 @@ impl TestDeviceCommunicationManagerHelper {
 
 #[derive(Default)]
 pub struct TestDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
@@ -101,7 +101,9 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(TestDeviceCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(TestDeviceCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 

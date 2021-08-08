@@ -113,7 +113,7 @@ fn serial_read_thread(
 
 #[derive(Default)]
 pub struct LovenseSerialDongleCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
@@ -123,7 +123,9 @@ impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManag
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(LovenseSerialDongleCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(LovenseSerialDongleCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 

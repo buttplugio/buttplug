@@ -72,27 +72,19 @@ impl ButtplugProtocolCommandHandler for Patoo {
           mode = 0;
 
           // If we have a second vibe and it's not also 0, use that
-          if cmds.len() > 1 {            
-             speed = cmds[1].unwrap_or(0) as u8;
-             if speed != 0 {
-                mode |= 0x80;
-             }
+          if cmds.len() > 1 {
+            speed = cmds[1].unwrap_or(0) as u8;
+            if speed != 0 {
+              mode |= 0x80;
+            }
           }
         } else if cmds.len() > 1 && cmds[1].unwrap_or(0) as u8 != 0 {
           // Enable second vibe if it's not at 0
           mode |= 0x80;
         }
 
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![speed],
-          true,
-        )));
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(
-          Endpoint::TxMode,
-          vec![mode],
-          true,
-        )));
+        fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![speed], true)));
+        fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::TxMode, vec![mode], true)));
       }
 
       // TODO Just use join_all here
@@ -119,7 +111,9 @@ mod test {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("PBT821").await.unwrap();
       let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
-      let command_receiver_txmode = test_device.get_endpoint_receiver(&Endpoint::TxMode).unwrap();
+      let command_receiver_txmode = test_device
+        .get_endpoint_receiver(&Endpoint::TxMode)
+        .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -170,18 +164,18 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver_txmode));
 
       device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.1),
-                VibrateSubcommand::new(1, 0.9),
-              ],
-            )
-                .into(),
+        .parse_message(
+          VibrateCmd::new(
+            0,
+            vec![
+              VibrateSubcommand::new(0, 0.1),
+              VibrateSubcommand::new(1, 0.9),
+            ],
           )
-          .await
-          .unwrap();
+          .into(),
+        )
+        .await
+        .unwrap();
       // only vibe 1 changed, 2 writes, same data
       check_test_recv_value(
         &command_receiver_tx,
@@ -195,18 +189,18 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver_txmode));
 
       device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.0),
-                VibrateSubcommand::new(1, 0.9),
-              ],
-            )
-                .into(),
+        .parse_message(
+          VibrateCmd::new(
+            0,
+            vec![
+              VibrateSubcommand::new(0, 0.0),
+              VibrateSubcommand::new(1, 0.9),
+            ],
           )
-          .await
-          .unwrap();
+          .into(),
+        )
+        .await
+        .unwrap();
       // turn off vibe 1, 2 writes (mode 0x80)
       check_test_recv_value(
         &command_receiver_tx,
@@ -236,14 +230,16 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver_txmode));
     });
   }
-  
+
   #[test]
   pub fn test_patoo_protocol_carrot() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("PTVEA2601").await.unwrap();
-      
+
       let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
-      let command_receiver_txmode = test_device.get_endpoint_receiver(&Endpoint::TxMode).unwrap();
+      let command_receiver_txmode = test_device
+        .get_endpoint_receiver(&Endpoint::TxMode)
+        .unwrap();
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -279,7 +275,8 @@ mod test {
           )
           .into(),
         )
-        .await.is_err());
+        .await
+        .is_err());
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
 

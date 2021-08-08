@@ -130,7 +130,7 @@ fn hid_read_thread(
 
 #[derive(Default)]
 pub struct LovenseHIDDongleCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
@@ -140,7 +140,9 @@ impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerB
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(LovenseHIDDongleCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(LovenseHIDDongleCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 

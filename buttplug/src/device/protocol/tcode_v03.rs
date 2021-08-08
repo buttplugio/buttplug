@@ -1,4 +1,7 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler, generic_command_manager::GenericCommandManager};
+use super::{
+  generic_command_manager::GenericCommandManager, ButtplugDeviceResultFuture, ButtplugProtocol,
+  ButtplugProtocolCommandHandler,
+};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{protocol::ButtplugProtocolProperties, DeviceImpl, DeviceWriteCmd, Endpoint},
@@ -38,12 +41,11 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     device: Arc<DeviceImpl>,
     msg: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
-
     Box::pin(async move {
       let mut fut_vec = vec![];
       for v in msg.vectors() {
         let position = (v.position * 99f64) as u32;
-  
+
         let command = format!("L{}{:02}I{}\n", v.index, position, v.duration);
         fut_vec.push(device.write_value(DeviceWriteCmd::new(
           Endpoint::Tx,
@@ -72,7 +74,11 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
             let tcode_vibrate_cmd = format!("V{}{:02}\n", i, speed).as_bytes().to_vec();
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, tcode_vibrate_cmd, false)));
+            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+              Endpoint::Tx,
+              tcode_vibrate_cmd,
+              false,
+            )));
           }
         }
       }

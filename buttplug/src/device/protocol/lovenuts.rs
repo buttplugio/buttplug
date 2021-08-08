@@ -44,7 +44,7 @@ impl ButtplugProtocolCommandHandler for LoveNuts {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          let mut data: Vec<u8> = vec![ 0x45, 0x56, 0x4f, 0x4c ];
+          let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
           for _ in 0..10 {
             let mut b: u8 = speed as u8;
             b |= (speed as u8) << 4;
@@ -53,11 +53,9 @@ impl ButtplugProtocolCommandHandler for LoveNuts {
           data.push(0x00);
           data.push(0xff);
 
-          device.write_value(DeviceWriteCmd::new(
-            Endpoint::Tx,
-            data,
-            false,
-          )).await?;
+          device
+            .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+            .await?;
         }
       }
 
@@ -89,22 +87,8 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![
-            0x45,
-            0x56,
-            0x4f,
-            0x4c,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x88,
-            0x00,
-            0xff,
+            0x45, 0x56, 0x4f, 0x4c, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88,
+            0x00, 0xff,
           ],
           false,
         )),
@@ -119,22 +103,8 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![
-            0x45,
-            0x56,
-            0x4f,
-            0x4c,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
+            0x45, 0x56, 0x4f, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0xff,
           ],
           false,
         )),

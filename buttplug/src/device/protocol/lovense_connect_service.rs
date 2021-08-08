@@ -5,7 +5,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint, DeviceReadCmd
+    DeviceImpl, DeviceReadCmd, DeviceWriteCmd, Endpoint,
   },
 };
 use std::sync::{
@@ -73,7 +73,9 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
         }
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address()).as_bytes().to_vec();
+            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address())
+              .as_bytes()
+              .to_vec();
             fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
           }
         }
@@ -95,7 +97,9 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     Box::pin(async move {
       let result = manager.lock().await.update_rotation(&msg)?;
       if let Some((speed, clockwise)) = result[0] {
-        let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address()).as_bytes().to_vec();
+        let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address())
+          .as_bytes()
+          .to_vec();
         let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
         fut.await?;
         let dir = direction.load(Ordering::SeqCst);
@@ -122,9 +126,18 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     Box::pin(async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
-      let reading = device.read_value(DeviceReadCmd::new(Endpoint::Rx, 0, 0)).await.unwrap();
+      let reading = device
+        .read_value(DeviceReadCmd::new(Endpoint::Rx, 0, 0))
+        .await
+        .unwrap();
       info!("Battery level: {}", reading.data()[0]);
-      Ok(messages::BatteryLevelReading::new(message.device_index(), reading.data()[0] as f64 / 100f64).into())
+      Ok(
+        messages::BatteryLevelReading::new(
+          message.device_index(),
+          reading.data()[0] as f64 / 100f64,
+        )
+        .into(),
+      )
     })
   }
 }

@@ -25,7 +25,9 @@ use crate::{
       ButtplugServerMessage, DeviceList, DeviceMessageInfo,
     },
   },
-  device::{configuration_manager::DeviceConfigurationManager, ButtplugDevice, protocol::ButtplugProtocol},
+  device::{
+    configuration_manager::DeviceConfigurationManager, protocol::ButtplugProtocol, ButtplugDevice,
+  },
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
@@ -44,7 +46,7 @@ pub struct DeviceManager {
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
-  config: Arc<DeviceConfigurationManager>
+  config: Arc<DeviceConfigurationManager>,
 }
 
 unsafe impl Send for DeviceManager {}
@@ -81,7 +83,7 @@ impl DeviceManager {
       device_event_sender,
       devices,
       comm_managers: Arc::new(DashMap::new()),
-      config
+      config,
     })
   }
 
@@ -227,8 +229,13 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder {    
-    let mgr = builder.event_sender(self.device_event_sender.clone()).finish();
+  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError>
+  where
+    T: DeviceCommunicationManagerBuilder,
+  {
+    let mgr = builder
+      .event_sender(self.device_event_sender.clone())
+      .finish();
     if self.comm_managers.contains_key(mgr.name()) {
       return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
         mgr.name().to_owned(),
@@ -244,9 +251,7 @@ impl DeviceManager {
         .unwrap();
     })
     .unwrap();
-    self
-      .comm_managers
-      .insert(mgr.name().to_owned(), mgr);
+    self.comm_managers.insert(mgr.name().to_owned(), mgr);
     Ok(())
   }
 
@@ -276,12 +281,17 @@ impl DeviceManager {
     Ok(helper)
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError> where T: ButtplugProtocol {
+  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
+  where
+    T: ButtplugProtocol,
+  {
     if !self.config.has_protocol(protocol_name) {
       self.config.add_protocol::<T>(protocol_name);
       Ok(())
     } else {
-      Err(ButtplugServerError::ProtocolAlreadyAdded(protocol_name.to_owned()))
+      Err(ButtplugServerError::ProtocolAlreadyAdded(
+        protocol_name.to_owned(),
+      ))
     }
   }
 
@@ -290,7 +300,9 @@ impl DeviceManager {
       self.config.remove_protocol(protocol_name);
       Ok(())
     } else {
-      Err(ButtplugServerError::ProtocolDoesNotExist(protocol_name.to_owned()))
+      Err(ButtplugServerError::ProtocolDoesNotExist(
+        protocol_name.to_owned(),
+      ))
     }
   }
 

@@ -461,7 +461,11 @@ impl ButtplugDevice {
               // devices like Lovense, some Kiiroo, etc, this can get fairly
               // complicated.
               let sharable_device_impl = Arc::new(device_impl);
-              match device_config_mgr.get_protocol_creator(&*config_name)(sharable_device_impl.clone(), device_protocol_config).await
+              match device_config_mgr.get_protocol_creator(&*config_name)(
+                sharable_device_impl.clone(),
+                device_protocol_config,
+              )
+              .await
               {
                 Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(
                   protocol_impl,

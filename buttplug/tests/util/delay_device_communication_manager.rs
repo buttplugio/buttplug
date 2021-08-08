@@ -1,7 +1,7 @@
 use buttplug::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder
+    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   },
 };
 use std::sync::{
@@ -12,7 +12,7 @@ use tokio::sync::mpsc::Sender;
 
 #[derive(Default)]
 pub struct DelayDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>
+  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
@@ -22,7 +22,9 @@ impl DeviceCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilde
   }
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(DelayDeviceCommunicationManager::new(self.sender.take().unwrap()))
+    Box::new(DelayDeviceCommunicationManager::new(
+      self.sender.take().unwrap(),
+    ))
   }
 }
 

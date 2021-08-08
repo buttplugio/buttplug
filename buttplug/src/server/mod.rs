@@ -146,7 +146,9 @@ impl ButtplugServer {
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
-  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError> where T: DeviceCommunicationManagerBuilder
+  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError>
+  where
+    T: DeviceCommunicationManagerBuilder,
   {
     self.device_manager.add_comm_manager(builder)
   }
@@ -157,7 +159,10 @@ impl ButtplugServer {
     self.device_manager.add_test_comm_manager()
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError> where T: ButtplugProtocol {
+  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
+  where
+    T: ButtplugProtocol,
+  {
     self.device_manager.add_protocol::<T>(protocol_name)
   }
 
