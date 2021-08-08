@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2019 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2021 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -19,7 +19,6 @@ use super::protocol::{ButtplugProtocol, TryCreateProtocolFunc, get_default_proto
 use serde::Deserialize;
 use std::{
   collections::{HashMap, HashSet},
-  mem,
   sync::Arc
 };
 use uuid::Uuid;
@@ -29,8 +28,6 @@ static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
-static USER_DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/buttplug-user-device-config-schema.json");
 
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
@@ -81,6 +78,13 @@ impl BluetoothLESpecifier {
       names: set,
       services: HashMap::new(),
     }
+  }
+
+  pub fn merge(&mut self, other: BluetoothLESpecifier) {
+    // Add any new names.
+    self.names = self.names.union(&other.names).cloned().collect();
+    // Add new services, overwrite matching services.
+    self.services.extend(other.services);
   }
 }
 
@@ -166,6 +170,13 @@ pub struct WebsocketSpecifier {
   pub names: HashSet<String>
 }
 
+impl WebsocketSpecifier {
+  pub fn merge(&mut self, other: WebsocketSpecifier) {
+    // Just add the new identifier names
+    self.names.extend(other.names);
+  }
+}
+
 impl PartialEq for WebsocketSpecifier {
   fn eq(&self, other: &Self) -> bool {
     if self.names.intersection(&other.names).count() > 0 {
@@ -221,13 +232,6 @@ pub struct ProtocolDefinition {
   pub configurations: Vec<ProtocolAttributes>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
-pub struct UserProtocolDefinition {
-  // Right now, we only allow users to specify serial ports through this
-  // interface. It will contain more additions in the future.
-  pub serial: Option<Vec<SerialSpecifier>>,
-}
-
 fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
 where
   T: PartialEq,
@@ -257,29 +261,88 @@ impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
   }
 }
 
+impl ProtocolDefinition {
+  pub fn merge_user_definition(&mut self, other: ProtocolDefinition) {
+    // Easy: Just extend vectors we already have
+    if let Some(other_usb) = other.usb {
+      if let Some(ref mut usb) = self.usb {
+        usb.extend(other_usb);
+      } else {
+        self.usb = Some(other_usb);
+      }
+    }
+
+    if let Some(other_serial) = other.serial {
+      if let Some(ref mut serial) = self.serial {
+        serial.extend(other_serial);
+      } else {
+        self.serial = Some(other_serial);
+      }
+    }
+
+    if let Some(other_hid) = other.hid {
+      if let Some(ref mut hid) = self.hid {
+        hid.extend(other_hid);
+      } else {
+        self.hid = Some(other_hid);
+      }
+    }
+
+    // Not so easy: Actually do complex merges for systems with more identifiers
+    if let Some(other_btle) = other.btle {
+      if let Some(ref mut btle) = self.btle {
+        btle.merge(other_btle);
+      } else {
+        self.btle = Some(other_btle);
+      }
+    }
+
+    if let Some(other_websocket) = other.websocket {
+      if let Some(ref mut websocket) = self.websocket {
+        websocket.merge(other_websocket);
+      } else {
+        self.websocket = Some(other_websocket);
+      }
+    }
+
+    // Not possible: Don't even try to merge specific specifiers.
+    if other.xinput.is_some() {
+      error!("XInput specifier set for user configuration, ignoring.");
+    }
+
+    if other.lovense_connect_service.is_some() {
+      error!("Lovense connect service specifier set for user configuration, ignoring.");
+    }
+
+    // If new defaults are set, overwrite.
+    if other.defaults.is_some() {
+      self.defaults = other.defaults;
+    }
+
+    // Treat configurations like paths; Extend using the new ones first, so we'll find them first,
+    // but leave everything in. Post warning messages if anything repeats after this.
+    if other.configurations.len() > 0 {
+      self.configurations = other.configurations.iter().chain(self.configurations.iter()).cloned().collect();
+    }
+  }
+}
+
 #[derive(Deserialize, Debug)]
 pub struct ProtocolConfiguration {
   pub version: u32,
   pub(self) protocols: HashMap<String, ProtocolDefinition>,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct UserProtocolConfiguration {
-  pub protocols: HashMap<String, UserProtocolDefinition>,
-}
-
 impl ProtocolConfiguration {
-  pub fn merge_user_config(&mut self, other: UserProtocolConfiguration) {
+  pub fn merge_user_config(&mut self, other: ProtocolConfiguration) {
     // For now, we're only merging serial info in.
     for (protocol, conf) in other.protocols {
       if self.protocols.contains_key(&protocol) {
-        let our_serial_conf_option = &mut self.protocols.get_mut(&protocol).unwrap().serial;
-        let mut other_serial_conf = conf.serial;
-        if let Some(ref mut our_serial_config) = our_serial_conf_option {
-          our_serial_config.extend(other_serial_conf.unwrap());
-        } else {
-          mem::swap(our_serial_conf_option, &mut other_serial_conf);
-        }
+        // Just checked we have this.
+        let mut protocol_conf = self.protocols.get_mut(&protocol).unwrap();
+        protocol_conf.merge_user_definition(conf);
+      } else {
+        self.protocols.insert(protocol, conf);
       }
     }
   }
@@ -430,7 +493,7 @@ impl DeviceConfigurationManager {
     );
 
     if let Some(user_config_str) = user_config {
-      let user_validator = JSONValidator::new(USER_DEVICE_CONFIGURATION_JSON_SCHEMA);
+      let user_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
       match user_validator.validate(&user_config_str) {
         Ok(_) => match serde_json::from_str(&user_config_str) {
           Ok(user_cfg) => config.merge_user_config(user_cfg),
