@@ -1,3 +1,16 @@
+# 4.1.0 (2021-08-07)
+
+## Features
+
+- Update to btleplug v0.8
+  - Adds async API
+  - 50% reduction in bluetooth code
+  - Far more stable/reliably on macOS
+  - Paves the way for Buttplug Android
+- Added Websocket Server Communication Manager
+  - Paves the way for Device Simulators
+  - Makes DIY devices much easier to connect for prototyping
+
 # 4.0.4 (2021-07-04)
 
 ## Features
