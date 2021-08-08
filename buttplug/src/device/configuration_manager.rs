@@ -339,7 +339,7 @@ impl ProtocolConfiguration {
     for (protocol, conf) in other.protocols {
       if self.protocols.contains_key(&protocol) {
         // Just checked we have this.
-        let mut protocol_conf = self.protocols.get_mut(&protocol).unwrap();
+        let protocol_conf = self.protocols.get_mut(&protocol).unwrap();
         protocol_conf.merge_user_definition(conf);
       } else {
         self.protocols.insert(protocol, conf);
