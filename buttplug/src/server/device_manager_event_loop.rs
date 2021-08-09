@@ -9,11 +9,13 @@ use crate::{
   },
   util::async_manager,
 };
-use dashmap::DashMap;
+use dashmap::{DashMap, DashSet};
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
 use tokio::sync::{broadcast, mpsc};
 use tracing;
@@ -23,6 +25,8 @@ pub struct DeviceManagerEventLoop {
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_index_generator: u32,
   device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+  device_allow_list: Arc<DashSet<String>>,
+  device_deny_list: Arc<DashSet<String>>,
   ping_timer: Arc<PingTimer>,
   /// Maps device addresses to indexes, so they can be reused on reconnect.
   device_index_map: Arc<DashMap<String, u32>>,
@@ -48,6 +52,8 @@ impl DeviceManagerEventLoop {
     device_config_manager: Arc<DeviceConfigurationManager>,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+    device_allow_list: Arc<DashSet<String>>,
+    device_deny_list: Arc<DashSet<String>>,
     ping_timer: Arc<PingTimer>,
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
   ) -> Self {
@@ -56,6 +62,8 @@ impl DeviceManagerEventLoop {
       device_config_manager,
       server_sender,
       device_map,
+      device_allow_list,
+      device_deny_list,
       ping_timer,
       device_comm_receiver,
       device_index_generator: 0,
@@ -119,7 +127,6 @@ impl DeviceManagerEventLoop {
           .is_err()
         {
           info!("Server disappeared, exiting loop.");
-          return;
         }
       }
       DeviceCommunicationEvent::DeviceFound {
@@ -133,6 +140,27 @@ impl DeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
         let _enter = span.enter();
+        for denied_device in self.device_deny_list.iter() {
+          if *denied_device == address {
+            info!("Denied device address {} found, ignoring.", address);
+            return;
+          }
+        }
+        if !self.device_allow_list.is_empty() {
+          let mut is_allowed = false;
+          for allowed_device in self.device_allow_list.iter() {
+            if *allowed_device == address {
+              info!("Allowed device {} found, allowing connection.", address);
+              is_allowed = true;
+              break;
+            }
+          }
+          if !is_allowed {
+            info!("Device address {} found but not in allow list, ignoring.", address);
+            return;
+          }
+        }
+        
         // Check to make sure the device isn't already connected. If it is, drop it.
         for device_entry in self.device_map.iter() {
           if device_entry.value().address() == address {
@@ -147,7 +175,7 @@ impl DeviceManagerEventLoop {
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
-      }
+      },
     }
   }
 

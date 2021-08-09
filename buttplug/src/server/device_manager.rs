@@ -32,7 +32,7 @@ use crate::{
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
 };
-use dashmap::DashMap;
+use dashmap::{DashMap, DashSet};
 use futures::future;
 use std::{
   convert::TryFrom,
@@ -45,6 +45,8 @@ pub struct DeviceManager {
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+  device_allow_list: Arc<DashSet<String>>,
+  device_deny_list: Arc<DashSet<String>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
   config: Arc<DeviceConfigurationManager>,
 }
@@ -68,10 +70,14 @@ impl DeviceManager {
     )?);
     let devices = Arc::new(DashMap::new());
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
+    let device_allow_list = Arc::new(DashSet::new());
+    let device_deny_list = Arc::new(DashSet::new());
     let mut event_loop = DeviceManagerEventLoop::new(
       config.clone(),
       output_sender,
       devices.clone(),
+      device_allow_list.clone(),
+      device_deny_list.clone(),
       ping_timer,
       device_event_receiver,
     );
@@ -82,6 +88,8 @@ impl DeviceManager {
     Ok(Self {
       device_event_sender,
       devices,
+      device_allow_list,
+      device_deny_list,
       comm_managers: Arc::new(DashMap::new()),
       config,
     })
@@ -308,6 +316,26 @@ impl DeviceManager {
 
   pub fn remove_all_protocols(&self) {
     self.config.remove_all_protocols();
+  }
+
+  pub fn add_allowed_device(&self, address: &str) {
+    info!("Adding device address {} to allowed devices list.", address);
+    self.device_allow_list.insert(address.to_owned());
+  }
+
+  pub fn add_denied_device(&self, address: &str) {
+    info!("Adding device address {} to denied devices list.", address);
+    self.device_deny_list.insert(address.to_owned());
+  }
+
+  pub fn remove_allowed_device(&self, address: &str) {
+    info!("Removing device address {} from allowed devices list.", address);
+    self.device_allow_list.remove(address);
+  }
+
+  pub fn remove_denied_device(&self, address: &str) {
+    info!("Removing device address {} from denied devices list.", address);
+    self.device_deny_list.remove(address);
   }
 }
 
