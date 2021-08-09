@@ -188,7 +188,7 @@ mod test {
       let server = ButtplugServer::default();
       let recv = server.event_stream();
       pin_mut!(recv);
-      let helper = server.add_test_comm_manager().unwrap();
+      let helper = server.device_manager().add_test_comm_manager().unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);

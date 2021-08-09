@@ -1,4 +1,4 @@
-use super::{ButtplugServer, ButtplugServerError, ButtplugServerOptions};
+use super::{ButtplugServer, ButtplugServerOptions, DeviceManager};
 use crate::{
   connector::ButtplugConnector,
   core::{
@@ -7,9 +7,6 @@ use crate::{
       self, ButtplugClientMessage, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessage,
     },
   },
-  device::protocol::ButtplugProtocol,
-  server::DeviceCommunicationManagerBuilder,
-  test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use futures::{future::Future, select, FutureExt, Stream, StreamExt};
@@ -186,32 +183,8 @@ impl ButtplugRemoteServer {
     Ok(())
   }
 
-  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError>
-  where
-    T: DeviceCommunicationManagerBuilder,
-  {
-    self.server.add_comm_manager(builder)
-  }
-
-  pub fn add_test_comm_manager(
-    &self,
-  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerError> {
-    self.server.add_test_comm_manager()
-  }
-
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
-  where
-    T: ButtplugProtocol,
-  {
-    self.server.add_protocol::<T>(protocol_name)
-  }
-
-  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
-    self.server.remove_protocol(protocol_name)
-  }
-
-  pub fn remove_all_protocols(&self) {
-    self.server.remove_all_protocols();
+  pub fn device_manager(&self) -> &DeviceManager {
+    self.server.device_manager()
   }
 }
 

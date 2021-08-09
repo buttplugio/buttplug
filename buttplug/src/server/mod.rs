@@ -24,11 +24,8 @@ use crate::{
       StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  device::protocol::ButtplugProtocol,
-  test::TestDeviceCommunicationManagerHelper,
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
-use comm_managers::DeviceCommunicationManagerBuilder;
 use device_manager::DeviceManager;
 use futures::{
   future::{self, BoxFuture},
@@ -146,32 +143,8 @@ impl ButtplugServer {
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
-  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError>
-  where
-    T: DeviceCommunicationManagerBuilder,
-  {
-    self.device_manager.add_comm_manager(builder)
-  }
-
-  pub fn add_test_comm_manager(
-    &self,
-  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerError> {
-    self.device_manager.add_test_comm_manager()
-  }
-
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
-  where
-    T: ButtplugProtocol,
-  {
-    self.device_manager.add_protocol::<T>(protocol_name)
-  }
-
-  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
-    self.device_manager.remove_protocol(protocol_name)
-  }
-
-  pub fn remove_all_protocols(&self) {
-    self.device_manager.remove_all_protocols();
+  pub fn device_manager(&self) -> &DeviceManager {
+    &self.device_manager
   }
 
   pub fn connected(&self) -> bool {

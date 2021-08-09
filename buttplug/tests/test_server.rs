@@ -129,7 +129,7 @@ fn test_device_stop_on_ping_timeout() {
     let server = ButtplugServer::new_with_options(&options).unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     // TODO This should probably use a test protocol we control, not the aneros protocol
     let device = helper.add_ble_device("Massage Demo").await;
 
@@ -223,7 +223,7 @@ fn test_device_index_generation() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -269,7 +269,7 @@ fn test_server_scanning_finished() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -299,6 +299,7 @@ fn test_server_scanning_finished() {
     }
     assert!(finish_received);
     server
+      .device_manager()
       .add_comm_manager(util::DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     helper.add_ble_device("Massage Demo").await;

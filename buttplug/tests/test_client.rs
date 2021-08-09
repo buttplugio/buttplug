@@ -118,7 +118,7 @@ fn test_client_connected_status() {
 fn test_start_scanning() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();
-    let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
+    let test_mgr_helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
     test_mgr_helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
     client.connect(connector).await.unwrap();
@@ -134,6 +134,7 @@ fn test_stop_scanning_when_not_scanning() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
+      .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
@@ -158,6 +159,7 @@ fn test_start_scanning_when_already_scanning() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
+      .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
@@ -174,6 +176,7 @@ fn test_client_scanning_finished() {
     let connector = ButtplugInProcessClientConnector::default();
     connector
       .server_ref()
+      .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
       .unwrap();
     let client = ButtplugClient::new("Test Client");
@@ -212,7 +215,7 @@ fn test_client_ping() {
 fn test_stop_all_devices_and_device_command_range() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();
-    let test_mgr_helper = connector.server_ref().add_test_comm_manager().unwrap();
+    let test_mgr_helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
     let test_device = test_mgr_helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();

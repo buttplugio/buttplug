@@ -289,6 +289,7 @@ impl ButtplugClient {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManagerBuilder;
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(BtlePlugCommunicationManagerBuilder::default())
         .unwrap();
     }
@@ -297,6 +298,7 @@ impl ButtplugClient {
       use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerCommunicationManagerBuilder;
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(
           WebsocketServerCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
         )

@@ -22,7 +22,7 @@ fn test_capabilities_exposure() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Onyx+").await;
     server
       .parse_message(
@@ -63,7 +63,7 @@ fn test_server_raw_message() {
     let server = ButtplugServer::new_with_options(&options).unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -110,7 +110,7 @@ fn test_server_no_raw_message() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -157,7 +157,7 @@ fn test_reject_on_no_raw_message() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -230,7 +230,7 @@ fn test_repeated_address_additions() {
     let server = ButtplugServer::default();
     let recv = server.event_stream();
     pin_mut!(recv);
-    let helper = server.add_test_comm_manager().unwrap();
+    let helper = server.device_manager().add_test_comm_manager().unwrap();
     helper
       .add_ble_device_with_address("Massage Demo", "SameAddress")
       .await;
