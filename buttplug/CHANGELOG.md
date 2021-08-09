@@ -1,4 +1,4 @@
-# 4.1.0 (2021-08-07)
+# 5.0.0 (2021-08-07)
 
 ## Features
 
@@ -10,6 +10,18 @@
 - Added Websocket Server Communication Manager
   - Paves the way for Device Simulators
   - Makes DIY devices much easier to connect for prototyping
+- Added Device Allow/Deny capabilities
+  - Allows users ability to never or always connect to certain devices
+- Added Device Configuration addition capabilities
+  - While loading a default device configuration is still possible, we now externalize the loading
+    functions so that the library isn't absolutely bound to certain configuration types.
+
+## Breaking Changes
+
+- No breaking Client API changes
+- Server API Surface changes
+  - In lieu of proxying APIs up thru the server, we now just expose a way to get a reference to a
+    device manager for adding protocols, configurations, etc...
 
 # 4.0.4 (2021-07-04)
 
