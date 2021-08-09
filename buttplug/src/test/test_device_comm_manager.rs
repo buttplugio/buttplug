@@ -144,11 +144,11 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
             name: d
               .device()
               .as_ref()
-              .map_or("Test device".to_owned(), |x| x.name().clone()),
+              .map_or("Test device".to_owned(), |x| x.name()),
             address: d
               .device()
               .as_ref()
-              .map_or("Test device address".to_owned(), |x| x.address().clone()),
+              .map_or("Test device address".to_owned(), |x| x.address()),
             creator: Box::new(d),
           })
           .await

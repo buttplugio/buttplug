@@ -74,7 +74,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
   }
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
-    return Arc::new(AtomicBool::new(false));
+    Arc::new(AtomicBool::new(false))
   }
 }
 /*

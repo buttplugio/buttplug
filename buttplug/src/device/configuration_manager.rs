@@ -57,7 +57,7 @@ impl PartialEq for BluetoothLESpecifier {
           compare_name = &other_name;
         } else if other_name.ends_with('*') {
           wildcard = other_name.clone();
-          compare_name = &name;
+          compare_name = name;
         } else {
           continue;
         }
@@ -325,7 +325,7 @@ impl ProtocolDefinition {
 
     // Treat configurations like paths; Extend using the new ones first, so we'll find them first,
     // but leave everything in. Post warning messages if anything repeats after this.
-    if other.configurations.len() > 0 {
+    if !other.configurations.is_empty() {
       self.configurations = other
         .configurations
         .iter()
@@ -479,8 +479,8 @@ impl DeviceConfigurationManager {
     };
 
     let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
-    let mut config: ProtocolConfiguration = match config_validator.validate(&config_str) {
-      Ok(_) => match serde_json::from_str(&config_str) {
+    let mut config: ProtocolConfiguration = match config_validator.validate(config_str) {
+      Ok(_) => match serde_json::from_str(config_str) {
         Ok(protocol_config) => protocol_config,
         Err(err) => {
           return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
@@ -503,8 +503,8 @@ impl DeviceConfigurationManager {
 
     if let Some(user_config_str) = user_config {
       let user_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
-      match user_validator.validate(&user_config_str) {
-        Ok(_) => match serde_json::from_str(&user_config_str) {
+      match user_validator.validate(user_config_str) {
+        Ok(_) => match serde_json::from_str(user_config_str) {
           Ok(user_cfg) => config.merge_user_config(user_cfg),
           Err(err) => {
             return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
@@ -710,7 +710,8 @@ mod test {
       &None,
       &Some(
         r#"
-        { 
+        {
+            "version": 1, 
             "protocols": {
                 "nobra": {
                     "serial": [

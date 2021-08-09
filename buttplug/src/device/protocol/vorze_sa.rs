@@ -76,7 +76,7 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
     speed = 0f64;
   }
 
-  return speed as u8;
+  speed as u8
 }
 
 impl ButtplugProtocolCommandHandler for VorzeSA {

@@ -155,9 +155,9 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
     let addr = format!("{}:{}", base_addr, self.options.ws_insecure_port);
     debug!("Websocket Insecure: Trying to listen on {}", addr);
-    let request_receiver_clone = request_receiver.clone();
-    let response_sender_clone = incoming_sender.clone();
-    let disconnect_notifier_clone = disconnect_notifier.clone();
+    let request_receiver_clone = request_receiver;
+    let response_sender_clone = incoming_sender;
+    let disconnect_notifier_clone = disconnect_notifier;
     let fut = async move {
       // Create the event loop and TCP listener we'll accept connections on.
       let try_socket = TcpListener::bind(&addr).await;

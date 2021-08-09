@@ -47,7 +47,7 @@ impl ButtplugProtocol for Patoo {
     while i < c.len() && !c[i].is_digit(10) {
       i += 1;
     }
-    Box::pin(future::ready(Ok(Some(c[0..i].into_iter().collect()))))
+    Box::pin(future::ready(Ok(Some(c[0..i].iter().collect()))))
   }
 }
 
@@ -64,7 +64,7 @@ impl ButtplugProtocolCommandHandler for Patoo {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         // Default to vibes
-        let mut mode: u8 = 04;
+        let mut mode: u8 = 4u8;
 
         // Use vibe 1 as speed
         let mut speed = cmds[0].unwrap_or(0) as u8;

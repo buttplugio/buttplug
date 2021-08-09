@@ -77,7 +77,6 @@ impl BtleplugAdapterTask {
           .is_err()
         {
           error!("Device manager receiver dropped, cannot send device found message.");
-          return;
         }
       }
     } else {

@@ -140,7 +140,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   ) -> Self {
     let (event_stream, _) = broadcast::channel(256);
     let event_stream_clone = event_stream.clone();
-    let address_clone = address.clone();
+    let address_clone = address;
     let name_clone = name.to_owned();
     async_manager::spawn(async move {
       let mut error_notification = false;

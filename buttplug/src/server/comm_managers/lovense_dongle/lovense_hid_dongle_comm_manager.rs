@@ -47,7 +47,7 @@ fn hid_write_thread(
     for chunk in data_bytes.chunks(63) {
       trace!("bytes: {:?}", chunk);
       let mut byte_array = [0u8; 65];
-      byte_array[1..chunk.len() + 1].copy_from_slice(&chunk);
+      byte_array[1..chunk.len() + 1].copy_from_slice(chunk);
       dongle.write(&byte_array).unwrap();
     }
   };
@@ -98,7 +98,7 @@ fn hid_read_thread(
           let sender_clone = sender.clone();
 
           let stream =
-            Deserializer::from_str(&incoming).into_iter::<LovenseDongleIncomingMessage>();
+            Deserializer::from_str(incoming).into_iter::<LovenseDongleIncomingMessage>();
           for msg in stream {
             match msg {
               Ok(m) => {

@@ -98,7 +98,7 @@ impl ButtplugProtocol for Lovense {
               return Err(
                 ButtplugDeviceError::ProtocolSpecificError(
                   "Lovense".to_owned(),
-                  format!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY).to_owned(),
+                  format!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY),
                 )
                 .into()
               );

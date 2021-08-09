@@ -293,7 +293,7 @@ where
           if self.device_map.contains_key(&d.device_index) {
             continue;
           }
-          let device = self.create_client_device(&d);
+          let device = self.create_client_device(d);
           self.send_client_event(ButtplugClientEvent::DeviceAdded(device));
         }
         true

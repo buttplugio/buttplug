@@ -114,7 +114,6 @@ impl WebsocketServerCommunicationManager {
               .is_err()
             {
               error!("Device manager disappeared, exiting.");
-              return;
             }
           } else {
             error!("Did not receive info message as first packet, dropping connection.");
