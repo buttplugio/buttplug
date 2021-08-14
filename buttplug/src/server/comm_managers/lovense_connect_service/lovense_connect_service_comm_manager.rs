@@ -66,7 +66,6 @@ type LovenseServiceInfo = HashMap<String, LovenseServiceHostInfo>;
 
 async fn lovense_local_service_check(
   event_sender: mpsc::Sender<DeviceCommunicationEvent>,
-  has_known_hosts: Arc<AtomicBool>,
   is_scanning: Arc<AtomicBool>,
   known_hosts: Arc<Mutex<Vec<String>>>,
 ) {
@@ -74,8 +73,7 @@ async fn lovense_local_service_check(
     Arc::new(DashMap::new());
   loop {
     let hosts = known_hosts.lock().await.clone();
-    if hosts.len() == 0 {
-      has_known_hosts.store(false, Ordering::SeqCst);
+    if hosts.is_empty() {
       break;
     }
     for host in hosts {
@@ -174,7 +172,6 @@ pub struct LovenseConnectServiceCommunicationManager {
   sender: mpsc::Sender<DeviceCommunicationEvent>,
   known_hosts: Arc<Mutex<Vec<String>>>,
   is_scanning: Arc<AtomicBool>,
-  has_known_hosts: Arc<AtomicBool>,
 }
 
 impl LovenseConnectServiceCommunicationManager {
@@ -183,7 +180,6 @@ impl LovenseConnectServiceCommunicationManager {
       sender,
       known_hosts: Arc::new(Mutex::new(vec![])),
       is_scanning: Arc::new(AtomicBool::new(false)),
-      has_known_hosts: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -198,10 +194,10 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
     let sender = self.sender.clone();
     let is_scanning = self.is_scanning.clone();
     let known_hosts = self.known_hosts.clone();
-    let has_known_hosts = self.has_known_hosts.clone();
     async_manager::spawn(
       async move {
         debug!("Starting scanning");
+        let mut has_warned = false;
         while is_scanning.load(Ordering::SeqCst) {
           match reqwest::get("https://api.lovense.com/api/lan/getToys").await {
             Ok(res) => {
@@ -221,18 +217,24 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
               {
                 *current_known_hosts = new_known_hosts.iter().map(|x| (*x).clone()).collect();
               }
-              if current_known_hosts.len() > 0 && !has_known_hosts.load(Ordering::SeqCst) {
-                has_known_hosts.store(true, Ordering::SeqCst);
+              if current_known_hosts.is_empty() {
+                if !has_warned {
+                  warn!("Lovense Connect Service could not find any usable hosts. Will continue scanning until hosts are found or scanning is requested to stop.");
+                  has_warned = true;
+                }
+              } else {
                 let service_fut = lovense_local_service_check(
                   sender.clone(),
-                  has_known_hosts.clone(),
                   is_scanning.clone(),
                   known_hosts.clone(),
                 );
+                info!("Lovense Connect Server API query returned: {}", text);
                 async_manager::spawn(async move {
                   service_fut.await;
                 })
                 .unwrap();
+                has_warned = false;
+                break;
               }
             }
             Err(err) => error!("Got http error: {}", err),
@@ -256,6 +258,5 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
 impl Drop for LovenseConnectServiceCommunicationManager {
   fn drop(&mut self) {
     self.is_scanning.store(false, Ordering::SeqCst);
-    self.has_known_hosts.store(false, Ordering::SeqCst);
   }
 }
