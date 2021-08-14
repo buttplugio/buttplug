@@ -233,7 +233,6 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
                   service_fut.await;
                 })
                 .unwrap();
-                has_warned = false;
                 break;
               }
             }
