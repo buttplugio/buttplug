@@ -294,12 +294,12 @@ impl ButtplugClient {
     }
     #[cfg(feature = "websocket-server-manager")]
     {
-      use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerCommunicationManagerBuilder;
+      use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()
         .add_comm_manager(
-          WebsocketServerCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
+          WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
         )
         .unwrap();
     }

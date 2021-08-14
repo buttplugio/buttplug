@@ -7,7 +7,7 @@ mod websocket_connector_tests {
     connector::{
       ButtplugRemoteClientConnector, ButtplugRemoteServerConnector,
       ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport,
-      ButtplugWebsocketServerTransportOptions,
+      ButtplugWebsocketServerTransportBuilder,
     },
     core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     server::ButtplugRemoteServer,
@@ -27,12 +27,7 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteServerConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugServerJSONSerializer,
-        >::new(ButtplugWebsocketServerTransport::new(
-          ButtplugWebsocketServerTransportOptions {
-            ws_listen_on_all_interfaces: false,
-            ws_insecure_port: 12345u16,
-          },
-        ));
+        >::new(ButtplugWebsocketServerTransportBuilder::default().finish());
         server_clone.start(connector).await.unwrap();
       })
       .unwrap();
@@ -79,12 +74,7 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteClientConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugClientJSONSerializer,
-        >::new(ButtplugWebsocketServerTransport::new(
-          ButtplugWebsocketServerTransportOptions {
-            ws_listen_on_all_interfaces: false,
-            ws_insecure_port: 12347u16,
-          },
-        ));
+        >::new(ButtplugWebsocketServerTransportBuilder::default().finish());
 
         let client = ButtplugClient::new("Test Client");
         if client.connect(connector).await.is_ok() {

@@ -6,9 +6,7 @@ use crate::connector::{
 use futures::future::BoxFuture;
 use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
-pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError};
-#[cfg(feature = "websockets")]
-pub use websocket::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
+pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
 
 use thiserror::Error;
 

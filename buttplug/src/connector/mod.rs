@@ -87,7 +87,7 @@ pub use remote_connector::{
 #[cfg(feature = "websockets")]
 pub use transport::ButtplugWebsocketClientTransport;
 #[cfg(feature = "websockets")]
-pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportOptions};
+pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
 
 use crate::{
   core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},

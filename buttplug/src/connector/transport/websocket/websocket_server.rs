@@ -17,13 +17,41 @@ use tokio::sync::{
   Mutex, Notify,
 };
 
-#[derive(Default, Clone, Debug)]
-pub struct ButtplugWebsocketServerTransportOptions {
+#[derive(Clone, Debug)]
+pub struct ButtplugWebsocketServerTransportBuilder {
   /// If true, listens all on available interfaces. Otherwise, only listens on 127.0.0.1.
-  pub ws_listen_on_all_interfaces: bool,
-  /// Insecure port for listening for websocket connections. Secure ports were
-  /// removed, but this name was left as is to minimize code breakage.
-  pub ws_insecure_port: u16,
+  listen_on_all_interfaces: bool,
+  /// Insecure port for listening for websocket connections.
+  port: u16,
+}
+
+impl Default for ButtplugWebsocketServerTransportBuilder {
+  fn default() -> Self {
+    Self {
+      listen_on_all_interfaces: false,
+      port: 12345
+    }
+  }
+}
+
+impl ButtplugWebsocketServerTransportBuilder {
+  pub fn listen_on_all_interfaces(&mut self, listen_on_all_interfaces: bool) -> &mut Self {
+    self.listen_on_all_interfaces = listen_on_all_interfaces;
+    self
+  }
+
+  pub fn port(&mut self, port: u16) -> &mut Self {
+    self.port = port;
+    self
+  }
+
+  pub fn finish(&self) -> ButtplugWebsocketServerTransport {
+    ButtplugWebsocketServerTransport {
+      port: self.port,
+      listen_on_all_interfaces: self.listen_on_all_interfaces,
+      disconnect_notifier: Arc::new(Notify::new()),
+    }
+  }
 }
 
 async fn run_connection_loop<S>(
@@ -62,6 +90,7 @@ async fn run_connection_loop<S>(
             ButtplugSerializedMessage::Binary(binary_msg) => {
               if websocket_server_sender
                 .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
+            
                 .await
                 .is_err() {
                 error!("Cannot send binary value to server, considering connection closed.");
@@ -124,17 +153,9 @@ async fn run_connection_loop<S>(
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
-  options: ButtplugWebsocketServerTransportOptions,
+  port: u16,
+  listen_on_all_interfaces: bool,
   disconnect_notifier: Arc<Notify>,
-}
-
-impl ButtplugWebsocketServerTransport {
-  pub fn new(options: ButtplugWebsocketServerTransportOptions) -> Self {
-    Self {
-      options,
-      disconnect_notifier: Arc::new(Notify::new()),
-    }
-  }
 }
 
 impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
@@ -145,7 +166,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
 
-    let base_addr = if self.options.ws_listen_on_all_interfaces {
+    let base_addr = if self.listen_on_all_interfaces {
       "0.0.0.0"
     } else {
       "127.0.0.1"
@@ -153,7 +174,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
 
     let request_receiver = Arc::new(Mutex::new(Some(outgoing_receiver)));
 
-    let addr = format!("{}:{}", base_addr, self.options.ws_insecure_port);
+    let addr = format!("{}:{}", base_addr, self.port);
     debug!("Websocket Insecure: Trying to listen on {}", addr);
     let request_receiver_clone = request_receiver;
     let response_sender_clone = incoming_sender;
