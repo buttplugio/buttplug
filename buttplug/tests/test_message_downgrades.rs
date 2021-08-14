@@ -12,7 +12,7 @@ mod test {
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
     server::ButtplugServer,
-    test::check_test_recv_value,
+    server::comm_managers::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
     util::async_manager,
   };
   use futures::{pin_mut, StreamExt};
@@ -63,7 +63,9 @@ mod test {
       let recv = server.event_stream();
       pin_mut!(recv);
       let serializer = ButtplugServerJSONSerializer::default();
-      let helper = server.device_manager().add_test_comm_manager().unwrap();
+      let builder = TestDeviceCommunicationManagerBuilder::default();
+      let helper = builder.helper();
+      server.device_manager().add_comm_manager(builder).unwrap();
       helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
@@ -110,7 +112,9 @@ mod test {
       let recv = server.event_stream();
       pin_mut!(recv);
       let serializer = ButtplugServerJSONSerializer::default();
-      let helper = server.device_manager().add_test_comm_manager().unwrap();
+      let builder = TestDeviceCommunicationManagerBuilder::default();
+      let helper = builder.helper();
+      server.device_manager().add_comm_manager(builder).unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;

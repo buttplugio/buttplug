@@ -29,7 +29,6 @@ use crate::{
     configuration_manager::{DeviceConfigurationManager, ProtocolDefinition}, protocol::ButtplugProtocol, ButtplugDevice,
   },
   server::ButtplugServerResultFuture,
-  test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
@@ -255,32 +254,6 @@ impl DeviceManager {
     .unwrap();
     self.comm_managers.insert(mgr.name().to_owned(), mgr);
     Ok(())
-  }
-
-  pub fn add_test_comm_manager(
-    &self,
-  ) -> Result<TestDeviceCommunicationManagerHelper, ButtplugServerError> {
-    let mgr = TestDeviceCommunicationManager::new(self.device_event_sender.clone());
-    if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
-        mgr.name().to_owned(),
-      ));
-    }
-    let status = mgr.scanning_status();
-    let sender = self.device_event_sender.clone();
-    // TODO This could run out of order and possibly cause weird scanning finished bugs?
-    async_manager::spawn(async move {
-      sender
-        .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
-        .await
-        .unwrap();
-    })
-    .unwrap();
-    let helper = mgr.helper();
-    self
-      .comm_managers
-      .insert(mgr.name().to_owned(), Box::new(mgr));
-    Ok(helper)
   }
 
   pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>

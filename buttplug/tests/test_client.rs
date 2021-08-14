@@ -13,7 +13,7 @@ use buttplug::{
   },
   device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
   server::ButtplugServerBuilder,
-  test::check_test_recv_value,
+  server::comm_managers::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
   util::async_manager,
 };
 use futures::{future::BoxFuture, StreamExt};
@@ -118,8 +118,10 @@ fn test_client_connected_status() {
 fn test_start_scanning() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();
-    let test_mgr_helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
-    test_mgr_helper.add_ble_device("Massage Demo").await;
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
+    helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
     client.connect(connector).await.unwrap();
     assert!(client.start_scanning().await.is_ok());
@@ -214,8 +216,10 @@ fn test_client_ping() {
 fn test_stop_all_devices_and_device_command_range() {
   async_manager::block_on(async {
     let connector = ButtplugInProcessClientConnector::default();
-    let test_mgr_helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
-    let test_device = test_mgr_helper.add_ble_device("Massage Demo").await;
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
+    let test_device = helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();
     client.connect(connector).await.unwrap();

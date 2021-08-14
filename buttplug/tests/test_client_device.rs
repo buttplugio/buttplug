@@ -9,6 +9,7 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage},
   },
+  server::comm_managers::test::TestDeviceCommunicationManagerBuilder,
   util::async_manager,
 };
 use futures::StreamExt;
@@ -22,7 +23,9 @@ fn test_client_device_connected_status() {
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
-    let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();
@@ -57,7 +60,9 @@ fn test_client_device_client_disconnected_status() {
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
-    let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();
@@ -95,7 +100,9 @@ fn test_client_device_connected_no_event_listener() {
   async_manager::block_on(async {
     let client = ButtplugClient::new("Test Client");
     let connector = ButtplugInProcessClientConnector::default();
-    let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();
@@ -117,7 +124,9 @@ fn test_client_device_invalid_command() {
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
-    let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();

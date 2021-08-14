@@ -12,6 +12,8 @@ pub mod xinput;
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;
 
+pub mod test;
+
 use crate::{core::ButtplugResultFuture, device::ButtplugDeviceImplCreator};
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};

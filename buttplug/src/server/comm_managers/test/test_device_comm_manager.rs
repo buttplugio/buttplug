@@ -1,4 +1,4 @@
-use super::{TestDeviceImplCreator, TestDeviceInternal};
+use super::test_device::{TestDeviceImplCreator, TestDeviceInternal};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   device::{
@@ -93,6 +93,13 @@ impl TestDeviceCommunicationManagerHelper {
 #[derive(Default)]
 pub struct TestDeviceCommunicationManagerBuilder {
   sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
+  devices: WaitingDeviceList
+}
+
+impl TestDeviceCommunicationManagerBuilder {
+  pub fn helper(&self) -> TestDeviceCommunicationManagerHelper {
+    TestDeviceCommunicationManagerHelper::new(self.devices.clone())
+  }
 }
 
 impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
@@ -104,6 +111,7 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
       self.sender.take().unwrap(),
+      self.devices
     ))
   }
 }
@@ -114,14 +122,10 @@ pub struct TestDeviceCommunicationManager {
 }
 
 impl TestDeviceCommunicationManager {
-  pub fn helper(&self) -> TestDeviceCommunicationManagerHelper {
-    TestDeviceCommunicationManagerHelper::new(self.devices.clone())
-  }
-
-  pub fn new(device_sender: Sender<DeviceCommunicationEvent>) -> Self {
+  pub fn new(device_sender: Sender<DeviceCommunicationEvent>, devices: WaitingDeviceList) -> Self {
     Self {
       device_sender,
-      devices: Arc::new(Mutex::new(vec![])),
+      devices
     }
   }
 }
@@ -176,11 +180,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 
 #[cfg(test)]
 mod test {
-  use crate::{
-    core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    server::ButtplugServer,
-    util::async_manager,
-  };
+  use crate::{core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage}, server::ButtplugServer, server::comm_managers::test::TestDeviceCommunicationManagerBuilder, util::async_manager};
   use futures::StreamExt;
 
   #[test]
@@ -189,7 +189,9 @@ mod test {
       let server = ButtplugServer::default();
       let recv = server.event_stream();
       pin_mut!(recv);
-      let helper = server.device_manager().add_test_comm_manager().unwrap();
+      let builder = TestDeviceCommunicationManagerBuilder::default();
+      let helper = builder.helper();
+      server.device_manager().add_comm_manager(builder).unwrap();
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);

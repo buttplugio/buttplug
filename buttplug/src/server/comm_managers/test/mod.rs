@@ -12,7 +12,7 @@ pub use test_device::{
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
-  new_bluetoothle_test_device, TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper,
+  new_bluetoothle_test_device, TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper, TestDeviceCommunicationManagerBuilder
 };
 use tokio::sync::mpsc::Receiver;
 
