@@ -13,7 +13,8 @@ use crate::{
   },
   core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
 };
-use std::collections::HashMap;
+use dashmap::DashMap;
+use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
 
 /// Message sorting and pairing for remote client connectors.
 ///
@@ -60,14 +61,14 @@ pub struct ClientMessageSorter {
   /// the server. Once we get back a response with a matching `id`, we remove
   /// the entry from this map, and use the waker to complete the future with the
   /// received response message.
-  future_map: HashMap<u32, ButtplugServerMessageStateShared>,
+  future_map: DashMap<u32, ButtplugServerMessageStateShared>,
 
   /// Message `id` counter
   ///
   /// Every time we add a message to the future_map, we need it to have a unique
   /// `id`. We assume that unsigned 2^32 will be enough (Buttplug isn't THAT
   /// chatty), and use it as a monotonically increasing counter for setting `id`s.
-  current_id: u32,
+  current_id: Arc<AtomicU32>,
 }
 
 impl ClientMessageSorter {
@@ -75,13 +76,14 @@ impl ClientMessageSorter {
   ///
   /// Given a message and its related future, set the message's `id`, and match
   /// that id with the future to be resolved when we get a response back.
-  pub fn register_future(&mut self, msg_fut: &mut ButtplugClientMessageFuturePair) {
-    trace!("Setting message id to {}", self.current_id);
-    msg_fut.msg.set_id(self.current_id);
+  pub fn register_future(&self, msg_fut: &mut ButtplugClientMessageFuturePair) {
+    let id = self.current_id.load(Ordering::SeqCst);
+    trace!("Setting message id to {}", id);
+    msg_fut.msg.set_id(id);
     self
       .future_map
-      .insert(self.current_id, msg_fut.waker.clone());
-    self.current_id += 1;
+      .insert(id, msg_fut.waker.clone());
+    self.current_id.store(id + 1, Ordering::SeqCst);
   }
 
   /// Given a response message from the server, resolve related future if we
@@ -90,19 +92,19 @@ impl ClientMessageSorter {
   /// Returns true if the response message was resolved to a future via matching
   /// `id`, otherwise returns false. False returns mean the message should be
   /// considered as an *event*.
-  pub fn maybe_resolve_result(&mut self, msg: &ButtplugCurrentSpecServerMessage) -> bool {
+  pub fn maybe_resolve_result(&self, msg: &ButtplugCurrentSpecServerMessage) -> bool {
     let id = msg.id();
     trace!("Trying to resolve message future for id {}.", id);
     match self.future_map.remove(&id) {
-      Some(mut _state) => {
+      Some((_, state)) => {
         trace!("Resolved id {} to a future.", id);
         if let Err(e) = msg.is_valid() {
           error!("Message not valid: {:?} - Error: {}", msg, e);
-          _state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
+          state.set_reply(Err(ButtplugClientError::ButtplugError(e.into())));
         } else if let ButtplugCurrentSpecServerMessage::Error(e) = msg {
-          _state.set_reply(Err(e.original_error().into()))
+          state.set_reply(Err(e.original_error().into()))
         } else {
-          _state.set_reply(Ok(msg.clone()))
+          state.set_reply(Ok(msg.clone()))
         }
         true
       }
@@ -121,8 +123,8 @@ impl Default for ClientMessageSorter {
   /// 0 (0 is reserved for system incoming messages).
   fn default() -> Self {
     Self {
-      future_map: HashMap::<u32, ButtplugServerMessageStateShared>::new(),
-      current_id: 1,
+      future_map: DashMap::new(),
+      current_id: Arc::new(AtomicU32::new(1)),
     }
   }
 }
