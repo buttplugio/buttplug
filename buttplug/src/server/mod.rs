@@ -78,41 +78,41 @@ impl Default for ButtplugServerBuilder {
 }
 
 impl ButtplugServerBuilder {
-  pub fn name(mut self, name: &str) -> Self {
+  pub fn name(&mut self, name: &str) -> &mut Self {
     self.name = name.to_owned();
     self
   }
 
-  pub fn max_ping_time(mut self, ping_time: u64) -> Self {
+  pub fn max_ping_time(&mut self, ping_time: u64) -> &mut Self {
     self.max_ping_time = Some(ping_time);
     self
   }
 
-  pub fn allow_raw_messages(mut self, allow: bool) -> Self {
+  pub fn allow_raw_messages(&mut self, allow: bool) -> &mut Self {
     self.allow_raw_messages = allow;
     self
   }
 
-  pub fn device_configuration_json(mut self, config_json: Option<String>) -> Self {
+  pub fn device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
     self.device_configuration_json = config_json;
     self
   }
 
-  pub fn user_device_configuration_json(mut self, config_json: Option<String>) -> Self {
+  pub fn user_device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
     self.user_device_configuration_json = config_json;
     self
   }
 
-  pub fn finish(self) -> Result<ButtplugServer, ButtplugError> {
+  pub fn finish(&self) -> Result<ButtplugServer, ButtplugError> {
     // If the user config string exists, parse it.
-    let user_config = if let Some(user_device_config) = self.user_device_configuration_json {
+    let user_config = if let Some(user_device_config) = &self.user_device_configuration_json {
       Some(load_protocol_config_from_json(&user_device_config)?)
     } else {
       None
     };
     
     // If the device config string exists, parse it.
-    let device_config = if let Some(main_device_config) = self.device_configuration_json {
+    let device_config = if let Some(main_device_config) = &self.device_configuration_json {
       let mut main_config = load_protocol_config_from_json(&main_device_config)?;
       if let Some(user_config) = user_config {
         main_config.merge(user_config);
