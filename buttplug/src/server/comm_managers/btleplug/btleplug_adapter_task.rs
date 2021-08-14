@@ -5,9 +5,7 @@ use btleplug::{
   platform::{Adapter, Manager},
 };
 use futures::{future::FutureExt, StreamExt};
-#[cfg(target_os = "linux")]
 use futures_timer::Delay;
-#[cfg(target_os = "linux")]
 use std::time::Duration;
 use tokio::sync::mpsc::{Receiver, Sender};
 
@@ -20,6 +18,7 @@ pub enum BtleplugAdapterCommand {
 pub struct BtleplugAdapterTask {
   event_sender: Sender<DeviceCommunicationEvent>,
   command_receiver: Receiver<BtleplugAdapterCommand>,
+
 }
 
 impl BtleplugAdapterTask {
@@ -96,13 +95,38 @@ impl BtleplugAdapterTask {
       }
     };
 
-    let adapter = match manager.adapters().await {
-      Ok(adapters) => adapters.into_iter().nth(0).unwrap(),
-      Err(e) => {
-        error!("Error retreiving BTLE adapters: {:?}", e);
-        return;
+    // Start by assuming we'll find the adapter on the first try. If not, we'll print an error
+    // message then loop while trying to find it.
+    let mut adapter_found = true;
+
+    let adapter;
+
+    loop {
+      if !adapter_found {
+        Delay::new(Duration::from_secs(1)).await;
       }
-    };
+      adapter = match manager.adapters().await {
+        Ok(adapters) => {
+          if adapters.is_empty() {
+            if adapter_found {
+              adapter_found = false;
+              warn!("Bluetooth LE adapter not found, will not be using bluetooth scanning until found. Buttplug will continue polling for the adapter, but no more warning messages will be posted.");
+            }
+            continue;
+          }
+          info!("Bluetooth LE adapter found.");
+          adapters.into_iter().nth(0).unwrap()
+        }
+        Err(e) => {
+          if adapter_found {
+            adapter_found = false;
+            error!("Error retreiving BTLE adapters: {:?}", e);
+          }
+          continue;
+        }
+      };
+      break;
+    }
 
     #[cfg(not(target_os = "linux"))]
     let mut events = adapter.events().await.unwrap();
@@ -127,7 +151,9 @@ impl BtleplugAdapterTask {
                 debug!("BTLEPlug Device disconnected: {:?}", addr);
                 tried_addresses.retain(|bd_addr| addr != *bd_addr);
               }
-              _ => {}
+              event => {
+                trace!("Unhandled btleplug central event: {:?}", event)
+              }
             }
           }
           #[cfg(target_os = "linux")]
