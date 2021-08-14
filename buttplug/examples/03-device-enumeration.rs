@@ -11,7 +11,6 @@
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent, VibrateCommand},
   // connector::ButtplugInProcessClientConnector,
-  server::ButtplugServerOptions,
   util::async_manager,
 };
 use futures_timer::Delay;
@@ -105,7 +104,7 @@ async fn device_enumeration_example() {
   let client = ButtplugClient::new("test client");
   let mut event_stream = client.event_stream();
   client
-    .connect_in_process(&ButtplugServerOptions::default())
+    .connect_in_process(None)
     .await
     .unwrap();
   // First, we'll start the server looking for devices.

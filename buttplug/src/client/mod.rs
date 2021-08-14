@@ -26,6 +26,8 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
+#[cfg(feature = "server")]
+use crate::server::ButtplugServer;
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
 pub use device::{
@@ -276,14 +278,11 @@ impl ButtplugClient {
   #[cfg(feature = "server")]
   pub async fn connect_in_process(
     &self,
-    options: &crate::server::ButtplugServerOptions,
+    server: Option<ButtplugServer>
   ) -> Result<(), ButtplugClientError> {
     use crate::connector::ButtplugInProcessClientConnector;
 
-    let connector = match ButtplugInProcessClientConnector::new_with_options(options) {
-      Ok(conn) => conn,
-      Err(err) => return Err(ButtplugClientError::ButtplugError(err)),
-    };
+    let connector = ButtplugInProcessClientConnector::new(server);
     #[cfg(feature = "btleplug-manager")]
     {
       use crate::server::comm_managers::btleplug::BtlePlugCommunicationManagerBuilder;
@@ -304,12 +303,12 @@ impl ButtplugClient {
         )
         .unwrap();
     }
-    /*
     #[cfg(feature = "serial-manager")]
     {
       use crate::server::comm_managers::serialport::SerialPortCommunicationManagerBuilder;
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(SerialPortCommunicationManagerBuilder::default())
         .unwrap();
     }
@@ -318,6 +317,7 @@ impl ButtplugClient {
       use crate::server::comm_managers::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default())
         .unwrap();
     }
@@ -328,10 +328,12 @@ impl ButtplugClient {
       };
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default())
         .unwrap();
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default())
         .unwrap();
     }
@@ -340,10 +342,10 @@ impl ButtplugClient {
       use crate::server::comm_managers::xinput::XInputDeviceCommunicationManagerBuilder;
       connector
         .server_ref()
+        .device_manager()
         .add_comm_manager(XInputDeviceCommunicationManagerBuilder::default())
         .unwrap();
     }
-    */
     self.connect(connector).await
   }
 

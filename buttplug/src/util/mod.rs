@@ -9,6 +9,7 @@
 //! the library.
 
 pub mod async_manager;
+pub mod device_configuration;
 pub mod future;
 pub mod json;
 pub mod logging;

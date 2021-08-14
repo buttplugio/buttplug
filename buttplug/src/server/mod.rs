@@ -24,7 +24,7 @@ use crate::{
       StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream, device_configuration::{DEVICE_CONFIGURATION_JSON, load_protocol_config_from_json}},
 };
 use device_manager::DeviceManager;
 use futures::{
@@ -57,50 +57,78 @@ pub enum ButtplugServerError {
 }
 
 #[derive(Debug, Clone)]
-pub struct ButtplugServerOptions {
+pub struct ButtplugServerBuilder {
   pub name: String,
-  pub max_ping_time: u64,
+  pub max_ping_time: Option<u64>,
   pub allow_raw_messages: bool,
   pub device_configuration_json: Option<String>,
   pub user_device_configuration_json: Option<String>,
 }
 
-impl Default for ButtplugServerOptions {
+impl Default for ButtplugServerBuilder {
   fn default() -> Self {
     Self {
       name: "Buttplug Server".to_owned(),
-      max_ping_time: 0,
+      max_ping_time: None,
       allow_raw_messages: false,
-      device_configuration_json: None,
+      device_configuration_json: Some(DEVICE_CONFIGURATION_JSON.to_owned()),
       user_device_configuration_json: None,
     }
   }
 }
 
-/// Represents a ButtplugServer.
-pub struct ButtplugServer {
-  server_name: String,
-  max_ping_time: u64,
-  device_manager: DeviceManager,
-  ping_timer: Arc<PingTimer>,
-  connected: Arc<AtomicBool>,
-  output_sender: broadcast::Sender<ButtplugServerMessage>,
-}
-
-impl Default for ButtplugServer {
-  fn default() -> Self {
-    // We can unwrap here because if default init fails, so will pretty much every test.
-    Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
+impl ButtplugServerBuilder {
+  pub fn name(mut self, name: &str) -> Self {
+    self.name = name.to_owned();
+    self
   }
-}
 
-impl ButtplugServer {
-  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    debug!("Creating server '{}'", options.name);
+  pub fn max_ping_time(mut self, ping_time: u64) -> Self {
+    self.max_ping_time = Some(ping_time);
+    self
+  }
+
+  pub fn allow_raw_messages(mut self, allow: bool) -> Self {
+    self.allow_raw_messages = allow;
+    self
+  }
+
+  pub fn device_configuration_json(mut self, config_json: Option<String>) -> Self {
+    self.device_configuration_json = config_json;
+    self
+  }
+
+  pub fn user_device_configuration_json(mut self, config_json: Option<String>) -> Self {
+    self.user_device_configuration_json = config_json;
+    self
+  }
+
+  pub fn finish(self) -> Result<ButtplugServer, ButtplugError> {
+    // If the user config string exists, parse it.
+    let user_config = if let Some(user_device_config) = self.user_device_configuration_json {
+      Some(load_protocol_config_from_json(&user_device_config)?)
+    } else {
+      None
+    };
+    
+    // If the device config string exists, parse it.
+    let device_config = if let Some(main_device_config) = self.device_configuration_json {
+      let mut main_config = load_protocol_config_from_json(&main_device_config)?;
+      if let Some(user_config) = user_config {
+        main_config.merge(user_config);
+      }
+      Some(main_config)
+    } else {
+      user_config
+    };
+
+    // Create the server
+    debug!("Creating server '{}'", self.name);
     let (send, _) = broadcast::channel(256);
     let output_sender_clone = send.clone();
     let connected = Arc::new(AtomicBool::new(false));
-    let ping_timer = Arc::new(PingTimer::new(options.max_ping_time));
+    let ping_time = self.max_ping_time.unwrap_or(0);
+    let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
     let connected_clone = connected.clone();
     async_manager::spawn(
@@ -120,23 +148,54 @@ impl ButtplugServer {
       .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
     )
     .unwrap();
-    let device_manager = DeviceManager::try_new(
+    let device_manager = DeviceManager::new(
       send.clone(),
       ping_timer.clone(),
-      options.allow_raw_messages,
-      &options.device_configuration_json,
-      &options.user_device_configuration_json,
-    )?;
-    Ok(Self {
-      server_name: options.name.clone(),
-      max_ping_time: options.max_ping_time,
+      self.allow_raw_messages
+    );
+
+    if let Some(devices) = device_config {
+      for (name, def) in devices.protocols {
+        device_manager.add_protocol_definition(&name, def);
+      }
+    }
+
+    let server = ButtplugServer {
+      server_name: self.name.clone(),
+      max_ping_time: ping_time,
       device_manager,
       ping_timer,
       connected,
       output_sender: send,
-    })
-  }
+    };
 
+    // Add the device config
+
+    // Update with the user config
+
+    // Assuming everything passed, return the server.
+    Ok(server)
+  }
+}
+
+/// Represents a ButtplugServer.
+pub struct ButtplugServer {
+  server_name: String,
+  max_ping_time: u64,
+  device_manager: DeviceManager,
+  ping_timer: Arc<PingTimer>,
+  connected: Arc<AtomicBool>,
+  output_sender: broadcast::Sender<ButtplugServerMessage>,
+}
+
+impl Default for ButtplugServer {
+  fn default() -> Self {
+    // We can unwrap here because if default init fails, so will pretty much every test.
+    ButtplugServerBuilder::default().finish().unwrap()
+  }
+}
+
+impl ButtplugServer {
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.

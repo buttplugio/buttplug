@@ -13,7 +13,6 @@ use buttplug::{
     ButtplugClient, ButtplugClientDevice, ButtplugClientDeviceMessageType, ButtplugClientEvent,
     VibrateCommand,
   },
-  server::ButtplugServerOptions,
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -29,7 +28,7 @@ async fn device_control_example() {
   let client = ButtplugClient::new("Example Client");
   let mut event_stream = client.event_stream();
   client
-    .connect_in_process(&ButtplugServerOptions::default())
+    .connect_in_process(None)
     .await
     .unwrap();
 

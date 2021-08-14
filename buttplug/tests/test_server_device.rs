@@ -7,7 +7,7 @@ use buttplug::{
     },
   },
   device::Endpoint,
-  server::{ButtplugServer, ButtplugServerOptions},
+  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
@@ -58,9 +58,7 @@ fn test_capabilities_exposure() {
 #[test]
 fn test_server_raw_message() {
   async_manager::block_on(async {
-    let mut options = ButtplugServerOptions::default();
-    options.allow_raw_messages = true;
-    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let server = ButtplugServerBuilder::default().allow_raw_messages(true).finish().unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);
     let helper = server.device_manager().add_test_comm_manager().unwrap();

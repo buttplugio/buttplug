@@ -9,10 +9,11 @@ use buttplug::{
     },
   },
   device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-  server::{ButtplugServer, ButtplugServerOptions},
-  test::check_test_recv_value,
+  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
+#[cfg(test)]
+use buttplug::test::check_test_recv_value;
 use futures::{pin_mut, Stream, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
@@ -88,9 +89,7 @@ fn test_server_version_gt() {
 #[test]
 fn test_ping_timeout() {
   async_manager::block_on(async {
-    let mut options = ButtplugServerOptions::default();
-    options.max_ping_time = 100;
-    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);
     let msg =
@@ -124,9 +123,7 @@ fn test_ping_timeout() {
 #[test]
 fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
-    let mut options = ButtplugServerOptions::default();
-    options.max_ping_time = 100;
-    let server = ButtplugServer::new_with_options(&options).unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);
     let helper = server.device_manager().add_test_comm_manager().unwrap();

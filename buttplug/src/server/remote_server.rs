@@ -1,4 +1,4 @@
-use super::{ButtplugServer, ButtplugServerOptions, DeviceManager};
+use super::{ButtplugServer, ButtplugServerBuilder, DeviceManager};
 use crate::{
   connector::ButtplugConnector,
   core::{
@@ -131,19 +131,18 @@ async fn run_server<ConnectorType>(
 
 impl Default for ButtplugRemoteServer {
   fn default() -> Self {
-    Self::new_with_options(&ButtplugServerOptions::default()).unwrap()
+    Self::new(ButtplugServerBuilder::default().finish().unwrap())
   }
 }
 
 impl ButtplugRemoteServer {
-  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    let server = ButtplugServer::new_with_options(options)?;
+  pub fn new(server: ButtplugServer) -> Self {
     let (event_sender, _) = broadcast::channel(256);
-    Ok(Self {
+    Self {
       event_sender,
       server: Arc::new(server),
       disconnect_notifier: Arc::new(Notify::new()),
-    })
+    }
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugRemoteServerEvent> {

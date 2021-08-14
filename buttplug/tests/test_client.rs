@@ -12,7 +12,7 @@ use buttplug::{
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-  server::ButtplugServerOptions,
+  server::ButtplugServerBuilder,
   test::check_test_recv_value,
   util::async_manager,
 };
@@ -196,9 +196,8 @@ fn test_client_scanning_finished() {
 #[test]
 fn test_client_ping() {
   async_manager::block_on(async {
-    let mut options = ButtplugServerOptions::default();
-    options.max_ping_time = 200;
-    let connector = ButtplugInProcessClientConnector::new_with_options(&options).unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(200).finish().unwrap();
+    let connector = ButtplugInProcessClientConnector::new(Some(server));
     let client = ButtplugClient::new("Test Client");
     client.connect(connector).await.unwrap();
     assert!(client.ping().await.is_ok());

@@ -11,7 +11,7 @@ use buttplug::{
   },
   util::async_manager,
 };
-use futures::{pin_mut, StreamExt};
+use futures::StreamExt;
 use futures_timer::Delay;
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
@@ -23,8 +23,6 @@ fn test_client_device_connected_status() {
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
     let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
-    let recv = client.event_stream();
-    pin_mut!(recv);
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();
@@ -60,8 +58,6 @@ fn test_client_device_client_disconnected_status() {
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
     let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
-    let recv = client.event_stream();
-    pin_mut!(recv);
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();
@@ -122,8 +118,6 @@ fn test_client_device_invalid_command() {
     let mut event_stream = client.event_stream();
     let connector = ButtplugInProcessClientConnector::default();
     let helper = connector.server_ref().device_manager().add_test_comm_manager().unwrap();
-    let recv = client.event_stream();
-    pin_mut!(recv);
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
     client.connect(connector).await.unwrap();

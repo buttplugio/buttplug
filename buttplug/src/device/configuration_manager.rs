@@ -16,7 +16,6 @@ use crate::{
     messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap},
   },
   device::Endpoint,
-  util::json::JSONValidator,
 };
 use dashmap::DashMap;
 use serde::Deserialize;
@@ -25,11 +24,6 @@ use std::{
   sync::Arc,
 };
 use uuid::Uuid;
-
-static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config.json");
-static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
 
 // Note: There's a ton of extra structs in here just to deserialize the json
 // file. Just leave them and build extras (for instance,
@@ -214,7 +208,7 @@ pub struct ProtocolAttributes {
   messages: Option<DeviceMessageAttributesMap>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Default)]
 pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in get_specifiers(). Feels
@@ -336,27 +330,6 @@ impl ProtocolDefinition {
   }
 }
 
-#[derive(Deserialize, Debug)]
-pub struct ProtocolConfiguration {
-  pub version: u32,
-  pub(self) protocols: HashMap<String, ProtocolDefinition>,
-}
-
-impl ProtocolConfiguration {
-  pub fn merge_user_config(&mut self, other: ProtocolConfiguration) {
-    // For now, we're only merging serial info in.
-    for (protocol, conf) in other.protocols {
-      if self.protocols.contains_key(&protocol) {
-        // Just checked we have this.
-        let protocol_conf = self.protocols.get_mut(&protocol).unwrap();
-        protocol_conf.merge_user_definition(conf);
-      } else {
-        self.protocols.insert(protocol, conf);
-      }
-    }
-  }
-}
-
 #[derive(Clone, Debug)]
 pub struct DeviceProtocolConfiguration {
   allow_raw_messages: bool,
@@ -453,7 +426,7 @@ impl DeviceProtocolConfiguration {
 
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
-  pub(self) config: ProtocolConfiguration,
+  protocol_definitions: Arc<DashMap<String, ProtocolDefinition>>,
   protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>,
 }
 
@@ -461,72 +434,25 @@ impl Default for DeviceConfigurationManager {
   fn default() -> Self {
     // Unwrap allowed here because we assume our built in device config will
     // always work. System won't pass tests or possibly even build otherwise.
-    Self::new_with_options(false, &None, &None).unwrap()
+    Self::new(false)
   }
 }
 
 impl DeviceConfigurationManager {
-  pub fn new_with_options(
-    allow_raw_messages: bool,
-    external_config: &Option<String>,
-    user_config: &Option<String>,
-  ) -> Result<Self, ButtplugDeviceError> {
-    // TODO Handling references incorrectly here.
-    let config_str = if let Some(cfg) = external_config {
-      cfg
-    } else {
-      DEVICE_CONFIGURATION_JSON
-    };
-
-    let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
-    let mut config: ProtocolConfiguration = match config_validator.validate(config_str) {
-      Ok(_) => match serde_json::from_str(config_str) {
-        Ok(protocol_config) => protocol_config,
-        Err(err) => {
-          return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-            "{}",
-            err
-          )))
-        }
-      },
-      Err(err) => {
-        return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-          "{}",
-          err
-        )))
-      }
-    };
-    info!(
-      "Successfully loaded Device Configuration File Version {}",
-      config.version
-    );
-
-    if let Some(user_config_str) = user_config {
-      let user_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
-      match user_validator.validate(user_config_str) {
-        Ok(_) => match serde_json::from_str(user_config_str) {
-          Ok(user_cfg) => config.merge_user_config(user_cfg),
-          Err(err) => {
-            return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-              "{}",
-              err
-            )))
-          }
-        },
-        Err(err) => {
-          return Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-            "{}",
-            err
-          )))
-        }
-      }
-    }
-
-    Ok(DeviceConfigurationManager {
+  pub fn new(allow_raw_messages: bool) -> Self {
+    Self {
       allow_raw_messages,
-      config,
+      protocol_definitions: Arc::new(DashMap::new()),
       protocol_map: Arc::new(get_default_protocol_map()),
-    })
+    }
+  }
+
+  pub fn add_protocol_definition(&self, protocol_name: &str, protocol_definition: ProtocolDefinition) {
+    self.protocol_definitions.insert(protocol_name.to_owned(), protocol_definition);
+  }
+
+  pub fn remove_protocol_definition(&self, protocol_name: &str) {
+    self.protocol_definitions.remove(protocol_name);
   }
 
   pub fn add_protocol<T>(&self, protocol_name: &str)
@@ -555,11 +481,11 @@ impl DeviceConfigurationManager {
   /// Provides read-only access to the internal protocol/identifier map. Mainly
   /// used for WebBluetooth filter construction, but could also be handy for
   /// listing capabilities in UI, etc.
-  pub fn protocol_configurations(&self) -> &HashMap<String, ProtocolDefinition> {
-    &self.config.protocols
+  pub fn protocol_definitions(&self) -> Arc<DashMap<String, ProtocolDefinition>> {
+    self.protocol_definitions.clone()
   }
 
-  pub fn find_configuration(
+  pub fn find_protocol_definitions(
     &self,
     specifier: &DeviceSpecifier,
   ) -> Option<(bool, String, ProtocolDefinition)> {
@@ -567,10 +493,10 @@ impl DeviceConfigurationManager {
       "Looking for protocol that matches specifier: {:?}",
       specifier
     );
-    for (name, def) in self.config.protocols.iter() {
-      if def == specifier {
-        info!("Found protocol {:?} for specifier {:?}.", name, specifier);
-        return Some((self.allow_raw_messages, name.clone(), def.clone()));
+    for config in self.protocol_definitions.iter() {
+      if config.value() == specifier {
+        info!("Found protocol {:?} for specifier {:?}.", config.key(), specifier);
+        return Some((self.allow_raw_messages, config.key().clone(), config.value().clone()));
       }
     }
     debug!("No protocol found for specifier {:?}.", specifier);
@@ -581,7 +507,7 @@ impl DeviceConfigurationManager {
     debug!("Looking for protocol {}", name);
     // TODO It feels like maybe there should be a cleaner way to do this,
     // but I'm not really sure what it is?
-    if let Some(proto) = self.config.protocols.get(name) {
+    if let Some(proto) = self.protocol_definitions.get(name) {
       info!("Found a protocol definition for {}", name);
       Some(DeviceProtocolConfiguration::new(
         self.allow_raw_messages,
@@ -598,37 +524,37 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    BluetoothLESpecifier, DeviceConfigurationManager, DeviceProtocolConfiguration, DeviceSpecifier,
+    BluetoothLESpecifier, DeviceProtocolConfiguration, DeviceSpecifier, SerialSpecifier
   };
-  use crate::core::messages::ButtplugDeviceMessageType;
-
+  use crate::{core::messages::ButtplugDeviceMessageType, device::configuration_manager::ProtocolDefinition, util::device_configuration::create_test_dcm};
+/*
   #[test]
   fn test_load_config() {
     let config = DeviceConfigurationManager::default();
     debug!("{:?}", config.config);
   }
-
+*/
   #[test]
   fn test_config_equals() {
-    let config = DeviceConfigurationManager::default();
+    let config = create_test_dcm(false);
     let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
-    assert!(config.find_configuration(&launch).is_some());
+    assert!(config.find_protocol_definitions(&launch).is_some());
   }
 
   #[test]
   fn test_config_wildcard_equals() {
-    let config = DeviceConfigurationManager::default();
+    let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    assert!(config.find_configuration(&lovense).is_some());
+    assert!(config.find_protocol_definitions(&lovense).is_some());
   }
 
   #[test]
   fn test_specific_device_config_creation() {
-    let config = DeviceConfigurationManager::default();
+    let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_configuration(&lovense).unwrap();
+    let proto = config.find_protocol_definitions(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
@@ -647,10 +573,10 @@ mod test {
 
   #[test]
   fn test_raw_device_config_creation() {
-    let config = DeviceConfigurationManager::new_with_options(true, &None, &None).unwrap();
+    let config = create_test_dcm(true);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_configuration(&lovense).unwrap();
+    let proto = config.find_protocol_definitions(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
@@ -665,10 +591,10 @@ mod test {
 
   #[test]
   fn test_non_raw_device_config_creation() {
-    let config = DeviceConfigurationManager::default();
+    let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_configuration(&lovense).unwrap();
+    let proto = config.find_protocol_definitions(&lovense).unwrap();
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).unwrap();
@@ -683,11 +609,11 @@ mod test {
 
   #[test]
   fn test_user_config_loading() {
-    let mut config = DeviceConfigurationManager::default();
-    assert!(config.config.protocols.contains_key("nobra"));
+    // Assume we have a nobra's entry in the device config.
+    let mut config = create_test_dcm(false);
+    assert!(config.protocol_definitions().contains_key("nobra"));
     assert!(config
-      .config
-      .protocols
+      .protocol_definitions()
       .get("nobra")
       .unwrap()
       .serial
@@ -695,8 +621,7 @@ mod test {
       .is_some());
     assert_eq!(
       config
-        .config
-        .protocols
+        .protocol_definitions()
         .get("nobra")
         .unwrap()
         .serial
@@ -705,36 +630,17 @@ mod test {
         .len(),
       1
     );
-    config = DeviceConfigurationManager::new_with_options(
-      false,
-      &None,
-      &Some(
-        r#"
-        {
-            "version": 1, 
-            "protocols": {
-                "nobra": {
-                    "serial": [
-                        {
-                            "port": "COM1",
-                            "baud-rate": 19200,
-                            "data-bits": 8,
-                            "parity": "N",
-                            "stop-bits": 1
-                        }
-                    ]
-                }
-            }
-        }
-        "#
-        .to_string(),
-      ),
-    )
-    .unwrap();
-    assert!(config.config.protocols.contains_key("nobra"));
+
+    // Now try overriding it, make sure we still only have 1.
+    config = create_test_dcm(false);
+    let mut nobra_def = ProtocolDefinition::default();
+    let mut serial_specifier = SerialSpecifier::default();
+    serial_specifier.port = "COM1".to_owned();
+    nobra_def.serial = Some(vec!(serial_specifier));
+    config.add_protocol_definition("nobra", nobra_def);
+    assert!(config.protocol_definitions().contains_key("nobra"));
     assert!(config
-      .config
-      .protocols
+      .protocol_definitions()
       .get("nobra")
       .unwrap()
       .serial
@@ -742,19 +648,17 @@ mod test {
       .is_some());
     assert_eq!(
       config
-        .config
-        .protocols
+        .protocol_definitions()
         .get("nobra")
         .unwrap()
         .serial
         .as_ref()
         .unwrap()
         .len(),
-      2
+      1
     );
     assert!(config
-      .config
-      .protocols
+      .protocol_definitions()
       .get("nobra")
       .unwrap()
       .serial

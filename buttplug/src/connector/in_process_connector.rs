@@ -1,10 +1,9 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::{
-    errors::ButtplugError,
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
-  server::{ButtplugServer, ButtplugServerOptions},
+  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use futures::{
@@ -57,7 +56,7 @@ pub struct ButtplugInProcessClientConnector {
 impl<'a> Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
     // Unwrap is fine here, if we pass in default options we'll never fail.
-    ButtplugInProcessClientConnector::new_with_options(&ButtplugServerOptions::default()).unwrap()
+    ButtplugInProcessClientConnector::new(None)
   }
 }
 
@@ -68,15 +67,14 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
-  pub fn new_with_options(options: &ButtplugServerOptions) -> Result<Self, ButtplugError> {
-    let server = Arc::new(ButtplugServer::new_with_options(options)?);
+  pub fn new(server: Option<ButtplugServer>) -> Self {
     // Create a dummy channel, will just be overwritten on connect.
     let (server_outbound_sender, _) = channel(256);
-    Ok(Self {
+    Self {
       server_outbound_sender,
-      server,
+      server: Arc::new(server.unwrap_or(ButtplugServerBuilder::default().finish().unwrap())),
       connected: Arc::new(AtomicBool::new(false)),
-    })
+    }
   }
 
   /// Get a reference to the internal server.

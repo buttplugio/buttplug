@@ -432,7 +432,7 @@ impl ButtplugDevice {
     // configuration but something goes wrong after this, then it's an
     // error.
 
-    match device_config_mgr.find_configuration(&device_creator.get_specifier()) {
+    match device_config_mgr.find_protocol_definitions(&device_creator.get_specifier()) {
       Some((allow_raw_messages, config_name, config)) => {
         // Now that we have both a possible device implementation and a
         // configuration for that device, try to initialize the implementation.

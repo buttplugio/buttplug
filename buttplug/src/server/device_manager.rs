@@ -26,7 +26,7 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::DeviceConfigurationManager, protocol::ButtplugProtocol, ButtplugDevice,
+    configuration_manager::{DeviceConfigurationManager, ProtocolDefinition}, protocol::ButtplugProtocol, ButtplugDevice,
   },
   server::ButtplugServerResultFuture,
   test::{TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper},
@@ -56,18 +56,12 @@ unsafe impl Send for DeviceManager {}
 unsafe impl Sync for DeviceManager {}
 
 impl DeviceManager {
-  pub fn try_new(
+  pub fn new(
     output_sender: broadcast::Sender<ButtplugServerMessage>,
     ping_timer: Arc<PingTimer>,
     allow_raw_messages: bool,
-    device_config_json: &Option<String>,
-    user_device_config_json: &Option<String>,
-  ) -> Result<Self, ButtplugDeviceError> {
-    let config = Arc::new(DeviceConfigurationManager::new_with_options(
-      allow_raw_messages,
-      device_config_json,
-      user_device_config_json,
-    )?);
+  ) -> Self {
+    let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages));
     let devices = Arc::new(DashMap::new());
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let device_allow_list = Arc::new(DashSet::new());
@@ -85,14 +79,14 @@ impl DeviceManager {
       event_loop.run().await;
     })
     .unwrap();
-    Ok(Self {
+    Self {
       device_event_sender,
       devices,
       device_allow_list,
       device_deny_list,
       comm_managers: Arc::new(DashMap::new()),
       config,
-    })
+    }
   }
 
   fn start_scanning(&self) -> ButtplugServerResultFuture {
@@ -316,6 +310,14 @@ impl DeviceManager {
 
   pub fn remove_all_protocols(&self) {
     self.config.remove_all_protocols();
+  }
+
+  pub fn add_protocol_definition(&self, name: &str, config: ProtocolDefinition) {
+    self.config.add_protocol_definition(name, config);
+  }
+
+  pub fn remove_protocol_definition(&self, name: &str) {
+    self.config.remove_protocol_definition(name);    
   }
 
   pub fn add_allowed_device(&self, address: &str) {
