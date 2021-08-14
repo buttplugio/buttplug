@@ -1,4 +1,4 @@
-use super::websocket_server_comm_manager::WebsocketCommManagerInitInfo;
+use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -110,7 +110,7 @@ async fn run_connection_loop<S>(
 }
 
 pub struct WebsocketServerDeviceImplCreator {
-  info: WebsocketCommManagerInitInfo,
+  info: WebsocketServerDeviceCommManagerInitInfo,
   outgoing_sender: Option<Sender<Vec<u8>>>,
   incoming_broadcaster: Option<broadcast::Sender<Vec<u8>>>,
   device_event_sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
@@ -118,7 +118,7 @@ pub struct WebsocketServerDeviceImplCreator {
 
 impl WebsocketServerDeviceImplCreator {
   pub fn new<S>(
-    info: WebsocketCommManagerInitInfo,
+    info: WebsocketServerDeviceCommManagerInitInfo,
     ws_stream: async_tungstenite::WebSocketStream<S>,
   ) -> Self
   where
@@ -187,7 +187,7 @@ pub struct WebsocketServerDeviceImpl {
   connected: Arc<AtomicBool>,
   subscribed: Arc<AtomicBool>,
   subscribe_token: Arc<Mutex<Option<CancellationToken>>>,
-  info: WebsocketCommManagerInitInfo,
+  info: WebsocketServerDeviceCommManagerInitInfo,
   outgoing_sender: Sender<Vec<u8>>,
   incoming_broadcaster: broadcast::Sender<Vec<u8>>,
   device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
@@ -196,7 +196,7 @@ pub struct WebsocketServerDeviceImpl {
 impl WebsocketServerDeviceImpl {
   pub fn new(
     device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
-    info: WebsocketCommManagerInitInfo,
+    info: WebsocketServerDeviceCommManagerInitInfo,
     outgoing_sender: Sender<Vec<u8>>,
     incoming_broadcaster: broadcast::Sender<Vec<u8>>,
   ) -> Self {
