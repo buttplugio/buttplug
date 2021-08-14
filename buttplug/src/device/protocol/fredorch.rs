@@ -190,11 +190,10 @@ impl ButtplugProtocolCommandHandler for Fredorch {
 
 #[cfg(all(test, feature = "server"))]
 mod test {
-  use crate::test::check_test_recv_empty;
   use crate::{
     core::messages::{FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    test::{check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
     util::async_manager,
   };
 
