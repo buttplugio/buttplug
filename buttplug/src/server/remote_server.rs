@@ -25,8 +25,8 @@ pub enum ButtplugRemoteServerEvent {
 
 #[derive(Error, Debug)]
 pub enum ButtplugServerConnectorError {
-  #[error("Can't connect")]
-  ConnectorError,
+  #[error("Cannot bring up server for connection: {0}")]
+  ConnectorError(String),
 }
 
 pub enum ButtplugServerCommand {
@@ -164,7 +164,7 @@ impl ButtplugRemoteServer {
       connector
         .connect(connector_sender)
         .await
-        .map_err(|_| ButtplugServerConnectorError::ConnectorError)?;
+        .map_err(|e| ButtplugServerConnectorError::ConnectorError(format!("{:?}", e)))?;
       run_server(
         server_clone,
         event_sender_clone,
