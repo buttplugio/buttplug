@@ -1,5 +1,5 @@
 use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
-use crate::{core::ButtplugResultFuture, device::protocol::cachito::Cachito, server::comm_managers::{
+use crate::{core::ButtplugResultFuture, server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
   }};
 use futures::{StreamExt, FutureExt};

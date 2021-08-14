@@ -17,12 +17,14 @@ use futures::{
   future::{self, BoxFuture},
   AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt,
 };
+use futures_timer::Delay;
 use std::{
   fmt::{self, Debug},
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
+  time::Duration
 };
 use tokio::sync::{
   broadcast,
@@ -44,15 +46,35 @@ async fn run_connection_loop<S>(
 
   let (mut websocket_server_sender, mut websocket_server_receiver) = ws_stream.split();
 
+  // Start pong count at 1, so we'll clear it after sending our first ping.
+  let mut pong_count = 1u32;
+
+  let mut sleep = Delay::new(Duration::from_millis(1000)).fuse();
+
   loop {
     select! {
+      _ = sleep => {
+        if pong_count == 0 {
+          error!("Cannot no pongs received, considering connection closed.");
+          return;          
+        }
+        pong_count = 0;
+        if websocket_server_sender
+          .send(async_tungstenite::tungstenite::Message::Ping(vec!(0)))
+          .await
+          .is_err() {
+          error!("Cannot send ping to client, considering connection closed.");
+          return;
+        }
+        sleep = Delay::new(Duration::from_millis(1000)).fuse();
+      }
       ws_msg = request_receiver.recv().fuse() => {
         if let Some(binary_msg) = ws_msg {
           if websocket_server_sender
             .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
             .await
             .is_err() {
-            error!("Cannot send binary value to server, considering connection closed.");
+            error!("Cannot send binary value to client, considering connection closed.");
             return;
           }
         } else {
@@ -88,7 +110,7 @@ async fn run_connection_loop<S>(
                   continue;
                 }
                 async_tungstenite::tungstenite::Message::Pong(_) => {
-                  // noop
+                  pong_count += 1;
                   continue;
                 }
               }

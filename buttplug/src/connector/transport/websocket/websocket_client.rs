@@ -106,6 +106,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
       match connect_async_with_tls_connector(&address, tls_connector).await {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
+
           async_manager::spawn(
             async move {
               loop {
@@ -124,6 +125,57 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       return;
                     }
                   },
+                  response = reader.next().fuse() => {
+                    trace!("Websocket receiving: {:?}", response);
+                    if response.is_none() {
+                      info!("Connector holding websocket dropped, returning");
+                      writer.close().await.unwrap_or_else(|err| error!("{}", err));
+                      return;                      
+                    }
+                    match response.unwrap() {
+                      Ok(msg) => match msg {
+                        Message::Text(t) => {
+                          if incoming_sender
+                            .send(ButtplugTransportIncomingMessage::Message(
+                              ButtplugSerializedMessage::Text(t.to_string()),
+                            ))
+                            .await
+                            .is_err()
+                          {
+                            error!("Websocket holder has closed, exiting websocket loop.");
+                            return;
+                          }
+                        }
+                        Message::Binary(v) => {
+                          if incoming_sender
+                            .send(ButtplugTransportIncomingMessage::Message(
+                              ButtplugSerializedMessage::Binary(v),
+                            ))
+                            .await
+                            .is_err()
+                          {
+                            error!("Websocket holder has closed, exiting websocket loop.");
+                            return;
+                          }
+                        }
+                        Message::Ping(data) => {
+                          writer.send(Message::Pong(data)).await.expect("This should never fail?");
+                        }
+                        Message::Pong(_) => {}
+                        Message::Close(_) => {
+                          info!("Websocket has requested close.");
+                          return;
+                        }
+                      },
+                      Err(err) => {
+                        error!(
+                          "Error in websocket client loop (assuming disconnect): {}",
+                          err
+                        );
+                        break;
+                      }
+                    }
+                  }
                   _ = disconnect_notifier.notified().fuse() => {
                     // If we can't close, just print the error to the logs but
                     // still break out of the loop.
@@ -136,57 +188,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                 }
               }
             }
-            .instrument(tracing::info_span!("Websocket Send Task")),
-          )
-          .unwrap();
-          async_manager::spawn(
-            async move {
-              while let Some(response) = reader.next().await {
-                trace!("Websocket receiving: {:?}", response);
-                match response {
-                  Ok(msg) => match msg {
-                    Message::Text(t) => {
-                      if incoming_sender
-                        .send(ButtplugTransportIncomingMessage::Message(
-                          ButtplugSerializedMessage::Text(t.to_string()),
-                        ))
-                        .await
-                        .is_err()
-                      {
-                        error!("Websocket holder has closed, exiting websocket loop.");
-                        return;
-                      }
-                    }
-                    Message::Binary(v) => {
-                      if incoming_sender
-                        .send(ButtplugTransportIncomingMessage::Message(
-                          ButtplugSerializedMessage::Binary(v),
-                        ))
-                        .await
-                        .is_err()
-                      {
-                        error!("Websocket holder has closed, exiting websocket loop.");
-                        return;
-                      }
-                    }
-                    Message::Ping(_) => {}
-                    Message::Pong(_) => {}
-                    Message::Close(_) => {
-                      info!("Websocket has requested close.");
-                      return;
-                    }
-                  },
-                  Err(err) => {
-                    error!(
-                      "Error in websocket client loop (assuming disconnect): {}",
-                      err
-                    );
-                    break;
-                  }
-                }
-              }
-            }
-            .instrument(tracing::info_span!("Websocket Receive Task")),
+            .instrument(tracing::info_span!("Websocket Client I/O Task")),
           )
           .unwrap();
           Ok(())

@@ -9,8 +9,12 @@ use crate::{
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
+use futures_timer::Delay;
 use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
-use std::sync::Arc;
+use std::{
+  sync::Arc,
+  time::Duration
+};
 use tokio::net::TcpListener;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
@@ -66,6 +70,10 @@ async fn run_connection_loop<S>(
 
   let (mut websocket_server_sender, mut websocket_server_receiver) = ws_stream.split();
 
+  // Start pong count at 1, so we'll clear it after sending our first ping.
+  let mut pong_count = 1u32;
+  let mut sleep = Delay::new(Duration::from_millis(1000)).fuse();
+
   loop {
     select! {
       _ = disconnect_notifier.notified().fuse() => {
@@ -74,6 +82,21 @@ async fn run_connection_loop<S>(
           error!("Cannot close, assuming connection already closed");
           return;
         }
+      },
+      _ = sleep => {
+        if pong_count == 0 {
+          error!("Cannot no pongs received, considering connection closed.");
+          return;          
+        }
+        pong_count = 0;
+        if websocket_server_sender
+          .send(async_tungstenite::tungstenite::Message::Ping(vec!(0)))
+          .await
+          .is_err() {
+          error!("Cannot send ping to client, considering connection closed.");
+          return;
+        }
+        sleep = Delay::new(Duration::from_millis(1000)).fuse();
       },
       serialized_msg = request_receiver.recv().fuse() => {
         if let Some(serialized_msg) = serialized_msg {
@@ -128,6 +151,7 @@ async fn run_connection_loop<S>(
                 }
                 async_tungstenite::tungstenite::Message::Pong(_) => {
                   // noop
+                  pong_count += 1;
                   continue;
                 }
                 async_tungstenite::tungstenite::Message::Binary(_) => {
