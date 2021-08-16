@@ -67,6 +67,14 @@
           "52300001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "52300002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "52300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "46300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "46300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "46300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "50300011-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "50300012-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "50300013-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -107,7 +115,8 @@
                 20,
                 20
               ]
-            }
+            },
+            "BatteryLevelCmd": {}
           }
         },
         {
@@ -124,7 +133,8 @@
               "StepCount": [
                 20
               ]
-            }
+            },
+            "BatteryLevelCmd": {}
           }
         },
         {
@@ -198,6 +208,14 @@
           "name": {
             "en-us": "Loveai Dolp"
           }
+        },
+        {
+          "identifier": [
+            "F"
+          ],
+          "name": {
+            "en-us": "Lovense Blast"
+          }
         }
       ]
     },
@@ -242,7 +260,8 @@
                 20,
                 20
               ]
-            }
+            },
+            "BatteryLevelCmd": {}
           }
         },
         {
@@ -258,7 +277,8 @@
               "StepCount": [
                 20
               ]
-            }
+            },
+            "BatteryLevelCmd": {}
           }
         },
         {
@@ -323,6 +343,22 @@
           ],
           "name": {
             "en-us": "Lovense Diamo"
+          }
+        },
+        {
+          "identifier": [
+            "ToyS"
+          ],
+          "name": {
+            "en-us": "Loveai Dolp"
+          }
+        },
+        {
+          "identifier": [
+            "F"
+          ],
+          "name": {
+            "en-us": "Lovense Blast"
           }
         }
       ]
