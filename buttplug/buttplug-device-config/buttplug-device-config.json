@@ -2854,6 +2854,32 @@
           "FleshlightLaunchFW12Cmd": {}
         }
       }
+    },
+    "mizzzee": {
+      "btle": {
+        "names": [
+          "NFY008"
+        ],
+        "services": {
+          "0000eea0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000eea1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Mizz Zee Pill"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              68
+            ]
+          },
+          "FleshlightLaunchFW12Cmd": {}
+        }
+      }
     }
   }
 }
