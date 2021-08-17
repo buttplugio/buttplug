@@ -21,6 +21,7 @@ pub mod magic_motion_v1;
 pub mod magic_motion_v2;
 pub mod magic_motion_v3;
 pub mod maxpro;
+pub mod mizzzee;
 pub mod motorbunny;
 pub mod mysteryvibe;
 pub mod nobra;
@@ -103,6 +104,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
   add_to_protocol_map::<magic_motion_v3::MagicMotionV3>(&map, "magic-motion-3");
   add_to_protocol_map::<maxpro::Maxpro>(&map, "maxpro");
+  add_to_protocol_map::<mizzzee::MizzZee>(&map, "mizzzee");
   add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
   add_to_protocol_map::<mysteryvibe::MysteryVibe>(&map, "mysteryvibe");
   add_to_protocol_map::<nobra::Nobra>(&map, "nobra");
