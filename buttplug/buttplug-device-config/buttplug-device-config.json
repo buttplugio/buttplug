@@ -2782,7 +2782,8 @@
         "names": [
           "PTVEA*",
           "PBT*",
-          "PCS*"
+          "PCS*",
+          "PHT*"
         ],
         "services": {
           "f000aa64-0451-4000-b000-000000000000": {
@@ -2819,6 +2820,14 @@
           ],
           "name": {
             "en-us": "Patoo Vibrator"
+          }
+        },
+        {
+          "identifier": [
+            "PHT"
+          ],
+          "name": {
+            "en-us": "Patoo Bean Sprout"
           }
         },
         {

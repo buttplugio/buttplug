@@ -1864,8 +1864,9 @@ protocols:
     btle:
       names:
         - PTVEA* # Carrot
-        - PBT*    # Devil
-        - PCS*    # Vibrator
+        - PBT*   # Devil
+        - PCS*   # Vibrator
+        - PHT*   # Bean Sprout
       services:
         f000aa64-0451-4000-b000-000000000000:
           txmode: f000aa65-0451-4000-b000-000000000000
@@ -1888,9 +1889,13 @@ protocols:
         name:
           en-us: Patoo Vibrator
       - identifier:
+          - PHT
+        name:
+          en-us: Patoo Bean Sprout
+      - identifier:
           - PBT
         name:
-          en-us: Patoo Devil       
+          en-us: Patoo Devil
         messages:
           VibrateCmd:
             FeatureCount: 2
