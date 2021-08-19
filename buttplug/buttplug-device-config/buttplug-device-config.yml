@@ -1938,7 +1938,7 @@ protocols:
           tx: 0000eea1-0000-1000-8000-00805f9b34fb
     defaults:
       name:
-        en-us: Mizz Zee Pill
+        en-us: Mizz Zee Device
       messages:
         VibrateCmd:
           FeatureCount: 1
