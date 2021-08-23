@@ -14,7 +14,11 @@
   - Allows users ability to never or always connect to certain devices
 - Added Device Configuration addition capabilities
   - While loading a default device configuration is still possible, we now externalize the loading
-    functions so that the library isn't absolutely bound to certain configuration types.
+    functions so that the library isn't bound to certain configuration formats.
+
+## Bugfixes
+
+- #381: Fix issue with DNS resolution for Lovense Connect Service
 
 ## Breaking Changes
 
