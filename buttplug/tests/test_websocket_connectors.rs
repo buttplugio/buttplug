@@ -27,7 +27,7 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteServerConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugServerJSONSerializer,
-        >::new(ButtplugWebsocketServerTransportBuilder::default().finish());
+        >::new(ButtplugWebsocketServerTransportBuilder::default().port(12349).finish());
         server_clone.start(connector).await.unwrap();
       })
       .unwrap();
@@ -37,7 +37,7 @@ mod websocket_connector_tests {
           ButtplugWebsocketClientTransport,
           ButtplugClientJSONSerializer,
         >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
-          "ws://127.0.0.1:12345",
+          "ws://127.0.0.1:12349",
         ));
 
         let client = ButtplugClient::new("Test Client");
@@ -74,7 +74,7 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteClientConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugClientJSONSerializer,
-        >::new(ButtplugWebsocketServerTransportBuilder::default().finish());
+        >::new(ButtplugWebsocketServerTransportBuilder::default().port(12347).finish());
 
         let client = ButtplugClient::new("Test Client");
         if client.connect(connector).await.is_ok() {
