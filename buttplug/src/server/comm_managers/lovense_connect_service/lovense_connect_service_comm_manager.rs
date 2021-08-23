@@ -204,10 +204,22 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
               let text = res.text().await.unwrap();
               let info: LovenseServiceInfo = serde_json::from_str(&text).unwrap();
               let mut current_known_hosts = known_hosts.lock().await;
-              // We set the protocol type here so it'll just filter down, in case we want to move to secure.
               let new_known_hosts: Vec<String> = info
                 .iter()
-                .map(|x| format!("http://{}:{}", x.0, x.1.http_port))
+                .map(|x| {
+                  // Lovense Connect uses [ip].lovense.club, which is a loopback DNS resolver that
+                  // should just point to [ip]. This is used for handling secure certificate
+                  // resolution when trying to use lovense connect over secure contexts. However,
+                  // this sometimes fails on DNS resolution. Since we aren't using secure contexts
+                  // at the moment, we can just cut out the IP from the domain and use that
+                  // directly, which has fixed issues for some users.
+                  let host_parts: Vec<&str> = x.0.split(".").collect();
+                  let new_http_host = host_parts[0].replace("-", ".");
+                  // We set the protocol type here so it'll just filter down, in case we want to move to secure.
+                  let host = format!("http://{}:{}", new_http_host, x.1.http_port);
+                  debug!("Lovense Connect converting IP to {}", host);
+                  host
+                })
                 .collect();
               // check for both different numbers of elements as well as elements not being the same
               if current_known_hosts.len() != new_known_hosts.len()
