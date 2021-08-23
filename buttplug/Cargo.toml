@@ -35,17 +35,17 @@ unstable=[]
 
 [dependencies]
 # buttplug_derive = { path = "../buttplug_derive" }
-native-tls = { version = "0.2.7", optional = true }
+native-tls = { version = "0.2.8", optional = true }
 buttplug_derive = "0.6.2"
 futures = "0.3.16"
 futures-util = "0.3.16"
 async-trait = "0.1.51"
-serde = { version = "1.0.127", features = ["derive"] }
+serde = { version = "1.0.128", features = ["derive"] }
 serde_json = "1.0.66"
 serde_repr = "0.1.7"
 uuid = { version = "0.8.2", features = ["serde"] }
 url = "2.2.2"
-btleplug = { version = "0.8.0", optional = true }
+btleplug = { version = "0.8.1", optional = true }
 # btleplug = { path = "../../btleplug", optional = true}
 # btleplug = { git = 'https://github.com/deviceplug/btleplug', branch = 'master', optional = true }
 strum_macros = "0.21.1"
@@ -58,17 +58,17 @@ valico = "3.6.0"
 thiserror = "1.0.26"
 async-tungstenite = { version = "0.14.0", optional = true }
 futures-timer = "3.0.2"
-wasm-bindgen-futures = { version = "0.4.25", optional = true }
+wasm-bindgen-futures = { version = "0.4.26", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.26"
 tracing-futures = "0.2.5"
-tracing-subscriber = { version = "0.2.19", features = ["json"] }
+tracing-subscriber = { version = "0.2.20", features = ["json"] }
 dashmap = "4.0.2"
 displaydoc = "0.2.3"
 serialport = { version = "4.0.1", optional = true }
 hidapi = { version = "1.2.6", optional = true }
-wasm-bindgen = { version = "0.2.75", optional = true }
-tokio = { version = "1.9.0", features = ["sync"] }
+wasm-bindgen = { version = "0.2.76", optional = true }
+tokio = { version = "1.10.0", features = ["sync"] }
 async-stream = "0.3.2"
 prost = "0.8.0"
 tokio-util = "0.6.7"
@@ -79,7 +79,7 @@ serde-aux = "2.2.0"
 rusty-xinput = "1.2.0"
 
 [dev-dependencies]
-tokio = { version = "1.9.0", features = ["io-std", "io-util", "macros"] }
+tokio = { version = "1.10.0", features = ["io-std", "io-util", "macros"] }
 tracing-log = { version = "0.1.2", features = ["env_logger"] }
 
 [lib]
