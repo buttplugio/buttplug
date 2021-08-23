@@ -314,6 +314,144 @@ fn test_server_scanning_finished() {
   });
 }
 
+#[test]
+fn test_server_builder_null_device_config() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    let _ = builder.device_configuration_json(None).finish().unwrap();
+  });
+}
+
+#[test]
+fn test_server_builder_device_config_invalid_json() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    assert!(builder.device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned())).finish().is_err());
+  });
+}
+
+#[test]
+fn test_server_builder_device_config_schema_break() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    // missing version block.
+    let device_json = r#"{
+      "protocols": {
+        "jejoue": {
+          "btle": {
+            "names": [
+              "Je Joue"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          },
+          "defaults": {
+            "name": {
+              "en-us": "Je Joue Device"
+            },
+            "messages": {
+              "VibrateCmd": {
+                "FeatureCount": 2,
+                "StepCount": [
+                  5,
+                  5
+                ]
+              }
+            }
+          }
+        },
+      }
+    }"#;
+    assert!(builder.device_configuration_json(Some(device_json.to_owned())).finish().is_err());
+  });
+}
+
+#[test]
+fn test_server_builder_device_config_old_config_version() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    // missing version block.
+    let device_json = r#"{
+      "version": 0,
+      "protocols": {}
+    }
+    "#;
+    assert!(builder.device_configuration_json(Some(device_json.to_owned())).finish().is_err());
+  });
+}
+
+#[test]
+fn test_server_builder_null_user_device_config() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    let _ = builder.user_device_configuration_json(None).finish().unwrap();
+  });
+}
+
+#[test]
+fn test_server_builder_user_device_config_invalid_json() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    assert!(builder.user_device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned())).finish().is_err());
+  });
+}
+
+#[test]
+fn test_server_builder_user_device_config_schema_break() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    // missing version block.
+    let device_json = r#"{
+      "protocols": {
+        "jejoue": {
+          "btle": {
+            "names": [
+              "Je Joue"
+            ],
+            "services": {
+              "0000fff0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          },
+          "defaults": {
+            "name": {
+              "en-us": "Je Joue Device"
+            },
+            "messages": {
+              "VibrateCmd": {
+                "FeatureCount": 2,
+                "StepCount": [
+                  5,
+                  5
+                ]
+              }
+            }
+          }
+        },
+      }
+    }"#;
+    assert!(builder.user_device_configuration_json(Some(device_json.to_owned())).finish().is_err());
+  });
+}
+
+#[test]
+fn test_server_builder_user_device_config_old_config_version() {
+  async_manager::block_on(async {
+    let mut builder = ButtplugServerBuilder::default();
+    // missing version block.
+    let device_json = r#"{
+      "version": 0,
+      "protocols": {}
+    }
+    "#;
+    assert!(builder.user_device_configuration_json(Some(device_json.to_owned())).finish().is_err());
+  });
+}
+
 // TODO Test sending system message (Id 0)
 // TODO Test sending system message (Ok but Id > 0)
 // TODO Test repeated handshake
