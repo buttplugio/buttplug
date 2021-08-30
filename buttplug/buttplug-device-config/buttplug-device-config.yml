@@ -1950,6 +1950,24 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 68
+  htk_bm:
+    btle:
+      names:
+        - HTK-BLE-BM001
+      services:
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
+        00001802-0000-1000-8000-00805f9b34fb:
+          tx: 00002a06-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: HTK Breast Massager
+      messages:
+        VibrateCmd:
+          FeatureCount: 2
+          StepCount:
+            - 1
+            - 1
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
