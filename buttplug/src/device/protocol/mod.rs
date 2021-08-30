@@ -4,6 +4,7 @@ pub mod cachito;
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
 pub mod generic_command_manager;
+pub mod htk_bm;
 pub mod jejoue;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
@@ -81,6 +82,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<aneros::Aneros>(&map, "aneros");
   add_to_protocol_map::<cachito::Cachito>(&map, "cachito");
   add_to_protocol_map::<fredorch::Fredorch>(&map, "fredorch");
+  add_to_protocol_map::<htk_bm::HtkBm>(&map, "htk_bm");
   add_to_protocol_map::<jejoue::JeJoue>(&map, "jejoue");
   add_to_protocol_map::<kiiroo_v2::KiirooV2>(&map, "kiiroo-v2");
   add_to_protocol_map::<kiiroo_v2_vibrator::KiirooV2Vibrator>(&map, "kiiroo-v2-vibrator");
