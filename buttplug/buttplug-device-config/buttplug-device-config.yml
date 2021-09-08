@@ -1998,6 +1998,22 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 3
+  hgod:
+    btle:
+      names:
+        - AMN NEO
+      services:
+        0000ffe3-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Hgod Butterfly Love
+      messages:
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 10            
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
