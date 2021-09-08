@@ -1931,6 +1931,7 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 100
+        FleshlightLaunchFW12Cmd: {}
   fredorch:
     btle:
       names:
@@ -1963,7 +1964,6 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 68
-        FleshlightLaunchFW12Cmd: {}
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
