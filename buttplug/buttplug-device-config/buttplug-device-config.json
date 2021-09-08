@@ -2925,6 +2925,32 @@
           }
         }
       }
+    },
+    "ankni": {
+      "btle": {
+        "names": [
+          "DSJM"
+        ],
+        "services": {
+          "0000fe00-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fe01-0000-1000-8000-00805f9b34fb",
+            "rx": "0000fe02-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Ankni Candy"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              3
+            ]
+          }
+        }
+      }
     }
   }
 }
