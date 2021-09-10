@@ -1,5 +1,5 @@
 {
-  "version": 56,
+  "version": 57,
   "protocols": {
     "lovense": {
       "btle": {
@@ -67,6 +67,14 @@
           "52300001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "52300002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "52300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "50300011-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "50300012-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "50300013-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "4a300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "4a300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "4a300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -197,6 +205,24 @@
           ],
           "name": {
             "en-us": "Loveai Dolp"
+          }
+        },
+        {
+          "identifier": [
+            "J"
+          ],
+          "name": {
+            "en-us": "Lovense Quake"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                20,
+                20
+              ]
+            },
+            "BatteryLevelCmd": {}
           }
         }
       ]
