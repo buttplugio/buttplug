@@ -63,7 +63,7 @@ impl ButtplugProtocolCommandHandler for WeVibe8Bit {
           ]
         };
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, true))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -94,7 +94,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x09, 0x09, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       // Since we only created one subcommand, we should only receive one command.
@@ -112,7 +112,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-          false,
+          true,
         )),
       );
     });
