@@ -45,12 +45,12 @@ impl ButtplugProtocol for WeVibe {
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-      false,
+      true,
     ));
     let vibration_off = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-      false,
+      true,
     ));
     Box::pin(async move {
       vibration_on.await?;
@@ -89,7 +89,7 @@ impl ButtplugProtocolCommandHandler for WeVibe {
           ]
         };
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, true))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -116,7 +116,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       check_test_recv_value(
@@ -124,7 +124,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       device
@@ -136,7 +136,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x80, 0x00, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       // Since we only created one subcommand, we should only receive one command.
@@ -164,7 +164,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x4c, 0x00, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       device
@@ -176,7 +176,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-          false,
+          true,
         )),
       );
     });
@@ -192,7 +192,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       check_test_recv_value(
@@ -200,7 +200,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       device
@@ -212,7 +212,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x88, 0x00, 0x03, 0x00, 0x00],
-          false,
+          true,
         )),
       );
       // Since we only created one subcommand, we should only receive one command.
@@ -230,7 +230,7 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-          false,
+          true,
         )),
       );
     });
