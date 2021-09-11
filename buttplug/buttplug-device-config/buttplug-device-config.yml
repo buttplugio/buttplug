@@ -118,7 +118,7 @@
 # - Serial info here is for default device configuration. Port names
 #   will have to be added by the user in the user device config file.
 
-version: 55
+version: 58
 
 protocols:
   
