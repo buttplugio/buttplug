@@ -10,7 +10,7 @@
 ## Bugfixes
 
 - Fix issue with FleshlightLaunchFW12Cmd support for TCode devices
-- Fix issue with WeVibe using incorrect write specifications for bluetooth toys
+- Fix issue with WeVibe using incorrect write types for bluetooth toys
 
 # 5.0.0 (2021-08-07)
 
