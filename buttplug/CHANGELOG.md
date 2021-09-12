@@ -1,3 +1,17 @@
+# 5.0.1 (2021-09-11)
+
+## Features
+- Added Hardware Support:
+  - Lovense Quake
+  - HTK Breast Massager
+  - Ankni Candy
+  - Hgod Butterfly Love
+
+## Bugfixes
+
+- Fix issue with FleshlightLaunchFW12Cmd support for TCode devices
+- Fix issue with WeVibe using incorrect write specifications for bluetooth toys
+
 # 5.0.0 (2021-08-07)
 
 ## Features
