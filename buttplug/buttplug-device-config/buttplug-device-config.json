@@ -1172,7 +1172,6 @@
           "Gala",
           "Jive",
           "Nova",
-          "NOVAV2",
           "Pivot",
           "Rave",
           "Skeena",
@@ -1306,8 +1305,7 @@
         },
         {
           "identifier": [
-            "Nova",
-            "NOVAV2"
+            "Nova"
           ],
           "name": {
             "en-us": "WeVibe Nova"
@@ -1348,7 +1346,11 @@
           "Melt",
           "Moxie",
           "Vector",
-          "Wand"
+          "Wand",
+          "Bond",
+          "Nelson",
+          "Nova2",
+          "Nova_2"
         ],
         "services": {
           "f000bb03-0451-4000-b000-000000000000": {
@@ -1441,6 +1443,41 @@
               "FeatureCount": 1,
               "StepCount": [
                 22
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Bond",
+            "Nelson"
+          ],
+          "name": {
+            "en-us": "WeVibe Bond"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                27
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "Nova2",
+            "Nova_2"
+          ],
+          "name": {
+            "en-us": "WeVibe Nova 2"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                27,
+                27
               ]
             }
           }

@@ -869,7 +869,6 @@ protocols:
         - Gala
         - Jive
         - Nova
-        - NOVAV2
         - Pivot
         - Rave
         - Skeena
@@ -950,7 +949,6 @@ protocols:
               - 15
       - identifier:
           - Nova
-          - NOVAV2
         name:
           en-us: WeVibe Nova
         messages:
@@ -977,6 +975,10 @@ protocols:
         - Moxie
         - Vector
         - Wand
+        - Bond
+        - Nelson # Bond alias
+        - Nova2
+        - Nova_2
       services:
         f000bb03-0451-4000-b000-000000000000:
           tx: f000c000-0451-4000-b000-000000000000
@@ -1032,6 +1034,27 @@ protocols:
             FeatureCount: 1
             StepCount:
               - 22
+      - identifier:
+          - Bond
+          - Nelson
+        name:
+          en-us: WeVibe Bond
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 27
+      - identifier:
+          - Nova2
+          - Nova_2
+        name:
+          en-us: WeVibe Nova 2
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 27
+              - 27
   wevibe-legacy:
     btle:
       names:
