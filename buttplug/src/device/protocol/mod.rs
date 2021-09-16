@@ -4,8 +4,8 @@ pub mod ankni;
 pub mod cachito;
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
-pub mod hgod;
 pub mod generic_command_manager;
+pub mod hgod;
 pub mod htk_bm;
 pub mod jejoue;
 pub mod kiiroo_v2;
@@ -16,6 +16,7 @@ pub mod lelof1s;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
 pub mod lovense_connect_service;
@@ -100,6 +101,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<libo_shark::LiboShark>(&map, "libo-shark");
   add_to_protocol_map::<libo_vibes::LiboVibes>(&map, "libo-vibes");
   add_to_protocol_map::<lovehoney_desire::LovehoneyDesire>(&map, "lovehoney-desire");
+  add_to_protocol_map::<lovedistance::LoveDistance>(&map, "lovedistance");
   add_to_protocol_map::<lovense::Lovense>(&map, "lovense");
   add_to_protocol_map::<lovense_connect_service::LovenseConnectService>(
     &map,
