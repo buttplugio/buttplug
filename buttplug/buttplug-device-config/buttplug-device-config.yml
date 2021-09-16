@@ -2036,7 +2036,48 @@ protocols:
         VibrateCmd:
           FeatureCount: 1
           StepCount:
-            - 10            
+            - 10
+  lovedistance:
+    btle:
+      names:
+        - REACH G
+        - REACH
+        - MAG
+        - SPAN
+        - RANGE
+      services:
+        0000ff00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ff01-0000-1000-8000-00805f9b34fb
+          rx: 0000ff02-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Love Distance Device
+      messages:
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 121
+    configurations:
+      - identifier:
+          - REACH G
+        name:
+          en-us: Love Distance Reach G
+      - identifier:
+          - REACH
+        name:
+          en-us: Love Distance Reach
+      - identifier:
+          - MAG
+        name:
+          en-us: Love Distance Mag
+      - identifier:
+          - SPAN
+        name:
+          en-us: Love Distance Span
+      - identifier:
+          - RANGE
+        name:
+          en-us: Love Distance Range
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
