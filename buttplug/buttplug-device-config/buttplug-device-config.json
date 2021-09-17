@@ -3137,6 +3137,70 @@
           }
         }
       ]
+    },
+    "satisfyer": {
+      "btle": {
+        "names": [
+          "SF *"
+        ],
+        "services": {
+          "00001800-0000-1000-8000-00805f9b34fb": {
+            "firmware": "00002a00-0000-1000-8000-00805f9b34fb"
+          },
+          "51361500-c5e7-47c7-8a6e-47ebc99d80e8": {
+            "command": "51361501-c5e7-47c7-8a6e-47ebc99d80e8",
+            "tx": "51361502-c5e7-47c7-8a6e-47ebc99d80e8"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Satisfyer device"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              100,
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "SF Royal One"
+          ],
+          "name": {
+            "en-us": "Satisfyer Royal One"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "SF Love Triangle"
+          ],
+          "name": {
+            "en-us": "Satisfyer Love Triangle"
+          }
+        },
+        {
+          "identifier": [
+            "SF Double Joy"
+          ],
+          "name": {
+            "en-us": "Satisfyer Double Joy"
+          }
+        }
+      ]
     }
   }
 }
