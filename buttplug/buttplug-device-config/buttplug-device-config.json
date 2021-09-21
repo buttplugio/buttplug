@@ -2726,11 +2726,11 @@
       ],
       "defaults": {
         "name": {
-          "en-us": "TCode v0.3 (Single Linear Axis)"
+          "en-us": "TCode v0.3 (Multi Linear Axis)"
         },
         "messages": {
           "LinearCmd": {
-            "FeatureCount": 1,
+            "FeatureCount": 40,
             "StepCount": [
               100
             ]

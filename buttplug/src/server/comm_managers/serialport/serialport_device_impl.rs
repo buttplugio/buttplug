@@ -151,7 +151,7 @@ impl SerialPortDeviceImpl {
       .spawn(move || {
         debug!("Starting serial port connection thread for {}", port_name);
         let port_result = serialport::new(&port_name, port_def.baud_rate)
-          .timeout(Duration::from_millis(100))
+          .timeout(Duration::from_millis(15))
           .open();
         if port_sender.blocking_send(port_result)
           .is_err() {

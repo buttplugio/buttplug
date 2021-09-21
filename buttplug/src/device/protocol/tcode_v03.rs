@@ -37,11 +37,33 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     device: Arc<DeviceImpl>,
     msg: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
-    let v = msg.vectors()[0].clone();
-
-    let position = (v.position * 99f64) as u32;
-
-    let command = format!("L0{:02}I{}\n", position, v.duration);
+	let mut command = "".to_string();
+	
+	for v in msg.vectors() {
+		if command.chars().count() > 0 {
+			command.push_str(" ");
+		}
+		
+		let position = (v.position * 99f64) as u32;
+		let mut index = v.index;
+		let mut command_type = 'L';
+		if index > 29 {
+			index -= 30;
+			command_type = 'A';
+		}
+		else if index > 19 {
+			index -= 20;
+			command_type = 'V';
+		}
+		else if index > 9 {
+			index -= 10;
+			command_type = 'R';
+		}
+		let command_append = format!("{}{}{:02}I{}", command_type, index, position, v.duration);
+		command.push_str(&command_append);
+	}
+	
+	command.push_str("\n");
     info!("{}", command);
     let fut = device.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
