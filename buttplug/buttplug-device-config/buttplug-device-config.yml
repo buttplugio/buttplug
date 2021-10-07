@@ -1218,6 +1218,7 @@ protocols:
         - Pearl2.1
         - OhMiBod 4.0
         - OhMiBod LUMEN
+        - Pulse Interactive
       services:
         00001900-0000-1000-8000-00805f9b34fb:
           # Used to clear the whitelist
@@ -1282,6 +1283,15 @@ protocols:
             FeatureCount: 1
             StepCount:
              - 100
+      - identifier:
+          - Pulse Interactive
+        name:
+          en-us: Hot Octopuss Pulse Solo Interactive
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 6
   kiiroo-v21-initialized:
     btle:
       names:
