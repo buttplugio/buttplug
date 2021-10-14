@@ -10,14 +10,14 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
-pub struct Svakom {
+pub struct SvakomSam {
   name: String,
   manager: Arc<Mutex<GenericCommandManager>>,
   message_attributes: DeviceMessageAttributesMap,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl ButtplugProtocol for Svakom {
+impl ButtplugProtocol for SvakomSam {
   fn new_protocol(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
@@ -33,7 +33,7 @@ impl ButtplugProtocol for Svakom {
   }
 }
 
-impl ButtplugProtocolCommandHandler for Svakom {
+impl ButtplugProtocolCommandHandler for SvakomSam {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<DeviceImpl>,
@@ -44,13 +44,20 @@ impl ButtplugProtocolCommandHandler for Svakom {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          let multiplier: u8 = if speed == 0 { 0x00 } else { 0x01 };
-          let msg = DeviceWriteCmd::new(
+          device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
-            [0x55, 0x04, 0x03, 0x00, multiplier, speed as u8].to_vec(),
-            false,
-          );
-          device.write_value(msg).await?;
+            [18, 1, 3, 0, 5, speed as u8].to_vec(),
+            true,
+          )).await?;
+        }
+        if cmds.len() > 1 {
+          if let Some(speed) = cmds[1] {
+            device.write_value(DeviceWriteCmd::new(
+              Endpoint::Tx,
+              [18, 6, 1, speed as u8].to_vec(),
+              true,
+            )).await?;
+          }
         }
       }
 
@@ -69,9 +76,9 @@ mod test {
   };
 
   #[test]
-  pub fn test_svakom_protocol() {
+  pub fn test_svakom_sam_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Phoenix NEO").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Sam Neo").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -81,8 +88,22 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![85, 4, 3, 0, 1, 10],
-          false,
+          vec![18, 1, 3, 0, 5, 5],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
+      // Since we only created one changed subcommand, we should only receive one command.
+      device
+          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5), VibrateSubcommand::new(1, 1.0)]).into())
+          .await
+          .unwrap();
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![18, 6, 1, 1],
+          true,
         )),
       );
       // Since we only created one subcommand, we should only receive one command.
@@ -99,10 +120,19 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![85, 4, 3, 0, 0, 0],
-          false,
+          vec![18, 1, 3, 0, 5, 0],
+          true,
         )),
       );
+      check_test_recv_value(
+        &command_receiver,
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![18, 6, 1, 0],
+          true,
+        )),
+      );
+      assert!(check_test_recv_empty(&command_receiver));
     });
   }
 }
