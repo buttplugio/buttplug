@@ -1558,6 +1558,37 @@ protocols:
           - Vick NEO
         name:
           en-us: Svakom Vick Neo
+  svakom-sam:
+    btle:
+      names:
+        - Sam Neo
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Svakom Sam Neo
+      messages:
+        VibrateCmd:
+          FeatureCount: 2
+          StepCount:
+            - 10
+            - 1
+  svakom-alex:
+    btle:
+      names:
+        - Alex NEO
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Svakom Alex Neo
+      messages:
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 3
   realov:
     btle:
       names:

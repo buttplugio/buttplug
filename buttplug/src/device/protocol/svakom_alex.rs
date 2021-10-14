@@ -10,14 +10,14 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
-pub struct Svakom {
+pub struct SvakomAlex {
   name: String,
   manager: Arc<Mutex<GenericCommandManager>>,
   message_attributes: DeviceMessageAttributesMap,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
 }
 
-impl ButtplugProtocol for Svakom {
+impl ButtplugProtocol for SvakomAlex {
   fn new_protocol(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
@@ -33,7 +33,7 @@ impl ButtplugProtocol for Svakom {
   }
 }
 
-impl ButtplugProtocolCommandHandler for Svakom {
+impl ButtplugProtocolCommandHandler for SvakomAlex {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<DeviceImpl>,
@@ -44,10 +44,9 @@ impl ButtplugProtocolCommandHandler for Svakom {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          let multiplier: u8 = if speed == 0 { 0x00 } else { 0x01 };
           let msg = DeviceWriteCmd::new(
             Endpoint::Tx,
-            [0x55, 0x04, 0x03, 0x00, multiplier, speed as u8].to_vec(),
+            [18, 1, 3, 0, if speed == 0 { 0xFF } else { speed as u8 }, 0].to_vec(),
             false,
           );
           device.write_value(msg).await?;
@@ -69,9 +68,9 @@ mod test {
   };
 
   #[test]
-  pub fn test_svakom_protocol() {
+  pub fn test_svakom_alex_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Phoenix NEO").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Alex NEO").await.unwrap();
       let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -81,16 +80,12 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![85, 4, 3, 0, 1, 10],
+          vec![18, 1, 3, 0, 2, 0],
           false,
         )),
       );
-      // Since we only created one subcommand, we should only receive one command.
-      device
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-          .unwrap();
       assert!(check_test_recv_empty(&command_receiver));
+      // Since we only created one changed subcommand, we should only receive one command.
       device
           .parse_message(StopDeviceCmd::new(0).into())
           .await
@@ -99,7 +94,7 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![85, 4, 3, 0, 0, 0],
+          vec![18, 1, 3, 0, 255, 0],
           false,
         )),
       );

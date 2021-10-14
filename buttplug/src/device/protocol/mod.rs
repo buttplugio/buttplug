@@ -36,6 +36,8 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod satisfyer;
 pub mod svakom;
+pub mod svakom_alex;
+pub mod svakom_sam;
 pub mod tcode_v03;
 pub mod thehandy;
 pub mod vibratissimo;
@@ -124,6 +126,8 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<realov::Realov>(&map, "realov");
   add_to_protocol_map::<satisfyer::Satisfyer>(&map, "satisfyer");
   add_to_protocol_map::<svakom::Svakom>(&map, "svakom");
+  add_to_protocol_map::<svakom_alex::SvakomAlex>(&map, "svakom-alex");
+  add_to_protocol_map::<svakom_sam::SvakomSam>(&map, "svakom-sam");
   add_to_protocol_map::<tcode_v03::TCodeV03>(&map, "tcode-v03");
   add_to_protocol_map::<thehandy::TheHandy>(&map, "thehandy");
   add_to_protocol_map::<vibratissimo::Vibratissimo>(&map, "vibratissimo");
