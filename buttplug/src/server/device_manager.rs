@@ -31,21 +31,37 @@ use crate::{
   server::ButtplugServerResultFuture,
   util::async_manager,
 };
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use futures::future;
 use std::{
   convert::TryFrom,
   sync::{atomic::Ordering, Arc},
 };
 use tokio::sync::{broadcast, mpsc};
+use serde::{Serialize, Deserialize};
+use getset::Getters;
+
+#[derive(Serialize, Deserialize, Debug, Getters)]
+#[getset(get = "pub")]
+pub struct DeviceUserConfig {
+  #[serde(rename="display-name")]
+  display_name: Option<String>,
+  allow: Option<bool>,
+  deny: Option<bool>
+}
+
+#[derive(Debug)]
+pub struct DeviceInfo {
+  pub address: String,
+  pub display_name: Option<String>
+}
 
 pub struct DeviceManager {
   // This uses a map to make sure we don't have 2 comm managers of the same type
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-  device_allow_list: Arc<DashSet<String>>,
-  device_deny_list: Arc<DashSet<String>>,
+  device_user_config: Arc<DashMap<String, DeviceUserConfig>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
   config: Arc<DeviceConfigurationManager>,
 }
@@ -63,14 +79,12 @@ impl DeviceManager {
     let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages));
     let devices = Arc::new(DashMap::new());
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let device_allow_list = Arc::new(DashSet::new());
-    let device_deny_list = Arc::new(DashSet::new());
+    let device_user_config = Arc::new(DashMap::new());
     let mut event_loop = DeviceManagerEventLoop::new(
       config.clone(),
       output_sender,
       devices.clone(),
-      device_allow_list.clone(),
-      device_deny_list.clone(),
+      device_user_config.clone(),
       ping_timer,
       device_event_receiver,
     );
@@ -81,8 +95,7 @@ impl DeviceManager {
     Self {
       device_event_sender,
       devices,
-      device_allow_list,
-      device_deny_list,
+      device_user_config,
       comm_managers: Arc::new(DashMap::new()),
       config,
     }
@@ -293,24 +306,25 @@ impl DeviceManager {
     self.config.remove_protocol_definition(name);    
   }
 
-  pub fn add_allowed_device(&self, address: &str) {
-    info!("Adding device address {} to allowed devices list.", address);
-    self.device_allow_list.insert(address.to_owned());
+  pub fn add_device_user_config(&self, address: &str, config: DeviceUserConfig) {
+    info!("Adding device user config for address {} with values {:?}.", address, config);
+    self.device_user_config.insert(address.to_owned(), config);
   }
 
-  pub fn add_denied_device(&self, address: &str) {
-    info!("Adding device address {} to denied devices list.", address);
-    self.device_deny_list.insert(address.to_owned());
+  pub fn remove_device_user_config(&self, address: &str) {
+    info!("Removing device user config for address {}.", address);
+    self.device_user_config.remove(address);
   }
 
-  pub fn remove_allowed_device(&self, address: &str) {
-    info!("Removing device address {} from allowed devices list.", address);
-    self.device_allow_list.remove(address);
-  }
-
-  pub fn remove_denied_device(&self, address: &str) {
-    info!("Removing device address {} from denied devices list.", address);
-    self.device_deny_list.remove(address);
+  pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {
+    if let Some(device) = self.devices.get(&index) {
+      Ok(DeviceInfo {
+        address: device.value().address().to_owned(),
+        display_name: device.value().display_name().clone()
+      })
+    } else {
+      Err(ButtplugDeviceError::DeviceNotAvailable(index).into())
+    }
   }
 }
 

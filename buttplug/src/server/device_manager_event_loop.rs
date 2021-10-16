@@ -1,4 +1,4 @@
-use super::{comm_managers::DeviceCommunicationEvent, ping_timer::PingTimer};
+use super::{comm_managers::DeviceCommunicationEvent, ping_timer::PingTimer, device_manager::DeviceUserConfig};
 use crate::{
   core::messages::{
     ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished, StopDeviceCmd,
@@ -9,7 +9,7 @@ use crate::{
   },
   util::async_manager,
 };
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
 use std::{
   sync::{
@@ -25,8 +25,7 @@ pub struct DeviceManagerEventLoop {
   device_config_manager: Arc<DeviceConfigurationManager>,
   device_index_generator: u32,
   device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-  device_allow_list: Arc<DashSet<String>>,
-  device_deny_list: Arc<DashSet<String>>,
+  device_user_config: Arc<DashMap<String, DeviceUserConfig>>,
   ping_timer: Arc<PingTimer>,
   /// Maps device addresses to indexes, so they can be reused on reconnect.
   device_index_map: Arc<DashMap<String, u32>>,
@@ -52,8 +51,7 @@ impl DeviceManagerEventLoop {
     device_config_manager: Arc<DeviceConfigurationManager>,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-    device_allow_list: Arc<DashSet<String>>,
-    device_deny_list: Arc<DashSet<String>>,
+    device_user_config: Arc<DashMap<String, DeviceUserConfig>>,
     ping_timer: Arc<PingTimer>,
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
   ) -> Self {
@@ -62,8 +60,7 @@ impl DeviceManagerEventLoop {
       device_config_manager,
       server_sender,
       device_map,
-      device_allow_list,
-      device_deny_list,
+      device_user_config,
       ping_timer,
       device_comm_receiver,
       device_index_generator: 0,
@@ -79,10 +76,19 @@ impl DeviceManagerEventLoop {
     let device_event_sender_clone = self.device_event_sender.clone();
     let create_device_future =
       ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
+    let device_user_config = self.device_user_config.clone();
     async_manager::spawn(async move {
       match create_device_future.await {
         Ok(option_dev) => match option_dev {
-          Some(device) => {
+          Some(mut device) => {
+            // The device was created, now we need to customize it before handing it to the system.
+            if let Some(device_config) = device_user_config.get(device.address()) {
+              if let Some(device_name) = device_config.display_name() {
+                info!("Display name found for {} ({}), setting to {}", device.name(), device.address(), device_name);
+                device.set_display_name(device_name);
+              }
+            }
+
             if device_event_sender_clone
               .send(ButtplugDeviceEvent::Connected(Arc::new(device)))
               .await
@@ -140,26 +146,6 @@ impl DeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
         let _enter = span.enter();
-        for denied_device in self.device_deny_list.iter() {
-          if *denied_device == address {
-            info!("Denied device address {} found, ignoring.", address);
-            return;
-          }
-        }
-        if !self.device_allow_list.is_empty() {
-          let mut is_allowed = false;
-          for allowed_device in self.device_allow_list.iter() {
-            if *allowed_device == address {
-              info!("Allowed device {} found, allowing connection.", address);
-              is_allowed = true;
-              break;
-            }
-          }
-          if !is_allowed {
-            info!("Device address {} found but not in allow list, ignoring.", address);
-            return;
-          }
-        }
         
         // Check to make sure the device isn't already connected. If it is, drop it.
         for device_entry in self.device_map.iter() {
@@ -171,6 +157,32 @@ impl DeviceManagerEventLoop {
             return;
           }
         }
+
+        // Make sure the device isn't on the deny list
+        if let Some(config) = self.device_user_config.get(&address) {
+          if let Some(true) = config.deny() {
+            info!("Denied device address {} found, ignoring.", address);
+            return;
+          }
+        }
+
+        let mut is_allowed = true;
+        {
+          // Make sure allow list isn't active, or that the device is in the allow list if it is.
+          let mut allow_list = self.device_user_config.iter().filter(|x| *x.value().allow() == Some(true)).peekable();
+          if allow_list.peek().is_some() {
+            if !allow_list.any(|x| *x.key() == address) {
+              info!("Allow list active and device address {} not found, ignoring.", address);
+              is_allowed = false;
+            } else {
+              info!("Allow list active and device address {} found.", address);
+            }
+          }
+        }
+        if !is_allowed {
+          return;
+        }
+
         self.try_create_new_device(creator);
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {

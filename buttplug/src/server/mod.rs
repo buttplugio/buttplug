@@ -158,6 +158,9 @@ impl ButtplugServerBuilder {
       for (name, def) in devices.protocols {
         device_manager.add_protocol_definition(&name, def);
       }
+      for (address, user_config) in devices.user_config {
+        device_manager.add_device_user_config(&address, user_config);
+      }
     }
 
     let server = ButtplugServer {

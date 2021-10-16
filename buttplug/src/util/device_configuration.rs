@@ -1,7 +1,8 @@
 
 use crate::{
   core::errors::{ButtplugError, ButtplugDeviceError},
-  device::configuration_manager::{ProtocolDefinition, DeviceConfigurationManager}
+  device::configuration_manager::{ProtocolDefinition, DeviceConfigurationManager},
+  server::device_manager::DeviceUserConfig
 };
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -15,7 +16,10 @@ static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
 #[derive(Deserialize, Debug)]
 pub struct ProtocolConfiguration {
   pub version: u32,
+  #[serde(default)]
   pub protocols: HashMap<String, ProtocolDefinition>,
+  #[serde(rename="user-config", default)]
+  pub user_config: HashMap<String, DeviceUserConfig>
 }
 
 impl ProtocolConfiguration {
@@ -30,6 +34,8 @@ impl ProtocolConfiguration {
         self.protocols.insert(protocol, conf);
       }
     }
+    // Just copy the user config wholesale.
+    self.user_config = other.user_config;
   }
 }
 
@@ -53,9 +59,9 @@ pub fn load_protocol_config_from_json(config_str: &str) -> Result<ProtocolConfig
             internal_config_version
           )).into())
         } else {
+          info!("{:?}", protocol_config);
           Ok(protocol_config)
         }
-        
       }
       Err(err) => {
         Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(

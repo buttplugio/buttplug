@@ -389,6 +389,7 @@ pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Arc<DeviceImpl>,
+  display_name: Option<String>
 }
 
 impl Debug for ButtplugDevice {
@@ -416,7 +417,7 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
-    Self { protocol, device }
+    Self { protocol, device, display_name: None }
   }
 
   pub fn address(&self) -> &str {
@@ -486,6 +487,15 @@ impl ButtplugDevice {
     }
   }
 
+  pub fn set_display_name(&mut self, name: &str) {
+    info!("Adding display name {} to device {} ({})", name, self.name(), self.address());
+    self.display_name = Some(name.to_owned());
+  }
+
+  pub fn display_name(&self) -> Option<String> {
+    self.display_name.clone()
+  }
+
   pub fn name(&self) -> String {
     // Instead of checking for raw messages at the protocol level, add the raw
     // call here, since this is the only way to access devices in the library
@@ -500,7 +510,7 @@ impl ButtplugDevice {
       ))
       .is_ok()
     {
-      format!("{} (Raw)", self.protocol.name())
+      format!("{} (Raw Messages Allowed)", self.protocol.name())
     } else {
       self.protocol.name().to_owned()
     }
