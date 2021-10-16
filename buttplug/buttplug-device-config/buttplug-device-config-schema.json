@@ -380,11 +380,34 @@
       },
       "additionalProperties": false
     },
+    "user-config": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "allow": {
+              "type": "boolean"
+            },
+            "deny": {
+              "type": "boolean"
+            },
+            "display-name": {
+              "type": "string"
+            },
+            "index": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "additionalProperties": false
   },
   "required": [
-    "version",
-    "protocols"
+    "version"
   ],
   "additionalProperties": false
 }
