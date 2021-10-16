@@ -235,11 +235,18 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
       WriteType::WithoutResponse
     };
     Box::pin(async move {
-      device
+      match device
         .write(&characteristic, &msg.data, write_type)
-        .await
-        .unwrap();
-      Ok(())
+        .await {
+        Ok(()) => Ok(()),
+        Err(err) => {
+          error!("BTLEPlug device write error: {:?}", err);
+          Err(
+            ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+              format!("{:?}", err),
+            )).into())
+        }
+      }
     })
   }
 
