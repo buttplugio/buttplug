@@ -222,28 +222,6 @@
       "additionalProperties": false,
       "minProperties": 0
     },
-    "ShockMessageAttributes": {
-      "description": "Attributes for ShockCmd.",
-      "type": "object",
-      "properties": {
-        "FeatureCount": {
-          "$ref": "#/components/FeatureCount"
-        },
-        "StepCount": {
-          "$ref": "#/components/StepCount"
-        },
-        "MaxDuration": {
-          "description": "Maximum duration of shock for each actuator",
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "minimum": 0
-          }
-        }
-      },
-      "additionalProperties": false,
-      "minProperties": 0
-    },
     "DeviceMessagesEx": {
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "object",
@@ -295,12 +273,6 @@
         },
         "PatternPlaybackCmd": {
           "$ref": "#/components/PatternMessageAttributes"
-        },
-        "ShockCmd": {
-          "$ref": "#/components/ShockMessageAttributes"
-        },
-        "ToneEmitterCmd": {
-          "$ref": "#/components/GenericMessageAttributes"
         }
       },
       "additionalProperties": false
