@@ -88,7 +88,7 @@ pub use remote_connector::{
 pub use transport::ButtplugWebsocketClientTransport;
 #[cfg(feature = "websockets")]
 pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
-
+pub use transport::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder, ButtplugPipeServerTransportBuilder, ButtplugPipeServerTransport};
 use crate::{
   core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
