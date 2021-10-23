@@ -59,7 +59,6 @@ pub fn load_protocol_config_from_json(config_str: &str) -> Result<ProtocolConfig
             internal_config_version
           )).into())
         } else {
-          info!("{:?}", protocol_config);
           Ok(protocol_config)
         }
       }
