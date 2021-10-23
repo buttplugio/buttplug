@@ -43,7 +43,7 @@ impl JSONValidator {
   pub fn validate(&self, json_str: &str) -> Result<(), ButtplugSerializerError> {
     let schema = self.scope.resolve(&self.id).unwrap();
     let check_value = serde_json::from_str(json_str)
-      .map_err(|err| ButtplugSerializerError::JsonSerializerError(format!("{:?}", err)))?;
+      .map_err(|err| ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", json_str, err)))?;
     let state = schema.validate(&check_value);
     if state.is_valid() {
       Ok(())
@@ -52,7 +52,8 @@ impl JSONValidator {
       // much with it anyways, so just convert it to its display and hand that
       // back.
       Err(ButtplugSerializerError::JsonValidatorError(format!(
-        "{:?}",
+        "Message: {} - Error: {:?}",
+        json_str,
         state
       )))
     }

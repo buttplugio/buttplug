@@ -63,7 +63,7 @@ where
   // isn't clonable.
   validator.validate(&msg).and_then(|_| {
     serde_json::from_str::<Vec<T>>(&msg)
-      .map_err(|e| ButtplugSerializerError::JsonSerializerError(format!("{:?}", e)))
+      .map_err(|e| ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e)))
   })
 }
 
