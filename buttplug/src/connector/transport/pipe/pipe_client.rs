@@ -7,16 +7,7 @@
 
 //! Handling of named pipes and unix domain sockets, via tokio.
 
-use crate::{
-  connector::{
-    transport::{
-      ButtplugConnectorTransport,
-      ButtplugTransportIncomingMessage,
-    },
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
-  },
-  core::messages::serializer::ButtplugSerializedMessage,
-};
+use crate::{connector::{ButtplugConnectorError, ButtplugConnectorResultFuture, transport::{ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError, ButtplugTransportIncomingMessage}}, core::messages::serializer::ButtplugSerializedMessage};
 use futures::future::BoxFuture;
 use std::sync::Arc;
 use tokio::{
@@ -53,28 +44,18 @@ impl ButtplugPipeClientTransportBuilder {
 
 
 async fn run_connection_loop(
-  pipe_name: &str,
+  mut client: named_pipe::NamedPipeClient,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
   disconnect_notifier: Arc<Notify>,
 ) {
   info!("Starting pipe server connection event loop.");
 
-  let mut client = named_pipe::ClientOptions::new()
-    .open(pipe_name)
-    .unwrap();
-
   loop {
     tokio::select! {
       _ = disconnect_notifier.notified()=> {
-        info!("Pipe server connector requested disconnect.");
-        /*
-        if client.disconnect().is_err() {
-          error!("Cannot close, assuming connection already closed");
-          return;
-        }
-        */
-        return;
+        info!("Pipe server connector requested disconnect, exiting loop.");
+        break;
       },
       serialized_msg = request_receiver.recv() => {
         if let Some(serialized_msg) = serialized_msg {
@@ -85,7 +66,7 @@ async fn run_connection_loop(
                 .await
                 .is_err() {
                 error!("Cannot send text value to server, considering connection closed.");
-                return;
+                break;
               }
             }
             ButtplugSerializedMessage::Binary(binary_msg) => {
@@ -94,18 +75,13 @@ async fn run_connection_loop(
                 .await
                 .is_err() {
                 error!("Cannot send binary value to server, considering connection closed.");
-                return;
+                break;
               }
             }
           }
         } else {
-          info!("Websocket server connector owner dropped, disconnecting websocket connection.");
-          /*
-          if client.disconnect().is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
-           */
-          return;
+          info!("Pipe server connector owner dropped, disconnecting pipe connection.");
+          break;
         }
       }
       ready = client.ready(Interest::READABLE) => {
@@ -119,11 +95,16 @@ async fn run_connection_loop(
                     continue;
                   }
                   data.truncate(n);
-                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(String::from_utf8(data).unwrap()))).await.is_err() {
+                  let json_str = if let Ok(json) = String::from_utf8(data) {
+                    json
+                  } else {
+                    error!("Could not parse incoming values as valid utf8.");
+                    continue;
+                  };
+                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(json_str))).await.is_err() {
                     error!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
-    
                 },
                 Err(e) => {
 
@@ -132,14 +113,14 @@ async fn run_connection_loop(
             }
           },
           Err(err) => {
-            error!("Error from websocket server, assuming disconnection: {:?}", err);
-            let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
+            error!("Error from pipe server, assuming disconnection: {:?}", err);
             break;
           }
         }
       }
     }
   }
+  let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Pipe server closed".to_owned())).await;
 }
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -168,8 +149,9 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
+      let mut client = named_pipe::ClientOptions::new().open(address).map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
       tokio::spawn(async move {
-        run_connection_loop(&address, outgoing_receiver, incoming_sender, disconnect_notifier).await;
+        run_connection_loop(client, outgoing_receiver, incoming_sender, disconnect_notifier).await;
       });
       Ok(())
     })
@@ -182,5 +164,37 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
       disconnect_notifier.notify_waiters();
       Ok(())
     })
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::ButtplugPipeClientTransportBuilder;
+  use crate::{
+    core::messages::serializer::ButtplugClientJSONSerializer,
+    connector::{ButtplugRemoteClientConnector, transport::ButtplugConnectorTransport},
+    util::async_manager,
+    client::ButtplugClient
+  };
+  use tokio::sync::mpsc;
+
+
+  #[test]
+  pub fn test_client_transport_error_invalid_pipe() {
+    async_manager::block_on(async move {
+      let transport = ButtplugPipeClientTransportBuilder::new("notapipe").finish();
+      let (_, receiver) = mpsc::channel(1);
+      let (sender, _) = mpsc::channel(1);
+      assert!(transport.connect(receiver, sender).await.is_err());
+    });
+  }
+
+  #[test]
+  pub fn test_client_error_invalid_pipe() {
+    async_manager::block_on(async move {
+      let transport = ButtplugPipeClientTransportBuilder::new("notapipe").finish();
+      let client = ButtplugClient::new("Test Client");
+      assert!(client.connect(ButtplugRemoteClientConnector::<_, ButtplugClientJSONSerializer>::new(transport)).await.is_err());
+    });
   }
 }
