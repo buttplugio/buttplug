@@ -83,7 +83,7 @@ fn test_server_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name(), "Aneros Vivi (Raw)");
+        assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
         assert!(da
           .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
