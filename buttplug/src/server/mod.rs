@@ -146,8 +146,7 @@ impl ButtplugServerBuilder {
         };
       }
       .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
-    )
-    .unwrap();
+    );
     let device_manager = DeviceManager::new(
       send.clone(),
       ping_timer.clone(),

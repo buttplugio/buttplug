@@ -29,8 +29,7 @@ impl std::io::Write for ChannelWriter {
       // Ignore errors on dropped channels here. We can't really do a ton about
       // them.
       let _ = sender.send(send_buf.to_vec()).await;
-    })
-    .unwrap();
+    });
     Ok(len)
   }
 

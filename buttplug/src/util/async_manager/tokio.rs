@@ -14,11 +14,11 @@ impl Spawn for TokioAsyncManager {
   }
 }
 
-pub fn spawn<Fut>(future: Fut) -> Result<(), SpawnError>
+pub fn spawn<Fut>(future: Fut)
 where
   Fut: Future<Output = ()> + Send + 'static,
 {
-  TokioAsyncManager::default().spawn(future)
+  TokioAsyncManager::default().spawn(future).unwrap()
 }
 
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>

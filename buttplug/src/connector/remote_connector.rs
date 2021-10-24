@@ -265,8 +265,7 @@ where
                 transport_incoming_receiver,
               )
               .await
-            })
-            .unwrap();
+            });
             Ok(())
           }
           Err(e) => Err(e),

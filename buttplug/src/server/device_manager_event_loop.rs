@@ -100,8 +100,7 @@ impl DeviceManagerEventLoop {
         },
         Err(e) => error!("Device errored while trying to connect: {}", e),
       }
-    }.instrument(tracing::Span::current()))
-    .unwrap();
+    }.instrument(tracing::Span::current()));
   }
 
   async fn handle_device_communication(&mut self, event: DeviceCommunicationEvent) {
@@ -242,8 +241,7 @@ impl DeviceManagerEventLoop {
           while let Ok(event) = event_listener.recv().await {
             event_sender.send(event).await.unwrap();
           }
-        })
-        .unwrap();
+        });
 
         info!("Assigning index {} to {}", device_index, device.name());
         let device_added_message =
@@ -292,8 +290,7 @@ impl DeviceManagerEventLoop {
           error!("Error stopping device on ping timeout: {}", e);
         }
       }
-    })
-    .unwrap();
+    });
   }
 
   pub async fn run(&mut self) {

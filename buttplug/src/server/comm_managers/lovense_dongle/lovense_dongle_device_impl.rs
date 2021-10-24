@@ -133,8 +133,7 @@ impl LovenseDongleDeviceImpl {
       device_event_sender_clone
         .send(ButtplugDeviceEvent::Removed(address_clone.clone()))
         .unwrap();
-    })
-    .unwrap();
+    });
     Self {
       address: address.to_owned(),
       device_outgoing,

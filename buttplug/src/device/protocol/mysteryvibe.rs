@@ -112,8 +112,7 @@ impl ButtplugProtocolCommandHandler for MysteryVibe {
       if !update_running.load(Ordering::SeqCst) {
         async_manager::spawn(
           async move { vibration_update_handler(device, current_command).await },
-        )
-        .unwrap();
+        );
         update_running.store(true, Ordering::SeqCst);
       }
       Ok(messages::Ok::default().into())

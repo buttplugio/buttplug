@@ -236,8 +236,7 @@ impl ButtplugClient {
         client_event_loop.run().await;
       }
       .instrument(tracing::info_span!("Client Loop Span")),
-    )
-    .unwrap();
+    );
     self.run_handshake().await
   }
 

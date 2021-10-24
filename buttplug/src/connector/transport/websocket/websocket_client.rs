@@ -189,8 +189,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
               }
             }
             .instrument(tracing::info_span!("Websocket Client I/O Task")),
-          )
-          .unwrap();
+          );
           Ok(())
         }
         Err(websocket_error) => Err(ButtplugConnectorError::TransportSpecificError(

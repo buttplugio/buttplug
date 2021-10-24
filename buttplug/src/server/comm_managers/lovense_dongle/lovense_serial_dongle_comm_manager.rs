@@ -155,8 +155,7 @@ impl LovenseSerialDongleCommunicationManager {
       if let Err(err) = dongle_fut.await {
         error!("Error finding serial dongle: {:?}", err);
       }
-    })
-    .unwrap();
+    });
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
     async_manager::spawn(
@@ -169,8 +168,7 @@ impl LovenseSerialDongleCommunicationManager {
         parent: tracing::Span::current(),
         "Lovense Serial Dongle State Machine"
       )),
-    )
-    .unwrap();
+    );
     mgr
   }
 

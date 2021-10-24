@@ -97,8 +97,7 @@ impl LovenseServiceDeviceImpl {
       }
       let _ = sender_clone.send(ButtplugDeviceEvent::Removed(toy_id_clone));
       info!("Exiting lovense service device connection check loop.");
-    })
-    .unwrap();
+    });
     Self {
       event_sender: device_event_sender,
       http_host: http_host.to_owned(),

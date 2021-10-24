@@ -243,8 +243,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
                 info!("Lovense Connect Server API query returned: {}", text);
                 async_manager::spawn(async move {
                   service_fut.await;
-                })
-                .unwrap();
+                });
                 break;
               }
             }
@@ -255,8 +254,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
         debug!("Stopping scanning");
       }
       .instrument(info_span!("Lovense Connect Service Scanner")),
-    )
-    .unwrap();
+    );
     Box::pin(async move { Ok(()) })
   }
 

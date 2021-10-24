@@ -90,8 +90,7 @@ impl DeviceManager {
     );
     async_manager::spawn(async move {
       event_loop.run().await;
-    })
-    .unwrap();
+    });
     Self {
       device_event_sender,
       devices,
@@ -263,8 +262,7 @@ impl DeviceManager {
         .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
         .await
         .unwrap();
-    })
-    .unwrap();
+    });
     self.comm_managers.insert(mgr.name().to_owned(), mgr);
     Ok(())
   }

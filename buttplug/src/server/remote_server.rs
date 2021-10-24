@@ -91,7 +91,7 @@ async fn run_server<ConnectorType>(
                 }
               }
             }
-          }).unwrap();
+          });
         }
       },
       _ = disconnect_notifier.notified().fuse() => {

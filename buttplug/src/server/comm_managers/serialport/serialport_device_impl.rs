@@ -277,8 +277,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
             }
           }
         }
-      })
-      .unwrap();
+      });
       Ok(())
     })
   }

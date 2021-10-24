@@ -68,8 +68,7 @@ impl Drop for PingTimer {
       if sender.send(PingMessage::End).await.is_err() {
         debug!("Receiver does not exist, assuming ping timer event loop already dead.");
       }
-    })
-    .unwrap();
+    });
   }
 }
 
@@ -85,7 +84,7 @@ impl PingTimer {
         ping_timeout_notifier.clone(),
         pinged_out.clone(),
       );
-      async_manager::spawn(async move { fut.await }).unwrap();
+      async_manager::spawn(async move { fut.await });
     }
     Self {
       max_ping_time,

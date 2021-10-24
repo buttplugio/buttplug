@@ -263,8 +263,9 @@ where
 
     trace!("Sending message to connector: {:?}", msg_fut.msg);
     self.sorter.register_future(&mut msg_fut);
-    // TODO What happens if the connector isn't connected?
-    self.connector.send(msg_fut.msg).await.unwrap();
+    if self.connector.send(msg_fut.msg).await.is_err() {
+      error!("Sending message failed, connector most likely no longer connected.");
+    }
   }
 
   /// Parses message types from the client, returning false when disconnect

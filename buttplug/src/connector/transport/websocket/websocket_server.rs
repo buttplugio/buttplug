@@ -230,8 +230,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
             disconnect_notifier_clone,
           )
           .await;
-        })
-        .unwrap();
+        });
         Ok(())
       } else {
         Err(ButtplugConnectorError::ConnectorGenericError(

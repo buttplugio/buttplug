@@ -38,8 +38,7 @@ impl BtlePlugCommunicationManager {
     async_manager::spawn(async move {
       let mut task = BtleplugAdapterTask::new(event_sender, receiver);
       task.run().await;
-    })
-    .unwrap();
+    });
     Self {
       adapter_event_sender: sender,
     }

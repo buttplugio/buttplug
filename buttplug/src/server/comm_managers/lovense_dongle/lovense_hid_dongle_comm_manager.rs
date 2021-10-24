@@ -171,8 +171,7 @@ impl LovenseHIDDongleCommunicationManager {
         let _ = dongle_fut.await;
       }
       .instrument(tracing::info_span!("Lovense HID Dongle Finder Task")),
-    )
-    .unwrap();
+    );
     let mut machine =
       create_lovense_dongle_machine(event_sender, machine_receiver, mgr.is_scanning.clone());
     async_manager::spawn(
@@ -182,8 +181,7 @@ impl LovenseHIDDongleCommunicationManager {
         }
       }
       .instrument(tracing::info_span!("Lovense HID Dongle State Machine")),
-    )
-    .unwrap();
+    );
     mgr
   }
 

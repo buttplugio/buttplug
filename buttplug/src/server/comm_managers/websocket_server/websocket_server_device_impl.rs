@@ -305,8 +305,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
           }
         }
         info!("Data channel closed, ending websocket server device listener task");
-      })
-      .unwrap();
+      });
       Ok(())
     })
   }

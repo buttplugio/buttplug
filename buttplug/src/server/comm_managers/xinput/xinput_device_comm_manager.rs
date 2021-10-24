@@ -99,8 +99,7 @@ impl XInputConnectionTracker {
       let check_running = self.check_running.clone();
       async_manager::spawn(async move {
         check_gamepad_connectivity(connected_gamepads, check_running, None).await;
-      })
-      .unwrap();
+      });
     }
   }
 
@@ -118,8 +117,7 @@ impl XInputConnectionTracker {
       let check_running = self.check_running.clone();
       async_manager::spawn(async move {
         check_gamepad_connectivity(connected_gamepads, check_running, Some(sender)).await;
-      })
-      .unwrap();
+      });
     }
   }
 
@@ -219,8 +217,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
           }
         }
       }
-    })
-    .unwrap();
+    });
     Box::pin(future::ready(Ok(())))
   }
 

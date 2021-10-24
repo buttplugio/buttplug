@@ -191,8 +191,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
           }
         }
       }
-    })
-    .unwrap();
+    });
     Self {
       device,
       endpoints,
