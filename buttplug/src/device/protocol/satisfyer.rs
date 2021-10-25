@@ -105,12 +105,12 @@ mod test {
   #[test]
   pub fn test_satisfyer_2v_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("SF Love Triangle").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("SF Love Triangle").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -123,12 +123,12 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 0.9)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -140,7 +140,7 @@ mod test {
       device
           .parse_message(StopDeviceCmd::new(0).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -155,12 +155,12 @@ mod test {
   #[test]
   pub fn test_satisfyer_1v_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("SF Royal One").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("SF Royal One").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -173,12 +173,12 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
           .parse_message(StopDeviceCmd::new(0).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

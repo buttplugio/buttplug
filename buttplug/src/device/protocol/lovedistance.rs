@@ -87,8 +87,8 @@ mod test {
   #[test]
   pub fn test_lovedistance_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("REACH G").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("REACH G").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),
@@ -101,7 +101,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -114,7 +114,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),

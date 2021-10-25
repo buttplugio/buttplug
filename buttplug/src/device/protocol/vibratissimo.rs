@@ -44,13 +44,8 @@ impl ButtplugProtocol for Vibratissimo {
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     Box::pin(async move {
 
-      let mut name = device_impl.name.clone();
-      let result = device_impl.read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500)).await;
-      if result.is_ok() {
-        name = String::from_utf8(result.unwrap().data().to_vec()).unwrap_or(device_impl.name.clone());
-      }
-
-      Ok(Some(name))
+      let result = device_impl.read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500)).await?;
+      Ok(Some(String::from_utf8(result.data().to_vec()).unwrap_or(device_impl.name.clone())))
     })
   }
 }
@@ -123,18 +118,18 @@ mod test {
   #[test]
   pub fn test_vibratissimo_protocol_default() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
         .get_endpoint_receiver(&Endpoint::TxVibrate)
-        .unwrap();
+        .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
-        .unwrap();
+        .expect("Test, assuming infallible");
 
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -158,14 +153,14 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_mode));
       assert!(check_test_recv_empty(&command_receiver_vibrate));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -191,13 +186,13 @@ mod test {
   #[ignore] // Need to be able to set BLE model info to be read on test device
   pub fn test_vibratissimo_protocol_licker() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
           .get_endpoint_receiver(&Endpoint::TxVibrate)
-          .unwrap();
+          .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
           .get_endpoint_receiver(&Endpoint::TxMode)
-          .unwrap();
+          .expect("Test, assuming infallible");
 
       assert!(check_test_recv_empty(&command_receiver_mode));
       assert!(check_test_recv_empty(&command_receiver_vibrate));
@@ -205,7 +200,7 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -228,7 +223,7 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 1.0)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -252,13 +247,13 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_mode));
       assert!(check_test_recv_empty(&command_receiver_vibrate));
       device
           .parse_message(StopDeviceCmd::new(0).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
 
       check_test_recv_value(
         &command_receiver_vibrate,
@@ -285,13 +280,13 @@ mod test {
   #[ignore] // Need to be able to set BLE model info to be read on test device
   pub fn test_vibratissimo_protocol_rabbit() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Vibratissimo").await.expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
           .get_endpoint_receiver(&Endpoint::TxVibrate)
-          .unwrap();
+          .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
           .get_endpoint_receiver(&Endpoint::TxMode)
-          .unwrap();
+          .expect("Test, assuming infallible");
 
       assert!(check_test_recv_empty(&command_receiver_mode));
       assert!(check_test_recv_empty(&command_receiver_vibrate));
@@ -299,7 +294,7 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -322,7 +317,7 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 1.0)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -345,7 +340,7 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 1.0)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -369,14 +364,14 @@ mod test {
       device
           .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_mode));
       assert!(check_test_recv_empty(&command_receiver_vibrate));
 
       device
           .parse_message(StopDeviceCmd::new(0).into())
           .await
-          .unwrap();
+          .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_vibrate,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

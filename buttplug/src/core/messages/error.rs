@@ -71,7 +71,7 @@ impl Error {
 
   pub fn original_error(&self) -> ButtplugError {
     if self.original_error.is_some() {
-      self.original_error.clone().unwrap()
+      self.original_error.clone().expect("Already checked that it's valid.")
     } else {
       // Try deserializing what's in the error_message field
       #[cfg(feature = "serialize-json")]
@@ -97,7 +97,7 @@ impl From<ButtplugError> for Error {
       ButtplugError::ButtplugUnknownError { .. } => ErrorCode::ErrorUnknown,
     };
     #[cfg(feature = "serialize-json")]
-    let msg = serde_json::to_string(&error).unwrap();
+    let msg = serde_json::to_string(&error).expect("All buttplug errors are serializable");
     #[cfg(not(feature = "serialize-json"))]
     let msg = error.to_string();
     Error::new(code, &msg, Some(error))
@@ -151,13 +151,13 @@ mod test {
       "Test Error",
       None,
     ));
-    let js = serde_json::to_string(&error).unwrap();
+    let js = serde_json::to_string(&error).expect("Infallible serialization.");
     assert_eq!(ERROR_STR, js);
   }
 
   #[test]
   fn test_error_deserialize() {
-    let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&ERROR_STR).unwrap();
+    let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&ERROR_STR).expect("Infallible deserialization");
     assert_eq!(
       ButtplugCurrentSpecServerMessage::Error(Error::new(
         ErrorCode::ErrorHandshake,

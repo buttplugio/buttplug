@@ -111,12 +111,12 @@ mod test {
   #[test]
   pub fn test_kiiroov2_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Launch").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![50, 50], false)),
@@ -127,12 +127,12 @@ mod test {
   #[test]
   pub fn test_kiiroov2_linearcmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Launch").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![49, 19], false)),

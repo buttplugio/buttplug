@@ -448,36 +448,24 @@ impl ButtplugDevice {
         // TODO Should we even return a config from the device_config_mgr if the
         // protocol isn't there?
         if device_config_mgr.has_protocol(&*config_name) {
-          match device_creator.try_create_device_impl(config).await {
-            Ok(device_impl) => {
-              info!(
-                address = tracing::field::display(device_impl.address()),
-                "Found Buttplug Device {}",
-                device_impl.name()
-              );
-              // If we've made it this far, we now have a connected device
-              // implementation with endpoints set up. We now need to run whatever
-              // protocol initialization might need to happen. We'll fetch a protocol
-              // creator, pass the device implementation to it, then let it do
-              // whatever it needs. For most protocols, this is a no-op. However, for
-              // devices like Lovense, some Kiiroo, etc, this can get fairly
-              // complicated.
-              let sharable_device_impl = Arc::new(device_impl);
-              match device_config_mgr.get_protocol_creator(&*config_name)(
-                sharable_device_impl.clone(),
-                device_protocol_config,
-              )
-              .await
-              {
-                Ok(protocol_impl) => Ok(Some(ButtplugDevice::new(
-                  protocol_impl,
-                  sharable_device_impl,
-                ))),
-                Err(e) => Err(e),
-              }
-            }
-            Err(e) => Err(e),
-          }
+          let device_impl = device_creator.try_create_device_impl(config).await?;
+          info!(
+            address = tracing::field::display(device_impl.address()),
+            "Found Buttplug Device {}",
+            device_impl.name()
+          );
+          // If we've made it this far, we now have a connected device
+          // implementation with endpoints set up. We now need to run whatever
+          // protocol initialization might need to happen. We'll fetch a protocol
+          // creator, pass the device implementation to it, then let it do
+          // whatever it needs. For most protocols, this is a no-op. However, for
+          // devices like Lovense, some Kiiroo, etc, this can get fairly
+          // complicated.
+          let sharable_device_impl = Arc::new(device_impl);
+          let protocol_creator_func = 
+            device_config_mgr.get_protocol_creator(&*config_name).expect("Already checked for protocol existence");
+          let protocol_impl = protocol_creator_func(sharable_device_impl.clone(), device_protocol_config).await?;
+          Ok(Some(ButtplugDevice::new(protocol_impl, sharable_device_impl)))
         } else {
           info!("Protocol {} not available", config_name);
           Ok(None)

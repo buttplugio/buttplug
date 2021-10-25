@@ -109,7 +109,7 @@ impl ButtplugProtocol for TheHandy {
       // If they ever change this, I quit (or will just update the device config).
 
       let mut sec_buf = vec![];
-      session_req.encode(&mut sec_buf).unwrap();
+      session_req.encode(&mut sec_buf).expect("Infallible encode.");
       device_impl.write_value(DeviceWriteCmd::new(Endpoint::Firmware, sec_buf, false));
       let _ = device_impl.read_value(DeviceReadCmd::new(Endpoint::Firmware, 100, 500));
 
@@ -206,7 +206,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
       }],
     };
     let mut linear_buf = vec![];
-    linear_payload.encode(&mut linear_buf).unwrap();
+    linear_payload.encode(&mut linear_buf).expect("Infallible encode.");
     Box::pin(async move {
       device
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, linear_buf, true))

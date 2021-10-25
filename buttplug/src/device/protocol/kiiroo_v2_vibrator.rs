@@ -73,8 +73,8 @@ mod test {
   #[test]
   pub fn test_kiiroov2vibrator_protocol_3_features() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Titan").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Titan").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(
           VibrateCmd::new(
@@ -88,7 +88,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![25, 50, 75], false)),
@@ -107,12 +107,12 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -127,8 +127,8 @@ mod test {
   #[test]
   pub fn test_kiiroov2vibrator_protocol_2_features() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Fuse").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Fuse").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(
           VibrateCmd::new(
@@ -141,7 +141,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![25, 50, 0], false)),
@@ -159,12 +159,12 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -179,12 +179,12 @@ mod test {
   #[test]
   pub fn test_kiiroov2vibrator_protocol_1_features() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Pearl2").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Pearl2").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.25)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![25, 0, 0], false)),
@@ -193,12 +193,12 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.25)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

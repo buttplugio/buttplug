@@ -80,12 +80,12 @@ mod test {
   #[test]
   pub fn test_cachito_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("CCTSK").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("CCTSK").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // We just vibe 1 so expect 1 write
       check_test_recv_value(
         &command_receiver,
@@ -96,7 +96,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // no-op
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -112,7 +112,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // fianlly setting second vibe whilst changing vibe 1, 2 writes
       check_test_recv_value(
         &command_receiver,
@@ -136,7 +136,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // only vibe 1 changed
       check_test_recv_value(
         &command_receiver,
@@ -147,7 +147,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // stop on both
       check_test_recv_value(
         &command_receiver,

@@ -64,7 +64,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!("Vibrate?v={}&t={}", cmds[0].unwrap(), device.address())
+          let lovense_cmd = format!("Vibrate?v={}&t={}", cmds[0].expect("Already checked existence"), device.address())
             .as_bytes()
             .to_vec();
           let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
@@ -128,9 +128,8 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
       // implementation and it's the only thing read will return.
       let reading = device
         .read_value(DeviceReadCmd::new(Endpoint::Rx, 0, 0))
-        .await
-        .unwrap();
-      info!("Battery level: {}", reading.data()[0]);
+        .await?;
+      debug!("Battery level: {}", reading.data()[0]);
       Ok(
         messages::BatteryLevelReading::new(
           message.device_index(),

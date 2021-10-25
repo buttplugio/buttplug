@@ -73,7 +73,7 @@ mod test {
       message_version: ButtplugMessageSpecVersion::Version2,
     };
     assert_eq!(
-      serde_json::from_str::<RequestServerInfo>(new_json).unwrap(),
+      serde_json::from_str::<RequestServerInfo>(new_json).expect("Test unwrap"),
       new_msg
     );
   }
@@ -93,7 +93,7 @@ mod test {
       message_version: ButtplugMessageSpecVersion::Version0,
     };
     assert_eq!(
-      serde_json::from_str::<RequestServerInfo>(old_json).unwrap(),
+      serde_json::from_str::<RequestServerInfo>(old_json).expect("Test unwrap"),
       old_msg
     );
   }

@@ -109,15 +109,15 @@ mod test {
   #[test]
   pub fn test_patoo_protocol_devil() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PBT821").await.unwrap();
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("PBT821").await.expect("Test, assuming infallible");
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       let command_receiver_txmode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
-        .unwrap();
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // We just vibe 1 so expect 2 writes (mode 0x04)
       check_test_recv_value(
         &command_receiver_tx,
@@ -133,7 +133,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // no-op
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -150,7 +150,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // setting second vibe whilst changing vibe 1, 2 writes (mode 1)
       check_test_recv_value(
         &command_receiver_tx,
@@ -175,7 +175,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // only vibe 1 changed, 2 writes, same data
       check_test_recv_value(
         &command_receiver_tx,
@@ -200,7 +200,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // turn off vibe 1, 2 writes (mode 0x80)
       check_test_recv_value(
         &command_receiver_tx,
@@ -216,7 +216,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // stop on both, 2 writes (mode 0)
       check_test_recv_value(
         &command_receiver_tx,
@@ -234,16 +234,16 @@ mod test {
   #[test]
   pub fn test_patoo_protocol_carrot() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PTVEA2601").await.unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("PTVEA2601").await.expect("Test, assuming infallible");
 
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       let command_receiver_txmode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
-        .unwrap();
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // We just vibe 1 so expect 2 writes (mode 0x04)
       check_test_recv_value(
         &command_receiver_tx,
@@ -259,7 +259,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // no-op
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -283,7 +283,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // stop on both, 2 writes (mode 0)
       check_test_recv_value(
         &command_receiver_tx,

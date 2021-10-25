@@ -42,14 +42,14 @@ pub fn msg_to_protocol_json<T>(msg: T) -> String
 where
   T: ButtplugMessage + Serialize + Deserialize<'static>,
 {
-  serde_json::to_string(&[&msg]).unwrap()
+  serde_json::to_string(&[&msg]).expect("Infallible serialization")
 }
 
 pub fn vec_to_protocol_json<T>(msg: Vec<T>) -> String
 where
   T: ButtplugMessage + Serialize + Deserialize<'static>,
 {
-  serde_json::to_string(&msg).unwrap()
+  serde_json::to_string(&msg).expect("Infallible serialization")
 }
 
 fn deserialize_to_message<T>(
@@ -250,7 +250,7 @@ mod test {
     let serializer = ButtplugServerJSONSerializer::default();
     serializer
       .deserialize(ButtplugSerializedMessage::Text(json.to_owned()))
-      .unwrap();
+      .expect("Infallible deserialization");
     assert_eq!(
       *serializer.message_version.borrow(),
       Some(ButtplugMessageSpecVersion::Version2)

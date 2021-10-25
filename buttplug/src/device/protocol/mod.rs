@@ -158,7 +158,7 @@ pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
         Err(err) => return Err(err),
       };
       let (names, attrs) = config.get_attributes(&device_identifier, &endpoints)?;
-      let name = names.get("en-us").unwrap().clone();
+      let name = names.get("en-us").expect("Required value for JSON Schema").clone();
       Ok(Self::new_protocol(&name, attrs))
     })
   }

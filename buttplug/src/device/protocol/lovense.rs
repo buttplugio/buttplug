@@ -78,7 +78,7 @@ impl ButtplugProtocol for Lovense {
         select! {
           event = event_receiver.recv().fuse() => {
             if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
-              let type_response = std::str::from_utf8(&n).unwrap().to_owned();
+              let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
               return Ok(Some(identifier));
@@ -133,7 +133,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!("Vibrate:{};", cmds[0].unwrap()).as_bytes().to_vec();
+          let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity")).as_bytes().to_vec();
           let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
           fut.await?;
           return Ok(messages::Ok::default().into());

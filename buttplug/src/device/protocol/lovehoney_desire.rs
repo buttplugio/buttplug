@@ -61,7 +61,7 @@ impl ButtplugProtocolCommandHandler for LovehoneyDesire {
         if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
           let fut = device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
-            vec![0xF3, 0, cmds[0].unwrap() as u8],
+            vec![0xF3, 0, cmds[0].expect("Already checked value existence") as u8],
             false,
           ));
           fut.await?;
@@ -101,14 +101,14 @@ mod test {
   #[test]
   pub fn test_lovehoney_desire_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
 
       // If we send one speed to one motor, we should only see one output.
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -132,7 +132,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -156,7 +156,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
@@ -178,7 +178,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

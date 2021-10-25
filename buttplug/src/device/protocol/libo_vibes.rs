@@ -94,15 +94,15 @@ mod test {
   #[test]
   pub fn test_libo_vibes_protocol_1vibe() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Yuyi").await.unwrap();
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Yuyi").await.expect("Test, assuming infallible");
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
-        .unwrap();
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x32], false)),
@@ -114,14 +114,14 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_tx_mode));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00], false)),
@@ -137,11 +137,11 @@ mod test {
   #[test]
   pub fn test_libo_vibes_protocol_2vibe() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Gugudai").await.unwrap();
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Gugudai").await.expect("Test, assuming infallible");
+      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
-        .unwrap();
+        .expect("Test, assuming infallible");
       device
         .parse_message(
           VibrateCmd::new(
@@ -154,7 +154,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x32], false)),
@@ -170,7 +170,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 1.0)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx_mode,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x03], false)),
@@ -181,14 +181,14 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_tx_mode));
 
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00], false)),

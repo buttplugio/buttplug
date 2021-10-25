@@ -94,12 +94,12 @@ mod test {
   #[test]
   pub fn test_je_joue_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Je Joue").await.unwrap();
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let (device, test_device) = new_bluetoothle_test_device("Je Joue").await.expect("Test, assuming infallible");
+      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // We just vibe 1 so expect 1 write (mode 2)
       check_test_recv_value(
         &command_receiver,
@@ -110,7 +110,7 @@ mod test {
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // no-op
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -126,7 +126,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // setting second vibe whilst changing vibe 1, 1 writes (mode 1)
       check_test_recv_value(
         &command_receiver,
@@ -146,7 +146,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // only vibe 1 changed, 1 write, same data
       check_test_recv_value(
         &command_receiver,
@@ -166,7 +166,7 @@ mod test {
           .into(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // turn off vibe 1, 1 write (mode 3)
       check_test_recv_value(
         &command_receiver,
@@ -177,7 +177,7 @@ mod test {
       device
         .parse_message(StopDeviceCmd::new(0).into())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       // stop on both, 1 write (mode 1)
       check_test_recv_value(
         &command_receiver,

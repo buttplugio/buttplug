@@ -104,9 +104,9 @@ impl ButtplugProtocolCommandHandler for MysteryVibe {
       let write_mutex = current_command.clone();
       let mut command_writer = write_mutex.write().await;
       let command: Vec<u8> = result
-        .unwrap()
+        .expect("Already checked validity")
         .into_iter()
-        .map(|x| x.unwrap() as u8)
+        .map(|x| x.expect("Validity ensured via GCM match_all") as u8)
         .collect();
       *command_writer = command;
       if !update_running.load(Ordering::SeqCst) {
