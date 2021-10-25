@@ -26,8 +26,7 @@ fn test_garbled_client_rsi_response() {
     async_manager::spawn(async move {
       helper_clone.connect_without_reply().await.unwrap();
       finish_notifier_clone.notify_waiters();
-    })
-    .unwrap();
+    });
     // Just assume we get an RSI message
     let _ = helper.recv_outgoing().await;
     // Send back crap.
@@ -70,8 +69,7 @@ fn test_serialized_error_relay() {
       )));
       error_msg.set_id(3);
       helper_clone.send_client_incoming(error_msg).await;
-    })
-    .unwrap();
+    });
     assert!(matches!(
       helper.client().start_scanning().await.unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugUnknownError(

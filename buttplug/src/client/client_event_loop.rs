@@ -167,17 +167,15 @@ where
       return;
     }
 
-    // The only reason a send will fail is if we have no receivers. Since we
-    // already checked for receivers here, we can unwrap without issue.
-    self.to_client_sender.send(event).unwrap();
+    self.to_client_sender.send(event).expect("Already checked for receivers.");
   }
 
   fn disconnect_device(&mut self, device_index: u32) {
     if !self.device_map.contains_key(&device_index) {
       return;
     }
-    // Checked for device index existence, can unwrap here.
-    let device = (*self.device_map.get(&device_index).unwrap()).clone();
+
+    let device = (*self.device_map.get(&device_index).expect("Checked for device index already.")).clone();
     device.set_device_connected(false);
     device.queue_event(ButtplugClientDeviceEvent::DeviceRemoved);
     // Then remove it from our storage map

@@ -30,7 +30,7 @@ async fn device_control_example() {
   client
     .connect_in_process(None)
     .await
-    .unwrap();
+    .expect("Simple in process creation should always succeed");
 
   // We'll mostly be doing the same thing we did in example #3, up until we get
   // a device.
@@ -88,12 +88,18 @@ async fn device_control_example() {
         .allowed_messages
         .contains_key(&ButtplugClientDeviceMessageType::VibrateCmd)
       {
-        dev.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
+        if let Err(e) = dev.vibrate(VibrateCommand::Speed(1.0)).await {
+          println!("Error sending vibrate command to device! {}", e);
+          return;
+        }
         println!("{} should start vibrating!", dev.name);
         Delay::new(Duration::from_secs(1)).await;
         // All devices also have a "stop" command that will make
         // them stop whatever they're doing.
-        dev.stop().await.unwrap();
+        if let Err(e) = dev.stop().await {
+          println!("Error sending stop command to device! {}", e);
+          return;
+        }
         println!("{} should stop vibrating!", dev.name);
         Delay::new(Duration::from_secs(1)).await;
       } else {
@@ -103,7 +109,7 @@ async fn device_control_example() {
   };
 
   loop {
-    match event_stream.next().await.unwrap() {
+    match event_stream.next().await.expect("We own the client so the event stream shouldn't die.") {
       ButtplugClientEvent::DeviceAdded(dev) => {
         println!("We got a device: {}", dev.name);
         let fut = vibrate_device(dev);

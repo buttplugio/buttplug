@@ -89,11 +89,11 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           TlsConnector::builder()
             .danger_accept_invalid_certs(true)
             .build()
-            .unwrap()
+            .expect("Should always succeed, we're not setting any fallible options.")
             .into(),
         )
       } else {
-        Some(TlsConnector::new().unwrap().into())
+        Some(TlsConnector::new().expect("Should always succeed, not setting options.").into())
       }
     } else {
       // If we're not using a secure connection, just return None, at which
@@ -132,7 +132,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                       writer.close().await.unwrap_or_else(|err| error!("{}", err));
                       return;                      
                     }
-                    match response.unwrap() {
+                    match response.expect("Already checked for none.") {
                       Ok(msg) => match msg {
                         Message::Text(t) => {
                           if incoming_sender

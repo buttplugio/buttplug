@@ -237,8 +237,7 @@ where
     connector_incoming_sender: Sender<InboundMessageType>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if self.transport.is_some() {
-      // We can unwrap this because we just proved we had it.
-      let transport = self.transport.take().unwrap();
+      let transport = self.transport.take().expect("Already checked that this would be a valid take().");
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       Box::pin(async move {

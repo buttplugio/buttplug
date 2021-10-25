@@ -18,7 +18,7 @@ use std::{
 use tokio::net::TcpListener;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
-  Mutex, Notify,
+  Notify,
 };
 
 #[derive(Clone, Debug)]
@@ -196,11 +196,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       "127.0.0.1"
     };
 
-    let request_receiver = Arc::new(Mutex::new(Some(outgoing_receiver)));
-
     let addr = format!("{}:{}", base_addr, self.port);
     debug!("Websocket Insecure: Trying to listen on {}", addr);
-    let request_receiver_clone = request_receiver;
     let response_sender_clone = incoming_sender;
     let disconnect_notifier_clone = disconnect_notifier;
     let fut = async move {
@@ -225,7 +222,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
         async_manager::spawn(async move {
           run_connection_loop(
             ws_stream,
-            (*request_receiver_clone.lock().await).take().unwrap(),
+            outgoing_receiver,
             response_sender_clone,
             disconnect_notifier_clone,
           )
@@ -240,8 +237,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     };
 
     Box::pin(async move {
-      fut.await?;
-      Ok(())
+      fut.await
     })
   }
 

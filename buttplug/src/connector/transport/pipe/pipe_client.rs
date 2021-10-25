@@ -19,7 +19,6 @@ use tokio::{
 };
 #[cfg(target_os = "windows")]
 use tokio::net::windows::named_pipe;
-use tracing::Instrument;
 
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeClientTransportBuilder {
@@ -106,8 +105,9 @@ async fn run_connection_loop(
                     break;
                   }
                 },
-                Err(e) => {
-
+                Err(err) => {
+                  error!("Error from pipe server, assuming disconnection: {:?}", err);
+                  break;
                 }
               }
             }
@@ -131,15 +131,6 @@ pub struct ButtplugPipeClientTransport {
   disconnect_notifier: Arc<Notify>,
 }
 
-impl ButtplugPipeClientTransport {
-  fn create(address: &str) -> Self {
-    Self {
-      address: address.to_owned(),
-      disconnect_notifier: Arc::new(Notify::new()),
-    }
-  }
-}
-
 impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
   fn connect(
     &self,
@@ -149,7 +140,7 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      let mut client = named_pipe::ClientOptions::new().open(address).map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
+      let client = named_pipe::ClientOptions::new().open(address).map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
       tokio::spawn(async move {
         run_connection_loop(client, outgoing_receiver, incoming_sender, disconnect_notifier).await;
       });

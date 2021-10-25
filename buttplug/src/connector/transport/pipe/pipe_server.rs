@@ -58,7 +58,7 @@ async fn run_connection_loop(
         info!("Pipe server connector requested disconnect.");
         if server.disconnect().is_err() {
           error!("Cannot close, assuming connection already closed");
-          return;
+          break;
         }
       },
       serialized_msg = request_receiver.recv() => {
@@ -70,7 +70,7 @@ async fn run_connection_loop(
                 .await
                 .is_err() {
                 error!("Cannot send text value to server, considering connection closed.");
-                return;
+                break;
               }
             }
             ButtplugSerializedMessage::Binary(binary_msg) => {
@@ -79,16 +79,16 @@ async fn run_connection_loop(
                 .await
                 .is_err() {
                 error!("Cannot send binary value to server, considering connection closed.");
-                return;
+                break;
               }
             }
           }
         } else {
-          info!("Websocket server connector owner dropped, disconnecting websocket connection.");
+          info!("Pipe server connector owner dropped, disconnecting websocket connection.");
           if server.disconnect().is_err() {
             error!("Cannot close, assuming connection already closed");
           }
-          return;
+          break;
         }
       }
       ready = server.ready(Interest::READABLE) => {
@@ -102,27 +102,34 @@ async fn run_connection_loop(
                     continue;
                   }
                   data.truncate(n);
-                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(String::from_utf8(data).unwrap()))).await.is_err() {
+                  let json_str = if let Ok(json) = String::from_utf8(data) {
+                    json
+                  } else {
+                    error!("Could not parse incoming values as valid utf8.");
+                    continue;
+                  };
+                  if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(json_str))).await.is_err() {
                     error!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
     
                 },
-                Err(e) => {
-
+                Err(err) => {
+                  error!("Error from pipe server, assuming disconnection: {:?}", err);
+                  break;      
                 }
               }
             }
           },
           Err(err) => {
-            error!("Error from websocket server, assuming disconnection: {:?}", err);
-            let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
+            error!("Error from pipe server, assuming disconnection: {:?}", err);
             break;
           }
         }
       }
     }
   }
+  let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Pipe server closed".to_owned())).await;
 }
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -140,7 +147,7 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      let mut server = named_pipe::ServerOptions::new()
+      let server = named_pipe::ServerOptions::new()
         .first_pipe_instance(true)
         .create(address)
         .map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;

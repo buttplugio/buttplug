@@ -72,7 +72,7 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(server.unwrap_or(ButtplugServerBuilder::default().finish().unwrap())),
+      server: Arc::new(server.unwrap_or(ButtplugServerBuilder::default().finish().expect("Default server builder should always work."))),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }
@@ -111,7 +111,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
             // in-process conversion, we can unwrap because we know our
             // try_into() will always succeed (which may not be the case with
             // remote connections that have different spec versions).
-            if send.send(event.try_into().unwrap()).await.is_err() {
+            if send.send(event.try_into().expect("This is in-process so we're always on the latest message spec, this will always work.")).await.is_err() {
               break;
             }
           }
@@ -138,18 +138,15 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     if !self.connected.load(Ordering::SeqCst) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
-    let input = msg.try_into().unwrap();
+    let input = msg.try_into().expect("This is in-process so message conversions will always work.");
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {
-      // Once again, this is an in process server, so we know we'll always be
-      // running on the same spec version. Therefore we can just unwrap after
-      // the try_into() conversion.
       let output: ButtplugCurrentSpecServerMessage = output_fut
         .await
         .unwrap_or_else(|e| e.into())
         .try_into()
-        .unwrap();
+        .expect("This is in-process so message conversions will always work.");
       sender
         .send(output)
         .await

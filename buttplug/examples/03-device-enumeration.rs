@@ -16,7 +16,7 @@ use buttplug::{
 use futures_timer::Delay;
 use std::time::Duration;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
-// use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},  core::messages::serializer::ButtplugClientJSONSerializer};
+use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport, ButtplugPipeClientTransportBuilder, ButtplugRemoteServerConnector, ButtplugPipeServerTransportBuilder},  core::messages::serializer::{ButtplugServerJSONSerializer, ButtplugClientJSONSerializer}, server::{ButtplugRemoteServer, comm_managers::btleplug::BtlePlugCommunicationManagerBuilder}};
 use futures::StreamExt;
 use tracing::{info, span, Level};
 
@@ -33,6 +33,14 @@ async fn device_enumeration_example() {
   // will use an embedded connector.
   // let connector = ButtplugInProcessClientConnector::default();
   // let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
+
+  tokio::spawn(async move {
+    let server = ButtplugRemoteServer::default();//ButtplugPipeServerTransportBuilder::default().finish();
+    server.device_manager().add_comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    server.start(ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(ButtplugPipeServerTransportBuilder::new("\\\\.\\pipe\\testpipe").finish())).await;
+  });
+
+  tokio::time::sleep(std::time::Duration::from_millis(100)).await;
 
   // This example will also work with a WebsocketConnector if you want to
   // connect to Intiface Desktop or an intiface-cli instance.
@@ -64,7 +72,7 @@ async fn device_enumeration_example() {
   // manager, this gets a little complicated. We'll just be emulating a
   // bluetooth device, the Aneros Vivi, by using its bluetooth name.
 
-  /* let helper = connector.server_ref().add_test_comm_manager().unwrap();
+  /* let helper = connector.server_ref().add_test_comm_manager().expect("Test communication manager addition should always succeed");
    let _ = helper.add_ble_device("Massage Demo").await;
   */
   // If we wanted to add a real device manager, like the btleplug manager,
@@ -103,10 +111,13 @@ async fn device_enumeration_example() {
   // With that out of the way, let's build our client.
   let client = ButtplugClient::new("test client");
   let mut event_stream = client.event_stream();
+  info!("Client connecting...");
   client
-    .connect_in_process(None)
+    //.connect_in_process(None)
+    .connect(ButtplugRemoteClientConnector::<_, ButtplugClientJSONSerializer>::new(ButtplugPipeClientTransportBuilder::new("\\\\.\\pipe\\testpipe").finish()))
     .await
     .unwrap();
+    info!("Client initiating scan...");
   // First, we'll start the server looking for devices.
   if let Err(err) = client.start_scanning().await {
     // If the server disconnected between the time we spun up the
@@ -115,6 +126,7 @@ async fn device_enumeration_example() {
     println!("Client errored when starting scan! {}", err);
     return;
   }
+  info!("Client scanning...");
   // Ok, we've started scanning. Now we need to wait to hear back from the
   // server on whether we got anything. To do that, we use our event stream.
   //
@@ -155,8 +167,7 @@ async fn device_enumeration_example() {
             println!("Battery: {}", device.battery_level().await.unwrap());
             println!("{} should stop vibrating!", device.name);
             Delay::new(Duration::from_secs(1)).await;
-          })
-          .unwrap();
+          });
         }
         ButtplugClientEvent::ScanningFinished => {
           println!("Scanning finished signaled.");
@@ -174,8 +185,7 @@ async fn device_enumeration_example() {
         }
       }
     }
-  })
-  .unwrap();
+  });
 
   println!("Hit enter to continue...");
   BufReader::new(io::stdin())

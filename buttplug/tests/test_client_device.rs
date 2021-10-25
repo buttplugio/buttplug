@@ -191,8 +191,7 @@ fn test_client_repeated_deviceadded_message() {
         .send_client_incoming(device_added.clone().into())
         .await;
       helper_clone.send_client_incoming(device_added.into()).await;
-    })
-    .unwrap();
+    });
     helper.client().start_scanning().await.unwrap();
     assert!(matches!(
       event_stream.next().await.unwrap(),
@@ -230,8 +229,7 @@ fn test_client_repeated_deviceremoved_message() {
       helper_clone
         .send_client_incoming(device_removed.into())
         .await;
-    })
-    .unwrap();
+    });
     helper.client().start_scanning().await.unwrap();
     assert!(matches!(
       event_stream.next().await.unwrap(),

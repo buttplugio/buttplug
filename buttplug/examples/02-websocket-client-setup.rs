@@ -59,7 +59,10 @@ async fn websocket_connector_example() {
   // out, things look basically the same, EXCEPT for the fact that, unlike the
   // mebedded connector, this can fail! If it does, the unwrap on run() will
   // panic and you'll get an error message about not being able to connect.
-  client.connect(connector).await.unwrap();
+  if let Err(e) = client.connect(connector).await {
+    println!("Client connection failed! {}", e);
+    return;
+  }
   println!("Is the client connected? {}", client.connected());
   println!("Waiting for server disconnect...");
   let mut event_stream = client.event_stream();

@@ -83,8 +83,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
           }
         };
       }
-    })
-    .unwrap();
+    });
     Box::pin(future::ready(Ok(())))
   }
 
@@ -151,8 +150,7 @@ impl ChannelClientTestHelper {
         assert!(false, "Error connecting to client: {:?}", e);
       }
       finish_notifier_clone.notify_waiters();
-    })
-    .unwrap();
+    });
     // Wait for RequestServerInfo message
     assert!(matches!(
       self.get_next_client_message().await,

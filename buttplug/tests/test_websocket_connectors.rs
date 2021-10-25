@@ -29,8 +29,7 @@ mod websocket_connector_tests {
           ButtplugServerJSONSerializer,
         >::new(ButtplugWebsocketServerTransportBuilder::default().port(12349).finish());
         server_clone.start(connector).await.unwrap();
-      })
-      .unwrap();
+      });
       let mut connected = false;
       for _ in 0..10u8 {
         let connector = ButtplugRemoteClientConnector::<
@@ -66,8 +65,7 @@ mod websocket_connector_tests {
           "ws://127.0.0.1:12347",
         ));
         server_clone.start(connector).await.unwrap();
-      })
-      .unwrap();
+      });
 
       let mut connected = false;
       for _ in 0..10u8 {
