@@ -19,7 +19,7 @@ pub fn spawn<Fut>(future: Fut)
 where
   Fut: Future<Output = ()> + 'static,
 {
-  spawn_local(future).unwrap();
+  spawn_local(future).expect("Should always have a runtime.");
 }
 
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>

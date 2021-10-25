@@ -26,9 +26,7 @@ impl ProtocolConfiguration {
   pub fn merge(&mut self, other: ProtocolConfiguration) {
     // For now, we're only merging serial info in.
     for (protocol, conf) in other.protocols {
-      if self.protocols.contains_key(&protocol) {
-        // Just checked we have this.
-        let protocol_conf = self.protocols.get_mut(&protocol).unwrap();
+      if let Some(protocol_conf) = self.protocols.get_mut(&protocol) {
         protocol_conf.merge_user_definition(conf);
       } else {
         self.protocols.insert(protocol, conf);
@@ -40,7 +38,7 @@ impl ProtocolConfiguration {
 }
 
 pub fn get_internal_config_version() -> u32 {
-  let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON).unwrap();
+  let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON).expect("If this fails, the whole library goes with it.");
   config.version
 }
 
@@ -79,7 +77,7 @@ pub fn load_protocol_config_from_json(config_str: &str) -> Result<ProtocolConfig
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON).unwrap();
+  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON).expect("If this fails, the whole library goes with it.");
   let dcm = DeviceConfigurationManager::new(allow_raw_messages);
   for (name, def) in devices.protocols {
     dcm.add_protocol_definition(&name, def);

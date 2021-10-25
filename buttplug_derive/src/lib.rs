@@ -7,7 +7,7 @@ use quote::quote;
 pub fn buttplug_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   // Build the trait implementation
   impl_buttplug_message_macro(&ast)
@@ -59,7 +59,7 @@ fn impl_buttplug_message_macro(ast: &syn::DeriveInput) -> TokenStream {
 pub fn buttplug_device_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   let mut tokens = impl_buttplug_message_macro(&ast);
   tokens.extend(impl_buttplug_device_message_macro(&ast));
@@ -110,7 +110,7 @@ fn impl_buttplug_device_message_macro(ast: &syn::DeriveInput) -> TokenStream {
 pub fn buttplug_message_validator_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   // Build the trait implementation
   impl_buttplug_message_validator_macro(&ast)
@@ -148,7 +148,7 @@ fn impl_buttplug_message_validator_macro(ast: &syn::DeriveInput) -> TokenStream 
 pub fn try_from_buttplug_client_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   impl_try_from_buttplug_client_message_derive_macro(&ast)
 }
@@ -187,7 +187,7 @@ fn impl_try_from_buttplug_client_message_derive_macro(ast: &syn::DeriveInput) ->
 pub fn try_from_buttplug_out_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   impl_try_from_buttplug_server_message_derive_macro(&ast)
 }
@@ -218,7 +218,7 @@ fn impl_try_from_buttplug_server_message_derive_macro(ast: &syn::DeriveInput) ->
 pub fn from_specific_buttplug_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   impl_from_specific_buttplug_message_derive_macro(&ast)
 }
@@ -244,7 +244,7 @@ fn impl_from_specific_buttplug_message_derive_macro(ast: &syn::DeriveInput) -> T
 pub fn buttplug_client_message_type_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   // Build the trait implementation
   impl_buttplug_client_message_type_macro(&ast)
@@ -262,7 +262,7 @@ fn impl_buttplug_client_message_type_macro(ast: &syn::DeriveInput) -> TokenStrea
 pub fn buttplug_server_message_type_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   // Build the trait implementation
   impl_buttplug_server_message_type_macro(&ast)
@@ -280,7 +280,7 @@ fn impl_buttplug_server_message_type_macro(ast: &syn::DeriveInput) -> TokenStrea
 pub fn buttplug_protocol_properties_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree
   // that we can manipulate
-  let ast = syn::parse(input).unwrap();
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
 
   // Build the trait implementation
   impl_buttplug_protocol_properties_macro(&ast)

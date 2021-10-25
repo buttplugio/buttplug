@@ -23,7 +23,7 @@ impl DeviceCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilde
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(DelayDeviceCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("Test, assuming infallible"),
     ))
   }
 }
@@ -63,7 +63,7 @@ impl DeviceCommunicationManager for DelayDeviceCommunicationManager {
       sender
         .send(DeviceCommunicationEvent::ScanningFinished)
         .await
-        .unwrap();
+        .expect("Test, assuming infallible");
       Ok(())
     })
   }

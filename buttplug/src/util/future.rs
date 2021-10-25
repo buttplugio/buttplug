@@ -58,7 +58,7 @@ impl<T> ButtplugFutureState<T> {
     self.reply = Some(reply);
 
     if self.waker.is_some() {
-      self.waker.take().unwrap().wake();
+      self.waker.take().expect("Already checked validity").wake();
     }
   }
 }
@@ -103,9 +103,7 @@ impl<T> ButtplugFutureStateShared<T> {
   /// method, in this module. Everything else should just be setting replies,
   /// and can use set_reply accordingly.
   pub(super) fn lock(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
-    // There should only ever be lock contention if we're polling while
-    // settings, which should rarely if ever happen.
-    self.state.lock().unwrap()
+    self.state.lock().expect("There should never be lock contention for a buttplug future.")
   }
 
   /// Locks immediately and sets the reply for the internal waker, or panics if
@@ -184,7 +182,7 @@ impl<T> Future for ButtplugFuture<T> {
     // reading the value.
     let mut waker_state = self.waker_state.lock();
     if waker_state.reply.is_some() {
-      let msg = waker_state.reply.take().unwrap();
+      let msg = waker_state.reply.take().expect("Already checked validity");
       Poll::Ready(msg)
     } else {
       waker_state.waker = Some(cx.waker().clone());

@@ -18,7 +18,7 @@ pub fn spawn<Fut>(future: Fut)
 where
   Fut: Future<Output = ()> + Send + 'static,
 {
-  TokioAsyncManager::default().spawn(future).unwrap()
+  TokioAsyncManager::default().spawn(future).expect("Infallible, only returns result to match trait")
 }
 
 pub fn spawn_with_handle<Fut>(future: Fut) -> Result<RemoteHandle<Fut::Output>, SpawnError>
@@ -34,7 +34,7 @@ where
   F: Future,
 {
   // Create the runtime
-  let rt = tokio::runtime::Runtime::new().unwrap();
+  let rt = tokio::runtime::Runtime::new().expect("Assumed infallible in this case (usually for tests).");
 
   // Execute the future, blocking the current thread until completion
   rt.block_on(async move { f.await })

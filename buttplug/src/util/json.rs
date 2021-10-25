@@ -28,9 +28,9 @@ impl JSONValidator {
   ///
   /// - `schema`: JSON Schema that the validator should use.
   pub fn new(schema: &str) -> Self {
-    let schema_json: Value = serde_json::from_str(schema).unwrap();
+    let schema_json: Value = serde_json::from_str(schema).expect("If this fails, the library is going with it.");
     let mut scope = json_schema::Scope::new();
-    let id = scope.compile(schema_json, false).unwrap();
+    let id = scope.compile(schema_json, false).expect("If this fails, the library is going with it.");
     Self { id, scope }
   }
 
@@ -41,7 +41,7 @@ impl JSONValidator {
   ///
   /// - `json_str`: JSON string to validate.
   pub fn validate(&self, json_str: &str) -> Result<(), ButtplugSerializerError> {
-    let schema = self.scope.resolve(&self.id).unwrap();
+    let schema = self.scope.resolve(&self.id).expect("id generated on creation.");
     let check_value = serde_json::from_str(json_str)
       .map_err(|err| ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", json_str, err)))?;
     let state = schema.validate(&check_value);
