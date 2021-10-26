@@ -55,7 +55,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     Box::pin(async move {
       if adapter_event_sender.send(BtleplugAdapterCommand::StartScanning).await.is_err() {
         error!("Error starting scan, cannot send to btleplug event loop.");
-        Err(ButtplugDeviceError::DeviceNotAvailable("Cannot send start scanning request to event loop.".to_owned()).into())
+        Err(ButtplugDeviceError::DeviceConnectionError("Cannot send start scanning request to event loop.".to_owned()).into())
       }  else {
         Ok(())
       }      
@@ -67,7 +67,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
     Box::pin(async move {
       if adapter_event_sender.send(BtleplugAdapterCommand::StopScanning).await.is_err() {
         error!("Error stopping scan, cannot send to btleplug event loop.");
-        Err(ButtplugDeviceError::DeviceNotAvailable("Cannot send stop scanning request to event loop.".to_owned()).into())
+        Err(ButtplugDeviceError::DeviceConnectionError("Cannot send stop scanning request to event loop.".to_owned()).into())
       }  else {
         Ok(())
       }  
