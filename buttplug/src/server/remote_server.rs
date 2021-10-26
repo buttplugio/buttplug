@@ -135,7 +135,7 @@ async fn run_server<ConnectorType>(
 
 impl Default for ButtplugRemoteServer {
   fn default() -> Self {
-    Self::new(ButtplugServerBuilder::default().finish().unwrap())
+    Self::new(ButtplugServerBuilder::default().finish().expect("Default is infallible"))
   }
 }
 

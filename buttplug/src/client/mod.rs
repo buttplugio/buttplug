@@ -289,7 +289,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(BtlePlugCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     #[cfg(feature = "websocket-server-manager")]
     {
@@ -300,7 +300,7 @@ impl ButtplugClient {
         .add_comm_manager(
           WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
         )
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
     }
     #[cfg(feature = "serial-manager")]
     {
@@ -309,7 +309,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(SerialPortCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
     }
     #[cfg(feature = "lovense-connect-service-manager")]
     {
@@ -318,7 +318,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
     }
     #[cfg(feature = "lovense-dongle-manager")]
     {
@@ -329,12 +329,12 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
       connector
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
     }
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
@@ -343,7 +343,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(XInputDeviceCommunicationManagerBuilder::default())
-        .unwrap();
+        .expect("Expected that all additions will work in connect_in_process.");        
     }
     self.connect(connector).await
   }

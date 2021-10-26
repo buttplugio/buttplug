@@ -89,7 +89,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         );
       }
     };
-    for proto_service in protocol.btle.unwrap().services.values() {
+    for proto_service in protocol.btle.expect("To get this far we are guaranteed to have a btle block in the config").services.values() {
       for (chr_name, chr_uuid) in proto_service.iter() {
         let maybe_chr = chars.iter().find(|c| c.uuid == *chr_uuid);
         if let Some(chr) = maybe_chr {
@@ -98,12 +98,12 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         }
       }
     }
-    let notification_stream = self.device.notifications().await.unwrap();
+    let notification_stream = self.device.notifications().await.expect("Should always be able to get notifications");
     let device_internal_impl = BtlePlugDeviceImpl::new(
       self.device.clone(),
       &self.name,
       self.address,
-      self.adapter.events().await.unwrap(),
+      self.adapter.events().await.expect("Should always be able to get events"),
       notification_stream,
       endpoints.clone(),
       uuid_map,
@@ -185,7 +185,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                   .send(ButtplugDeviceEvent::Removed(
                     address_clone.to_string()
                   ))
-                  .unwrap();
+                  .expect("Device manager owns this, if we don't have one this loop won't run.");
               }
             }
           }

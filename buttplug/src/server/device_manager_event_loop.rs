@@ -218,11 +218,8 @@ impl DeviceManagerEventLoop {
         // address), consider it disconnected and eject it from the map. This
         // should also trigger a disconnect event before our new DeviceAdded
         // message goes out, so timing matters here.
-        if self.device_map.contains_key(&device_index) {
+        if let Some((_, old_device)) = self.device_map.remove(&device_index) {
           info!("Device map contains key {}.", device_index);
-          // We just checked that the key exists, so we can unwrap
-          // here.
-          let (_, old_device) = self.device_map.remove(&device_index).unwrap();
           // After removing the device from the array, manually disconnect it to
           // make sure the event is thrown.
           if let Err(err) = old_device.disconnect().await {
@@ -239,7 +236,7 @@ impl DeviceManagerEventLoop {
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
           while let Ok(event) = event_listener.recv().await {
-            event_sender.send(event).await.unwrap();
+            event_sender.send(event).await.expect("Should always succeed since it goes to the Device Manager which owns us.");
           }
         });
 
@@ -258,8 +255,8 @@ impl DeviceManagerEventLoop {
         }
       }
       ButtplugDeviceEvent::Removed(address) => {
-        let device_index = *self.device_index_map.get(&address).unwrap().value();
-        self.device_map.remove(&device_index).unwrap();
+        let device_index = *self.device_index_map.get(&address).expect("Index must exist to get here.").value();
+        self.device_map.remove(&device_index).expect("Remove will always work.");
         if self
           .server_sender
           .send(DeviceRemoved::new(device_index).into())

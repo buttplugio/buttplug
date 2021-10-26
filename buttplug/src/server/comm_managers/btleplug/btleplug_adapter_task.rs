@@ -38,10 +38,20 @@ impl BtleplugAdapterTask {
     adapter: &Adapter,
     tried_addresses: &mut Vec<BDAddr>,
   ) {
-    let peripheral = adapter.peripheral(*bd_addr).await.unwrap();
+    let peripheral = if let Ok(peripheral) = adapter.peripheral(*bd_addr).await {
+      peripheral
+    } else {
+      error!("Peripheral with address {} not found.", bd_addr);
+      return;
+    };
     // If a device has no discernable name, we can't do anything
     // with it, just ignore it.
-    let properties = peripheral.properties().await.unwrap().unwrap();
+    let properties = if let Ok(Some(properties)) = peripheral.properties().await {
+      properties
+    } else {
+      error!("Cannot retreive peripheral properties for {}.", bd_addr);
+      return;
+    };
     if let Some(name) = properties.local_name {
       let span = info_span!(
         "btleplug enumeration",
@@ -107,15 +117,16 @@ impl BtleplugAdapterTask {
       }
       adapter = match manager.adapters().await {
         Ok(adapters) => {
-          if adapters.is_empty() {
+          if let Some(adapter) = adapters.into_iter().nth(0) {
+            info!("Bluetooth LE adapter found.");
+            adapter
+          } else {
             if adapter_found {
               adapter_found = false;
               warn!("Bluetooth LE adapter not found, will not be using bluetooth scanning until found. Buttplug will continue polling for the adapter, but no more warning messages will be posted.");
             }
             continue;
           }
-          info!("Bluetooth LE adapter found.");
-          adapters.into_iter().nth(0).unwrap()
         }
         Err(e) => {
           if adapter_found {
@@ -129,7 +140,7 @@ impl BtleplugAdapterTask {
     }
 
     #[cfg(not(target_os = "linux"))]
-    let mut events = adapter.events().await.unwrap();
+    let mut events = adapter.events().await.expect("Should always be able to retreive stream.");
 
     let mut tried_addresses = vec![];
 
@@ -143,17 +154,22 @@ impl BtleplugAdapterTask {
         event = event_fut.fuse() => {
           #[cfg(not(target_os = "linux"))]
           {
-            match event.unwrap() {
-              CentralEvent::DeviceDiscovered(bd_addr) | CentralEvent::DeviceUpdated(bd_addr) => {
-                self.maybe_add_peripheral(&bd_addr, &adapter, &mut tried_addresses).await;
+            if let Some(event) = event {
+              match event {
+                CentralEvent::DeviceDiscovered(bd_addr) | CentralEvent::DeviceUpdated(bd_addr) => {
+                  self.maybe_add_peripheral(&bd_addr, &adapter, &mut tried_addresses).await;
+                }
+                CentralEvent::DeviceDisconnected(addr) => {
+                  debug!("BTLEPlug Device disconnected: {:?}", addr);
+                  tried_addresses.retain(|bd_addr| addr != *bd_addr);
+                }
+                event => {
+                  trace!("Unhandled btleplug central event: {:?}", event)
+                }
               }
-              CentralEvent::DeviceDisconnected(addr) => {
-                debug!("BTLEPlug Device disconnected: {:?}", addr);
-                tried_addresses.retain(|bd_addr| addr != *bd_addr);
-              }
-              event => {
-                trace!("Unhandled btleplug central event: {:?}", event)
-              }
+            } else {
+              error!("Event stream closed. Exiting loop.");
+              return;
             }
           }
           #[cfg(target_os = "linux")]
@@ -162,13 +178,13 @@ impl BtleplugAdapterTask {
             // set allow dead code. Therefore, we just copy the event to nothing in order to supress
             // the warning. Ew.
             let _ = event;
-            let peripherals = adapter.peripherals().await.unwrap();
+            let peripherals = adapter.peripherals().await.expect("Removing this once we update to btleplug v0.9");
 
             // All peripheral devices in range.
             for peripheral in peripherals.iter() {
               // We'll incur 2 peripheral lookups here but this isn't really a slow call so it's
               // fine.
-              let properties = peripheral.properties().await.unwrap().unwrap();
+              let properties = peripheral.properties().await.expect("Removing this once we update to btleplug v0.9").expect("Removing this once we update to btleplug v0.9");
               self.maybe_add_peripheral(&properties.address, &adapter, &mut tried_addresses).await;
             }
           }
@@ -178,9 +194,15 @@ impl BtleplugAdapterTask {
             match cmd {
               BtleplugAdapterCommand::StartScanning => {
                 tried_addresses.clear();
-                adapter.start_scan().await.unwrap();
+                if let Err(err) = adapter.start_scan().await {
+                  error!("Start scanning request failed: {}", err);
+                }
               }
-              BtleplugAdapterCommand::StopScanning => adapter.stop_scan().await.unwrap(),
+              BtleplugAdapterCommand::StopScanning => {
+                if let Err(err) = adapter.stop_scan().await {
+                  error!("Stop scanning request failed: {}", err);
+                }
+              }
             }
           }
         }

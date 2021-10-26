@@ -261,7 +261,7 @@ impl DeviceManager {
       sender
         .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
         .await
-        .unwrap();
+        .expect("We should always have an event loop for this to go to.");
     });
     self.comm_managers.insert(mgr.name().to_owned(), mgr);
     Ok(())
