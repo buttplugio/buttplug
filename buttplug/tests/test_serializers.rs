@@ -24,7 +24,7 @@ fn test_garbled_client_rsi_response() {
     let finish_notifier = Arc::new(Notify::new());
     let finish_notifier_clone = finish_notifier.clone();
     async_manager::spawn(async move {
-      helper_clone.connect_without_reply().await.unwrap();
+      helper_clone.connect_without_reply().await.expect("Test, assuming infallible.");
       finish_notifier_clone.notify_waiters();
     });
     // Just assume we get an RSI message

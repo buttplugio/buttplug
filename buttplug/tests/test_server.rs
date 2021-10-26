@@ -23,7 +23,7 @@ async fn setup_test_server(
   let server = ButtplugServer::default();
   let recv = server.event_stream();
   // assert_eq!(server.server_name, "Test Server");
-  match server.parse_message(msg_union).await.unwrap() {
+  match server.parse_message(msg_union).await.expect("Test, assuming infallible.") {
     ButtplugServerMessage::ServerInfo(s) => assert_eq!(
       s,
       messages::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version2, 0)
@@ -88,7 +88,7 @@ fn test_server_version_gt() {
 #[test]
 fn test_ping_timeout() {
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().expect("Test, assuming infallible.");
     let recv = server.event_stream();
     pin_mut!(recv);
     let msg =
@@ -108,7 +108,7 @@ fn test_ping_timeout() {
       panic!("Got wrong type of error back!");
     }
     // Check that we got an event back about the ping out.
-    let msg = recv.next().await.unwrap();
+    let msg = recv.next().await.expect("Test, assuming infallible.");
     if let ButtplugServerMessage::Error(e) = msg {
       if messages::ErrorCode::ErrorPing != e.error_code {
         panic!("Didn't get a ping error");
@@ -122,12 +122,12 @@ fn test_ping_timeout() {
 #[test]
 fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(100).finish().expect("Test, assuming infallible.");
     let recv = server.event_stream();
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
 
     // TODO This should probably use a test protocol we control, not the aneros protocol
     let device = helper.add_ble_device("Massage Demo").await;
@@ -162,8 +162,8 @@ fn test_device_stop_on_ping_timeout() {
           .into(),
       )
       .await
-      .unwrap();
-    let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      .expect("Test, assuming infallible.");
+    let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible.");
     check_test_recv_value(
       &command_receiver,
       DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
@@ -224,7 +224,7 @@ fn test_device_index_generation() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;
     assert!(server
@@ -272,7 +272,7 @@ fn test_server_scanning_finished() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
 
     helper.add_ble_device("Massage Demo").await;
     helper.add_ble_device("Massage Demo").await;
@@ -305,7 +305,7 @@ fn test_server_scanning_finished() {
     server
       .device_manager()
       .add_comm_manager(util::DelayDeviceCommunicationManagerBuilder::default())
-      .unwrap();
+      .expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(messages::StartScanning::default().into())
@@ -318,7 +318,7 @@ fn test_server_scanning_finished() {
 fn test_server_builder_null_device_config() {
   async_manager::block_on(async {
     let mut builder = ButtplugServerBuilder::default();
-    let _ = builder.device_configuration_json(None).finish().unwrap();
+    let _ = builder.device_configuration_json(None).finish().expect("Test, assuming infallible.");
   });
 }
 
@@ -387,7 +387,7 @@ fn test_server_builder_device_config_old_config_version() {
 fn test_server_builder_null_user_device_config() {
   async_manager::block_on(async {
     let mut builder = ButtplugServerBuilder::default();
-    let _ = builder.user_device_configuration_json(None).finish().unwrap();
+    let _ = builder.user_device_configuration_json(None).finish().expect("Test, assuming infallible.");
   });
 }
 

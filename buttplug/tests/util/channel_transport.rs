@@ -58,7 +58,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
     let outside_sender = self.outside_sender.clone();
     let outside_receiver_mutex = self.outside_receiver.clone();
     async_manager::spawn(async move {
-      let mut outside_receiver = outside_receiver_mutex.lock().await.take().unwrap();
+      let mut outside_receiver = outside_receiver_mutex.lock().await.take().expect("Test, assuming infallible");
       loop {
         select! {
           _ = disconnect_notifier.notified().fuse() => {
@@ -67,7 +67,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
           }
           outgoing = outgoing_receiver.recv().fuse() => {
             if let Some(o) = outgoing {
-              outside_sender.send(o).await.unwrap();
+              outside_sender.send(o).await.expect("Test, assuming infallible");
             } else {
               info!("Test dropped stream, returning");
               return;
@@ -75,7 +75,7 @@ impl ButtplugConnectorTransport for ChannelTransport {
           }
           incoming = outside_receiver.recv().fuse() => {
             if let Some(i) = incoming {
-              incoming_sender.send(i).await.unwrap();
+              incoming_sender.send(i).await.expect("Test, assuming infallible");
             } else {
               info!("Test dropped stream, returning");
               return;
@@ -120,7 +120,7 @@ impl ChannelClientTestHelper {
     )
     .into()]);
     let server_serializer = ButtplugServerJSONSerializer::default();
-    server_serializer.deserialize(rsi_setup_msg).unwrap();
+    server_serializer.deserialize(rsi_setup_msg).expect("Test, assuming infallible");
     Self {
       client,
       connector,
@@ -136,13 +136,13 @@ impl ChannelClientTestHelper {
   }
 
   pub async fn connect_without_reply(&self) -> Result<(), ButtplugClientError> {
-    let connector = self.connector.lock().await.take().unwrap();
+    let connector = self.connector.lock().await.take().expect("Test, assuming infallible");
     self.client.connect(connector).await
   }
 
   pub async fn simulate_successful_connect(&self) {
     let client_clone = self.client.clone();
-    let connector = self.connector.lock().await.take().unwrap();
+    let connector = self.connector.lock().await.take().expect("Test, assuming infallible");
     let finish_notifier = Arc::new(Notify::new());
     let finish_notifier_clone = finish_notifier.clone();
     async_manager::spawn(async move {
@@ -181,18 +181,18 @@ impl ChannelClientTestHelper {
   pub async fn get_next_client_message(&self) -> ButtplugClientMessage {
     self
       .server_serializer
-      .deserialize(self.recv_outgoing().await.unwrap())
-      .unwrap()[0]
+      .deserialize(self.recv_outgoing().await.expect("Test, assuming infallible"))
+      .expect("Test, assuming infallible")[0]
       .clone()
   }
 
   pub async fn recv_outgoing(&self) -> Option<ButtplugSerializedMessage> {
     // If this ever conflicts, its the tests fault, so just panic.
-    self.receiver.try_lock().unwrap().recv().await
+    self.receiver.try_lock().expect("Test, assuming infallible").recv().await
   }
 
   pub async fn send_incoming(&self, msg: ButtplugTransportIncomingMessage) {
-    self.sender.send(msg).await.unwrap();
+    self.sender.send(msg).await.expect("Test, assuming infallible");
   }
 
   pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {
@@ -253,11 +253,11 @@ impl ChannelServerTestHelper {
 
   pub async fn recv_outgoing(&self) -> Option<ButtplugSerializedMessage> {
     // If this ever conflicts, its the tests fault, so just panic.
-    self.receiver.try_lock().unwrap().recv().await
+    self.receiver.try_lock().expect("Test, assuming infallible").recv().await
   }
 
   pub async fn send_incoming(&self, msg: ButtplugTransportIncomingMessage) {
-    self.sender.send(msg).await.unwrap();
+    self.sender.send(msg).await.expect("Test, assuming infallible");
   }
 
   pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {

@@ -23,8 +23,8 @@ mod test {
       let server = ButtplugServer::default();
       let serializer = ButtplugServerJSONSerializer::default();
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
-      let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
-      let incoming = server.parse_message(output[0].clone()).await.unwrap();
+      let output = serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.");
+      let incoming = server.parse_message(output[0].clone()).await.expect("Test, assuming infallible.");
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -43,8 +43,8 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let rsi =
         r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
-      let output = serializer.deserialize(rsi.to_owned().into()).unwrap();
-      let incoming = server.parse_message(output[0].clone()).await.unwrap();
+      let output = serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.");
+      let incoming = server.parse_message(output[0].clone()).await.expect("Test, assuming infallible.");
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -65,13 +65,13 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).unwrap();
+      server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
       helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
-        .parse_message(serializer.deserialize(rsi.to_owned().into()).unwrap()[0].clone())
+        .parse_message(serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.")[0].clone())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible.");
       assert_eq!(
         serializer.serialize(vec!(output)),
         format!(
@@ -85,19 +85,19 @@ mod test {
         .await;
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about scanning finishing.
-      let mut msg = recv.next().await.unwrap();
+      let mut msg = recv.next().await.expect("Test, assuming infallible.");
       // We should receive ScanningFinished and DeviceAdded, but the order may change.
       let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
       assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
-      msg = recv.next().await.unwrap();
+      msg = recv.next().await.expect("Test, assuming infallible.");
       // We should get back an aneros with only SingleMotorVibrateCmd
       assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
       let rdl = serializer
         .deserialize(ButtplugSerializedMessage::Text(
           r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
         ))
-        .unwrap();
-      output = server.parse_message(rdl[0].clone()).await.unwrap();
+        .expect("Test, assuming infallible.");
+      output = server.parse_message(rdl[0].clone()).await.expect("Test, assuming infallible.");
       assert_eq!(
         serializer.serialize(vec!(output)),
         r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}]}}]"#.to_owned().into()
@@ -114,14 +114,14 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).unwrap();
+      server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
       let device = helper.add_ble_device("Massage Demo").await;
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let output = server
-        .parse_message(serializer.deserialize(rsi.to_owned().into()).unwrap()[0].clone())
+        .parse_message(serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.")[0].clone())
         .await
-        .unwrap();
+        .expect("Test, assuming infallible.");
       assert_eq!(
         serializer.serialize(vec!(output)),
         format!(
@@ -135,11 +135,11 @@ mod test {
         .await;
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about scanning finishing.
-      let mut msg = recv.next().await.unwrap();
+      let mut msg = recv.next().await.expect("Test, assuming infallible.");
       // We should receive ScanningFinished and DeviceAdded, but the order may change.
       let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
       assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
-      msg = recv.next().await.unwrap();
+      msg = recv.next().await.expect("Test, assuming infallible.");
       // We should get back an aneros with only SingleMotorVibrateCmd
       assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
       let output2 = server
@@ -150,16 +150,16 @@ mod test {
                 .to_owned()
                 .into(),
             )
-            .unwrap()[0]
+            .expect("Test, assuming infallible.")[0]
             .clone(),
         )
         .await
-        .unwrap();
+        .expect("Test, assuming infallible.");
       assert_eq!(
         serializer.serialize(vec!(output2)),
         r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
       );
-      let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+      let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible.");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),

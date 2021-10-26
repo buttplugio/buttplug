@@ -28,7 +28,7 @@ mod websocket_connector_tests {
           ButtplugWebsocketServerTransport,
           ButtplugServerJSONSerializer,
         >::new(ButtplugWebsocketServerTransportBuilder::default().port(12349).finish());
-        server_clone.start(connector).await.unwrap();
+        server_clone.start(connector).await.expect("Test, assuming infallible.");
       });
       let mut connected = false;
       for _ in 0..10u8 {
@@ -47,7 +47,7 @@ mod websocket_connector_tests {
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
-      server.disconnect().await.unwrap();
+      server.disconnect().await.expect("Test, assuming infallible.");
     });
   }
 
@@ -64,7 +64,7 @@ mod websocket_connector_tests {
         >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
           "ws://127.0.0.1:12347",
         ));
-        server_clone.start(connector).await.unwrap();
+        server_clone.start(connector).await.expect("Test, assuming infallible.");
       });
 
       let mut connected = false;
@@ -82,7 +82,7 @@ mod websocket_connector_tests {
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
-      server.disconnect().await.unwrap();
+      server.disconnect().await.expect("Test, assuming infallible.");
     });
   }
 }

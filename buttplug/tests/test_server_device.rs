@@ -25,7 +25,7 @@ fn test_capabilities_exposure() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Onyx+").await;
     server
       .parse_message(
@@ -33,11 +33,11 @@ fn test_capabilities_exposure() {
           .into(),
       )
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     server
       .parse_message(messages::StartScanning::default().into())
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     while let Some(msg) = recv.next().await {
       if let ButtplugServerMessage::DeviceAdded(device) = msg {
         assert!(!device
@@ -61,12 +61,12 @@ fn test_capabilities_exposure() {
 #[test]
 fn test_server_raw_message() {
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default().allow_raw_messages(true).finish().unwrap();
+    let server = ButtplugServerBuilder::default().allow_raw_messages(true).finish().expect("Test, assuming infallible.");
     let recv = server.event_stream();
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -115,7 +115,7 @@ fn test_server_no_raw_message() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -164,7 +164,7 @@ fn test_reject_on_no_raw_message() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
@@ -239,7 +239,7 @@ fn test_repeated_address_additions() {
     pin_mut!(recv);
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server.device_manager().add_comm_manager(builder).unwrap();
+    server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper
       .add_ble_device_with_address("Massage Demo", "SameAddress")
       .await;
@@ -268,12 +268,12 @@ fn test_repeated_address_additions() {
             device_index = Some(da.device_index());
           } else {
             assert!(device_removed_called);
-            assert_eq!(da.device_index(), device_index.unwrap());
+            assert_eq!(da.device_index(), device_index.expect("Test, assuming infallible."));
             return;
           }
         }
         ButtplugServerMessage::DeviceRemoved(dr) => {
-          assert_eq!(dr.device_index(), device_index.unwrap());
+          assert_eq!(dr.device_index(), device_index.expect("Test, assuming infallible."));
           device_removed_called = true;
         }
         _ => {

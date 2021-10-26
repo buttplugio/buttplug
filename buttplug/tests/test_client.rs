@@ -64,7 +64,7 @@ fn test_disconnect_status() {
     client
       .connect(ButtplugInProcessClientConnector::default())
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     assert!(client.disconnect().await.is_ok());
     assert!(!client.connected());
   });
@@ -78,7 +78,7 @@ fn test_double_disconnect() {
     client
       .connect(ButtplugInProcessClientConnector::default())
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     assert!(client.disconnect().await.is_ok());
     assert!(client.disconnect().await.is_err());
   });
@@ -92,7 +92,7 @@ fn test_connect_init() {
     client
       .connect(ButtplugInProcessClientConnector::default())
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     assert_eq!(client.server_name(), Some("Buttplug Server".to_owned()));
   });
 }
@@ -106,9 +106,9 @@ fn test_client_connected_status() {
     client
       .connect(ButtplugInProcessClientConnector::default())
       .await
-      .unwrap();
+      .expect("Test, assuming infallible.");
     assert!(client.connected());
-    client.disconnect().await.unwrap();
+    client.disconnect().await.expect("Test, assuming infallible.");
     assert!(!client.connected());
   });
 }
@@ -120,10 +120,10 @@ fn test_start_scanning() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
+    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
     assert!(client.start_scanning().await.is_ok());
   });
 }
@@ -138,9 +138,9 @@ fn test_stop_scanning_when_not_scanning() {
       .server_ref()
       .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
-      .unwrap();
+      .expect("Test, assuming infallible.");
     let client = ButtplugClient::new("Test Client");
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
     let should_be_err = client.stop_scanning().await;
     if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
       assert!(matches!(
@@ -163,9 +163,9 @@ fn test_start_scanning_when_already_scanning() {
       .server_ref()
       .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
-      .unwrap();
+      .expect("Test, assuming infallible.");
     let client = ButtplugClient::new("Test Client");
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
     assert!(client.start_scanning().await.is_ok());
     assert!(client.start_scanning().await.is_err());
   });
@@ -180,15 +180,15 @@ fn test_client_scanning_finished() {
       .server_ref()
       .device_manager()
       .add_comm_manager(DelayDeviceCommunicationManagerBuilder::default())
-      .unwrap();
+      .expect("Test, assuming infallible.");
     let client = ButtplugClient::new("Test Client");
     let mut recv = client.event_stream();
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
 
     assert!(client.start_scanning().await.is_ok());
     assert!(client.stop_scanning().await.is_ok());
     assert!(matches!(
-      recv.next().await.unwrap(),
+      recv.next().await.expect("Test, assuming infallible."),
       ButtplugClientEvent::ScanningFinished
     ));
   });
@@ -198,10 +198,10 @@ fn test_client_scanning_finished() {
 #[test]
 fn test_client_ping() {
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default().max_ping_time(200).finish().unwrap();
+    let server = ButtplugServerBuilder::default().max_ping_time(200).finish().expect("Test, assuming infallible.");
     let connector = ButtplugInProcessClientConnector::new(Some(server));
     let client = ButtplugClient::new("Test Client");
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
     assert!(client.ping().await.is_ok());
     Delay::new(Duration::from_millis(800)).await;
     // TODO Watch for ping events
@@ -218,18 +218,18 @@ fn test_stop_all_devices_and_device_command_range() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).unwrap();
+    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
     let test_device = helper.add_ble_device("Massage Demo").await;
     let client = ButtplugClient::new("Test Client");
     let mut event_stream = client.event_stream();
-    client.connect(connector).await.unwrap();
+    client.connect(connector).await.expect("Test, assuming infallible.");
     assert!(client.start_scanning().await.is_ok());
     while let Some(event) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(dev) = event {
         assert!(dev.vibrate(VibrateCommand::Speed(0.5)).await.is_ok());
         // Unlike protocol unit tests, here the endpoint doesn't exist until
         // after device creation, so create the test receiver later.
-        let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).unwrap();
+        let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible.");
         check_test_recv_value(
           &command_receiver,
           DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
