@@ -18,7 +18,7 @@ pub enum PingMessage {
 }
 
 async fn ping_timer(
-  max_ping_time: u64,
+  max_ping_time: u32,
   mut ping_msg_receiver: mpsc::Receiver<PingMessage>,
   notifier: Arc<Notify>,
   pinged_out_status: Arc<AtomicBool>,
@@ -27,7 +27,7 @@ async fn ping_timer(
   let mut pinged = false;
   loop {
     select! {
-      _ = Delay::new(Duration::from_millis(max_ping_time)).fuse() => {
+      _ = Delay::new(Duration::from_millis(max_ping_time.into())).fuse() => {
         if started {
           if !pinged {
             notifier.notify_waiters();
@@ -41,7 +41,7 @@ async fn ping_timer(
         if msg.is_none() {
           return;
         }
-        match msg.unwrap() {
+        match msg.expect("Already checked") {
           PingMessage::StartTimer => started = true,
           PingMessage::StopTimer => started = false,
           PingMessage::Ping => pinged = true,
@@ -53,7 +53,7 @@ async fn ping_timer(
 }
 
 pub struct PingTimer {
-  max_ping_time: u64,
+  max_ping_time: u32,
   ping_msg_sender: mpsc::Sender<PingMessage>,
   ping_timeout_notifier: Arc<Notify>,
   pinged_out: Arc<AtomicBool>,
@@ -73,7 +73,7 @@ impl Drop for PingTimer {
 }
 
 impl PingTimer {
-  pub fn new(max_ping_time: u64) -> Self {
+  pub fn new(max_ping_time: u32) -> Self {
     let ping_timeout_notifier = Arc::new(Notify::new());
     let (sender, receiver) = mpsc::channel(256);
     let pinged_out = Arc::new(AtomicBool::new(false));
@@ -94,7 +94,7 @@ impl PingTimer {
     }
   }
 
-  pub fn max_ping_time(&self) -> u64 {
+  pub fn max_ping_time(&self) -> u32 {
     self.max_ping_time
   }
 

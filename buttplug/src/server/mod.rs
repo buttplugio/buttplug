@@ -33,7 +33,6 @@ use futures::{
 };
 use ping_timer::PingTimer;
 use std::{
-  convert::{TryFrom, TryInto},
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -59,7 +58,7 @@ pub enum ButtplugServerError {
 #[derive(Debug, Clone)]
 pub struct ButtplugServerBuilder {
   pub name: String,
-  pub max_ping_time: Option<u64>,
+  pub max_ping_time: Option<u32>,
   pub allow_raw_messages: bool,
   pub device_configuration_json: Option<String>,
   pub user_device_configuration_json: Option<String>,
@@ -83,7 +82,7 @@ impl ButtplugServerBuilder {
     self
   }
 
-  pub fn max_ping_time(&mut self, ping_time: u64) -> &mut Self {
+  pub fn max_ping_time(&mut self, ping_time: u32) -> &mut Self {
     self.max_ping_time = Some(ping_time);
     self
   }
@@ -183,7 +182,7 @@ impl ButtplugServerBuilder {
 /// Represents a ButtplugServer.
 pub struct ButtplugServer {
   server_name: String,
-  max_ping_time: u64,
+  max_ping_time: u32,
   device_manager: DeviceManager,
   ping_timer: Arc<PingTimer>,
   connected: Arc<AtomicBool>,
@@ -193,7 +192,7 @@ pub struct ButtplugServer {
 impl Default for ButtplugServer {
   fn default() -> Self {
     // We can unwrap here because if default init fails, so will pretty much every test.
-    ButtplugServerBuilder::default().finish().unwrap()
+    ButtplugServerBuilder::default().finish().expect("Default is infallible")
   }
 }
 
@@ -323,7 +322,7 @@ impl ButtplugServer {
     let out_msg = messages::ServerInfo::new(
       &self.server_name,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-      self.max_ping_time.try_into().unwrap(),
+      self.max_ping_time,
     );
     let connected = self.connected.clone();
     Box::pin(async move {
