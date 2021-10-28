@@ -13,10 +13,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use btleplug::{
-  api::{BDAddr, Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
-  platform::Adapter,
-};
+use btleplug::{api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType}, platform::{Adapter, PeripheralId}};
 use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream, StreamExt,
@@ -35,13 +32,13 @@ use uuid::Uuid;
 
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   name: String,
-  address: BDAddr,
+  address: PeripheralId,
   device: T,
   adapter: Adapter,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
-  pub fn new(name: &str, address: &BDAddr, device: T, adapter: Adapter) -> Self {
+  pub fn new(name: &str, address: &PeripheralId, device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
@@ -76,25 +73,27 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
-    let chars = match self.device.discover_characteristics().await {
-      Ok(chars) => chars,
-      Err(err) => {
-        error!("BTLEPlug error discovering characteristics: {:?}", err);
-        return Err(
-          ButtplugDeviceError::DeviceConnectionError(format!(
-            "BTLEPlug error discovering characteristics: {:?}",
-            err
-          ))
-          .into(),
-        );
-      }
-    };
-    for proto_service in protocol.btle.expect("To get this far we are guaranteed to have a btle block in the config").services.values() {
-      for (chr_name, chr_uuid) in proto_service.iter() {
-        let maybe_chr = chars.iter().find(|c| c.uuid == *chr_uuid);
-        if let Some(chr) = maybe_chr {
-          endpoints.insert(*chr_name, chr.clone());
-          uuid_map.insert(*chr_uuid, *chr_name);
+    if let Err(err) = self.device.discover_services().await {
+      error!("BTLEPlug error discovering characteristics: {:?}", err);
+      return Err(
+        ButtplugDeviceError::DeviceConnectionError(format!(
+          "BTLEPlug error discovering characteristics: {:?}",
+          err
+        ))
+        .into(),
+      );
+    }
+    for (proto_uuid, proto_service) in protocol.btle.expect("To get this far we are guaranteed to have a btle block in the config").services {
+      for service in self.device.services() {
+        if service.uuid != proto_uuid {
+          continue;
+        }
+        for (chr_name, chr_uuid) in proto_service.iter() {
+          let maybe_chr = service.characteristics.iter().find(|c| c.uuid == *chr_uuid);
+          if let Some(chr) = maybe_chr {
+            endpoints.insert(*chr_name, chr.clone());
+            uuid_map.insert(*chr_uuid, *chr_name);
+          }
         }
       }
     }
@@ -102,7 +101,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     let device_internal_impl = BtlePlugDeviceImpl::new(
       self.device.clone(),
       &self.name,
-      self.address,
+      self.address.clone(),
       self.adapter.events().await.expect("Should always be able to get events"),
       notification_stream,
       endpoints.clone(),
@@ -110,7 +109,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     );
     let device_impl = DeviceImpl::new(
       &self.name,
-      &self.address.to_string(),
+      &format!("{:?}", self.address),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
       Box::new(device_internal_impl),
     );
@@ -132,7 +131,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   pub fn new(
     device: T,
     name: &str,
-    address: BDAddr,
+    address: PeripheralId,
     mut adapter_event_stream: Pin<Box<dyn Stream<Item = CentralEvent> + Send>>,
     mut notification_stream: Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
     endpoints: HashMap<Endpoint, Characteristic>,
@@ -140,7 +139,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   ) -> Self {
     let (event_stream, _) = broadcast::channel(256);
     let event_stream_clone = event_stream.clone();
-    let address_clone = address;
+    let address_clone = address.clone();
     let name_clone = name.to_owned();
     async_manager::spawn(async move {
       let mut error_notification = false;
@@ -162,7 +161,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                 continue;
               };
               if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
-                address.to_string(),
+                format!("{:?}", address),
                 endpoint,
                 notification.value,
               )) {
@@ -183,7 +182,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                 );
                 event_stream_clone
                   .send(ButtplugDeviceEvent::Removed(
-                    address_clone.to_string()
+                    format!("{:?}", address)
                   ))
                   .expect("Device manager owns this, if we don't have one this loop won't run.");
               }
