@@ -160,6 +160,9 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                 }
                 continue;
               };
+              if event_stream_clone.receiver_count() == 0 {
+                continue;
+              }
               if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
                 format!("{:?}", address),
                 endpoint,
@@ -169,7 +172,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                   "Cannot send notification, device object disappeared: {:?}",
                   err
                 );
-                return;
+                break;
               }
             }
           }
@@ -180,16 +183,26 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                   "Device {:?} disconnected",
                   name_clone
                 );
-                event_stream_clone
+                if event_stream_clone.receiver_count() != 0 {
+                  if let Err(err) = event_stream_clone
                   .send(ButtplugDeviceEvent::Removed(
                     format!("{:?}", address)
-                  ))
-                  .expect("Device manager owns this, if we don't have one this loop won't run.");
+                  )) {
+                    error!(
+                      "Cannot send notification, device object disappeared: {:?}",
+                      err
+                    );
+                  }
+                }
+                // At this point, we have nothing left to do because we can't reconnect a device
+                // that's been connected. Exit.
+                break;
               }
             }
           }
         }
       }
+      info!("Exiting btleplug notification/event loop for device {:?}", address_clone)
     });
     Self {
       device,
