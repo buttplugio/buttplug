@@ -137,7 +137,7 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     let command_url = format!(
       "{}/{}",
       self.http_host,
-      std::str::from_utf8(&msg.data).unwrap()
+      std::str::from_utf8(&msg.data).expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
     Box::pin(async move {
       match reqwest::get(command_url).await {

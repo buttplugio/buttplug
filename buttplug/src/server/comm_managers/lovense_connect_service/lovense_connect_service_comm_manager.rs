@@ -79,7 +79,7 @@ async fn lovense_local_service_check(
     for host in hosts {
       match reqwest::get(format!("{}/GetToys", host)).await {
         Ok(res) => {
-          let text = res.text().await.unwrap();
+          let text = res.text().await.expect("If we got a 200 back, we should at least have text.");
           let info: LovenseServiceLocalInfo = serde_json::from_str(&text).unwrap();
 
           // First off, remove all devices that are no longer in the list
@@ -94,13 +94,12 @@ async fn lovense_local_service_check(
           connected_device_info.retain(|k, _| info.data.contains_key(k));
 
           for (_, toy) in info.data.iter() {
-            if connected_device_info.contains_key(&toy.id) {
+            if let Some(info_ref) = connected_device_info.get(&toy.id) {
               // For some reason, this requires its own scoping block, otherwise
               // the write lock will hold forever, which blocks the server? I'm
               // guessing this has to do with loop hoisting but it still seems
               // odd.
               {
-                let info_ref = connected_device_info.get(&toy.id).unwrap();
                 let mut info_lock = info_ref.write().await;
                 *info_lock = toy.clone();
               }
@@ -120,7 +119,7 @@ async fn lovense_local_service_check(
             connected_device_info.insert(toy.id.clone(), Arc::new(RwLock::new((*toy).clone())));
             let device_creator = Box::new(LovenseServiceDeviceImplCreator::new(
               &host,
-              connected_device_info.get(&toy.id).unwrap().clone(),
+              connected_device_info.get(&toy.id).expect("Just inserted this.").clone(),
             ));
             if event_sender
               .send(DeviceCommunicationEvent::DeviceFound {
@@ -163,7 +162,7 @@ impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationMan
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseConnectServiceCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We're creating/moving this, so we can take it."),
     ))
   }
 }

@@ -80,7 +80,7 @@ impl XInputDeviceImpl {
     let connection_tracker = XInputConnectionTracker::default();
     connection_tracker.add_with_sender(index, device_event_sender.clone());
     Self {
-      handle: rusty_xinput::XInputHandle::load_default().unwrap(),
+      handle: rusty_xinput::XInputHandle::load_default().expect("The DLL should load as long as we're on windows, and we don't get here if we're not on windows."),
       index,
       event_sender: device_event_sender,
       connection_tracker,
@@ -113,8 +113,8 @@ impl DeviceImplInternal for XInputDeviceImpl {
     let index = self.index;
     Box::pin(async move {
       let mut cursor = Cursor::new(msg.data);
-      let left_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
-      let right_motor_speed = cursor.read_u16::<LittleEndian>().unwrap();
+      let left_motor_speed = cursor.read_u16::<LittleEndian>().expect("Packed in protocol, infallible");
+      let right_motor_speed = cursor.read_u16::<LittleEndian>().expect("Packed in protocol, infallible");
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {

@@ -77,7 +77,7 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
     let device_impl_internal = LovenseDongleDeviceImpl::new(
       &self.id,
       self.device_outgoing.clone(),
-      self.device_incoming.take().unwrap(),
+      self.device_incoming.take().expect("We'll always have a device here"),
     );
     let device = DeviceImpl::new(
       "Lovense Dongle Device",
@@ -111,7 +111,7 @@ impl LovenseDongleDeviceImpl {
         if msg.func != LovenseDongleMessageFunc::ToyData {
           continue;
         }
-        let data_str = msg.data.unwrap().data.unwrap();
+        let data_str = msg.data.expect("USB format shouldn't change").data.expect("USB format shouldn't change");
         if device_event_sender_clone
           .send(ButtplugDeviceEvent::Notification(
             address_clone.clone(),
@@ -128,11 +128,11 @@ impl LovenseDongleDeviceImpl {
         }
       }
       info!("Lovense dongle device disconnected",);
-      // This should always succeed, as it'll relay up to the device manager,
-      // and that's what owns us.
-      device_event_sender_clone
+      if device_event_sender_clone
         .send(ButtplugDeviceEvent::Removed(address_clone.clone()))
-        .unwrap();
+        .is_err() {
+          error!("Device Manager no longer alive, cannot send removed event.");
+        }
     });
     Self {
       address: address.to_owned(),
@@ -175,7 +175,7 @@ impl DeviceImplInternal for LovenseDongleDeviceImpl {
         func: LovenseDongleMessageFunc::Command,
         message_type: LovenseDongleMessageType::Toy,
         id: Some(address),
-        command: Some(std::str::from_utf8(&msg.data).unwrap().to_string()),
+        command: Some(std::str::from_utf8(&msg.data).expect("Got this from our own protocol code, we know it'll be a formattable string.").to_string()),
         eager: None,
       };
       port_sender

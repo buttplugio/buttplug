@@ -48,7 +48,10 @@ fn hid_write_thread(
       trace!("bytes: {:?}", chunk);
       let mut byte_array = [0u8; 65];
       byte_array[1..chunk.len() + 1].copy_from_slice(chunk);
-      dongle.write(&byte_array).unwrap();
+      if let Err(err) = dongle.write(&byte_array) {
+        // We're probably going to exit very quickly after this.
+        error!("Cannot write to dongle: {}", err);
+      }
     }
   };
 
@@ -63,7 +66,7 @@ fn hid_write_thread(
         port_write(s);
       }
       OutgoingLovenseData::Message(m) => {
-        port_write(serde_json::to_string(&m).unwrap());
+        port_write(serde_json::to_string(&m).expect("This will always serialize."));
       }
     }
   }
@@ -76,7 +79,7 @@ fn hid_read_thread(
   token: CancellationToken,
 ) {
   trace!("Starting HID dongle read thread");
-  dongle.set_blocking_mode(true).unwrap();
+  dongle.set_blocking_mode(true).expect("Should alwasy succeed.");
   let mut data: String = String::default();
   let mut buf = [0u8; 1024];
   while !token.is_cancelled() {
@@ -88,7 +91,7 @@ fn hid_read_thread(
         trace!("Got {} hid bytes", len);
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
-        data += std::str::from_utf8(&buf[0..len - 1]).unwrap();
+        data += std::str::from_utf8(&buf[0..len - 1]).expect("We should at least get strings from the dongle.");
         if data.contains('\n') {
           // We have what should be a full message.
           // Split it.
@@ -103,7 +106,10 @@ fn hid_read_thread(
             match msg {
               Ok(m) => {
                 trace!("Read message: {:?}", m);
-                sender_clone.blocking_send(m).unwrap();
+                if let Err(err) = sender_clone.blocking_send(m) {
+                  // Error, assume we'll be cancelled by disconnect.
+                  error!("Error sending message, assuming device disconnect: {:?}", err);
+                }
               }
               Err(_e) => {
                 //error!("Error reading: {:?}", e);
@@ -141,7 +147,7 @@ impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerB
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseHIDDongleCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("It's ours, we know we have it."),
     ))
   }
 }
@@ -217,14 +223,14 @@ impl LovenseHIDDongleCommunicationManager {
         .spawn(move || {
           hid_read_thread(dongle1, reader_sender, read_token);
         })
-        .unwrap();
+        .expect("Thread should always spawn");
 
       let write_thread = thread::Builder::new()
         .name("Lovense Dongle HID Writer Thread".to_string())
         .spawn(move || {
           hid_write_thread(dongle2, writer_receiver, write_token);
         })
-        .unwrap();
+        .expect("Thread should always spawn");
 
       *(held_read_thread.lock().await) = Some(read_thread);
       *(held_write_thread.lock().await) = Some(write_thread);
@@ -234,7 +240,7 @@ impl LovenseHIDDongleCommunicationManager {
           reader_receiver,
         ))
         .await
-        .unwrap();
+        .expect("We've already spun up the state machine so we know this receiver exists.");
       info!("Found Lovense HID Dongle");
       Ok(())
     })
@@ -258,7 +264,7 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
       sender
         .send(LovenseDeviceCommand::StartScanning)
         .await
-        .unwrap();
+        .expect("Machine always exists as long as this object does.");
       Ok(())
     })
   }
@@ -269,7 +275,7 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
       sender
         .send(LovenseDeviceCommand::StopScanning)
         .await
-        .unwrap();
+        .expect("Machine always exists as long as this object does.");
       Ok(())
     })
   }

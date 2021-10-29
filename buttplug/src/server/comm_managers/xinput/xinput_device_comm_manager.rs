@@ -48,7 +48,7 @@ async fn check_gamepad_connectivity(
   sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
 ) {
   check_running.store(true, Ordering::SeqCst);
-  let handle = rusty_xinput::XInputHandle::load_default().unwrap();
+  let handle = rusty_xinput::XInputHandle::load_default().expect("Always loads in windows, this shouldn't run elsewhere.");
   loop {
     let gamepads = connected_gamepads.load(Ordering::SeqCst);
     if gamepads == 0 {
@@ -70,11 +70,9 @@ async fn check_gamepad_connectivity(
         let new_connected_gamepads = gamepads & !(1 << *index as u8);
         connected_gamepads.store(new_connected_gamepads, Ordering::SeqCst);
         if let Some(send) = &sender {
-          // This should always succeed, as it'll relay up to the device manager,
-          // and that's what owns us.
           send
             .send(ButtplugDeviceEvent::Removed(create_address(*index)))
-            .unwrap();
+            .expect("Infallible, device manager listening or this doesn't exist.");
         }
         // If we're out of gamepads to track, return immediately.
         if new_connected_gamepads == 0 {
@@ -139,7 +137,7 @@ impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuild
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(XInputDeviceCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We own it, we'll take it."),
     ))
   }
 }
@@ -171,7 +169,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
     let scanning_notifier = self.scanning_notifier.clone();
     let connected_gamepads = self.connected_gamepads.clone();
     async_manager::spawn(async move {
-      let handle = rusty_xinput::XInputHandle::load_default().unwrap();
+      let handle = rusty_xinput::XInputHandle::load_default().expect("Always loads in windows, this shouldn't run elsewhere.");
       let mut stop = false;
       while !stop {
         for i in &[
