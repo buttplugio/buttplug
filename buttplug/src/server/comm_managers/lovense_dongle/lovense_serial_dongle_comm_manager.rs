@@ -34,13 +34,16 @@ fn serial_write_thread(
 ) {
   let mut port_write = |mut data: String| {
     data += "\r\n";
-    info!("Writing message: {}", data);
+    debug!("Writing message: {}", data);
 
     // TODO WRITE SHOULD ALWAYS BE FOLLOWED BY A READ UNLESS "EAGER" IS USED
     //
     // We should check this on the outgoing message. Otherwise we will run into
     // all sorts of trouble.
-    port.write_all(&data.into_bytes()).unwrap();
+    if let Err(e) = port.write_all(&data.into_bytes()) {
+      error!("Cannot write to port, exiting: {}", e);
+      return;
+    }
   };
   while let Some(data) = async_manager::block_on(async {
     select! {
@@ -53,7 +56,7 @@ fn serial_write_thread(
         port_write(s);
       }
       OutgoingLovenseData::Message(m) => {
-        port_write(serde_json::to_string(&m).unwrap());
+        port_write(serde_json::to_string(&m).expect("We create these packets so they'll always serialize."));
       }
     }
   }
@@ -71,7 +74,7 @@ fn serial_read_thread(
     match port.read(&mut buf) {
       Ok(len) => {
         debug!("Got {} serial bytes", len);
-        data += std::str::from_utf8(&buf[0..len]).unwrap();
+        data += std::str::from_utf8(&buf[0..len]).expect("We should always get valid data from the port.");
         if data.contains('\n') {
           debug!("Serial Buffer: {}", data);
 
@@ -81,7 +84,7 @@ fn serial_read_thread(
             match msg {
               Ok(m) => {
                 debug!("Read message: {:?}", m);
-                async_manager::block_on(async { sender_clone.send(m).await.unwrap() });
+                async_manager::block_on(async { sender_clone.send(m).await.expect("Thread shouldn't be running if we don't have a listener.") });
               }
               Err(e) => {
                 error!("Error reading: {:?}", e);
@@ -124,7 +127,7 @@ impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManag
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseSerialDongleCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We own this so take will always work."),
     ))
   }
 }
@@ -204,21 +207,21 @@ impl LovenseSerialDongleCommunicationManager {
                       let (writer_sender, writer_receiver) = channel(256);
                       let (reader_sender, reader_receiver) = channel(256);
 
-                      let read_port = (*dongle_port).try_clone().unwrap();
+                      let read_port = (*dongle_port).try_clone().expect("USB port should always clone.");
                       let read_thread = thread::Builder::new()
                         .name("Serial Reader Thread".to_string())
                         .spawn(move || {
                           serial_read_thread(read_port, reader_sender, read_token);
                         })
-                        .unwrap();
+                        .expect("Thread should always create");
 
-                      let write_port = (*dongle_port).try_clone().unwrap();
+                      let write_port = (*dongle_port).try_clone().expect("USB port should always clone.");
                       let write_thread = thread::Builder::new()
                         .name("Serial Writer Thread".to_string())
                         .spawn(move || {
                           serial_write_thread(write_port, writer_receiver, write_token);
                         })
-                        .unwrap();
+                        .expect("Thread should always create");
 
                       *(held_read_thread.lock().await) = Some(read_thread);
                       *(held_write_thread.lock().await) = Some(write_thread);
@@ -228,7 +231,7 @@ impl LovenseSerialDongleCommunicationManager {
                           reader_receiver,
                         ))
                         .await
-                        .unwrap();
+                        .expect("Machine exists if we got here.");
                     }
                     Err(e) => error!("{:?}", e),
                   };
@@ -262,7 +265,7 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
       sender
         .send(LovenseDeviceCommand::StartScanning)
         .await
-        .unwrap();
+        .expect("If we're getting scan requests, we should a task to throw it at.");
       Ok(())
     })
   }
@@ -273,7 +276,7 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
       sender
         .send(LovenseDeviceCommand::StopScanning)
         .await
-        .unwrap();
+        .expect("If we're getting scan requests, we should a task to throw it at.");
       Ok(())
     })
   }

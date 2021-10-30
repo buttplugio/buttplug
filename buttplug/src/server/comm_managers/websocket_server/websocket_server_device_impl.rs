@@ -98,11 +98,11 @@ async fn run_connection_loop<S>(
                   let _ = response_sender.send(binary_msg);
                 }
                 async_tungstenite::tungstenite::Message::Close(_) => {
-                  event_sender
-                  .send(ButtplugDeviceEvent::Removed(
-                    address.to_owned()
-                  ))
-                  .unwrap();
+                  // Drop the error if no one receives the message, we're breaking anyways.
+                  let _ = event_sender
+                    .send(ButtplugDeviceEvent::Removed(
+                      address.to_owned()
+                    ));
                   break;
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
@@ -190,10 +190,10 @@ impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
     _: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
     let device_impl_internal = WebsocketServerDeviceImpl::new(
-      self.device_event_sender.take().unwrap(),
+      self.device_event_sender.take().expect("We own this so we can always take."),
       self.info.clone(),
-      self.outgoing_sender.take().unwrap(),
-      self.incoming_broadcaster.take().unwrap(),
+      self.outgoing_sender.take().expect("We own this so we can always take."),
+      self.incoming_broadcaster.take().expect("We own this so we can always take."),
     );
     let device_impl = DeviceImpl::new(
       &self.info.identifier,
@@ -262,8 +262,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
     let sender = self.outgoing_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
-      sender.send(msg.data).await.unwrap();
-      Ok(())
+      sender.send(msg.data).await.map_err(|err| ButtplugDeviceError::DeviceCommunicationError(format!("Could not write value to websocket device: {}", err)).into())
     })
   }
 
@@ -287,14 +286,14 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
             result = data_receiver.recv().fuse() => {
               match result {
                 Ok(data) => {
-                  info!("Got websocket data! {:?}", data);
-                  event_sender
+                  debug!("Got websocket data! {:?}", data);
+                  // We don't really care if there's no one to send the error to here.
+                  let _ = event_sender
                     .send(ButtplugDeviceEvent::Notification(
                       address.clone(),
                       Endpoint::Tx,
                       data,
-                    ))
-                    .unwrap();
+                    ));
                 },
                 Err(_) => break,
               }
@@ -316,7 +315,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
       let subscribed_token = self.subscribe_token.clone();
       Box::pin(async move {
         subscribed.store(false, Ordering::SeqCst);
-        let token = (subscribed_token.lock().await).take().unwrap();
+        let token = (subscribed_token.lock().await).take().expect("If we were subscribed, we'll have a token.");
         token.cancel();
         Ok(())
       })

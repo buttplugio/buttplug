@@ -6,5 +6,5 @@ fn main() {
     ],
     &["src/device/protocol/thehandy"],
   )
-  .unwrap();
+  .expect("These will always compile or we shouldn't be building.");
 }

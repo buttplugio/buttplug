@@ -57,7 +57,7 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device = self.device_impl.take().unwrap();
+    let device = self.device_impl.take().expect("We'll always have this at this point");
     if let Some(btle) = &protocol.btle {
       for endpoint_map in btle.services.values() {
         for endpoint in endpoint_map.keys() {
@@ -123,7 +123,7 @@ impl TestDeviceInternal {
   }
 
   pub fn send_event(&self, event: ButtplugDeviceEvent) {
-    self.event_sender.send(event).unwrap();
+    self.event_sender.send(event).expect("Test");
   }
 
   pub fn name(&self) -> String {
@@ -157,7 +157,7 @@ impl TestDeviceInternal {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender.send(ButtplugDeviceEvent::Removed(address)).unwrap();
+      sender.send(ButtplugDeviceEvent::Removed(address)).expect("Test");
       Ok(())
     })
   }
@@ -197,7 +197,7 @@ impl DeviceImplInternal for TestDevice {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender.send(ButtplugDeviceEvent::Removed(address)).unwrap();
+      sender.send(ButtplugDeviceEvent::Removed(address)).expect("Test");
       Ok(())
     })
   }
@@ -216,7 +216,7 @@ impl DeviceImplInternal for TestDevice {
       match channels.get(&msg.endpoint) {
         Some(device_channel) => {
           // We hold both ends, can unwrap.
-          device_channel.sender.send(msg.into()).await.unwrap();
+          device_channel.sender.send(msg.into()).await.expect("Test");
           Ok(())
         }
         None => Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into()),

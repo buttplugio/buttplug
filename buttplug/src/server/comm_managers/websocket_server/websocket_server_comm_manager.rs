@@ -1,7 +1,7 @@
 use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
 use crate::{core::ButtplugResultFuture, server::comm_managers::{
     DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
-  }};
+  }, util::async_manager};
 use futures::{StreamExt, FutureExt};
 use serde::Deserialize;
 use tokio::{
@@ -54,7 +54,7 @@ impl DeviceCommunicationManagerBuilder for WebsocketServerDeviceCommunicationMan
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We'll always be able to take this"),
       self.server_port,
       self.listen_on_all_interfaces,
     ))
@@ -74,7 +74,7 @@ impl WebsocketServerDeviceCommunicationManager {
     trace!("Websocket server port created.");
     let server_cancellation_token = CancellationToken::new();
     let child_token = server_cancellation_token.child_token();
-    tokio::spawn(async move {
+    async_manager::spawn(async move {
       let base_addr = if listen_on_all_interfaces {
         "0.0.0.0"
       } else {
@@ -82,20 +82,36 @@ impl WebsocketServerDeviceCommunicationManager {
       };
 
       let addr = format!("{}:{}", base_addr, port);
-      debug!("Websocket Insecure: Trying to listen on {}", addr);
+      debug!("Trying to listen on {}", addr);
 
       // Create the event loop and TCP listener we'll accept connections on.
       let try_socket = TcpListener::bind(&addr).await;
-      debug!("Websocket Insecure: Socket bound.");
-      let listener = try_socket.unwrap(); //.map_err(|e| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{:?}", e))))?;
-      debug!("Websocket Insecure: Listening on: {}", addr);
+      debug!("Socket bound.");
+      let listener = if let Ok(listener) = try_socket {
+        listener
+      } else {
+        error!("Cannot bind websocket server to {}.", addr);
+        return;
+      };
+      debug!("Listening on: {}", addr);
       loop {
         select! {
           listener_result = listener.accept().fuse() => {
-            let (stream, _) = listener_result.unwrap();            
-            info!("Websocket Insecure: Got connection");
+            let stream = if let Ok((stream, _)) = listener_result {
+              stream
+            } else {
+              error!("Cannot bind websocket server comm manager to address {}.", addr);
+              return;
+            };
+            info!("Got connection");
             let ws_fut = async_tungstenite::tokio::accept_async(stream);
-            let mut ws_stream = ws_fut.await.unwrap();
+            let mut ws_stream = match ws_fut.await {
+              Ok(ws_stream) => ws_stream,
+              Err(err) => {
+                error!("Cannot accept socket: {}", err);
+                continue;
+              }
+            };
             // Websockets are different from the rest of the communication managers, in that we have no
             // information about the device type when we create the connection, and therefore have to
             // wait for the first packet. We'll have to pass our device event sender off to the newly
@@ -107,7 +123,15 @@ impl WebsocketServerDeviceCommunicationManager {
                 ws_stream.next().await
               {
                 let info_packet: WebsocketServerDeviceCommManagerInitInfo =
-                  serde_json::from_str(&info_message).unwrap();
+                  if let Ok(packet) = serde_json::from_str(&info_message) {
+                    packet
+                  } else {
+                    error!("Did not receive a valid JSON info packet as the first packet, disconnecting.");
+                    if let Err(err) = ws_stream.close(None).await {
+                      error!("Error closing connection: {}", err);
+                    }
+                    return;
+                  };
                 if sender_clone
                   .send(DeviceCommunicationEvent::DeviceFound {
                     name: format!("Websocket Device {}", info_packet.identifier),

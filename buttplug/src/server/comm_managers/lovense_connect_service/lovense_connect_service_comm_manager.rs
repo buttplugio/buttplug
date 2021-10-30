@@ -9,6 +9,7 @@ use crate::{
 use dashmap::DashMap;
 use futures::future;
 use futures_timer::Delay;
+use reqwest::StatusCode;
 use serde::Deserialize;
 use serde_aux::prelude::*;
 use std::{
@@ -79,8 +80,14 @@ async fn lovense_local_service_check(
     for host in hosts {
       match reqwest::get(format!("{}/GetToys", host)).await {
         Ok(res) => {
+          if res.status() != StatusCode::OK {
+            error!("Error contacting Lovense Connect Local API endpoint. Status returned: {}", res.status());
+            tokio::time::sleep(Duration::from_secs(1)).await;
+            continue;
+          }              
+
           let text = res.text().await.expect("If we got a 200 back, we should at least have text.");
-          let info: LovenseServiceLocalInfo = serde_json::from_str(&text).unwrap();
+          let info: LovenseServiceLocalInfo = serde_json::from_str(&text).expect("Should always get json back from service, if we got a response.");
 
           // First off, remove all devices that are no longer in the list
           // (devices turned off or removed from the Lovense Connect app)
@@ -200,8 +207,13 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
         while is_scanning.load(Ordering::SeqCst) {
           match reqwest::get("https://api.lovense.com/api/lan/getToys").await {
             Ok(res) => {
-              let text = res.text().await.unwrap();
-              let info: LovenseServiceInfo = serde_json::from_str(&text).unwrap();
+              if res.status() != StatusCode::OK {
+                error!("Error contacting Lovense Connect Remote API endpoint. Status returned: {}", res.status());
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                continue;
+              }              
+              let text = res.text().await.expect("Should always get json back from service, if we got a response.");
+              let info: LovenseServiceInfo = serde_json::from_str(&text).expect("Should always get json back from service, if we got a response.");
               let mut current_known_hosts = known_hosts.lock().await;
               let new_known_hosts: Vec<String> = info
                 .iter()

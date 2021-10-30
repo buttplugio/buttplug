@@ -22,12 +22,12 @@ pub fn check_test_recv_value(
   command: DeviceImplCommand,
 ) {
   assert_eq!(
-    recv_now(&mut receiver.lock().unwrap()).unwrap().unwrap(),
+    recv_now(&mut receiver.lock().expect("Test")).expect("Test").expect("Test"),
     command
   );
 }
 
 #[allow(dead_code)]
 pub fn check_test_recv_empty(receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>) -> bool {
-  iffy_is_empty_check(&mut receiver.lock().unwrap())
+  iffy_is_empty_check(&mut receiver.lock().expect("Test"))
 }

@@ -78,7 +78,10 @@ fn serial_write_thread(mut port: Box<dyn SerialPort>, receiver: mpsc::Receiver<V
   //
   // This is a blocking recv so we don't have to worry about the port.
   while let Some(v) = recv.blocking_recv() {
-    port.write_all(&v).unwrap();
+    if let Err(err) = port.write_all(&v) {
+      error!("Cannot write data to serial port, exiting thread: {}", err);
+      return;
+    }
   }
 }
 
@@ -130,10 +133,10 @@ impl SerialPortDeviceImpl {
     // If we've gotten this far, we can expect we have a serial port definition.
     let port_def = protocol_def
       .serial
-      .unwrap()
+      .expect("This will exist if we've made it here")
       .into_iter()
       .find(|port| port_info.port_name == port.port)
-      .unwrap();
+      .expect("We had to match the port already to get here.");
 
     // This seems like it should be a oneshot, but there's no way to await a
     // value on those?
@@ -159,9 +162,9 @@ impl SerialPortDeviceImpl {
           }
         debug!("Exiting serial port connection thread for {}", port_name);
       })
-      .unwrap();
+      .expect("Thread creation should always succeed.");
 
-    let port = port_receiver.recv().await.unwrap().map_err(|e| {
+    let port = port_receiver.recv().await.expect("This will always be a Some value, we're just blocking for bringup").map_err(|e| {
       ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
         ButtplugDeviceSpecificError::SerialError(e.to_string()),
       ))
@@ -172,24 +175,24 @@ impl SerialPortDeviceImpl {
 
     let token = CancellationToken::new();
     let read_token = token.child_token();
-    let read_port = (*port).try_clone().unwrap();
+    let read_port = (*port).try_clone().expect("Should always be able to clone port");
     let read_thread = thread::Builder::new()
       .name("Serial Reader Thread".to_string())
       .spawn(move || {
         serial_read_thread(read_port, reader_sender, read_token);
       })
-      .unwrap();
+      .expect("Should always be able to create thread");
 
-    let write_port = (*port).try_clone().unwrap();
+    let write_port = (*port).try_clone().expect("Should always be able to clone port");
     let write_thread = thread::Builder::new()
       .name("Serial Writer Thread".to_string())
       .spawn(move || {
         serial_write_thread(write_port, writer_receiver);
       })
-      .unwrap();
+      .expect("Should always be able to create thread");
 
     Ok(Self {
-      address: port.name().unwrap(),
+      address: port.name().unwrap_or("Default Serial Port Device (No Name Given)".to_owned()),
       _read_thread: read_thread,
       _write_thread: write_thread,
       port_receiver: Arc::new(Mutex::new(reader_receiver)),
@@ -234,7 +237,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
           .recv()
           .now_or_never()
           .unwrap_or_else(|| Some(vec![]))
-          .unwrap(),
+          .expect("Always set to Some before unwrapping."),
       ))
     })
   }
@@ -243,7 +246,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
     let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
-      sender.send(msg.data).await.unwrap();
+      sender.send(msg.data).await.expect("Tasks should exist if we get here.");
       Ok(())
     })
   }
@@ -269,7 +272,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
                   Endpoint::Tx,
                   data,
                 ))
-                .unwrap();
+                .expect("As long as we're subscribed we should have a listener");
             }
             None => {
               info!("Data channel closed, ending serial listener task");

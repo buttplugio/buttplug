@@ -23,7 +23,7 @@ impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(SerialPortCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We'll always be able to take this"),
     ))
   }
 }

@@ -29,7 +29,7 @@ fn new_uninitialized_ble_test_device(
   let address = address.unwrap_or_else(|| {
     SystemTime::now()
       .duration_since(UNIX_EPOCH)
-      .unwrap()
+      .expect("Test")
       .subsec_nanos()
       .to_string()
   });
@@ -51,8 +51,8 @@ async fn new_bluetoothle_test_device_with_cfg(
   let device: ButtplugDevice =
     ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
       .await
-      .unwrap()
-      .unwrap();
+      .expect("Test")
+      .expect("Test");
   Ok((device, device_impl_clone))
 }
 
@@ -110,7 +110,7 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
-      self.sender.take().unwrap(),
+      self.sender.take().expect("We always have this."),
       self.devices
     ))
   }
@@ -191,7 +191,7 @@ mod test {
       pin_mut!(recv);
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).unwrap();
+      server.device_manager().add_comm_manager(builder).expect("Test");
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
@@ -210,7 +210,7 @@ mod test {
           break;
         }
       }
-      device.disconnect().await.unwrap();
+      device.disconnect().await.expect("Test");
       // Check that we got an event back about a removed device.
       while let Some(msg) = recv.next().await {
         match msg {
