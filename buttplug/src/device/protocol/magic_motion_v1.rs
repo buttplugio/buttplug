@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::Arc;
@@ -75,7 +77,11 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{
+      check_test_recv_empty,
+      check_test_recv_value,
+      new_bluetoothle_test_device,
+    },
     util::async_manager,
   };
 
@@ -85,7 +91,9 @@ mod test {
       let (device, test_device) = new_bluetoothle_test_device("Smart Mini Vibe")
         .await
         .expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await

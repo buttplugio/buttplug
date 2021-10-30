@@ -8,7 +8,10 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
-  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, TryCreateProtocolFunc,
+  add_to_protocol_map,
+  get_default_protocol_map,
+  ButtplugProtocol,
+  TryCreateProtocolFunc,
 };
 use crate::{
   core::{
@@ -423,7 +426,14 @@ impl DeviceProtocolConfiguration {
       .entry(ButtplugDeviceMessageType::StopDeviceCmd)
       .or_insert_with(DeviceMessageAttributes::default);
 
-    Ok((device_attrs.name.as_ref().expect("Name required as part of JSON schema").clone(), attributes))
+    Ok((
+      device_attrs
+        .name
+        .as_ref()
+        .expect("Name required as part of JSON schema")
+        .clone(),
+      attributes,
+    ))
   }
 }
 
@@ -450,8 +460,14 @@ impl DeviceConfigurationManager {
     }
   }
 
-  pub fn add_protocol_definition(&self, protocol_name: &str, protocol_definition: ProtocolDefinition) {
-    self.protocol_definitions.insert(protocol_name.to_owned(), protocol_definition);
+  pub fn add_protocol_definition(
+    &self,
+    protocol_name: &str,
+    protocol_definition: ProtocolDefinition,
+  ) {
+    self
+      .protocol_definitions
+      .insert(protocol_name.to_owned(), protocol_definition);
   }
 
   pub fn remove_protocol_definition(&self, protocol_name: &str) {
@@ -478,7 +494,10 @@ impl DeviceConfigurationManager {
   }
 
   pub fn get_protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
-    self.protocol_map.get(protocol_name).map(|pair| *pair.value())
+    self
+      .protocol_map
+      .get(protocol_name)
+      .map(|pair| *pair.value())
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly
@@ -498,8 +517,16 @@ impl DeviceConfigurationManager {
     );
     for config in self.protocol_definitions.iter() {
       if config.value() == specifier {
-        info!("Found protocol {:?} for specifier {:?}.", config.key(), specifier);
-        return Some((self.allow_raw_messages, config.key().clone(), config.value().clone()));
+        info!(
+          "Found protocol {:?} for specifier {:?}.",
+          config.key(),
+          specifier
+        );
+        return Some((
+          self.allow_raw_messages,
+          config.key().clone(),
+          config.value().clone(),
+        ));
       }
     }
     debug!("No protocol found for specifier {:?}.", specifier);
@@ -527,16 +554,23 @@ impl DeviceConfigurationManager {
 #[cfg(test)]
 mod test {
   use super::{
-    BluetoothLESpecifier, DeviceProtocolConfiguration, DeviceSpecifier, SerialSpecifier
+    BluetoothLESpecifier,
+    DeviceProtocolConfiguration,
+    DeviceSpecifier,
+    SerialSpecifier,
   };
-  use crate::{core::messages::ButtplugDeviceMessageType, device::configuration_manager::ProtocolDefinition, util::device_configuration::create_test_dcm};
-/*
-  #[test]
-  fn test_load_config() {
-    let config = DeviceConfigurationManager::default();
-    debug!("{:?}", config.config);
-  }
-*/
+  use crate::{
+    core::messages::ButtplugDeviceMessageType,
+    device::configuration_manager::ProtocolDefinition,
+    util::device_configuration::create_test_dcm,
+  };
+  /*
+    #[test]
+    fn test_load_config() {
+      let config = DeviceConfigurationManager::default();
+      debug!("{:?}", config.config);
+    }
+  */
   #[test]
   fn test_config_equals() {
     let config = create_test_dcm(false);
@@ -557,12 +591,19 @@ mod test {
     let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_protocol_definitions(&lovense).expect("Test, assuming infallible");
+    let proto = config
+      .find_protocol_definitions(&lovense)
+      .expect("Test, assuming infallible");
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).expect("Test, assuming infallible");
+    let (name_map, message_map) = proto_config
+      .get_attributes("P", &vec![])
+      .expect("Test, assuming infallible");
     // Make sure we got the right name
-    assert_eq!(name_map.get("en-us").expect("Test, assuming infallible"), "Lovense Edge");
+    assert_eq!(
+      name_map.get("en-us").expect("Test, assuming infallible"),
+      "Lovense Edge"
+    );
     // Make sure we overwrote the default of 1
     assert_eq!(
       message_map
@@ -579,12 +620,19 @@ mod test {
     let config = create_test_dcm(true);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_protocol_definitions(&lovense).expect("Test, assuming infallible");
+    let proto = config
+      .find_protocol_definitions(&lovense)
+      .expect("Test, assuming infallible");
     let proto_config =
       DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).expect("Test, assuming infallible");
+    let (name_map, message_map) = proto_config
+      .get_attributes("P", &vec![])
+      .expect("Test, assuming infallible");
     // Make sure we got the right name
-    assert_eq!(name_map.get("en-us").expect("Test, assuming infallible"), "Lovense Edge");
+    assert_eq!(
+      name_map.get("en-us").expect("Test, assuming infallible"),
+      "Lovense Edge"
+    );
     // Make sure we overwrote the default of 1
     assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
     assert!(message_map.contains_key(&ButtplugDeviceMessageType::RawReadCmd));
@@ -597,12 +645,19 @@ mod test {
     let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
-    let proto = config.find_protocol_definitions(&lovense).expect("Test, assuming infallible");
+    let proto = config
+      .find_protocol_definitions(&lovense)
+      .expect("Test, assuming infallible");
     let proto_config =
       DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
-    let (name_map, message_map) = proto_config.get_attributes("P", &vec![]).expect("Test, assuming infallible");
+    let (name_map, message_map) = proto_config
+      .get_attributes("P", &vec![])
+      .expect("Test, assuming infallible");
     // Make sure we got the right name
-    assert_eq!(name_map.get("en-us").expect("Test, assuming infallible"), "Lovense Edge");
+    assert_eq!(
+      name_map.get("en-us").expect("Test, assuming infallible"),
+      "Lovense Edge"
+    );
     // Make sure we overwrote the default of 1
     assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
     assert!(!message_map.contains_key(&ButtplugDeviceMessageType::RawReadCmd));
@@ -639,7 +694,7 @@ mod test {
     let mut nobra_def = ProtocolDefinition::default();
     let mut serial_specifier = SerialSpecifier::default();
     serial_specifier.port = "COM1".to_owned();
-    nobra_def.serial = Some(vec!(serial_specifier));
+    nobra_def.serial = Some(vec![serial_specifier]);
     config.add_protocol_definition("nobra", nobra_def);
     assert!(config.protocol_definitions().contains_key("nobra"));
     assert!(config

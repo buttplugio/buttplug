@@ -6,8 +6,15 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplCommand,
-    DeviceImplInternal, DeviceReadCmd, DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplCommand,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
     Endpoint,
   },
 };
@@ -57,7 +64,10 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    let device = self.device_impl.take().expect("We'll always have this at this point");
+    let device = self
+      .device_impl
+      .take()
+      .expect("We'll always have this at this point");
     if let Some(btle) = &protocol.btle {
       for endpoint_map in btle.services.values() {
         for endpoint in endpoint_map.keys() {
@@ -157,7 +167,9 @@ impl TestDeviceInternal {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender.send(ButtplugDeviceEvent::Removed(address)).expect("Test");
+      sender
+        .send(ButtplugDeviceEvent::Removed(address))
+        .expect("Test");
       Ok(())
     })
   }
@@ -197,7 +209,9 @@ impl DeviceImplInternal for TestDevice {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      sender.send(ButtplugDeviceEvent::Removed(address)).expect("Test");
+      sender
+        .send(ButtplugDeviceEvent::Removed(address))
+        .expect("Test");
       Ok(())
     })
   }

@@ -1,8 +1,14 @@
 use crate::core::{
   errors::{ButtplugDeviceError, ButtplugError},
   messages::{
-    ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, DeviceMessageAttributesMap,
-    LinearCmd, RotateCmd, RotationSubcommand, VibrateCmd, VibrateSubcommand,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessageType,
+    DeviceMessageAttributesMap,
+    LinearCmd,
+    RotateCmd,
+    RotationSubcommand,
+    VibrateCmd,
+    VibrateSubcommand,
   },
 };
 
@@ -258,8 +264,13 @@ mod test {
 
   use super::GenericCommandManager;
   use crate::core::messages::{
-    ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap, RotateCmd,
-    RotationSubcommand, VibrateCmd, VibrateSubcommand,
+    ButtplugDeviceMessageType,
+    DeviceMessageAttributes,
+    DeviceMessageAttributesMap,
+    RotateCmd,
+    RotationSubcommand,
+    VibrateCmd,
+    VibrateSubcommand,
   };
   #[test]
   pub fn test_command_generator_vibration() {
@@ -280,10 +291,17 @@ mod test {
       ],
     );
     assert_eq!(
-      mgr.update_vibration(&vibrate_msg, false).expect("Test, assuming infallible"),
+      mgr
+        .update_vibration(&vibrate_msg, false)
+        .expect("Test, assuming infallible"),
       Some(vec![Some(10), Some(10)])
     );
-    assert_eq!(mgr.update_vibration(&vibrate_msg, false).expect("Test, assuming infallible"), None);
+    assert_eq!(
+      mgr
+        .update_vibration(&vibrate_msg, false)
+        .expect("Test, assuming infallible"),
+      None
+    );
     let vibrate_msg_2 = VibrateCmd::new(
       0,
       vec![
@@ -292,7 +310,9 @@ mod test {
       ],
     );
     assert_eq!(
-      mgr.update_vibration(&vibrate_msg_2, false).expect("Test, assuming infallible"),
+      mgr
+        .update_vibration(&vibrate_msg_2, false)
+        .expect("Test, assuming infallible"),
       Some(vec![None, Some(15)])
     );
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
@@ -318,10 +338,17 @@ mod test {
       ],
     );
     assert_eq!(
-      mgr.update_rotation(&rotate_msg).expect("Test, assuming infallible"),
+      mgr
+        .update_rotation(&rotate_msg)
+        .expect("Test, assuming infallible"),
       vec![Some((10, true)), Some((10, true))]
     );
-    assert_eq!(mgr.update_rotation(&rotate_msg).expect("Test, assuming infallible"), vec![None, None]);
+    assert_eq!(
+      mgr
+        .update_rotation(&rotate_msg)
+        .expect("Test, assuming infallible"),
+      vec![None, None]
+    );
     let rotate_msg_2 = RotateCmd::new(
       0,
       vec![
@@ -330,7 +357,9 @@ mod test {
       ],
     );
     assert_eq!(
-      mgr.update_rotation(&rotate_msg_2).expect("Test, assuming infallible"),
+      mgr
+        .update_rotation(&rotate_msg_2)
+        .expect("Test, assuming infallible"),
       vec![None, Some((15, false))]
     );
     let rotate_msg_invalid = RotateCmd::new(0, vec![RotationSubcommand::new(2, 0.5, true)]);

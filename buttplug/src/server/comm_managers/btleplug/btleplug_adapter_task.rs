@@ -1,6 +1,9 @@
 use super::btleplug_device_impl::BtlePlugDeviceImplCreator;
 use crate::server::comm_managers::DeviceCommunicationEvent;
-use btleplug::{api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter}, platform::{Adapter, Manager, PeripheralId}};
+use btleplug::{
+  api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
+  platform::{Adapter, Manager, PeripheralId},
+};
 use futures::{future::FutureExt, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
@@ -15,7 +18,6 @@ pub enum BtleplugAdapterCommand {
 pub struct BtleplugAdapterTask {
   event_sender: Sender<DeviceCommunicationEvent>,
   command_receiver: Receiver<BtleplugAdapterCommand>,
-
 }
 
 impl BtleplugAdapterTask {
@@ -46,7 +48,10 @@ impl BtleplugAdapterTask {
     let properties = if let Ok(Some(properties)) = peripheral.properties().await {
       properties
     } else {
-      error!("Cannot retreive peripheral properties for {:?}.", peripheral_id);
+      error!(
+        "Cannot retreive peripheral properties for {:?}.",
+        peripheral_id
+      );
       return;
     };
     if let Some(name) = properties.local_name {
@@ -136,7 +141,10 @@ impl BtleplugAdapterTask {
       break;
     }
 
-    let mut events = adapter.events().await.expect("Should always be able to retreive stream.");
+    let mut events = adapter
+      .events()
+      .await
+      .expect("Should always be able to retreive stream.");
 
     let mut tried_addresses = vec![];
 

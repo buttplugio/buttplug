@@ -54,7 +54,8 @@ mod test {
   fn test_endpoint_deserialize() {
     let endpoint_str =
       "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
-    let union: ButtplugCurrentSpecServerMessage = serde_json::from_str(&endpoint_str).expect("Infallible deserialization.");
+    let union: ButtplugCurrentSpecServerMessage =
+      serde_json::from_str(&endpoint_str).expect("Infallible deserialization.");
     assert_eq!(
       ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
       union

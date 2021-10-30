@@ -19,12 +19,22 @@ use crate::{
   core::{
     errors::*,
     messages::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
-      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      StopAllDevices,
+      StopScanning,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream, device_configuration::{DEVICE_CONFIGURATION_JSON, load_protocol_config_from_json}},
+  util::{
+    async_manager,
+    device_configuration::{load_protocol_config_from_json, DEVICE_CONFIGURATION_JSON},
+    stream::convert_broadcast_receiver_to_stream,
+  },
 };
 use device_manager::DeviceManager;
 use futures::{
@@ -32,11 +42,9 @@ use futures::{
   Stream,
 };
 use ping_timer::PingTimer;
-use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
 };
 use thiserror::Error;
 use tokio::sync::broadcast;
@@ -109,7 +117,7 @@ impl ButtplugServerBuilder {
     } else {
       None
     };
-    
+
     // If the device config string exists, parse it.
     let device_config = if let Some(main_device_config) = &self.device_configuration_json {
       let mut main_config = load_protocol_config_from_json(main_device_config)?;
@@ -146,11 +154,8 @@ impl ButtplugServerBuilder {
       }
       .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
     );
-    let device_manager = DeviceManager::new(
-      send.clone(),
-      ping_timer.clone(),
-      self.allow_raw_messages
-    );
+    let device_manager =
+      DeviceManager::new(send.clone(), ping_timer.clone(), self.allow_raw_messages);
 
     if let Some(devices) = device_config {
       for (name, def) in devices.protocols {
@@ -192,7 +197,9 @@ pub struct ButtplugServer {
 impl Default for ButtplugServer {
   fn default() -> Self {
     // We can unwrap here because if default init fails, so will pretty much every test.
-    ButtplugServerBuilder::default().finish().expect("Default is infallible")
+    ButtplugServerBuilder::default()
+      .finish()
+      .expect("Default is infallible")
   }
 }
 

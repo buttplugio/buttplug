@@ -24,6 +24,7 @@ impl ButtplugProtocol for RawProtocol {
   }
 }
 
-impl ButtplugProtocolCommandHandler for RawProtocol {}
+impl ButtplugProtocolCommandHandler for RawProtocol {
+}
 
 // TODO Write tests

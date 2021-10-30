@@ -1,18 +1,25 @@
 use super::{
-  fleshlight_launch_helper::get_speed, ButtplugDeviceResultFuture, ButtplugProtocol,
+  fleshlight_launch_helper::get_speed,
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      DeviceMessageAttributesMap,
       FleshlightLaunchFW12Cmd,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use futures::future::BoxFuture;
@@ -111,8 +118,12 @@ mod test {
   #[test]
   pub fn test_kiiroov2_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Launch")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
         .await
@@ -127,8 +138,12 @@ mod test {
   #[test]
   pub fn test_kiiroov2_linearcmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Launch")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
         .await

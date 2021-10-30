@@ -1,6 +1,7 @@
 mod lovense_connect_service_comm_manager;
 mod lovense_connect_service_device_impl;
 pub use lovense_connect_service_comm_manager::{
-  LovenseConnectServiceCommunicationManager, LovenseConnectServiceCommunicationManagerBuilder,
+  LovenseConnectServiceCommunicationManager,
+  LovenseConnectServiceCommunicationManagerBuilder,
 };
 pub use lovense_connect_service_device_impl::LovenseServiceDeviceImpl;

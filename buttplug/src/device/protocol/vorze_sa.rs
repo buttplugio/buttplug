@@ -1,11 +1,16 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
-    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
@@ -190,19 +195,32 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 mod test {
   use crate::{
     core::messages::{
-      LinearCmd, RotateCmd, RotationSubcommand, StopDeviceCmd, VectorSubcommand, VibrateCmd,
+      LinearCmd,
+      RotateCmd,
+      RotationSubcommand,
+      StopDeviceCmd,
+      VectorSubcommand,
+      VibrateCmd,
       VibrateSubcommand,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{
+      check_test_recv_empty,
+      check_test_recv_value,
+      new_bluetoothle_test_device,
+    },
     util::async_manager,
   };
 
   #[test]
   pub fn test_vorze_sa_vibration_protocol_bach() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Bach smart").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Bach smart")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -236,8 +254,12 @@ mod test {
   #[test]
   pub fn test_vorze_sa_vibration_protocol_rocket() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("ROCKET").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("ROCKET")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
@@ -271,8 +293,12 @@ mod test {
   #[test]
   pub fn test_vorze_sa_rotation_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("CycSA").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("CycSA")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into())
         .await
@@ -320,8 +346,12 @@ mod test {
   #[test]
   pub fn test_vorze_sa_linear_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("VorzePiston").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("VorzePiston")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 150, 0.95)]).into())
         .await

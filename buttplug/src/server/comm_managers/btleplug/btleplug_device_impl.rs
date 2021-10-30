@@ -6,17 +6,28 @@ use crate::{
   },
   device::{
     configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
-use btleplug::{api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType}, platform::{Adapter, PeripheralId}};
+use btleplug::{
+  api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
+  platform::{Adapter, PeripheralId},
+};
 use futures::{
   future::{self, BoxFuture, FutureExt},
-  Stream, StreamExt,
+  Stream,
+  StreamExt,
 };
 use std::{
   collections::HashMap,
@@ -83,7 +94,11 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         .into(),
       );
     }
-    for (proto_uuid, proto_service) in protocol.btle.expect("To get this far we are guaranteed to have a btle block in the config").services {
+    for (proto_uuid, proto_service) in protocol
+      .btle
+      .expect("To get this far we are guaranteed to have a btle block in the config")
+      .services
+    {
       for service in self.device.services() {
         if service.uuid != proto_uuid {
           continue;
@@ -97,12 +112,20 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         }
       }
     }
-    let notification_stream = self.device.notifications().await.expect("Should always be able to get notifications");
+    let notification_stream = self
+      .device
+      .notifications()
+      .await
+      .expect("Should always be able to get notifications");
     let device_internal_impl = BtlePlugDeviceImpl::new(
       self.device.clone(),
       &self.name,
       self.address.clone(),
-      self.adapter.events().await.expect("Should always be able to get events"),
+      self
+        .adapter
+        .events()
+        .await
+        .expect("Should always be able to get events"),
       notification_stream,
       endpoints.clone(),
       uuid_map,
@@ -124,8 +147,10 @@ pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
-unsafe impl<T: Peripheral + 'static> Send for BtlePlugDeviceImpl<T> {}
-unsafe impl<T: Peripheral + 'static> Sync for BtlePlugDeviceImpl<T> {}
+unsafe impl<T: Peripheral + 'static> Send for BtlePlugDeviceImpl<T> {
+}
+unsafe impl<T: Peripheral + 'static> Sync for BtlePlugDeviceImpl<T> {
+}
 
 impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   pub fn new(
@@ -202,7 +227,10 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
           }
         }
       }
-      info!("Exiting btleplug notification/event loop for device {:?}", address_clone)
+      info!(
+        "Exiting btleplug notification/event loop for device {:?}",
+        address_clone
+      )
     });
     Self {
       device,
@@ -246,16 +274,16 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
       WriteType::WithoutResponse
     };
     Box::pin(async move {
-      match device
-        .write(&characteristic, &msg.data, write_type)
-        .await {
+      match device.write(&characteristic, &msg.data, write_type).await {
         Ok(()) => Ok(()),
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
           Err(
             ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
               format!("{:?}", err),
-            )).into())
+            ))
+            .into(),
+          )
         }
       }
     })

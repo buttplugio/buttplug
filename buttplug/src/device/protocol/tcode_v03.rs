@@ -1,5 +1,7 @@
 use super::{
-  generic_command_manager::GenericCommandManager, ButtplugDeviceResultFuture, ButtplugProtocol,
+  generic_command_manager::GenericCommandManager,
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{

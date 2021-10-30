@@ -7,15 +7,26 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, WebsocketSpecifier},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   util::async_manager,
 };
 use async_trait::async_trait;
 use futures::{
   future::{self, BoxFuture},
-  AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt,
+  AsyncRead,
+  AsyncWrite,
+  FutureExt,
+  SinkExt,
+  StreamExt,
 };
 use futures_timer::Delay;
 use std::{
@@ -24,7 +35,7 @@ use std::{
     atomic::{AtomicBool, Ordering},
     Arc,
   },
-  time::Duration
+  time::Duration,
 };
 use tokio::sync::{
   broadcast,
@@ -56,7 +67,7 @@ async fn run_connection_loop<S>(
       _ = sleep => {
         if pong_count == 0 {
           error!("Cannot no pongs received, considering connection closed.");
-          return;          
+          return;
         }
         pong_count = 0;
         if websocket_server_sender
@@ -190,10 +201,19 @@ impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
     _: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
     let device_impl_internal = WebsocketServerDeviceImpl::new(
-      self.device_event_sender.take().expect("We own this so we can always take."),
+      self
+        .device_event_sender
+        .take()
+        .expect("We own this so we can always take."),
       self.info.clone(),
-      self.outgoing_sender.take().expect("We own this so we can always take."),
-      self.incoming_broadcaster.take().expect("We own this so we can always take."),
+      self
+        .outgoing_sender
+        .take()
+        .expect("We own this so we can always take."),
+      self
+        .incoming_broadcaster
+        .take()
+        .expect("We own this so we can always take."),
     );
     let device_impl = DeviceImpl::new(
       &self.info.identifier,
@@ -262,7 +282,13 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
     let sender = self.outgoing_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
-      sender.send(msg.data).await.map_err(|err| ButtplugDeviceError::DeviceCommunicationError(format!("Could not write value to websocket device: {}", err)).into())
+      sender.send(msg.data).await.map_err(|err| {
+        ButtplugDeviceError::DeviceCommunicationError(format!(
+          "Could not write value to websocket device: {}",
+          err
+        ))
+        .into()
+      })
     })
   }
 
@@ -315,7 +341,9 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
       let subscribed_token = self.subscribe_token.clone();
       Box::pin(async move {
         subscribed.store(false, Ordering::SeqCst);
-        let token = (subscribed_token.lock().await).take().expect("If we were subscribed, we'll have a token.");
+        let token = (subscribed_token.lock().await)
+          .take()
+          .expect("If we were subscribed, we'll have a token.");
         token.cancel();
         Ok(())
       })

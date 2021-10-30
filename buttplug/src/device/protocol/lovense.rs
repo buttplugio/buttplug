@@ -7,12 +7,17 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      DeviceMessageAttributesMap,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use futures::{future::BoxFuture, FutureExt};
@@ -133,7 +138,9 @@ impl ButtplugProtocolCommandHandler for Lovense {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity")).as_bytes().to_vec();
+          let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity"))
+            .as_bytes()
+            .to_vec();
           let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
           fut.await?;
           return Ok(messages::Ok::default().into());

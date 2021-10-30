@@ -6,13 +6,15 @@ mod test {
     core::messages::{
       self,
       serializer::{
-        ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
+        ButtplugMessageSerializer,
+        ButtplugSerializedMessage,
+        ButtplugServerJSONSerializer,
       },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::ButtplugServer,
     server::comm_managers::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+    server::ButtplugServer,
     util::async_manager,
   };
   use futures::{pin_mut, StreamExt};
@@ -23,8 +25,13 @@ mod test {
       let server = ButtplugServer::default();
       let serializer = ButtplugServerJSONSerializer::default();
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
-      let output = serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.");
-      let incoming = server.parse_message(output[0].clone()).await.expect("Test, assuming infallible.");
+      let output = serializer
+        .deserialize(rsi.to_owned().into())
+        .expect("Test, assuming infallible.");
+      let incoming = server
+        .parse_message(output[0].clone())
+        .await
+        .expect("Test, assuming infallible.");
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -43,8 +50,13 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let rsi =
         r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client", "MessageVersion": 2}}]"#;
-      let output = serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.");
-      let incoming = server.parse_message(output[0].clone()).await.expect("Test, assuming infallible.");
+      let output = serializer
+        .deserialize(rsi.to_owned().into())
+        .expect("Test, assuming infallible.");
+      let incoming = server
+        .parse_message(output[0].clone())
+        .await
+        .expect("Test, assuming infallible.");
       let incoming_json = serializer.serialize(vec![incoming]);
       assert_eq!(
         incoming_json,
@@ -65,11 +77,19 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+      server
+        .device_manager()
+        .add_comm_manager(builder)
+        .expect("Test, assuming infallible.");
       helper.add_ble_device("Massage Demo").await;
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let mut output = server
-        .parse_message(serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.")[0].clone())
+        .parse_message(
+          serializer
+            .deserialize(rsi.to_owned().into())
+            .expect("Test, assuming infallible.")[0]
+            .clone(),
+        )
         .await
         .expect("Test, assuming infallible.");
       assert_eq!(
@@ -97,7 +117,10 @@ mod test {
           r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
         ))
         .expect("Test, assuming infallible.");
-      output = server.parse_message(rdl[0].clone()).await.expect("Test, assuming infallible.");
+      output = server
+        .parse_message(rdl[0].clone())
+        .await
+        .expect("Test, assuming infallible.");
       assert_eq!(
         serializer.serialize(vec!(output)),
         r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}]}}]"#.to_owned().into()
@@ -114,12 +137,20 @@ mod test {
       let serializer = ButtplugServerJSONSerializer::default();
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+      server
+        .device_manager()
+        .add_comm_manager(builder)
+        .expect("Test, assuming infallible.");
       let device = helper.add_ble_device("Massage Demo").await;
 
       let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
       let output = server
-        .parse_message(serializer.deserialize(rsi.to_owned().into()).expect("Test, assuming infallible.")[0].clone())
+        .parse_message(
+          serializer
+            .deserialize(rsi.to_owned().into())
+            .expect("Test, assuming infallible.")[0]
+            .clone(),
+        )
         .await
         .expect("Test, assuming infallible.");
       assert_eq!(
@@ -159,7 +190,9 @@ mod test {
         serializer.serialize(vec!(output2)),
         r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
       );
-      let command_receiver = device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible.");
+      let command_receiver = device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible.");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),

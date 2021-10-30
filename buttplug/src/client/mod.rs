@@ -10,14 +10,22 @@ pub mod client_event_loop;
 mod client_message_sorter;
 pub mod device;
 
+#[cfg(feature = "server")]
+use crate::server::ButtplugServer;
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-      ButtplugMessageSpecVersion, Ping, RequestDeviceList, RequestServerInfo, StartScanning,
-      StopAllDevices, StopScanning,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessageSpecVersion,
+      Ping,
+      RequestDeviceList,
+      RequestServerInfo,
+      StartScanning,
+      StopAllDevices,
+      StopScanning,
     },
   },
   util::{
@@ -26,13 +34,15 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-#[cfg(feature = "server")]
-use crate::server::ButtplugServer;
 use client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
 pub use device::{
-  ButtplugClientDevice, ButtplugClientDeviceEvent, ButtplugClientDeviceMessageType, LinearCommand,
-  RotateCommand, VibrateCommand,
+  ButtplugClientDevice,
+  ButtplugClientDeviceEvent,
+  ButtplugClientDeviceMessageType,
+  LinearCommand,
+  RotateCommand,
+  VibrateCommand,
 };
 use futures::{
   future::{self, BoxFuture},
@@ -142,7 +152,8 @@ pub enum ButtplugClientEvent {
   Error(ButtplugError),
 }
 
-impl Unpin for ButtplugClientEvent {}
+impl Unpin for ButtplugClientEvent {
+}
 
 /// Struct used by applications to communicate with a Buttplug Server.
 ///
@@ -174,10 +185,12 @@ pub struct ButtplugClient {
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
-unsafe impl Send for ButtplugClient {}
+unsafe impl Send for ButtplugClient {
+}
 // Not actually sure this should be sync, but trying to call handshake breaks
 // without it.
-unsafe impl Sync for ButtplugClient {}
+unsafe impl Sync for ButtplugClient {
+}
 
 impl ButtplugClient {
   pub fn new(name: &str) -> Self {
@@ -277,7 +290,7 @@ impl ButtplugClient {
   #[cfg(feature = "server")]
   pub async fn connect_in_process(
     &self,
-    server: Option<ButtplugServer>
+    server: Option<ButtplugServer>,
   ) -> Result<(), ButtplugClientError> {
     use crate::connector::ButtplugInProcessClientConnector;
 
@@ -298,9 +311,10 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(
-          WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
+          WebsocketServerDeviceCommunicationManagerBuilder::default()
+            .listen_on_all_interfaces(true),
         )
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     #[cfg(feature = "serial-manager")]
     {
@@ -309,7 +323,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(SerialPortCommunicationManagerBuilder::default())
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     #[cfg(feature = "lovense-connect-service-manager")]
     {
@@ -318,23 +332,24 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default())
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     #[cfg(feature = "lovense-dongle-manager")]
     {
       use crate::server::comm_managers::lovense_dongle::{
-        LovenseHIDDongleCommunicationManagerBuilder, LovenseSerialDongleCommunicationManagerBuilder,
+        LovenseHIDDongleCommunicationManagerBuilder,
+        LovenseSerialDongleCommunicationManagerBuilder,
       };
       connector
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default())
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
       connector
         .server_ref()
         .device_manager()
         .add_comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default())
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
@@ -343,7 +358,7 @@ impl ButtplugClient {
         .server_ref()
         .device_manager()
         .add_comm_manager(XInputDeviceCommunicationManagerBuilder::default())
-        .expect("Expected that all additions will work in connect_in_process.");        
+        .expect("Expected that all additions will work in connect_in_process.");
     }
     self.connect(connector).await
   }

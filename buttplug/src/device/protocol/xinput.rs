@@ -6,7 +6,9 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use byteorder::{LittleEndian, WriteBytesExt};
@@ -69,10 +71,14 @@ impl ButtplugProtocolCommandHandler for XInput {
             // checking.
             let mut cmd = vec![];
             if cmd
-              .write_u16::<LittleEndian>(cmds[1].expect("GCM uses match_all, we'll always get 2 values") as u16)
+              .write_u16::<LittleEndian>(
+                cmds[1].expect("GCM uses match_all, we'll always get 2 values") as u16,
+              )
               .is_err()
               || cmd
-                .write_u16::<LittleEndian>(cmds[0].expect("GCM uses match_all, we'll always get 2 values") as u16)
+                .write_u16::<LittleEndian>(
+                  cmds[0].expect("GCM uses match_all, we'll always get 2 values") as u16,
+                )
                 .is_err()
             {
               return Err(

@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::Arc;
@@ -87,15 +89,23 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{
+      check_test_recv_empty,
+      check_test_recv_value,
+      new_bluetoothle_test_device,
+    },
     util::async_manager,
   };
 
   #[test]
   pub fn test_libo_vibes_protocol_1vibe() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Yuyi").await.expect("Test, assuming infallible");
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Yuyi")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver_tx = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
@@ -137,8 +147,12 @@ mod test {
   #[test]
   pub fn test_libo_vibes_protocol_2vibe() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Gugudai").await.expect("Test, assuming infallible");
-      let command_receiver_tx = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Gugudai")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver_tx = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       let command_receiver_tx_mode = test_device
         .get_endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");

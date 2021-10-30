@@ -3,7 +3,9 @@ use crate::{
   core::ButtplugResultFuture,
   device::ButtplugDeviceEvent,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -48,7 +50,8 @@ async fn check_gamepad_connectivity(
   sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
 ) {
   check_running.store(true, Ordering::SeqCst);
-  let handle = rusty_xinput::XInputHandle::load_default().expect("Always loads in windows, this shouldn't run elsewhere.");
+  let handle = rusty_xinput::XInputHandle::load_default()
+    .expect("Always loads in windows, this shouldn't run elsewhere.");
   loop {
     let gamepads = connected_gamepads.load(Ordering::SeqCst);
     if gamepads == 0 {
@@ -169,7 +172,8 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
     let scanning_notifier = self.scanning_notifier.clone();
     let connected_gamepads = self.connected_gamepads.clone();
     async_manager::spawn(async move {
-      let handle = rusty_xinput::XInputHandle::load_default().expect("Always loads in windows, this shouldn't run elsewhere.");
+      let handle = rusty_xinput::XInputHandle::load_default()
+        .expect("Always loads in windows, this shouldn't run elsewhere.");
       let mut stop = false;
       while !stop {
         for i in &[

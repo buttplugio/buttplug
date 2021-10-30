@@ -2,16 +2,18 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::{
   core::{
     errors::ButtplugError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap}
+    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
+use futures::future::BoxFuture;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use futures::future::BoxFuture;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Ankni {
@@ -40,9 +42,23 @@ impl ButtplugProtocol for Ankni {
     device_impl: Arc<DeviceImpl>,
   ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
     Box::pin(async move {
-      let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01], true);
+      let msg = DeviceWriteCmd::new(
+        Endpoint::Tx,
+        vec![
+          0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+          0x01, 0x01, 0x01, 0x01, 0x01,
+        ],
+        true,
+      );
       device_impl.write_value(msg).await?;
-      let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0x00, 0x00], true);
+      let msg = DeviceWriteCmd::new(
+        Endpoint::Tx,
+        vec![
+          0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd,
+          0xfd, 0xfd, 0xfd, 0x00, 0x00,
+        ],
+        true,
+      );
       device_impl.write_value(msg).await?;
       Ok(None)
     })
@@ -83,7 +99,7 @@ impl ButtplugProtocolCommandHandler for Ankni {
                 0x00,
                 0x00,
                 0x00,
-                0x00
+                0x00,
               ],
               true,
             ))
@@ -108,23 +124,34 @@ mod test {
   #[test]
   pub fn test_ankni_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("DSJM").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("DSJM")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01], true
+          vec![
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+          ],
+          true,
         )),
       );
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0x00, 0x00], true
+          vec![
+            0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd,
+            0xfd, 0xfd, 0xfd, 0xfd, 0x00, 0x00,
+          ],
+          true,
         )),
       );
-
 
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -135,26 +162,9 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![
-            0x03,
-            0x12,
-            0x02,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00],
+            0x03, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          ],
           true,
         )),
       );
@@ -168,26 +178,9 @@ mod test {
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![
-            0x03,
-            0x12,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00],
+            0x03, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          ],
           true,
         )),
       );

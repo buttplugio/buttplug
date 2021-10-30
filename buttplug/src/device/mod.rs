@@ -2,7 +2,10 @@ pub mod configuration_manager;
 pub mod protocol;
 use serde::{
   de::{self, Visitor},
-  Deserialize, Deserializer, Serialize, Serializer,
+  Deserialize,
+  Deserializer,
+  Serialize,
+  Serializer,
 };
 use std::{
   fmt::{self, Debug},
@@ -15,8 +18,15 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugServerMessage, DeviceMessageAttributesMap,
-      RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugServerMessage,
+      DeviceMessageAttributesMap,
+      RawReadCmd,
+      RawReading,
+      RawSubscribeCmd,
+      RawUnsubscribeCmd,
+      RawWriteCmd,
     },
     ButtplugResultFuture,
   },
@@ -389,7 +399,7 @@ pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Arc<DeviceImpl>,
-  display_name: Option<String>
+  display_name: Option<String>,
 }
 
 impl Debug for ButtplugDevice {
@@ -407,7 +417,8 @@ impl Hash for ButtplugDevice {
   }
 }
 
-impl Eq for ButtplugDevice {}
+impl Eq for ButtplugDevice {
+}
 
 impl PartialEq for ButtplugDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -417,7 +428,11 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
-    Self { protocol, device, display_name: None }
+    Self {
+      protocol,
+      device,
+      display_name: None,
+    }
   }
 
   pub fn address(&self) -> &str {
@@ -462,10 +477,15 @@ impl ButtplugDevice {
           // devices like Lovense, some Kiiroo, etc, this can get fairly
           // complicated.
           let sharable_device_impl = Arc::new(device_impl);
-          let protocol_creator_func = 
-            device_config_mgr.get_protocol_creator(&*config_name).expect("Already checked for protocol existence");
-          let protocol_impl = protocol_creator_func(sharable_device_impl.clone(), device_protocol_config).await?;
-          Ok(Some(ButtplugDevice::new(protocol_impl, sharable_device_impl)))
+          let protocol_creator_func = device_config_mgr
+            .get_protocol_creator(&*config_name)
+            .expect("Already checked for protocol existence");
+          let protocol_impl =
+            protocol_creator_func(sharable_device_impl.clone(), device_protocol_config).await?;
+          Ok(Some(ButtplugDevice::new(
+            protocol_impl,
+            sharable_device_impl,
+          )))
         } else {
           info!("Protocol {} not available", config_name);
           Ok(None)
@@ -476,7 +496,12 @@ impl ButtplugDevice {
   }
 
   pub fn set_display_name(&mut self, name: &str) {
-    info!("Adding display name {} to device {} ({})", name, self.name(), self.address());
+    info!(
+      "Adding display name {} to device {} ({})",
+      name,
+      self.name(),
+      self.address()
+    );
     self.display_name = Some(name.to_owned());
   }
 

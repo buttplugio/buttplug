@@ -1,21 +1,29 @@
-use super::{comm_managers::DeviceCommunicationEvent, ping_timer::PingTimer, device_manager::DeviceUserConfig};
+use super::{
+  comm_managers::DeviceCommunicationEvent,
+  device_manager::DeviceUserConfig,
+  ping_timer::PingTimer,
+};
 use crate::{
   core::messages::{
-    ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished, StopDeviceCmd,
+    ButtplugServerMessage,
+    DeviceAdded,
+    DeviceRemoved,
+    ScanningFinished,
+    StopDeviceCmd,
   },
   device::{
-    configuration_manager::DeviceConfigurationManager, ButtplugDevice, ButtplugDeviceEvent,
+    configuration_manager::DeviceConfigurationManager,
+    ButtplugDevice,
+    ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
   },
   util::async_manager,
 };
 use dashmap::DashMap;
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
-use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
 };
 use tokio::sync::{broadcast, mpsc};
 use tracing;
@@ -145,7 +153,7 @@ impl DeviceManagerEventLoop {
           address = tracing::field::display(address.clone())
         );
         let _enter = span.enter();
-        
+
         // Check to make sure the device isn't already connected. If it is, drop it.
         for device_entry in self.device_map.iter() {
           if device_entry.value().address() == address {
@@ -168,10 +176,17 @@ impl DeviceManagerEventLoop {
         let mut is_allowed = true;
         {
           // Make sure allow list isn't active, or that the device is in the allow list if it is.
-          let mut allow_list = self.device_user_config.iter().filter(|x| *x.value().allow() == Some(true)).peekable();
+          let mut allow_list = self
+            .device_user_config
+            .iter()
+            .filter(|x| *x.value().allow() == Some(true))
+            .peekable();
           if allow_list.peek().is_some() {
             if !allow_list.any(|x| *x.key() == address) {
-              info!("Allow list active and device address {} not found, ignoring.", address);
+              info!(
+                "Allow list active and device address {} not found, ignoring.",
+                address
+              );
               is_allowed = false;
             } else {
               info!("Allow list active and device address {} found.", address);
@@ -186,7 +201,7 @@ impl DeviceManagerEventLoop {
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
-      },
+      }
     }
   }
 
@@ -236,7 +251,10 @@ impl DeviceManagerEventLoop {
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
           while let Ok(event) = event_listener.recv().await {
-            event_sender.send(event).await.expect("Should always succeed since it goes to the Device Manager which owns us.");
+            event_sender
+              .send(event)
+              .await
+              .expect("Should always succeed since it goes to the Device Manager which owns us.");
           }
         });
 
@@ -255,8 +273,15 @@ impl DeviceManagerEventLoop {
         }
       }
       ButtplugDeviceEvent::Removed(address) => {
-        let device_index = *self.device_index_map.get(&address).expect("Index must exist to get here.").value();
-        self.device_map.remove(&device_index).expect("Remove will always work.");
+        let device_index = *self
+          .device_index_map
+          .get(&address)
+          .expect("Index must exist to get here.")
+          .value();
+        self
+          .device_map
+          .remove(&device_index)
+          .expect("Remove will always work.");
         if self
           .server_sender
           .send(DeviceRemoved::new(device_index).into())

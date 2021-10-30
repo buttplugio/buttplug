@@ -5,22 +5,22 @@ use crate::{
       ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
 use std::sync::Arc;
+#[cfg(target_os = "windows")]
+use tokio::net::windows::named_pipe;
 use tokio::{
+  io::{AsyncWriteExt, Interest},
   sync::{
     mpsc::{Receiver, Sender},
     Notify,
   },
-  io::{AsyncWriteExt, Interest}
 };
-#[cfg(target_os = "windows")]
-use tokio::net::windows::named_pipe;
-
 
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeServerTransportBuilder {
@@ -31,7 +31,7 @@ pub struct ButtplugPipeServerTransportBuilder {
 impl ButtplugPipeServerTransportBuilder {
   pub fn new(address: &str) -> Self {
     Self {
-      address: address.to_owned()
+      address: address.to_owned(),
     }
   }
 
@@ -42,7 +42,6 @@ impl ButtplugPipeServerTransportBuilder {
     }
   }
 }
-
 
 async fn run_connection_loop(
   mut server: named_pipe::NamedPipeServer,
@@ -112,11 +111,11 @@ async fn run_connection_loop(
                     error!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
-    
+
                 },
                 Err(err) => {
                   error!("Error from pipe server, assuming disconnection: {:?}", err);
-                  break;      
+                  break;
                 }
               }
             }
@@ -129,7 +128,11 @@ async fn run_connection_loop(
       }
     }
   }
-  let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Pipe server closed".to_owned())).await;
+  let _ = response_sender
+    .send(ButtplugTransportIncomingMessage::Close(
+      "Pipe server closed".to_owned(),
+    ))
+    .await;
 }
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -150,11 +153,25 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
       let server = named_pipe::ServerOptions::new()
         .first_pipe_instance(true)
         .create(address)
-        .map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
-      server.connect().await.map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
-  
+        .map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;
+      server.connect().await.map_err(|err| {
+        ButtplugConnectorError::TransportSpecificError(
+          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+        )
+      })?;
+
       tokio::spawn(async move {
-        run_connection_loop(server, outgoing_receiver, incoming_sender, disconnect_notifier).await;
+        run_connection_loop(
+          server,
+          outgoing_receiver,
+          incoming_sender,
+          disconnect_notifier,
+        )
+        .await;
       });
       Ok(())
     })
@@ -169,19 +186,16 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
   }
 }
 
-
-
 #[cfg(test)]
 mod test {
   use super::ButtplugPipeServerTransportBuilder;
   use crate::{
+    connector::{transport::ButtplugConnectorTransport, ButtplugRemoteServerConnector},
     core::messages::serializer::ButtplugServerJSONSerializer,
-    connector::{ButtplugRemoteServerConnector, transport::ButtplugConnectorTransport},
+    server::ButtplugRemoteServer,
     util::async_manager,
-    server::ButtplugRemoteServer
   };
   use tokio::sync::mpsc;
-
 
   #[test]
   pub fn test_server_transport_error_invalid_pipe() {
@@ -198,7 +212,13 @@ mod test {
     async_manager::block_on(async move {
       let transport = ButtplugPipeServerTransportBuilder::new("notapipe").finish();
       let server = ButtplugRemoteServer::default();
-      assert!(server.start(ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(transport)).await.is_err());
+      assert!(server
+        .start(ButtplugRemoteServerConnector::<
+          _,
+          ButtplugServerJSONSerializer,
+        >::new(transport))
+        .await
+        .is_err());
     });
   }
 }

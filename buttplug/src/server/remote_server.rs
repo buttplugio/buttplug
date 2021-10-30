@@ -4,7 +4,11 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      self, ButtplugClientMessage, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessage,
+      self,
+      ButtplugClientMessage,
+      ButtplugMessage,
+      ButtplugMessageValidator,
+      ButtplugServerMessage,
     },
   },
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
@@ -133,7 +137,11 @@ async fn run_server<ConnectorType>(
 
 impl Default for ButtplugRemoteServer {
   fn default() -> Self {
-    Self::new(ButtplugServerBuilder::default().finish().expect("Default is infallible"))
+    Self::new(
+      ButtplugServerBuilder::default()
+        .finish()
+        .expect("Default is infallible"),
+    )
   }
 }
 

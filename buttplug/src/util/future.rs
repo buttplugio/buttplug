@@ -103,7 +103,10 @@ impl<T> ButtplugFutureStateShared<T> {
   /// method, in this module. Everything else should just be setting replies,
   /// and can use set_reply accordingly.
   pub(super) fn lock(&self) -> MutexGuard<'_, ButtplugFutureState<T>> {
-    self.state.lock().expect("There should never be lock contention for a buttplug future.")
+    self
+      .state
+      .lock()
+      .expect("There should never be lock contention for a buttplug future.")
   }
 
   /// Locks immediately and sets the reply for the internal waker, or panics if

@@ -12,10 +12,15 @@ use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::messages::{
     serializer::{
-      ButtplugClientJSONSerializer, ButtplugMessageSerializer, ButtplugSerializedMessage,
+      ButtplugClientJSONSerializer,
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
     },
-    ButtplugClientMessage, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage,
-    ButtplugMessage, ButtplugServerMessage,
+    ButtplugClientMessage,
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
+    ButtplugServerMessage,
   },
   util::async_manager,
 };
@@ -237,7 +242,10 @@ where
     connector_incoming_sender: Sender<InboundMessageType>,
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     if self.transport.is_some() {
-      let transport = self.transport.take().expect("Already checked that this would be a valid take().");
+      let transport = self
+        .transport
+        .take()
+        .expect("Already checked that this would be a valid take().");
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
       Box::pin(async move {

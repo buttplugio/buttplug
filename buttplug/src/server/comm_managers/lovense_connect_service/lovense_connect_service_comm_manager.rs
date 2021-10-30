@@ -2,7 +2,9 @@ use super::lovense_connect_service_device_impl::LovenseServiceDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -99,13 +101,20 @@ async fn lovense_local_service_check(
       match reqwest::get(format!("{}/GetToys", host)).await {
         Ok(res) => {
           if res.status() != StatusCode::OK {
-            error!("Error contacting Lovense Connect Local API endpoint. Status returned: {}", res.status());
+            error!(
+              "Error contacting Lovense Connect Local API endpoint. Status returned: {}",
+              res.status()
+            );
             tokio::time::sleep(Duration::from_secs(1)).await;
             continue;
-          }              
+          }
 
-          let text = res.text().await.expect("If we got a 200 back, we should at least have text.");
-          let info: LovenseServiceLocalInfo = serde_json::from_str(&text).expect("Should always get json back from service, if we got a response.");
+          let text = res
+            .text()
+            .await
+            .expect("If we got a 200 back, we should at least have text.");
+          let info: LovenseServiceLocalInfo = serde_json::from_str(&text)
+            .expect("Should always get json back from service, if we got a response.");
 
           // First off, remove all devices that are no longer in the list
           // (devices turned off or removed from the Lovense Connect app)
@@ -144,7 +153,10 @@ async fn lovense_local_service_check(
             connected_device_info.insert(toy.id.clone(), Arc::new(RwLock::new((*toy).clone())));
             let device_creator = Box::new(LovenseServiceDeviceImplCreator::new(
               &host,
-              connected_device_info.get(&toy.id).expect("Just inserted this.").clone(),
+              connected_device_info
+                .get(&toy.id)
+                .expect("Just inserted this.")
+                .clone(),
             ));
             if event_sender
               .send(DeviceCommunicationEvent::DeviceFound {
@@ -187,7 +199,10 @@ impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationMan
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseConnectServiceCommunicationManager::new(
-      self.sender.take().expect("We're creating/moving this, so we can take it."),
+      self
+        .sender
+        .take()
+        .expect("We're creating/moving this, so we can take it."),
     ))
   }
 }
@@ -229,7 +244,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
                 error!("Error contacting Lovense Connect Remote API endpoint. Status returned: {}", res.status());
                 tokio::time::sleep(Duration::from_secs(1)).await;
                 continue;
-              }              
+              }
               let text = res.text().await.expect("Should always get json back from service, if we got a response.");
               let info: LovenseServiceInfo = serde_json::from_str(&text).expect("Should always get json back from service, if we got a response.");
               let mut current_known_hosts = known_hosts.lock().await;

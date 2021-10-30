@@ -54,12 +54,21 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, ButtplugDeviceMessageType,
-      ButtplugMessage, DeviceMessageAttributesMap, RawReading, VibrateCmd, VibrateSubcommand,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      DeviceMessageAttributesMap,
+      RawReading,
+      VibrateCmd,
+      VibrateSubcommand,
     },
   },
   device::{
-    configuration_manager::DeviceProtocolConfiguration, ButtplugDeviceResultFuture, DeviceReadCmd,
+    configuration_manager::DeviceProtocolConfiguration,
+    ButtplugDeviceResultFuture,
+    DeviceReadCmd,
     Endpoint,
   },
 };
@@ -158,7 +167,10 @@ pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
         Err(err) => return Err(err),
       };
       let (names, attrs) = config.get_attributes(&device_identifier, &endpoints)?;
-      let name = names.get("en-us").expect("Required value for JSON Schema").clone();
+      let name = names
+        .get("en-us")
+        .expect("Required value for JSON Schema")
+        .clone();
       Ok(Self::new_protocol(&name, attrs))
     })
   }

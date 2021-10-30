@@ -1,11 +1,17 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
-    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceReadCmd, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::{
@@ -64,9 +70,13 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!("Vibrate?v={}&t={}", cmds[0].expect("Already checked existence"), device.address())
-            .as_bytes()
-            .to_vec();
+          let lovense_cmd = format!(
+            "Vibrate?v={}&t={}",
+            cmds[0].expect("Already checked existence"),
+            device.address()
+          )
+          .as_bytes()
+          .to_vec();
           let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
           fut.await?;
           return Ok(messages::Ok::default().into());

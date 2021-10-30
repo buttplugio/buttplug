@@ -7,18 +7,29 @@
 
 //! Handling of named pipes and unix domain sockets, via tokio.
 
-use crate::{connector::{ButtplugConnectorError, ButtplugConnectorResultFuture, transport::{ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError, ButtplugTransportIncomingMessage}}, core::messages::serializer::ButtplugSerializedMessage};
+use crate::{
+  connector::{
+    transport::{
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
+      ButtplugTransportIncomingMessage,
+    },
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
+  },
+  core::messages::serializer::ButtplugSerializedMessage,
+};
 use futures::future::BoxFuture;
 use std::sync::Arc;
+#[cfg(target_os = "windows")]
+use tokio::net::windows::named_pipe;
 use tokio::{
+  io::{AsyncWriteExt, Interest},
   sync::{
     mpsc::{Receiver, Sender},
     Notify,
   },
-  io::{AsyncWriteExt, Interest}
 };
-#[cfg(target_os = "windows")]
-use tokio::net::windows::named_pipe;
 
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeClientTransportBuilder {
@@ -29,7 +40,7 @@ pub struct ButtplugPipeClientTransportBuilder {
 impl ButtplugPipeClientTransportBuilder {
   pub fn new(address: &str) -> Self {
     Self {
-      address: address.to_owned()
+      address: address.to_owned(),
     }
   }
 
@@ -40,7 +51,6 @@ impl ButtplugPipeClientTransportBuilder {
     }
   }
 }
-
 
 async fn run_connection_loop(
   mut client: named_pipe::NamedPipeClient,
@@ -120,7 +130,11 @@ async fn run_connection_loop(
       }
     }
   }
-  let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Pipe server closed".to_owned())).await;
+  let _ = response_sender
+    .send(ButtplugTransportIncomingMessage::Close(
+      "Pipe server closed".to_owned(),
+    ))
+    .await;
 }
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -140,9 +154,21 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      let client = named_pipe::ClientOptions::new().open(address).map_err(|err| ButtplugConnectorError::TransportSpecificError(ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err))))?;
+      let client = named_pipe::ClientOptions::new()
+        .open(address)
+        .map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;
       tokio::spawn(async move {
-        run_connection_loop(client, outgoing_receiver, incoming_sender, disconnect_notifier).await;
+        run_connection_loop(
+          client,
+          outgoing_receiver,
+          incoming_sender,
+          disconnect_notifier,
+        )
+        .await;
       });
       Ok(())
     })
@@ -162,13 +188,12 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
 mod test {
   use super::ButtplugPipeClientTransportBuilder;
   use crate::{
+    client::ButtplugClient,
+    connector::{transport::ButtplugConnectorTransport, ButtplugRemoteClientConnector},
     core::messages::serializer::ButtplugClientJSONSerializer,
-    connector::{ButtplugRemoteClientConnector, transport::ButtplugConnectorTransport},
     util::async_manager,
-    client::ButtplugClient
   };
   use tokio::sync::mpsc;
-
 
   #[test]
   pub fn test_client_transport_error_invalid_pipe() {
@@ -185,7 +210,13 @@ mod test {
     async_manager::block_on(async move {
       let transport = ButtplugPipeClientTransportBuilder::new("notapipe").finish();
       let client = ButtplugClient::new("Test Client");
-      assert!(client.connect(ButtplugRemoteClientConnector::<_, ButtplugClientJSONSerializer>::new(transport)).await.is_err());
+      assert!(client
+        .connect(ButtplugRemoteClientConnector::<
+          _,
+          ButtplugClientJSONSerializer,
+        >::new(transport))
+        .await
+        .is_err());
     });
   }
 }

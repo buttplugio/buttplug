@@ -6,8 +6,15 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
@@ -164,18 +171,24 @@ impl SerialPortDeviceImpl {
       })
       .expect("Thread creation should always succeed.");
 
-    let port = port_receiver.recv().await.expect("This will always be a Some value, we're just blocking for bringup").map_err(|e| {
-      ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
-        ButtplugDeviceSpecificError::SerialError(e.to_string()),
-      ))
-    })?;
+    let port = port_receiver
+      .recv()
+      .await
+      .expect("This will always be a Some value, we're just blocking for bringup")
+      .map_err(|e| {
+        ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
+          ButtplugDeviceSpecificError::SerialError(e.to_string()),
+        ))
+      })?;
     debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);
     let (reader_sender, reader_receiver) = mpsc::channel(256);
 
     let token = CancellationToken::new();
     let read_token = token.child_token();
-    let read_port = (*port).try_clone().expect("Should always be able to clone port");
+    let read_port = (*port)
+      .try_clone()
+      .expect("Should always be able to clone port");
     let read_thread = thread::Builder::new()
       .name("Serial Reader Thread".to_string())
       .spawn(move || {
@@ -183,7 +196,9 @@ impl SerialPortDeviceImpl {
       })
       .expect("Should always be able to create thread");
 
-    let write_port = (*port).try_clone().expect("Should always be able to clone port");
+    let write_port = (*port)
+      .try_clone()
+      .expect("Should always be able to clone port");
     let write_thread = thread::Builder::new()
       .name("Serial Writer Thread".to_string())
       .spawn(move || {
@@ -192,7 +207,9 @@ impl SerialPortDeviceImpl {
       .expect("Should always be able to create thread");
 
     Ok(Self {
-      address: port.name().unwrap_or_else(|| "Default Serial Port Device (No Name Given)".to_owned()),
+      address: port
+        .name()
+        .unwrap_or_else(|| "Default Serial Port Device (No Name Given)".to_owned()),
       _read_thread: read_thread,
       _write_thread: write_thread,
       port_receiver: Arc::new(Mutex::new(reader_receiver)),
@@ -246,7 +263,10 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
     let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
-      sender.send(msg.data).await.expect("Tasks should exist if we get here.");
+      sender
+        .send(msg.data)
+        .await
+        .expect("Tasks should exist if we get here.");
       Ok(())
     })
   }

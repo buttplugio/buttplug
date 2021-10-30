@@ -9,12 +9,17 @@
 
 use crate::{
   client::{
-    ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugServerMessageStateShared,
+    ButtplugClientError,
+    ButtplugClientMessageFuturePair,
+    ButtplugServerMessageStateShared,
   },
   core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use dashmap::DashMap;
-use std::sync::{Arc, atomic::{AtomicU32, Ordering}};
+use std::sync::{
+  atomic::{AtomicU32, Ordering},
+  Arc,
+};
 
 /// Message sorting and pairing for remote client connectors.
 ///
@@ -80,9 +85,7 @@ impl ClientMessageSorter {
     let id = self.current_id.load(Ordering::SeqCst);
     trace!("Setting message id to {}", id);
     msg_fut.msg.set_id(id);
-    self
-      .future_map
-      .insert(id, msg_fut.waker.clone());
+    self.future_map.insert(id, msg_fut.waker.clone());
     self.current_id.store(id + 1, Ordering::SeqCst);
   }
 

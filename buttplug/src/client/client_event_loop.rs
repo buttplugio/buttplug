@@ -10,15 +10,20 @@
 use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
-  ButtplugClientEvent, ButtplugClientMessageFuturePair,
+  ButtplugClientEvent,
+  ButtplugClientMessageFuturePair,
 };
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, ButtplugDeviceMessage,
-      ButtplugMessageValidator, DeviceList, DeviceMessageInfo,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugDeviceMessage,
+      ButtplugMessageValidator,
+      DeviceList,
+      DeviceMessageInfo,
     },
   },
 };
@@ -167,7 +172,10 @@ where
       return;
     }
 
-    self.to_client_sender.send(event).expect("Already checked for receivers.");
+    self
+      .to_client_sender
+      .send(event)
+      .expect("Already checked for receivers.");
   }
 
   fn disconnect_device(&mut self, device_index: u32) {
@@ -175,7 +183,11 @@ where
       return;
     }
 
-    let device = (*self.device_map.get(&device_index).expect("Checked for device index already.")).clone();
+    let device = (*self
+      .device_map
+      .get(&device_index)
+      .expect("Checked for device index already."))
+    .clone();
     device.set_device_connected(false);
     device.queue_event(ButtplugClientDeviceEvent::DeviceRemoved);
     // Then remove it from our storage map

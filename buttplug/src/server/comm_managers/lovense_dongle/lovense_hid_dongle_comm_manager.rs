@@ -1,13 +1,17 @@
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
+    LovenseDeviceCommand,
+    LovenseDongleIncomingMessage,
+    OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -79,7 +83,9 @@ fn hid_read_thread(
   token: CancellationToken,
 ) {
   trace!("Starting HID dongle read thread");
-  dongle.set_blocking_mode(true).expect("Should alwasy succeed.");
+  dongle
+    .set_blocking_mode(true)
+    .expect("Should alwasy succeed.");
   let mut data: String = String::default();
   let mut buf = [0u8; 1024];
   while !token.is_cancelled() {
@@ -91,7 +97,8 @@ fn hid_read_thread(
         trace!("Got {} hid bytes", len);
         // Don't read last byte, as it'll always be 0 since the string
         // terminator is sent.
-        data += std::str::from_utf8(&buf[0..len - 1]).expect("We should at least get strings from the dongle.");
+        data += std::str::from_utf8(&buf[0..len - 1])
+          .expect("We should at least get strings from the dongle.");
         if data.contains('\n') {
           // We have what should be a full message.
           // Split it.
@@ -100,15 +107,17 @@ fn hid_read_thread(
           let incoming = msg_vec[0];
           let sender_clone = sender.clone();
 
-          let stream =
-            Deserializer::from_str(incoming).into_iter::<LovenseDongleIncomingMessage>();
+          let stream = Deserializer::from_str(incoming).into_iter::<LovenseDongleIncomingMessage>();
           for msg in stream {
             match msg {
               Ok(m) => {
                 trace!("Read message: {:?}", m);
                 if let Err(err) = sender_clone.blocking_send(m) {
                   // Error, assume we'll be cancelled by disconnect.
-                  error!("Error sending message, assuming device disconnect: {:?}", err);
+                  error!(
+                    "Error sending message, assuming device disconnect: {:?}",
+                    err
+                  );
                 }
               }
               Err(_e) => {

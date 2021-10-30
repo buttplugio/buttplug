@@ -1,17 +1,25 @@
 use super::{
-  fleshlight_launch_helper, ButtplugDeviceResultFuture, ButtplugProtocol,
+  fleshlight_launch_helper,
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      DeviceMessageAttributesMap,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceReadCmd, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceReadCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use futures::future::{self, BoxFuture};
@@ -109,7 +117,9 @@ impl ButtplugProtocol for TheHandy {
       // If they ever change this, I quit (or will just update the device config).
 
       let mut sec_buf = vec![];
-      session_req.encode(&mut sec_buf).expect("Infallible encode.");
+      session_req
+        .encode(&mut sec_buf)
+        .expect("Infallible encode.");
       device_impl.write_value(DeviceWriteCmd::new(Endpoint::Firmware, sec_buf, false));
       let _ = device_impl.read_value(DeviceReadCmd::new(Endpoint::Firmware, 100, 500));
 
@@ -206,7 +216,9 @@ impl ButtplugProtocolCommandHandler for TheHandy {
       }],
     };
     let mut linear_buf = vec![];
-    linear_payload.encode(&mut linear_buf).expect("Infallible encode.");
+    linear_payload
+      .encode(&mut linear_buf)
+      .expect("Infallible encode.");
     Box::pin(async move {
       device
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, linear_buf, true))

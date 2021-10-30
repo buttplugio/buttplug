@@ -10,10 +10,12 @@
 use crate::{
   connector::{
     transport::{
-      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
@@ -93,7 +95,11 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
             .into(),
         )
       } else {
-        Some(TlsConnector::new().expect("Should always succeed, not setting options.").into())
+        Some(
+          TlsConnector::new()
+            .expect("Should always succeed, not setting options.")
+            .into(),
+        )
       }
     } else {
       // If we're not using a secure connection, just return None, at which
@@ -130,7 +136,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                     if response.is_none() {
                       info!("Connector holding websocket dropped, returning");
                       writer.close().await.unwrap_or_else(|err| error!("{}", err));
-                      return;                      
+                      return;
                     }
                     match response.expect("Already checked for none.") {
                       Ok(msg) => match msg {

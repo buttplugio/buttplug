@@ -1,15 +1,22 @@
 use super::{
-  fleshlight_launch_helper::get_speed, ButtplugDeviceResultFuture, ButtplugProtocol,
+  fleshlight_launch_helper::get_speed,
+  ButtplugDeviceResultFuture,
+  ButtplugProtocol,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
   core::messages::{
-    self, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage, DeviceMessageAttributesMap,
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
     FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::{
@@ -110,11 +117,19 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
 mod test {
   use crate::{
     core::messages::{
-      FleshlightLaunchFW12Cmd, LinearCmd, StopDeviceCmd, VectorSubcommand, VibrateCmd,
+      FleshlightLaunchFW12Cmd,
+      LinearCmd,
+      StopDeviceCmd,
+      VectorSubcommand,
+      VibrateCmd,
       VibrateSubcommand,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{
+      check_test_recv_empty,
+      check_test_recv_value,
+      new_bluetoothle_test_device,
+    },
     util::async_manager,
   };
 
@@ -122,8 +137,12 @@ mod test {
   #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
   pub fn test_kiiroov21_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Onyx2.1")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
@@ -144,8 +163,12 @@ mod test {
   #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
   pub fn test_kiiroov21_linearcmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Onyx2.1").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Onyx2.1")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
@@ -165,8 +188,12 @@ mod test {
   #[test]
   pub fn test_kiiroov21_vibratecmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Cliona").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("Cliona")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())

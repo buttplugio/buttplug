@@ -8,11 +8,17 @@ use crate::{
 };
 use std::sync::{Arc, Mutex};
 pub use test_device::{
-  TestDevice, TestDeviceEndpointChannel, TestDeviceImplCreator, TestDeviceInternal,
+  TestDevice,
+  TestDeviceEndpointChannel,
+  TestDeviceImplCreator,
+  TestDeviceInternal,
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
-  new_bluetoothle_test_device, TestDeviceCommunicationManager, TestDeviceCommunicationManagerHelper, TestDeviceCommunicationManagerBuilder
+  new_bluetoothle_test_device,
+  TestDeviceCommunicationManager,
+  TestDeviceCommunicationManagerBuilder,
+  TestDeviceCommunicationManagerHelper,
 };
 use tokio::sync::mpsc::Receiver;
 
@@ -22,7 +28,9 @@ pub fn check_test_recv_value(
   command: DeviceImplCommand,
 ) {
   assert_eq!(
-    recv_now(&mut receiver.lock().expect("Test")).expect("Test").expect("Test"),
+    recv_now(&mut receiver.lock().expect("Test"))
+      .expect("Test")
+      .expect("Test"),
     command
   );
 }

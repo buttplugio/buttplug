@@ -1,7 +1,10 @@
 mod util;
 use buttplug::{
   client::{
-    ButtplugClient, ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent,
+    ButtplugClient,
+    ButtplugClientDeviceEvent,
+    ButtplugClientError,
+    ButtplugClientEvent,
     VibrateCommand,
   },
   connector::ButtplugInProcessClientConnector,
@@ -25,12 +28,22 @@ fn test_client_device_connected_status() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+    connector
+      .server_ref()
+      .device_manager()
+      .add_comm_manager(builder)
+      .expect("Test, assuming infallible.");
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client.connect(connector).await.expect("Test, assuming infallible.");
+    client
+      .connect(connector)
+      .await
+      .expect("Test, assuming infallible.");
     assert!(client.connected());
-    client.start_scanning().await.expect("Test, assuming infallible.");
+    client
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     let mut client_device = None;
     while let Some(msg) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(da) = msg {
@@ -41,14 +54,20 @@ fn test_client_device_connected_status() {
     let test_device = client_device.expect("Test, assuming infallible.");
     let mut device_event_stream = test_device.event_stream();
     assert!(test_device.connected());
-    device.disconnect().await.expect("Test, assuming infallible.");
+    device
+      .disconnect()
+      .await
+      .expect("Test, assuming infallible.");
     while let Some(msg) = device_event_stream.next().await {
       if let ButtplugClientDeviceEvent::DeviceRemoved = msg {
         assert!(!test_device.connected());
         break;
       }
     }
-    client.disconnect().await.expect("Test, assuming infallible.");
+    client
+      .disconnect()
+      .await
+      .expect("Test, assuming infallible.");
     assert!(!client.connected());
   });
 }
@@ -62,12 +81,22 @@ fn test_client_device_client_disconnected_status() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+    connector
+      .server_ref()
+      .device_manager()
+      .add_comm_manager(builder)
+      .expect("Test, assuming infallible.");
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client.connect(connector).await.expect("Test, assuming infallible.");
+    client
+      .connect(connector)
+      .await
+      .expect("Test, assuming infallible.");
     assert!(client.connected());
-    client.start_scanning().await.expect("Test, assuming infallible.");
+    client
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     let mut client_device = None;
     while let Some(msg) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(da) = msg {
@@ -78,7 +107,10 @@ fn test_client_device_client_disconnected_status() {
     let test_device = client_device.expect("Test, assuming infallible.");
     let mut device_event_stream = test_device.event_stream();
     assert!(test_device.connected());
-    client.disconnect().await.expect("Test, assuming infallible.");
+    client
+      .disconnect()
+      .await
+      .expect("Test, assuming infallible.");
     while let Some(msg) = event_stream.next().await {
       if let ButtplugClientEvent::ServerDisconnect = msg {
         assert!(!client.connected());
@@ -102,16 +134,32 @@ fn test_client_device_connected_no_event_listener() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+    connector
+      .server_ref()
+      .device_manager()
+      .add_comm_manager(builder)
+      .expect("Test, assuming infallible.");
     let device = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client.connect(connector).await.expect("Test, assuming infallible.");
+    client
+      .connect(connector)
+      .await
+      .expect("Test, assuming infallible.");
     assert!(client.connected());
-    client.start_scanning().await.expect("Test, assuming infallible.");
+    client
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     Delay::new(Duration::from_millis(100)).await;
-    device.disconnect().await.expect("Test, assuming infallible.");
+    device
+      .disconnect()
+      .await
+      .expect("Test, assuming infallible.");
     Delay::new(Duration::from_millis(100)).await;
-    client.disconnect().await.expect("Test, assuming infallible.");
+    client
+      .disconnect()
+      .await
+      .expect("Test, assuming infallible.");
     assert!(!client.connected());
     Delay::new(Duration::from_millis(100)).await;
   });
@@ -126,12 +174,22 @@ fn test_client_device_invalid_command() {
     let connector = ButtplugInProcessClientConnector::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    connector.server_ref().device_manager().add_comm_manager(builder).expect("Test, assuming infallible.");
+    connector
+      .server_ref()
+      .device_manager()
+      .add_comm_manager(builder)
+      .expect("Test, assuming infallible.");
     let _ = helper.add_ble_device("Massage Demo").await;
     assert!(!client.connected());
-    client.connect(connector).await.expect("Test, assuming infallible.");
+    client
+      .connect(connector)
+      .await
+      .expect("Test, assuming infallible.");
     assert!(client.connected());
-    client.start_scanning().await.expect("Test, assuming infallible.");
+    client
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     let mut client_device = None;
     while let Some(msg) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(da) = msg {
@@ -192,13 +250,23 @@ fn test_client_repeated_deviceadded_message() {
         .await;
       helper_clone.send_client_incoming(device_added.into()).await;
     });
-    helper.client().start_scanning().await.expect("Test, assuming infallible.");
+    helper
+      .client()
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     assert!(matches!(
-      event_stream.next().await.expect("Test, assuming infallible."),
+      event_stream
+        .next()
+        .await
+        .expect("Test, assuming infallible."),
       ButtplugClientEvent::DeviceAdded(..)
     ));
     assert!(matches!(
-      event_stream.next().await.expect("Test, assuming infallible."),
+      event_stream
+        .next()
+        .await
+        .expect("Test, assuming infallible."),
       ButtplugClientEvent::Error(..)
     ));
   });
@@ -230,17 +298,30 @@ fn test_client_repeated_deviceremoved_message() {
         .send_client_incoming(device_removed.into())
         .await;
     });
-    helper.client().start_scanning().await.expect("Test, assuming infallible.");
+    helper
+      .client()
+      .start_scanning()
+      .await
+      .expect("Test, assuming infallible.");
     assert!(matches!(
-      event_stream.next().await.expect("Test, assuming infallible."),
+      event_stream
+        .next()
+        .await
+        .expect("Test, assuming infallible."),
       ButtplugClientEvent::DeviceAdded(..)
     ));
     assert!(matches!(
-      event_stream.next().await.expect("Test, assuming infallible."),
+      event_stream
+        .next()
+        .await
+        .expect("Test, assuming infallible."),
       ButtplugClientEvent::DeviceRemoved(..)
     ));
     assert!(matches!(
-      event_stream.next().await.expect("Test, assuming infallible."),
+      event_stream
+        .next()
+        .await
+        .expect("Test, assuming infallible."),
       ButtplugClientEvent::Error(..)
     ));
   });

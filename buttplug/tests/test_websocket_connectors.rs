@@ -5,8 +5,10 @@ mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
     connector::{
-      ButtplugRemoteClientConnector, ButtplugRemoteServerConnector,
-      ButtplugWebsocketClientTransport, ButtplugWebsocketServerTransport,
+      ButtplugRemoteClientConnector,
+      ButtplugRemoteServerConnector,
+      ButtplugWebsocketClientTransport,
+      ButtplugWebsocketServerTransport,
       ButtplugWebsocketServerTransportBuilder,
     },
     core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
@@ -27,8 +29,15 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteServerConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugServerJSONSerializer,
-        >::new(ButtplugWebsocketServerTransportBuilder::default().port(12349).finish());
-        server_clone.start(connector).await.expect("Test, assuming infallible.");
+        >::new(
+          ButtplugWebsocketServerTransportBuilder::default()
+            .port(12349)
+            .finish(),
+        );
+        server_clone
+          .start(connector)
+          .await
+          .expect("Test, assuming infallible.");
       });
       let mut connected = false;
       for _ in 0..10u8 {
@@ -47,7 +56,10 @@ mod websocket_connector_tests {
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
-      server.disconnect().await.expect("Test, assuming infallible.");
+      server
+        .disconnect()
+        .await
+        .expect("Test, assuming infallible.");
     });
   }
 
@@ -64,7 +76,10 @@ mod websocket_connector_tests {
         >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
           "ws://127.0.0.1:12347",
         ));
-        server_clone.start(connector).await.expect("Test, assuming infallible.");
+        server_clone
+          .start(connector)
+          .await
+          .expect("Test, assuming infallible.");
       });
 
       let mut connected = false;
@@ -72,7 +87,11 @@ mod websocket_connector_tests {
         let connector = ButtplugRemoteClientConnector::<
           ButtplugWebsocketServerTransport,
           ButtplugClientJSONSerializer,
-        >::new(ButtplugWebsocketServerTransportBuilder::default().port(12347).finish());
+        >::new(
+          ButtplugWebsocketServerTransportBuilder::default()
+            .port(12347)
+            .finish(),
+        );
 
         let client = ButtplugClient::new("Test Client");
         if client.connect(connector).await.is_ok() {
@@ -82,7 +101,10 @@ mod websocket_connector_tests {
         Delay::new(Duration::from_secs(1)).await;
       }
       assert!(connected);
-      server.disconnect().await.expect("Test, assuming infallible.");
+      server
+        .disconnect()
+        .await
+        .expect("Test, assuming infallible.");
     });
   }
 }

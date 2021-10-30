@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
 };
 use std::sync::Arc;
@@ -61,7 +63,11 @@ impl ButtplugProtocolCommandHandler for LovehoneyDesire {
         if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
           let fut = device.write_value(DeviceWriteCmd::new(
             Endpoint::Tx,
-            vec![0xF3, 0, cmds[0].expect("Already checked value existence") as u8],
+            vec![
+              0xF3,
+              0,
+              cmds[0].expect("Already checked value existence") as u8,
+            ],
             false,
           ));
           fut.await?;
@@ -94,15 +100,23 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device},
+    server::comm_managers::test::{
+      check_test_recv_empty,
+      check_test_recv_value,
+      new_bluetoothle_test_device,
+    },
     util::async_manager,
   };
 
   #[test]
   pub fn test_lovehoney_desire_protocol() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE").await.expect("Test, assuming infallible");
-      let command_receiver = test_device.get_endpoint_receiver(&Endpoint::Tx).expect("Test, assuming infallible");
+      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE")
+        .await
+        .expect("Test, assuming infallible");
+      let command_receiver = test_device
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
 
       // If we send one speed to one motor, we should only see one output.
       device

@@ -6,9 +6,11 @@ use crate::{
     ButtplugDevice,
   },
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
-  util::device_configuration::create_test_dcm
+  util::device_configuration::create_test_dcm,
 };
 use futures::future;
 use std::{
@@ -44,8 +46,7 @@ async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
-  let config_mgr =
-    device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
+  let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
   let device: ButtplugDevice =
@@ -93,7 +94,7 @@ impl TestDeviceCommunicationManagerHelper {
 #[derive(Default)]
 pub struct TestDeviceCommunicationManagerBuilder {
   sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-  devices: WaitingDeviceList
+  devices: WaitingDeviceList,
 }
 
 impl TestDeviceCommunicationManagerBuilder {
@@ -111,7 +112,7 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
       self.sender.take().expect("We always have this."),
-      self.devices
+      self.devices,
     ))
   }
 }
@@ -125,7 +126,7 @@ impl TestDeviceCommunicationManager {
   pub fn new(device_sender: Sender<DeviceCommunicationEvent>, devices: WaitingDeviceList) -> Self {
     Self {
       device_sender,
-      devices
+      devices,
     }
   }
 }
@@ -180,7 +181,12 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 
 #[cfg(test)]
 mod test {
-  use crate::{core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage}, server::ButtplugServer, server::comm_managers::test::TestDeviceCommunicationManagerBuilder, util::async_manager};
+  use crate::{
+    core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
+    server::comm_managers::test::TestDeviceCommunicationManagerBuilder,
+    server::ButtplugServer,
+    util::async_manager,
+  };
   use futures::StreamExt;
 
   #[test]
@@ -191,7 +197,10 @@ mod test {
       pin_mut!(recv);
       let builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = builder.helper();
-      server.device_manager().add_comm_manager(builder).expect("Test");
+      server
+        .device_manager()
+        .add_comm_manager(builder)
+        .expect("Test");
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);

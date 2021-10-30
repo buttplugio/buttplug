@@ -1,5 +1,7 @@
 use super::xinput_device_comm_manager::{
-  create_address, XInputConnectionTracker, XInputControllerIndex,
+  create_address,
+  XInputConnectionTracker,
+  XInputControllerIndex,
 };
 use crate::{
   core::{
@@ -9,8 +11,15 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
 };
@@ -113,8 +122,12 @@ impl DeviceImplInternal for XInputDeviceImpl {
     let index = self.index;
     Box::pin(async move {
       let mut cursor = Cursor::new(msg.data);
-      let left_motor_speed = cursor.read_u16::<LittleEndian>().expect("Packed in protocol, infallible");
-      let right_motor_speed = cursor.read_u16::<LittleEndian>().expect("Packed in protocol, infallible");
+      let left_motor_speed = cursor
+        .read_u16::<LittleEndian>()
+        .expect("Packed in protocol, infallible");
+      let right_motor_speed = cursor
+        .read_u16::<LittleEndian>()
+        .expect("Packed in protocol, infallible");
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {

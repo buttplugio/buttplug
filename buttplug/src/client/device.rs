@@ -14,11 +14,26 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      BatteryLevelCmd, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecDeviceMessageType,
-      ButtplugCurrentSpecServerMessage, ButtplugMessage, DeviceMessageAttributes,
-      DeviceMessageAttributesMap, DeviceMessageInfo, LinearCmd, RSSILevelCmd, RawReadCmd,
-      RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd, RotateCmd, RotationSubcommand,
-      StopDeviceCmd, VectorSubcommand, VibrateCmd, VibrateSubcommand,
+      BatteryLevelCmd,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecDeviceMessageType,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+      DeviceMessageAttributes,
+      DeviceMessageAttributesMap,
+      DeviceMessageInfo,
+      LinearCmd,
+      RSSILevelCmd,
+      RawReadCmd,
+      RawSubscribeCmd,
+      RawUnsubscribeCmd,
+      RawWriteCmd,
+      RotateCmd,
+      RotationSubcommand,
+      StopDeviceCmd,
+      VectorSubcommand,
+      VibrateCmd,
+      VibrateSubcommand,
     },
   },
   device::Endpoint,
@@ -160,8 +175,10 @@ pub struct ButtplugClientDevice {
   client_connected: Arc<AtomicBool>,
 }
 
-unsafe impl Send for ButtplugClientDevice {}
-unsafe impl Sync for ButtplugClientDevice {}
+unsafe impl Send for ButtplugClientDevice {
+}
+unsafe impl Sync for ButtplugClientDevice {
+}
 
 impl ButtplugClientDevice {
   /// Creates a new [ButtplugClientDevice] instance
@@ -585,11 +602,15 @@ impl ButtplugClientDevice {
       error!("No handlers for device event, dropping event: {:?}", event);
       return;
     }
-    self.internal_event_sender.send(event).expect("Checked for receivers already.");
+    self
+      .internal_event_sender
+      .send(event)
+      .expect("Checked for receivers already.");
   }
 }
 
-impl Eq for ButtplugClientDevice {}
+impl Eq for ButtplugClientDevice {
+}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

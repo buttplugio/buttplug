@@ -2,7 +2,9 @@ use super::SerialPortDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
 };
 use futures::future;
@@ -23,7 +25,10 @@ impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(SerialPortCommunicationManager::new(
-      self.sender.take().expect("We'll always be able to take this"),
+      self
+        .sender
+        .take()
+        .expect("We'll always be able to take this"),
     ))
   }
 }

@@ -1,8 +1,6 @@
 use crate::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-  core::{
-    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
-  },
+  core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
@@ -72,7 +70,11 @@ impl<'a> ButtplugInProcessClientConnector {
     let (server_outbound_sender, _) = channel(256);
     Self {
       server_outbound_sender,
-      server: Arc::new(server.unwrap_or_else(|| ButtplugServerBuilder::default().finish().expect("Default server builder should always work."))),
+      server: Arc::new(server.unwrap_or_else(|| {
+        ButtplugServerBuilder::default()
+          .finish()
+          .expect("Default server builder should always work.")
+      })),
       connected: Arc::new(AtomicBool::new(false)),
     }
   }
@@ -138,7 +140,9 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
     if !self.connected.load(Ordering::SeqCst) {
       return ButtplugConnectorError::ConnectorNotConnected.into();
     }
-    let input = msg.try_into().expect("This is in-process so message conversions will always work.");
+    let input = msg
+      .try_into()
+      .expect("This is in-process so message conversions will always work.");
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
     Box::pin(async move {

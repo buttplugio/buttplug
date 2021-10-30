@@ -9,18 +9,25 @@ use buttplug::{
 };
 
 async fn setup_test_client() -> ButtplugClient {
-  let server = ButtplugServerBuilder::default().name("Websocket DCM Test Server").finish().expect("Test, assuming infallible.");
+  let server = ButtplugServerBuilder::default()
+    .name("Websocket DCM Test Server")
+    .finish()
+    .expect("Test, assuming infallible.");
   server
-  .device_manager()
-  .add_comm_manager(
-    WebsocketServerDeviceCommunicationManagerBuilder::default().server_port(51283).listen_on_all_interfaces(true),
-  )
-  .expect("Test, assuming infallible.");
+    .device_manager()
+    .add_comm_manager(
+      WebsocketServerDeviceCommunicationManagerBuilder::default()
+        .server_port(51283)
+        .listen_on_all_interfaces(true),
+    )
+    .expect("Test, assuming infallible.");
   let connector = ButtplugInProcessClientConnector::new(Some(server));
 
-
   let client = ButtplugClient::new("Websocket DCM Test Client");
-  client.connect(connector).await.expect("Test, assuming infallible.");
+  client
+    .connect(connector)
+    .await
+    .expect("Test, assuming infallible.");
   client
 }
 

@@ -7,8 +7,15 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, LovenseConnectServiceSpecifier, ProtocolDefinition},
-    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
-    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
+    ButtplugDeviceEvent,
+    ButtplugDeviceImplCreator,
+    DeviceImpl,
+    DeviceImplInternal,
+    DeviceReadCmd,
+    DeviceSubscribeCmd,
+    DeviceUnsubscribeCmd,
+    DeviceWriteCmd,
+    Endpoint,
   },
   util::async_manager,
 };
@@ -55,11 +62,8 @@ impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
   ) -> Result<DeviceImpl, ButtplugError> {
     let toy_info = self.toy_info.read().await;
 
-    let device_impl_internal = LovenseServiceDeviceImpl::new(
-      &self.http_host,
-      self.toy_info.clone(),
-      &toy_info.id,
-    );
+    let device_impl_internal =
+      LovenseServiceDeviceImpl::new(&self.http_host, self.toy_info.clone(), &toy_info.id);
     let device_impl = DeviceImpl::new(
       &toy_info.name,
       &toy_info.id,
@@ -78,11 +82,7 @@ pub struct LovenseServiceDeviceImpl {
 }
 
 impl LovenseServiceDeviceImpl {
-  fn new(
-    http_host: &str,
-    toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
-    toy_id: &str,
-  ) -> Self {
+  fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>, toy_id: &str) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let sender_clone = device_event_sender.clone();
     let toy_id = toy_id.to_owned();
@@ -131,7 +131,8 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     let command_url = format!(
       "{}/{}",
       self.http_host,
-      std::str::from_utf8(&msg.data).expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
+      std::str::from_utf8(&msg.data)
+        .expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
     Box::pin(async move {
       match reqwest::get(command_url).await {

@@ -1,12 +1,11 @@
-
+use super::json::JSONValidator;
 use crate::{
-  core::errors::{ButtplugError, ButtplugDeviceError},
-  device::configuration_manager::{ProtocolDefinition, DeviceConfigurationManager},
-  server::device_manager::DeviceUserConfig
+  core::errors::{ButtplugDeviceError, ButtplugError},
+  device::configuration_manager::{DeviceConfigurationManager, ProtocolDefinition},
+  server::device_manager::DeviceUserConfig,
 };
 use serde::Deserialize;
 use std::collections::HashMap;
-use super::json::JSONValidator;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -18,8 +17,8 @@ pub struct ProtocolConfiguration {
   pub version: u32,
   #[serde(default)]
   pub protocols: HashMap<String, ProtocolDefinition>,
-  #[serde(rename="user-config", default)]
-  pub user_config: HashMap<String, DeviceUserConfig>
+  #[serde(rename = "user-config", default)]
+  pub user_config: HashMap<String, DeviceUserConfig>,
 }
 
 impl ProtocolConfiguration {
@@ -38,11 +37,14 @@ impl ProtocolConfiguration {
 }
 
 pub fn get_internal_config_version() -> u32 {
-  let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON).expect("If this fails, the whole library goes with it.");
+  let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
+    .expect("If this fails, the whole library goes with it.");
   config.version
 }
 
-pub fn load_protocol_config_from_json(config_str: &str) -> Result<ProtocolConfiguration, ButtplugError> {
+pub fn load_protocol_config_from_json(
+  config_str: &str,
+) -> Result<ProtocolConfiguration, ButtplugError> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
     Ok(_) => match serde_json::from_str(config_str) {
@@ -60,24 +62,15 @@ pub fn load_protocol_config_from_json(config_str: &str) -> Result<ProtocolConfig
           Ok(protocol_config)
         }
       }
-      Err(err) => {
-        Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-          "{}",
-          err
-        )).into())
-      }
+      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)).into()),
     },
-    Err(err) => {
-      Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
-        "{}",
-        err
-      )).into())
-    }
+    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)).into()),
   }
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON).expect("If this fails, the whole library goes with it.");
+  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON)
+    .expect("If this fails, the whole library goes with it.");
   let dcm = DeviceConfigurationManager::new(allow_raw_messages);
   for (name, def) in devices.protocols {
     dcm.add_protocol_definition(&name, def);

@@ -5,5 +5,6 @@ pub use async_tungstenite::tungstenite::Error as TungsteniteError;
 pub use websocket_client::ButtplugWebsocketClientTransport;
 
 pub use websocket_server::{
-  ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder,
+  ButtplugWebsocketServerTransport,
+  ButtplugWebsocketServerTransportBuilder,
 };

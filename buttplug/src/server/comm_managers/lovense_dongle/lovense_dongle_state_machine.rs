@@ -129,11 +129,19 @@ impl ChannelHub {
   }
 
   pub async fn send_output(&self, msg: OutgoingLovenseData) {
-    self.dongle_outgoing.send(msg).await.expect("Won't get here without owner being alive.");
+    self
+      .dongle_outgoing
+      .send(msg)
+      .await
+      .expect("Won't get here without owner being alive.");
   }
 
   pub async fn send_event(&self, msg: DeviceCommunicationEvent) {
-    self.event_outgoing.send(msg).await.expect("Won't get here without owner being alive.");
+    self
+      .event_outgoing
+      .send(msg)
+      .await
+      .expect("Won't get here without owner being alive.");
   }
 
   pub fn set_scanning_status(&self, is_scanning: bool) {
@@ -305,10 +313,7 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
     }
     if let Some(id) = id {
       info!("Lovense dongle found already connected devices");
-      return Some(Box::new(LovenseDongleDeviceLoop::new(
-        self.hub,
-        id,
-      )));
+      return Some(Box::new(LovenseDongleDeviceLoop::new(self.hub, id)));
     }
     if self.should_scan {
       info!("No devices connected to lovense dongle, scanning.");
@@ -336,7 +341,9 @@ impl LovenseDongleState for LovenseDongleIdle {
                     info!("Lovense dongle already connected to a device, registering in system.");
                     return Some(Box::new(LovenseDongleDeviceLoop::new(
                       self.hub,
-                      incoming_data.id.expect("Dongle protocol shouldn't change, message always has ID."),
+                      incoming_data
+                        .id
+                        .expect("Dongle protocol shouldn't change, message always has ID."),
                     )));
                   }
                   _ => error!(
@@ -450,7 +457,9 @@ impl LovenseDongleState for LovenseDongleScanning {
                       info!("Lovense dongle already connected to a device, registering in system.");
                       return Some(Box::new(LovenseDongleDeviceLoop::new(
                         self.hub,
-                        incoming_data.id.expect("Dongle protocol shouldn't change, message always has ID."),
+                        incoming_data
+                          .id
+                          .expect("Dongle protocol shouldn't change, message always has ID."),
                       )));
                     }
                     _ => {
@@ -486,7 +495,9 @@ impl LovenseDongleState for LovenseDongleScanning {
               if let Some(data) = device_msg.data {
                 return Some(Box::new(LovenseDongleStopScanningAndConnect::new(
                   self.hub,
-                  data.id.expect("Dongle protocol shouldn't change, message always has ID."),
+                  data
+                    .id
+                    .expect("Dongle protocol shouldn't change, message always has ID."),
                 )));
               } else if device_msg.result.is_some() {
                 // emit and return to idle
@@ -638,7 +649,10 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
                 }
               }
             }
-            _ => device_read_sender.send(dongle_msg).await.expect("Won't get here if the parent isn't alive."),
+            _ => device_read_sender
+              .send(dongle_msg)
+              .await
+              .expect("Won't get here if the parent isn't alive."),
           }
         }
         IncomingMessage::CommMgr(comm_msg) => match comm_msg {

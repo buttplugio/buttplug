@@ -1,15 +1,25 @@
+mod pipe;
 #[cfg(feature = "websockets")]
 mod websocket;
-mod pipe;
 use crate::connector::{
-  ButtplugConnectorError, ButtplugConnectorResultFuture, ButtplugSerializedMessage,
+  ButtplugConnectorError,
+  ButtplugConnectorResultFuture,
+  ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
+pub use pipe::{
+  pipe_client::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder},
+  pipe_server::{ButtplugPipeServerTransport, ButtplugPipeServerTransportBuilder},
+};
+use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
-pub use websocket::{ButtplugWebsocketClientTransport, TungsteniteError, ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
-pub use pipe::{pipe_client::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder}, pipe_server::{ButtplugPipeServerTransport, ButtplugPipeServerTransportBuilder}};
-use thiserror::Error;
+pub use websocket::{
+  ButtplugWebsocketClientTransport,
+  ButtplugWebsocketServerTransport,
+  ButtplugWebsocketServerTransportBuilder,
+  TungsteniteError,
+};
 
 /// Messages we can receive from a connector.
 #[derive(Clone, Debug, Display)]

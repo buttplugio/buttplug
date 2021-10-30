@@ -3,10 +3,18 @@ use crate::{
   core::{
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
-      self, ButtplugClientMessage, ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageSpecVersion,
-      ButtplugServerMessage, ButtplugSpecV0ClientMessage, ButtplugSpecV0ServerMessage,
-      ButtplugSpecV1ClientMessage, ButtplugSpecV1ServerMessage, ButtplugSpecV2ClientMessage,
+      self,
+      ButtplugClientMessage,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessage,
+      ButtplugSpecV0ClientMessage,
+      ButtplugSpecV0ServerMessage,
+      ButtplugSpecV1ClientMessage,
+      ButtplugSpecV1ServerMessage,
+      ButtplugSpecV2ClientMessage,
       ButtplugSpecV2ServerMessage,
     },
   },
@@ -62,8 +70,9 @@ where
   // We have to pass back a string formatted error, as SerdeJson's error type
   // isn't clonable.
   validator.validate(&msg).and_then(|_| {
-    serde_json::from_str::<Vec<T>>(&msg)
-      .map_err(|e| ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e)))
+    serde_json::from_str::<Vec<T>>(&msg).map_err(|e| {
+      ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
+    })
   })
 }
 
@@ -112,8 +121,10 @@ fn serialize_to_version(
   })
 }
 
-unsafe impl Sync for ButtplugServerJSONSerializer {}
-unsafe impl Send for ButtplugServerJSONSerializer {}
+unsafe impl Sync for ButtplugServerJSONSerializer {
+}
+unsafe impl Send for ButtplugServerJSONSerializer {
+}
 
 impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   type Inbound = ButtplugClientMessage;
@@ -210,8 +221,10 @@ impl Default for ButtplugClientJSONSerializer {
   }
 }
 
-unsafe impl Sync for ButtplugClientJSONSerializer {}
-unsafe impl Send for ButtplugClientJSONSerializer {}
+unsafe impl Sync for ButtplugClientJSONSerializer {
+}
+unsafe impl Send for ButtplugClientJSONSerializer {
+}
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
   type Inbound = ButtplugCurrentSpecServerMessage;

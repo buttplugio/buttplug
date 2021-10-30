@@ -79,24 +79,31 @@ mod in_process_connector;
 pub mod remote_connector;
 pub mod transport;
 
-#[cfg(all(feature = "server", feature = "client"))]
-pub use in_process_connector::ButtplugInProcessClientConnector;
-pub use remote_connector::{
-  ButtplugRemoteClientConnector, ButtplugRemoteConnector, ButtplugRemoteServerConnector,
-};
-#[cfg(feature = "websockets")]
-pub use transport::ButtplugWebsocketClientTransport;
-#[cfg(feature = "websockets")]
-pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
-pub use transport::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder, ButtplugPipeServerTransportBuilder, ButtplugPipeServerTransport};
 use crate::{
   core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
+#[cfg(all(feature = "server", feature = "client"))]
+pub use in_process_connector::ButtplugInProcessClientConnector;
+pub use remote_connector::{
+  ButtplugRemoteClientConnector,
+  ButtplugRemoteConnector,
+  ButtplugRemoteServerConnector,
+};
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
+#[cfg(feature = "websockets")]
+pub use transport::ButtplugWebsocketClientTransport;
+pub use transport::{
+  ButtplugPipeClientTransport,
+  ButtplugPipeClientTransportBuilder,
+  ButtplugPipeServerTransport,
+  ButtplugPipeServerTransportBuilder,
+};
+#[cfg(feature = "websockets")]
+pub use transport::{ButtplugWebsocketServerTransport, ButtplugWebsocketServerTransportBuilder};
 
 pub type ButtplugConnectorResult = Result<(), ButtplugConnectorError>;
 pub type ButtplugConnectorStateShared =

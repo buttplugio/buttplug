@@ -1,20 +1,19 @@
 use crate::{
   connector::{
     transport::{
-      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   core::messages::serializer::ButtplugSerializedMessage,
   util::async_manager,
 };
-use futures_timer::Delay;
 use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
-use std::{
-  sync::Arc,
-  time::Duration
-};
+use futures_timer::Delay;
+use std::{sync::Arc, time::Duration};
 use tokio::net::TcpListener;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
@@ -33,7 +32,7 @@ impl Default for ButtplugWebsocketServerTransportBuilder {
   fn default() -> Self {
     Self {
       listen_on_all_interfaces: false,
-      port: 12345
+      port: 12345,
     }
   }
 }
@@ -86,7 +85,7 @@ async fn run_connection_loop<S>(
       _ = sleep => {
         if pong_count == 0 {
           error!("Cannot no pongs received, considering connection closed.");
-          return;          
+          return;
         }
         pong_count = 0;
         if websocket_server_sender
@@ -113,7 +112,7 @@ async fn run_connection_loop<S>(
             ButtplugSerializedMessage::Binary(binary_msg) => {
               if websocket_server_sender
                 .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
-            
+
                 .await
                 .is_err() {
                 error!("Cannot send binary value to server, considering connection closed.");
@@ -236,9 +235,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       }
     };
 
-    Box::pin(async move {
-      fut.await
-    })
+    Box::pin(async move { fut.await })
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {

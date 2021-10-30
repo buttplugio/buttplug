@@ -10,7 +10,9 @@
 
 use super::{
   comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
   device_manager_event_loop::DeviceManagerEventLoop,
   ping_timer::PingTimer,
@@ -20,40 +22,48 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugDeviceMessage, ButtplugMessage,
-      ButtplugServerMessage, DeviceList, DeviceMessageInfo,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      DeviceList,
+      DeviceMessageInfo,
     },
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDefinition}, protocol::ButtplugProtocol, ButtplugDevice,
+    configuration_manager::{DeviceConfigurationManager, ProtocolDefinition},
+    protocol::ButtplugProtocol,
+    ButtplugDevice,
   },
   server::ButtplugServerResultFuture,
   util::async_manager,
 };
 use dashmap::DashMap;
 use futures::future;
+use getset::Getters;
+use serde::{Deserialize, Serialize};
 use std::{
   convert::TryFrom,
   sync::{atomic::Ordering, Arc},
 };
 use tokio::sync::{broadcast, mpsc};
-use serde::{Serialize, Deserialize};
-use getset::Getters;
 
 #[derive(Serialize, Deserialize, Debug, Getters)]
 #[getset(get = "pub")]
 pub struct DeviceUserConfig {
-  #[serde(rename="display-name")]
+  #[serde(rename = "display-name")]
   display_name: Option<String>,
   allow: Option<bool>,
-  deny: Option<bool>
+  deny: Option<bool>,
 }
 
 #[derive(Debug)]
 pub struct DeviceInfo {
   pub address: String,
-  pub display_name: Option<String>
+  pub display_name: Option<String>,
 }
 
 pub struct DeviceManager {
@@ -66,9 +76,11 @@ pub struct DeviceManager {
   config: Arc<DeviceConfigurationManager>,
 }
 
-unsafe impl Send for DeviceManager {}
+unsafe impl Send for DeviceManager {
+}
 
-unsafe impl Sync for DeviceManager {}
+unsafe impl Sync for DeviceManager {
+}
 
 impl DeviceManager {
   pub fn new(
@@ -301,11 +313,14 @@ impl DeviceManager {
   }
 
   pub fn remove_protocol_definition(&self, name: &str) {
-    self.config.remove_protocol_definition(name);    
+    self.config.remove_protocol_definition(name);
   }
 
   pub fn add_device_user_config(&self, address: &str, config: DeviceUserConfig) {
-    info!("Adding device user config for address {} with values {:?}.", address, config);
+    info!(
+      "Adding device user config for address {} with values {:?}.",
+      address, config
+    );
     self.device_user_config.insert(address.to_owned(), config);
   }
 
@@ -318,7 +333,7 @@ impl DeviceManager {
     if let Some(device) = self.devices.get(&index) {
       Ok(DeviceInfo {
         address: device.value().address().to_owned(),
-        display_name: device.value().display_name()
+        display_name: device.value().display_name(),
       })
     } else {
       Err(ButtplugDeviceError::DeviceNotAvailable(index))

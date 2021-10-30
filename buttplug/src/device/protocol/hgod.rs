@@ -3,7 +3,9 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    DeviceImpl, DeviceWriteCmd, Endpoint,
+    DeviceImpl,
+    DeviceWriteCmd,
+    Endpoint,
   },
   util::async_manager,
 };
@@ -52,11 +54,7 @@ async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<R
   info!("Entering Hgod Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device
-    .write_value(DeviceWriteCmd::new(
-      Endpoint::Tx,
-      current_command,
-      true,
-    ))
+    .write_value(DeviceWriteCmd::new(Endpoint::Tx, current_command, true))
     .await
     .is_ok()
   {

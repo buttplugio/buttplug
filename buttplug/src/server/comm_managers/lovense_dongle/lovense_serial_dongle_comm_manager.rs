@@ -1,13 +1,17 @@
 use super::{
   lovense_dongle_messages::{
-    LovenseDeviceCommand, LovenseDongleIncomingMessage, OutgoingLovenseData,
+    LovenseDeviceCommand,
+    LovenseDongleIncomingMessage,
+    OutgoingLovenseData,
   },
   lovense_dongle_state_machine::create_lovense_dongle_machine,
 };
 use crate::{
   core::ButtplugResultFuture,
   server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -55,7 +59,9 @@ fn serial_write_thread(
         port_write(s);
       }
       OutgoingLovenseData::Message(m) => {
-        port_write(serde_json::to_string(&m).expect("We create these packets so they'll always serialize."));
+        port_write(
+          serde_json::to_string(&m).expect("We create these packets so they'll always serialize."),
+        );
       }
     }
   }
@@ -73,7 +79,8 @@ fn serial_read_thread(
     match port.read(&mut buf) {
       Ok(len) => {
         debug!("Got {} serial bytes", len);
-        data += std::str::from_utf8(&buf[0..len]).expect("We should always get valid data from the port.");
+        data += std::str::from_utf8(&buf[0..len])
+          .expect("We should always get valid data from the port.");
         if data.contains('\n') {
           debug!("Serial Buffer: {}", data);
 
@@ -83,7 +90,12 @@ fn serial_read_thread(
             match msg {
               Ok(m) => {
                 debug!("Read message: {:?}", m);
-                async_manager::block_on(async { sender_clone.send(m).await.expect("Thread shouldn't be running if we don't have a listener.") });
+                async_manager::block_on(async {
+                  sender_clone
+                    .send(m)
+                    .await
+                    .expect("Thread shouldn't be running if we don't have a listener.")
+                });
               }
               Err(e) => {
                 error!("Error reading: {:?}", e);
@@ -126,7 +138,10 @@ impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManag
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseSerialDongleCommunicationManager::new(
-      self.sender.take().expect("We own this so take will always work."),
+      self
+        .sender
+        .take()
+        .expect("We own this so take will always work."),
     ))
   }
 }
@@ -206,7 +221,9 @@ impl LovenseSerialDongleCommunicationManager {
                       let (writer_sender, writer_receiver) = channel(256);
                       let (reader_sender, reader_receiver) = channel(256);
 
-                      let read_port = (*dongle_port).try_clone().expect("USB port should always clone.");
+                      let read_port = (*dongle_port)
+                        .try_clone()
+                        .expect("USB port should always clone.");
                       let read_thread = thread::Builder::new()
                         .name("Serial Reader Thread".to_string())
                         .spawn(move || {
@@ -214,7 +231,9 @@ impl LovenseSerialDongleCommunicationManager {
                         })
                         .expect("Thread should always create");
 
-                      let write_port = (*dongle_port).try_clone().expect("USB port should always clone.");
+                      let write_port = (*dongle_port)
+                        .try_clone()
+                        .expect("USB port should always clone.");
                       let write_thread = thread::Builder::new()
                         .name("Serial Writer Thread".to_string())
                         .spawn(move || {

@@ -1,13 +1,16 @@
 use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
-use crate::{core::ButtplugResultFuture, server::comm_managers::{
-    DeviceCommunicationEvent, DeviceCommunicationManager, DeviceCommunicationManagerBuilder,
-  }, util::async_manager};
-use futures::{StreamExt, FutureExt};
-use serde::Deserialize;
-use tokio::{
-  net::TcpListener,
-  sync::mpsc::Sender
+use crate::{
+  core::ButtplugResultFuture,
+  server::comm_managers::{
+    DeviceCommunicationEvent,
+    DeviceCommunicationManager,
+    DeviceCommunicationManagerBuilder,
+  },
+  util::async_manager,
 };
+use futures::{FutureExt, StreamExt};
+use serde::Deserialize;
+use tokio::{net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
 
 // Packet format received from external devices.
@@ -54,7 +57,10 @@ impl DeviceCommunicationManagerBuilder for WebsocketServerDeviceCommunicationMan
 
   fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(
-      self.sender.take().expect("We'll always be able to take this"),
+      self
+        .sender
+        .take()
+        .expect("We'll always be able to take this"),
       self.server_port,
       self.listen_on_all_interfaces,
     ))
@@ -62,7 +68,7 @@ impl DeviceCommunicationManagerBuilder for WebsocketServerDeviceCommunicationMan
 }
 
 pub struct WebsocketServerDeviceCommunicationManager {
-  server_cancellation_token: CancellationToken
+  server_cancellation_token: CancellationToken,
 }
 
 impl WebsocketServerDeviceCommunicationManager {
@@ -159,7 +165,7 @@ impl WebsocketServerDeviceCommunicationManager {
       }
     });
     Self {
-      server_cancellation_token
+      server_cancellation_token,
     }
   }
 }
