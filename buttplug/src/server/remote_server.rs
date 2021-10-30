@@ -75,10 +75,8 @@ async fn run_server<ConnectorType>(
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 if let ButtplugClientMessage::RequestServerInfo(rsi) = client_message {
-                  if remote_event_sender_clone.receiver_count() > 0 {
-                    if remote_event_sender_clone.send(ButtplugRemoteServerEvent::Connected(rsi.client_name().clone())).is_err() {
-                      error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                    }
+                  if remote_event_sender_clone.receiver_count() > 0 && remote_event_sender_clone.send(ButtplugRemoteServerEvent::Connected(rsi.client_name().clone())).is_err() {
+                    error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                   }
                 }
                 if connector_clone.send(ret_msg).await.is_err() {
@@ -117,7 +115,7 @@ async fn run_server<ConnectorType>(
                }
               },
               _ => {}
-            }  
+            }
           }
           let connector_clone = shared_connector.clone();
           if connector_clone.send(msg).await.is_err() {

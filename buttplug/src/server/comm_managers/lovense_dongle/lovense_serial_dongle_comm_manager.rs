@@ -41,8 +41,7 @@ fn serial_write_thread(
     // We should check this on the outgoing message. Otherwise we will run into
     // all sorts of trouble.
     if let Err(e) = port.write_all(&data.into_bytes()) {
-      error!("Cannot write to port, exiting: {}", e);
-      return;
+      error!("Cannot write to port: {}", e);
     }
   };
   while let Some(data) = async_manager::block_on(async {

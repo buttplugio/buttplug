@@ -59,7 +59,7 @@ impl BtleplugAdapterTask {
       // Names are the only way we really have to test devices
       // at the moment. Most devices don't send services on
       // advertisement.
-      if !name.is_empty() && !tried_addresses.contains(&peripheral_id)
+      if !name.is_empty() && !tried_addresses.contains(peripheral_id)
       //&& !connected_addresses_handler.contains_key(&properties.address)
       {
         let address = properties.address;
@@ -67,7 +67,7 @@ impl BtleplugAdapterTask {
         tried_addresses.push(peripheral_id.clone());
         let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
           &name,
-          &peripheral_id,
+          peripheral_id,
           peripheral.clone(),
           adapter.clone(),
         ));
@@ -114,7 +114,7 @@ impl BtleplugAdapterTask {
       }
       adapter = match manager.adapters().await {
         Ok(adapters) => {
-          if let Some(adapter) = adapters.into_iter().nth(0) {
+          if let Some(adapter) = adapters.into_iter().next() {
             info!("Bluetooth LE adapter found.");
             adapter
           } else {

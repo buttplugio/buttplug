@@ -105,14 +105,14 @@ impl ButtplugServerBuilder {
   pub fn finish(&self) -> Result<ButtplugServer, ButtplugError> {
     // If the user config string exists, parse it.
     let user_config = if let Some(user_device_config) = &self.user_device_configuration_json {
-      Some(load_protocol_config_from_json(&user_device_config)?)
+      Some(load_protocol_config_from_json(user_device_config)?)
     } else {
       None
     };
     
     // If the device config string exists, parse it.
     let device_config = if let Some(main_device_config) = &self.device_configuration_json {
-      let mut main_config = load_protocol_config_from_json(&main_device_config)?;
+      let mut main_config = load_protocol_config_from_json(main_device_config)?;
       if let Some(user_config) = user_config {
         main_config.merge(user_config);
       }

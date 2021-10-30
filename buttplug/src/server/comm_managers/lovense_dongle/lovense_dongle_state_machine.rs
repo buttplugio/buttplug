@@ -520,7 +520,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
   async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("stopping search");
     let scan_msg = LovenseDongleOutgoingMessage {
-      message_type: LovenseDongleMessageType::USB,
+      message_type: LovenseDongleMessageType::Usb,
       func: LovenseDongleMessageFunc::StopSearch,
       eager: None,
       id: None,
@@ -546,7 +546,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
   async fn transition(mut self: Box<Self>) -> Option<Box<dyn LovenseDongleState>> {
     info!("stopping search and connecting to device");
     let scan_msg = LovenseDongleOutgoingMessage {
-      message_type: LovenseDongleMessageType::USB,
+      message_type: LovenseDongleMessageType::Usb,
       func: LovenseDongleMessageFunc::StopSearch,
       eager: None,
       id: None,

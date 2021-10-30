@@ -192,7 +192,7 @@ impl SerialPortDeviceImpl {
       .expect("Should always be able to create thread");
 
     Ok(Self {
-      address: port.name().unwrap_or("Default Serial Port Device (No Name Given)".to_owned()),
+      address: port.name().unwrap_or_else(|| "Default Serial Port Device (No Name Given)".to_owned()),
       _read_thread: read_thread,
       _write_thread: write_thread,
       port_receiver: Arc::new(Mutex::new(reader_receiver)),

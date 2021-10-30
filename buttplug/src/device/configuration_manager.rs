@@ -48,7 +48,7 @@ impl PartialEq for BluetoothLESpecifier {
         let mut wildcard: String;
         if name.ends_with('*') {
           wildcard = name.clone();
-          compare_name = &other_name;
+          compare_name = other_name;
         } else if other_name.ends_with('*') {
           wildcard = other_name.clone();
           compare_name = name;
@@ -86,6 +86,8 @@ impl BluetoothLESpecifier {
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   exists: bool,
 }
 
@@ -103,6 +105,8 @@ impl PartialEq for LovenseConnectServiceSpecifier {
 
 #[derive(Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
+  // Needed for deserialziation but unused.
+  #[allow(dead_code)]
   exists: bool,
 }
 
@@ -474,7 +478,7 @@ impl DeviceConfigurationManager {
   }
 
   pub fn get_protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
-    self.protocol_map.get(protocol_name).map(|pair| pair.value().clone())
+    self.protocol_map.get(protocol_name).map(|pair| *pair.value())
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly

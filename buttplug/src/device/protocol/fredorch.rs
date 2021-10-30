@@ -51,15 +51,15 @@ const CRC_LO: [u8; 256] = [
   138, 74, 78, 142, 143, 79, 141, 77, 76, 140, 68, 132, 133, 69, 135, 71, 70, 134, 130, 66, 67,
   131, 65, 129, 128, 64,
 ];
-pub fn crc16(data: &Vec<u8>) -> [u8; 2] {
+pub fn crc16(data: &[u8]) -> [u8; 2] {
   let mut n: u8 = 255;
   let mut o: u8 = 255;
-  for i in 0..data.len() {
-    let a: u8 = n ^ data[i];
+  for val in data {
+    let a: u8 = n ^ val;
     n = o ^ CRC_HI[a as usize];
     o = CRC_LO[a as usize]
   }
-  return [n, o];
+  [n, o]
 }
 
 #[derive(ButtplugProtocolProperties)]

@@ -45,7 +45,7 @@ enum VorzeDevices {
   Piston = 3,
   Cyclone = 1,
   Rocket = 7,
-  UFO = 2,
+  Ufo = 2,
 }
 
 #[repr(u8)]
@@ -118,7 +118,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     let manager = self.manager.clone();
     // This will never change, so we can process it before the future.
     let dev_id = if self.name.contains("UFO") {
-      VorzeDevices::UFO
+      VorzeDevices::Ufo
     } else {
       VorzeDevices::Cyclone
     };

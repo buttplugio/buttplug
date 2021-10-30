@@ -318,10 +318,10 @@ impl DeviceManager {
     if let Some(device) = self.devices.get(&index) {
       Ok(DeviceInfo {
         address: device.value().address().to_owned(),
-        display_name: device.value().display_name().clone()
+        display_name: device.value().display_name()
       })
     } else {
-      Err(ButtplugDeviceError::DeviceNotAvailable(index).into())
+      Err(ButtplugDeviceError::DeviceNotAvailable(index))
     }
   }
 }

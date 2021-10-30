@@ -36,8 +36,9 @@ pub enum LovenseDongleResultCode {
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub enum LovenseDongleMessageType {
+  #[allow(clippy::upper_case_acronyms)]
   #[serde(rename = "usb")]
-  USB,
+  Usb,
   #[serde(rename = "toy")]
   Toy,
 }

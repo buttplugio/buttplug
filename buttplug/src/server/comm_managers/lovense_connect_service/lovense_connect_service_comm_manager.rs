@@ -31,10 +31,14 @@ const LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL: u64 = 1;
 pub(super) struct LovenseServiceToyInfo {
   pub id: String,
   pub name: String,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(rename = "nickName")]
   pub nickname: String,
   #[serde(rename = "status", deserialize_with = "deserialize_bool_from_anything")]
   pub connected: bool,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   pub version: String,
   #[serde(deserialize_with = "deserialize_number_from_string")]
   pub battery: i8,
@@ -42,22 +46,36 @@ pub(super) struct LovenseServiceToyInfo {
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceHostInfo {
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   pub domain: String,
   #[serde(rename = "httpPort")]
   pub http_port: u16,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(rename = "wsPort")]
   pub ws_port: u16,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(rename = "httpsPort")]
   pub https_port: u16,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(rename = "wssPort")]
   pub wss_port: u16,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   pub toys: HashMap<String, LovenseServiceToyInfo>,
 }
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceLocalInfo {
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(rename = "type", deserialize_with = "deserialize_string_from_number")]
   pub reply_type: String,
+  // Needed for proper deserialization, but clippy will complain.
+  #[allow(dead_code)]
   #[serde(deserialize_with = "deserialize_number_from_string")]
   pub code: u32,
   pub data: HashMap<String, LovenseServiceToyInfo>,
@@ -224,7 +242,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
                   // this sometimes fails on DNS resolution. Since we aren't using secure contexts
                   // at the moment, we can just cut out the IP from the domain and use that
                   // directly, which has fixed issues for some users.
-                  let host_parts: Vec<&str> = x.0.split(".").collect();
+                  let host_parts: Vec<&str> = x.0.split('.').collect();
                   let new_http_host = host_parts[0].replace("-", ".");
                   // We set the protocol type here so it'll just filter down, in case we want to move to secure.
                   let host = format!("http://{}:{}", new_http_host, x.1.http_port);
@@ -236,7 +254,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
               if current_known_hosts.len() != new_known_hosts.len()
                 || !current_known_hosts
                   .iter()
-                  .all(|item| new_known_hosts.contains(&item))
+                  .all(|item| new_known_hosts.contains(item))
               {
                 *current_known_hosts = new_known_hosts.iter().map(|x| (*x).clone()).collect();
               }

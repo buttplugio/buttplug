@@ -45,7 +45,7 @@ impl ButtplugProtocol for Vibratissimo {
     Box::pin(async move {
 
       let result = device_impl.read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500)).await?;
-      Ok(Some(String::from_utf8(result.data().to_vec()).unwrap_or(device_impl.name.clone())))
+      Ok(Some(String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone())))
     })
   }
 }
@@ -77,8 +77,8 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         let mut data: Vec<u8> = Vec::new();
-        for i in 0..cmds.len() {
-          data.push( cmds[i].unwrap_or(0) as u8 );
+        for cmd in cmds {
+          data.push( cmd.unwrap_or(0) as u8 );
         }
         if data.len() == 1 {
           data.push( 0x00 );
