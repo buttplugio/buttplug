@@ -1589,6 +1589,22 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 3
+  svakom-iker:
+    btle:
+      names:
+        - Iker
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Svakom Iker
+      messages:
+        VibrateCmd:
+          FeatureCount: 2
+          StepCount:
+            - 10
+            - 5
   realov:
     btle:
       names:
