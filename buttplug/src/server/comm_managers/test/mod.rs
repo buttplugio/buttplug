@@ -29,7 +29,7 @@ pub fn check_test_recv_value(
 ) {
   assert_eq!(
     recv_now(&mut receiver.lock().expect("Test"))
-      .expect("Test")
+      .expect("No messages received")
       .expect("Test"),
     command
   );

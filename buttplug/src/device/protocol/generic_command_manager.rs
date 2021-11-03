@@ -326,6 +326,8 @@ mod test {
     );
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
     assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
+
+    assert_eq!(mgr.get_vibration(), vec![Some(10), Some(15)]);
   }
 
   #[test]
