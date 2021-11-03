@@ -13,11 +13,21 @@ use buttplug::{
   // connector::ButtplugInProcessClientConnector,
   util::async_manager,
 };
+use buttplug::{
+  connector::{
+    ButtplugPipeClientTransportBuilder,
+    ButtplugPipeServerTransportBuilder,
+    ButtplugRemoteClientConnector,
+    ButtplugRemoteServerConnector,
+    ButtplugWebsocketClientTransport,
+  },
+  core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
+  server::{comm_managers::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer},
+};
+use futures::StreamExt;
 use futures_timer::Delay;
 use std::time::Duration;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
-use buttplug::{connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport, ButtplugPipeClientTransportBuilder, ButtplugRemoteServerConnector, ButtplugPipeServerTransportBuilder},  core::messages::serializer::{ButtplugServerJSONSerializer, ButtplugClientJSONSerializer}, server::{ButtplugRemoteServer, comm_managers::btleplug::BtlePlugCommunicationManagerBuilder}};
-use futures::StreamExt;
 use tracing::{info, span, Level};
 
 async fn device_enumeration_example() {
@@ -35,9 +45,18 @@ async fn device_enumeration_example() {
   // let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
 
   tokio::spawn(async move {
-    let server = ButtplugRemoteServer::default();//ButtplugPipeServerTransportBuilder::default().finish();
-    server.device_manager().add_comm_manager(BtlePlugCommunicationManagerBuilder::default());
-    server.start(ButtplugRemoteServerConnector::<_, ButtplugServerJSONSerializer>::new(ButtplugPipeServerTransportBuilder::new("\\\\.\\pipe\\testpipe").finish())).await;
+    let server = ButtplugRemoteServer::default(); //ButtplugPipeServerTransportBuilder::default().finish();
+    server
+      .device_manager()
+      .add_comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    server
+      .start(ButtplugRemoteServerConnector::<
+        _,
+        ButtplugServerJSONSerializer,
+      >::new(
+        ButtplugPipeServerTransportBuilder::new("\\\\.\\pipe\\testpipe").finish(),
+      ))
+      .await;
   });
 
   tokio::time::sleep(std::time::Duration::from_millis(100)).await;
@@ -114,10 +133,15 @@ async fn device_enumeration_example() {
   info!("Client connecting...");
   client
     //.connect_in_process(None)
-    .connect(ButtplugRemoteClientConnector::<_, ButtplugClientJSONSerializer>::new(ButtplugPipeClientTransportBuilder::new("\\\\.\\pipe\\testpipe").finish()))
+    .connect(ButtplugRemoteClientConnector::<
+      _,
+      ButtplugClientJSONSerializer,
+    >::new(
+      ButtplugPipeClientTransportBuilder::new("\\\\.\\pipe\\testpipe").finish(),
+    ))
     .await
     .unwrap();
-    info!("Client initiating scan...");
+  info!("Client initiating scan...");
   // First, we'll start the server looking for devices.
   if let Err(err) = client.start_scanning().await {
     // If the server disconnected between the time we spun up the
