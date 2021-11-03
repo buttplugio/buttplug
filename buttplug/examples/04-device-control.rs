@@ -8,11 +8,12 @@
 // Let's make something move! In this example, we'll see how to tell what a
 // device can do, then send it a command (assuming it vibrates)!
 
-use buttplug::{
-  client::{
-    ButtplugClient, ButtplugClientDevice, ButtplugClientDeviceMessageType, ButtplugClientEvent,
-    VibrateCommand,
-  },
+use buttplug::client::{
+  ButtplugClient,
+  ButtplugClientDevice,
+  ButtplugClientDeviceMessageType,
+  ButtplugClientEvent,
+  VibrateCommand,
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -109,7 +110,11 @@ async fn device_control_example() {
   };
 
   loop {
-    match event_stream.next().await.expect("We own the client so the event stream shouldn't die.") {
+    match event_stream
+      .next()
+      .await
+      .expect("We own the client so the event stream shouldn't die.")
+    {
       ButtplugClientEvent::DeviceAdded(dev) => {
         println!("We got a device: {}", dev.name);
         let fut = vibrate_device(dev);
