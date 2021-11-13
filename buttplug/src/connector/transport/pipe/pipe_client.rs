@@ -23,6 +23,8 @@ use futures::future::BoxFuture;
 use std::sync::Arc;
 #[cfg(target_os = "windows")]
 use tokio::net::windows::named_pipe;
+#[cfg(not(target_os = "windows"))]
+use tokio::net::UnixStream;
 use tokio::{
   io::{AsyncWriteExt, Interest},
   sync::{
@@ -30,6 +32,11 @@ use tokio::{
     Notify,
   },
 };
+
+#[cfg(target_os = "windows")]
+type PipeClientType = named_pipe::NamedPipeClient;
+#[cfg(not(target_os = "windows"))]
+type PipeClientType = UnixStream;
 
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeClientTransportBuilder {
@@ -53,7 +60,7 @@ impl ButtplugPipeClientTransportBuilder {
 }
 
 async fn run_connection_loop(
-  mut client: named_pipe::NamedPipeClient,
+  mut client: PipeClientType,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
   disconnect_notifier: Arc<Notify>,
@@ -154,6 +161,7 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
+      #[cfg(target = "windows")]
       let client = named_pipe::ClientOptions::new()
         .open(address)
         .map_err(|err| {
@@ -161,6 +169,14 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
             ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
           )
         })?;
+      #[cfg(not(target = "windows"))]
+      let client = UnixStream::connect(address)
+        .await
+        .map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;      
       tokio::spawn(async move {
         run_connection_loop(
           client,

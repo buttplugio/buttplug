@@ -14,6 +14,8 @@ use futures::future::BoxFuture;
 use std::sync::Arc;
 #[cfg(target_os = "windows")]
 use tokio::net::windows::named_pipe;
+#[cfg(not(target_os = "windows"))]
+use tokio::net::{UnixListener, UnixStream};
 use tokio::{
   io::{AsyncWriteExt, Interest},
   sync::{
@@ -21,6 +23,12 @@ use tokio::{
     Notify,
   },
 };
+
+#[cfg(target_os = "windows")]
+type PipeServerType = named_pipe::NamedPipeServer;
+#[cfg(not(target_os = "windows"))]
+type PipeServerType = UnixStream;
+
 
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeServerTransportBuilder {
@@ -44,7 +52,7 @@ impl ButtplugPipeServerTransportBuilder {
 }
 
 async fn run_connection_loop(
-  mut server: named_pipe::NamedPipeServer,
+  mut server: PipeServerType,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
   disconnect_notifier: Arc<Notify>,
@@ -55,7 +63,12 @@ async fn run_connection_loop(
     tokio::select! {
       _ = disconnect_notifier.notified()=> {
         info!("Pipe server connector requested disconnect.");
-        if server.disconnect().is_err() {
+        #[cfg(target = "windows")]
+        let response = server.disconnect();
+        #[cfg(not(target = "windows"))]
+        let response = server.shutdown().await;
+
+        if response.is_err(){
           error!("Cannot close, assuming connection already closed");
           break;
         }
@@ -84,8 +97,14 @@ async fn run_connection_loop(
           }
         } else {
           info!("Pipe server connector owner dropped, disconnecting websocket connection.");
-          if server.disconnect().is_err() {
+          #[cfg(target = "windows")]
+          let response = server.disconnect();
+          #[cfg(not(target = "windows"))]
+          let response = server.shutdown().await;
+  
+          if response.is_err(){
             error!("Cannot close, assuming connection already closed");
+            break;
           }
           break;
         }
@@ -150,7 +169,9 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      let server = named_pipe::ServerOptions::new()
+      #[cfg(target="windows")]
+      let server = {
+        let server = named_pipe::ServerOptions::new()
         .first_pipe_instance(true)
         .create(address)
         .map_err(|err| {
@@ -158,12 +179,27 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
             ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
           )
         })?;
-      server.connect().await.map_err(|err| {
-        ButtplugConnectorError::TransportSpecificError(
-          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
-        )
-      })?;
-
+        server.connect().await.map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;
+        server
+      };
+      #[cfg(not(target="windows"))]
+      let server = {
+        let server = UnixListener::bind(address).map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;
+        let (client, _addr) = server.accept().await.map_err(|err| {
+          ButtplugConnectorError::TransportSpecificError(
+            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+          )
+        })?;
+        client
+      };
       tokio::spawn(async move {
         run_connection_loop(
           server,
