@@ -249,6 +249,7 @@ fn test_reject_on_no_raw_message() {
   });
 }
 
+#[cfg(target = "windows")]
 #[test]
 fn test_repeated_address_additions() {
   async_manager::block_on(async {

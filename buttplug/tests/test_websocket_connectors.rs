@@ -1,6 +1,6 @@
 // The tests in this file can fail on CI if there isn't a timed retry.
 
-#[cfg(feature = "websockets")]
+#[cfg(all(feature = "websockets", target = "windows"))]
 mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
