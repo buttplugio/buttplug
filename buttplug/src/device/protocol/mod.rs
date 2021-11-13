@@ -7,6 +7,7 @@ pub mod fleshlight_launch_helper;
 pub mod fredorch;
 pub mod generic_command_manager;
 pub mod hgod;
+pub mod hismith;
 pub mod htk_bm;
 pub mod jejoue;
 pub mod kiiroo_v2;
@@ -103,6 +104,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<buttplug_passthru::ButtplugPassthru>(&map, "buttplug-passthru");
   add_to_protocol_map::<cachito::Cachito>(&map, "cachito");
   add_to_protocol_map::<fredorch::Fredorch>(&map, "fredorch");
+  add_to_protocol_map::<hismith::Hismith>(&map, "hismith");
   add_to_protocol_map::<hgod::Hgod>(&map, "hgod");
   add_to_protocol_map::<htk_bm::HtkBm>(&map, "htk_bm");
   add_to_protocol_map::<jejoue::JeJoue>(&map, "jejoue");
