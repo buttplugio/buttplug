@@ -173,12 +173,7 @@ impl GenericCommandManager {
   }
 
   pub fn get_vibration(&mut self) -> Vec<Option<u32>> {
-    // Return the current vibration values
-    let mut result: Vec<Option<u32>> = vec![None; self.vibrations.len()];
-    for (index, speed) in self.vibrations.iter().enumerate() {
-      result[index] = Some(*speed);
-    }
-    result
+    self.vibrations.iter().map(|x| Some(*x)).collect()
   }
 
   pub fn update_rotation(
