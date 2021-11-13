@@ -38,7 +38,7 @@ impl std::io::Write for ChannelWriter {
   }
 }
 
-impl MakeWriter for ChannelWriter {
+impl MakeWriter<'_> for ChannelWriter {
   type Writer = ChannelWriter;
   fn make_writer(&self) -> Self::Writer {
     ChannelWriter::new(self.log_sender.clone())
