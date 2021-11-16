@@ -169,7 +169,7 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
     Box::pin(async move {
-      #[cfg(target="windows")]
+      #[cfg(target_os = "windows")]
       let server = {
         let server = named_pipe::ServerOptions::new()
         .first_pipe_instance(true)
@@ -186,7 +186,7 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
         })?;
         server
       };
-      #[cfg(not(target="windows"))]
+      #[cfg(not(target_os = "windows"))]
       let server = {
         let server = UnixListener::bind(address).map_err(|err| {
           ButtplugConnectorError::TransportSpecificError(
