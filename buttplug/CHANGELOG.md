@@ -13,6 +13,8 @@
 
 ## Bugfixes
 
+- Lovense Connect will now use user's IP instead of lovense.club resolution, bypassing issues with
+  Lovense's DNS resolver.
 - Removed all .unwrap()s from library, either by cleanup or conversion to .expect() with useful
   message. This will probably fix multiple issues.
 
