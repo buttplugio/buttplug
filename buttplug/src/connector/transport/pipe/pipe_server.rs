@@ -244,6 +244,7 @@ mod test {
     });
   }
 
+  #[cfg(target_os = "windows")]
   #[test]
   pub fn test_server_error_invalid_pipe() {
     async_manager::block_on(async move {
