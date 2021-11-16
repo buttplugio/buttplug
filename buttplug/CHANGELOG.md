@@ -1,6 +1,25 @@
+# 5.1.0 (2021-11-15)
+
+## Features
+
+- Added Named Pipe/Unix Domain Socket connector
+- Updated to btleplug v0.9, simplified Linux bluetooth code to be in line with rest of platforms
+- Bring User Device Configuration in-line with Device Configuration
+- Added Hardware Support:
+  - LoveDistance devices
+  - Satisfyer devices (May have issues on desktop due to pairing)
+  - Hot Octopuss Pulse (Kiiroo/Bluetooth Edition)
+  - Svakom Sam, Alex, Iker
+
+## Bugfixes
+
+- Removed all .unwrap()s from library, either by cleanup or conversion to .expect() with useful
+  message. This will probably fix multiple issues.
+
 # 5.0.1 (2021-09-11)
 
 ## Features
+
 - Added Hardware Support:
   - Lovense Quake
   - HTK Breast Massager
