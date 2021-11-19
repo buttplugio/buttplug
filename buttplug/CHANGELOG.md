@@ -6,6 +6,7 @@
 - Updated to btleplug v0.9, simplified Linux bluetooth code to be in line with rest of platforms
 - Bring User Device Configuration in-line with Device Configuration
 - Added Hardware Support:
+  - Lovense Gush, Hyphy
   - LoveDistance devices
   - Satisfyer devices (May have issues on desktop due to pairing)
   - Hot Octopuss Pulse (Kiiroo/Bluetooth Edition)
@@ -13,8 +14,9 @@
 
 ## Bugfixes
 
+- Renamed Lovense Quake to Lovense Dolce
 - Lovense Connect will now use user's IP instead of lovense.club resolution, bypassing issues with
-  Lovense's DNS resolver.
+  Lovense's DNS resolver
 - Removed all .unwrap()s from library, either by cleanup or conversion to .expect() with useful
   message. This will probably fix multiple issues.
 
