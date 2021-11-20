@@ -57,7 +57,7 @@ impl BtleplugAdapterTask {
     if let Some(name) = properties.local_name {
       let span = info_span!(
         "btleplug enumeration",
-        address = tracing::field::display(properties.address),
+        address = tracing::field::display(format!("{:?}", peripheral_id)),
         name = tracing::field::display(&name)
       );
       let _enter = span.enter();
@@ -67,8 +67,7 @@ impl BtleplugAdapterTask {
       if !name.is_empty() && !tried_addresses.contains(peripheral_id)
       //&& !connected_addresses_handler.contains_key(&properties.address)
       {
-        let address = properties.address;
-        debug!("Found new bluetooth device: {} {}", name, address);
+        debug!("Found new bluetooth device: {} {:?}", name, peripheral_id);
         tried_addresses.push(peripheral_id.clone());
         let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
           &name,
@@ -81,7 +80,7 @@ impl BtleplugAdapterTask {
           .event_sender
           .send(DeviceCommunicationEvent::DeviceFound {
             name,
-            address: address.to_string(),
+            address: format!("{:?}", peripheral_id),
             creator: device_creator,
           })
           .await
