@@ -2,9 +2,9 @@ use super::json::JSONValidator;
 use crate::{
   core::errors::{ButtplugDeviceError, ButtplugError},
   device::configuration_manager::{DeviceConfigurationManager, ProtocolDefinition},
-  server::device_manager::DeviceUserConfig,
+  server::{device_manager::DeviceUserConfig},
 };
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
@@ -12,13 +12,23 @@ pub static DEVICE_CONFIGURATION_JSON: &str =
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct ProtocolConfiguration {
   pub version: u32,
   #[serde(default)]
   pub protocols: HashMap<String, ProtocolDefinition>,
   #[serde(rename = "user-config", default)]
   pub user_config: HashMap<String, DeviceUserConfig>,
+}
+
+impl Default for ProtocolConfiguration {
+  fn default() -> Self {
+    Self {
+      version: get_internal_config_version(),
+      protocols: HashMap::new(),
+      user_config: HashMap::new()
+    }
+  }
 }
 
 impl ProtocolConfiguration {
@@ -33,6 +43,10 @@ impl ProtocolConfiguration {
     }
     // Just copy the user config wholesale.
     self.user_config = other.user_config;
+  }
+
+  pub fn to_json(&self) -> String {
+    serde_json::to_string(self).expect("All types below this are Serialize, so this should be infallible.")
   }
 }
 

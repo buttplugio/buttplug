@@ -43,7 +43,7 @@ use crate::{
 };
 use dashmap::DashMap;
 use futures::future;
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
   convert::TryFrom,
@@ -51,12 +51,18 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc};
 
-#[derive(Serialize, Deserialize, Debug, Getters)]
-#[getset(get = "pub")]
+#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq)]
+#[getset(get = "pub", set = "pub")]
 pub struct DeviceUserConfig {
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   #[serde(rename = "display-name")]
   display_name: Option<String>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   allow: Option<bool>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
   deny: Option<bool>,
 }
 

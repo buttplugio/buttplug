@@ -21,7 +21,7 @@ use crate::{
   device::Endpoint,
 };
 use dashmap::DashMap;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::{
   collections::{HashMap, HashSet},
   sync::Arc,
@@ -34,7 +34,7 @@ use uuid::Uuid;
 // gonna hurt anything and making a ton of serde attributes is just going to get
 // confusing (see the messages impl).
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
   pub names: HashSet<String>,
   pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
@@ -87,7 +87,7 @@ impl BluetoothLESpecifier {
   }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
   // Needed for proper deserialization, but clippy will complain.
   #[allow(dead_code)]
@@ -106,7 +106,7 @@ impl PartialEq for LovenseConnectServiceSpecifier {
   }
 }
 
-#[derive(Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
   // Needed for deserialziation but unused.
   #[allow(dead_code)]
@@ -125,7 +125,7 @@ impl PartialEq for XInputSpecifier {
   }
 }
 
-#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct HIDSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
@@ -133,7 +133,7 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
-#[derive(Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct SerialSpecifier {
   #[serde(rename = "baud-rate")]
   pub baud_rate: u32,
@@ -160,7 +160,7 @@ impl PartialEq for SerialSpecifier {
   }
 }
 
-#[derive(Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
 pub struct USBSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
@@ -168,7 +168,7 @@ pub struct USBSpecifier {
   product_id: u16,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WebsocketSpecifier {
   pub names: HashSet<String>,
 }
@@ -197,7 +197,7 @@ impl WebsocketSpecifier {
   }
 }
 
-#[derive(Deserialize, Debug, PartialEq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum DeviceSpecifier {
   BluetoothLE(BluetoothLESpecifier),
   HID(HIDSpecifier),
@@ -208,14 +208,14 @@ pub enum DeviceSpecifier {
   Websocket(WebsocketSpecifier),
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ProtocolAttributes {
   identifier: Option<Vec<String>>,
   name: Option<HashMap<String, String>>,
   messages: Option<DeviceMessageAttributesMap>,
 }
 
-#[derive(Deserialize, Debug, Clone, Default)]
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in get_specifiers(). Feels
