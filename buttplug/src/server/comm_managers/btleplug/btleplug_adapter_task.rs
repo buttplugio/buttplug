@@ -120,6 +120,27 @@ impl BtleplugAdapterTask {
         Ok(adapters) => {
           if let Some(adapter) = adapters.into_iter().next() {
             info!("Bluetooth LE adapter found.");
+            // Bluetooth dongle identification for Windows
+            #[cfg(target_os="windows")]
+            {
+              use windows::Devices::Bluetooth::BluetoothAdapter;
+              let adapter_result = BluetoothAdapter::GetDefaultAsync().expect("If we're here, we got an adapter").await;
+              let adapter = adapter_result.expect("Considering infallible at this point");
+              let device_id = adapter.DeviceId().expect("Considering infallible at this point").to_string();
+              info!("Windows Bluetooth Adapter ID: {:?}", device_id);
+              let device_manufacturer = if device_id.contains("VID_0A12") {
+                "Cambridge Silicon Radio (CSR)"
+              } else if device_id.contains("VID_0A5C") {
+                "Broadcom"
+              } else if device_id.contains("VID_8087") {
+                "Intel"
+              } else if device_id.contains("VID_0BDA") {
+                "RealTek"
+              } else {
+                "Unknown Manufacturer"
+              };
+              info!("Windows Bluetooth Adapter Manufacturer: {}", device_manufacturer);
+            }
             adapter
           } else {
             if adapter_found {

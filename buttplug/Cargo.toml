@@ -98,3 +98,6 @@ features = ["default", "unstable"]
 
 [build-dependencies]
 prost-build = "0.9.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.28.0", features = ["std", "Devices_Bluetooth", "Foundation"] }
