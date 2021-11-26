@@ -66,6 +66,7 @@ impl LovenseDongleDeviceImplCreator {
       // Hacky, but it works.
       specifier: DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
         "LVS-DongleDevice",
+        &[]
       )),
       id: id.to_string(),
       device_outgoing,

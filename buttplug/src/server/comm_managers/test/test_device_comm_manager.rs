@@ -35,7 +35,7 @@ fn new_uninitialized_ble_test_device(
       .subsec_nanos()
       .to_string()
   });
-  let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name));
+  let specifier = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
   let device_impl = Arc::new(TestDeviceInternal::new(name, &address));
   let device_impl_clone = device_impl.clone();
   let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);

@@ -3249,9 +3249,12 @@
         "names": [
           "SF *"
         ],
+        "advertised-services": [
+          "0000180a-0000-1000-8000-00805f9b34fb"
+        ],
         "services": {
           "00001800-0000-1000-8000-00805f9b34fb": {
-            "firmware": "00002a00-0000-1000-8000-00805f9b34fb"
+            "rxblemodel": "00002a00-0000-1000-8000-00805f9b34fb"
           },
           "51361500-c5e7-47c7-8a6e-47ebc99d80e8": {
             "command": "51361501-c5e7-47c7-8a6e-47ebc99d80e8",
@@ -3261,7 +3264,7 @@
       },
       "defaults": {
         "name": {
-          "en-us": "Satisfyer device"
+          "en-us": "Satisfyer Device"
         },
         "messages": {
           "VibrateCmd": {
@@ -3304,6 +3307,14 @@
           ],
           "name": {
             "en-us": "Satisfyer Double Joy"
+          }
+        },
+        {
+          "identifier": [
+            "SF Curvy 2*"
+          ],
+          "name": {
+            "en-us": "Satisfyer Curvy 2+"
           }
         }
       ]

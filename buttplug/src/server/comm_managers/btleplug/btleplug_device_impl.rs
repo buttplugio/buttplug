@@ -44,15 +44,17 @@ use uuid::Uuid;
 pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   name: String,
   address: PeripheralId,
+  services: Vec<Uuid>,
   device: T,
   adapter: Adapter,
 }
 
 impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
-  pub fn new(name: &str, address: &PeripheralId, device: T, adapter: Adapter) -> Self {
+  pub fn new(name: &str, address: &PeripheralId, services: &[Uuid], device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
       address: address.to_owned(),
+      services: services.to_vec(),
       device,
       adapter,
     }
@@ -68,32 +70,35 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 #[async_trait]
 impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
   fn get_specifier(&self) -> DeviceSpecifier {
-    DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&self.name))
+    DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&self.name, &self.services))
   }
 
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDefinition,
   ) -> Result<DeviceImpl, ButtplugError> {
-    if let Err(err) = self.device.connect().await {
-      let return_err = ButtplugDeviceError::DeviceSpecificError(
-        ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", err)),
-      );
-      return Err(return_err.into());
+    if !self.device.is_connected().await.expect("If we crash here it's Bluez's fault. Use something else please.") {
+      if let Err(err) = self.device.connect().await {
+        let return_err = ButtplugDeviceError::DeviceSpecificError(
+          ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", err)),
+        );
+        return Err(return_err.into());
+      }
+      if let Err(err) = self.device.discover_services().await {
+        error!("BTLEPlug error discovering characteristics: {:?}", err);
+        return Err(
+          ButtplugDeviceError::DeviceConnectionError(format!(
+            "BTLEPlug error discovering characteristics: {:?}",
+            err
+          ))
+          .into(),
+        );
+      }
     }
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
-    if let Err(err) = self.device.discover_services().await {
-      error!("BTLEPlug error discovering characteristics: {:?}", err);
-      return Err(
-        ButtplugDeviceError::DeviceConnectionError(format!(
-          "BTLEPlug error discovering characteristics: {:?}",
-          err
-        ))
-        .into(),
-      );
-    }
+
     for (proto_uuid, proto_service) in protocol
       .btle
       .expect("To get this far we are guaranteed to have a btle block in the config")
@@ -103,11 +108,15 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         if service.uuid != proto_uuid {
           continue;
         }
+        
+        debug!("Found required service {} {:?}", service.uuid, service);
         for (chr_name, chr_uuid) in proto_service.iter() {
-          let maybe_chr = service.characteristics.iter().find(|c| c.uuid == *chr_uuid);
-          if let Some(chr) = maybe_chr {
+          if let Some(chr) = service.characteristics.iter().find(|c| c.uuid == *chr_uuid) {
+            debug!("Found characteristic {} for endpoint {}", chr.uuid, *chr_name);
             endpoints.insert(*chr_name, chr.clone());
             uuid_map.insert(*chr_uuid, *chr_name);
+          } else {
+            error!("Characteristic {} ({}) not found, may cause issues in connection.", chr_name, chr_uuid);
           }
         }
       }

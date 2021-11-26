@@ -54,40 +54,43 @@ impl BtleplugAdapterTask {
       );
       return;
     };
-    if let Some(name) = properties.local_name {
+
+    let device_name = if let Some(name) = properties.local_name {
+      name
+    } else {
+      String::new()
+    };
+
+    if (!device_name.is_empty() || !properties.services.is_empty()) && !tried_addresses.contains(peripheral_id) {
       let span = info_span!(
         "btleplug enumeration",
         address = tracing::field::display(format!("{:?}", peripheral_id)),
-        name = tracing::field::display(&name)
+        name = tracing::field::display(&device_name)
       );
       let _enter = span.enter();
       // Names are the only way we really have to test devices
       // at the moment. Most devices don't send services on
       // advertisement.
-      if !name.is_empty() && !tried_addresses.contains(peripheral_id)
-      //&& !connected_addresses_handler.contains_key(&properties.address)
+      debug!("Found new bluetooth device: {} {:?}", device_name, peripheral_id);
+      tried_addresses.push(peripheral_id.clone());
+      let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
+        &device_name,
+        peripheral_id,
+        &properties.services,
+        peripheral.clone(),
+        adapter.clone(),
+      ));
+      if self
+        .event_sender
+        .send(DeviceCommunicationEvent::DeviceFound {
+          name: device_name,
+          address: format!("{:?}", peripheral_id),
+          creator: device_creator,
+        })
+        .await
+        .is_err()
       {
-        debug!("Found new bluetooth device: {} {:?}", name, peripheral_id);
-        tried_addresses.push(peripheral_id.clone());
-        let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
-          &name,
-          peripheral_id,
-          peripheral.clone(),
-          adapter.clone(),
-        ));
-
-        if self
-          .event_sender
-          .send(DeviceCommunicationEvent::DeviceFound {
-            name,
-            address: format!("{:?}", peripheral_id),
-            creator: device_creator,
-          })
-          .await
-          .is_err()
-        {
-          error!("Device manager receiver dropped, cannot send device found message.");
-        }
+        error!("Device manager receiver dropped, cannot send device found message.");
       }
     } else {
       trace!(

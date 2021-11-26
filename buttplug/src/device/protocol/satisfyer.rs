@@ -8,6 +8,7 @@ use crate::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
+    DeviceReadCmd,
     Endpoint,
   },
 };
@@ -44,8 +45,13 @@ impl ButtplugProtocol for Satisfyer {
     let msg = DeviceWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
+      let result = device_impl
+        .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+        .await?;
+      let device_identifier = String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
+      info!("Satisfyer Device Identifier: {}", device_identifier);
       info_fut.await?;
-      Ok(None)
+      Ok(Some(device_identifier))
     })
   }
 }

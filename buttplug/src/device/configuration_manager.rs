@@ -37,14 +37,22 @@ use uuid::Uuid;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BluetoothLESpecifier {
   pub names: HashSet<String>,
+  #[serde(default, rename = "advertised-services")]
+  pub advertised_services: HashSet<Uuid>,
+  // Set of services that we may have gotten as part of the advertisement.
   pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
 }
 
 impl PartialEq for BluetoothLESpecifier {
   fn eq(&self, other: &Self) -> bool {
+    // If names or advertised services are found, use those automatically.
     if self.names.intersection(&other.names).count() > 0 {
       return true;
     }
+    if self.advertised_services.intersection(&other.advertised_services).count() > 0 {
+      return true;
+    }
+    // Otherwise, try wildcarded names.
     for name in &self.names {
       for other_name in &other.names {
         let compare_name: &String;
@@ -70,12 +78,14 @@ impl PartialEq for BluetoothLESpecifier {
 }
 
 impl BluetoothLESpecifier {
-  pub fn new_from_device(name: &str) -> BluetoothLESpecifier {
-    let mut set = HashSet::new();
-    set.insert(name.to_string());
+  pub fn new_from_device(name: &str, advertised_services: &[Uuid]) -> BluetoothLESpecifier {
+    let mut name_set = HashSet::new();
+    name_set.insert(name.to_string());
+    let service_set = HashSet::from_iter(advertised_services.iter().copied());
     BluetoothLESpecifier {
-      names: set,
-      services: HashMap::new(),
+      names: name_set,
+      advertised_services: service_set,
+      services: HashMap::new()
     }
   }
 
@@ -574,7 +584,7 @@ mod test {
   #[test]
   fn test_config_equals() {
     let config = create_test_dcm(false);
-    let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch"));
+    let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch", &[]));
     assert!(config.find_protocol_definitions(&launch).is_some());
   }
 
@@ -582,7 +592,7 @@ mod test {
   fn test_config_wildcard_equals() {
     let config = create_test_dcm(false);
     let lovense =
-      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
     assert!(config.find_protocol_definitions(&lovense).is_some());
   }
 
@@ -590,7 +600,7 @@ mod test {
   fn test_specific_device_config_creation() {
     let config = create_test_dcm(false);
     let lovense =
-      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
     let proto = config
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
@@ -619,7 +629,7 @@ mod test {
   fn test_raw_device_config_creation() {
     let config = create_test_dcm(true);
     let lovense =
-      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
     let proto = config
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
@@ -644,7 +654,7 @@ mod test {
   fn test_non_raw_device_config_creation() {
     let config = create_test_dcm(false);
     let lovense =
-      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever"));
+      DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
     let proto = config
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");

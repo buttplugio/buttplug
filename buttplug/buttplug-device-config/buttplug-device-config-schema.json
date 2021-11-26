@@ -18,6 +18,13 @@
           },
           "minItems": 1
         },
+        "advertised-services": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "$ref": "#/components/uuid"
+          }
+        },        
         "services": {
           "type": "object",
           "patternProperties": {
