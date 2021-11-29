@@ -24,6 +24,7 @@ pub mod lovenuts;
 pub mod magic_motion_v1;
 pub mod magic_motion_v2;
 pub mod magic_motion_v3;
+pub mod mannuo;
 pub mod maxpro;
 pub mod mizzzee;
 pub mod motorbunny;
@@ -124,6 +125,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<magic_motion_v1::MagicMotionV1>(&map, "magic-motion-1");
   add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
   add_to_protocol_map::<magic_motion_v3::MagicMotionV3>(&map, "magic-motion-3");
+  add_to_protocol_map::<mannuo::ManNuo>(&map, "mannuo");
   add_to_protocol_map::<maxpro::Maxpro>(&map, "maxpro");
   add_to_protocol_map::<mizzzee::MizzZee>(&map, "mizzzee");
   add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
