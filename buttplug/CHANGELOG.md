@@ -5,16 +5,19 @@
 - Added Named Pipe/Unix Domain Socket connector
 - Updated to btleplug v0.9, simplified Linux bluetooth code to be in line with rest of platforms
 - Bring User Device Configuration in-line with Device Configuration
+- btleplug DCM now prints radio manufacturer to logs (useful for debugging)
+- btleplug DCM can now identify devices via advertised services (useful for Satisfyer, Vibratissimo)
 - Added Hardware Support:
   - Lovense Gush, Hyphy
   - LoveDistance devices
-  - Satisfyer devices (May have issues on desktop due to pairing)
+  - Satisfyer devices (Only works w/ CSR Bluetooth dongle, and only one device bonded at a time)
   - Hot Octopuss Pulse (Kiiroo/Bluetooth Edition)
   - Svakom Sam, Alex, Iker
+  - ManNuo devices
 
 ## Bugfixes
 
-- Renamed Lovense Quake to Lovense Dolce
+- Renamed Lovense Quake to Lovense Dolce, Lovense Blast to Lovense Ridge
 - Lovense Connect will now use user's IP instead of lovense.club resolution, bypassing issues with
   Lovense's DNS resolver
 - Removed all .unwrap()s from library, either by cleanup or conversion to .expect() with useful
