@@ -101,7 +101,7 @@ mod test {
           .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], true)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![170, 85, 6, 1, 1, 1, 2, 250, 0], true)),
       );
       // Since we only created one subcommand, we should only receive one command.
       device
@@ -109,40 +109,6 @@ mod test {
           .await
           .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
-      device
-          .parse_message(
-            VibrateCmd::new(
-              0,
-              vec![
-                VibrateSubcommand::new(0, 0.1),
-                VibrateSubcommand::new(1, 0.5),
-              ],
-            )
-                .into(),
-          )
-          .await
-          .expect("Test, assuming infallible");
-      // TODO There's probably a more concise way to do this.
-      check_test_recv_value(
-        &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![170, 85, 6, 1, 1, 1, 1, 128, 121], true)),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], true)),
-      );
-      device
-          .parse_message(StopDeviceCmd::new(0).into())
-          .await
-          .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], true)),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], true)),
-      );
     });
   }
 }

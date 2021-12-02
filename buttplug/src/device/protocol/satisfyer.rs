@@ -183,7 +183,7 @@ mod test {
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
-          vec![50, 50, 50, 50, 0, 0, 0, 0],
+          vec![0, 0, 0, 0, 50, 50, 50, 50],
           false,
         )),
       );
