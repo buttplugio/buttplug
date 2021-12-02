@@ -167,7 +167,10 @@ impl DeviceManagerEventLoop {
 
         // Make sure the device isn't on the deny list
         if let Some(config) = self.device_user_config.get(&address) {
-          info!("Device {} has a user configuration entry, checking.", address);
+          info!(
+            "Device {} has a user configuration entry, checking.",
+            address
+          );
           if let Some(true) = config.deny() {
             info!("Denied device address {} found, ignoring.", address);
             return;

@@ -21,7 +21,7 @@ use crate::{
   device::Endpoint,
 };
 use dashmap::DashMap;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashMap, HashSet},
   sync::Arc,
@@ -49,7 +49,12 @@ impl PartialEq for BluetoothLESpecifier {
     if self.names.intersection(&other.names).count() > 0 {
       return true;
     }
-    if self.advertised_services.intersection(&other.advertised_services).count() > 0 {
+    if self
+      .advertised_services
+      .intersection(&other.advertised_services)
+      .count()
+      > 0
+    {
       return true;
     }
     // Otherwise, try wildcarded names.
@@ -85,7 +90,7 @@ impl BluetoothLESpecifier {
     BluetoothLESpecifier {
       names: name_set,
       advertised_services: service_set,
-      services: HashMap::new()
+      services: HashMap::new(),
     }
   }
 

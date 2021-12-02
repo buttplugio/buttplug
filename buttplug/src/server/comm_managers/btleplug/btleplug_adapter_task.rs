@@ -61,7 +61,9 @@ impl BtleplugAdapterTask {
       String::new()
     };
 
-    if (!device_name.is_empty() || !properties.services.is_empty()) && !tried_addresses.contains(peripheral_id) {
+    if (!device_name.is_empty() || !properties.services.is_empty())
+      && !tried_addresses.contains(peripheral_id)
+    {
       let span = info_span!(
         "btleplug enumeration",
         address = tracing::field::display(format!("{:?}", peripheral_id)),
@@ -71,7 +73,10 @@ impl BtleplugAdapterTask {
       // Names are the only way we really have to test devices
       // at the moment. Most devices don't send services on
       // advertisement.
-      debug!("Found new bluetooth device: {} {:?}", device_name, peripheral_id);
+      debug!(
+        "Found new bluetooth device: {} {:?}",
+        device_name, peripheral_id
+      );
       tried_addresses.push(peripheral_id.clone());
       let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
         &device_name,
@@ -124,12 +129,17 @@ impl BtleplugAdapterTask {
           if let Some(adapter) = adapters.into_iter().next() {
             info!("Bluetooth LE adapter found.");
             // Bluetooth dongle identification for Windows
-            #[cfg(target_os="windows")]
+            #[cfg(target_os = "windows")]
             {
               use windows::Devices::Bluetooth::BluetoothAdapter;
-              let adapter_result = BluetoothAdapter::GetDefaultAsync().expect("If we're here, we got an adapter").await;
+              let adapter_result = BluetoothAdapter::GetDefaultAsync()
+                .expect("If we're here, we got an adapter")
+                .await;
               let adapter = adapter_result.expect("Considering infallible at this point");
-              let device_id = adapter.DeviceId().expect("Considering infallible at this point").to_string();
+              let device_id = adapter
+                .DeviceId()
+                .expect("Considering infallible at this point")
+                .to_string();
               info!("Windows Bluetooth Adapter ID: {:?}", device_id);
               let device_manufacturer = if device_id.contains("VID_0A12") {
                 "Cambridge Silicon Radio (CSR)"
@@ -142,7 +152,10 @@ impl BtleplugAdapterTask {
               } else {
                 "Unknown Manufacturer"
               };
-              info!("Windows Bluetooth Adapter Manufacturer: {}", device_manufacturer);
+              info!(
+                "Windows Bluetooth Adapter Manufacturer: {}",
+                device_manufacturer
+              );
             }
             adapter
           } else {

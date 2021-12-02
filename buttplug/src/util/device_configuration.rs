@@ -2,9 +2,9 @@ use super::json::JSONValidator;
 use crate::{
   core::errors::{ButtplugDeviceError, ButtplugError},
   device::configuration_manager::{DeviceConfigurationManager, ProtocolDefinition},
-  server::{device_manager::DeviceUserConfig},
+  server::device_manager::DeviceUserConfig,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
@@ -26,7 +26,7 @@ impl Default for ProtocolConfiguration {
     Self {
       version: get_internal_config_version(),
       protocols: HashMap::new(),
-      user_config: HashMap::new()
+      user_config: HashMap::new(),
     }
   }
 }
@@ -46,7 +46,8 @@ impl ProtocolConfiguration {
   }
 
   pub fn to_json(&self) -> String {
-    serde_json::to_string(self).expect("All types below this are Serialize, so this should be infallible.")
+    serde_json::to_string(self)
+      .expect("All types below this are Serialize, so this should be infallible.")
   }
 }
 

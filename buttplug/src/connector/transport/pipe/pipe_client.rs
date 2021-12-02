@@ -170,13 +170,11 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
           )
         })?;
       #[cfg(not(target_os = "windows"))]
-      let client = UnixStream::connect(address)
-        .await
-        .map_err(|err| {
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
-          )
-        })?;      
+      let client = UnixStream::connect(address).await.map_err(|err| {
+        ButtplugConnectorError::TransportSpecificError(
+          ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+        )
+      })?;
       tokio::spawn(async move {
         run_connection_loop(
           client,

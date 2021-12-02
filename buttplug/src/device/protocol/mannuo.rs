@@ -24,8 +24,8 @@ impl ButtplugProtocol for ManNuo {
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
   ) -> Box<dyn ButtplugProtocol>
-    where
-        Self: Sized,
+  where
+    Self: Sized,
   {
     let manager = GenericCommandManager::new(&message_attributes);
 
@@ -60,11 +60,9 @@ impl ButtplugProtocolCommandHandler for ManNuo {
             }
             data.push(crc);
 
-            device.write_value(DeviceWriteCmd::new(
-              Endpoint::Tx,
-              data,
-              true,
-            )).await?;
+            device
+              .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, true))
+              .await?;
           }
         }
       }
@@ -90,24 +88,28 @@ mod test {
   pub fn test_mannuo_protocol() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Sex toys")
-          .await
-          .expect("Test, assuming infallible");
+        .await
+        .expect("Test, assuming infallible");
       let command_receiver = test_device
-          .get_endpoint_receiver(&Endpoint::Tx)
-          .expect("Test, assuming infallible");
+        .get_endpoint_receiver(&Endpoint::Tx)
+        .expect("Test, assuming infallible");
       device
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-          .expect("Test, assuming infallible");
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![170, 85, 6, 1, 1, 1, 2, 250, 0], true)),
+        DeviceImplCommand::Write(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          vec![170, 85, 6, 1, 1, 1, 2, 250, 0],
+          true,
+        )),
       );
       // Since we only created one subcommand, we should only receive one command.
       device
-          .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-          .await
-          .expect("Test, assuming infallible");
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .await
+        .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
     });
   }

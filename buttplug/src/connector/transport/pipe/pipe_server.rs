@@ -29,7 +29,6 @@ type PipeServerType = named_pipe::NamedPipeServer;
 #[cfg(not(target_os = "windows"))]
 type PipeServerType = UnixStream;
 
-
 #[derive(Clone, Debug)]
 pub struct ButtplugPipeServerTransportBuilder {
   /// Address (either Named Pipe or Domain Socket File) to connect to
@@ -101,7 +100,7 @@ async fn run_connection_loop(
           let response = server.disconnect();
           #[cfg(not(target = "windows"))]
           let response = server.shutdown().await;
-  
+
           if response.is_err(){
             error!("Cannot close, assuming connection already closed");
             break;
@@ -172,13 +171,13 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
       #[cfg(target_os = "windows")]
       let server = {
         let server = named_pipe::ServerOptions::new()
-        .first_pipe_instance(true)
-        .create(address)
-        .map_err(|err| {
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
-          )
-        })?;
+          .first_pipe_instance(true)
+          .create(address)
+          .map_err(|err| {
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
+            )
+          })?;
         server.connect().await.map_err(|err| {
           ButtplugConnectorError::TransportSpecificError(
             ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{}", err)),
