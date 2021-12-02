@@ -88,7 +88,7 @@ pub(crate) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessa
 /// [ButtplugClientMessageFuturePair] type. We can then expect the connector to
 /// get the response from the server, match it with our message (using something
 /// like the
-/// [ClientConnectorMessageSorter][crate::connector::ClientConnectorMessageSorter]),
+/// [ClientMessageSorter][crate::client::client_message_sorter::ClientMessageSorter]),
 /// and set the reply in the waker we've sent along. This will resolve the
 /// future we're waiting on and allow us to continue execution.
 #[derive(Clone)]
@@ -163,12 +163,12 @@ impl Unpin for ButtplugClientEvent {
 /// the API.
 ///
 /// Clients serve a few different purposes:
-/// - Managing connections to servers, thru [ButtplugClientConnector]s
+/// - Managing connections to servers, thru [ButtplugConnector]s
 /// - Emitting events received from the Server
 /// - Holding state related to the server (i.e. what devices are currently
 ///   connected, etc...)
 ///
-/// Clients are created by the [ButtplugClient::run()] method, which also
+/// Clients are created by the [ButtplugClient::new()] method, which also
 /// handles spinning up the event loop and connecting the client to the server.
 /// Closures passed to the run() method can access and use the Client object.
 pub struct ButtplugClient {

@@ -7,43 +7,36 @@
 
 //! Methods for establishing connections between Buttplug Clients and Servers
 //!
-//! Buttplug is made to work in many different circumstances. The
-//! [ButtplugClient] and [ButtplugServer] may be in the same process, in
-//! different process communicating over some sort of IPC, or on different
-//! machines using a network connection. Connectors are what make these setups
-//! possible.
+//! Buttplug is made to work in many different circumstances. The [crate::client::ButtplugClient]
+//! and [crate::server::ButtplugServer] may be in the same process, in different process
+//! communicating over some sort of IPC, or on different machines using a network connection.
+//! Connectors are what make these setups possible.
 //!
 //! # How Buttplug Clients and Servers Use Connectors
 //!
-//! A Buttplug Client uses a connector to communicate with a server, be it in
-//! the same process or on another machine. The client's connector handles
-//! establishing the connection to the server, as well as sending ([possibly
-//! serialized][crate::core::messages::serializer]) messages to the server and
-//! matching replies from the server to waiting futures.
+//! A Buttplug Client uses a connector to communicate with a server, be it in the same process or on
+//! another machine. The client's connector handles establishing the connection to the server, as
+//! well as sending ([possibly serialized][crate::core::messages::serializer]) messages to the
+//! server and matching replies from the server to waiting futures.
 //!
-//! Buttplug servers use connectors to receive info from clients. They usually
-//! have less to do than client connectors, because they don't have to keep
-//! track of messages waiting for replies (since Buttplug messages that require
-//! responses are only client -> server, the server will never send anything to
-//! a client that expects a response.)
+//! Buttplug servers use connectors to receive info from clients. They usually have less to do than
+//! client connectors, because they don't have to keep track of messages waiting for replies (since
+//! Buttplug messages that require responses are only client -> server, the server will never send
+//! anything to a client that expects a response.)
 //!
 //! # In-Process and Remote Connectors
 //!
-//! There are two types of connectors: In-Process and Remote. All connectors
-//! have the same API (since they all follow the [ButtplugClientConnector] and
-//! [ButtplugServerConnector] traits), but will varying in latency, message
-//! passing techniques, etc...
+//! There are two types of connectors: In-Process and Remote. All connectors have the same API
+//! (since they all follow the [crate::connector::ButtplugConnector] trait), but will varying in
+//! latency, message passing techniques, etc...
 //!
-//! There is only 1 in-process connector, the
-//! [ButtplugInProcessClientConnector]. This is used when the client and server
-//! live in the same process, which is useful for multiple reasons (see
-//! [ButtplugInProcessClientConnector] documentation for more info). As
-//! in-process connectors can just send message objects back and forth, there is
-//! no need for message serialization.
+//! There is only 1 in-process connector, the [ButtplugInProcessClientConnector]. This is used when
+//! the client and server live in the same process, which is useful for multiple reasons (see
+//! [ButtplugInProcessClientConnector] documentation for more info). As in-process connectors can
+//! just send message objects back and forth, there is no need for message serialization.
 //!
-//! Remote connectors refer to any connector that connects to something outside
-//! of the current process, be it still on the same machine (IPC) or somewhere
-//! else (network).
+//! Remote connectors refer to any connector that connects to something outside of the current
+//! process, be it still on the same machine (IPC) or somewhere else (network).
 //!
 //! # Remote Transports
 //!
@@ -51,28 +44,24 @@
 //!
 //! # Buttplug Client/Server Does Not Necessarily Mean Transport Client/Server
 //!
-//! Here's an odd but valid situation: *You can have a Buttplug Client that uses
-//! a Websocket Server connector!*
+//! Here's an odd but valid situation: *You can have a Buttplug Client that uses a Websocket Server
+//! connector!*
 //!
-//! There are times where this is actually useful. For instance, let's say a
-//! user of Buttplug wants to use a Windows 7 desktop machine to control a
-//! Bluetooth LE toy. This normally wouldn't work because Windows 7 doesn't have
-//! a Bluetooth LE API we can easily access. However, they also have an android
-//! phone. They could run a Buttplug Server in Chrome on their Android phone,
-//! have the Client on the desktop run a websocket server, then have (and stick
-//! with me here) the Buttplug Server in the Android Chrome instance use a
-//! Websocket Client to connect to the Websocket Server on the desktop. This
-//! allows the desktop machine to proxy Bluetooth to the WebBluetooth API built
+//! There are times where this is actually useful. For instance, let's say a user of Buttplug wants
+//! to use a Windows 7 desktop machine to control a Bluetooth LE toy. This normally wouldn't work
+//! because Windows 7 doesn't have a Bluetooth LE API we can easily access. However, they also have
+//! an android phone. They could run a Buttplug Server in Chrome on their Android phone, have the
+//! Client on the desktop run a websocket server, then have (and stick with me here) the Buttplug
+//! Server in the Android Chrome instance use a Websocket Client to connect to the Websocket Server
+//! on the desktop. This allows the desktop machine to proxy Bluetooth to the WebBluetooth API built
 //! into Android Chrome.
 //!
 //! Is this ridiculous? *Absolutely*.
 //!
-//! Will people do it? Remember, this is a library about sex, so the answer is
-//! also *Absolutely*.
+//! Will people do it? Remember, this is a library about sex, so the answer is also *Absolutely*.
 //!
-//! There are slightly more useful situations like device forwarders where this
-//! work comes in also, but that Windows 7/Android example is where the idea
-//! originally came from.
+//! There are slightly more useful situations like device forwarders where this work comes in also,
+//! but that Windows 7/Android example is where the idea originally came from.
 
 #[cfg(all(feature = "server", feature = "client"))]
 mod in_process_connector;
@@ -147,11 +136,11 @@ where
 ///
 /// The `O` type specifies the outbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugClientOutMessage][crate::core::messages::ButtplugClientOutMessage].
+/// [ButtplugClientMessage][crate::core::messages::ButtplugClientMessage].
 ///
 /// The `I` type specifies the inbound message type. This will usually be a
 /// message enum. For instance, in a client connector, this would usually be
-/// [ButtplugClientInMessage][crate::core::messages::ButtplugClientInMessage].
+/// [ButtplugServerMessage][crate::core::messages::ButtplugServerMessage].
 pub trait ButtplugConnector<OutboundMessageType, InboundMessageType>: Send + Sync
 where
   OutboundMessageType: ButtplugMessage + 'static,
@@ -164,7 +153,7 @@ where
   ///
   /// # Errors
   ///
-  /// Returns a [ButtplugClientConnectorError] if there is a problem with the
+  /// Returns a [ButtplugConnectorError] if there is a problem with the
   /// connection process. It is assumed that all information needed to create
   /// the connection will be passed as part of the Trait implementors creation
   /// methods.
@@ -179,7 +168,7 @@ where
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>>;
   /// Disconnects the client from the server.
   ///
-  /// Returns a [ButtplugClientConnectorError] if there is a problem with the
+  /// Returns a [ButtplugConnectorError] if there is a problem with the
   /// disconnection process.
   ///
   /// # Async

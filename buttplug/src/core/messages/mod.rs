@@ -180,7 +180,7 @@ pub trait ButtplugDeviceMessage: ButtplugMessage {
   fn set_device_index(&mut self, id: u32);
 }
 
-/// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
+/// Used in [MessageAttributes][crate::core::messages::DeviceMessageAttributes] for denoting message
 /// capabilties.
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugDeviceMessageType {
@@ -216,7 +216,7 @@ impl Ord for ButtplugDeviceMessageType {
     self.to_string().cmp(&other.to_string())
   }
 }
-/// Used in [MessageAttributes][crate::core::messages::MessageAttributes] for denoting message
+/// Used in [MessageAttributes][crate::core::messages::DeviceMessageAttributes] for denoting message
 /// capabilties. Only contains message that are valid in the current version of the spec.
 #[derive(Copy, Debug, Clone, PartialEq, Eq, Hash, Display, Serialize, Deserialize)]
 pub enum ButtplugCurrentSpecDeviceMessageType {
