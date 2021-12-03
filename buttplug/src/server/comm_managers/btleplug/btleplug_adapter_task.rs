@@ -160,6 +160,10 @@ impl BtleplugAdapterTask {
                 "Intel"
               } else if device_id.contains("VID_0BDA") {
                 "RealTek"
+              } else if device_id.contains("VID_0B05") {
+                "Asus"
+              } else if device_id.contains("VID_13D3") {
+                "IMC"
               } else {
                 "Unknown Manufacturer"
               };
