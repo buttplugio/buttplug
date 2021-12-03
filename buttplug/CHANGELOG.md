@@ -1,7 +1,16 @@
-# 5.1.0 (2021-11-15)
+# 5.1.1 (2021-12-03)
+
+## Bugfixes
+
+- #410: Fixed issue with hidapi on linux not working with Lovense dongles
+- #411: Fixed issue with bluetooth devices without full advertisement info being ignored
+- #412: Added more bluetooth manufacturer identifier data
+
+# 5.1.0 (2021-12-01)
 
 ## Features
 
+- Update to Rust Edition 2021
 - Added Named Pipe/Unix Domain Socket connector
 - Updated to btleplug v0.9, simplified Linux bluetooth code to be in line with rest of platforms
 - Bring User Device Configuration in-line with Device Configuration
