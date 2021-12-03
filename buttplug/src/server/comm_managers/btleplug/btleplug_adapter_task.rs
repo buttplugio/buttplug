@@ -15,6 +15,13 @@ pub enum BtleplugAdapterCommand {
   StopScanning,
 }
 
+#[derive(Clone, PartialEq, Debug)]
+struct PeripheralInfo {
+  name: Option<String>,
+  peripheral_id: PeripheralId,
+  services: Vec<uuid::Uuid>
+}
+
 pub struct BtleplugAdapterTask {
   event_sender: Sender<DeviceCommunicationEvent>,
   command_receiver: Receiver<BtleplugAdapterCommand>,
@@ -35,7 +42,7 @@ impl BtleplugAdapterTask {
     &self,
     peripheral_id: &PeripheralId,
     adapter: &Adapter,
-    tried_addresses: &mut Vec<PeripheralId>,
+    tried_addresses: &mut Vec<PeripheralInfo>,
   ) {
     let peripheral = if let Ok(peripheral) = adapter.peripheral(peripheral_id).await {
       peripheral
@@ -55,14 +62,20 @@ impl BtleplugAdapterTask {
       return;
     };
 
-    let device_name = if let Some(name) = properties.local_name {
-      name
+    let device_name = if let Some(name) = &properties.local_name {
+      name.clone()
     } else {
       String::new()
     };
 
+    let peripheral_info = PeripheralInfo {
+      name: properties.local_name.clone(),
+      peripheral_id: peripheral_id.clone(),
+      services: properties.services.clone()
+    };
+
     if (!device_name.is_empty() || !properties.services.is_empty())
-      && !tried_addresses.contains(peripheral_id)
+      && !tried_addresses.contains(&peripheral_info)
     {
       let span = info_span!(
         "btleplug enumeration",
@@ -70,14 +83,12 @@ impl BtleplugAdapterTask {
         name = tracing::field::display(&device_name)
       );
       let _enter = span.enter();
-      // Names are the only way we really have to test devices
-      // at the moment. Most devices don't send services on
-      // advertisement.
+
       debug!(
-        "Found new bluetooth device: {} {:?}",
-        device_name, peripheral_id
+        "Found new bluetooth device advertisement: {:?}",
+        peripheral_info
       );
-      tried_addresses.push(peripheral_id.clone());
+      tried_addresses.push(peripheral_info.clone());
       let device_creator = Box::new(BtlePlugDeviceImplCreator::new(
         &device_name,
         peripheral_id,
@@ -196,7 +207,7 @@ impl BtleplugAdapterTask {
                 }
                 CentralEvent::DeviceDisconnected(peripheral_id) => {
                   debug!("BTLEPlug Device disconnected: {:?}", peripheral_id);
-                  tried_addresses.retain(|id| peripheral_id != *id);
+                  tried_addresses.retain(|info| info.peripheral_id != peripheral_id);
                 }
                 event => {
                   trace!("Unhandled btleplug central event: {:?}", event)
