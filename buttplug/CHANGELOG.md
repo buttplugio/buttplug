@@ -1,3 +1,10 @@
+# 5.1.2 (2021-12-04)
+
+## Bugfixes
+
+- #413: Fix race condition with bluetooth advertisements causing multiple connection attempts to the
+  same device simultaneously.
+
 # 5.1.1 (2021-12-03)
 
 ## Bugfixes
