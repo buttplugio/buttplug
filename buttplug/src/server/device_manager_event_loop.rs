@@ -19,7 +19,7 @@ use crate::{
   },
   util::async_manager,
 };
-use dashmap::DashMap;
+use dashmap::{DashMap, DashSet};
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -52,6 +52,8 @@ pub struct DeviceManagerEventLoop {
   scanning_in_progress: bool,
   /// Holds the status of comm manager scanning states (scanning/not scanning).
   comm_manager_scanning_statuses: Vec<Arc<AtomicBool>>,
+  /// Devices currently trying to connect.
+  connecting_devices: Arc<DashSet<String>>,
 }
 
 impl DeviceManagerEventLoop {
@@ -77,14 +79,16 @@ impl DeviceManagerEventLoop {
       device_event_receiver,
       scanning_in_progress: false,
       comm_manager_scanning_statuses: vec![],
+      connecting_devices: Arc::new(DashSet::new()),
     }
   }
 
-  fn try_create_new_device(&mut self, device_creator: Box<dyn ButtplugDeviceImplCreator>) {
+  fn try_create_new_device(&mut self, device_address: String, device_creator: Box<dyn ButtplugDeviceImplCreator>) {
     let device_event_sender_clone = self.device_event_sender.clone();
     let create_device_future =
       ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
     let device_user_config = self.device_user_config.clone();
+    let connecting_devices = self.connecting_devices.clone();
     async_manager::spawn(async move {
       match create_device_future.await {
         Ok(option_dev) => match option_dev {
@@ -108,6 +112,7 @@ impl DeviceManagerEventLoop {
         },
         Err(e) => error!("Device errored while trying to connect: {}", e),
       }
+      connecting_devices.remove(&device_address);
     }.instrument(tracing::Span::current()));
   }
 
@@ -155,15 +160,27 @@ impl DeviceManagerEventLoop {
         let _enter = span.enter();
 
         // Check to make sure the device isn't already connected. If it is, drop it.
-        for device_entry in self.device_map.iter() {
-          if device_entry.value().address() == address {
-            debug!(
-              "Device {} already connected, ignoring new device emission",
-              address
-            );
-            return;
-          }
+        if self.device_map.iter().any(|entry| entry.value().address() == address) {
+          debug!(
+            "Device {} already connected, ignoring new device event.",
+            address
+          );
+          return;
         }
+
+        // Some device managers (like bluetooth) can send multiple DeviceFound events for the same
+        // device, due to how things like advertisements work. We'll filter this at the
+        // DeviceManager level to make sure that even if a badly coded DCM throws multiple found
+        // events, we only listen to the first one.
+        if self.connecting_devices.contains(&address) {
+          info!(
+            "Device {} currently trying to connect, ignoring new device event.",
+            address
+          );
+          return;
+        }
+
+        self.connecting_devices.insert(address.clone());
 
         // Make sure the device isn't on the deny list
         if let Some(config) = self.device_user_config.get(&address) {
@@ -203,7 +220,7 @@ impl DeviceManagerEventLoop {
           return;
         }
 
-        self.try_create_new_device(creator);
+        self.try_create_new_device(address, creator);
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
