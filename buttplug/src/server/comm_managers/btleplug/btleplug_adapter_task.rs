@@ -19,7 +19,7 @@ pub enum BtleplugAdapterCommand {
 struct PeripheralInfo {
   name: Option<String>,
   peripheral_id: PeripheralId,
-  services: Vec<uuid::Uuid>
+  services: Vec<uuid::Uuid>,
 }
 
 pub struct BtleplugAdapterTask {
@@ -71,7 +71,7 @@ impl BtleplugAdapterTask {
     let peripheral_info = PeripheralInfo {
       name: properties.local_name.clone(),
       peripheral_id: peripheral_id.clone(),
-      services: properties.services.clone()
+      services: properties.services.clone(),
     };
 
     if (!device_name.is_empty() || !properties.services.is_empty())
