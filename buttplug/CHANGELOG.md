@@ -1,3 +1,9 @@
+# 5.1.3 (2021-12-08)
+
+## Bugfixes
+
+- Fix missing tokio feature for Named Pipes
+
 # 5.1.2 (2021-12-04)
 
 ## Bugfixes
