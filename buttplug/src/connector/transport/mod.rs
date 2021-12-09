@@ -1,3 +1,4 @@
+#[cfg(not(target_arch = "wasm32"))]
 mod pipe;
 #[cfg(feature = "websockets")]
 mod websocket;
@@ -7,6 +8,7 @@ use crate::connector::{
   ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
+#[cfg(not(target_arch = "wasm32"))]
 pub use pipe::{
   pipe_client::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder},
   pipe_server::{ButtplugPipeServerTransport, ButtplugPipeServerTransportBuilder},

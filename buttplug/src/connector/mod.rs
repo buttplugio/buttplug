@@ -85,6 +85,7 @@ use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 #[cfg(feature = "websockets")]
 pub use transport::ButtplugWebsocketClientTransport;
+#[cfg(not(target_arch = "wasm32"))]
 pub use transport::{
   ButtplugPipeClientTransport,
   ButtplugPipeClientTransportBuilder,
