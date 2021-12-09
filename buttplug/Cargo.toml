@@ -70,7 +70,7 @@ serialport = { version = "4.0.1", optional = true }
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "1.3.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 wasm-bindgen = { version = "0.2.78", optional = true }
-tokio = { version = "1.14.0", features = ["sync", "macros"] }
+tokio = { version = "1.14.0", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.2"
 prost = "0.9.0"
 tokio-util = "0.6.9"
@@ -82,7 +82,7 @@ getset = "0.1.2"
 rusty-xinput = "1.2.0"
 
 [dev-dependencies]
-tokio = { version = "1.14.0", features = ["io-std", "io-util"] }
+tokio = { version = "1.14.0", features = ["io-std"] }
 tracing-log = { version = "0.1.2", features = ["env_logger"] }
 
 [lib]
