@@ -1,3 +1,9 @@
+# 5.1.4 (2021-12-08)
+
+## Bugfixes
+
+- WASM API updates (hadn't built WASM in a while, broke stuff :( ))
+
 # 5.1.3 (2021-12-08)
 
 ## Bugfixes
