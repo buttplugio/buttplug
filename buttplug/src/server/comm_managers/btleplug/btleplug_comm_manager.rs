@@ -8,7 +8,7 @@ use crate::{
   },
   util::async_manager,
 };
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 
 use tokio::sync::mpsc::{channel, Sender};
 
@@ -35,6 +35,7 @@ impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
 
 pub struct BtlePlugCommunicationManager {
   adapter_event_sender: Sender<BtleplugAdapterCommand>,
+  scanning_status: Arc<AtomicBool>
 }
 
 impl BtlePlugCommunicationManager {
@@ -46,6 +47,7 @@ impl BtlePlugCommunicationManager {
     });
     Self {
       adapter_event_sender: sender,
+      scanning_status: Arc::new(AtomicBool::new(false))
     }
   }
 }
@@ -57,6 +59,9 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
   fn start_scanning(&self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
+    let scanning_status = self.scanning_status.clone();
+    // Set to true just to make sure we don't call ScanningFinished too early.
+    scanning_status.store(true, Ordering::SeqCst);
     Box::pin(async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StartScanning)
@@ -64,6 +69,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
         .is_err()
       {
         error!("Error starting scan, cannot send to btleplug event loop.");
+        scanning_status.store(false, Ordering::SeqCst);
         Err(
           ButtplugDeviceError::DeviceConnectionError(
             "Cannot send start scanning request to event loop.".to_owned(),
@@ -71,6 +77,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           .into(),
         )
       } else {
+
         Ok(())
       }
     })
@@ -78,6 +85,8 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
   fn stop_scanning(&self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
+    // Just assume any outcome of this means we're done scanning.
+    self.scanning_status.store(false, Ordering::SeqCst);
     Box::pin(async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StopScanning)
@@ -98,7 +107,7 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
   }
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
-    Arc::new(AtomicBool::new(false))
+    self.scanning_status.clone()
   }
 }
 /*
