@@ -10,27 +10,7 @@ use crate::{
 };
 use std::sync::Arc;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct Maxpro {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-}
-
-impl ButtplugProtocol for Maxpro {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-    })
-  }
-}
+super::default_protocol_declaration!(Maxpro);
 
 impl ButtplugProtocolCommandHandler for Maxpro {
   fn handle_vibrate_cmd(

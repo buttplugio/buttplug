@@ -9,33 +9,8 @@ use crate::{
   device::{protocol::ButtplugProtocolProperties, DeviceImpl, DeviceWriteCmd, Endpoint},
 };
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct TCodeV03 {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  manager: Arc<Mutex<GenericCommandManager>>,
-}
-
-impl ButtplugProtocol for TCodeV03 {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol>
-  where
-    Self: Sized,
-  {
-    let manager = Arc::new(Mutex::new(GenericCommandManager::new(&message_attributes)));
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: vec![],
-      manager,
-    })
-  }
-}
+super::default_protocol_declaration!(TCodeV03);
 
 impl ButtplugProtocolCommandHandler for TCodeV03 {
   fn handle_linear_cmd(

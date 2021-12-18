@@ -77,6 +77,8 @@ use crate::{
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
 use std::sync::Arc;
+use generic_command_manager::GenericCommandManager;
+
 
 pub type TryCreateProtocolFunc =
   fn(
@@ -530,3 +532,38 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
     self.command_unimplemented(print_type_of(&message))
   }
 }
+
+#[macro_export]
+macro_rules! default_protocol_declaration {
+  ( $protocol_name:ident ) => {
+    #[derive(ButtplugProtocolProperties)]
+    pub struct $protocol_name {
+      name: String,
+      message_attributes: DeviceMessageAttributesMap,
+      #[allow(dead_code)]
+      manager: Arc<tokio::sync::Mutex<GenericCommandManager>>,
+      stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+    }
+    
+    impl ButtplugProtocol for $protocol_name {
+      fn new_protocol(
+        name: &str,
+        message_attributes: DeviceMessageAttributesMap,
+      ) -> Box<dyn ButtplugProtocol>
+      where
+        Self: Sized,
+      {
+        let manager = GenericCommandManager::new(&message_attributes);
+    
+        Box::new(Self {
+          name: name.to_owned(),
+          message_attributes,
+          stop_commands: manager.get_stop_commands(),
+          manager: Arc::new(tokio::sync::Mutex::new(manager)),
+        })
+      }
+    }    
+  };
+}
+
+pub use default_protocol_declaration;

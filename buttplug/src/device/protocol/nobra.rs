@@ -9,34 +9,8 @@ use crate::{
   },
 };
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct Nobra {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-}
-
-impl ButtplugProtocol for Nobra {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol>
-  where
-    Self: Sized,
-  {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-    })
-  }
-}
+super::default_protocol_declaration!(Nobra);
 
 impl ButtplugProtocolCommandHandler for Nobra {
   fn handle_vibrate_cmd(
