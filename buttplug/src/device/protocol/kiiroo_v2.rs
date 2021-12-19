@@ -6,7 +6,6 @@ use super::{
 };
 use crate::{
   core::{
-    errors::ButtplugError,
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
@@ -22,7 +21,6 @@ use crate::{
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
@@ -38,30 +36,35 @@ pub struct KiirooV2 {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for KiirooV2 {
-  fn new_protocol(
+impl KiirooV2 {
+  fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
+  ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       _manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
-    })
+    }
   }
+}
 
-  fn initialize(
-    device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+impl ButtplugProtocol for KiirooV2 {
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
+  {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      Ok(None)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

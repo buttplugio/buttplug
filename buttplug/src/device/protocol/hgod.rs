@@ -32,23 +32,25 @@ pub struct Hgod {
   updater_running: Arc<AtomicBool>,
 }
 
-impl ButtplugProtocol for Hgod {
-  fn new_protocol(
+impl Hgod {
+  fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
+  ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       updater_running: Arc::new(AtomicBool::new(false)),
       current_command: Arc::new(RwLock::new(vec![0x55, 0x04, 0, 0, 0, 0])),
-    })
+    }
   }
 }
+
+super::default_protocol_trait_declaration!(Hgod);
 
 async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Hgod Control Loop");

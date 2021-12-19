@@ -26,22 +26,24 @@ pub struct VorzeSA {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for VorzeSA {
-  fn new_protocol(
+impl VorzeSA {
+  fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
+  ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
-    })
+    }
   }
 }
+
+super::default_protocol_trait_declaration!(VorzeSA);
 
 #[repr(u8)]
 #[derive(PartialEq)]

@@ -29,23 +29,25 @@ pub struct LovenseConnectService {
   rotation_direction: Arc<AtomicBool>,
 }
 
-impl ButtplugProtocol for LovenseConnectService {
+impl LovenseConnectService {
   // Due to this lacking the ability to take extra fields, we can't pass in our
   // event receiver from the subscription, which we'll need for things like
   // battery readings. Therefore, we expect initialize() to return the protocol
   // itself instead of calling this, which is simply a convenience method for
   // the default implementation anyways.
-  fn new_protocol(name: &str, attrs: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+  fn new(name: &str, attrs: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&attrs);
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes: attrs,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       rotation_direction: Arc::new(AtomicBool::new(false)),
-    })
+    }
   }
 }
+
+super::default_protocol_trait_declaration!(LovenseConnectService);
 
 impl ButtplugProtocolCommandHandler for LovenseConnectService {
   fn handle_vibrate_cmd(

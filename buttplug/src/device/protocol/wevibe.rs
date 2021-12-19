@@ -1,7 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors::ButtplugError,
     messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
@@ -11,38 +10,18 @@ use crate::{
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
 use futures_timer::Delay;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct WeVibe {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-}
+super::default_protocol_definition!(WeVibe);
 
 impl ButtplugProtocol for WeVibe {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-    })
-  }
-
-  fn initialize(
-    device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
+  {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
@@ -58,7 +37,8 @@ impl ButtplugProtocol for WeVibe {
       vibration_on.await?;
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
-      Ok(None)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)      
     })
   }
 }

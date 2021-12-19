@@ -1,7 +1,7 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugMessageError},
+    errors:: ButtplugMessageError,
     messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
@@ -12,41 +12,21 @@ use crate::{
   },
 };
 use byteorder::{LittleEndian, WriteBytesExt};
-use futures::future::{self, BoxFuture};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct XInput {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-}
+super::default_protocol_definition!(XInput);
 
 impl ButtplugProtocol for XInput {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-    })
-  }
-
-  fn initialize(
-    _device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
-  where
-    Self: Sized,
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
   {
-    // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-    Box::pin(future::ready(Ok(Some("XInput Gamepad".to_owned()))))
+    Box::pin(async move {
+      // This must match the identifier in the device config, otherwise we'll fail to load controllers.
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some("XInput Gamepad".to_owned()), config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+    })
   }
 }
 

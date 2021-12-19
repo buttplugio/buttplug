@@ -6,7 +6,6 @@ use super::{
 };
 use crate::{
   core::{
-    errors::ButtplugError,
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
@@ -19,10 +18,10 @@ use crate::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
     DeviceWriteCmd,
+    DeviceProtocolConfiguration,
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
   Arc,
@@ -78,25 +77,28 @@ pub struct Fredorch {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for Fredorch {
-  fn new_protocol(
+impl Fredorch {
+  fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
+  ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       _manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
-    })
+    }
   }
+}
 
-  fn initialize(
+impl ButtplugProtocol for Fredorch {
+  fn try_create(
     device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+    config: DeviceProtocolConfiguration
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>> {
     Box::pin(async move {
       // Set the device to program mode
       let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
@@ -146,7 +148,8 @@ impl ButtplugProtocol for Fredorch {
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      Ok(None)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

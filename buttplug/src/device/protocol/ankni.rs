@@ -1,7 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors::ButtplugError,
     messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
@@ -11,36 +10,16 @@ use crate::{
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
-pub struct Ankni {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-}
+super::default_protocol_definition!(Ankni);
 
 impl ButtplugProtocol for Ankni {
-  fn new_protocol(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
-      name: name.to_owned(),
-      message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-    })
-  }
-
-  fn initialize(
-    device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
+  {
     Box::pin(async move {
       let msg = DeviceWriteCmd::new(
         Endpoint::Tx,
@@ -60,7 +39,8 @@ impl ButtplugProtocol for Ankni {
         true,
       );
       device_impl.write_value(msg).await?;
-      Ok(None)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

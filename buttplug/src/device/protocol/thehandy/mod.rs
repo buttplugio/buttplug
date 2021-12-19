@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::{ButtplugDeviceError},
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
@@ -16,18 +16,18 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    DeviceProtocolConfiguration,
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
     Endpoint,
   },
 };
-use futures::future::{self, BoxFuture};
+use futures::future;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
-// use tokio::sync::Mutex;
 use prost::Message;
 
 mod protocomm {
@@ -42,56 +42,54 @@ mod handyplug {
 pub struct TheHandy {
   name: String,
   message_attributes: DeviceMessageAttributesMap,
-  //_manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  // The generic command manager would normally handle this storage, but the
-  // only reason we're retaining tracking information is to build our fucking
-  // timing calculation for the fleshlight command backport. I am so mad right
-  // now.
+  // The generic command manager would normally handle this storage, but the only reason we're
+  // retaining tracking information is to build our fucking timing calculation for the fleshlight
+  // command backport. I am so mad right now.
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for TheHandy {
-  fn new_protocol(
+impl TheHandy {
+  pub fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol>
+  ) -> Self
   where
     Self: Sized,
   {
-    let manager = GenericCommandManager::new(&message_attributes);
-
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
+      stop_commands: GenericCommandManager::new(&message_attributes).get_stop_commands(),
       message_attributes,
-      stop_commands: manager.get_stop_commands(),
-      //_manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    })
+      previous_position: Arc::new(AtomicU8::new(0))
+    }
   }
+}
 
-  fn initialize(
+impl ButtplugProtocol for TheHandy {
+  
+  fn try_create(
     device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
+    config: DeviceProtocolConfiguration
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
   where
     Self: Sized,
   {
     Box::pin(async move {
-      // Ok, here we go. This is an overly-complex nightmare but apparently
-      // "protocomm makes the firmware easier".
+      // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
+      // firmware easier".
       //
-      // This code is mostly my translation of the Handy Python POC. It leaves
-      // out a lot of stuff that doesn't seem needed (ping messages, the whole
-      // RequestServerInfo flow, etc...) If they ever change anything, I quit.
+      // This code is mostly my translation of the Handy Python POC. It leaves out a lot of stuff
+      // that doesn't seem needed (ping messages, the whole RequestServerInfo flow, etc...) If they
+      // ever change anything, I quit.
       //
-      // If you are a sex toy manufacturer reading this code: Please, talk to me
-      // before implementing your protocol. Buttplug is not made to be a
-      // hardware/firmware protocol, and you will regret trying to make it such.
+      // If you are a sex toy manufacturer reading this code: Please, talk to me before implementing
+      // your protocol. Buttplug is not made to be a hardware/firmware protocol, and you will regret
+      // trying to make it such.
 
-      // First we need to set up a session with The Handy. This will require
-      // sending the "security initializer" to basically say we're sending
-      // plaintext. Due to pb3 making everything optional, we have some Option<T>
-      // wrappers here.
+      // First we need to set up a session with The Handy. This will require sending the "security
+      // initializer" to basically say we're sending plaintext. Due to pb3 making everything
+      // optional, we have some Option<T> wrappers here.
       let session_req = protocomm::SessionData {
         sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
         proto: Some(protocomm::session_data::Proto::Sec0(
@@ -104,15 +102,14 @@ impl ButtplugProtocol for TheHandy {
         )),
       };
 
-      // We need to shove this at what we're calling the "firmware" endpoint but
-      // is actually the "prov-session" characteristic. These names are stored
-      // in characteristic descriptors, which isn't super common on sex toys
-      // (with exceptions for things that have a lot of sensors, like the Lelo
-      // F1s).
+      // We need to shove this at what we're calling the "firmware" endpoint but is actually the
+      // "prov-session" characteristic. These names are stored in characteristic descriptors, which
+      // isn't super common on sex toys (with exceptions for things that have a lot of sensors, like
+      // the Lelo F1s).
       //
-      // I don't have to do characteristic descriptor lookups for the
-      // other 140+ pieces of hardware this library supports so I'm damn well
-      // not doing it now. YOLO'ing hardcoded values from the device config.
+      // I don't have to do characteristic descriptor lookups for the other 140+ pieces of hardware
+      // this library supports so I'm damn well not doing it now. YOLO'ing hardcoded values from the
+      // device config.
       //
       // If they ever change this, I quit (or will just update the device config).
 
@@ -123,14 +120,14 @@ impl ButtplugProtocol for TheHandy {
       device_impl.write_value(DeviceWriteCmd::new(Endpoint::Firmware, sec_buf, false));
       let _ = device_impl.read_value(DeviceReadCmd::new(Endpoint::Firmware, 100, 500));
 
-      // At this point, the "handyplug" protocol does actually have both
-      // RequestServerInfo and Ping messages that it can use. However, having
-      // removed these and still tried to run the system, it seems fine. I've
-      // omitted those for the moment, and will readd the complexity once it
+      // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
+      // messages that it can use. However, having removed these and still tried to run the system,
+      // it seems fine. I've omitted those for the moment, and will readd the complexity once it
       // does not seem needless.
       //
-      // We have no device name updates here, so just return None.
-      Ok(None)
+      // We have no device name updates here, so just return a device.
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

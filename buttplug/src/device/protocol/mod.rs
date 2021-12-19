@@ -156,41 +156,22 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   map
 }
 
+pub fn get_protocol_features(device_impl: Arc<DeviceImpl>, alternative_name: Option<String>, config: DeviceProtocolConfiguration) -> Result<(String, DeviceMessageAttributesMap), ButtplugError> {
+  let endpoints = device_impl.endpoints();
+  let name = alternative_name.unwrap_or_else(|| device_impl.name().to_owned());
+  let (names, attrs) = config.get_attributes(&name, &endpoints)?;
+  let name = names
+    .get("en-us")
+    .expect("Required value for JSON Schema")
+    .clone();
+  Ok((name, attrs))
+}
+
 pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
   fn try_create(
     device_impl: Arc<DeviceImpl>,
     config: DeviceProtocolConfiguration,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
-  where
-    Self: Sized,
-  {
-    let endpoints = device_impl.endpoints();
-    let name = device_impl.name().to_owned();
-    let init_fut = Self::initialize(device_impl);
-    Box::pin(async move {
-      let device_identifier = match init_fut.await {
-        Ok(maybe_ident) => maybe_ident.unwrap_or(name),
-        Err(err) => return Err(err),
-      };
-      let (names, attrs) = config.get_attributes(&device_identifier, &endpoints)?;
-      let name = names
-        .get("en-us")
-        .expect("Required value for JSON Schema")
-        .clone();
-      Ok(Self::new_protocol(&name, attrs))
-    })
-  }
-
-  fn initialize(
-    _device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>>
-  where
-    Self: Sized,
-  {
-    Box::pin(future::ready(Ok(None)))
-  }
-
-  fn new_protocol(name: &str, attrs: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol>
   where
     Self: Sized;
 }
@@ -534,7 +515,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 }
 
 #[macro_export]
-macro_rules! default_protocol_declaration {
+macro_rules! default_protocol_definition {
   ( $protocol_name:ident ) => {
     #[derive(ButtplugProtocolProperties)]
     pub struct $protocol_name {
@@ -544,26 +525,58 @@ macro_rules! default_protocol_declaration {
       manager: Arc<tokio::sync::Mutex<GenericCommandManager>>,
       stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
     }
-    
-    impl ButtplugProtocol for $protocol_name {
-      fn new_protocol(
+
+    impl $protocol_name {
+      pub fn new(
         name: &str,
         message_attributes: DeviceMessageAttributesMap,
-      ) -> Box<dyn ButtplugProtocol>
+      ) -> Self
       where
         Self: Sized,
       {
         let manager = GenericCommandManager::new(&message_attributes);
     
-        Box::new(Self {
+        Self {
           name: name.to_owned(),
           message_attributes,
           stop_commands: manager.get_stop_commands(),
           manager: Arc::new(tokio::sync::Mutex::new(manager)),
-        })
+        }
       }
-    }    
+    }
+  }
+}
+
+#[macro_export]
+macro_rules! default_protocol_trait_declaration {
+  ( $protocol_name:ident ) => {
+    impl ButtplugProtocol for $protocol_name {
+      fn try_create(
+        device_impl: Arc<crate::device::DeviceImpl>,
+        config: crate::device::protocol::DeviceProtocolConfiguration,
+      ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
+      {
+        let device = {
+          match crate::device::protocol::get_protocol_features(device_impl, None, config) {
+            Ok((name, attrs)) => Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>),
+            Err(e) => Err(e)
+          }
+        };
+        Box::pin(futures::future::ready(device))
+      }
+    }
   };
 }
 
+#[macro_export]
+macro_rules! default_protocol_declaration {
+  ( $protocol_name:ident ) => {
+    crate::default_protocol_definition!($protocol_name);
+
+    crate::default_protocol_trait_declaration!($protocol_name);
+  };
+}
+
+pub use default_protocol_definition;
 pub use default_protocol_declaration;
+pub use default_protocol_trait_declaration;

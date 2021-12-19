@@ -20,7 +20,7 @@ use crate::{
     Endpoint,
   },
 };
-use futures::{future::BoxFuture, FutureExt};
+use futures::FutureExt;
 use futures_timer::Delay;
 use std::{
   sync::{
@@ -48,26 +48,25 @@ pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
 }
 
-impl ButtplugProtocol for Lovense {
-  // Due to this lacking the ability to take extra fields, we can't pass in our
-  // event receiver from the subscription, which we'll need for things like
-  // battery readings. Therefore, we expect initialize() to return the protocol
-  // itself instead of calling this, which is simply a convenience method for
-  // the default implementation anyways.
-  fn new_protocol(name: &str, attrs: DeviceMessageAttributesMap) -> Box<dyn ButtplugProtocol> {
+impl Lovense {
+  fn new(name: &str, attrs: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&attrs);
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes: attrs,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       rotation_direction: Arc::new(AtomicBool::new(false)),
-    })
+    }
   }
+}
 
-  fn initialize(
-    device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+
+impl ButtplugProtocol for Lovense {
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>> {
     Box::pin(async move {
       let mut event_receiver = device_impl.event_stream();
       let identifier;
@@ -86,7 +85,8 @@ impl ButtplugProtocol for Lovense {
               let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-              return Ok(Some(identifier));
+              let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(identifier), config)?;
+              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);              
             } else {
               return Err(
                 ButtplugDeviceError::ProtocolSpecificError(
@@ -111,6 +111,8 @@ impl ButtplugProtocol for Lovense {
           }
         }
       }
+
+      
     })
   }
 }

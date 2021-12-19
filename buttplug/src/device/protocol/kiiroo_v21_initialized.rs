@@ -6,7 +6,6 @@ use super::{
 };
 use crate::{
   core::{
-    errors::ButtplugError,
     messages::{
       self,
       ButtplugDeviceCommandMessageUnion,
@@ -22,7 +21,6 @@ use crate::{
     Endpoint,
   },
 };
-use futures::future::BoxFuture;
 use futures_timer::Delay;
 use std::sync::{
   atomic::{AtomicU8, Ordering::SeqCst},
@@ -40,25 +38,29 @@ pub struct KiirooV21Initialized {
   previous_position: Arc<AtomicU8>,
 }
 
-impl ButtplugProtocol for KiirooV21Initialized {
-  fn new_protocol(
+impl KiirooV21Initialized {
+  fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-  ) -> Box<dyn ButtplugProtocol> {
+  ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
-    Box::new(Self {
+    Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
-    })
+    }
   }
+}
 
-  fn initialize(
-    device_impl: Arc<DeviceImpl>,
-  ) -> BoxFuture<'static, Result<Option<String>, ButtplugError>> {
+impl ButtplugProtocol for KiirooV21Initialized {
+  fn try_create(
+    device_impl: Arc<crate::device::DeviceImpl>,
+    config: crate::device::protocol::DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
+  {
     debug!("calling Onyx+ init");
     let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
@@ -74,7 +76,8 @@ impl ButtplugProtocol for KiirooV21Initialized {
       init_fut1.await?;
       Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
-      Ok(None)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }
