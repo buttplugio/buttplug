@@ -10,9 +10,10 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
+  util::async_manager
 };
-use tokio::sync::Mutex;
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
+use tokio::sync::{Mutex, mpsc};
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Satisfyer {
@@ -20,20 +21,40 @@ pub struct Satisfyer {
   message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  last_command: Arc<Mutex<Vec<u8>>>
+}
+
+// Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
+// Therefore we try to send a command every ~3s unless something is sent/updated sooner.
+async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>>>) {
+  while device.connected() {
+    // Scope to make sure we drop the lock before sleeping.
+    {
+      let current_data = data.lock().await.clone();
+      if let Err(e) = device
+        .write_value(DeviceWriteCmd::new(Endpoint::Tx, current_data.clone().to_vec(), false))
+        .await {
+        error!("Got an error from a satisfyer device, exiting control loop: {:?}", e);
+        break;
+      }
+    }
+    tokio::time::sleep(Duration::from_secs(3)).await;
+  }
 }
 
 impl Satisfyer {
   fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
+    last_command: Arc<Mutex<Vec<u8>>>
   ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
-
     Self {
       name: name.to_owned(),
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
+      last_command
     }
   }
 }
@@ -46,16 +67,25 @@ impl ButtplugProtocol for Satisfyer {
   {
     let msg = DeviceWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = device_impl.write_value(msg);
+    
     Box::pin(async move {
       let result = device_impl
         .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
-      let device_identifier =
+      let mut device_identifier =
         String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
-      info!("Satisfyer Device Identifier: {}", device_identifier);
+      device_identifier.pop();
+      info!("Satisfyer Device Identifier: {:?} {}", result.data(), device_identifier);
       info_fut.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(device_identifier), config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl.clone(), Some(device_identifier), config)?;
+      // Now that we've initialized and constructed the device, start the update cycle to make sure
+      // we don't drop the connection.
+      let last_command = Arc::new(Mutex::new(vec![0u8; 8]));
+      let device = Self::new(&name, attrs, last_command.clone());
+      async_manager::spawn(async move {
+        send_satisfyer_updates(device_impl, last_command).await;
+      });
+      Ok(Box::new(device) as Box<dyn ButtplugProtocol>)
     })
   }
 }
@@ -68,6 +98,7 @@ impl ButtplugProtocolCommandHandler for Satisfyer {
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
+    let last_command = self.last_command.clone();
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, true)?;
       if let Some(cmds) = result {
@@ -94,6 +125,7 @@ impl ButtplugProtocolCommandHandler for Satisfyer {
             cmds[0].unwrap_or(0) as u8,
           ]
         };
+        *last_command.lock().await = data.clone();
         device
           .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
           .await?;
