@@ -2199,32 +2199,56 @@ protocols:
         en-us: Satisfyer Device
       messages:
         VibrateCmd:
-          FeatureCount: 2
+          FeatureCount: 1
           StepCount:
-            - 100
             - 100
     configurations:
       - identifier:
           - SF Royal One
         name:
           en-us: Satisfyer Royal One
-        messages:
-          VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
       - identifier:
           - SF Love Triangle
         name:
           en-us: Satisfyer Love Triangle
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100          
       - identifier:
           - SF Double Joy
         name:
           en-us: Satisfyer Double Joy
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100          
       - identifier:
-          - SF Curvy 2*
+          - Double Wand-er
+        name:
+          en-us: Satisfyer Double Wand-er      
+      - identifier:
+          - SF Curvy 2+
         name:
           en-us: Satisfyer Curvy 2+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - Plug-ilicious 1
+        name:
+          en-us: Satisfyer Plug-ilicious 1
+      - identifier:
+          - Plug-ilicious 2
+        name:
+          en-us: Satisfyer Plug-ilicious 2
   mannuo:
     btle:
       names:

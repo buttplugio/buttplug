@@ -13,7 +13,7 @@ use crate::{
   util::async_manager
 };
 use std::{sync::Arc, time::Duration};
-use tokio::sync::{Mutex, mpsc};
+use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Satisfyer {
@@ -74,6 +74,8 @@ impl ButtplugProtocol for Satisfyer {
         .await?;
       let mut device_identifier =
         String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
+      // Satisfyer devices send a null character at the end of their names. Pop that off, as it's
+      // still a valid utf-8 character and screws up our string comparisons.
       device_identifier.pop();
       info!("Satisfyer Device Identifier: {:?} {}", result.data(), device_identifier);
       info_fut.await?;
