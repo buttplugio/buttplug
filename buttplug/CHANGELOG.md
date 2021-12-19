@@ -1,3 +1,11 @@
+# 5.1.5 (2021-12-18)
+
+## Bugfixes
+
+- Fix issue with Bluetooth scanning reporting finished status before it's actually done
+- Add heartbeat for Satisfyer devices so they don't disconnect when no messages are sent
+- Fix name/identifier handling for Satisfyer devices
+
 # 5.1.4 (2021-12-08)
 
 ## Bugfixes
