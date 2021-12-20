@@ -35,10 +35,7 @@ pub struct KiirooV21 {
 }
 
 impl KiirooV21 {
-  fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Self {
+  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Self {

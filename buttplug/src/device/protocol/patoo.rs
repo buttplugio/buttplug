@@ -16,8 +16,10 @@ impl ButtplugProtocol for Patoo {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     // Patoo Love devices have wildcarded names of ([A-Z]+)\d*
     // Force the identifier lookup to the non-numeric portion
     let c: Vec<char> = device_impl.name().chars().collect();
@@ -27,7 +29,8 @@ impl ButtplugProtocol for Patoo {
     }
     let name = c[0..i].iter().collect();
     Box::pin(async move {
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(name), config)?;
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, Some(name), config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

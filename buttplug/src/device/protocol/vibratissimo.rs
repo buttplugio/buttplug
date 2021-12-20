@@ -1,14 +1,12 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::{
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
-      VibrateCmd,
-      VibrateSubcommand,
-    },
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
+    VibrateCmd,
+    VibrateSubcommand,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -26,14 +24,18 @@ impl ButtplugProtocol for Vibratissimo {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     Box::pin(async move {
       let result = device_impl
         .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
-      let ident = String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(ident), config)?;
+      let ident =
+        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, Some(ident), config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

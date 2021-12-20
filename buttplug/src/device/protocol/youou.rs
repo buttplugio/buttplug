@@ -22,10 +22,7 @@ pub struct Youou {
 }
 
 impl Youou {
-  fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Self {
+  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Self {
@@ -41,12 +38,18 @@ impl ButtplugProtocol for Youou {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
     Box::pin(async move {
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some("VX001_".to_owned()), config)?;
+      let (name, attrs) = crate::device::protocol::get_protocol_features(
+        device_impl,
+        Some("VX001_".to_owned()),
+        config,
+      )?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

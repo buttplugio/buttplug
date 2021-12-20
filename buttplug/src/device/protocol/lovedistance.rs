@@ -1,8 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -18,14 +16,17 @@ impl ButtplugProtocol for LoveDistance {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     Box::pin(async move {
       let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
       device_impl.write_value(msg).await?;
       let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
       device_impl.write_value(msg).await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

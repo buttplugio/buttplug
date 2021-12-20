@@ -5,20 +5,18 @@ use super::{
   ButtplugProtocolCommandHandler,
 };
 use crate::{
-  core::{
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
-      FleshlightLaunchFW12Cmd,
-    },
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
+    FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
-    DeviceWriteCmd,
     DeviceProtocolConfiguration,
+    DeviceWriteCmd,
     Endpoint,
   },
 };
@@ -78,10 +76,7 @@ pub struct Fredorch {
 }
 
 impl Fredorch {
-  fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Self {
+  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Self {
@@ -97,8 +92,11 @@ impl Fredorch {
 impl ButtplugProtocol for Fredorch {
   fn try_create(
     device_impl: Arc<DeviceImpl>,
-    config: DeviceProtocolConfiguration
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>> {
+    config: DeviceProtocolConfiguration,
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     Box::pin(async move {
       // Set the device to program mode
       let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
@@ -148,7 +146,8 @@ impl ButtplugProtocol for Fredorch {
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

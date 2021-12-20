@@ -1,7 +1,7 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors:: ButtplugMessageError,
+    errors::ButtplugMessageError,
     messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   },
   device::{
@@ -20,11 +20,17 @@ impl ButtplugProtocol for XInput {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     Box::pin(async move {
       // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some("XInput Gamepad".to_owned()), config)?;
+      let (name, attrs) = crate::device::protocol::get_protocol_features(
+        device_impl,
+        Some("XInput Gamepad".to_owned()),
+        config,
+      )?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

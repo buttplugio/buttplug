@@ -76,9 +76,8 @@ use crate::{
 };
 use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
-use std::sync::Arc;
 use generic_command_manager::GenericCommandManager;
-
+use std::sync::Arc;
 
 pub type TryCreateProtocolFunc =
   fn(
@@ -156,7 +155,11 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   map
 }
 
-pub fn get_protocol_features(device_impl: Arc<DeviceImpl>, alternative_name: Option<String>, config: DeviceProtocolConfiguration) -> Result<(String, DeviceMessageAttributesMap), ButtplugError> {
+pub fn get_protocol_features(
+  device_impl: Arc<DeviceImpl>,
+  alternative_name: Option<String>,
+  config: DeviceProtocolConfiguration,
+) -> Result<(String, DeviceMessageAttributesMap), ButtplugError> {
   let endpoints = device_impl.endpoints();
   let name = alternative_name.unwrap_or_else(|| device_impl.name().to_owned());
   let (names, attrs) = config.get_attributes(&name, &endpoints)?;
@@ -527,15 +530,12 @@ macro_rules! default_protocol_definition {
     }
 
     impl $protocol_name {
-      pub fn new(
-        name: &str,
-        message_attributes: DeviceMessageAttributesMap,
-      ) -> Self
+      pub fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self
       where
         Self: Sized,
       {
         let manager = GenericCommandManager::new(&message_attributes);
-    
+
         Self {
           name: name.to_owned(),
           message_attributes,
@@ -544,7 +544,7 @@ macro_rules! default_protocol_definition {
         }
       }
     }
-  }
+  };
 }
 
 #[macro_export]
@@ -554,12 +554,14 @@ macro_rules! default_protocol_trait_declaration {
       fn try_create(
         device_impl: Arc<crate::device::DeviceImpl>,
         config: crate::device::protocol::DeviceProtocolConfiguration,
-      ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-      {
+      ) -> futures::future::BoxFuture<
+        'static,
+        Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+      > {
         let device = {
           match crate::device::protocol::get_protocol_features(device_impl, None, config) {
             Ok((name, attrs)) => Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>),
-            Err(e) => Err(e)
+            Err(e) => Err(e),
           }
         };
         Box::pin(futures::future::ready(device))
@@ -577,6 +579,6 @@ macro_rules! default_protocol_declaration {
   };
 }
 
-pub use default_protocol_definition;
 pub use default_protocol_declaration;
+pub use default_protocol_definition;
 pub use default_protocol_trait_declaration;

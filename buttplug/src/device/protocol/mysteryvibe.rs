@@ -1,8 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -39,10 +37,7 @@ pub struct MysteryVibe {
 }
 
 impl MysteryVibe {
-  fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Self {
+  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Self {
@@ -60,13 +55,16 @@ impl ButtplugProtocol for MysteryVibe {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     let msg = DeviceWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

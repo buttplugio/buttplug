@@ -1,8 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -20,8 +18,10 @@ impl ButtplugProtocol for WeVibe {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     debug!("calling WeVibe init");
     let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
       Endpoint::Tx,
@@ -37,8 +37,9 @@ impl ButtplugProtocol for WeVibe {
       vibration_on.await?;
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)      
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

@@ -8,7 +8,10 @@ use crate::{
   },
   util::async_manager,
 };
-use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
+use std::sync::{
+  atomic::{AtomicBool, Ordering},
+  Arc,
+};
 
 use tokio::sync::mpsc::{channel, Sender};
 
@@ -35,7 +38,7 @@ impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
 
 pub struct BtlePlugCommunicationManager {
   adapter_event_sender: Sender<BtleplugAdapterCommand>,
-  scanning_status: Arc<AtomicBool>
+  scanning_status: Arc<AtomicBool>,
 }
 
 impl BtlePlugCommunicationManager {
@@ -47,7 +50,7 @@ impl BtlePlugCommunicationManager {
     });
     Self {
       adapter_event_sender: sender,
-      scanning_status: Arc::new(AtomicBool::new(false))
+      scanning_status: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -77,7 +80,6 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
           .into(),
         )
       } else {
-
         Ok(())
       }
     })

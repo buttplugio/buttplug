@@ -61,12 +61,14 @@ impl Lovense {
   }
 }
 
-
 impl ButtplugProtocol for Lovense {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>> {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     Box::pin(async move {
       let mut event_receiver = device_impl.event_stream();
       let identifier;
@@ -86,7 +88,7 @@ impl ButtplugProtocol for Lovense {
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
               let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(identifier), config)?;
-              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);              
+              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);
             } else {
               return Err(
                 ButtplugDeviceError::ProtocolSpecificError(
@@ -111,8 +113,6 @@ impl ButtplugProtocol for Lovense {
           }
         }
       }
-
-      
     })
   }
 }

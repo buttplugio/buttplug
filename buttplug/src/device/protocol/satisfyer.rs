@@ -1,8 +1,6 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::{
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
-  },
+  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
@@ -10,7 +8,7 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  util::async_manager
+  util::async_manager,
 };
 use std::{sync::Arc, time::Duration};
 use tokio::sync::Mutex;
@@ -21,7 +19,7 @@ pub struct Satisfyer {
   message_attributes: DeviceMessageAttributesMap,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  last_command: Arc<Mutex<Vec<u8>>>
+  last_command: Arc<Mutex<Vec<u8>>>,
 }
 
 // Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
@@ -32,9 +30,17 @@ async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>
     {
       let current_data = data.lock().await.clone();
       if let Err(e) = device
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, current_data.clone().to_vec(), false))
-        .await {
-        error!("Got an error from a satisfyer device, exiting control loop: {:?}", e);
+        .write_value(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          current_data.clone().to_vec(),
+          false,
+        ))
+        .await
+      {
+        error!(
+          "Got an error from a satisfyer device, exiting control loop: {:?}",
+          e
+        );
         break;
       }
     }
@@ -46,7 +52,7 @@ impl Satisfyer {
   fn new(
     name: &str,
     message_attributes: DeviceMessageAttributesMap,
-    last_command: Arc<Mutex<Vec<u8>>>
+    last_command: Arc<Mutex<Vec<u8>>>,
   ) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
     Self {
@@ -54,7 +60,7 @@ impl Satisfyer {
       message_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
-      last_command
+      last_command,
     }
   }
 }
@@ -63,11 +69,13 @@ impl ButtplugProtocol for Satisfyer {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     let msg = DeviceWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = device_impl.write_value(msg);
-    
+
     Box::pin(async move {
       let result = device_impl
         .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
@@ -77,9 +85,17 @@ impl ButtplugProtocol for Satisfyer {
       // Satisfyer devices send a null character at the end of their names. Pop that off, as it's
       // still a valid utf-8 character and screws up our string comparisons.
       device_identifier.pop();
-      info!("Satisfyer Device Identifier: {:?} {}", result.data(), device_identifier);
+      info!(
+        "Satisfyer Device Identifier: {:?} {}",
+        result.data(),
+        device_identifier
+      );
       info_fut.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl.clone(), Some(device_identifier), config)?;
+      let (name, attrs) = crate::device::protocol::get_protocol_features(
+        device_impl.clone(),
+        Some(device_identifier),
+        config,
+      )?;
       // Now that we've initialized and constructed the device, start the update cycle to make sure
       // we don't drop the connection.
       let last_command = Arc::new(Mutex::new(vec![0u8; 8]));
@@ -165,7 +181,7 @@ mod test {
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .expect("Test, assuming infallible");
-        /*
+      /*
       check_test_recv_value(
         &command_receiver,
         DeviceImplCommand::Write(DeviceWriteCmd::new(

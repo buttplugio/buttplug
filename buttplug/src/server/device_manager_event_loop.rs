@@ -83,7 +83,11 @@ impl DeviceManagerEventLoop {
     }
   }
 
-  fn try_create_new_device(&mut self, device_address: String, device_creator: Box<dyn ButtplugDeviceImplCreator>) {
+  fn try_create_new_device(
+    &mut self,
+    device_address: String,
+    device_creator: Box<dyn ButtplugDeviceImplCreator>,
+  ) {
     let device_event_sender_clone = self.device_event_sender.clone();
     let create_device_future =
       ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
@@ -160,7 +164,11 @@ impl DeviceManagerEventLoop {
         let _enter = span.enter();
 
         // Check to make sure the device isn't already connected. If it is, drop it.
-        if self.device_map.iter().any(|entry| entry.value().address() == address) {
+        if self
+          .device_map
+          .iter()
+          .any(|entry| entry.value().address() == address)
+        {
           debug!(
             "Device {} already connected, ignoring new device event.",
             address

@@ -5,14 +5,12 @@ use super::{
   ButtplugProtocolCommandHandler,
 };
 use crate::{
-  core::{
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
-      FleshlightLaunchFW12Cmd,
-    },
+  core::messages::{
+    self,
+    ButtplugDeviceCommandMessageUnion,
+    ButtplugDeviceMessage,
+    DeviceMessageAttributesMap,
+    FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
@@ -37,10 +35,7 @@ pub struct KiirooV2 {
 }
 
 impl KiirooV2 {
-  fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
-  ) -> Self {
+  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
     let manager = GenericCommandManager::new(&message_attributes);
 
     Self {
@@ -57,13 +52,16 @@ impl ButtplugProtocol for KiirooV2 {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
     config: crate::device::protocol::DeviceProtocolConfiguration,
-  ) -> futures::future::BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>>
-  {
+  ) -> futures::future::BoxFuture<
+    'static,
+    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+  > {
     let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+      let (name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }
