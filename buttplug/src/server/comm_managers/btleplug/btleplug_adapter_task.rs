@@ -212,6 +212,7 @@ impl BtleplugAdapterTask {
                 CentralEvent::DeviceDisconnected(peripheral_id) => {
                   debug!("BTLEPlug Device disconnected: {:?}", peripheral_id);
                   tried_addresses.retain(|info| info.peripheral_id != peripheral_id);
+                  self.maybe_add_peripheral(&peripheral_id, &adapter, &mut tried_addresses).await;
                 }
                 event => {
                   trace!("Unhandled btleplug central event: {:?}", event)
