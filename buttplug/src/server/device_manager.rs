@@ -281,6 +281,7 @@ impl DeviceManager {
         .await
         .expect("We should always have an event loop for this to go to.");
     });
+    info!("Added device comm manager {}", mgr.name().to_owned());
     self.comm_managers.insert(mgr.name().to_owned(), mgr);
     Ok(())
   }
@@ -291,6 +292,7 @@ impl DeviceManager {
   {
     if !self.config.has_protocol(protocol_name) {
       self.config.add_protocol::<T>(protocol_name);
+      info!("Added protocol {}", protocol_name);
       Ok(())
     } else {
       Err(ButtplugServerError::ProtocolAlreadyAdded(
@@ -302,6 +304,7 @@ impl DeviceManager {
   pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
     if self.config.has_protocol(protocol_name) {
       self.config.remove_protocol(protocol_name);
+      info!("Removed protocol {}", protocol_name);
       Ok(())
     } else {
       Err(ButtplugServerError::ProtocolDoesNotExist(
@@ -311,14 +314,17 @@ impl DeviceManager {
   }
 
   pub fn remove_all_protocols(&self) {
+    info!("Removed all protocols");
     self.config.remove_all_protocols();
   }
 
   pub fn add_protocol_definition(&self, name: &str, config: ProtocolDefinition) {
+    info!("Adding protocol definition {}", name);
     self.config.add_protocol_definition(name, config);
   }
 
   pub fn remove_protocol_definition(&self, name: &str) {
+    info!("Removing protocol definition {}", name);
     self.config.remove_protocol_definition(name);
   }
 

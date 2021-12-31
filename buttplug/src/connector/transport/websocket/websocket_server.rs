@@ -196,21 +196,21 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     };
 
     let addr = format!("{}:{}", base_addr, self.port);
-    debug!("Websocket Insecure: Trying to listen on {}", addr);
+    debug!("Websocket: Trying to listen on {}", addr);
     let response_sender_clone = incoming_sender;
     let disconnect_notifier_clone = disconnect_notifier;
     let fut = async move {
       // Create the event loop and TCP listener we'll accept connections on.
       let try_socket = TcpListener::bind(&addr).await;
-      debug!("Websocket Insecure: Socket bound.");
+      debug!("Websocket: Socket bound.");
       let listener = try_socket.map_err(|e| {
         ButtplugConnectorError::TransportSpecificError(
           ButtplugConnectorTransportSpecificError::GenericNetworkError(format!("{:?}", e)),
         )
       })?;
-      debug!("Websocket Insecure: Listening on: {}", addr);
+      debug!("Websocket: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
-        info!("Websocket Insecure: Got connection");
+        info!("Websocket: Got connection");
         let ws_fut = async_tungstenite::tokio::accept_async(stream);
         let ws_stream = ws_fut.await.map_err(|err| {
           error!("Websocket server accept error: {:?}", err);
@@ -230,7 +230,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
         Ok(())
       } else {
         Err(ButtplugConnectorError::ConnectorGenericError(
-          "Could not run accept for insecure port".to_owned(),
+          "Could not run accept for port".to_owned(),
         ))
       }
     };
