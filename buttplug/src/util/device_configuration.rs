@@ -59,6 +59,7 @@ pub fn get_internal_config_version() -> u32 {
 
 pub fn load_protocol_config_from_json(
   config_str: &str,
+  skip_version_check: bool
 ) -> Result<ProtocolConfiguration, ButtplugError> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
@@ -67,7 +68,7 @@ pub fn load_protocol_config_from_json(
         let internal_config_version = get_internal_config_version();
         // No idea why, but rustc can't seem to resolve protocol_config's type here?!
         let protocol_version = (&protocol_config as &ProtocolConfiguration).version;
-        if protocol_version < internal_config_version {
+        if !skip_version_check && protocol_version < internal_config_version {
           Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
             "Device configuration file version {} is older than internal version {}. Please use a newer file.",
             protocol_version,
@@ -84,7 +85,7 @@ pub fn load_protocol_config_from_json(
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON)
+  let devices = load_protocol_config_from_json(DEVICE_CONFIGURATION_JSON, false)
     .expect("If this fails, the whole library goes with it.");
   let dcm = DeviceConfigurationManager::new(allow_raw_messages);
   for (name, def) in devices.protocols {
