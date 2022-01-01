@@ -132,6 +132,7 @@ impl ButtplugServerBuilder {
 
     // Create the server
     debug!("Creating server '{}'", self.name);
+    info!("Buttplug Server Operating System Info: {}", os_info::get());
     let (send, _) = broadcast::channel(256);
     let output_sender_clone = send.clone();
     let connected = Arc::new(AtomicBool::new(false));
