@@ -6,15 +6,8 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
-    Endpoint,
+    ButtplugDeviceEvent, ButtplugDeviceImplCreator, DeviceImpl, DeviceImplInternal, DeviceReadCmd,
+    DeviceSubscribeCmd, DeviceUnsubscribeCmd, DeviceWriteCmd, Endpoint,
   },
   server::comm_managers::ButtplugDeviceSpecificError,
   util::async_manager,
@@ -100,19 +93,33 @@ fn serial_read_thread(
   while !token.is_cancelled() {
     // TODO This is probably too small
     let mut buf: [u8; 1024] = [0; 1024];
-    match port.read(&mut buf) {
-      Ok(len) => {
-        trace!("Got {} serial bytes", len);
-        if sender.blocking_send(buf[0..len].to_vec()).is_err() {
-          error!("Serial port implementation disappeared, exiting read thread.");
-          break;
+    match port.bytes_to_read() {
+      Ok(read_len) => {
+        if read_len == 0 {
+          thread::sleep(Duration::from_millis(10));
+          continue;
+        }
+        match port.read(&mut buf) {
+          Ok(len) => {
+            trace!("Got {} serial bytes", len);
+            if sender.blocking_send(buf[0..len].to_vec()).is_err() {
+              error!("Serial port implementation disappeared, exiting read thread.");
+              break;
+            }
+          }
+          Err(e) => {
+            if e.kind() == ErrorKind::TimedOut {
+              continue;
+            }
+            error!("{:?}", e);
+          }
         }
       }
       Err(e) => {
-        if e.kind() == ErrorKind::TimedOut {
-          continue;
+        warn!("Error reading from serial port: {:?}", e);
+        if e.kind() == serialport::ErrorKind::NoDevice {
+          info!("Serial device gone, breaking out of read loop.");
         }
-        error!("{:?}", e);
       }
     }
   }
