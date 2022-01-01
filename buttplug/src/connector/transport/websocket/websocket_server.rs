@@ -78,13 +78,13 @@ async fn run_connection_loop<S>(
       _ = disconnect_notifier.notified().fuse() => {
         info!("Websocket server connector requested disconnect.");
         if websocket_server_sender.close().await.is_err() {
-          error!("Cannot close, assuming connection already closed");
+          warn!("Cannot close, assuming connection already closed");
           return;
         }
       },
       _ = sleep => {
         if pong_count == 0 {
-          error!("No pongs received, considering connection closed.");
+          warn!("No pongs received, considering connection closed.");
           return;
         }
         pong_count = 0;
@@ -92,7 +92,7 @@ async fn run_connection_loop<S>(
           .send(async_tungstenite::tungstenite::Message::Ping(vec!(0)))
           .await
           .is_err() {
-          error!("Cannot send ping to client, considering connection closed.");
+          warn!("Cannot send ping to client, considering connection closed.");
           return;
         }
         sleep = Delay::new(Duration::from_millis(1000)).fuse();
@@ -105,7 +105,7 @@ async fn run_connection_loop<S>(
                 .send(async_tungstenite::tungstenite::Message::Text(text_msg))
                 .await
                 .is_err() {
-                error!("Cannot send text value to server, considering connection closed.");
+                warn!("Cannot send text value to server, considering connection closed.");
                 return;
               }
             }
@@ -115,7 +115,7 @@ async fn run_connection_loop<S>(
 
                 .await
                 .is_err() {
-                error!("Cannot send binary value to server, considering connection closed.");
+                warn!("Cannot send binary value to server, considering connection closed.");
                 return;
               }
             }
@@ -123,7 +123,7 @@ async fn run_connection_loop<S>(
         } else {
           info!("Websocket server connector owner dropped, disconnecting websocket connection.");
           if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
+            warn!("Cannot close, assuming connection already closed");
           }
           return;
         }
@@ -136,7 +136,7 @@ async fn run_connection_loop<S>(
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
                   trace!("Got text: {}", text_msg);
                   if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
-                    error!("Connector that owns transport no longer available, exiting.");
+                    warn!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
                 }
@@ -159,14 +159,14 @@ async fn run_connection_loop<S>(
               }
             },
             Err(err) => {
-              error!("Error from websocket server, assuming disconnection: {:?}", err);
+              warn!("Error from websocket server, assuming disconnection: {:?}", err);
               let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
               break;
             }
           }
         },
         None => {
-          error!("Websocket channel closed, breaking");
+          warn!("Websocket channel closed, breaking");
           return;
         }
       }

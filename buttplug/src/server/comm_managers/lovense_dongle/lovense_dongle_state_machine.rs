@@ -302,9 +302,9 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
                   }
                 }
               }
-              func => error!("Cannot handle dongle function {:?}", func),
+              func => warn!("Cannot handle dongle function {:?}", func),
             }
-            _ => error!("Cannot handle incoming message {:?}", incoming_msg),
+            _ => warn!("Cannot handle incoming message {:?}", incoming_msg),
         }
       },
       _ = futures_timer::Delay::new(std::time::Duration::from_millis(250)).fuse() => {
@@ -346,7 +346,7 @@ impl LovenseDongleState for LovenseDongleIdle {
                         .expect("Dongle protocol shouldn't change, message always has ID."),
                     )));
                   }
-                  _ => error!(
+                  _ => warn!(
                     "LovenseDongleIdle State cannot handle dongle status {:?}",
                     status
                   ),
@@ -358,7 +358,7 @@ impl LovenseDongleState for LovenseDongleIdle {
             if let Some(result) = device_msg.result {
               match result {
                 LovenseDongleResultCode::SearchStopped => debug!("Lovense dongle search stopped."),
-                _ => error!(
+                _ => warn!(
                   "LovenseDongleIdle State cannot handle search result {:?}",
                   result
                 ),
@@ -371,7 +371,7 @@ impl LovenseDongleState for LovenseDongleIdle {
                 LovenseDongleResultCode::CommandSuccess => {
                   debug!("Lovense dongle search stop command successful.")
                 }
-                _ => error!(
+                _ => warn!(
                   "LovenseDongleIdle State cannot handle stop search result {:?}",
                   result
                 ),
@@ -391,7 +391,7 @@ impl LovenseDongleState for LovenseDongleIdle {
             return Some(Box::new(LovenseDongleStopScanning::new(self.hub)));
           }
           _ => {
-            error!(
+            warn!(
               "Unhandled comm manager message to lovense dongle: {:?}",
               comm_msg
             );
@@ -402,7 +402,7 @@ impl LovenseDongleState for LovenseDongleIdle {
           return self.hub.create_new_wait_for_dongle_state();
         }
         msg => {
-          error!("Unhandled message to lovense dongle: {:?}", msg);
+          warn!("Unhandled message to lovense dongle: {:?}", msg);
         }
       }
     }
@@ -463,7 +463,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                       )));
                     }
                     _ => {
-                      error!(
+                      warn!(
                         "LovenseDongleScanning state cannot handle dongle status {:?}",
                         status
                       )
@@ -484,7 +484,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                     );
                     return Some(Box::new(LovenseDongleStartScanning::new(self.hub)));
                   }
-                  _ => error!(
+                  _ => warn!(
                     "LovenseDongleIdle State cannot handle search result {:?}",
                     result
                   ),
@@ -504,7 +504,7 @@ impl LovenseDongleState for LovenseDongleScanning {
                 return Some(Box::new(LovenseDongleIdle::new(self.hub)));
               }
             }
-            _ => error!(
+            _ => warn!(
               "LovenseDongleScanning state cannot handle dongle function {:?}",
               device_msg
             ),
@@ -515,7 +515,7 @@ impl LovenseDongleState for LovenseDongleScanning {
           self.hub.set_scanning_status(false);
           return self.hub.create_new_wait_for_dongle_state();
         }
-        _ => error!(
+        _ => warn!(
           "LovenseDongleScanning state cannot handle dongle function {:?}",
           msg
         ),
@@ -587,7 +587,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
               }
             }
           }
-          _ => error!(
+          _ => warn!(
             "LovenseDongleStopScanningAndConnect cannot handle dongle function {:?}",
             device_msg
           ),
@@ -596,7 +596,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
           info!("Channel disconnect of some kind, returning to 'wait for dongle' state.");
           return self.hub.create_new_wait_for_dongle_state();
         }
-        _ => error!("Cannot handle dongle function {:?}", msg),
+        _ => warn!("Cannot handle dongle function {:?}", msg),
       }
     }
     self
@@ -670,7 +670,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
               .send_event(DeviceCommunicationEvent::ScanningFinished)
               .await;
           }
-          _ => error!(
+          _ => warn!(
             "Cannot handle communication manager function {:?}",
             comm_msg
           ),

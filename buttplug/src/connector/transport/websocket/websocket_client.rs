@@ -148,7 +148,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                             .await
                             .is_err()
                           {
-                            error!("Websocket holder has closed, exiting websocket loop.");
+                            warn!("Websocket holder has closed, exiting websocket loop.");
                             return;
                           }
                         }
@@ -160,7 +160,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                             .await
                             .is_err()
                           {
-                            error!("Websocket holder has closed, exiting websocket loop.");
+                            warn!("Websocket holder has closed, exiting websocket loop.");
                             return;
                           }
                         }
