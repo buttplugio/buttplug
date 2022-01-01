@@ -59,7 +59,7 @@ pub fn get_internal_config_version() -> u32 {
 
 pub fn load_protocol_config_from_json(
   config_str: &str,
-  skip_version_check: bool
+  skip_version_check: bool,
 ) -> Result<ProtocolConfiguration, ButtplugError> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {

@@ -26,12 +26,17 @@ impl ButtplugProtocol for XInput {
   > {
     Box::pin(async move {
       // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-      let (mut name, attrs) = crate::device::protocol::get_protocol_features(
-        device_impl.clone(),
-        None,
-        config,
-      )?;
-      name = format!("{} {}", name, device_impl.address().chars().last().expect("We already set the address before getting here"));
+      let (mut name, attrs) =
+        crate::device::protocol::get_protocol_features(device_impl.clone(), None, config)?;
+      name = format!(
+        "{} {}",
+        name,
+        device_impl
+          .address()
+          .chars()
+          .last()
+          .expect("We already set the address before getting here")
+      );
       Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
     })
   }

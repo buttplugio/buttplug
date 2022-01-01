@@ -37,7 +37,11 @@ pub(super) struct LovenseServiceToyInfo {
   pub _nickname: String,
   #[serde(rename = "status", deserialize_with = "deserialize_bool_from_anything")]
   pub connected: bool,
-  #[serde(rename = "version", skip, deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "version",
+    skip,
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub _version: i32,
   #[serde(deserialize_with = "deserialize_number_from_string")]
   pub battery: i8,
@@ -47,13 +51,28 @@ pub(super) struct LovenseServiceToyInfo {
 struct LovenseServiceHostInfo {
   #[serde(rename = "domain")]
   pub _domain: String,
-  #[serde(rename = "httpPort", deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "httpPort",
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub http_port: u16,
-  #[serde(rename = "wsPort", skip, deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "wsPort",
+    skip,
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub _ws_port: u16,
-  #[serde(rename = "httpsPort", skip, deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "httpsPort",
+    skip,
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub _https_port: u16,
-  #[serde(rename = "wssPort", skip, deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "wssPort",
+    skip,
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub _wss_port: u16,
   #[serde(rename = "toys", skip)]
   pub _toys: HashMap<String, LovenseServiceToyInfo>,
@@ -61,9 +80,17 @@ struct LovenseServiceHostInfo {
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceLocalInfo {
-  #[serde(rename = "type", skip, deserialize_with = "deserialize_string_from_number")]
+  #[serde(
+    rename = "type",
+    skip,
+    deserialize_with = "deserialize_string_from_number"
+  )]
   pub _reply_type: String,
-  #[serde(rename = "code", skip, deserialize_with = "deserialize_number_from_string")]
+  #[serde(
+    rename = "code",
+    skip,
+    deserialize_with = "deserialize_number_from_string"
+  )]
   pub _code: u32,
   pub data: HashMap<String, LovenseServiceToyInfo>,
 }
