@@ -20,7 +20,7 @@ use serde_json::Deserializer;
 use serialport::{available_ports, SerialPort, SerialPortType};
 use std::{
   io::ErrorKind,
-  sync::{atomic::AtomicBool, Arc},
+  sync::{atomic::{Ordering, AtomicBool}, Arc},
   thread,
   time::Duration,
 };
@@ -153,18 +153,21 @@ pub struct LovenseSerialDongleCommunicationManager {
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
   thread_cancellation_token: CancellationToken,
+  dongle_available: Arc<AtomicBool>
 }
 
 impl LovenseSerialDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     trace!("Lovense dongle serial port created");
     let (machine_sender, machine_receiver) = channel(256);
+    let dongle_available = Arc::new(AtomicBool::new(false));
     let mgr = Self {
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
       thread_cancellation_token: CancellationToken::new(),
+      dongle_available
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
@@ -198,6 +201,7 @@ impl LovenseSerialDongleCommunicationManager {
     let held_read_thread = self.read_thread.clone();
     let held_write_thread = self.write_thread.clone();
     let token = self.thread_cancellation_token.child_token();
+    let dongle_available = self.dongle_available.clone();
     Box::pin(
       async move {
         // TODO Does this block? Should it run in one of our threads?
@@ -243,6 +247,7 @@ impl LovenseSerialDongleCommunicationManager {
 
                       *(held_read_thread.lock().await) = Some(read_thread);
                       *(held_write_thread.lock().await) = Some(write_thread);
+                      dongle_available.store(true, Ordering::SeqCst);
                       machine_sender_clone
                         .send(LovenseDeviceCommand::DongleFound(
                           writer_sender,
@@ -301,6 +306,10 @@ impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
+  }
+
+  fn can_scan(&self) -> bool {
+    self.dongle_available.load(Ordering::SeqCst)
   }
 }
 

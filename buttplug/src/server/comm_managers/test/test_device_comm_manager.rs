@@ -178,6 +178,12 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
   fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
+
+  // Assume tests can scan for now, this would be a good place to instrument for device manager
+  // testing later.
+  fn can_scan(&self) -> bool {
+    true
+  }
 }
 
 #[cfg(test)]

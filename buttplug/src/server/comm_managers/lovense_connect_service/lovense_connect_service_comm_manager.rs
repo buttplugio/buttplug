@@ -318,6 +318,12 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
     self.is_scanning.store(false, Ordering::SeqCst);
     Box::pin(future::ready(Ok(())))
   }
+
+  // Assume we've already got network access. A bad assumption, but we'll need to figure out how to
+  // make this work better later.
+  fn can_scan(&self) -> bool {
+    return true;
+  }
 }
 
 impl Drop for LovenseConnectServiceCommunicationManager {

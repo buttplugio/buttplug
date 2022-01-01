@@ -99,4 +99,9 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
   fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
+
+  // We should always be able to at least look at serial ports.
+  fn can_scan(&self) -> bool {
+    true
+  }
 }

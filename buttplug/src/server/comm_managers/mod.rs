@@ -46,6 +46,7 @@ pub trait DeviceCommunicationManager: Send + Sync {
   fn scanning_status(&self) -> Arc<AtomicBool> {
     Arc::new(AtomicBool::new(false))
   }
+  fn can_scan(&self) -> bool;
   // Events happen via channel senders passed to the comm manager.
 }
 

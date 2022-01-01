@@ -167,18 +167,21 @@ pub struct LovenseHIDDongleCommunicationManager {
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
   thread_cancellation_token: CancellationToken,
+  dongle_available: Arc<AtomicBool>
 }
 
 impl LovenseHIDDongleCommunicationManager {
   fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     trace!("Lovense dongle HID Manager created");
     let (machine_sender, machine_receiver) = channel(256);
+    let dongle_available = Arc::new(AtomicBool::new(false));
     let mgr = Self {
       machine_sender,
       read_thread: Arc::new(Mutex::new(None)),
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
       thread_cancellation_token: CancellationToken::new(),
+      dongle_available
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(
@@ -210,6 +213,7 @@ impl LovenseHIDDongleCommunicationManager {
     let held_write_thread = self.write_thread.clone();
     let read_token = self.thread_cancellation_token.child_token();
     let write_token = self.thread_cancellation_token.child_token();
+    let dongle_available = self.dongle_available.clone();
     Box::pin(async move {
       let (writer_sender, writer_receiver) = channel(256);
       let (reader_sender, reader_receiver) = channel(256);
@@ -218,6 +222,9 @@ impl LovenseHIDDongleCommunicationManager {
         error!("Failed to create HIDAPI instance. Was one already created?");
         ButtplugDeviceError::DeviceConnectionError("Cannot create HIDAPI.".to_owned())
       })?;
+
+      // We can't clone HIDDevices, so instead we just open 2 instances of the same one to pass to
+      // the different threads. Ugh.
       let dongle1 = api.open(0x1915, 0x520a).map_err(|_| {
         warn!("Cannot find lovense HID dongle.");
         ButtplugDeviceError::DeviceConnectionError("Cannot find lovense HID Dongle.".to_owned())
@@ -226,6 +233,8 @@ impl LovenseHIDDongleCommunicationManager {
         warn!("Cannot find lovense HID dongle.");
         ButtplugDeviceError::DeviceConnectionError("Cannot find lovense HID Dongle.".to_owned())
       })?;
+
+      dongle_available.store(true, Ordering::SeqCst);
 
       let read_thread = thread::Builder::new()
         .name("Lovense Dongle HID Reader Thread".to_string())
@@ -291,6 +300,10 @@ impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
+  }
+
+  fn can_scan(&self) -> bool {
+    self.dongle_available.load(Ordering::SeqCst)
   }
 }
 

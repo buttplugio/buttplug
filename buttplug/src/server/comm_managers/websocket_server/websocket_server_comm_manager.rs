@@ -183,6 +183,11 @@ impl DeviceCommunicationManager for WebsocketServerDeviceCommunicationManager {
   fn stop_scanning(&self) -> ButtplugResultFuture {
     Box::pin(async move { Ok(()) })
   }
+
+  // No restrictions since this is network not hardware.
+  fn can_scan(&self) -> bool {
+    true
+  }
 }
 
 impl Drop for WebsocketServerDeviceCommunicationManager {

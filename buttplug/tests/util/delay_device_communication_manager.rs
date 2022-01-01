@@ -73,4 +73,8 @@ impl DeviceCommunicationManager for DelayDeviceCommunicationManager {
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.is_scanning.clone()
   }
+
+  fn can_scan(&self) -> bool {
+    true
+  }
 }

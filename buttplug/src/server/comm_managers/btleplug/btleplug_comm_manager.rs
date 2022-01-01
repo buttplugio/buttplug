@@ -39,18 +39,22 @@ impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
 pub struct BtlePlugCommunicationManager {
   adapter_event_sender: Sender<BtleplugAdapterCommand>,
   scanning_status: Arc<AtomicBool>,
+  adapter_connected: Arc<AtomicBool>,
 }
 
 impl BtlePlugCommunicationManager {
   pub fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     let (sender, receiver) = channel(256);
+    let adapter_connected =  Arc::new(AtomicBool::new(false));
+    let adapter_connected_clone = adapter_connected.clone();
     async_manager::spawn(async move {
-      let mut task = BtleplugAdapterTask::new(event_sender, receiver);
+      let mut task = BtleplugAdapterTask::new(event_sender, receiver, adapter_connected_clone);
       task.run().await;
     });
     Self {
       adapter_event_sender: sender,
       scanning_status: Arc::new(AtomicBool::new(false)),
+      adapter_connected
     }
   }
 }
@@ -110,6 +114,10 @@ impl DeviceCommunicationManager for BtlePlugCommunicationManager {
 
   fn scanning_status(&self) -> Arc<AtomicBool> {
     self.scanning_status.clone()
+  }
+
+  fn can_scan(&self) -> bool {
+    self.adapter_connected.load(Ordering::SeqCst)
   }
 }
 /*
