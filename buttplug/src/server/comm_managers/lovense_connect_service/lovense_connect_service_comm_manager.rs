@@ -33,53 +33,38 @@ const LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL: u64 = 1;
 pub(super) struct LovenseServiceToyInfo {
   pub id: String,
   pub name: String,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(rename = "nickName")]
-  pub nickname: String,
+  #[serde(rename = "nickName", skip)]
+  pub _nickname: String,
   #[serde(rename = "status", deserialize_with = "deserialize_bool_from_anything")]
   pub connected: bool,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  pub version: String,
+  #[serde(rename = "version", skip, deserialize_with = "deserialize_number_from_string")]
+  pub _version: i32,
   #[serde(deserialize_with = "deserialize_number_from_string")]
   pub battery: i8,
 }
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceHostInfo {
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  pub domain: String,
-  #[serde(rename = "httpPort")]
+  #[serde(rename = "domain")]
+  pub _domain: String,
+  #[serde(rename = "httpPort", deserialize_with = "deserialize_number_from_string")]
   pub http_port: u16,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(rename = "wsPort")]
-  pub ws_port: u16,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(rename = "httpsPort")]
-  pub https_port: u16,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(rename = "wssPort")]
-  pub wss_port: u16,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  pub toys: HashMap<String, LovenseServiceToyInfo>,
+  #[serde(rename = "wsPort", skip, deserialize_with = "deserialize_number_from_string")]
+  pub _ws_port: u16,
+  #[serde(rename = "httpsPort", skip, deserialize_with = "deserialize_number_from_string")]
+  pub _https_port: u16,
+  #[serde(rename = "wssPort", skip, deserialize_with = "deserialize_number_from_string")]
+  pub _wss_port: u16,
+  #[serde(rename = "toys", skip)]
+  pub _toys: HashMap<String, LovenseServiceToyInfo>,
 }
 
 #[derive(Deserialize, Debug)]
 struct LovenseServiceLocalInfo {
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(rename = "type", deserialize_with = "deserialize_string_from_number")]
-  pub reply_type: String,
-  // Needed for proper deserialization, but clippy will complain.
-  #[allow(dead_code)]
-  #[serde(deserialize_with = "deserialize_number_from_string")]
-  pub code: u32,
+  #[serde(rename = "type", skip, deserialize_with = "deserialize_string_from_number")]
+  pub _reply_type: String,
+  #[serde(rename = "code", skip, deserialize_with = "deserialize_number_from_string")]
+  pub _code: u32,
   pub data: HashMap<String, LovenseServiceToyInfo>,
 }
 
