@@ -482,7 +482,9 @@ fn test_server_builder_user_device_config_schema_break() {
   });
 }
 
+// Skip until we've figured out whether we actually want version differences to fail.
 #[test]
+#[ignore]
 fn test_server_builder_user_device_config_old_config_version() {
   async_manager::block_on(async {
     let mut builder = ButtplugServerBuilder::default();
