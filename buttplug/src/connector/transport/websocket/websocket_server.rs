@@ -84,7 +84,7 @@ async fn run_connection_loop<S>(
       },
       _ = sleep => {
         if pong_count == 0 {
-          error!("Cannot no pongs received, considering connection closed.");
+          error!("No pongs received, considering connection closed.");
           return;
         }
         pong_count = 0;
