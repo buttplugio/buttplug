@@ -21,13 +21,14 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc, Notify};
 
+// 1-index this because we use it elsewhere for showing which controller is which.
 #[derive(Debug, Display, Clone, Copy)]
 #[repr(u8)]
 pub enum XInputControllerIndex {
-  XInputController0 = 0,
-  XInputController1 = 1,
-  XInputController2 = 2,
-  XInputController3 = 3,
+  XInputController1 = 0,
+  XInputController2 = 1,
+  XInputController3 = 2,
+  XInputController4 = 3,
 }
 
 // Windows has a nice API for Plug n' Play. However, I am lazy and do not want
@@ -58,10 +59,10 @@ async fn check_gamepad_connectivity(
       break;
     }
     for index in &[
-      XInputControllerIndex::XInputController0,
       XInputControllerIndex::XInputController1,
       XInputControllerIndex::XInputController2,
       XInputControllerIndex::XInputController3,
+      XInputControllerIndex::XInputController4,
     ] {
       // If this isn't in our list of known gamepads, continue.
       if (gamepads & 1 << *index as u8) == 0 {
@@ -177,10 +178,10 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
       let mut stop = false;
       while !stop {
         for i in &[
-          XInputControllerIndex::XInputController0,
           XInputControllerIndex::XInputController1,
           XInputControllerIndex::XInputController2,
           XInputControllerIndex::XInputController3,
+          XInputControllerIndex::XInputController4,
         ] {
           match handle.get_state(*i as u32) {
             Ok(_) => {

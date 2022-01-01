@@ -55,7 +55,6 @@ impl Debug for XInputDeviceImplCreator {
 #[async_trait]
 impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
   fn get_specifier(&self) -> DeviceSpecifier {
-    debug!("Getting the specifier!");
     DeviceSpecifier::XInput(XInputSpecifier::default())
   }
 
