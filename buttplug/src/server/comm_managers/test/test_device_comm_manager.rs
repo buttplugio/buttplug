@@ -49,11 +49,12 @@ async fn new_bluetoothle_test_device_with_cfg(
   let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
+  let err_str = &format!("No protocol found for device {}", name);
   let device: ButtplugDevice =
     ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
       .await
       .expect("Empty option shouldn't be possible")
-      .expect(&format!("No protocol found for device {}", name));
+      .expect(err_str);
   Ok((device, device_impl_clone))
 }
 

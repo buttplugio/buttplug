@@ -23,7 +23,7 @@ impl ButtplugProtocolCommandHandler for ManNuo {
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
-        if cmds.len() >= 1 {
+        if !cmds.is_empty() {
           if let Some(speed) = cmds[0] {
             let mut data = vec![0xAA, 0x55, 0x06, 0x01, 0x01, 0x01, speed as u8, 0xFA];
 
