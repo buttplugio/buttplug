@@ -47,7 +47,10 @@ use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
   convert::TryFrom,
-  sync::{atomic::{Ordering, AtomicBool}, Arc},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
 use tokio::sync::{broadcast, mpsc};
 
@@ -80,7 +83,7 @@ pub struct DeviceManager {
   device_user_config: Arc<DashMap<String, DeviceUserConfig>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
   config: Arc<DeviceConfigurationManager>,
-  has_run_first_scan_status: Arc<AtomicBool>
+  has_run_first_scan_status: Arc<AtomicBool>,
 }
 
 unsafe impl Send for DeviceManager {
@@ -116,7 +119,7 @@ impl DeviceManager {
       device_user_config,
       comm_managers: Arc::new(DashMap::new()),
       config,
-      has_run_first_scan_status: Arc::new(AtomicBool::new(false))
+      has_run_first_scan_status: Arc::new(AtomicBool::new(false)),
     }
   }
 
@@ -130,13 +133,17 @@ impl DeviceManager {
       Box::pin(async move {
         if !has_run_first_scan_status.load(Ordering::SeqCst) {
           info!("Scanning Status (Only shown on first scan)");
-          let mut colliding_dcms = vec!();
+          let mut colliding_dcms = vec![];
           for mgr in mgrs.iter() {
             info!("{}: {}", mgr.key(), mgr.value().can_scan());
             // Hack: Lovense and Bluetooth dongles will fight with each other over devices, possibly
             // interrupting each other connecting and causing very weird issues for users. Print a
             // warning message to logs if more than one is active and available to scan.
-            if (mgr.key() == "BtlePlugCommunicationManager" || mgr.key() == "LovenseSerialDongleCommunicationManager" || mgr.key() == "LovenseHIDDongleCommunicationManager") && mgr.value().can_scan() {
+            if (mgr.key() == "BtlePlugCommunicationManager"
+              || mgr.key() == "LovenseSerialDongleCommunicationManager"
+              || mgr.key() == "LovenseHIDDongleCommunicationManager")
+              && mgr.value().can_scan()
+            {
               colliding_dcms.push(mgr.key().clone());
             }
           }

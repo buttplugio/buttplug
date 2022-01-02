@@ -6,7 +6,13 @@ use btleplug::{
 };
 use futures::{future::FutureExt, StreamExt};
 use futures_timer::Delay;
-use std::{time::Duration, sync::{Arc, atomic::{AtomicBool, Ordering}}};
+use std::{
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 use tokio::sync::mpsc::{Receiver, Sender};
 
 #[derive(Debug, Clone, Copy)]
@@ -32,7 +38,7 @@ impl BtleplugAdapterTask {
   pub fn new(
     event_sender: Sender<DeviceCommunicationEvent>,
     command_receiver: Receiver<BtleplugAdapterCommand>,
-    adapter_connected: Arc<AtomicBool>
+    adapter_connected: Arc<AtomicBool>,
   ) -> Self {
     Self {
       event_sender,

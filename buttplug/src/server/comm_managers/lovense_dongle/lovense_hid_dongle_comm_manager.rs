@@ -167,7 +167,7 @@ pub struct LovenseHIDDongleCommunicationManager {
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
   thread_cancellation_token: CancellationToken,
-  dongle_available: Arc<AtomicBool>
+  dongle_available: Arc<AtomicBool>,
 }
 
 impl LovenseHIDDongleCommunicationManager {
@@ -181,7 +181,7 @@ impl LovenseHIDDongleCommunicationManager {
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
       thread_cancellation_token: CancellationToken::new(),
-      dongle_available
+      dongle_available,
     };
     let dongle_fut = mgr.find_dongle();
     async_manager::spawn(

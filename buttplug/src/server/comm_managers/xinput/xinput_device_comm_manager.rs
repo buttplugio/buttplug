@@ -243,5 +243,5 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
   // We should always be able to at least look at xinput if we're up on windows.
   fn can_scan(&self) -> bool {
     true
-  }  
+  }
 }

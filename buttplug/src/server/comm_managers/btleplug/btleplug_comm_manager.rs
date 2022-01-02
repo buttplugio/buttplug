@@ -45,7 +45,7 @@ pub struct BtlePlugCommunicationManager {
 impl BtlePlugCommunicationManager {
   pub fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
     let (sender, receiver) = channel(256);
-    let adapter_connected =  Arc::new(AtomicBool::new(false));
+    let adapter_connected = Arc::new(AtomicBool::new(false));
     let adapter_connected_clone = adapter_connected.clone();
     async_manager::spawn(async move {
       let mut task = BtleplugAdapterTask::new(event_sender, receiver, adapter_connected_clone);
@@ -54,7 +54,7 @@ impl BtlePlugCommunicationManager {
     Self {
       adapter_event_sender: sender,
       scanning_status: Arc::new(AtomicBool::new(false)),
-      adapter_connected
+      adapter_connected,
     }
   }
 }

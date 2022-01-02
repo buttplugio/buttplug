@@ -20,7 +20,10 @@ use serde_json::Deserializer;
 use serialport::{available_ports, SerialPort, SerialPortType};
 use std::{
   io::ErrorKind,
-  sync::{atomic::{Ordering, AtomicBool}, Arc},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
   thread,
   time::Duration,
 };
@@ -153,7 +156,7 @@ pub struct LovenseSerialDongleCommunicationManager {
   write_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
   is_scanning: Arc<AtomicBool>,
   thread_cancellation_token: CancellationToken,
-  dongle_available: Arc<AtomicBool>
+  dongle_available: Arc<AtomicBool>,
 }
 
 impl LovenseSerialDongleCommunicationManager {
@@ -167,7 +170,7 @@ impl LovenseSerialDongleCommunicationManager {
       write_thread: Arc::new(Mutex::new(None)),
       is_scanning: Arc::new(AtomicBool::new(false)),
       thread_cancellation_token: CancellationToken::new(),
-      dongle_available
+      dongle_available,
     };
     let dongle_fut = mgr.find_dongle();
     // TODO If we don't find a dongle before scanning, what happens?
