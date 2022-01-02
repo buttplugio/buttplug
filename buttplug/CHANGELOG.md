@@ -1,3 +1,19 @@
+# 5.1.6 (2022-01-01)
+
+## Features
+
+- Add more log messages on host machine and configuration loading, helpful for debugging
+- XInput controller names now also have their index (i.e. XInput Gamepad 1/2/3/4 versus just XInput
+  Gamepad)
+
+## Bugfixes
+
+- #420: Fix issue with serial port DCM blocking itself when waiting for reads with no data
+- #418: No longer error when user config file version not >= current device file version
+- #417: Fix Lovense Connect JSON endpoint types to be more flexible
+- #416: Warn when bluetooth and lovense dongles are both active
+- Reduce severity of some common log messages from error to warn
+
 # 5.1.5 (2021-12-18)
 
 ## Bugfixes
