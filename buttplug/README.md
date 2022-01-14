@@ -2,7 +2,6 @@
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
-[![Discourse Forum](https://img.shields.io/badge/discourse-forum-blue.svg)](https://metafetish.club)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 
@@ -24,8 +23,12 @@
       Developer Guide
     </a>
     <span> | </span>
-    <a href="https://github.com/buttplugio/buttplug-rs/releases">
-      Releases
+    <a href="https://how.do.i.get.buttplug.in">
+      User FAQ
+    </a>
+    <span> | </span>
+    <a href="https://awesome.buttplug.io">
+      Apps/Games Using Buttplug
     </a>
   </h3>
 </div>
@@ -49,19 +52,6 @@ portions of the system. Implementations for other langauges (such as C# and JS) 
 the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for
 more info.
 
-## Hardware Support
-
-Buttplug-rs is currently capable of controlling toys via:
-
-- Bluetooth LE
-- Serial Ports
-- USB HID
-- Lovense Devices via the Lovense Dongle (All Versions)
-- Lovense Connect App
-- XInput gamepads (Windows only at the moment)
-
-See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
-
 ## Introduction
 
 [Buttplug](https://buttplug.io) is a framework for hooking up hardware to interfaces, where hardware
@@ -76,6 +66,19 @@ with computers.
 The core of buttplug works as a router. It is a Rust based application that connects to libraries
 that registers and communicates with different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
+
+## Hardware Support
+
+Buttplug-rs is currently capable of controlling toys via:
+
+- Bluetooth LE
+- Serial Ports
+- USB HID
+- Lovense Devices via the Lovense Dongle (All Versions)
+- Lovense Connect App
+- XInput gamepads (Windows only at the moment)
+
+See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
 ## Compiling
 
