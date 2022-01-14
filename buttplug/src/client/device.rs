@@ -599,7 +599,9 @@ impl ButtplugClientDevice {
 
   pub(super) fn queue_event(&self, event: ButtplugClientDeviceEvent) {
     if self.internal_event_sender.receiver_count() == 0 {
-      error!("No handlers for device event, dropping event: {:?}", event);
+      // We can drop devices before we've hooked up listeners or after the device manager drops,
+      // which is common, so only show this when in debug.
+      debug!("No handlers for device event, dropping event: {:?}", event);
       return;
     }
     self
