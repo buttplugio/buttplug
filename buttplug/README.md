@@ -1,4 +1,4 @@
-# Buttplug
+# Buttplug Intiface Device Control Library
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
@@ -37,20 +37,6 @@
   <img src="https://raw.githubusercontent.com/buttplugio/buttplug-rs/dev/buttplug/docs/buttplug_rust_docs.png">
 </p>
 
-Full Rust implementation of the Buttplug Intimate Hardware Protocol.
-
-## Read Me First!
-
-If you are new to Buttplug, you most likely want to start with the [Buttplug
-Website](https://buttplug.io) for links to documentation, applications, games, and other resources.
-
-For a demo of what this framework can do, [check out this demo
-video](https://www.youtube.com/watch?v=RXD76g5fias).
-
-Buttplug-rs is a full fledged implementation of Buttplug, implementing both the client and server
-portions of the system. Implementations for other langauges (such as C# and JS) are built on top of
-the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for
-more info.
 
 ## Introduction
 
@@ -67,6 +53,11 @@ The core of buttplug works as a router. It is a Rust based application that conn
 that registers and communicates with different hardware. Clients can then connect over websockets or
 network ports, to claim and interact with the hardware.
 
+Buttplug-rs is a full fledged implementation of Buttplug, implementing both the client and server
+portions of the system. Implementations for other langauges (such as C# and JS) are built on top of
+the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for
+more info.
+
 ## Hardware Support
 
 Buttplug-rs is currently capable of controlling toys via:
@@ -76,6 +67,7 @@ Buttplug-rs is currently capable of controlling toys via:
 - USB HID
 - Lovense Devices via the Lovense Dongle (All Versions)
 - Lovense Connect App
+- Websockets (for simulated and DIY devices)
 - XInput gamepads (Windows only at the moment)
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
@@ -114,8 +106,7 @@ The following crate features are available
 | `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
 | `tokio-runtime` | None | Uses tokio for futures |
 | `wasm-bindgen-runtime` | None | Uses the wasm-bindgen executor as a runtime (WASM only) |
-
-(Tokio coming soon)
+| `websocket-server-manager` | `websockets` | Support for connecting devices via Websockets |
 
 Default features are enough to build a full desktop system:
 
@@ -127,6 +118,7 @@ Default features are enough to build a full desktop system:
 - `btleplug-manager`
 - `serial-manager`
 - `lovense-dongle-manager`
+- `websocket-server-manager`
 - `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
   other platforms).
 
@@ -157,7 +149,7 @@ Buttplug is BSD 3-Clause licensed.
 
 ```text
 
-Copyright (c) 2016-2021, Nonpolynomial, LLC
+Copyright (c) 2016-2022, Nonpolynomial, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
