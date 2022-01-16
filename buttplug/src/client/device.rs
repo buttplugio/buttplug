@@ -175,11 +175,6 @@ pub struct ButtplugClientDevice {
   client_connected: Arc<AtomicBool>,
 }
 
-unsafe impl Send for ButtplugClientDevice {
-}
-unsafe impl Sync for ButtplugClientDevice {
-}
-
 impl ButtplugClientDevice {
   /// Creates a new [ButtplugClientDevice] instance
   ///

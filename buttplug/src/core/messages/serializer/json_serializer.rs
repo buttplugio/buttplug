@@ -18,28 +18,29 @@ use crate::{
       ButtplugSpecV2ServerMessage,
     },
   },
-  util::json::JSONValidator,
 };
 use serde::{Deserialize, Serialize};
-use std::cell::RefCell;
 use std::convert::TryFrom;
+use once_cell::sync::OnceCell;
+use jsonschema::JSONSchema;
 
 static MESSAGE_JSON_SCHEMA: &str =
   include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
 
-/// Creates a [Valico][valico] validator using the built in buttplug message schema.
-pub fn create_message_validator() -> JSONValidator {
-  JSONValidator::new(MESSAGE_JSON_SCHEMA)
+/// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
+pub fn create_message_validator() -> JSONSchema {
+  let schema: serde_json::Value = serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("Built in schema better be valid");
+  JSONSchema::compile(&schema).expect("Built in schema better be valid")
 }
 pub struct ButtplugServerJSONSerializer {
-  pub(super) message_version: RefCell<Option<messages::ButtplugMessageSpecVersion>>,
-  validator: JSONValidator,
+  pub(super) message_version: OnceCell<messages::ButtplugMessageSpecVersion>,
+  validator: JSONSchema,
 }
 
 impl Default for ButtplugServerJSONSerializer {
   fn default() -> Self {
     Self {
-      message_version: RefCell::new(None),
+      message_version: OnceCell::new(),
       validator: create_message_validator(),
     }
   }
@@ -61,7 +62,7 @@ where
 }
 
 fn deserialize_to_message<T>(
-  validator: &JSONValidator,
+  validator: &JSONSchema,
   msg: String,
 ) -> Result<Vec<T>, ButtplugSerializerError>
 where
@@ -69,10 +70,18 @@ where
 {
   // We have to pass back a string formatted error, as SerdeJson's error type
   // isn't clonable.
-  validator.validate(&msg).and_then(|_| {
-    serde_json::from_str::<Vec<T>>(&msg).map_err(|e| {
-      ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
-    })
+  serde_json::from_str::<serde_json::Value>(&msg).map_err(|e| {
+    ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
+  }).and_then(|json_msg| {
+    match validator.validate(&json_msg) {
+      Ok(_) => serde_json::from_value(json_msg.clone()).map_err(|e| {
+        ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
+      }),
+      Err(e) => {
+        let err_vec: Vec<jsonschema::ValidationError> = e.collect();
+        Err(ButtplugSerializerError::JsonSerializerError(format!("Error during JSON Schema Validation: {:?}", err_vec)))
+      }
+    }
   })
 }
 
@@ -121,11 +130,6 @@ fn serialize_to_version(
   })
 }
 
-unsafe impl Sync for ButtplugServerJSONSerializer {
-}
-unsafe impl Send for ButtplugServerJSONSerializer {
-}
-
 impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   type Inbound = ButtplugClientMessage;
   type Outbound = ButtplugServerMessage;
@@ -143,7 +147,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     // RequestServerInfo message to get the version. RequestServerInfo can
     // always be parsed as the latest message version, as we keep it
     // compatible across versions via serde options.
-    if let Some(version) = *self.message_version.borrow() {
+    if let Some(version) = self.message_version.get() {
       return Ok(match version {
         ButtplugMessageSpecVersion::Version0 => {
           deserialize_to_message::<ButtplugSpecV0ClientMessage>(&self.validator, msg)?
@@ -180,7 +184,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         "Setting JSON Wrapper message version to {}",
         rsi.message_version()
       );
-      *self.message_version.borrow_mut() = Some(rsi.message_version());
+      self.message_version.set(rsi.message_version()).expect("This should only ever be called once.");
     } else {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }
@@ -188,8 +192,8 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   }
 
   fn serialize(&self, msgs: Vec<ButtplugServerMessage>) -> ButtplugSerializedMessage {
-    if let Some(version) = *self.message_version.borrow() {
-      serialize_to_version(version, msgs)
+    if let Some(version) = self.message_version.get() {
+      serialize_to_version(*version, msgs)
     } else {
       // In the rare event that there is a problem with the
       // RequestServerInfo message (so we can't set up our known spec
@@ -210,7 +214,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
 }
 
 pub struct ButtplugClientJSONSerializer {
-  validator: JSONValidator,
+  validator: JSONSchema
 }
 
 impl Default for ButtplugClientJSONSerializer {
@@ -219,11 +223,6 @@ impl Default for ButtplugClientJSONSerializer {
       validator: create_message_validator(),
     }
   }
-}
-
-unsafe impl Sync for ButtplugClientJSONSerializer {
-}
-unsafe impl Send for ButtplugClientJSONSerializer {
 }
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
@@ -265,8 +264,8 @@ mod test {
       .deserialize(ButtplugSerializedMessage::Text(json.to_owned()))
       .expect("Infallible deserialization");
     assert_eq!(
-      *serializer.message_version.borrow(),
-      Some(ButtplugMessageSpecVersion::Version2)
+      *serializer.message_version.get().clone().unwrap(),
+      ButtplugMessageSpecVersion::Version2
     );
   }
 

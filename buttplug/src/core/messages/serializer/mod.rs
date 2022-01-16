@@ -9,7 +9,7 @@ pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
 
 #[derive(Debug, Error, Clone, Serialize, Deserialize)]
 pub enum ButtplugSerializerError {
-  // Valico hands back a vector of errors that isn't easy to encase, so we just
+  // jsonschema hands back a vector of errors that isn't easy to encase, so we just
   // turn it into a big string and pass that back.
   #[error("JSON Schema Validation Error: {0}")]
   JsonValidatorError(String),

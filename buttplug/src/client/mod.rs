@@ -185,13 +185,6 @@ pub struct ButtplugClient {
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
-unsafe impl Send for ButtplugClient {
-}
-// Not actually sure this should be sync, but trying to call handshake breaks
-// without it.
-unsafe impl Sync for ButtplugClient {
-}
-
 impl ButtplugClient {
   pub fn new(name: &str) -> Self {
     let (message_sender, _) = broadcast::channel(256);

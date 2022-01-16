@@ -86,12 +86,6 @@ pub struct DeviceManager {
   has_run_first_scan_status: Arc<AtomicBool>,
 }
 
-unsafe impl Send for DeviceManager {
-}
-
-unsafe impl Sync for DeviceManager {
-}
-
 impl DeviceManager {
   pub fn new(
     output_sender: broadcast::Sender<ButtplugServerMessage>,

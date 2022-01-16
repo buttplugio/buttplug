@@ -177,11 +177,6 @@ pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
-unsafe impl<T: Peripheral + 'static> Send for BtlePlugDeviceImpl<T> {
-}
-unsafe impl<T: Peripheral + 'static> Sync for BtlePlugDeviceImpl<T> {
-}
-
 impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   pub fn new(
     device: T,
