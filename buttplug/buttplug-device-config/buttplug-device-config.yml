@@ -2251,6 +2251,10 @@ protocols:
           - Plug-ilicious 2
         name:
           en-us: Satisfyer Plug-ilicious 2
+      - identifier:
+          - SF Little Secret
+        name:
+          en-us: Satisfyer Little Secret
   mannuo:
     btle:
       names:
