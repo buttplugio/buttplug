@@ -457,8 +457,8 @@ impl ButtplugDevice {
         // finding endpoints, etc.
         let device_protocol_config = DeviceProtocolConfiguration::new(
           allow_raw_messages,
-          config.defaults.clone(),
-          config.configurations.clone(),
+          config.defaults().clone(),
+          config.configurations().clone(),
         );
         // TODO Should we even return a config from the device_config_mgr if the
         // protocol isn't there?

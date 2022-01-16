@@ -153,10 +153,11 @@ impl SerialPortDeviceImpl {
     let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.
     let port_def = protocol_def
-      .serial
+      .serial()
+      .clone()
       .expect("This will exist if we've made it here")
       .into_iter()
-      .find(|port| port_info.port_name == port.port)
+      .find(|port| port_info.port_name == *port.port())
       .expect("We had to match the port already to get here.");
 
     // This seems like it should be a oneshot, but there's no way to await a
@@ -174,7 +175,7 @@ impl SerialPortDeviceImpl {
       .name("Serial Port Connection Thread".to_string())
       .spawn(move || {
         debug!("Starting serial port connection thread for {}", port_name);
-        let port_result = serialport::new(&port_name, port_def.baud_rate)
+        let port_result = serialport::new(&port_name, *port_def.baud_rate())
           .timeout(Duration::from_millis(100))
           .open();
         if port_sender.blocking_send(port_result)

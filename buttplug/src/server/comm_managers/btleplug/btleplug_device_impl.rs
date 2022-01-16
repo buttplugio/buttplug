@@ -114,12 +114,13 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
 
     for (proto_uuid, proto_service) in protocol
-      .btle
+      .btle()
+      .as_ref()
       .expect("To get this far we are guaranteed to have a btle block in the config")
-      .services
+      .services()
     {
       for service in self.device.services() {
-        if service.uuid != proto_uuid {
+        if service.uuid != *proto_uuid {
           continue;
         }
 

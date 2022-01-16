@@ -68,8 +68,8 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
       .device_impl
       .take()
       .expect("We'll always have this at this point");
-    if let Some(btle) = &protocol.btle {
-      for endpoint_map in btle.services.values() {
+    if let Some(btle) = protocol.btle() {
+      for endpoint_map in btle.services().values() {
         for endpoint in endpoint_map.keys() {
           device.add_endpoint(endpoint).await;
         }

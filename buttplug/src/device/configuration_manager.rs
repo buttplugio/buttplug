@@ -26,6 +26,7 @@ use std::{
   collections::{HashMap, HashSet},
   sync::Arc,
 };
+use getset::{Getters, Setters, MutGetters};
 use uuid::Uuid;
 
 // Note: There's a ton of extra structs in here just to deserialize the json
@@ -34,13 +35,14 @@ use uuid::Uuid;
 // gonna hurt anything and making a ton of serde attributes is just going to get
 // confusing (see the messages impl).
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct BluetoothLESpecifier {
-  pub names: HashSet<String>,
+  names: HashSet<String>,
   #[serde(default, rename = "advertised-services")]
-  pub advertised_services: HashSet<Uuid>,
+  advertised_services: HashSet<Uuid>,
   // Set of services that we may have gotten as part of the advertisement.
-  pub services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
+  services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
 }
 
 impl PartialEq for BluetoothLESpecifier {
@@ -140,7 +142,8 @@ impl PartialEq for XInputSpecifier {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct HIDSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
@@ -148,16 +151,17 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct SerialSpecifier {
   #[serde(rename = "baud-rate")]
-  pub baud_rate: u32,
+  baud_rate: u32,
   #[serde(rename = "data-bits")]
-  pub data_bits: u8,
+  data_bits: u8,
   #[serde(rename = "stop-bits")]
-  pub stop_bits: u8,
-  pub parity: char,
-  pub port: String,
+  stop_bits: u8,
+  parity: char,
+  port: String,
 }
 
 impl SerialSpecifier {
@@ -175,7 +179,8 @@ impl PartialEq for SerialSpecifier {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct USBSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
@@ -183,7 +188,8 @@ pub struct USBSpecifier {
   product_id: u16,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub")]
 pub struct WebsocketSpecifier {
   pub names: HashSet<String>,
 }
@@ -223,29 +229,31 @@ pub enum DeviceSpecifier {
   Websocket(WebsocketSpecifier),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct ProtocolAttributes {
   identifier: Option<Vec<String>>,
   name: Option<HashMap<String, String>>,
   messages: Option<DeviceMessageAttributesMap>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Default)]
+#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in get_specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
-  pub usb: Option<Vec<USBSpecifier>>,
-  pub btle: Option<BluetoothLESpecifier>,
-  pub serial: Option<Vec<SerialSpecifier>>,
-  pub hid: Option<Vec<HIDSpecifier>>,
-  pub xinput: Option<XInputSpecifier>,
-  pub websocket: Option<WebsocketSpecifier>,
+  usb: Option<Vec<USBSpecifier>>,
+  btle: Option<BluetoothLESpecifier>,
+  serial: Option<Vec<SerialSpecifier>>,
+  hid: Option<Vec<HIDSpecifier>>,
+  xinput: Option<XInputSpecifier>,
+  websocket: Option<WebsocketSpecifier>,
   #[serde(rename = "lovense-connect-service")]
-  pub lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
-  pub defaults: Option<ProtocolAttributes>,
+  lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
+  defaults: Option<ProtocolAttributes>,
   #[serde(default)]
-  pub configurations: Vec<ProtocolAttributes>,
+  configurations: Vec<ProtocolAttributes>,
 }
 
 fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
