@@ -1026,6 +1026,7 @@ protocols:
         - Nelson # Bond alias
         - Nova2
         - Nova_2
+        - Nova 2
       services:
         f000bb03-0451-4000-b000-000000000000:
           tx: f000c000-0451-4000-b000-000000000000
@@ -1094,6 +1095,7 @@ protocols:
       - identifier:
           - Nova2
           - Nova_2
+          - Nova 2
         name:
           en-us: WeVibe Nova 2
         messages:
