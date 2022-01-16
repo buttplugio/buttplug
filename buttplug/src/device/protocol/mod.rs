@@ -1,6 +1,7 @@
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
 pub mod ankni;
+pub mod buttplug_passthru;
 pub mod cachito;
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
@@ -99,6 +100,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   let map = DashMap::new();
   add_to_protocol_map::<aneros::Aneros>(&map, "aneros");
   add_to_protocol_map::<ankni::Ankni>(&map, "ankni");
+  add_to_protocol_map::<buttplug_passthru::ButtplugPassthru>(&map, "buttplug-passthru");
   add_to_protocol_map::<cachito::Cachito>(&map, "cachito");
   add_to_protocol_map::<fredorch::Fredorch>(&map, "fredorch");
   add_to_protocol_map::<hgod::Hgod>(&map, "hgod");

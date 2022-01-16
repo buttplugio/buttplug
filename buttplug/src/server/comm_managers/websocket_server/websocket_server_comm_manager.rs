@@ -9,12 +9,12 @@ use crate::{
   util::async_manager,
 };
 use futures::{FutureExt, StreamExt};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use tokio::{net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
 
 // Packet format received from external devices.
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WebsocketServerDeviceCommManagerInitInfo {
   pub identifier: String,
   pub address: String,

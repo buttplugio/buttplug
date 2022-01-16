@@ -661,6 +661,7 @@ pub enum ButtplugDeviceManagerMessageUnion {
   FromSpecificButtplugMessage,
   TryFromButtplugClientMessage,
 )]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceCommandMessageUnion {
   FleshlightLaunchFW12Cmd(FleshlightLaunchFW12Cmd),
   SingleMotorVibrateCmd(SingleMotorVibrateCmd),
