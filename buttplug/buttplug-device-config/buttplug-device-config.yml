@@ -138,6 +138,8 @@ protocols:
       names:
         - LVS-*
         - LOVE-*
+      advertised-services:
+        - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
