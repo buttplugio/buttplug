@@ -102,13 +102,9 @@ impl ButtplugProtocol for Lovense {
           _ = Delay::new(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
             count += 1;
             if count > LOVENSE_COMMAND_RETRY {
-              return Err(
-                ButtplugDeviceError::ProtocolSpecificError(
-                  "Lovense".to_owned(),
-                  format!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY),
-                )
-                .into()
-              );
+              warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
+              let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
+              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);
             }
           }
         }
