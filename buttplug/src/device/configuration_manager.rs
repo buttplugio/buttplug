@@ -232,8 +232,11 @@ pub enum DeviceSpecifier {
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct ProtocolAttributes {
+  #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   name: Option<HashMap<String, String>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   messages: Option<DeviceMessageAttributesMap>,
 }
 
@@ -243,14 +246,22 @@ pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in get_specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
+  #[serde(skip_serializing_if = "Option::is_none")]
   usb: Option<Vec<USBSpecifier>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   btle: Option<BluetoothLESpecifier>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   serial: Option<Vec<SerialSpecifier>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   hid: Option<Vec<HIDSpecifier>>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   xinput: Option<XInputSpecifier>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   websocket: Option<WebsocketSpecifier>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "lovense-connect-service")]
   lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   defaults: Option<ProtocolAttributes>,
   #[serde(default)]
   configurations: Vec<ProtocolAttributes>,
