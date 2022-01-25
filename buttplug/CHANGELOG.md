@@ -1,3 +1,20 @@
+# 5.1.7 (2022-01-24)
+
+## Features
+
+- New Hardware Support
+  - Lovense Calor
+  - Hismith (REQUIRES EXTRA MODIFICATIONS CURRENTLY, see info at https://how.do.i.get.buttplug.in)
+  - Folove Devices
+  - Satisfyer Little Secret
+  - WeVibe Nova (Alternative names)
+- Add Buttplug Passthru Protocol (mostly for simulator development)
+
+## Bugfixes
+
+- Remove all unsafe calls (Didn't need them anyways)
+  - Required switching from valico to jsonschema for schema validators
+
 # 5.1.6 (2022-01-01)
 
 ## Features
