@@ -65,6 +65,26 @@ impl DeviceMessageAttributesBuilder {
   }
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum ActuatorType {
+  Vibrate,
+  Rotate,
+  Linear,
+  Oscillation,
+  Constrict,
+  Inflate
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum SensorType {
+  Button,
+  Pressure,
+  RSSI,
+  Battery,
+  // Accelerometer,
+  // Gyro,
+}
+
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
 //
@@ -79,6 +99,9 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "FeatureCount")]
   #[serde(skip_serializing_if = "Option::is_none")]
   feature_count: Option<u32>,
+  #[serde(rename = "FeatureDescriptors")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  feature_descriptors: Option<Vec<String>>,
   #[serde(rename = "StepCount")]
   #[serde(skip_serializing_if = "Option::is_none")]
   step_count: Option<Vec<u32>>,
@@ -91,23 +114,29 @@ pub struct DeviceMessageAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   max_duration: Option<Vec<u32>>,
   #[getset(get="pub")]
+  #[serde(rename = "ActuatorType")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  actuator_type: Option<Vec<ActuatorType>>,
+  #[getset(get="pub")]
+  #[serde(rename = "ActuatorType")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  sensor_type: Option<Vec<SensorType>>,
+  // Never serialize this, its for internal use only
+  #[getset(get="pub")]
   #[serde(rename = "StepRange")]
   #[serde(skip_serializing_if = "Option::is_none")]
   step_range: Option<Vec<(u32, u32)>>,
+  // Never serialize this, its for internal use only
+  #[getset(get="pub")]
+  #[serde(rename = "FeatureOrder")]
+  #[serde(skip)]
+  feature_order: Option<Vec<u32>>,
   /*
   // Unimplemented attributes
   #[serde(rename = "Patterns")]
   #[serde(skip_serializing_if = "Option::is_none")]
   patterns: Option<Vec<Vec<String>>>,
-  #[serde(rename = "ActuatorType")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  actuator_type: Option<Vec<String>>,
   */
-  // Never serialize this, its for internal use only
-  #[getset(get="pub")]
-  #[serde(rename = "FeatureOrder")]
-  #[serde(skip_serializing)]
-  pub feature_order: Option<Vec<u32>>,
 }
 
 impl DeviceMessageAttributes {
@@ -199,6 +228,9 @@ impl DeviceMessageAttributes {
   pub fn merge(&self, other: &DeviceMessageAttributes) -> DeviceMessageAttributes {
     DeviceMessageAttributes {
       feature_count: other.feature_count.or(self.feature_count),
+      feature_descriptors: other.feature_descriptors.clone().or_else(|| self.feature_descriptors.clone()),
+      actuator_type: other.actuator_type.clone().or_else(|| self.actuator_type.clone()),
+      sensor_type: other.sensor_type.clone().or_else(|| self.sensor_type.clone()),
       endpoints: other.endpoints.clone().or_else(|| self.endpoints.clone()),
       step_count: other.step_count.clone().or_else(|| self.step_count.clone()),
       max_duration: other.max_duration.clone().or_else(|| self.max_duration.clone()),

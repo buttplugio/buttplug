@@ -224,6 +224,11 @@ pub trait ButtplugProtocolProperties {
         .allows_message(&ButtplugDeviceMessageType::RSSILevelCmd)
         .then(|| ())
         .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd)),
+      ButtplugDeviceCommandMessageUnion::LevelCmd(_) => self
+        .device_attributes()
+        .allows_message(&ButtplugDeviceMessageType::LevelCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LevelCmd)),
       // We translate SingleMotorVibrateCmd into Vibrate, so this one is special.
       ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => self
         .device_attributes()
@@ -270,6 +275,7 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
         self.handle_fleshlight_launch_fw12_cmd(device, msg)
       }
       ButtplugDeviceCommandMessageUnion::KiirooCmd(msg) => self.handle_kiiroo_cmd(device, msg),
+      ButtplugDeviceCommandMessageUnion::LevelCmd(msg) => self.handle_level_cmd(device, msg),
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => self.handle_linear_cmd(device, msg),
       ButtplugDeviceCommandMessageUnion::RawReadCmd(msg) => self.handle_raw_read_cmd(device, msg),
       ButtplugDeviceCommandMessageUnion::RawWriteCmd(msg) => self.handle_raw_write_cmd(device, msg),
@@ -421,6 +427,14 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       ))
       .into(),
     )))
+  }
+
+  fn handle_level_cmd(
+    &self,
+    _device: Arc<DeviceImpl>,
+    message: messages::LevelCmd,
+  ) -> ButtplugDeviceResultFuture {
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn handle_vorze_a10_cyclone_cmd(
