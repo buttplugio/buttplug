@@ -23,6 +23,7 @@ mod device_removed;
 mod error;
 mod fleshlight_launch_fw12_cmd;
 mod kiiroo_cmd;
+mod level_cmd;
 mod linear_cmd;
 mod log;
 mod log_level;
@@ -63,6 +64,7 @@ pub use device_removed::DeviceRemoved;
 pub use error::{Error, ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
 pub use kiiroo_cmd::KiirooCmd;
+pub use level_cmd::LevelCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
@@ -107,6 +109,7 @@ pub enum ButtplugMessageSpecVersion {
   Version0 = 0,
   Version1 = 1,
   Version2 = 2,
+  Version3 = 3,
 }
 
 /// Message Id for events sent from the server, which are not in response to a
@@ -115,7 +118,7 @@ pub const BUTTPLUG_SERVER_EVENT_ID: u32 = 0;
 
 /// The current latest version of the spec implemented by the library.
 pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
-  ButtplugMessageSpecVersion::Version2;
+  ButtplugMessageSpecVersion::Version3;
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
@@ -194,6 +197,7 @@ pub enum ButtplugDeviceMessageType {
   RawUnsubscribeCmd,
   BatteryLevelCmd,
   RSSILevelCmd,
+  LevelCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -236,6 +240,7 @@ pub enum ButtplugCurrentSpecDeviceMessageType {
   RawUnsubscribeCmd,
   BatteryLevelCmd,
   RSSILevelCmd,
+  LevelCmd,
 }
 
 // Ordering for ButtplugCurrentDeviceMessageType should be lexicographic, for
@@ -278,6 +283,9 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
       ButtplugDeviceMessageType::RSSILevelCmd => {
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
+      ButtplugDeviceMessageType::LevelCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::LevelCmd)
+      }
       _ => Err(ButtplugMessageError::MessageConversionError(
         "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),
@@ -306,6 +314,7 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
         ButtplugDeviceMessageType::BatteryLevelCmd
       }
       ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
+      ButtplugCurrentSpecDeviceMessageType::LevelCmd => ButtplugDeviceMessageType::LevelCmd,
     }
   }
 }
@@ -341,6 +350,7 @@ pub enum ButtplugClientMessage {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
+  LevelCmd(LevelCmd),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
@@ -353,8 +363,6 @@ pub enum ButtplugClientMessage {
   VorzeA10CycloneCmd(VorzeA10CycloneCmd),
   // To Add:
   // PatternCmd
-  // ShockCmd?
-  // ToneEmitterCmd?
 }
 
 /// Represents all possible messages a
@@ -390,9 +398,75 @@ pub enum ButtplugServerMessage {
 }
 
 /// Type alias for the latest version of client-to-server messages.
-pub type ButtplugCurrentSpecClientMessage = ButtplugSpecV2ClientMessage;
+pub type ButtplugCurrentSpecClientMessage = ButtplugSpecV3ClientMessage;
 /// Type alias for the latest version of server-to-client messages.
-pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV2ServerMessage;
+pub type ButtplugCurrentSpecServerMessage = ButtplugSpecV3ServerMessage;
+
+/// Represents all client-to-server messages in v3 of the Buttplug Spec
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugClientMessageType,
+  FromSpecificButtplugMessage,
+  TryFromButtplugClientMessage,
+)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub enum ButtplugSpecV3ClientMessage {
+  // Handshake messages
+  RequestServerInfo(RequestServerInfo),
+  Ping(Ping),
+  // Device enumeration messages
+  StartScanning(StartScanning),
+  StopScanning(StopScanning),
+  RequestDeviceList(RequestDeviceList),
+  // Generic commands
+  StopAllDevices(StopAllDevices),
+  VibrateCmd(VibrateCmd),
+  LinearCmd(LinearCmd),
+  RotateCmd(RotateCmd),
+  RawWriteCmd(RawWriteCmd),
+  RawReadCmd(RawReadCmd),
+  StopDeviceCmd(StopDeviceCmd),
+  RawSubscribeCmd(RawSubscribeCmd),
+  RawUnsubscribeCmd(RawUnsubscribeCmd),
+  LevelCmd(LevelCmd),
+  // Sensor commands
+  BatteryLevelCmd(BatteryLevelCmd),
+  RSSILevelCmd(RSSILevelCmd),
+}
+
+/// Represents all server-to-client messages in v3 of the Buttplug Spec
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugServerMessageType,
+  FromSpecificButtplugMessage,
+  TryFromButtplugServerMessage,
+)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub enum ButtplugSpecV3ServerMessage {
+  // Status messages
+  Ok(Ok),
+  Error(Error),
+  // Handshake messages
+  ServerInfo(ServerInfo),
+  // Device enumeration messages
+  DeviceList(DeviceList),
+  DeviceAdded(DeviceAdded),
+  DeviceRemoved(DeviceRemoved),
+  ScanningFinished(ScanningFinished),
+  // Generic commands
+  RawReading(RawReading),
+  // Sensor commands
+  BatteryLevelReading(BatteryLevelReading),
+  RSSILevelReading(RSSILevelReading),
+}
 
 /// Represents all client-to-server messages in v2 of the Buttplug Spec
 #[derive(
@@ -678,4 +752,5 @@ pub enum ButtplugDeviceCommandMessageUnion {
   RawUnsubscribeCmd(RawUnsubscribeCmd),
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
+  LevelCmd(LevelCmd),
 }

@@ -32,7 +32,7 @@ async fn setup_test_server(
   {
     ButtplugServerMessage::ServerInfo(s) => assert_eq!(
       s,
-      messages::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version2, 0)
+      messages::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version3, 0)
     ),
     _ => panic!("Should've received ok"),
   }
@@ -42,7 +42,7 @@ async fn setup_test_server(
 #[test]
 fn test_server_handshake() {
   let msg =
-    messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
+    messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
   async_manager::block_on(async {
     let (server, _recv) = setup_test_server(msg).await;
     assert!(server.connected());
@@ -204,7 +204,7 @@ fn test_device_stop_on_ping_timeout() {
 
 #[test]
 fn test_repeated_handshake() {
-  let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
+  let msg = messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3);
   async_manager::block_on(async {
     let (server, _recv) = setup_test_server((msg.clone()).into()).await;
     assert!(server.connected());
@@ -503,7 +503,6 @@ fn test_server_builder_user_device_config_old_config_version() {
 
 // TODO Test sending system message (Id 0)
 // TODO Test sending system message (Ok but Id > 0)
-// TODO Test repeated handshake
 // TODO Test scan with no comm managers
 // TODO Test message with no RequestServerInfo first
 // TODO Test sending device command for device that doesn't exist (in server)

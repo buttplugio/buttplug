@@ -62,6 +62,25 @@
       "additionalProperties": false,
       "minProperties": 0
     },
+    "LevelMessageAttributes": {
+      "description": "Attributes for device messages.",
+      "type": "object",
+      "properties": {
+        "FeatureCount": { "$ref": "#/components/FeatureCount" },
+        "StepCount": { "$ref": "#/components/StepCount" },
+        "LevelRange": { "$ref": "#/components/LevelRange" },
+        "ActuatorType": { 
+          "description": "Denotes type of actuator (Vibrator, Linear, Oscillator, etc...)",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minItems": 1
+          } 
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
     "RawMessageAttributes": {
       "description": "Attributes for raw device messages.",
       "type": "object",
@@ -160,6 +179,14 @@
         "type": "integer"
       },
       "minItems": 1
+    },
+    "LevelRange": {
+      "description": "Specifies the minimum/maximum level for an actuator LevelCmd or LevelReading message.",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2
     }
   },
   "messages": {
@@ -754,6 +781,44 @@
         "Speeds"
       ]
     },
+    "LevelCmd": {
+      "type": "object",
+      "description": "Sends a generic level command to a device.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "Levels": {
+          "description": "Device actution level (floating point, range can vary) keyed on acutator index, stepping will be device specific.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Index": {
+                "description": "Actuator index.",
+                "type": "integer",
+                "minimum": 0
+              },
+              "Level": {
+                "description": "Actuator level (floating point, range can vary), stepping will be device specific.",
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "Index",
+              "Level"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "Levels"
+      ]
+    },
     "RotateCmd": {
       "type": "object",
       "description": "Sends a rotate command to a device that supports rotation.",
@@ -851,40 +916,41 @@
     "type": "object",
     "description": "One or more messages validated by the Buttplug Message schema list.",
     "properties": {
-      "Ok": { "$ref": "#/messages/Ok" },
-      "Error": { "$ref": "#/messages/Error" },
-      "Ping": { "$ref": "#/messages/Ping" },
-      "Test": { "$ref": "#/messages/Test" },
+      "BatteryLevelCmd": { "$ref": "#/messages/BatteryLevelCmd" },
+      "BatteryLevelReading": { "$ref": "#/messages/BatteryLevelReading" },
       "DeviceList": { "$ref": "#/messages/DeviceList" },
       "DeviceAdded": { "$ref": "#/messages/DeviceAdded" },
       "DeviceRemoved": { "$ref": "#/messages/DeviceRemoved" },
-      "RequestDeviceList": { "$ref": "#/messages/RequestDeviceList" },
-      "StopDeviceCmd": { "$ref": "#/messages/StopDeviceCmd" },
-      "StopAllDevices": { "$ref": "#/messages/StopAllDevices" },
-      "StartScanning": { "$ref": "#/messages/StartScanning" },
-      "StopScanning": { "$ref": "#/messages/StopScanning" },
-      "ScanningFinished": { "$ref": "#/messages/ScanningFinished" },
-      "RequestLog": { "$ref": "#/messages/RequestLog" },
-      "Log": { "$ref": "#/messages/Log" },
-      "RequestServerInfo": { "$ref": "#/messages/RequestServerInfo" },
-      "ServerInfo": { "$ref": "#/messages/ServerInfo" },
+      "Error": { "$ref": "#/messages/Error" },
       "FleshlightLaunchFW12Cmd": { "$ref": "#/messages/FleshlightLaunchFW12Cmd" },
-      "LovenseCmd": { "$ref": "#/messages/LovenseCmd" },
-      "SingleMotorVibrateCmd": { "$ref": "#/messages/SingleMotorVibrateCmd" },
       "KiirooCmd": { "$ref": "#/messages/KiirooCmd" },
+      "LevelCmd": { "$ref": "#/messages/LevelCmd" },
+      "LinearCmd": { "$ref": "#/messages/LinearCmd" },
+      "Log": { "$ref": "#/messages/Log" },
+      "LovenseCmd": { "$ref": "#/messages/LovenseCmd" },
+      "Ok": { "$ref": "#/messages/Ok" },
+      "Ping": { "$ref": "#/messages/Ping" },
       "RawReadCmd": { "$ref": "#/messages/RawReadCmd" },
+      "RawReading": { "$ref": "#/messages/RawReading" },
       "RawWriteCmd": { "$ref": "#/messages/RawWriteCmd" },
       "RawSubscribeCmd": { "$ref": "#/messages/RawSubscribeCmd" },
       "RawUnsubscribeCmd": { "$ref": "#/messages/RawUnsubscribeCmd" },
-      "RawReading": { "$ref": "#/messages/RawReading" },
-      "VorzeA10CycloneCmd": { "$ref": "#/messages/VorzeA10CycloneCmd" },
-      "VibrateCmd": { "$ref": "#/messages/VibrateCmd" },
+      "RequestDeviceList": { "$ref": "#/messages/RequestDeviceList" },
+      "RequestLog": { "$ref": "#/messages/RequestLog" },
+      "RequestServerInfo": { "$ref": "#/messages/RequestServerInfo" },
       "RotateCmd": { "$ref": "#/messages/RotateCmd" },
-      "LinearCmd": { "$ref": "#/messages/LinearCmd" },
-      "BatteryLevelCmd": { "$ref": "#/messages/BatteryLevelCmd" },
-      "BatteryLevelReading": { "$ref": "#/messages/BatteryLevelReading" },
       "RSSILevelCmd": { "$ref": "#/messages/RSSILevelCmd" },
-      "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" }
+      "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" },
+      "ScanningFinished": { "$ref": "#/messages/ScanningFinished" },
+      "ServerInfo": { "$ref": "#/messages/ServerInfo" },
+      "SingleMotorVibrateCmd": { "$ref": "#/messages/SingleMotorVibrateCmd" },
+      "StartScanning": { "$ref": "#/messages/StartScanning" },
+      "StopAllDevices": { "$ref": "#/messages/StopAllDevices" },
+      "StopDeviceCmd": { "$ref": "#/messages/StopDeviceCmd" },
+      "StopScanning": { "$ref": "#/messages/StopScanning" },
+      "Test": { "$ref": "#/messages/Test" },
+      "VibrateCmd": { "$ref": "#/messages/VibrateCmd" },
+      "VorzeA10CycloneCmd": { "$ref": "#/messages/VorzeA10CycloneCmd" }
     },
     "additionalProperties": false,
     "minProperties": 1,

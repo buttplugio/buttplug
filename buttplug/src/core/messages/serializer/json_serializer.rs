@@ -1,20 +1,24 @@
 use super::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError};
-use crate::core::{
-  errors::{ButtplugError, ButtplugHandshakeError},
-  messages::{
-    self,
-    ButtplugClientMessage,
-    ButtplugCurrentSpecClientMessage,
-    ButtplugCurrentSpecServerMessage,
-    ButtplugMessage,
-    ButtplugMessageSpecVersion,
-    ButtplugServerMessage,
-    ButtplugSpecV0ClientMessage,
-    ButtplugSpecV0ServerMessage,
-    ButtplugSpecV1ClientMessage,
-    ButtplugSpecV1ServerMessage,
-    ButtplugSpecV2ClientMessage,
-    ButtplugSpecV2ServerMessage,
+use crate::{
+  core::{
+    errors::{ButtplugError, ButtplugHandshakeError},
+    messages::{
+      self,
+      ButtplugClientMessage,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugMessage,
+      ButtplugMessageSpecVersion,
+      ButtplugServerMessage,
+      ButtplugSpecV0ClientMessage,
+      ButtplugSpecV0ServerMessage,
+      ButtplugSpecV1ClientMessage,
+      ButtplugSpecV1ServerMessage,
+      ButtplugSpecV2ClientMessage,
+      ButtplugSpecV2ServerMessage,
+      ButtplugSpecV3ClientMessage,
+      ButtplugSpecV3ServerMessage,
+    },
   },
 };
 use jsonschema::JSONSchema;
@@ -129,6 +133,17 @@ fn serialize_to_version(
         .collect();
       vec_to_protocol_json(msg_vec)
     }
+    ButtplugMessageSpecVersion::Version3 => {
+      let msg_vec: Vec<ButtplugSpecV3ServerMessage> = msgs
+        .iter()
+        .cloned()
+        .map(|msg| match ButtplugSpecV3ServerMessage::try_from(msg) {
+          Ok(msgv0) => msgv0,
+          Err(err) => ButtplugSpecV3ServerMessage::Error(ButtplugError::from(err).into()),
+        })
+        .collect();
+      vec_to_protocol_json(msg_vec)
+    }
   })
 }
 
@@ -172,6 +187,13 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .map(|m| m.into())
             .collect()
         }
+        ButtplugMessageSpecVersion::Version3 => {
+          deserialize_to_message::<ButtplugSpecV3ClientMessage>(&self.validator, msg)?
+            .iter()
+            .cloned()
+            .map(|m| m.into())
+            .collect()
+        }        
       });
     }
     // instead of using if/else here, return in the if, which drops the borrow.
