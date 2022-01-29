@@ -15,6 +15,7 @@ pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
 pub mod lelof1s;
+pub mod lelof1sv2;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
@@ -116,6 +117,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
     "kiiroo-v21-initialized",
   );
   add_to_protocol_map::<lelof1s::LeloF1s>(&map, "lelo-f1s");
+  add_to_protocol_map::<lelof1sv2::LeloF1sV2>(&map, "lelo-f1sv2");
   add_to_protocol_map::<libo_elle::LiboElle>(&map, "libo-elle");
   add_to_protocol_map::<libo_shark::LiboShark>(&map, "libo-shark");
   add_to_protocol_map::<libo_vibes::LiboVibes>(&map, "libo-vibes");
