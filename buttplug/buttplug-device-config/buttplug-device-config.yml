@@ -1807,6 +1807,32 @@ protocols:
           StepCount:
            - 100
            - 100
+  lelo-f1sv2:
+    btle:
+      names:
+        - F1SV2A
+        - F1SV2X
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+          # whitelist is hooked up to the security characteristic
+          # which must be written to during the handshake
+          whitelist: 00000a10-0000-1000-8000-00805f9b34fb
+          # Rx is hooked up to the button characteristic
+          # to help with the connection process
+          rx: 00000a10-0000-1000-8000-00805f9b34fb
+          # There are a LOT of other sensor characteristics
+          # I figure we'll add them as support for those sensor
+          # types is added to Buttplug
+    defaults:
+      name:
+        en-us: Lelo F1s V2
+      messages:
+        VibrateCmd:
+          FeatureCount: 2
+          StepCount:
+            - 100
+            - 100
   aneros:
     btle:
       names:
