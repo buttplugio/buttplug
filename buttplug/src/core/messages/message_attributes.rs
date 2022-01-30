@@ -43,4 +43,8 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "FeatureOrder")]
   #[serde(skip)]
   pub feature_order: Option<Vec<u32>>,
+  // Never serialize this, its for user config use only
+  #[serde(rename = "StepRange")]
+  #[serde(skip)]
+  pub step_range: Option<Vec<(u32, u32)>>,
 }
