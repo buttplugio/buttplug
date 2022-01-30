@@ -150,6 +150,20 @@
       },
       "minItems": 1
     },
+    "StepRange": {
+      "description": "Specifies the range of steps to use for a device. Devices will use 0 as a stop, so range is for 0 < x <= StepCount.",
+      "type": "array",
+      "items": {
+        "minimum": 1,
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "minItems": 1
+    },
     "FeatureOrder": {
       "description": "Specifies the order features are exposed in by the ButtplugMessages.",
       "type": "array",
@@ -178,6 +192,9 @@
         },
         "FeatureOrder": {
           "$ref": "#/components/FeatureOrder"
+        },
+        "StepRange": {
+          "$ref": "#/components/StepRange"
         }
       },
       "additionalProperties": false,

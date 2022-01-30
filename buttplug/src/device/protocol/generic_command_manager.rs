@@ -17,9 +17,9 @@ pub struct GenericCommandManager {
   sent_rotation: bool,
   _sent_linear: bool,
   vibrations: Vec<u32>,
-  vibration_step_counts: Vec<u32>,
+  vibration_step_ranges: Vec<(u32, u32)>,
   rotations: Vec<(u32, bool)>,
-  rotation_step_counts: Vec<u32>,
+  rotation_step_ranges: Vec<(u32, u32)>,
   _linears: Vec<(u32, u32)>,
   _linear_step_counts: Vec<u32>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
@@ -29,8 +29,10 @@ impl GenericCommandManager {
   pub fn new(attributes: &DeviceMessageAttributesMap) -> Self {
     let mut vibrations: Vec<u32> = vec![];
     let mut vibration_step_counts: Vec<u32> = vec![];
+    let mut vibration_step_ranges: Vec<(u32, u32)> = vec![];
     let mut rotations: Vec<(u32, bool)> = vec![];
     let mut rotation_step_counts: Vec<u32> = vec![];
+    let mut rotation_step_ranges: Vec<(u32, u32)> = vec![];
     let mut linears: Vec<(u32, u32)> = vec![];
     let mut linear_step_counts: Vec<u32> = vec![];
 
@@ -43,6 +45,13 @@ impl GenericCommandManager {
       }
       if let Some(step_counts) = &attr.step_count {
         vibration_step_counts = step_counts.clone();
+      }
+      if let Some(step_range) = &attr.step_range {
+        vibration_step_ranges = step_range.clone();
+      } else {
+        for step_count in &vibration_step_counts {
+          vibration_step_ranges.push((0, *step_count));
+        }
       }
 
       let mut subcommands = vec![];
@@ -57,6 +66,13 @@ impl GenericCommandManager {
       }
       if let Some(step_counts) = &attr.step_count {
         rotation_step_counts = step_counts.clone();
+      }
+      if let Some(step_range) = &attr.step_range {
+        rotation_step_ranges = step_range.clone();
+      } else {
+        for step_count in &rotation_step_counts {
+          rotation_step_ranges.push((0, *step_count));
+        }
       }
 
       // TODO Can we assume clockwise is false here? We might send extra
@@ -85,8 +101,8 @@ impl GenericCommandManager {
       vibrations,
       rotations,
       _linears: linears,
-      vibration_step_counts,
-      rotation_step_counts,
+      vibration_step_ranges,
+      rotation_step_ranges,
       _linear_step_counts: linear_step_counts,
       stop_commands,
     }
@@ -138,10 +154,16 @@ impl GenericCommandManager {
         );
       }
 
-      // When calculating speeds, round up. This follows how we calculated
-      // things in buttplug-js and buttplug-csharp, so it's more for history
-      // than anything, but it's what users will expect.
-      let speed = (speed_command.speed() * self.vibration_step_counts[index] as f64).ceil() as u32;
+      let range = self.vibration_step_ranges[index].1 - self.vibration_step_ranges[index].0;
+      let speed_modifier = speed_command.speed() * range as f64;
+      let speed = if speed_modifier < 0.0001 {
+        0
+      } else {
+        // When calculating speeds, round up. This follows how we calculated
+        // things in buttplug-js and buttplug-csharp, so it's more for history
+        // than anything, but it's what users will expect.
+        (speed_modifier + self.vibration_step_ranges[index].0 as f64).ceil() as u32
+      };
 
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
@@ -216,7 +238,16 @@ impl GenericCommandManager {
       // When calculating speeds, round up. This follows how we calculated
       // things in buttplug-js and buttplug-csharp, so it's more for history
       // than anything, but it's what users will expect.
-      let speed = (rotate_command.speed() * self.rotation_step_counts[index] as f64).ceil() as u32;
+      let range = self.rotation_step_ranges[index].1 - self.rotation_step_ranges[index].0;
+      let speed_modifier = rotate_command.speed() * range as f64;
+      let speed = if speed_modifier < 0.0001 {
+        0
+      } else {
+        // When calculating speeds, round up. This follows how we calculated
+        // things in buttplug-js and buttplug-csharp, so it's more for history
+        // than anything, but it's what users will expect.
+        (speed_modifier + self.rotation_step_ranges[index].0 as f64).ceil() as u32
+      };
       let clockwise = rotate_command.clockwise();
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
