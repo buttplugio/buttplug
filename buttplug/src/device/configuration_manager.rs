@@ -41,6 +41,8 @@ pub struct BluetoothLESpecifier {
   names: HashSet<String>,
   #[serde(default, rename = "advertised-services")]
   advertised_services: HashSet<Uuid>,
+  #[serde(default, rename = "required-endpoints")]
+  required_endpoints: HashSet<Endpoint>,
   // Set of services that we may have gotten as part of the advertisement.
   services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
 }
@@ -92,6 +94,7 @@ impl BluetoothLESpecifier {
     BluetoothLESpecifier {
       names: name_set,
       advertised_services: service_set,
+      required_endpoints: HashSet::new(),
       services: HashMap::new(),
     }
   }

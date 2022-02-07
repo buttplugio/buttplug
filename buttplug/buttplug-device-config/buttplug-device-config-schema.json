@@ -24,7 +24,13 @@
             "type": "string",
             "$ref": "#/components/uuid"
           }
-        },        
+        },
+        "required-endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "services": {
           "type": "object",
           "patternProperties": {

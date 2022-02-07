@@ -2175,6 +2175,9 @@ protocols:
         - SF *
       advertised-services:
         - 0000180a-0000-1000-8000-00805f9b34fb
+      required-endpoints:
+        - tx
+        - command
       services:
         00001800-0000-1000-8000-00805f9b34fb:
           rxblemodel: 00002a00-0000-1000-8000-00805f9b34fb

@@ -98,27 +98,35 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         );
         return Err(return_err.into());
       }
-      if let Err(err) = self.device.discover_services().await {
-        error!("BTLEPlug error discovering characteristics: {:?}", err);
-        return Err(
-          ButtplugDeviceError::DeviceConnectionError(format!(
-            "BTLEPlug error discovering characteristics: {:?}",
-            err
-          ))
-          .into(),
-        );
-      }
     }
+
+    // Lets get characteristics every time
+    if let Err(err) = self.device.discover_services().await {
+      error!("BTLEPlug error discovering characteristics: {:?}", err);
+      return Err(
+        ButtplugDeviceError::DeviceConnectionError(format!(
+          "BTLEPlug error discovering characteristics: {:?}",
+          err
+        ))
+        .into(),
+      );
+    }
+    debug!(
+      "Services for {:?}: {:?}",
+      self.device.address(),
+      self.device.services()
+    );
+
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
 
-    for (proto_uuid, proto_service) in protocol
+    let btle = protocol
       .btle()
       .as_ref()
-      .expect("To get this far we are guaranteed to have a btle block in the config")
-      .services()
-    {
+      .expect("To get this far we are guaranteed to have a btle block in the config");
+
+    for (proto_uuid, proto_service) in btle.services() {
       for service in self.device.services() {
         if service.uuid != *proto_uuid {
           continue;
@@ -142,6 +150,17 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
         }
       }
     }
+    for required_endpoint in btle.required_endpoints() {
+      if !endpoints.contains_key(required_endpoint) {
+        debug!(
+          "Device {:?} missing endpoint {:?} required for protocol",
+          self.device.address(),
+          *required_endpoint
+        );
+        return Err(ButtplugDeviceError::InvalidEndpoint(*required_endpoint).into());
+      }
+    }
+
     let notification_stream = self
       .device
       .notifications()
