@@ -228,7 +228,8 @@ impl DeviceManagerEventLoop {
           return;
         }
 
-        self.try_create_new_device(address, creator);
+        self.try_create_new_device(address.clone(), creator);
+        self.connecting_devices.remove(address.as_str());
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
@@ -309,10 +310,7 @@ impl DeviceManagerEventLoop {
           .get(&address)
           .expect("Index must exist to get here.")
           .value();
-        self
-          .device_map
-          .remove(&device_index)
-          .expect("Remove will always work.");
+        self.device_map.remove(&device_index);
         if self
           .server_sender
           .send(DeviceRemoved::new(device_index).into())
