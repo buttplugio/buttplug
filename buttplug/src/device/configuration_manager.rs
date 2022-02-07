@@ -21,12 +21,12 @@ use crate::{
   device::Endpoint,
 };
 use dashmap::DashMap;
+use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashMap, HashSet},
   sync::Arc,
 };
-use getset::{Getters, Setters, MutGetters};
 use uuid::Uuid;
 
 // Note: There's a ton of extra structs in here just to deserialize the json
@@ -544,27 +544,33 @@ impl DeviceConfigurationManager {
   pub fn find_protocol_definitions(
     &self,
     specifier: &DeviceSpecifier,
-  ) -> Option<(bool, String, ProtocolDefinition)> {
+  ) -> Option<Vec<(bool, String, ProtocolDefinition)>> {
     debug!(
       "Looking for protocol that matches specifier: {:?}",
       specifier
     );
-    for config in self.protocol_definitions.iter() {
-      if config.value() == specifier {
+    let protocols: Vec<(bool, String, ProtocolDefinition)> = self
+      .protocol_definitions
+      .iter()
+      .filter(|config| config.value() == specifier)
+      .map(|config| {
         info!(
           "Found protocol {:?} for specifier {:?}.",
           config.key(),
           specifier
         );
-        return Some((
+        return (
           self.allow_raw_messages,
           config.key().clone(),
           config.value().clone(),
-        ));
-      }
+        );
+      })
+      .collect();
+    if protocols.is_empty() {
+      debug!("No protocol found for specifier {:?}.", specifier);
+      return None;
     }
-    debug!("No protocol found for specifier {:?}.", specifier);
-    None
+    Some(protocols)
   }
 
   pub fn get_protocol_config(&self, name: &str) -> Option<DeviceProtocolConfiguration> {
@@ -625,11 +631,12 @@ mod test {
     let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
-    let proto = config
+    let protos = config
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
+    let proto = protos.first().expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations.clone());
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -654,11 +661,13 @@ mod test {
     let config = create_test_dcm(true);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
-    let proto = config
-      .find_protocol_definitions(&lovense)
-      .expect("Test, assuming infallible");
+
+    let protos = config
+        .find_protocol_definitions(&lovense)
+        .expect("Test, assuming infallible");
+    let proto = protos.first().expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations.clone());
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -679,11 +688,13 @@ mod test {
     let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
-    let proto = config
-      .find_protocol_definitions(&lovense)
-      .expect("Test, assuming infallible");
+
+    let protos = config
+        .find_protocol_definitions(&lovense)
+        .expect("Test, assuming infallible");
+    let proto = protos.first().expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations.clone());
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
