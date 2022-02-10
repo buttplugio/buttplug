@@ -41,9 +41,9 @@
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "array",
       "items": {
-        "type": "string",
-        "minItems": 1
-      }
+        "type": "string"
+      },
+      "minItems": 1
     },
     "NullMessageAttributes": {
       "description": "Attributes for device message that have no attributes.",
@@ -69,9 +69,9 @@
         "Endpoints": {
           "type": "array",
           "items": {
-            "type": "string",
-            "minItems": 1
-          }
+            "type": "string"
+          },
+          "minItems": 1
         }
       },
       "additionalProperties": false,
@@ -237,8 +237,7 @@
               "DeviceMessages"
             ]
 
-          },
-          "minItems": 0
+          }
         }
       },
       "additionalProperties": false,
@@ -473,11 +472,11 @@
         "Data": {
           "description": "Raw byte string to send to device.",
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 255,
-            "minItems": 1
+            "maximum": 255
           }
         },
         "WriteWithResponse": {
@@ -572,11 +571,11 @@
         "Data": {
           "description": "Raw byte string received from device.",
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 255,
-            "minItems": 1
+            "maximum": 255
           }
         }
       },
