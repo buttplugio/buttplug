@@ -89,10 +89,12 @@ impl DeviceManagerEventLoop {
     device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) {
     let device_event_sender_clone = self.device_event_sender.clone();
+    let user_device_configurations = self.device_user_config.get(&device_address).and_then(|x| x.messages().clone());
     let create_device_future =
-      ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
+      ButtplugDevice::try_create_device(self.device_config_manager.clone(), user_device_configurations, device_creator);
     let device_user_config = self.device_user_config.clone();
     let connecting_devices = self.connecting_devices.clone();
+
     async_manager::spawn(async move {
       match create_device_future.await {
         Ok(option_dev) => match option_dev {

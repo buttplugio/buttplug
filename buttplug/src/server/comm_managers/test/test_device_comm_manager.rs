@@ -51,7 +51,7 @@ async fn new_bluetoothle_test_device_with_cfg(
   let device_impl_clone = device_impl.clone();
   let err_str = &format!("No protocol found for device {}", name);
   let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
+    ButtplugDevice::try_create_device(config_mgr, None, Box::new(device_impl_creator))
       .await
       .expect("Empty option shouldn't be possible")
       .expect(err_str);

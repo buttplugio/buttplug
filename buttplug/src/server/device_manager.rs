@@ -31,6 +31,7 @@ use crate::{
       ButtplugServerMessage,
       DeviceList,
       DeviceMessageInfo,
+      DeviceMessageAttributesMap
     },
   },
   device::{
@@ -67,6 +68,9 @@ pub struct DeviceUserConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   deny: Option<bool>,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  #[serde(default)]
+  messages: Option<DeviceMessageAttributesMap>,
 }
 
 #[derive(Debug)]
