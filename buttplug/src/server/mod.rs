@@ -42,9 +42,12 @@ use futures::{
   Stream,
 };
 use ping_timer::PingTimer;
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use std::{
+  fmt,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc
+  },
 };
 use thiserror::Error;
 use tokio::sync::broadcast;
@@ -194,6 +197,16 @@ pub struct ButtplugServer {
   ping_timer: Arc<PingTimer>,
   connected: Arc<AtomicBool>,
   output_sender: broadcast::Sender<ButtplugServerMessage>,
+}
+
+impl std::fmt::Debug for ButtplugServer {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("ButtplugServer")
+      .field("server_name", &self.server_name)
+      .field("max_ping_time", &self.max_ping_time)
+      .field("connected", &self.connected)
+      .finish()
+  }
 }
 
 impl Default for ButtplugServer {
