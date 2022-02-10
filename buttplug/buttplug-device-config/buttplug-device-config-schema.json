@@ -153,16 +153,15 @@
     "StepRange": {
       "description": "Specifies the range of steps to use for a device. Devices will use 0 as a stop, so range is for 0 < x <= StepCount.",
       "type": "array",
+      "minItems": 1,
       "items": {
-        "minimum": 1,
+        "minItems": 2,
+        "maxItems": 2,
         "type": "array",
         "items": {
-          "type": "integer",
-          "minItems": 2,
-          "maxItems": 2
+          "type": "integer"
         }
-      },
-      "minItems": 1
+      }
     },
     "FeatureOrder": {
       "description": "Specifies the order features are exposed in by the ButtplugMessages.",
@@ -192,7 +191,15 @@
         },
         "FeatureOrder": {
           "$ref": "#/components/FeatureOrder"
-        },
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 0
+    },
+    "GenericUserMessageAttributes": {
+      "description": "Attributes for device messages that can be configured by the user.",
+      "type": "object",
+      "properties": {
         "StepRange": {
           "$ref": "#/components/StepRange"
         }
@@ -297,6 +304,22 @@
         },
         "PatternPlaybackCmd": {
           "$ref": "#/components/PatternMessageAttributes"
+        }
+      },
+      "additionalProperties": false
+    },
+    "UserDeviceMessagesEx": {
+      "description": "A list of the messages that can be configured in user device settings.",
+      "type": "object",
+      "properties": {
+        "VibrateCmd": {
+          "$ref": "#/components/GenericUserMessageAttributes"
+        },
+        "LinearCmd": {
+          "$ref": "#/components/GenericUserMessageAttributes"
+        },
+        "RotateCmd": {
+          "$ref": "#/components/GenericUserMessageAttributes"
         }
       },
       "additionalProperties": false
@@ -421,6 +444,9 @@
             },
             "index": {
               "type": "number"
+            },
+            "messages": {
+              "$ref": "#/components/UserDeviceMessagesEx"
             }
           },
           "additionalProperties": false

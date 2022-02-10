@@ -63,15 +63,29 @@ pub fn load_protocol_config_from_json(
 ) -> Result<ProtocolConfiguration, ButtplugError> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
-    Ok(_) => match serde_json::from_str(config_str) {
+    Ok(_) => match serde_json::from_str::<ProtocolConfiguration>(config_str) {
       Ok(protocol_config) => {
+        for (_, protocol_def) in &protocol_config.protocols {
+          for default in protocol_def.defaults() {
+            for message_map in default.messages() {
+              for (key, value) in message_map {
+                value.check(key).map_err(|err| ButtplugError::from(err))?;
+              } 
+            }
+          }
+          for configs in protocol_def.configurations() {
+            for message_map in configs.messages() {
+              for (key, value) in message_map {
+                value.check(key).map_err(|err| ButtplugError::from(err))?;
+              } 
+            }
+          }
+        }
         let internal_config_version = get_internal_config_version();
-        // No idea why, but rustc can't seem to resolve protocol_config's type here?!
-        let protocol_version = (&protocol_config as &ProtocolConfiguration).version;
-        if !skip_version_check && protocol_version < internal_config_version {
+        if !skip_version_check && protocol_config.version < internal_config_version {
           Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
             "Device configuration file version {} is older than internal version {}. Please use a newer file.",
-            protocol_version,
+            protocol_config.version,
             internal_config_version
           )).into())
         } else {

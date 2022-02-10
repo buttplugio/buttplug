@@ -367,6 +367,7 @@ impl ProtocolDefinition {
         .chain(self.configurations.iter())
         .cloned()
         .collect();
+      info!("{:?}", self.configurations);
     }
   }
 }
@@ -376,6 +377,7 @@ pub struct DeviceProtocolConfiguration {
   allow_raw_messages: bool,
   defaults: Option<ProtocolAttributes>,
   configurations: Vec<ProtocolAttributes>,
+  user_device_config: Option<DeviceMessageAttributesMap>
 }
 
 impl DeviceProtocolConfiguration {
@@ -383,11 +385,13 @@ impl DeviceProtocolConfiguration {
     allow_raw_messages: bool,
     defaults: Option<ProtocolAttributes>,
     configurations: Vec<ProtocolAttributes>,
+    user_device_config: Option<DeviceMessageAttributesMap>,
   ) -> Self {
     Self {
       allow_raw_messages,
       defaults,
       configurations,
+      user_device_config
     }
   }
 
@@ -459,6 +463,18 @@ impl DeviceProtocolConfiguration {
     attributes
       .entry(ButtplugDeviceMessageType::StopDeviceCmd)
       .or_insert_with(DeviceMessageAttributes::default);
+
+    // At this point, we've already filtered by address, and we know the identifier, so the user
+    // configurations we'll have here should be applied to the attributes we're sending to the
+    // protocol implementation.
+    if let Some(config) = &self.user_device_config {
+      for (message_type, user_attributes) in config {
+        if let Some(entry) = attributes.get_mut(&message_type) {
+          // manually merge this for now
+          entry.step_range = user_attributes.step_range.clone();
+        }
+      }
+    }
 
     Ok((
       device_attrs
@@ -577,6 +593,7 @@ impl DeviceConfigurationManager {
         self.allow_raw_messages,
         proto.defaults.clone(),
         proto.configurations.clone(),
+        None
       ))
     } else {
       debug!("No matching protocol definition found.");
@@ -629,7 +646,7 @@ mod test {
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations, None);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -658,7 +675,7 @@ mod test {
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations, None);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -683,7 +700,7 @@ mod test {
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations, None);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
