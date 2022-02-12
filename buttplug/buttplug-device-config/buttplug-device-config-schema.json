@@ -324,29 +324,44 @@
       },
       "additionalProperties": false
     },
-    "name-field": {
+    "UserConfig": {
       "type": "object",
       "patternProperties": {
-        "^(en-us)$": {
-          "type": "string"
-        },
-        "^[a-z]{2}-[A-Z]{2}$": {
-          "type": "string"
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "allow": {
+              "type": "boolean"
+            },
+            "deny": {
+              "type": "boolean"
+            },
+            "display-name": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer"
+            },
+            "messages": {
+              "$ref": "#/components/UserDeviceMessagesEx"
+            }
+          },
+          "additionalProperties": false
         }
       },
-      "minProperties": 1,
-      "required": [
-        "en-us"
-      ]
+      "additionalProperties": false
     },
     "defaults-definition": {
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/components/name-field"
+          "type": "string"
         },
         "messages": {
           "$ref": "#/components/DeviceMessagesEx"
+        },
+        "user-configs": {
+          "$ref": "#/components/UserConfig"
         }
       },
       "required": [
@@ -367,10 +382,13 @@
             "minItems": 1
           },
           "name": {
-            "$ref": "#/components/name-field"
+            "type": "string"
           },
           "messages": {
             "$ref": "#/components/DeviceMessagesEx"
+          },
+          "user-configs": {
+            "$ref": "#/components/UserConfig"
           }
         },
         "required": [
@@ -423,33 +441,6 @@
               "$ref": "#/components/configurations-definition"
             }
           }
-        }
-      },
-      "additionalProperties": false
-    },
-    "user-config": {
-      "type": "object",
-      "patternProperties": {
-        "^.*$": {
-          "type": "object",
-          "properties": {
-            "allow": {
-              "type": "boolean"
-            },
-            "deny": {
-              "type": "boolean"
-            },
-            "display-name": {
-              "type": "string"
-            },
-            "index": {
-              "type": "number"
-            },
-            "messages": {
-              "$ref": "#/components/UserDeviceMessagesEx"
-            }
-          },
-          "additionalProperties": false
         }
       },
       "additionalProperties": false
