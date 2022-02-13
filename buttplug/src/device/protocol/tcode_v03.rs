@@ -5,8 +5,11 @@ use super::{
   ButtplugProtocolCommandHandler,
 };
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
-  device::{protocol::ButtplugProtocolProperties, DeviceImpl, DeviceWriteCmd, Endpoint},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
+  device::{
+    protocol::ButtplugProtocolProperties, 
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    DeviceImpl, DeviceWriteCmd, Endpoint},
 };
 use std::sync::Arc;
 

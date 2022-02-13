@@ -8,17 +8,14 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
-  add_to_protocol_map,
-  get_default_protocol_map,
-  ButtplugProtocol,
-  TryCreateProtocolFunc,
+  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, TryCreateProtocolFunc,
 };
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap},
   },
-  device::Endpoint,
+  device::{DeviceImpl, Endpoint},
 };
 use dashmap::DashMap;
 use getset::{Getters, MutGetters, Setters};
@@ -219,7 +216,7 @@ impl WebsocketSpecifier {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
-pub enum DeviceSpecifier {
+pub enum ProtocolDeviceSpecifier {
   BluetoothLE(BluetoothLESpecifier),
   HID(HIDSpecifier),
   USB(USBSpecifier),
@@ -229,267 +226,310 @@ pub enum DeviceSpecifier {
   Websocket(WebsocketSpecifier),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct ProtocolAttributes {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  identifier: Option<Vec<String>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  name: Option<HashMap<String, String>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  messages: Option<DeviceMessageAttributesMap>,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct ProtocolDefinition {
-  // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
-  // they're kept separate here, and we return them in get_specifiers(). Feels
-  // very clumsy, but we really don't do this a bunch during a session.
-  #[serde(skip_serializing_if = "Option::is_none")]
-  usb: Option<Vec<USBSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  btle: Option<BluetoothLESpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  serial: Option<Vec<SerialSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hid: Option<Vec<HIDSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  xinput: Option<XInputSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  websocket: Option<WebsocketSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "lovense-connect-service")]
-  lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  defaults: Option<ProtocolAttributes>,
-  #[serde(default)]
-  configurations: Vec<ProtocolAttributes>,
-}
-
-fn option_some_eq<T>(a: &Option<T>, b: &T) -> bool
-where
-  T: PartialEq,
-{
-  a.as_ref().map_or(false, |x| x == b)
-}
-
-fn option_some_eq_vec<T>(a_opt: &Option<Vec<T>>, b: &T) -> bool
-where
-  T: PartialEq,
-{
-  a_opt.as_ref().map_or(false, |a_vec| a_vec.contains(b))
-}
-
-impl PartialEq<DeviceSpecifier> for ProtocolDefinition {
-  fn eq(&self, other: &DeviceSpecifier) -> bool {
-    // TODO This seems like a really gross way to do this?
-    match other {
-      DeviceSpecifier::USB(other_usb) => option_some_eq_vec(&self.usb, other_usb),
-      DeviceSpecifier::Serial(other_serial) => option_some_eq_vec(&self.serial, other_serial),
-      DeviceSpecifier::BluetoothLE(other_btle) => option_some_eq(&self.btle, other_btle),
-      DeviceSpecifier::HID(other_hid) => option_some_eq_vec(&self.hid, other_hid),
-      DeviceSpecifier::XInput(other_xinput) => option_some_eq(&self.xinput, other_xinput),
-      DeviceSpecifier::Websocket(other_websocket) => {
-        option_some_eq(&self.websocket, other_websocket)
+impl ProtocolDeviceSpecifier {
+  pub fn matches(&self, other: &ProtocolDeviceSpecifier) -> bool {
+    use ProtocolDeviceSpecifier::*;
+    match (self, other) {
+      (USB(self_spec), USB(other_spec)) => self_spec == other_spec,
+      (Serial(self_spec), Serial(other_spec)) => self_spec == other_spec,
+      (BluetoothLE(self_spec), BluetoothLE(other_spec)) => self_spec == other_spec,
+      (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
+      (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
+      (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
+      (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
+        self_spec == other_spec
       }
-      DeviceSpecifier::LovenseConnectService(other_lovense_service) => {
-        option_some_eq(&self.lovense_connect_service, other_lovense_service)
-      }
+      _ => false,
     }
   }
 }
 
-impl ProtocolDefinition {
-  pub fn merge_user_definition(&mut self, other: ProtocolDefinition) {
-    // Easy: Just extend vectors we already have
-    if let Some(other_usb) = other.usb {
-      if let Some(ref mut usb) = self.usb {
-        usb.extend(other_usb);
+#[derive(Debug, Clone, Default, Getters, Setters, MutGetters)]
+pub struct ProtocolDeviceAttributes {
+  parent: Option<Arc<ProtocolDeviceAttributes>>,
+  name: Option<String>,
+  display_name: Option<String>,
+  pub(super) message_attributes: DeviceMessageAttributesMap,
+}
+
+impl ProtocolDeviceAttributes {
+  pub fn new(
+    name: Option<String>,
+    display_name: Option<String>,
+    message_attributes: DeviceMessageAttributesMap,
+    parent: Option<Arc<ProtocolDeviceAttributes>>,
+  ) -> Self {
+    Self {
+      name,
+      display_name,
+      message_attributes,
+      parent,
+    }
+  }
+
+  // We only need to preserve the tree encoding inside of the DeviceConfigurationManager. Once a
+  // attributes struct is handed out to the world, it is considered static, so we can provide a
+  // flattened representation.
+  pub fn new_flattened(other: &ProtocolDeviceAttributes) -> Self {
+    Self {
+      parent: None,
+      name: Some(other.name().to_owned()),
+      display_name: other.display_name(),
+      message_attributes: other.message_attributes_map(),
+    }
+  }
+
+  pub fn name(&self) -> &str {
+    if let Some(name) = &self.name {
+      name
+    } else {
+      if let Some(parent) = &self.parent {
+        parent.name()
       } else {
-        self.usb = Some(other_usb);
+        "Unknown Buttplug Device"
       }
     }
+  }
 
-    if let Some(other_serial) = other.serial {
-      if let Some(ref mut serial) = self.serial {
-        serial.extend(other_serial);
+  pub fn display_name(&self) -> Option<String> {
+    if let Some(name) = &self.display_name {
+      Some(name.clone())
+    } else {
+      if let Some(parent) = &self.parent {
+        parent.display_name()
       } else {
-        self.serial = Some(other_serial);
+        None
       }
     }
+  }
 
-    if let Some(other_hid) = other.hid {
-      if let Some(ref mut hid) = self.hid {
-        hid.extend(other_hid);
+  pub fn allows_message(
+    &self,
+    message_type: &ButtplugDeviceMessageType,
+  ) -> Result<(), ButtplugDeviceError> {
+    self
+      .message_attributes
+      .contains_key(message_type)
+      .then(|| ())
+      .ok_or(ButtplugDeviceError::MessageNotSupported(*message_type))
+  }
+
+  pub fn message_attributes(
+    &self,
+    message_type: &ButtplugDeviceMessageType,
+  ) -> Option<DeviceMessageAttributes> {
+    if let Some(attributes) = self.message_attributes.get(message_type) {
+      Some(attributes.clone())
+    } else {
+      if let Some(parent) = &self.parent {
+        parent.message_attributes(message_type)
       } else {
-        self.hid = Some(other_hid);
+        None
       }
     }
+  }
 
-    // Not so easy: Actually do complex merges for systems with more identifiers
-    if let Some(other_btle) = other.btle {
-      if let Some(ref mut btle) = self.btle {
-        btle.merge(other_btle);
-      } else {
-        self.btle = Some(other_btle);
+  pub fn message_attributes_map(&self) -> DeviceMessageAttributesMap {
+    if let Some(parent) = &self.parent {
+      let mut map = parent.message_attributes_map();
+      for (message, value) in &self.message_attributes {
+        let attrs = map
+          .get(message)
+          .and_then(|base_attrs| Some(base_attrs.merge(value)))
+          .or_else(|| Some(value.clone()))
+          .expect("We filled in the device attributes either way.");
+        // Overwrite anything that might already be in the map with our new attribute set.
+        map.insert(*message, attrs);
+      }
+      map
+    } else {
+      self.message_attributes.clone()
+    }
+  }
+
+  pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
+    let endpoint_attributes = DeviceMessageAttributes {
+      endpoints: Some(endpoints.to_owned()),
+      ..Default::default()
+    };
+    self.message_attributes.insert(
+      ButtplugDeviceMessageType::RawReadCmd,
+      endpoint_attributes.clone(),
+    );
+    self.message_attributes.insert(
+      ButtplugDeviceMessageType::RawWriteCmd,
+      endpoint_attributes.clone(),
+    );
+    self.message_attributes.insert(
+      ButtplugDeviceMessageType::RawSubscribeCmd,
+      endpoint_attributes.clone(),
+    );
+    self.message_attributes.insert(
+      ButtplugDeviceMessageType::RawUnsubscribeCmd,
+      endpoint_attributes,
+    );
+  }
+}
+
+#[derive(Debug, Clone, Eq, Hash)]
+pub enum ProtocolAttributeIdentifier {
+  // The default protocol attribute identifier
+  Default,
+  Identifier(String),
+  Address(String),
+}
+
+impl PartialEq for ProtocolAttributeIdentifier {
+  fn eq(&self, other: &Self) -> bool {
+    use ProtocolAttributeIdentifier::*;
+    match (self, other) {
+      (Default, Default) => true,
+      (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
+      (Address(addr1), Address(addr2)) => addr1 == addr2,
+      _ => false,
+    }
+  }
+}
+
+#[derive(Debug, Clone, Getters, MutGetters, Default)]
+pub struct ProtocolDeviceConfiguration {
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  specifiers: Vec<ProtocolDeviceSpecifier>,
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  configurations: HashMap<ProtocolAttributeIdentifier, Arc<ProtocolDeviceAttributes>>,
+}
+
+impl ProtocolDeviceConfiguration {
+  pub fn new(
+    specifiers: Vec<ProtocolDeviceSpecifier>,
+    configurations: HashMap<ProtocolAttributeIdentifier, Arc<ProtocolDeviceAttributes>>,
+  ) -> Self {
+    Self {
+      specifiers,
+      configurations,
+    }
+  }
+
+  pub fn is_valid(&self) -> Result<(), ButtplugError> {
+    for (ident, attrs) in &self.configurations {
+      for (message_type, message_attrs) in attrs.message_attributes_map() {
+        message_attrs.check(&message_type).map_err(|err| {
+          info!("Error in {:?} {}: {:?}", ident, message_type, message_attrs);
+          ButtplugError::from(err)
+        })?;
       }
     }
+    Ok(())
+  }
 
-    if let Some(other_websocket) = other.websocket {
-      if let Some(ref mut websocket) = self.websocket {
-        websocket.merge(other_websocket);
-      } else {
-        self.websocket = Some(other_websocket);
-      }
-    }
-
-    // Not possible: Don't even try to merge specific specifiers.
-    if other.xinput.is_some() {
-      error!("XInput specifier set for user configuration, ignoring.");
-    }
-
-    if other.lovense_connect_service.is_some() {
-      error!("Lovense connect service specifier set for user configuration, ignoring.");
-    }
-
-    // If new defaults are set, overwrite.
-    if other.defaults.is_some() {
-      self.defaults = other.defaults;
-    }
-
-    // Treat configurations like paths; Extend using the new ones first, so we'll find them first,
-    // but leave everything in. Post warning messages if anything repeats after this.
-    if !other.configurations.is_empty() {
-      self.configurations = other
-        .configurations
-        .iter()
-        .chain(self.configurations.iter())
-        .cloned()
-        .collect();
-      info!("{:?}", self.configurations);
-    }
+  pub fn device_attributes(
+    &self,
+    identifier: &ProtocolAttributeIdentifier,
+  ) -> Option<&Arc<ProtocolDeviceAttributes>> {
+    self.configurations.get(identifier)
   }
 }
 
 #[derive(Clone, Debug)]
-pub struct DeviceProtocolConfiguration {
+pub struct DeviceAttributesBuilder {
   allow_raw_messages: bool,
-  defaults: Option<ProtocolAttributes>,
-  configurations: Vec<ProtocolAttributes>,
-  user_device_config: Option<DeviceMessageAttributesMap>
+  device_configuration: ProtocolDeviceConfiguration,
 }
 
-impl DeviceProtocolConfiguration {
-  pub fn new(
-    allow_raw_messages: bool,
-    defaults: Option<ProtocolAttributes>,
-    configurations: Vec<ProtocolAttributes>,
-    user_device_config: Option<DeviceMessageAttributesMap>,
-  ) -> Self {
+impl DeviceAttributesBuilder {
+  fn new(allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration) -> Self {
     Self {
       allow_raw_messages,
-      defaults,
-      configurations,
-      user_device_config
+      device_configuration,
     }
   }
 
-  pub fn get_attributes(
+  pub fn create_from_impl(
     &self,
-    identifier: &str,
-    endpoints: &[Endpoint],
-  ) -> Result<(HashMap<String, String>, DeviceMessageAttributesMap), ButtplugError> {
-    let mut attributes = DeviceMessageAttributesMap::new();
+    device_impl: &Arc<DeviceImpl>,
+  ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
+    self.create(
+      &ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()),
+      &ProtocolAttributeIdentifier::Identifier(device_impl.name().to_owned()),
+      &device_impl.endpoints(),
+    )
+  }
 
-    // If we find defaults, set those up first.
-    if let Some(ref attrs) = self.defaults {
-      if let Some(ref msg_attrs) = attrs.messages {
-        attributes = msg_attrs.clone();
-      }
-    }
+  pub fn create(
+    &self,
+    address: &ProtocolAttributeIdentifier,
+    identifier: &ProtocolAttributeIdentifier,
+    endpoints: &[Endpoint],
+  ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
+    let device_attributes = self
+      .device_configuration
+      .device_attributes(address)
+      .or_else(|| self.device_configuration.device_attributes(identifier))
+      .or_else(|| {
+        self
+          .device_configuration
+          .device_attributes(&ProtocolAttributeIdentifier::Default)
+      })
+      .ok_or(ButtplugError::from(
+        ButtplugDeviceError::DeviceConfigurationFileError(format!(
+          "Configuration not found for device identifier '{:?}' Address '{:?}'",
+          identifier, address
+        )),
+      ))?;
+
+    let mut attributes = ProtocolDeviceAttributes::new_flattened(device_attributes);
 
     // If we're allowing raw messages, tack those on beforehand also.
     if self.allow_raw_messages {
-      let endpoint_attributes = DeviceMessageAttributes {
-        endpoints: Some(endpoints.to_owned()),
-        ..Default::default()
-      };
-      attributes.insert(
-        ButtplugDeviceMessageType::RawReadCmd,
-        endpoint_attributes.clone(),
-      );
-      attributes.insert(
-        ButtplugDeviceMessageType::RawWriteCmd,
-        endpoint_attributes.clone(),
-      );
-      attributes.insert(
-        ButtplugDeviceMessageType::RawSubscribeCmd,
-        endpoint_attributes.clone(),
-      );
-      attributes.insert(
-        ButtplugDeviceMessageType::RawUnsubscribeCmd,
-        endpoint_attributes,
-      );
-    }
-
-    let device_attrs = if let Some(attrs) = self.configurations.iter().find(|attrs| {
-      attrs
-        .identifier
-        .as_ref()
-        .expect("Identifier required as part of JSON schema.")
-        .contains(&identifier.to_owned())
-    }) {
-      attrs
-    } else if let Some(attrs) = &self.defaults {
-      // If we can't find an identifier but we have a default block, return that.
-      attrs
-    } else {
-      // If we can't find anything, give up.
-      return Err(
-        ButtplugDeviceError::ProtocolAttributesNotFound(format!(
-          "Cannot find identifier {} in protocol.",
-          identifier
-        ))
-        .into(),
-      );
-    };
-
-    if let Some(ref msg_attrs) = device_attrs.messages {
-      attributes.extend(msg_attrs.clone());
+      attributes.add_raw_messages(endpoints);
     }
 
     // Everything needs to be able to stop.
     attributes
+      .message_attributes
       .entry(ButtplugDeviceMessageType::StopDeviceCmd)
       .or_insert_with(DeviceMessageAttributes::default);
 
-    // At this point, we've already filtered by address, and we know the identifier, so the user
-    // configurations we'll have here should be applied to the attributes we're sending to the
-    // protocol implementation.
-    if let Some(config) = &self.user_device_config {
-      for (message_type, user_attributes) in config {
-        if let Some(entry) = attributes.get_mut(&message_type) {
-          // manually merge this for now
-          entry.step_range = user_attributes.step_range.clone();
-        }
-      }
-    }
+    Ok(attributes)
+  }
+}
 
-    Ok((
-      device_attrs
-        .name
-        .as_ref()
-        .expect("Name required as part of JSON schema")
-        .clone(),
-      attributes,
-    ))
+#[derive(Clone, Debug)]
+pub struct ProtocolBuilder {
+  allow_raw_messages: bool,
+  creator_func: TryCreateProtocolFunc,
+  configuration: ProtocolDeviceConfiguration,
+}
+
+impl ProtocolBuilder {
+  fn new(
+    allow_raw_messages: bool,
+    creator_func: TryCreateProtocolFunc,
+    configuration: ProtocolDeviceConfiguration,
+  ) -> Self {
+    Self {
+      allow_raw_messages,
+      creator_func,
+      configuration,
+    }
+  }
+
+  pub async fn create(
+    &self,
+    device_impl: Arc<DeviceImpl>,
+  ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
+    let builder = DeviceAttributesBuilder::new(self.allow_raw_messages, self.configuration.clone());
+    (self.creator_func)(device_impl.clone(), builder).await
+  }
+
+  pub fn configuration(&self) -> &ProtocolDeviceConfiguration {
+    &self.configuration
   }
 }
 
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
-  protocol_definitions: Arc<DashMap<String, ProtocolDefinition>>,
+  protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
   protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>,
 }
 
@@ -505,42 +545,55 @@ impl DeviceConfigurationManager {
   pub fn new(allow_raw_messages: bool) -> Self {
     Self {
       allow_raw_messages,
-      protocol_definitions: Arc::new(DashMap::new()),
+      protocol_device_configurations: Arc::new(DashMap::new()),
       protocol_map: Arc::new(get_default_protocol_map()),
     }
   }
 
-  pub fn add_protocol_definition(
+  pub fn add_protocol_device_configuration(
     &self,
     protocol_name: &str,
-    protocol_definition: ProtocolDefinition,
-  ) {
+    protocol_definition: ProtocolDeviceConfiguration,
+  ) -> Result<(), ButtplugError> {
+    protocol_definition.is_valid()?;
+
     self
-      .protocol_definitions
+      .protocol_device_configurations
       .insert(protocol_name.to_owned(), protocol_definition);
+    Ok(())
   }
 
-  pub fn remove_protocol_definition(&self, protocol_name: &str) {
-    self.protocol_definitions.remove(protocol_name);
+  pub fn remove_protocol_device_configuration(&self, protocol_name: &str) {
+    self.protocol_device_configurations.remove(protocol_name);
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str)
+  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugDeviceError>
   where
     T: ButtplugProtocol,
   {
-    add_to_protocol_map::<T>(&self.protocol_map, protocol_name);
+    if !self.protocol_map.contains_key(protocol_name) {
+      add_to_protocol_map::<T>(&self.protocol_map, protocol_name);
+      Ok(())
+    } else {
+      Err(ButtplugDeviceError::ProtocolAlreadyAdded(
+        protocol_name.to_owned(),
+      ))
+    }
   }
 
-  pub fn remove_protocol(&self, protocol_name: &str) {
-    self.protocol_map.remove(protocol_name);
+  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugDeviceError> {
+    if self.protocol_map.contains_key(protocol_name) {
+      self.protocol_map.remove(protocol_name);
+      Ok(())
+    } else {
+      Err(ButtplugDeviceError::ProtocolNotImplemented(
+        protocol_name.to_owned(),
+      ))
+    }
   }
 
   pub fn remove_all_protocols(&self) {
     self.protocol_map.clear();
-  }
-
-  pub fn has_protocol(&self, protocol_name: &str) -> bool {
-    self.protocol_map.contains_key(protocol_name)
   }
 
   pub fn get_protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
@@ -553,28 +606,45 @@ impl DeviceConfigurationManager {
   /// Provides read-only access to the internal protocol/identifier map. Mainly
   /// used for WebBluetooth filter construction, but could also be handy for
   /// listing capabilities in UI, etc.
-  pub fn protocol_definitions(&self) -> Arc<DashMap<String, ProtocolDefinition>> {
-    self.protocol_definitions.clone()
+  pub fn protocol_device_configurations(
+    &self,
+  ) -> Arc<DashMap<String, ProtocolDeviceConfiguration>> {
+    self.protocol_device_configurations.clone()
   }
 
-  pub fn find_protocol_definitions(
+  pub fn get_protocol_builder(
     &self,
-    specifier: &DeviceSpecifier,
-  ) -> Option<(bool, String, ProtocolDefinition)> {
+    specifier: &ProtocolDeviceSpecifier,
+  ) -> Option<ProtocolBuilder> {
     debug!(
       "Looking for protocol that matches specifier: {:?}",
       specifier
     );
-    for config in self.protocol_definitions.iter() {
-      if config.value() == specifier {
+    for config in self.protocol_device_configurations.iter() {
+      if config.value().specifiers.contains(specifier) {
         info!(
-          "Found protocol {:?} for specifier {:?}.",
+          "Found protocol configuration {:?} for specifier {:?}.",
           config.key(),
           specifier
         );
-        return Some((
+
+        if !self.protocol_map.contains_key(config.key()) {
+          warn!(
+            "No protocol implementation for {:?} found for specifier {:?}.",
+            config.key(),
+            specifier
+          );
+          return None;
+        }
+
+        let creator_func = self
+          .protocol_map
+          .get(config.key())
+          .map(|pair| *pair.value())?;
+
+        return Some(ProtocolBuilder::new(
           self.allow_raw_messages,
-          config.key().clone(),
+          creator_func,
           config.value().clone(),
         ));
       }
@@ -582,31 +652,13 @@ impl DeviceConfigurationManager {
     debug!("No protocol found for specifier {:?}.", specifier);
     None
   }
-
-  pub fn get_protocol_config(&self, name: &str) -> Option<DeviceProtocolConfiguration> {
-    debug!("Looking for protocol {}", name);
-    // TODO It feels like maybe there should be a cleaner way to do this,
-    // but I'm not really sure what it is?
-    if let Some(proto) = self.protocol_definitions.get(name) {
-      info!("Found a protocol definition for {}", name);
-      Some(DeviceProtocolConfiguration::new(
-        self.allow_raw_messages,
-        proto.defaults.clone(),
-        proto.configurations.clone(),
-        None
-      ))
-    } else {
-      debug!("No matching protocol definition found.");
-      None
-    }
-  }
 }
 
+/*
 #[cfg(test)]
 mod test {
   use super::{
     BluetoothLESpecifier,
-    DeviceProtocolConfiguration,
     DeviceSpecifier,
     SerialSpecifier,
   };
@@ -626,7 +678,7 @@ mod test {
   fn test_config_equals() {
     let config = create_test_dcm(false);
     let launch = DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch", &[]));
-    assert!(config.find_protocol_definitions(&launch).is_some());
+    assert!(config.get_protocol_builder(&launch).is_some());
   }
 
   #[test]
@@ -634,7 +686,7 @@ mod test {
     let config = create_test_dcm(false);
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
-    assert!(config.find_protocol_definitions(&lovense).is_some());
+    assert!(config.get_protocol_builder(&lovense).is_some());
   }
 
   #[test]
@@ -643,10 +695,10 @@ mod test {
     let lovense =
       DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]));
     let proto = config
-      .find_protocol_definitions(&lovense)
+      .get_protocol_builder(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations, None);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -675,7 +727,7 @@ mod test {
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations, None);
+      DeviceProtocolConfiguration::new(true, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -700,7 +752,7 @@ mod test {
       .find_protocol_definitions(&lovense)
       .expect("Test, assuming infallible");
     let proto_config =
-      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations, None);
+      DeviceProtocolConfiguration::new(false, proto.2.defaults.clone(), proto.2.configurations);
     let (name_map, message_map) = proto_config
       .get_attributes("P", &vec![])
       .expect("Test, assuming infallible");
@@ -776,7 +828,6 @@ mod test {
       .iter()
       .any(|x| x.port == "COM1"));
   }
-
   // TODO Test invalid config load (not json)
   // TODO Test invalid user config load (not json)
   // TODO Test device config with repeated ble service
@@ -785,3 +836,4 @@ mod test {
   // TODO Test user config with invalid bus type
   // TODO Test user config with conflicting BLE name
 }
+*/

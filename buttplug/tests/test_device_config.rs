@@ -8,7 +8,7 @@ use buttplug::{
 
 const BASE_CONFIG_JSON: &str = r#"
 {
-  "version": 61,
+  "version": 63,
   "protocols": {
     "kiiroo-v21": {
       "btle": {
@@ -28,9 +28,7 @@ const BASE_CONFIG_JSON: &str = r#"
         }
       },
       "defaults": {
-        "name": {
-          "en-us": "Kiiroo V2.1 Device"
-        },
+        "name": "Kiiroo V2.1 Device",
         "messages": {}
       },
       "configurations": [
@@ -38,9 +36,7 @@ const BASE_CONFIG_JSON: &str = r#"
           "identifier": [
             "OhMiBod LUMEN"
           ],
-          "name": {
-            "en-us": "OhMiBod Lumen"
-          },
+          "name": "OhMiBod Lumen",
           "messages": {
             "VibrateCmd": {
               "FeatureCount": 1,
@@ -64,18 +60,27 @@ fn test_basic_device_config() {
   });
 }
 
+
 #[cfg(feature = "server")]
 #[test]
-fn test_invalid_step_range_device_config_wrong_range_length() {
-  tracing_subscriber::fmt::init();
+fn test_valid_step_range() {
+  //tracing_subscriber::fmt::init();
   let user_config_json = r#"
   {
-    "version": 61,
-    "user-config": {
-      "test-addr": {
-        "messages": {
-          "VibrateCmd": {
-            "StepRange": [[50,60]]
+    "version": 63,
+    "user-configs": {
+      "kiiroo-v21": {
+        "configurations": {
+          "OhMiBod LUMEN": {
+            "test-addr": {
+              "messages": {
+                "VibrateCmd": {
+                  "StepRange": [
+                    [50, 60]
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -86,35 +91,28 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
     assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
   });
 }
-/*
+
 #[cfg(feature = "server")]
 #[test]
-fn test_invalid_step_range_device_config_wrong_order() {
-  tracing_subscriber::fmt::init();
+fn test_invalid_step_range_device_config_wrong_range_length() {
   let user_config_json = r#"
   {
-    "version": 61,
-    "protocols": {
+    "version": 63,
+    "user-configs": {
       "kiiroo-v21": {
-        "configurations": [
-          {
-            "identifier": [
-              "OhMiBod LUMEN"
-            ],
-            "name": {
-              "en-us": "OhMiBod Lumen"
-            },
-            "messages": {
-              "VibrateCmd": {
-                "FeatureCount": 1,
-                "StepCount": [
-                  100
-                ],
-                "StepRange": [[60, 50]]
+        "configurations": {
+          "OhMiBod LUMEN": {
+            "test-addr": {
+              "messages": {
+                "VibrateCmd": {
+                  "StepRange": [
+                    [50]
+                  ]
+                }
               }
             }
           }
-        ]
+        }
       }
     }
   }
@@ -123,4 +121,35 @@ fn test_invalid_step_range_device_config_wrong_order() {
     assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_err());
   });
 }
-*/
+
+#[cfg(feature = "server")]
+#[test]
+fn test_invalid_step_range_device_config_wrong_order() {
+  //tracing_subscriber::fmt::init();
+  let user_config_json = r#"
+  {
+    "version": 63,
+    "user-configs": {
+      "kiiroo-v21": {
+        "configurations": {
+          "OhMiBod LUMEN": {
+            "test-addr": {
+              "messages": {
+                "VibrateCmd": {
+                  "StepRange": [
+                    [60, 50]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  "#;
+  async_manager::block_on(async move {
+    tracing::error!("{:?}", ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish());
+    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_err());
+  });
+}

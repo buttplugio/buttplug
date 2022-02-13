@@ -10,7 +10,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, XInputSpecifier},
+    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -54,13 +54,13 @@ impl Debug for XInputDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
-  fn get_specifier(&self) -> DeviceSpecifier {
-    DeviceSpecifier::XInput(XInputSpecifier::default())
+  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+    ProtocolDeviceSpecifier::XInput(XInputSpecifier::default())
   }
 
   async fn try_create_device_impl(
     &mut self,
-    _protocol: ProtocolDefinition,
+    _protocol: ProtocolDeviceConfiguration,
   ) -> Result<DeviceImpl, ButtplugError> {
     debug!("Emitting a new xbox device impl.");
     let device_impl_internal = XInputDeviceImpl::new(self.index);

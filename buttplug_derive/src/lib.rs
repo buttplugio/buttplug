@@ -291,11 +291,11 @@ fn impl_buttplug_protocol_properties_macro(ast: &syn::DeriveInput) -> TokenStrea
   let gen = quote! {
       impl ButtplugProtocolProperties for #name {
           fn name(&self) -> &str {
-            &self.name
+            self.device_attributes.name()
           }
 
-          fn message_attributes(&self) -> DeviceMessageAttributesMap {
-            self.message_attributes.clone()
+          fn device_attributes(&self) -> &ProtocolDeviceAttributes {
+            &self.device_attributes
           }
 
           fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {

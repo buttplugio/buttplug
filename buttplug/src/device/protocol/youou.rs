@@ -1,8 +1,9 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -15,19 +16,17 @@ use std::sync::{
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Youou {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   packet_id: AtomicU8,
 }
 
 impl Youou {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       packet_id: AtomicU8::new(0),
     }
@@ -37,7 +36,7 @@ impl Youou {
 impl ButtplugProtocol for Youou {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -45,12 +44,8 @@ impl ButtplugProtocol for Youou {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
     Box::pin(async move {
-      let (name, attrs) = crate::device::protocol::get_protocol_features(
-        device_impl,
-        Some("VX001_".to_owned()),
-        config,
-      )?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier("VX001_".to_owned()), &device_impl.endpoints())?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

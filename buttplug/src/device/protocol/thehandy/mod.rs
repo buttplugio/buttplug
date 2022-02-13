@@ -11,13 +11,12 @@ use crate::{
       self,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
-    DeviceProtocolConfiguration,
     DeviceReadCmd,
     DeviceWriteCmd,
     Endpoint,
@@ -40,8 +39,7 @@ mod handyplug {
 
 #[derive(ButtplugProtocolProperties)]
 pub struct TheHandy {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   // The generic command manager would normally handle this storage, but the only reason we're
   // retaining tracking information is to build our fucking timing calculation for the fleshlight
@@ -50,14 +48,13 @@ pub struct TheHandy {
 }
 
 impl TheHandy {
-  pub fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self
+  pub fn new(device_attributes: ProtocolDeviceAttributes) -> Self
   where
     Self: Sized,
   {
     Self {
-      name: name.to_owned(),
-      stop_commands: GenericCommandManager::new(&message_attributes).get_stop_commands(),
-      message_attributes,
+      stop_commands: GenericCommandManager::new(&device_attributes).get_stop_commands(),
+      device_attributes,
       previous_position: Arc::new(AtomicU8::new(0)),
     }
   }
@@ -66,7 +63,7 @@ impl TheHandy {
 impl ButtplugProtocol for TheHandy {
   fn try_create(
     device_impl: Arc<DeviceImpl>,
-    config: DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -125,9 +122,8 @@ impl ButtplugProtocol for TheHandy {
       // does not seem needless.
       //
       // We have no device name updates here, so just return a device.
-      let (name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create_from_impl(&device_impl)?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

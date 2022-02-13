@@ -1,8 +1,9 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -15,8 +16,7 @@ use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Satisfyer {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   last_command: Arc<Mutex<Vec<u8>>>,
@@ -50,14 +50,12 @@ async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>
 
 impl Satisfyer {
   fn new(
-    name: &str,
-    message_attributes: DeviceMessageAttributesMap,
+    device_attributes: ProtocolDeviceAttributes,
     last_command: Arc<Mutex<Vec<u8>>>,
   ) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+    let manager = GenericCommandManager::new(&device_attributes);
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       last_command,
@@ -68,7 +66,7 @@ impl Satisfyer {
 impl ButtplugProtocol for Satisfyer {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -90,15 +88,12 @@ impl ButtplugProtocol for Satisfyer {
         device_identifier
       );
       info_fut.await?;
-      let (name, attrs) = crate::device::protocol::get_protocol_features(
-        device_impl.clone(),
-        Some(device_identifier),
-        config,
-      )?;
+      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(device_identifier), &device_impl.endpoints())?;
+
       // Now that we've initialized and constructed the device, start the update cycle to make sure
       // we don't drop the connection.
       let last_command = Arc::new(Mutex::new(vec![0u8; 8]));
-      let device = Self::new(&name, attrs, last_command.clone());
+      let device = Self::new(device_attributes, last_command.clone());
       async_manager::spawn(async move {
         send_satisfyer_updates(device_impl, last_command).await;
       });

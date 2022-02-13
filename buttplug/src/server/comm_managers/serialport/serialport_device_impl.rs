@@ -5,7 +5,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition, SerialSpecifier},
+    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -36,14 +36,14 @@ use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
 pub struct SerialPortDeviceImplCreator {
-  specifier: DeviceSpecifier,
+  specifier: ProtocolDeviceSpecifier,
   port_info: SerialPortInfo,
 }
 
 impl SerialPortDeviceImplCreator {
   pub fn new(port_info: &SerialPortInfo) -> Self {
     Self {
-      specifier: DeviceSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
+      specifier: ProtocolDeviceSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
       port_info: port_info.clone(),
     }
   }
@@ -59,13 +59,13 @@ impl Debug for SerialPortDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
-  fn get_specifier(&self) -> DeviceSpecifier {
+  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
     self.specifier.clone()
   }
 
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    protocol: ProtocolDeviceConfiguration,
   ) -> Result<DeviceImpl, ButtplugError> {
     let device_impl_internal = SerialPortDeviceImpl::try_create(&self.port_info, protocol).await?;
     let device_impl = DeviceImpl::new(
@@ -148,17 +148,21 @@ pub struct SerialPortDeviceImpl {
 impl SerialPortDeviceImpl {
   pub async fn try_create(
     port_info: &SerialPortInfo,
-    protocol_def: ProtocolDefinition,
+    protocol_def: ProtocolDeviceConfiguration,
   ) -> Result<Self, ButtplugError> {
     let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.
-    let port_def = protocol_def
-      .serial()
-      .clone()
-      .expect("This will exist if we've made it here")
-      .into_iter()
-      .find(|port| port_info.port_name == *port.port())
-      .expect("We had to match the port already to get here.");
+    let mut port_def = None;
+    for specifier in protocol_def.specifiers() {
+      if let ProtocolDeviceSpecifier::Serial(serial) = specifier {
+        if port_info.port_name == *serial.port() {
+          port_def = Some(serial.clone());
+          break;
+        }
+      }
+    };
+    let port_def = port_def.expect("We'll always have a port definition by this point");
+
 
     // This seems like it should be a oneshot, but there's no way to await a
     // value on those?

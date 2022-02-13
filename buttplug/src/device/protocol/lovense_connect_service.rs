@@ -4,10 +4,10 @@ use crate::{
     self,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -22,8 +22,7 @@ use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct LovenseConnectService {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   rotation_direction: Arc<AtomicBool>,
@@ -35,11 +34,10 @@ impl LovenseConnectService {
   // battery readings. Therefore, we expect initialize() to return the protocol
   // itself instead of calling this, which is simply a convenience method for
   // the default implementation anyways.
-  fn new(name: &str, attrs: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&attrs);
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
     Self {
-      name: name.to_owned(),
-      message_attributes: attrs,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       rotation_direction: Arc::new(AtomicBool::new(false)),

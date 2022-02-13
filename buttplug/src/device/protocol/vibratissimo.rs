@@ -4,12 +4,12 @@ use crate::{
     self,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
     VibrateCmd,
     VibrateSubcommand,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -23,7 +23,7 @@ super::default_protocol_definition!(Vibratissimo);
 impl ButtplugProtocol for Vibratissimo {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -34,9 +34,8 @@ impl ButtplugProtocol for Vibratissimo {
         .await?;
       let ident =
         String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
-      let (name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl, Some(ident), config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(ident), &device_impl.endpoints())?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

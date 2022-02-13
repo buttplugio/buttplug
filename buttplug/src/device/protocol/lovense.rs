@@ -10,11 +10,11 @@ use crate::{
       self,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
-      DeviceMessageAttributesMap,
     },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -41,19 +41,17 @@ const LOVENSE_COMMAND_RETRY: u64 = 5;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Lovense {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   rotation_direction: Arc<AtomicBool>,
 }
 
 impl Lovense {
-  fn new(name: &str, attrs: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&attrs);
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
     Self {
-      name: name.to_owned(),
-      message_attributes: attrs,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       rotation_direction: Arc::new(AtomicBool::new(false)),
@@ -64,7 +62,7 @@ impl Lovense {
 impl ButtplugProtocol for Lovense {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -87,8 +85,8 @@ impl ButtplugProtocol for Lovense {
               let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-              let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, Some(identifier), config)?;
-              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);
+              let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(identifier), &device_impl.endpoints())?;
+              return Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             } else {
               return Err(
                 ButtplugDeviceError::ProtocolSpecificError(
@@ -103,8 +101,8 @@ impl ButtplugProtocol for Lovense {
             count += 1;
             if count > LOVENSE_COMMAND_RETRY {
               warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
-              let (name, attrs) = crate::device::protocol::get_protocol_features(device_impl, None, config)?;
-              return Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>);
+              let device_attributes = builder.create_from_impl(&device_impl)?;
+              return Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             }
           }
         }

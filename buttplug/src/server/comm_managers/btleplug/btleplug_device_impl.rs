@@ -5,7 +5,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{BluetoothLESpecifier, DeviceSpecifier, ProtocolDefinition},
+    configuration_manager::{BluetoothLESpecifier, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -75,8 +75,8 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 
 #[async_trait]
 impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
-  fn get_specifier(&self) -> DeviceSpecifier {
-    DeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+    ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
       &self.services,
     ))
@@ -84,7 +84,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    protocol: ProtocolDeviceConfiguration,
   ) -> Result<DeviceImpl, ButtplugError> {
     if !self
       .device
@@ -113,34 +113,37 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
 
-    for (proto_uuid, proto_service) in protocol
-      .btle()
-      .as_ref()
-      .expect("To get this far we are guaranteed to have a btle block in the config")
-      .services()
-    {
-      for service in self.device.services() {
-        if service.uuid != *proto_uuid {
-          continue;
-        }
-
-        debug!("Found required service {} {:?}", service.uuid, service);
-        for (chr_name, chr_uuid) in proto_service.iter() {
-          if let Some(chr) = service.characteristics.iter().find(|c| c.uuid == *chr_uuid) {
-            debug!(
-              "Found characteristic {} for endpoint {}",
-              chr.uuid, *chr_name
-            );
-            endpoints.insert(*chr_name, chr.clone());
-            uuid_map.insert(*chr_uuid, *chr_name);
-          } else {
-            error!(
-              "Characteristic {} ({}) not found, may cause issues in connection.",
-              chr_name, chr_uuid
-            );
+    if let Some(ProtocolDeviceSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolDeviceSpecifier::BluetoothLE(_))) {
+      for (proto_uuid, proto_service) in btle.services() {
+        for service in self.device.services() {
+          if service.uuid != *proto_uuid {
+            continue;
+          }
+  
+          debug!("Found required service {} {:?}", service.uuid, service);
+          for (chr_name, chr_uuid) in proto_service.iter() {
+            if let Some(chr) = service.characteristics.iter().find(|c| c.uuid == *chr_uuid) {
+              debug!(
+                "Found characteristic {} for endpoint {}",
+                chr.uuid, *chr_name
+              );
+              endpoints.insert(*chr_name, chr.clone());
+              uuid_map.insert(*chr_uuid, *chr_name);
+            } else {
+              error!(
+                "Characteristic {} ({}) not found, may cause issues in connection.",
+                chr_name, chr_uuid
+              );
+            }
           }
         }
       }
+    } else {
+      error!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, self.address);
+      return Err(
+        ButtplugDeviceError::DeviceConnectionError(format!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, self.address))
+        .into(),
+      );
     }
     let notification_stream = self
       .device

@@ -158,6 +158,8 @@ pub enum ButtplugDeviceError {
   ProtocolSpecificError(String, String),
   /// {0}
   ProtocolRequirementError(String),
+  /// Protocol already added to system {0},
+  ProtocolAlreadyAdded(String),
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
   /// Device Configuration File Error: {0}

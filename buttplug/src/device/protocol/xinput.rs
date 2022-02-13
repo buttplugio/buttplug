@@ -2,10 +2,11 @@ use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolComman
 use crate::{
   core::{
     errors::ButtplugMessageError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+    messages::{self, ButtplugDeviceCommandMessageUnion, },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -19,16 +20,16 @@ super::default_protocol_definition!(XInput);
 impl ButtplugProtocol for XInput {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
       // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-      let (mut name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl.clone(), None, config)?;
-      name = format!(
+      let device_attributes = builder.create_from_impl(&device_impl)?;
+      /*
+      let name = format!(
         "{} {}",
         name,
         device_impl
@@ -37,7 +38,8 @@ impl ButtplugProtocol for XInput {
           .last()
           .expect("We already set the address before getting here")
       );
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      */
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

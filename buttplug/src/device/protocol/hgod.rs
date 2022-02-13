@@ -1,8 +1,9 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -24,8 +25,7 @@ const HGOD_COMMAND_DELAY_MS: u64 = 100;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Hgod {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   current_command: Arc<RwLock<Vec<u8>>>,
@@ -33,12 +33,11 @@ pub struct Hgod {
 }
 
 impl Hgod {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       updater_running: Arc::new(AtomicBool::new(false)),

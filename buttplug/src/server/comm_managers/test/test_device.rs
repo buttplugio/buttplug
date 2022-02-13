@@ -5,7 +5,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceSpecifier, ProtocolDefinition},
+    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -28,13 +28,13 @@ use std::{
 use tokio::sync::{broadcast, mpsc};
 
 pub struct TestDeviceImplCreator {
-  specifier: DeviceSpecifier,
+  specifier: ProtocolDeviceSpecifier,
   device_impl: Option<Arc<TestDeviceInternal>>,
 }
 
 impl TestDeviceImplCreator {
   #[allow(dead_code)]
-  pub fn new(specifier: DeviceSpecifier, device_impl: Arc<TestDeviceInternal>) -> Self {
+  pub fn new(specifier: ProtocolDeviceSpecifier, device_impl: Arc<TestDeviceInternal>) -> Self {
     Self {
       specifier,
       device_impl: Some(device_impl),
@@ -56,19 +56,19 @@ impl Debug for TestDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
-  fn get_specifier(&self) -> DeviceSpecifier {
+  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
     self.specifier.clone()
   }
 
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    protocol: ProtocolDeviceConfiguration,
   ) -> Result<DeviceImpl, ButtplugError> {
     let device = self
       .device_impl
       .take()
       .expect("We'll always have this at this point");
-    if let Some(btle) = protocol.btle() {
+    if let Some(ProtocolDeviceSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolDeviceSpecifier::BluetoothLE(_))) {
       for endpoint_map in btle.services().values() {
         for endpoint in endpoint_map.keys() {
           device.add_endpoint(endpoint).await;

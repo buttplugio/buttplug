@@ -1,8 +1,9 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -15,7 +16,7 @@ super::default_protocol_definition!(Patoo);
 impl ButtplugProtocol for Patoo {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -27,11 +28,10 @@ impl ButtplugProtocol for Patoo {
     while i < c.len() && !c[i].is_digit(10) {
       i += 1;
     }
-    let name = c[0..i].iter().collect();
+    let name: String = c[0..i].iter().collect();
     Box::pin(async move {
-      let (name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl, Some(name), config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(name), &device_impl.endpoints())?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }
