@@ -9,13 +9,12 @@ use crate::{
     self,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
     FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes},
     DeviceImpl,
-    DeviceProtocolConfiguration,
     DeviceWriteCmd,
     Endpoint,
   },
@@ -68,20 +67,18 @@ pub fn crc16(data: &[u8]) -> [u8; 2] {
 
 #[derive(ButtplugProtocolProperties)]
 pub struct Fredorch {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   _manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
 }
 
 impl Fredorch {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       _manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
@@ -92,7 +89,7 @@ impl Fredorch {
 impl ButtplugProtocol for Fredorch {
   fn try_create(
     device_impl: Arc<DeviceImpl>,
-    config: DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -146,9 +143,8 @@ impl ButtplugProtocol for Fredorch {
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      let (name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create_from_impl(&device_impl)?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

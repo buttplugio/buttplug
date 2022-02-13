@@ -32,7 +32,7 @@ use crate::{
   },
   util::{
     async_manager,
-    device_configuration::{load_protocol_config_from_json, DEVICE_CONFIGURATION_JSON},
+    device_configuration::{load_protocol_configs_from_json, DEVICE_CONFIGURATION_JSON},
     stream::convert_broadcast_receiver_to_stream,
   },
 };
@@ -114,24 +114,8 @@ impl ButtplugServerBuilder {
   }
 
   pub fn finish(&self) -> Result<ButtplugServer, ButtplugError> {
-    // If the user config string exists, parse it.
-    let user_config = if let Some(user_device_config) = &self.user_device_configuration_json {
-      // Skip checking the version of user device config files for now.
-      Some(load_protocol_config_from_json(user_device_config, true)?)
-    } else {
-      None
-    };
 
-    // If the device config string exists, parse it.
-    let device_config = if let Some(main_device_config) = &self.device_configuration_json {
-      let mut main_config = load_protocol_config_from_json(main_device_config, false)?;
-      if let Some(user_config) = user_config {
-        main_config.merge(user_config);
-      }
-      Some(main_config)
-    } else {
-      user_config
-    };
+    let protocol_map = load_protocol_configs_from_json(self.device_configuration_json.clone(), self.user_device_configuration_json.clone(), false)?;
 
     // Create the server
     debug!("Creating server '{}'", self.name);
@@ -143,6 +127,14 @@ impl ButtplugServerBuilder {
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
     let connected_clone = connected.clone();
+
+    let device_manager =
+      DeviceManager::new(send.clone(), ping_timer.clone(), self.allow_raw_messages);
+
+    for (name, def) in protocol_map {
+      device_manager.add_protocol_device_configuration(&name, def)?;
+    }
+
     async_manager::spawn(
       async move {
         // This will only exit if we've pinged out.
@@ -159,17 +151,6 @@ impl ButtplugServerBuilder {
       }
       .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
     );
-    let device_manager =
-      DeviceManager::new(send.clone(), ping_timer.clone(), self.allow_raw_messages);
-
-    if let Some(devices) = device_config {
-      for (name, def) in devices.protocols {
-        device_manager.add_protocol_definition(&name, def);
-      }
-      for (address, user_config) in devices.user_config {
-        device_manager.add_device_user_config(&address, user_config);
-      }
-    }
 
     let server = ButtplugServer {
       server_name: self.name.clone(),

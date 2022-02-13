@@ -20,7 +20,7 @@ use super::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
+    errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     messages::{
       self,
       ButtplugClientMessage,
@@ -31,21 +31,18 @@ use crate::{
       ButtplugServerMessage,
       DeviceList,
       DeviceMessageInfo,
-      DeviceMessageAttributesMap
     },
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDefinition},
+    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceConfiguration},
     protocol::ButtplugProtocol,
     ButtplugDevice,
   },
   server::ButtplugServerResultFuture,
   util::async_manager,
 };
-use dashmap::DashMap;
+use dashmap::{DashMap, DashSet};
 use futures::future;
-use getset::{Getters, Setters};
-use serde::{Deserialize, Serialize};
 use std::{
   convert::TryFrom,
   sync::{
@@ -54,24 +51,6 @@ use std::{
   },
 };
 use tokio::sync::{broadcast, mpsc};
-
-#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq)]
-#[getset(get = "pub", set = "pub")]
-pub struct DeviceUserConfig {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  #[serde(rename = "display-name")]
-  display_name: Option<String>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  allow: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  deny: Option<bool>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(default)]
-  messages: Option<DeviceMessageAttributesMap>,
-}
 
 #[derive(Debug)]
 pub struct DeviceInfo {
@@ -84,10 +63,16 @@ pub struct DeviceManager {
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-  device_user_config: Arc<DashMap<String, DeviceUserConfig>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
   config: Arc<DeviceConfigurationManager>,
   has_run_first_scan_status: Arc<AtomicBool>,
+  /// List of device addresses we are ONLY allowed to connect to. If no addresses available, connect
+  /// to any device.
+  allowed_devices: Arc<DashSet<String>>,
+  /// List of device addresses we are not allowed to connect to.
+  denied_devices: Arc<DashSet<String>>,
+  /// Map of device address to related index, if index is stored.
+  reserved_device_indexes: Arc<DashMap<String, u32>>
 }
 
 impl DeviceManager {
@@ -99,14 +84,18 @@ impl DeviceManager {
     let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages));
     let devices = Arc::new(DashMap::new());
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let device_user_config = Arc::new(DashMap::new());
+    let allowed_devices = Arc::new(DashSet::new());
+    let denied_devices = Arc::new(DashSet::new());
+    let reserved_device_indexes = Arc::new(DashMap::new());
     let mut event_loop = DeviceManagerEventLoop::new(
       config.clone(),
       output_sender,
       devices.clone(),
-      device_user_config.clone(),
       ping_timer,
       device_event_receiver,
+      allowed_devices.clone(),
+      denied_devices.clone(),
+      reserved_device_indexes.clone()
     );
     async_manager::spawn(async move {
       event_loop.run().await;
@@ -114,10 +103,12 @@ impl DeviceManager {
     Self {
       device_event_sender,
       devices,
-      device_user_config,
       comm_managers: Arc::new(DashMap::new()),
       config,
       has_run_first_scan_status: Arc::new(AtomicBool::new(false)),
+      allowed_devices,
+      denied_devices,
+      reserved_device_indexes
     }
   }
 
@@ -312,31 +303,39 @@ impl DeviceManager {
     Ok(())
   }
 
+  pub fn add_allowed_device(&self, address: &str) {
+    self.allowed_devices.insert(address.to_owned());
+  }
+
+  pub fn remove_allowed_device(&self, address: &str) {
+    self.allowed_devices.remove(address);
+  }
+
+  pub fn add_denied_device(&self, address: &str) {
+    self.denied_devices.insert(address.to_owned());
+  }
+
+  pub fn remove_denied_device(&self, address: &str) {
+    self.denied_devices.remove(address);
+  }
+
+  pub fn add_reserved_device_index(&self, address: &str, index: u32) {
+    self.reserved_device_indexes.insert(address.to_owned(), index);
+  }
+
+  pub fn remove_reserved_device_index(&self, address: &str, index: u32) {
+    self.reserved_device_indexes.remove(address);
+  }
+
   pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
   where
     T: ButtplugProtocol,
   {
-    if !self.config.has_protocol(protocol_name) {
-      self.config.add_protocol::<T>(protocol_name);
-      info!("Added protocol {}", protocol_name);
-      Ok(())
-    } else {
-      Err(ButtplugServerError::ProtocolAlreadyAdded(
-        protocol_name.to_owned(),
-      ))
-    }
+    self.config.add_protocol::<T>(protocol_name).map_err(|_| ButtplugServerError::ProtocolAlreadyAdded(protocol_name.to_owned()))
   }
 
   pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
-    if self.config.has_protocol(protocol_name) {
-      self.config.remove_protocol(protocol_name);
-      info!("Removed protocol {}", protocol_name);
-      Ok(())
-    } else {
-      Err(ButtplugServerError::ProtocolDoesNotExist(
-        protocol_name.to_owned(),
-      ))
-    }
+    self.config.remove_protocol(protocol_name).map_err(|_| ButtplugServerError::ProtocolDoesNotExist(protocol_name.to_owned()))
   }
 
   pub fn remove_all_protocols(&self) {
@@ -344,27 +343,14 @@ impl DeviceManager {
     self.config.remove_all_protocols();
   }
 
-  pub fn add_protocol_definition(&self, name: &str, config: ProtocolDefinition) {
-    info!("Adding protocol definition {}", name);
-    self.config.add_protocol_definition(name, config);
+  pub fn add_protocol_device_configuration(&self, name: &str, config: ProtocolDeviceConfiguration) -> Result<(), ButtplugError> {
+    info!("Adding protocol device config {}", name);
+    self.config.add_protocol_device_configuration(name, config)
   }
 
-  pub fn remove_protocol_definition(&self, name: &str) {
-    info!("Removing protocol definition {}", name);
-    self.config.remove_protocol_definition(name);
-  }
-
-  pub fn add_device_user_config(&self, address: &str, config: DeviceUserConfig) {
-    info!(
-      "Adding device user config for address {} with values {:?}.",
-      address, config
-    );
-    self.device_user_config.insert(address.to_owned(), config);
-  }
-
-  pub fn remove_device_user_config(&self, address: &str) {
-    info!("Removing device user config for address {}.", address);
-    self.device_user_config.remove(address);
+  pub fn remove_protocol_device_configuration(&self, name: &str) {
+    info!("Removing protocol device config {}", name);
+    self.config.remove_protocol_device_configuration(name);
   }
 
   pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {

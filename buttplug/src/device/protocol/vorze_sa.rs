@@ -4,10 +4,10 @@ use crate::{
     self,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -19,20 +19,18 @@ use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct VorzeSA {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
 }
 
 impl VorzeSA {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
@@ -90,7 +88,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
-    let dev_id = if self.name.to_ascii_lowercase().contains("rocket") {
+    let dev_id = if self.name().to_ascii_lowercase().contains("rocket") {
       VorzeDevices::Rocket
     } else {
       VorzeDevices::Bach
@@ -121,7 +119,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
     // This will never change, so we can process it before the future.
-    let dev_id = if self.name.contains("UFO") {
+    let dev_id = if self.name().contains("UFO") {
       VorzeDevices::Ufo
     } else {
       VorzeDevices::Cyclone

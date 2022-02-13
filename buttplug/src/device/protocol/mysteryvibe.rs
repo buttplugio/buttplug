@@ -1,8 +1,9 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+  core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -28,8 +29,7 @@ const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct MysteryVibe {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   current_command: Arc<RwLock<Vec<u8>>>,
@@ -37,12 +37,11 @@ pub struct MysteryVibe {
 }
 
 impl MysteryVibe {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       updater_running: Arc::new(AtomicBool::new(false)),
@@ -54,7 +53,7 @@ impl MysteryVibe {
 impl ButtplugProtocol for MysteryVibe {
   fn try_create(
     device_impl: Arc<crate::device::DeviceImpl>,
-    config: crate::device::protocol::DeviceProtocolConfiguration,
+    builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -63,9 +62,8 @@ impl ButtplugProtocol for MysteryVibe {
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      let (name, attrs) =
-        crate::device::protocol::get_protocol_features(device_impl, None, config)?;
-      Ok(Box::new(Self::new(&name, attrs)) as Box<dyn ButtplugProtocol>)
+      let device_attributes = builder.create_from_impl(&device_impl)?;
+      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

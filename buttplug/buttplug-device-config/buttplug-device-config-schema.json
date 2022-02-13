@@ -155,12 +155,12 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "minItems": 2,
-        "maxItems": 2,
         "type": "array",
         "items": {
           "type": "integer"
-        }
+        },
+        "minItems": 2,
+        "maxItems": 2
       }
     },
     "FeatureOrder": {
@@ -359,14 +359,22 @@
         },
         "messages": {
           "$ref": "#/components/DeviceMessagesEx"
-        },
-        "user-configs": {
-          "$ref": "#/components/UserConfig"
         }
       },
       "required": [
         "name",
         "messages"
+      ]
+    },
+    "defaults-userconfig-definition": {
+      "type": "object",
+      "properties": {
+        "user-configs": {
+          "$ref": "#/components/UserConfig"
+        }
+      },
+      "required": [
+        "user-configs"
       ]
     },
     "configurations-definition": {
@@ -392,14 +400,24 @@
           }
         },
         "required": [
-          "identifier",
-          "name"
+          "identifier"
         ],
         "additionalProperties": false
       },
       "minItems": 1
+    },
+    "configurations-userconfig-definition": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "description": "protocol identifier",
+          "type": "object",
+          "$ref": "#/components/UserConfig",
+          "additionalProperties": false
+        }
+      }
     }
-  },
+  },  
   "type": "object",
   "properties": {
     "version": {
@@ -439,6 +457,44 @@
             },
             "configurations": {
               "$ref": "#/components/configurations-definition"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "user-configs": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "btle": {
+              "$ref": "#/components/btle-definition"
+            },
+            "serial": {
+              "$ref": "#/components/serial-definition"
+            },
+            "websocket": {
+              "$ref": "#/components/websocket-definition"
+            },
+            "usb": {
+              "$ref": "#/components/usb-definition"
+            },
+            "hid": {
+              "$ref": "#/components/usb-definition"
+            },
+            "xinput": {
+              "$ref": "#/components/xinput-definition"
+            },
+            "lovense-connect-service": {
+              "$ref": "#/components/lovense-connect-service-definition"
+            },
+            "defaults": {
+              "$ref": "#/components/defaults-userconfig-definition"
+            },
+            "configurations": {
+              "$ref": "#/components/configurations-userconfig-definition"
             }
           }
         }

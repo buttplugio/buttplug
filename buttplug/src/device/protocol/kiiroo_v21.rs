@@ -9,11 +9,11 @@ use crate::{
     self,
     ButtplugDeviceCommandMessageUnion,
     ButtplugDeviceMessage,
-    DeviceMessageAttributesMap,
     FleshlightLaunchFW12Cmd,
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -27,20 +27,18 @@ use tokio::sync::Mutex;
 
 #[derive(ButtplugProtocolProperties)]
 pub struct KiirooV21 {
-  name: String,
-  message_attributes: DeviceMessageAttributesMap,
+  device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
 }
 
 impl KiirooV21 {
-  fn new(name: &str, message_attributes: DeviceMessageAttributesMap) -> Self {
-    let manager = GenericCommandManager::new(&message_attributes);
+  fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
 
     Self {
-      name: name.to_owned(),
-      message_attributes,
+      device_attributes,
       stop_commands: manager.get_stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),

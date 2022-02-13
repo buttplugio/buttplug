@@ -31,12 +31,11 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, DeviceSpecifier, ProtocolDefinition},
+    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
     protocol::ButtplugProtocol,
   },
 };
 use async_trait::async_trait;
-use configuration_manager::DeviceProtocolConfiguration;
 use core::hash::{Hash, Hasher};
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
@@ -389,10 +388,10 @@ pub trait DeviceImplInternal: Sync + Send {
 
 #[async_trait]
 pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
-  fn get_specifier(&self) -> DeviceSpecifier;
+  fn get_specifier(&self) -> ProtocolDeviceSpecifier;
   async fn try_create_device_impl(
     &mut self,
-    protocol: ProtocolDefinition,
+    protocol: ProtocolDeviceConfiguration,
   ) -> Result<DeviceImpl, ButtplugError>;
 }
 
@@ -441,7 +440,6 @@ impl ButtplugDevice {
 
   pub async fn try_create_device(
     device_config_mgr: Arc<DeviceConfigurationManager>,
-    user_device_config: Option<DeviceMessageAttributesMap>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
     // First off, we need to see if we even have a configuration available
@@ -449,53 +447,37 @@ impl ButtplugDevice {
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
+    let protocol_builder = match device_config_mgr.get_protocol_builder(&device_creator.get_specifier()) {
+      Some(builder) => builder,
+      None => return Ok(None)
+    };
+      
 
-    match device_config_mgr.find_protocol_definitions(&device_creator.get_specifier()) {
-      Some((allow_raw_messages, config_name, config)) => {
-        // Now that we have both a possible device implementation and a
-        // configuration for that device, try to initialize the implementation.
-        // This usually means trying to connect to whatever the device is,
-        // finding endpoints, etc.
-        //
-        // TODO Should we even return a config from the device_config_mgr if the
-        // protocol isn't there?
-        if !device_config_mgr.has_protocol(&*config_name) {
-          info!("Protocol {} not available", config_name);
-          return Ok(None);
-        }
-        let device_impl = device_creator.try_create_device_impl(config.clone()).await?;
-        info!(
-          address = tracing::field::display(device_impl.address()),
-          "Found Buttplug Device {}",
-          device_impl.name()
-        );
-        // If we've made it this far, we now have a connected device
-        // implementation with endpoints set up. We now need to run whatever
-        // protocol initialization might need to happen. We'll fetch a protocol
-        // creator, pass the device implementation to it, then let it do
-        // whatever it needs. For most protocols, this is a no-op. However, for
-        // devices like Lovense, some Kiiroo, etc, this can get fairly
-        // complicated.
-        let device_protocol_config = DeviceProtocolConfiguration::new(
-          allow_raw_messages,
-          config.defaults().clone(),
-          config.configurations().clone(),
-          user_device_config
-        );
+    // Now that we have both a possible device implementation and a
+    // configuration for that device, try to initialize the implementation.
+    // This usually means trying to connect to whatever the device is,
+    // finding endpoints, etc.
+    let device_impl = device_creator.try_create_device_impl(protocol_builder.configuration().clone()).await?;
+    info!(
+      address = tracing::field::display(device_impl.address()),
+      "Found Buttplug Device {}",
+      device_impl.name()
+    );
 
-        let sharable_device_impl = Arc::new(device_impl);
-        let protocol_creator_func = device_config_mgr
-          .get_protocol_creator(&*config_name)
-          .expect("Already checked for protocol existence");
-        let protocol_impl =
-          protocol_creator_func(sharable_device_impl.clone(), device_protocol_config).await?;
-        Ok(Some(ButtplugDevice::new(
-          protocol_impl,
-          sharable_device_impl,
-        )))
-      }
-      None => Ok(None),
-    }
+    // If we've made it this far, we now have a connected device
+    // implementation with endpoints set up. We now need to run whatever
+    // protocol initialization might need to happen. We'll fetch a protocol
+    // creator, pass the device implementation to it, then let it do
+    // whatever it needs. For most protocols, this is a no-op. However, for
+    // devices like Lovense, some Kiiroo, etc, this can get fairly
+    // complicated.
+    let sharable_device_impl = Arc::new(device_impl);
+    let protocol_impl =
+      protocol_builder.create(sharable_device_impl.clone()).await?;
+    Ok(Some(ButtplugDevice::new(
+      protocol_impl,
+      sharable_device_impl,
+    )))
   }
 
   pub fn set_display_name(&mut self, name: &str) {
@@ -537,7 +519,7 @@ impl ButtplugDevice {
   }
 
   pub fn message_attributes(&self) -> DeviceMessageAttributesMap {
-    self.protocol.message_attributes()
+    self.protocol.device_attributes().message_attributes_map()
   }
 
   pub fn parse_message(

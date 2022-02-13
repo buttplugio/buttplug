@@ -36,6 +36,9 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "MaxDuration")]
   #[serde(skip_serializing_if = "Option::is_none")]
   pub max_duration: Option<Vec<u32>>,
+  #[serde(rename = "StepRange")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub step_range: Option<Vec<(u32, u32)>>,
   /*
   // Unimplemented attributes
   #[serde(rename = "Patterns")]
@@ -49,16 +52,13 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "FeatureOrder")]
   #[serde(skip_serializing)]
   pub feature_order: Option<Vec<u32>>,
-  // Never serialize this, its for user config use only
-  #[serde(rename = "StepRange")]
-  #[serde(skip_serializing)]
-  pub step_range: Option<Vec<(u32, u32)>>,
 }
 
 impl DeviceMessageAttributes {
   fn check_feature_count_validity(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), String> {
     info!("Feature count");
     if self.feature_count.is_none() {
+      info!("Feature count error");
       Err(format!("Feature count is required for {}.", message_type))
     } else {
       Ok(())
@@ -83,7 +83,6 @@ impl DeviceMessageAttributes {
       if step_range.len() != *self.feature_count.as_ref().expect("Already checked in feature count check.") as usize {
         Err(format!("Step range array length must match feature count for {}.", message_type))
       } else if step_range.iter().any(|range| { info!("{:?}", range); range.1 <= range.0 }) {
-        info!("WHAT");
         Err(format!("Step range array values must have an increasing range for {}.", message_type))
       } else if step_range.iter().enumerate().any(|(index, range)| range.1 > self.step_count.as_ref().expect("Already checked in step count check")[index]) {
         Err(format!("Step range array values must have max value of step for {}.", message_type))
@@ -125,6 +124,16 @@ impl DeviceMessageAttributes {
       },
       _ => Ok(())
     }.map_err(|error_str| ButtplugDeviceError::DeviceConfigurationFileError(error_str))
+  }
 
+  pub fn merge(&self, other: &DeviceMessageAttributes) -> DeviceMessageAttributes {
+    DeviceMessageAttributes {
+      feature_count: other.feature_count.or_else(|| self.feature_count),
+      endpoints: other.endpoints.clone().or_else(|| self.endpoints.clone()),
+      step_count: other.step_count.clone().or_else(|| self.step_count.clone()),
+      max_duration: other.max_duration.clone().or_else(|| self.max_duration.clone()),
+      step_range: other.step_range.clone().or_else(|| self.step_range.clone()),
+      feature_order: other.feature_order.clone().or_else(|| self.feature_order.clone())
+    }
   }
 }
