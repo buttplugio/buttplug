@@ -26,7 +26,7 @@ impl ButtplugProtocolCommandHandler for LiboElle {
       if let Some(cmds) = result {
         for (index, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            if index == 0 {
+            if index == 1 {
               let mut data = 0u8;
               if *speed as u8 > 0 && *speed as u8 <= 7 {
                 data |= (*speed as u8 - 1) << 4;
@@ -40,7 +40,7 @@ impl ButtplugProtocolCommandHandler for LiboElle {
                 vec![data],
                 false,
               )));
-            } else if index == 1 {
+            } else if index == 0 {
               fut_vec.push(device.write_value(DeviceWriteCmd::new(
                 Endpoint::TxMode,
                 vec![*speed as u8],
@@ -91,7 +91,6 @@ mod test {
             0,
             vec![
               VibrateSubcommand::new(0, 0.5),
-              VibrateSubcommand::new(1, 0.5),
             ],
           )
           .into(),
@@ -99,19 +98,15 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       check_test_recv_value(
-        &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x61], false)),
-      );
-      assert!(check_test_recv_empty(&command_receiver_tx));
-      check_test_recv_value(
         &command_receiver_tx_mode,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x02], false)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx_mode));
+      assert!(check_test_recv_empty(&command_receiver_tx));
 
       // Since we only created one subcommand, we should only receive one command.
       device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(1, 1.0)]).into())
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 1.0)]).into())
         .await
         .expect("Test, assuming infallible");
       check_test_recv_value(
@@ -122,7 +117,7 @@ mod test {
       assert!(check_test_recv_empty(&command_receiver_tx));
 
       device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 1.0)]).into())
         .await
         .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver_tx));
@@ -133,15 +128,11 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       check_test_recv_value(
-        &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00], false)),
-      );
-      assert!(check_test_recv_empty(&command_receiver_tx));
-      check_test_recv_value(
         &command_receiver_tx_mode,
         DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x00], false)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx_mode));
+      assert!(check_test_recv_empty(&command_receiver_tx));
     });
   }
 }
