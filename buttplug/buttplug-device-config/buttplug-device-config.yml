@@ -772,6 +772,62 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 77
+  magic-motion-4:
+    btle:
+      names:
+        - funone # Bunny
+        - Magic Sundi
+        - Kegel Coach
+        - Magic Lotos
+        - nyx
+        - umi
+      services:
+        78667579-7b48-43db-b8c5-7928a6b0a335:
+          tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
+        # Battery service
+        0000180f-0000-1000-8000-00805f9b34fb:
+          rxblebattery: 00002a19-0000-1000-8000-00805f9b34fb
+    defaults:
+      name:
+        en-us: Magic Motion V4 Device
+      messages:
+        BatteryLevelCmd: {}
+        RSSILevelCmd: {}
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 100
+    configurations:
+      - identifier:
+          - funone
+        name:
+          en-us: MagicMotion Bunny
+      - identifier:
+          - Magic Sundi
+        name:
+          en-us: MagicMotion Sundae
+      - identifier:
+          - Kegel Coach
+        name:
+          en-us: MagicMotion Kegel Coach
+      - identifier:
+          - Magic Lotos
+        name:
+          en-us: MagicMotion Lotos
+      - identifier:
+          - nyx
+        name:
+          en-us: MagicMotion Nyx
+      - identifier:
+          - umi
+        name:
+          en-us: MagicMotion Umi
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
   mysteryvibe:
     btle:
       names:
