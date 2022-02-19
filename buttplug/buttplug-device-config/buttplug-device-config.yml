@@ -1279,6 +1279,7 @@ protocols:
         - Pearl2.1
         - OhMiBod 4.0
         - OhMiBod LUMEN
+        - OhMiBod NEX3
         - Pulse Interactive
       services:
         00001900-0000-1000-8000-00805f9b34fb:
@@ -1343,7 +1344,16 @@ protocols:
           VibrateCmd:
             FeatureCount: 1
             StepCount:
-             - 100
+              - 100
+      - identifier:
+          - OhMiBod NEX3
+        name:
+          en-us: OhMiBod NEX|3
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
       - identifier:
           - Pulse Interactive
         name:

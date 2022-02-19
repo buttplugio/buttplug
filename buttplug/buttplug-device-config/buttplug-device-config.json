@@ -1838,6 +1838,7 @@
           "Pearl2.1",
           "OhMiBod 4.0",
           "OhMiBod LUMEN",
+          "OhMiBod NEX3",
           "Pulse Interactive"
         ],
         "services": {
@@ -1936,6 +1937,22 @@
           ],
           "name": {
             "en-us": "OhMiBod Lumen"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 1,
+              "StepCount": [
+                100
+              ]
+            }
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod NEX3"
+          ],
+          "name": {
+            "en-us": "OhMiBod NEX|3"
           },
           "messages": {
             "VibrateCmd": {
