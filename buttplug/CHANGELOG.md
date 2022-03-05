@@ -1,3 +1,20 @@
+# 5.1.8 (2022-03-05)
+
+## Features
+
+- Update to blteplug v0.9.2
+  - Should fix many issues with Windows Bluetooth, including panics in older versions of windows and
+    the ability to disconnect devices
+- New Hardware Support
+  - Lelo F1S v2
+  - OhMiBod NEX|3
+  - Magic Motion Bunny, Sundae, Kegel Coach, Lotos, Nyx, Umi
+
+## Bugfixes
+
+- Fix Libo Elle protocol issues
+- Fix Mannuo advertisement names
+
 # 5.1.7 (2022-01-24)
 
 ## Features
