@@ -148,6 +148,10 @@ async fn run_connection_loop<S>(
                   // noop
                   continue;
                 }
+                async_tungstenite::tungstenite::Message::Frame(_) => {
+                  // noop
+                  continue;
+                }
                 async_tungstenite::tungstenite::Message::Pong(_) => {
                   // noop
                   pong_count += 1;

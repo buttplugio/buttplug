@@ -168,6 +168,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                           writer.send(Message::Pong(data)).await.expect("This should never fail?");
                         }
                         Message::Pong(_) => {}
+                        Message::Frame(_) => {}
                         Message::Close(_) => {
                           info!("Websocket has requested close.");
                           return;
