@@ -52,7 +52,7 @@ impl Lovense {
     let manager = GenericCommandManager::new(&device_attributes);
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       rotation_direction: Arc::new(AtomicBool::new(false)),
     }

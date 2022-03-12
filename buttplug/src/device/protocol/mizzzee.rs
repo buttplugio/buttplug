@@ -66,7 +66,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,

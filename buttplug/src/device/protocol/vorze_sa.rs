@@ -31,7 +31,7 @@ impl VorzeSA {
 
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
     }
@@ -216,7 +216,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -255,7 +255,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -294,7 +294,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(RotateCmd::new(0, vec![RotationSubcommand::new(0, 0.5, false)]).into())
@@ -347,7 +347,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 150, 0.95)]).into())

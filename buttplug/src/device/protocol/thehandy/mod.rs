@@ -53,7 +53,7 @@ impl TheHandy {
     Self: Sized,
   {
     Self {
-      stop_commands: GenericCommandManager::new(&device_attributes).get_stop_commands(),
+      stop_commands: GenericCommandManager::new(&device_attributes).stop_commands(),
       device_attributes,
       previous_position: Arc::new(AtomicU8::new(0)),
     }
@@ -145,7 +145,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
       .store(message.position(), Ordering::SeqCst);
     let distance = (goal_position - previous_position).abs();
     let duration =
-      fleshlight_launch_helper::get_duration(distance, message.speed() as f64 / 99f64) as u32;
+      fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
     self.handle_linear_cmd(
       device,
       messages::LinearCmd::new(

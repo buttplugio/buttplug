@@ -1,5 +1,5 @@
 use super::{
-  fleshlight_launch_helper::get_speed,
+  fleshlight_launch_helper::calculate_speed,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolCommandHandler,
@@ -39,7 +39,7 @@ impl KiirooV21 {
 
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       previous_position: Arc::new(AtomicU8::new(0)),
     }
@@ -84,7 +84,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21 {
     let fl_cmd = FleshlightLaunchFW12Cmd::new(
       message.device_index(),
       (v.position * 99f64) as u8,
-      (get_speed(distance, v.duration) * 99f64) as u8,
+      (calculate_speed(distance, v.duration) * 99f64) as u8,
     );
     self.handle_fleshlight_launch_fw12_cmd(device, fl_cmd)
   }
@@ -138,7 +138,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
@@ -164,7 +164,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device
@@ -189,7 +189,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       assert!(check_test_recv_empty(&command_receiver));
       device

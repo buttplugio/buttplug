@@ -596,7 +596,7 @@ impl DeviceConfigurationManager {
     self.protocol_map.clear();
   }
 
-  pub fn get_protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
+  pub fn protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
     self
       .protocol_map
       .get(protocol_name)
@@ -612,7 +612,7 @@ impl DeviceConfigurationManager {
     self.protocol_device_configurations.clone()
   }
 
-  pub fn get_protocol_builder(
+  pub fn protocol_builder(
     &self,
     specifier: &ProtocolDeviceSpecifier,
   ) -> Option<ProtocolBuilder> {

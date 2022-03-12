@@ -194,7 +194,7 @@ impl GenericCommandManager {
     }
   }
 
-  pub fn get_vibration(&mut self) -> Vec<Option<u32>> {
+  pub fn vibration(&mut self) -> Vec<Option<u32>> {
     self.vibrations.iter().map(|x| Some(*x)).collect()
   }
 
@@ -289,7 +289,7 @@ impl GenericCommandManager {
     Ok(None)
   }
 
-  pub fn get_stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
+  pub fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
     self.stop_commands.clone()
   }
 }
@@ -355,7 +355,7 @@ mod test {
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
     assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.get_vibration(), vec![Some(10), Some(15)]);
+    assert_eq!(mgr.vibration(), vec![Some(10), Some(15)]);
   }
 
   #[test]

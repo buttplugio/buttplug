@@ -42,7 +42,7 @@ impl MysteryVibe {
 
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       updater_running: Arc::new(AtomicBool::new(false)),
       current_command: Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0])),

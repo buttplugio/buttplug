@@ -56,7 +56,7 @@ impl Satisfyer {
     let manager = GenericCommandManager::new(&device_attributes);
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       manager: Arc::new(Mutex::new(manager)),
       last_command,
     }
@@ -169,7 +169,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
@@ -235,7 +235,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       device
         .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())

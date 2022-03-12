@@ -496,7 +496,7 @@ macro_rules! default_protocol_definition {
 
         Self {
           device_attributes,
-          stop_commands: manager.get_stop_commands(),
+          stop_commands: manager.stop_commands(),
           manager: Arc::new(tokio::sync::Mutex::new(manager)),
         }
       }

@@ -112,10 +112,10 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
-        .get_endpoint_receiver(&Endpoint::TxVibrate)
+        .endpoint_receiver(&Endpoint::TxVibrate)
         .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
-        .get_endpoint_receiver(&Endpoint::TxMode)
+        .endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
 
       device
@@ -182,10 +182,10 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
-        .get_endpoint_receiver(&Endpoint::TxVibrate)
+        .endpoint_receiver(&Endpoint::TxVibrate)
         .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
-        .get_endpoint_receiver(&Endpoint::TxMode)
+        .endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
 
       assert!(check_test_recv_empty(&command_receiver_mode));
@@ -278,10 +278,10 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver_vibrate = test_device
-        .get_endpoint_receiver(&Endpoint::TxVibrate)
+        .endpoint_receiver(&Endpoint::TxVibrate)
         .expect("Test, assuming infallible");
       let command_receiver_mode = test_device
-        .get_endpoint_receiver(&Endpoint::TxMode)
+        .endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
 
       assert!(check_test_recv_empty(&command_receiver_mode));

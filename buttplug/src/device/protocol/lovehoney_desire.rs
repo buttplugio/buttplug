@@ -93,7 +93,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
 
       // If we send one speed to one motor, we should only see one output.

@@ -238,7 +238,7 @@ fn test_client_repeated_deviceadded_message() {
     let mut event_stream = helper.client().event_stream();
     async_manager::spawn(async move {
       assert!(matches!(
-        helper_clone.get_next_client_message().await,
+        helper_clone.next_client_message().await,
         ButtplugClientMessage::StartScanning(..)
       ));
       helper_clone
@@ -282,7 +282,7 @@ fn test_client_repeated_deviceremoved_message() {
     let mut event_stream = helper.client().event_stream();
     async_manager::spawn(async move {
       assert!(matches!(
-        helper_clone.get_next_client_message().await,
+        helper_clone.next_client_message().await,
         ButtplugClientMessage::StartScanning(..)
       ));
       helper_clone

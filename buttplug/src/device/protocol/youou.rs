@@ -27,7 +27,7 @@ impl Youou {
 
     Self {
       device_attributes,
-      stop_commands: manager.get_stop_commands(),
+      stop_commands: manager.stop_commands(),
       packet_id: AtomicU8::new(0),
     }
   }
@@ -122,7 +122,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
