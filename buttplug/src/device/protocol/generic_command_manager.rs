@@ -297,7 +297,7 @@ impl GenericCommandManager {
 #[cfg(test)]
 mod test {
 
-  use super::GenericCommandManager;
+  use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::core::messages::{
     ButtplugDeviceMessageType,
     DeviceMessageAttributes,
@@ -308,7 +308,6 @@ mod test {
     VibrateSubcommand,
   };
 
-  /*
   #[test]
   pub fn test_command_generator_vibration() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
@@ -319,7 +318,8 @@ mod test {
       ..Default::default()
     };
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
-    let mut mgr = GenericCommandManager::new(&attributes_map);
+    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let mut mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = VibrateCmd::new(
       0,
       vec![
@@ -368,7 +368,9 @@ mod test {
       ..Default::default()
     };
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
-    let mut mgr = GenericCommandManager::new(&attributes_map);
+    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let mut mgr = GenericCommandManager::new(&device_attributes);
+
     let rotate_msg = RotateCmd::new(
       0,
       vec![
@@ -404,6 +406,5 @@ mod test {
     let rotate_msg_invalid = RotateCmd::new(0, vec![RotationSubcommand::new(2, 0.5, true)]);
     assert!(mgr.update_rotation(&rotate_msg_invalid).is_err());
   }
-*/
   // TODO Write test for vibration stop generator
 }
