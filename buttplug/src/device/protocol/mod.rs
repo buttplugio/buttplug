@@ -176,47 +176,75 @@ pub trait ButtplugProtocolProperties {
     match message {
       ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::BatteryLevelCmd),
+        .allows_message(&ButtplugDeviceMessageType::BatteryLevelCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd)),
       ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd),
+        .allows_message(&ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd)),
       ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::KiirooCmd),
+        .allows_message(&ButtplugDeviceMessageType::KiirooCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::KiirooCmd)),
       ButtplugDeviceCommandMessageUnion::LinearCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::LinearCmd),
+        .allows_message(&ButtplugDeviceMessageType::LinearCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd)),
       ButtplugDeviceCommandMessageUnion::RawReadCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RawReadCmd),
+        .allows_message(&ButtplugDeviceMessageType::RawReadCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd)),
       ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RawSubscribeCmd),
+        .allows_message(&ButtplugDeviceMessageType::RawSubscribeCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd)),
       ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RawUnsubscribeCmd),
+        .allows_message(&ButtplugDeviceMessageType::RawUnsubscribeCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd)),
       ButtplugDeviceCommandMessageUnion::RawWriteCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RawWriteCmd),
+        .allows_message(&ButtplugDeviceMessageType::RawWriteCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd)),
       ButtplugDeviceCommandMessageUnion::RotateCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RotateCmd),
+        .allows_message(&ButtplugDeviceMessageType::RotateCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd)),
       ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::RSSILevelCmd),
+        .allows_message(&ButtplugDeviceMessageType::RSSILevelCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd)),
       // We translate SingleMotorVibrateCmd into Vibrate, so this one is special.
       ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::VibrateCmd),
+        .allows_message(&ButtplugDeviceMessageType::VibrateCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd)),
       ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::StopDeviceCmd),
+        .allows_message(&ButtplugDeviceMessageType::StopDeviceCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::StopDeviceCmd)),
       ButtplugDeviceCommandMessageUnion::VibrateCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::VibrateCmd),
+        .allows_message(&ButtplugDeviceMessageType::VibrateCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd)),
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(_) => self
         .device_attributes()
-        .allows_message(&ButtplugDeviceMessageType::VorzeA10CycloneCmd),
+        .allows_message(&ButtplugDeviceMessageType::VorzeA10CycloneCmd)
+        .then(|| ())
+        .ok_or(ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VorzeA10CycloneCmd)),
     }.map_err(|err| err.into())
   }
 }

@@ -306,12 +306,10 @@ impl ProtocolDeviceAttributes {
   pub fn allows_message(
     &self,
     message_type: &ButtplugDeviceMessageType,
-  ) -> Result<(), ButtplugDeviceError> {
+  ) -> bool {
     self
       .message_attributes
       .contains_key(message_type)
-      .then(|| ())
-      .ok_or(ButtplugDeviceError::MessageNotSupported(*message_type))
   }
 
   pub fn message_attributes(
