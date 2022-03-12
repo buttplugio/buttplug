@@ -221,12 +221,18 @@ impl DeviceManagerEventLoop {
           address = tracing::field::display(device.address())
         );
         let _enter = span.enter();
-        let generated_device_index = self.device_index_generator;
-        self.device_index_generator += 1;
-        // See if we have a reusable device index here.
-        let device_index = if let Some(id) = self.device_index_map.get(device.address()) {
+
+        // See if we have a reserved or reusable device index here.
+        let device_index = if let Some(id) = self.reserved_device_indexes.get(device.address())  {
+          *id.value()
+        } else if let Some(id) = self.device_index_map.get(device.address()) {
           *id.value()
         } else {
+          while self.reserved_device_indexes.iter().any(|x| *x.value() == self.device_index_generator) {
+            self.device_index_generator += 1;
+          }
+          let generated_device_index = self.device_index_generator;
+          self.device_index_generator += 1;
           self
             .device_index_map
             .insert(device.address().to_owned(), generated_device_index);
