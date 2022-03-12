@@ -67,7 +67,7 @@ fn test_serialized_error_relay() {
     let helper_clone = helper.clone();
     async_manager::spawn(async move {
       assert!(matches!(
-        helper_clone.get_next_client_message().await,
+        helper_clone.next_client_message().await,
         ButtplugClientMessage::StartScanning(..)
       ));
       let mut error_msg = ButtplugServerMessage::Error(messages::Error::from(ButtplugError::from(
