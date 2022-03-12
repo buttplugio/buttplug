@@ -356,7 +356,7 @@ pub fn load_protocol_configs_from_json(
 ) -> Result<ExternalDeviceConfiguration, ButtplugError> {
   // Start by loading the main config
   let main_config = load_protocol_config_from_json(
-    &main_config_str.unwrap_or(DEVICE_CONFIGURATION_JSON.to_owned()),
+    &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
     skip_version_check,
   )?;
 
@@ -374,8 +374,10 @@ pub fn load_protocol_configs_from_json(
     protocols.insert(protocol_name, protocol_def.into());
   }
 
-  let mut external_config = ExternalDeviceConfiguration::default();
-  external_config.protocol_configurations = protocols;
+  let mut external_config = ExternalDeviceConfiguration {
+    protocol_configurations: protocols,
+    .. Default::default()
+  };
 
   // Then load the user config
   if let Some(user_config) = user_config_str {

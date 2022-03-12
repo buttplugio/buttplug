@@ -282,24 +282,20 @@ impl ProtocolDeviceAttributes {
   pub fn name(&self) -> &str {
     if let Some(name) = &self.name {
       name
+    } else if let Some(parent) = &self.parent {
+      parent.name()
     } else {
-      if let Some(parent) = &self.parent {
-        parent.name()
-      } else {
         "Unknown Buttplug Device"
-      }
     }
   }
 
   pub fn display_name(&self) -> Option<String> {
     if let Some(name) = &self.display_name {
       Some(name.clone())
+    } else if let Some(parent) = &self.parent {
+      parent.display_name()
     } else {
-      if let Some(parent) = &self.parent {
-        parent.display_name()
-      } else {
-        None
-      }
+      None
     }
   }
 
@@ -318,12 +314,10 @@ impl ProtocolDeviceAttributes {
   ) -> Option<DeviceMessageAttributes> {
     if let Some(attributes) = self.message_attributes.get(message_type) {
       Some(attributes.clone())
+    } else if let Some(parent) = &self.parent {
+      parent.message_attributes(message_type)
     } else {
-      if let Some(parent) = &self.parent {
-        parent.message_attributes(message_type)
-      } else {
-        None
-      }
+      None
     }
   }
 
@@ -333,7 +327,7 @@ impl ProtocolDeviceAttributes {
       for (message, value) in &self.message_attributes {
         let attrs = map
           .get(message)
-          .and_then(|base_attrs| Some(base_attrs.merge(value)))
+          .map(|base_attrs| base_attrs.merge(value))
           .or_else(|| Some(value.clone()))
           .expect("We filled in the device attributes either way.");
         // Overwrite anything that might already be in the map with our new attribute set.
@@ -468,7 +462,7 @@ impl DeviceAttributesBuilder {
           .device_configuration
           .device_attributes(&ProtocolAttributeIdentifier::Default)
       })
-      .ok_or(ButtplugError::from(
+      .ok_or_else(|| ButtplugError::from(
         ButtplugDeviceError::DeviceConfigurationFileError(format!(
           "Configuration not found for device identifier '{:?}' Address '{:?}'",
           identifier, address
