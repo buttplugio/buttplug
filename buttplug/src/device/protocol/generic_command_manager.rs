@@ -359,6 +359,56 @@ mod test {
   }
 
   #[test]
+  pub fn test_command_generator_vibration_step_range() {
+    let mut attributes_map = DeviceMessageAttributesMap::new();
+
+    let vibrate_attributes = DeviceMessageAttributes {
+      feature_count: Some(2),
+      step_count: Some(vec![20, 20]),
+      ..Default::default()
+    };
+    attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
+    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let mut mgr = GenericCommandManager::new(&device_attributes);
+    let vibrate_msg = VibrateCmd::new(
+      0,
+      vec![
+        VibrateSubcommand::new(0, 0.5),
+        VibrateSubcommand::new(1, 0.5),
+      ],
+    );
+    assert_eq!(
+      mgr
+        .update_vibration(&vibrate_msg, false)
+        .expect("Test, assuming infallible"),
+      Some(vec![Some(10), Some(10)])
+    );
+    assert_eq!(
+      mgr
+        .update_vibration(&vibrate_msg, false)
+        .expect("Test, assuming infallible"),
+      None
+    );
+    let vibrate_msg_2 = VibrateCmd::new(
+      0,
+      vec![
+        VibrateSubcommand::new(0, 0.5),
+        VibrateSubcommand::new(1, 0.75),
+      ],
+    );
+    assert_eq!(
+      mgr
+        .update_vibration(&vibrate_msg_2, false)
+        .expect("Test, assuming infallible"),
+      Some(vec![None, Some(15)])
+    );
+    let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
+    assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
+
+    assert_eq!(mgr.vibration(), vec![Some(10), Some(15)]);
+  }
+
+  #[test]
   pub fn test_command_generator_rotation() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 

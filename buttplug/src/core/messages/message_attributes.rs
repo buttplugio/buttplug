@@ -123,12 +123,12 @@ impl DeviceMessageAttributes {
           .and_then(|_| self.check_feature_order(message_type))
       },
       _ => Ok(())
-    }.map_err(|error_str| ButtplugDeviceError::DeviceConfigurationFileError(error_str))
+    }.map_err(ButtplugDeviceError::DeviceConfigurationFileError)
   }
 
   pub fn merge(&self, other: &DeviceMessageAttributes) -> DeviceMessageAttributes {
     DeviceMessageAttributes {
-      feature_count: other.feature_count.or_else(|| self.feature_count),
+      feature_count: other.feature_count.or(self.feature_count),
       endpoints: other.endpoints.clone().or_else(|| self.endpoints.clone()),
       step_count: other.step_count.clone().or_else(|| self.step_count.clone()),
       max_duration: other.max_duration.clone().or_else(|| self.max_duration.clone()),

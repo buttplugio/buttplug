@@ -67,9 +67,8 @@ impl ButtplugProtocolCommandHandler for Youou {
     let speed: u8 = (msg.speeds()[0].speed() * max_value) as u8;
     let state: u8 = if speed > 0 { 1 } else { 0 };
 
-    let mut data;
     // Scope the packet id set so we can unlock ASAP.
-    data = vec![
+    let mut data = vec![
       0xaa,
       0x55,
       self.packet_id.load(Ordering::SeqCst),

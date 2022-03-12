@@ -270,7 +270,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
                   // at the moment, we can just cut out the IP from the domain and use that
                   // directly, which has fixed issues for some users.
                   let host_parts: Vec<&str> = x.0.split('.').collect();
-                  let new_http_host = host_parts[0].replace("-", ".");
+                  let new_http_host = host_parts[0].replace('-', ".");
                   // We set the protocol type here so it'll just filter down, in case we want to move to secure.
                   let host = format!("http://{}:{}", new_http_host, x.1.http_port);
                   debug!("Lovense Connect converting IP to {}", host);
@@ -322,7 +322,7 @@ impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
   // Assume we've already got network access. A bad assumption, but we'll need to figure out how to
   // make this work better later.
   fn can_scan(&self) -> bool {
-    return true;
+    true
   }
 }
 
