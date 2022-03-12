@@ -59,7 +59,7 @@ impl Debug for SerialPortDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     self.specifier.clone()
   }
 

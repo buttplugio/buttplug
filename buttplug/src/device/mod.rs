@@ -388,7 +388,7 @@ pub trait DeviceImplInternal: Sync + Send {
 
 #[async_trait]
 pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier;
+  fn specifier(&self) -> ProtocolDeviceSpecifier;
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDeviceConfiguration,
@@ -447,7 +447,7 @@ impl ButtplugDevice {
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
-    let protocol_builder = match device_config_mgr.get_protocol_builder(&device_creator.get_specifier()) {
+    let protocol_builder = match device_config_mgr.get_protocol_builder(&device_creator.specifier()) {
       Some(builder) => builder,
       None => return Ok(None)
     };

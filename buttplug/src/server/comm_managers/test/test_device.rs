@@ -56,7 +56,7 @@ impl Debug for TestDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     self.specifier.clone()
   }
 
