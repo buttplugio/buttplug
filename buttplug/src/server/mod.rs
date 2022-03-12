@@ -131,8 +131,20 @@ impl ButtplugServerBuilder {
     let device_manager =
       DeviceManager::new(send.clone(), ping_timer.clone(), self.allow_raw_messages);
 
-    for (name, def) in protocol_map {
-      device_manager.add_protocol_device_configuration(&name, def)?;
+    for address in protocol_map.allow_list() {
+      device_manager.add_allowed_device(address);
+    }
+
+    for address in protocol_map.deny_list() {
+      device_manager.add_denied_device(address);
+    }
+
+    for (index, address) in protocol_map.reserved_indexes() {
+      device_manager.add_reserved_device_index(address, *index);
+    }
+
+    for (name, def) in protocol_map.protocol_configurations() {
+      device_manager.add_protocol_device_configuration(name, def)?;
     }
 
     async_manager::spawn(
