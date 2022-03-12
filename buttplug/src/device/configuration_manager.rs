@@ -553,13 +553,13 @@ impl DeviceConfigurationManager {
   pub fn add_protocol_device_configuration(
     &self,
     protocol_name: &str,
-    protocol_definition: ProtocolDeviceConfiguration,
+    protocol_definition: &ProtocolDeviceConfiguration,
   ) -> Result<(), ButtplugError> {
     protocol_definition.is_valid()?;
 
     self
       .protocol_device_configurations
-      .insert(protocol_name.to_owned(), protocol_definition);
+      .insert(protocol_name.to_owned(), protocol_definition.clone());
     Ok(())
   }
 

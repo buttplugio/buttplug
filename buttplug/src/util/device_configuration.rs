@@ -183,15 +183,15 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 }
 
 fn add_user_configs_to_protocol(
-  protocols: &mut HashMap<String, ProtocolDeviceConfiguration>,
+  external_config: &mut ExternalDeviceConfiguration,
   user_config_def: HashMap<String, UserConfigDefinition>,
 ) {
   for (user_config_protocol, protocol_def) in user_config_def {
-    if !protocols.contains_key(&user_config_protocol) {
+    if !external_config.protocol_configurations.contains_key(&user_config_protocol) {
       continue;
     }
 
-    let base_protocol_def = protocols.get_mut(&user_config_protocol).unwrap();
+    let base_protocol_def = external_config.protocol_configurations.get_mut(&user_config_protocol).unwrap();
 
     // Make a vector out of the protocol definition specifiers
     if let Some(usb_vec) = protocol_def.usb {
@@ -260,13 +260,22 @@ fn add_user_configs_to_protocol(
     for (identifier, user_configuration) in protocol_def.configurations {
       if let Some(parent) = base_protocol_def.configurations().get(&ProtocolAttributeIdentifier::Identifier(identifier)) {
         for (address, user_config) in user_configuration {
+          if *user_config.allow().as_ref().unwrap_or(&false) {
+            external_config.allow_list.push(address.clone());
+          }
+          if *user_config.deny().as_ref().unwrap_or(&false) {
+            external_config.deny_list.push(address.clone());
+          }
+          if let Some(index) = user_config.index().as_ref() {
+            external_config.reserved_indexes.insert(*index, address.clone());
+          }
           let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
             None,
             user_config.display_name,
             user_config.messages.unwrap_or_default(),
             Some(parent.clone()),
           ));
-          configurations.insert(ProtocolAttributeIdentifier::Address(address), config_attrs);
+          configurations.insert(ProtocolAttributeIdentifier::Address(address.clone()), config_attrs);
         }
       }
     }
@@ -298,6 +307,15 @@ impl ProtocolConfiguration {
     serde_json::to_string(self)
       .expect("All types below this are Serialize, so this should be infallible.")
   }
+}
+
+#[derive(Default, Debug, Getters)]
+#[getset(get="pub")]
+pub struct ExternalDeviceConfiguration {
+  allow_list: Vec<String>,
+  deny_list: Vec<String>,
+  reserved_indexes: HashMap<u32, String>,
+  protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>
 }
 
 pub fn get_internal_config_version() -> u32 {
@@ -335,7 +353,7 @@ pub fn load_protocol_configs_from_json(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
   skip_version_check: bool,
-) -> Result<HashMap<String, ProtocolDeviceConfiguration>, ButtplugError> {
+) -> Result<ExternalDeviceConfiguration, ButtplugError> {
   // Start by loading the main config
   let main_config = load_protocol_config_from_json(
     &main_config_str.unwrap_or(DEVICE_CONFIGURATION_JSON.to_owned()),
@@ -356,24 +374,27 @@ pub fn load_protocol_configs_from_json(
     protocols.insert(protocol_name, protocol_def.into());
   }
 
+  let mut external_config = ExternalDeviceConfiguration::default();
+  external_config.protocol_configurations = protocols;
+
   // Then load the user config
   if let Some(user_config) = user_config_str {
     let config = load_protocol_config_from_json(&user_config, skip_version_check)?;
     if let Some(user_configs) = config.user_configs {
-      add_user_configs_to_protocol(&mut protocols, user_configs)
+      add_user_configs_to_protocol(&mut external_config, user_configs);
     }
   }
 
-  Ok(protocols)
+  Ok(external_config)
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
   let devices = load_protocol_configs_from_json(None, None, false)
     .expect("If this fails, the whole library goes with it.");
   let dcm = DeviceConfigurationManager::new(allow_raw_messages);
-  for (name, def) in devices {
+  for (name, def) in devices.protocol_configurations {
     dcm
-      .add_protocol_device_configuration(&name, def)
+      .add_protocol_device_configuration(&name, &def)
       .expect("If this fails, the whole library goes with it.");
   }
   dcm

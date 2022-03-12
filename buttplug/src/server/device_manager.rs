@@ -323,7 +323,7 @@ impl DeviceManager {
     self.reserved_device_indexes.insert(address.to_owned(), index);
   }
 
-  pub fn remove_reserved_device_index(&self, address: &str, index: u32) {
+  pub fn remove_reserved_device_index(&self, address: &str) {
     self.reserved_device_indexes.remove(address);
   }
 
@@ -343,7 +343,7 @@ impl DeviceManager {
     self.config.remove_all_protocols();
   }
 
-  pub fn add_protocol_device_configuration(&self, name: &str, config: ProtocolDeviceConfiguration) -> Result<(), ButtplugError> {
+  pub fn add_protocol_device_configuration(&self, name: &str, config: &ProtocolDeviceConfiguration) -> Result<(), ButtplugError> {
     info!("Adding protocol device config {}", name);
     self.config.add_protocol_device_configuration(name, config)
   }
