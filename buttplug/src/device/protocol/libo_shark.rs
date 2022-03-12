@@ -60,10 +60,10 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver_tx = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
       let command_receiver_tx_mode = test_device
-        .get_endpoint_receiver(&Endpoint::TxMode)
+        .endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
       device
         .parse_message(

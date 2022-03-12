@@ -179,7 +179,7 @@ fn test_device_stop_on_ping_timeout() {
       .await
       .expect("Test, assuming infallible.");
     let command_receiver = device
-      .get_endpoint_receiver(&Endpoint::Tx)
+      .endpoint_receiver(&Endpoint::Tx)
       .expect("Test, assuming infallible.");
     check_test_recv_value(
       &command_receiver,

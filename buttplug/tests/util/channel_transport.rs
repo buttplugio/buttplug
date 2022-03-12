@@ -178,7 +178,7 @@ impl ChannelClientTestHelper {
     });
     // Wait for RequestServerInfo message
     assert!(matches!(
-      self.get_next_client_message().await,
+      self.next_client_message().await,
       ButtplugClientMessage::RequestServerInfo(..)
     ));
     // Just assume we get an RSI message
@@ -194,7 +194,7 @@ impl ChannelClientTestHelper {
       .await;
     // Wait for RequestDeviceList message.
     assert!(matches!(
-      self.get_next_client_message().await,
+      self.next_client_message().await,
       ButtplugClientMessage::RequestDeviceList(..)
     ));
     let mut dl = messages::DeviceList::new(vec![]);
@@ -203,7 +203,7 @@ impl ChannelClientTestHelper {
     finish_notifier.notified().await;
   }
 
-  pub async fn get_next_client_message(&self) -> ButtplugClientMessage {
+  pub async fn next_client_message(&self) -> ButtplugClientMessage {
     self
       .server_serializer
       .deserialize(

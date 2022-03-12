@@ -191,7 +191,7 @@ mod test {
         r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
       );
       let command_receiver = device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible.");
       check_test_recv_value(
         &command_receiver,

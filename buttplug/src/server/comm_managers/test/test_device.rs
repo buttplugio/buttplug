@@ -144,7 +144,7 @@ impl TestDeviceInternal {
     self.address.clone()
   }
 
-  pub fn get_endpoint_receiver(
+  pub fn endpoint_receiver(
     &self,
     endpoint: &Endpoint,
   ) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>> {

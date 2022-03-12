@@ -264,7 +264,7 @@ fn test_stop_all_devices_and_device_command_range() {
         // Unlike protocol unit tests, here the endpoint doesn't exist until
         // after device creation, so create the test receiver later.
         let command_receiver = test_device
-          .get_endpoint_receiver(&Endpoint::Tx)
+          .endpoint_receiver(&Endpoint::Tx)
           .expect("Test, assuming infallible.");
         check_test_recv_value(
           &command_receiver,

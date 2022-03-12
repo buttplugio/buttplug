@@ -447,7 +447,7 @@ impl ButtplugDevice {
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
-    let protocol_builder = match device_config_mgr.get_protocol_builder(&device_creator.specifier()) {
+    let protocol_builder = match device_config_mgr.protocol_builder(&device_creator.specifier()) {
       Some(builder) => builder,
       None => return Ok(None)
     };

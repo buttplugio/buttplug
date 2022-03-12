@@ -50,7 +50,7 @@ impl ButtplugProtocolCommandHandler for SvakomIker {
           } else if vibe_off {
             // Turning off the vibe will turn off the pulser
             // Fetch the current pulser value to resend
-            let all_results = manager.lock().await.get_vibration();
+            let all_results = manager.lock().await.vibration();
             if let Some(speed) = all_results[1] {
               if speed != 0 {
                 device
@@ -91,7 +91,7 @@ mod test {
         .await
         .expect("Test, assuming infallible");
       let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
+        .endpoint_receiver(&Endpoint::Tx)
         .expect("Test, assuming infallible");
 
       // Turn on the vibe
