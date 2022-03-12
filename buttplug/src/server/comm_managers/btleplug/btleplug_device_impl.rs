@@ -75,7 +75,7 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 
 #[async_trait]
 impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
       &self.services,

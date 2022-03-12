@@ -196,7 +196,7 @@ impl Debug for WebsocketServerDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     ProtocolDeviceSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
 

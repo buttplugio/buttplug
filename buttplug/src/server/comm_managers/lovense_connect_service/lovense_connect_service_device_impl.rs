@@ -52,7 +52,7 @@ impl Debug for LovenseServiceDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     ProtocolDeviceSpecifier::LovenseConnectService(LovenseConnectServiceSpecifier::default())
   }
 

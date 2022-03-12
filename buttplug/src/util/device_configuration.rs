@@ -64,7 +64,7 @@ pub struct UserConfigAttributes {
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
-  // they're kept separate here, and we return them in get_specifiers(). Feels
+  // they're kept separate here, and we return them in specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
   #[serde(skip_serializing_if = "Option::is_none")]
   usb: Option<Vec<USBSpecifier>>,
@@ -91,7 +91,7 @@ pub struct ProtocolDefinition {
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
-  // they're kept separate here, and we return them in get_specifiers(). Feels
+  // they're kept separate here, and we return them in specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
   #[serde(skip_serializing_if = "Option::is_none")]
   usb: Option<Vec<USBSpecifier>>,

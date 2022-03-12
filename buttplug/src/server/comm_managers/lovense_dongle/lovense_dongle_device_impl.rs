@@ -77,7 +77,7 @@ impl LovenseDongleDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
-  fn get_specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolDeviceSpecifier {
     self.specifier.clone()
   }
 
