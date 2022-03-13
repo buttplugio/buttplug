@@ -645,9 +645,9 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  use super::{BluetoothLESpecifier, ProtocolAttributeIdentifier, ProtocolDeviceSpecifier};
+  use super::{BluetoothLESpecifier, ProtocolAttributeIdentifier, ProtocolDeviceSpecifier, DeviceAttributesBuilder};
   use crate::{
-    core::messages::ButtplugDeviceMessageType, util::device_configuration::create_test_dcm,
+    core::messages::ButtplugDeviceMessageType, util::device_configuration::create_test_dcm, device::Endpoint
   };
 
   #[test]
@@ -708,9 +708,9 @@ mod test {
     let builder = config
       .protocol_builder(&lovense)
       .expect("Test, assuming infallible");
-    let config = builder
-      .configuration()
-      .device_attributes(&ProtocolAttributeIdentifier::Identifier("P".to_owned()))
+    let device_attr_builder = DeviceAttributesBuilder::new(true, builder.configuration().clone());
+    let config = device_attr_builder
+      .create(&ProtocolAttributeIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributeIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
       .expect("Test, assuming infallible");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
@@ -731,10 +731,12 @@ mod test {
     let builder = config
       .protocol_builder(&lovense)
       .expect("Test, assuming infallible");
-    let config = builder
-      .configuration()
-      .device_attributes(&ProtocolAttributeIdentifier::Identifier("P".to_owned()))
-      .expect("Test, assuming infallible");
+      let device_attr_builder = DeviceAttributesBuilder::new(false, builder.configuration().clone());
+      let config = device_attr_builder
+        .create(&ProtocolAttributeIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributeIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
+        .expect("Test, assuming infallible");
+      // Make sure we got the right name
+      assert_eq!(config.name(), "Lovense Edge");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
     // Make sure we overwrote the default of 1
