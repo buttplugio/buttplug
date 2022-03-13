@@ -823,10 +823,4 @@ mod test {
   */
 
   // TODO Test invalid config load (not json)
-  // TODO Test invalid user config load (not json)
-  // TODO Test device config with repeated ble service
-  // TODO Test device config with repeated ble characteristic
-  // TODO Test user config with invalid protocol
-  // TODO Test user config with invalid bus type
-  // TODO Test user config with conflicting BLE name
 }
