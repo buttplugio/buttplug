@@ -97,6 +97,7 @@ impl BluetoothLESpecifier {
     // Add any new names.
     self.names = self.names.union(&other.names).cloned().collect();
     // Add new services, overwrite matching services.
+    self.advertised_services = self.advertised_services.union(&other.advertised_services).cloned().collect();
     self.services.extend(other.services);
   }
 }
