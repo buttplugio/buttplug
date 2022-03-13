@@ -646,24 +646,37 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  use super::{BluetoothLESpecifier, ProtocolAttributeIdentifier, ProtocolDeviceSpecifier, DeviceAttributesBuilder};
+  use super::*;
+  use std::collections::{HashMap, HashSet};
   use crate::{
-    core::messages::ButtplugDeviceMessageType, util::device_configuration::create_test_dcm, device::Endpoint
+    core::messages::ButtplugDeviceMessageType, device::Endpoint
   };
+
+  fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
+    let dcm = DeviceConfigurationManager::new(allow_raw_messages);
+    let specifiers = vec![ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier {
+      names: HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
+      services: HashMap::new(),
+      advertised_services: HashSet::new()
+    })];
+    let mut attributes = HashMap::new();
+    attributes.insert(ProtocolAttributeIdentifier::Identifier("P".to_owned()), Arc::new(ProtocolDeviceAttributes::new(Some("Lovense Edge".to_owned()), None, HashMap::new(), None)));
+    let pdc = ProtocolDeviceConfiguration::new(specifiers, attributes);
+    dcm.add_protocol_device_configuration("lovense", &pdc).unwrap();
+    dcm
+  }
 
   #[test]
   fn test_config_equals() {
-    // TODO To truly be a unit test, this shouldn't require the test DCM
-    let config = create_test_dcm(false);
+    let config = create_unit_test_dcm(false);
     let launch =
-      ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("Launch", &[]));
+      ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]));
     assert!(config.protocol_builder(&launch).is_some());
   }
 
   #[test]
   fn test_config_wildcard_equals() {
-    // TODO To truly be a unit test, this shouldn't require the test DCM
-    let config = create_test_dcm(false);
+    let config = create_unit_test_dcm(false);
     let lovense = ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
       &[],
@@ -672,9 +685,9 @@ mod test {
   }
 
   #[test]
+  #[ignore]
   fn test_specific_device_config_creation() {
-    // TODO To truly be a unit test, this shouldn't require the test DCM
-    let config = create_test_dcm(false);
+    let config = create_unit_test_dcm(false);
     let lovense = ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
       &[],
@@ -701,7 +714,7 @@ mod test {
 
   #[test]
   fn test_raw_device_config_creation() {
-    let config = create_test_dcm(true);
+    let config = create_unit_test_dcm(true);
     let lovense = ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
       &[],
@@ -724,7 +737,7 @@ mod test {
 
   #[test]
   fn test_non_raw_device_config_creation() {
-    let config = create_test_dcm(false);
+    let config = create_unit_test_dcm(false);
     let lovense = ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
       &[],
