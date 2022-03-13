@@ -164,7 +164,7 @@ impl GenericCommandManager {
         // than anything, but it's what users will expect.
         (speed_modifier + self.vibration_step_ranges[index].0 as f64).ceil() as u32
       };
-
+      info!("{:?} {} {} {}", self.vibration_step_ranges[index], range, speed_modifier, speed);
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
@@ -365,6 +365,7 @@ mod test {
     let vibrate_attributes = DeviceMessageAttributes {
       feature_count: Some(2),
       step_count: Some(vec![20, 20]),
+      step_range: Some(vec![(10, 15), (10, 20)]),
       ..Default::default()
     };
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
@@ -381,7 +382,7 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      Some(vec![Some(10), Some(10)])
+      Some(vec![Some(13), Some(15)])
     );
     assert_eq!(
       mgr
@@ -400,12 +401,12 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg_2, false)
         .expect("Test, assuming infallible"),
-      Some(vec![None, Some(15)])
+      Some(vec![None, Some(18)])
     );
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
     assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.vibration(), vec![Some(10), Some(15)]);
+    assert_eq!(mgr.vibration(), vec![Some(13), Some(18)]);
   }
 
   #[test]
