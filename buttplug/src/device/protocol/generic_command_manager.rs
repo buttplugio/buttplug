@@ -40,13 +40,13 @@ impl GenericCommandManager {
 
     // TODO We should probably panic here if we don't have feature and step counts?
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::VibrateCmd) {
-      if let Some(count) = attr.feature_count {
-        vibrations = vec![0; count as usize];
+      if let Some(count) = attr.feature_count() {
+        vibrations = vec![0; *count as usize];
       }
-      if let Some(step_counts) = &attr.step_count {
+      if let Some(step_counts) = &attr.step_count() {
         vibration_step_counts = step_counts.clone();
       }
-      if let Some(step_range) = &attr.step_range {
+      if let Some(step_range) = &attr.step_range() {
         vibration_step_ranges = step_range.clone();
       } else {
         for step_count in &vibration_step_counts {
@@ -61,13 +61,13 @@ impl GenericCommandManager {
       stop_commands.push(VibrateCmd::new(0, subcommands).into());
     }
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::RotateCmd) {
-      if let Some(count) = attr.feature_count {
-        rotations = vec![(0, true); count as usize];
+      if let Some(count) = attr.feature_count() {
+        rotations = vec![(0, true); *count as usize];
       }
-      if let Some(step_counts) = &attr.step_count {
+      if let Some(step_counts) = &attr.step_count() {
         rotation_step_counts = step_counts.clone();
       }
-      if let Some(step_range) = &attr.step_range {
+      if let Some(step_range) = &attr.step_range() {
         rotation_step_ranges = step_range.clone();
       } else {
         for step_count in &rotation_step_counts {
@@ -86,10 +86,10 @@ impl GenericCommandManager {
       stop_commands.push(RotateCmd::new(0, subcommands).into());
     }
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::LinearCmd) {
-      if let Some(count) = attr.feature_count {
-        linears = vec![(0, 0); count as usize];
+      if let Some(count) = attr.feature_count() {
+        linears = vec![(0, 0); *count as usize];
       }
-      if let Some(step_counts) = &attr.step_count {
+      if let Some(step_counts) = &attr.step_count() {
         linear_step_counts = step_counts.clone();
       }
     }
@@ -300,7 +300,7 @@ mod test {
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::core::messages::{
     ButtplugDeviceMessageType,
-    DeviceMessageAttributes,
+    DeviceMessageAttributesBuilder,
     DeviceMessageAttributesMap,
     RotateCmd,
     RotationSubcommand,
@@ -312,11 +312,11 @@ mod test {
   pub fn test_command_generator_vibration() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let vibrate_attributes = DeviceMessageAttributes {
-      feature_count: Some(2),
-      step_count: Some(vec![20, 20]),
-      ..Default::default()
-    };
+    let vibrate_attributes = DeviceMessageAttributesBuilder::default()
+      .feature_count(2)
+      .step_count(vec![20, 20])
+      .build(&ButtplugDeviceMessageType::VibrateCmd)
+      .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);
@@ -362,12 +362,12 @@ mod test {
   pub fn test_command_generator_vibration_step_range() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let vibrate_attributes = DeviceMessageAttributes {
-      feature_count: Some(2),
-      step_count: Some(vec![20, 20]),
-      step_range: Some(vec![(10, 15), (10, 20)]),
-      ..Default::default()
-    };
+    let vibrate_attributes = DeviceMessageAttributesBuilder::default()
+      .feature_count(2)
+      .step_count(vec![20, 20])
+      .step_range(vec![(10, 15), (10, 20)])
+      .build(&ButtplugDeviceMessageType::VibrateCmd)
+      .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);
@@ -413,11 +413,11 @@ mod test {
   pub fn test_command_generator_rotation() {
     let mut attributes_map = DeviceMessageAttributesMap::new();
 
-    let rotate_attributes = DeviceMessageAttributes {
-      feature_count: Some(2),
-      step_count: Some(vec![20, 20]),
-      ..Default::default()
-    };
+    let rotate_attributes = DeviceMessageAttributesBuilder::default()
+      .feature_count(2)
+      .step_count(vec![20, 20])
+      .build(&ButtplugDeviceMessageType::RotateCmd)
+      .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);

@@ -13,6 +13,57 @@ use crate::{
   device::Endpoint,
 };
 use serde::{Deserialize, Serialize};
+use getset::{Getters, Setters};
+
+#[derive(Debug, Default)]
+pub struct DeviceMessageAttributesBuilder {
+  attributes: DeviceMessageAttributes
+}
+
+impl DeviceMessageAttributesBuilder {
+  pub fn feature_count(mut self, count: u32) -> DeviceMessageAttributesBuilder {
+    self.attributes.feature_count = Some(count);
+    self
+  }
+
+  pub fn step_count(mut self, step_count: Vec<u32>) -> DeviceMessageAttributesBuilder {
+    self.attributes.step_count = Some(step_count);
+    self
+  }
+
+  pub fn step_range(mut self, step_range: Vec<(u32, u32)>) -> DeviceMessageAttributesBuilder {
+    self.attributes.step_range = Some(step_range);
+    self
+  }
+
+  pub fn endpoints(mut self, endpoints: Vec<Endpoint>) ->  DeviceMessageAttributesBuilder {
+    self.attributes.endpoints = Some(endpoints);
+    self
+  }
+
+  pub fn max_duration(mut self, max_duration: Vec<u32>) ->  DeviceMessageAttributesBuilder {
+    self.attributes.max_duration = Some(max_duration);
+    self
+  }
+
+  pub fn feature_order(mut self, feature_order: Vec<u32>)  ->  DeviceMessageAttributesBuilder {
+    self.attributes.feature_order = Some(feature_order);
+    self
+  }
+
+  pub fn build(self, message_type: &ButtplugDeviceMessageType) -> Result<DeviceMessageAttributes, ButtplugDeviceError> {
+    self.attributes.check(&message_type)?;
+    Ok(self.attributes)
+  }
+
+  // Required if we want to use this to build messages for v0/v1 fallbacks without creating specific
+  // attribute version structs for those fallbacks.
+  //
+  // TODO Look at creating versioned structs for this in v3
+  pub fn build_without_check(self) -> DeviceMessageAttributes {
+    self.attributes
+  }
+}
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
@@ -22,23 +73,27 @@ use serde::{Deserialize, Serialize};
 // immutable, we can leave the fields as public, versus trying to build
 // accessors to everything.
 
-#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize, Getters, Setters)]
 pub struct DeviceMessageAttributes {
+  #[getset(get="pub")]
   #[serde(rename = "FeatureCount")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub feature_count: Option<u32>,
+  feature_count: Option<u32>,
   #[serde(rename = "StepCount")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub step_count: Option<Vec<u32>>,
+  step_count: Option<Vec<u32>>,
+  #[getset(get="pub")]
   #[serde(rename = "Endpoints")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub endpoints: Option<Vec<Endpoint>>,
+  endpoints: Option<Vec<Endpoint>>,
+  #[getset(get="pub")]
   #[serde(rename = "MaxDuration")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub max_duration: Option<Vec<u32>>,
+  max_duration: Option<Vec<u32>>,
+  #[getset(get="pub")]
   #[serde(rename = "StepRange")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  pub step_range: Option<Vec<(u32, u32)>>,
+  step_range: Option<Vec<(u32, u32)>>,
   /*
   // Unimplemented attributes
   #[serde(rename = "Patterns")]
@@ -49,12 +104,25 @@ pub struct DeviceMessageAttributes {
   actuator_type: Option<Vec<String>>,
   */
   // Never serialize this, its for internal use only
+  #[getset(get="pub")]
   #[serde(rename = "FeatureOrder")]
   #[serde(skip_serializing)]
   pub feature_order: Option<Vec<u32>>,
 }
 
 impl DeviceMessageAttributes {
+  pub fn step_count(&self) -> Option<Vec<u32>> {
+    if let Some(ranges) = &self.step_range {
+      let mut step_range = vec!();
+      for range in ranges {
+        step_range.push(range.1 - range.0);
+      }
+      Some(step_range)
+    } else {
+      self.step_count.clone()
+    }
+  }
+
   fn check_feature_count_validity(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), String> {
     info!("Feature count");
     if self.feature_count.is_none() {
@@ -103,7 +171,7 @@ impl DeviceMessageAttributes {
       }
     } else {
       Ok(())
-    }    
+    }
   }
 
   // Check things that the JSON schema doesn't check. This is mostly for fields that reference other
@@ -116,11 +184,13 @@ impl DeviceMessageAttributes {
   pub fn check(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), ButtplugDeviceError> {
     match message_type {
       ButtplugDeviceMessageType::VibrateCmd | ButtplugDeviceMessageType::RotateCmd | ButtplugDeviceMessageType::LinearCmd => {
-        info!("Checking message type");
         self.check_feature_count_validity(message_type)
           .and_then(|_| self.check_step_count(message_type))
           .and_then(|_| self.check_step_range(message_type))
           .and_then(|_| self.check_feature_order(message_type))
+      },
+      ButtplugDeviceMessageType::RawReadCmd | ButtplugDeviceMessageType::RawWriteCmd | ButtplugDeviceMessageType::RawSubscribeCmd | ButtplugDeviceMessageType::RawUnsubscribeCmd => {
+        self.endpoints.is_some().then(|| ()).ok_or(format!("Endpoints vector must exist for {}.", message_type))
       },
       _ => Ok(())
     }.map_err(ButtplugDeviceError::DeviceConfigurationFileError)

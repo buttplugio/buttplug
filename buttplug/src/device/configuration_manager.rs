@@ -13,7 +13,7 @@ use super::protocol::{
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesMap},
+    messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap},
   },
   device::{DeviceImpl, Endpoint},
 };
@@ -341,10 +341,11 @@ impl ProtocolDeviceAttributes {
   }
 
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    let endpoint_attributes = DeviceMessageAttributes {
-      endpoints: Some(endpoints.to_owned()),
-      ..Default::default()
-    };
+    let endpoint_attributes = DeviceMessageAttributesBuilder::default()
+      .endpoints(endpoints.to_owned())
+      .build(&ButtplugDeviceMessageType::RawReadCmd)
+      .expect("Nothing needs checking");
+
     self.message_attributes.insert(
       ButtplugDeviceMessageType::RawReadCmd,
       endpoint_attributes.clone(),
@@ -706,7 +707,7 @@ mod test {
       config
         .message_attributes(&ButtplugDeviceMessageType::VibrateCmd)
         .expect("Test, assuming infallible")
-        .feature_count
+        .feature_count()
         .expect("Test, assuming infallible"),
       2
     );
@@ -823,4 +824,6 @@ mod test {
   */
 
   // TODO Test invalid config load (not json)
+
+  // TODO Test calculation/change of Step Count via Step Range
 }

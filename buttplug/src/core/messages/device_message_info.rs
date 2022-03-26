@@ -109,11 +109,12 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
 
     // The only attribute in v1 was feature count, so that's all we should
     // preserve.
-    for attributes in &mut dmi_v1.device_messages.values_mut() {
-      *attributes = DeviceMessageAttributes {
-        feature_count: attributes.feature_count,
-        ..Default::default()
-      };
+    for (_, attributes) in &mut dmi_v1.device_messages {
+      if let Some(feature_count) = attributes.feature_count() {
+        *attributes = DeviceMessageAttributesBuilder::default()
+          .feature_count(*feature_count)
+          .build_without_check();
+      }
     }
 
     // If VibrateCmd is listed, append SingleMotorVibrateCmd
