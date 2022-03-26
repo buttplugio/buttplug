@@ -339,8 +339,8 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
       .device_attributes()
       .message_attributes(&ButtplugDeviceMessageType::VibrateCmd)
     {
-      if let Some(count) = attr.feature_count {
-        vibrator_count = count as usize;
+      if let Some(count) = attr.feature_count() {
+        vibrator_count = *count as usize;
       } else {
         return ButtplugDeviceError::ProtocolRequirementError(format!(
           "{} needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.",

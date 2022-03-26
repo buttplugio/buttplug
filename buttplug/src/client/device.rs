@@ -319,8 +319,8 @@ impl ButtplugClientDevice {
       .allowed_messages
       .get(&ButtplugCurrentSpecDeviceMessageType::VibrateCmd)
     {
-      if let Some(v) = features.feature_count {
-        vibrator_count = v;
+      if let Some(v) = features.feature_count() {
+        vibrator_count = *v;
       }
     }
     let mut speed_vec: Vec<VibrateSubcommand>;
@@ -373,8 +373,8 @@ impl ButtplugClientDevice {
       .allowed_messages
       .get(&ButtplugCurrentSpecDeviceMessageType::LinearCmd)
     {
-      if let Some(v) = features.feature_count {
-        linear_count = v;
+      if let Some(v) = features.feature_count() {
+        linear_count = *v;
       }
     }
     let mut linear_vec: Vec<VectorSubcommand>;
@@ -425,8 +425,8 @@ impl ButtplugClientDevice {
       .allowed_messages
       .get(&ButtplugCurrentSpecDeviceMessageType::RotateCmd)
     {
-      if let Some(v) = features.feature_count {
-        rotate_count = v;
+      if let Some(v) = features.feature_count() {
+        rotate_count = *v;
       }
     }
     let mut rotate_vec: Vec<RotationSubcommand>;

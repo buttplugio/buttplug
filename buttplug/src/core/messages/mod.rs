@@ -66,7 +66,7 @@ pub use kiiroo_cmd::KiirooCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
-pub use message_attributes::DeviceMessageAttributes;
+pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesBuilder};
 pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;
