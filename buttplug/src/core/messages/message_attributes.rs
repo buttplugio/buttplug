@@ -207,3 +207,20 @@ impl DeviceMessageAttributes {
     }
   }
 }
+
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  #[test]
+  pub fn test_step_count_calculation() {
+    let vibrate_attributes = DeviceMessageAttributesBuilder::default()
+      .feature_count(2)
+      .step_count(vec![20, 20])
+      .step_range(vec![(10, 15), (10, 20)])
+      .build(&ButtplugDeviceMessageType::VibrateCmd)
+      .unwrap();
+
+    assert_eq!(vibrate_attributes.step_count(), Some(vec![5, 10]))
+  }
+}
