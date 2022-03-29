@@ -895,7 +895,7 @@
             "Magic Cell"
           ],
           "name": {
-            "en-us": "MagicMotion Dante/Candy"
+            "en-us": "MagicMotion Dante/Candy/Rise"
           }
         },
         {
@@ -1046,7 +1046,8 @@
           "Kegel Coach",
           "Magic Lotos",
           "nyx",
-          "umi"
+          "umi",
+          "funkegel"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1128,6 +1129,14 @@
                 100
               ]
             }
+          }
+        },
+        {
+          "identifier": [
+            "funkegel"
+          ],
+          "name": {
+            "en-us": "MagicMotion Crystal"
           }
         }
       ]
