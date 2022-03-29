@@ -689,7 +689,7 @@ protocols:
       - identifier:
           - Magic Cell
         name:
-          en-us: MagicMotion Dante/Candy
+          en-us: MagicMotion Dante/Candy/Rise
       - identifier:
           - Magic Wand
         name:
@@ -781,6 +781,7 @@ protocols:
         - Magic Lotos
         - nyx
         - umi
+        - funkegel # Crystal
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -828,6 +829,10 @@ protocols:
             StepCount:
               - 100
               - 100
+      - identifier:
+          - funkegel
+        name:
+          en-us: MagicMotion Crystal
   mysteryvibe:
     btle:
       names:
