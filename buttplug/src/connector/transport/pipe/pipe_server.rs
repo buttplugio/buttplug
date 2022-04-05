@@ -12,10 +12,6 @@ use crate::{
 };
 use futures::future::BoxFuture;
 use std::sync::Arc;
-#[cfg(target_os = "windows")]
-use tokio::net::windows::named_pipe;
-#[cfg(not(target_os = "windows"))]
-use tokio::net::{UnixListener, UnixStream};
 use tokio::{
   io::{AsyncWriteExt, Interest},
   sync::{
@@ -23,6 +19,10 @@ use tokio::{
     Notify,
   },
 };
+#[cfg(target_os = "windows")]
+use tokio::net::windows::named_pipe;
+#[cfg(not(target_os = "windows"))]
+use tokio::net::{UnixListener, UnixStream};
 
 #[cfg(target_os = "windows")]
 type PipeServerType = named_pipe::NamedPipeServer;
