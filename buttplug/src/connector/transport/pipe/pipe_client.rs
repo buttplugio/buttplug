@@ -198,6 +198,7 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
   }
 }
 
+#[cfg(target_os = "windows")]
 #[cfg(test)]
 mod test {
   use super::ButtplugPipeClientTransportBuilder;
