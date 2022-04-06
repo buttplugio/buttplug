@@ -80,11 +80,7 @@ impl ButtplugProtocol for Satisfyer {
       let result = device_impl
         .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
-      let mut device_identifier =
-        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
-      // Satisfyer devices send a null character at the end of their names. Pop that off, as it's
-      // still a valid utf-8 character and screws up our string comparisons.
-      device_identifier.pop();
+      let device_identifier = format!("{}", u32::from_be_bytes(result.data().to_vec().try_into().unwrap_or([0;4])));
       info!(
         "Satisfyer Device Identifier: {:?} {}",
         result.data(),

@@ -2300,11 +2300,11 @@ protocols:
       advertised-services:
         - 0000180a-0000-1000-8000-00805f9b34fb
       services:
-        00001800-0000-1000-8000-00805f9b34fb:
-          rxblemodel: 00002a00-0000-1000-8000-00805f9b34fb
+        0000180a-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 00002A24-0000-1000-8000-00805f9b34fb
         51361500-c5e7-47c7-8a6e-47ebc99d80e8:
-          command: 51361501-c5e7-47c7-8a6e-47ebc99d80e8
-          tx: 51361502-c5e7-47c7-8a6e-47ebc99d80e8
+          command: 51361501-c5e7-47c7-8a6e-47ebc99d80e8 # Motor mode
+          tx: 51361502-c5e7-47c7-8a6e-47ebc99d80e8 # Motor level
     defaults:
       name:
         en-us: Satisfyer Device
@@ -2315,11 +2315,115 @@ protocols:
             - 100
     configurations:
       - identifier:
-          - SF Royal One
+          - "10005"
         name:
-          en-us: Satisfyer Royal One
+          en-us: Satisfyer Hot Spot
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Heater?
       - identifier:
-          - SF Love Triangle
+          - "10006"
+        name:
+          en-us: Satisfyer Heated Affair
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Heater?
+      - identifier:
+          - "10007"
+        name:
+          en-us: Satisfyer Big Heat
+      - identifier:
+          - "10008"
+        name:
+          en-us: Satisfyer Heated Thrill
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Heater?
+      - identifier:
+          - "10009"
+        name:
+          en-us: Satisfyer Hot Bunny
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Heater?
+      - identifier:
+          - "10010"
+        name:
+          en-us: Satisfyer Heat Climax
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Heater?
+      - identifier:
+          - "10011"
+        name:
+          en-us: Satisfyer Heat Climax+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Heater?
+      - identifier:
+          - "10012"
+        name:
+          en-us: Satisfyer Hot Passion
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Heater?
+      - identifier:
+          - "10013"
+        name:
+          en-us: Satisfyer Haute Couture+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10014"
+        name:
+          en-us: Satisfyer High Fashion+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10015"
+        name:
+          en-us: Satisfyer Prêt-à-porter+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10024"
+          - "10025"
         name:
           en-us: Satisfyer Love Triangle
         messages:
@@ -2327,23 +2431,21 @@ protocols:
             FeatureCount: 2
             StepCount:
               - 100
-              - 100          
+              - 100 # Airpulse?
       - identifier:
-          - SF Double Joy
+          - "10027"
+          - "10028"
         name:
-          en-us: Satisfyer Double Joy
+          en-us: Satisfyer Curvy 1+
         messages:
           VibrateCmd:
             FeatureCount: 2
             StepCount:
               - 100
-              - 100          
+              - 100 # Airpulse?
       - identifier:
-          - Double Wand-er
-        name:
-          en-us: Satisfyer Double Wand-er      
-      - identifier:
-          - SF Curvy 2+
+          - "10030"
+          - "10031"
         name:
           en-us: Satisfyer Curvy 2+
         messages:
@@ -2351,19 +2453,599 @@ protocols:
             FeatureCount: 2
             StepCount:
               - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10032"
+        name:
+          en-us: Satisfyer Double Wand-er
+      - identifier:
+          - "10046"
+          - "10047"
+          - "10048"
+        name:
+          en-us: Satisfyer Double Joy
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
               - 100
       - identifier:
-          - Plug-ilicious 1
+          - "10049"
+          - "10050"
+          - "10051"
         name:
-          en-us: Satisfyer Plug-ilicious 1
+          en-us: Satisfyer Double Fun
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
       - identifier:
-          - Plug-ilicious 2
+          - "10052"
+          - "10053"
+          - "10054"
         name:
-          en-us: Satisfyer Plug-ilicious 2
+          en-us: Satisfyer Double Love
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
       - identifier:
-          - SF Little Secret
+          - "10055"
+        name:
+          en-us: Satisfyer Curvy 3+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10059"
+          - "10060"
+          - "10061"
+        name:
+          en-us: Satisfyer Hot Lover
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Heater?
+      - identifier:
+          - "10062"
+          - "10063"
+          - "10064"
+        name:
+          en-us: Satisfyer Mono Flex
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10065"
+          - "10066"
+          - "10067"
+          - "10068"
+        name:
+          en-us: Satisfyer Double Flex
+        messages:
+          VibrateCmd:
+            FeatureCount: 3
+            StepCount:
+              - 100
+              - 100
+              - 100
+      - identifier:
+          - "10069"
+          - "10070"
+          - "10071"
+        name:
+          en-us: Satisfyer Heat Wave
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Heater?
+      - identifier:
+          - "10072"
         name:
           en-us: Satisfyer Little Secret
+      - identifier:
+          - "10073"
+        name:
+          en-us: Satisfyer Sexy Secret
+      - identifier:
+          - "10074"
+        name:
+          en-us: Satisfyer Strong One
+      - identifier:
+          - "10075"
+        name:
+          en-us: Satisfyer Mighty One
+      - identifier:
+          - "10076"
+        name:
+          en-us: Satisfyer Powerful One
+      - identifier:
+          - "10077"
+        name:
+          en-us: Satisfyer Royal One
+      - identifier:
+          - "10078"
+        name:
+          en-us: Satisfyer Signet Ring
+      - identifier:
+          - "10079"
+          - "10080"
+        name:
+          en-us: Satisfyer Dual Love
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10081"
+          - "10082"
+        name:
+          en-us: Satisfyer Dual Pleasure
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10090"
+        name:
+          en-us: Satisfyer Hero+
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100 # Airpulse?
+      - identifier:
+          - "10091"
+        name:
+          en-us: Satisfyer Knight+
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100 # Airpulse?
+      - identifier:
+          - "10092"
+          - "10093"
+        name:
+          en-us: Satisfyer Newcomer+
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100 # Airpulse?
+      - identifier:
+          - "10100"
+          - "10101"
+        name:
+          en-us: Satisfyer Plug-ilicious 1
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10102"
+          - "10103"
+          - "10104"
+        name:
+          en-us: Satisfyer Plug-ilicious 2
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10105"
+        name:
+          en-us: Satisfyer E-Love Foreplay
+        messages:
+          VibrateCmd:
+            FeatureCount: 1 # 4?
+            StepCount:
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10108"
+        name:
+          en-us: Satisfyer E-Love G-Hunter
+        messages:
+          VibrateCmd:
+            FeatureCount: 1 # 4?
+            StepCount:
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10109"
+        name:
+          en-us: Satisfyer E-Love G-Hunter+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2 # 5?
+            StepCount:
+              - 100
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10110"
+        name:
+          en-us: Satisfyer E-Love G-Spotter
+        messages:
+          VibrateCmd:
+            FeatureCount: 2 # 4?
+            StepCount:
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10111"
+        name:
+          en-us: Satisfyer E-Love G-Spotter+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2 # 5?
+            StepCount:
+              - 100
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10112"
+        name:
+          en-us: Satisfyer E-Love Story
+        messages:
+          VibrateCmd:
+            FeatureCount: 1 # 4?
+            StepCount:
+              - 100
+              # - 100 e-amplitude
+              # - 100 e-pulsewidth
+              # - 100 e-frequency
+      - identifier:
+          - "10119"
+          - "10120"
+          - "10182"
+        name:
+          en-us: Satisfyer Love Birds 1
+      - identifier:
+          - "10121"
+          - "10122"
+          - "10123"
+        name:
+          en-us: Satisfyer Love Birds 2
+      - identifier:
+          - "10124"
+          - "10125"
+          - "10126"
+        name:
+          en-us: Satisfyer Love Birds Vary
+      - identifier:
+          - "10127"
+          - "10128"
+          - "10129"
+          - "10201"
+        name:
+          en-us: Satisfyer Ribbed Petal
+      - identifier:
+          - "10130"
+          - "10131"
+          - "10132"
+          - "10133"
+        name:
+          en-us: Satisfyer Shiny Petal
+      - identifier:
+          - "10134"
+          - "10135"
+          - "10136"
+          - "10202"
+        name:
+          en-us: Satisfyer Smooth Petal
+      - identifier:
+          - "10140"
+        name:
+          en-us: Satisfyer Men Vibration+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10141"
+        name:
+          en-us: Satisfyer Power Plug
+      - identifier:
+          - "10142"
+          - "10143"
+        name:
+          en-us: Satisfyer Rotator Plug 1+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100 # Single direction rotator
+              - 100
+      - identifier:
+          - "10144"
+          - "10145"
+        name:
+          en-us: Satisfyer Rotator Plug 2+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100 # Single direction rotator
+              - 100
+      - identifier:
+          - "10146"
+          - "10147"
+        name:
+          en-us: Satisfyer Deep Diver
+      - identifier:
+          - "10148"
+          - "10149"
+        name:
+          en-us: Satisfyer Sweet Seal
+      - identifier:
+          - "10150"
+          - "10151"
+        name:
+          en-us: Satisfyer Trendsetter
+      - identifier:
+          - "10154"
+          - "10155"
+          - "10156"
+        name:
+          en-us: Satisfyer Twirling Joy
+      - identifier:
+          - "10157"
+          - "10158"
+        name:
+          en-us: Satisfyer Ultra Power Bullet 8
+      - identifier:
+          - "10160"
+          - "10161"
+          - "10162"
+        name:
+          en-us: Satisfyer Double Desire
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10163"
+          - "10164"
+          - "10165"
+          - "10166"
+        name:
+          en-us: Satisfyer Double Lust
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10167"
+        name:
+          en-us: Satisfyer Epic Duo
+      - identifier:
+          - "10168"
+        name:
+          en-us: Satisfyer Pleasure Wand+
+      - identifier:
+          - "10169"
+          - "10170"
+          - "10171"
+        name:
+          en-us: Satisfyer Top Secret
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10172"
+          - "10173"
+          - "10174"
+        name:
+          en-us: Satisfyer Top Secret+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10175"
+          - "10176"
+        name:
+          en-us: Satisfyer Bullseye
+      - identifier:
+          - "10177"
+          - "10178"
+          - "10179"
+        name:
+          en-us: Satisfyer Sunray
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10180"
+          - "10181"
+        name:
+          en-us: Satisfyer Curvy Trinity 5+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10183"
+          - "10184"
+        name:
+          en-us: Satisfyer Intensity Plug
+      - identifier:
+          - "10185"
+        name:
+          en-us: Satisfyer Power Masturbator
+      - identifier:
+          - "10186"
+          - "10187"
+        name:
+          en-us: Satisfyer Hug me
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10188"
+        name:
+          en-us: Satisfyer Air Pump Bunny 5+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+          # Pump?
+      - identifier:
+          - "10189"
+        name:
+          en-us: Satisfyer Air Pump Vibrator 5+
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Pump?
+      - identifier:
+          - "10190"
+          - "10191"
+        name:
+          en-us: Satisfyer Threesome 4
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10192"
+        name:
+          en-us: Satisfyer G-Spot Flex 4+
+      - identifier:
+          - "10193"
+          - "10194"
+        name:
+          en-us: Satisfyer G-Spot Flex 5+
+      - identifier:
+          - "10195"
+        name:
+          en-us: Satisfyer Air Pump Booty 5+
+        messages:
+          VibrateCmd:
+            FeatureCount: 1
+            StepCount:
+              - 100
+          # Pump?
+      - identifier:
+          - "10196"
+        name:
+          en-us: Satisfyer Pro+ Wave 4
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100 # Wave?
+              - 100 # Airpulse?
+      - identifier:
+          - "10197"
+          - "10198"
+        name:
+          en-us: Satisfyer Mini Wand-er+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100
+      - identifier:
+          - "10199"
+          - "10200"
+        name:
+          en-us: Satisfyer Tropical Tip
+      - identifier:
+          - "10203"
+          - "10204"
+        name:
+          en-us: Satisfyer Twirling Pro+
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Airpulse?
+      - identifier:
+          - "10205"
+        name:
+          en-us: Satisfyer Perfect Pair 4
+      - identifier:
+          - "10206"
+          - "10207"
+          - "10208"
+        name:
+          en-us: Satisfyer Booty Absolute Beginners 5
+      - identifier:
+          - "10241"
+          - "10242"
+        name:
+          en-us: Satisfyer Rrrolling Sensation
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100
+              - 100 # Rolling?
   mannuo:
     btle:
       names:
