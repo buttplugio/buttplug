@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -11,10 +11,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(Patoo);
+super::default_protocol_definition!(Patoo, "patoo");
 
-impl ButtplugProtocol for Patoo {
+#[derive(Default, Debug)]
+pub struct PatooFactory {}
+
+impl ButtplugProtocolFactory for PatooFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -31,8 +35,12 @@ impl ButtplugProtocol for Patoo {
     let name: String = c[0..i].iter().collect();
     Box::pin(async move {
       let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(name), &device_impl.endpoints())?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(Patoo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "patoo"
   }
 }
 

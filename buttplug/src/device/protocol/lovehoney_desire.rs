@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -11,7 +11,7 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_declaration!(LovehoneyDesire);
+super::default_protocol_declaration!(LovehoneyDesire, "lovehoney-desire");
 
 impl ButtplugProtocolCommandHandler for LovehoneyDesire {
   fn handle_vibrate_cmd(

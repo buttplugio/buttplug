@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
     self,
@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
+
 pub struct VorzeSA {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -26,6 +26,8 @@ pub struct VorzeSA {
 }
 
 impl VorzeSA {
+  const PROTOCOL_IDENTIFIER: &'static str = "vorze-sa";
+
   fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -80,6 +82,10 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 
   speed as u8
 }
+
+crate::default_protocol_properties_definition!(VorzeSA);
+
+impl ButtplugProtocol for VorzeSA {}
 
 impl ButtplugProtocolCommandHandler for VorzeSA {
   fn handle_vibrate_cmd(

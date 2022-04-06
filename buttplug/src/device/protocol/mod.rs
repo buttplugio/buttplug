@@ -74,97 +74,88 @@ use futures::future::{self, BoxFuture};
 use generic_command_manager::GenericCommandManager;
 use std::sync::Arc;
 
-pub type TryCreateProtocolFunc =
-  fn(
-    Arc<DeviceImpl>,
-    DeviceAttributesBuilder,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
-
-pub fn add_to_protocol_map<T>(map: &DashMap<String, TryCreateProtocolFunc>, protocol_name: &str)
+pub fn add_to_protocol_map<T>(map: &DashMap<String, Arc<dyn ButtplugProtocolFactory>>, factory: T)
 where
-  T: ButtplugProtocol,
+  T: ButtplugProtocolFactory + 'static
 {
+  let factory = Arc::new(factory);
   map.insert(
-    protocol_name.to_owned(),
-    T::try_create as TryCreateProtocolFunc,
+    factory.protocol_identifier().to_owned(),
+    factory
   );
 }
 
-pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
+pub fn get_default_protocol_map() -> DashMap<String, Arc<dyn ButtplugProtocolFactory>> {
   let map = DashMap::new();
-  add_to_protocol_map::<aneros::Aneros>(&map, "aneros");
-  add_to_protocol_map::<ankni::Ankni>(&map, "ankni");
-  add_to_protocol_map::<buttplug_passthru::ButtplugPassthru>(&map, "buttplug-passthru");
-  add_to_protocol_map::<cachito::Cachito>(&map, "cachito");
-  add_to_protocol_map::<fredorch::Fredorch>(&map, "fredorch");
-  add_to_protocol_map::<hismith::Hismith>(&map, "hismith");
-  add_to_protocol_map::<hgod::Hgod>(&map, "hgod");
-  add_to_protocol_map::<htk_bm::HtkBm>(&map, "htk_bm");
-  add_to_protocol_map::<jejoue::JeJoue>(&map, "jejoue");
-  add_to_protocol_map::<kiiroo_v2::KiirooV2>(&map, "kiiroo-v2");
-  add_to_protocol_map::<kiiroo_v2_vibrator::KiirooV2Vibrator>(&map, "kiiroo-v2-vibrator");
-  add_to_protocol_map::<kiiroo_v21::KiirooV21>(&map, "kiiroo-v21");
-  add_to_protocol_map::<kiiroo_v21_initialized::KiirooV21Initialized>(
-    &map,
-    "kiiroo-v21-initialized",
-  );
-  add_to_protocol_map::<lelof1s::LeloF1s>(&map, "lelo-f1s");
-  add_to_protocol_map::<lelof1sv2::LeloF1sV2>(&map, "lelo-f1sv2");
-  add_to_protocol_map::<libo_elle::LiboElle>(&map, "libo-elle");
-  add_to_protocol_map::<libo_shark::LiboShark>(&map, "libo-shark");
-  add_to_protocol_map::<libo_vibes::LiboVibes>(&map, "libo-vibes");
-  add_to_protocol_map::<lovehoney_desire::LovehoneyDesire>(&map, "lovehoney-desire");
-  add_to_protocol_map::<lovedistance::LoveDistance>(&map, "lovedistance");
-  add_to_protocol_map::<lovense::Lovense>(&map, "lovense");
-  add_to_protocol_map::<lovense_connect_service::LovenseConnectService>(
-    &map,
-    "lovense-connect-service",
-  );
-  add_to_protocol_map::<lovenuts::LoveNuts>(&map, "lovenuts");
-  add_to_protocol_map::<magic_motion_v1::MagicMotionV1>(&map, "magic-motion-1");
-  add_to_protocol_map::<magic_motion_v2::MagicMotionV2>(&map, "magic-motion-2");
-  add_to_protocol_map::<magic_motion_v3::MagicMotionV3>(&map, "magic-motion-3");
-  add_to_protocol_map::<magic_motion_v4::MagicMotionV4>(&map, "magic-motion-4");
-  add_to_protocol_map::<mannuo::ManNuo>(&map, "mannuo");
-  add_to_protocol_map::<maxpro::Maxpro>(&map, "maxpro");
-  add_to_protocol_map::<mizzzee::MizzZee>(&map, "mizzzee");
-  add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
-  add_to_protocol_map::<mysteryvibe::MysteryVibe>(&map, "mysteryvibe");
-  add_to_protocol_map::<nobra::Nobra>(&map, "nobra");
-  add_to_protocol_map::<patoo::Patoo>(&map, "patoo");
-  add_to_protocol_map::<picobong::Picobong>(&map, "picobong");
-  add_to_protocol_map::<prettylove::PrettyLove>(&map, "prettylove");
-  add_to_protocol_map::<raw_protocol::RawProtocol>(&map, "raw");
-  add_to_protocol_map::<realov::Realov>(&map, "realov");
-  add_to_protocol_map::<satisfyer::Satisfyer>(&map, "satisfyer");
-  add_to_protocol_map::<svakom::Svakom>(&map, "svakom");
-  add_to_protocol_map::<svakom_alex::SvakomAlex>(&map, "svakom-alex");
-  add_to_protocol_map::<svakom_iker::SvakomIker>(&map, "svakom-iker");
-  add_to_protocol_map::<svakom_sam::SvakomSam>(&map, "svakom-sam");
-  add_to_protocol_map::<tcode_v03::TCodeV03>(&map, "tcode-v03");
-  add_to_protocol_map::<thehandy::TheHandy>(&map, "thehandy");
-  add_to_protocol_map::<vibratissimo::Vibratissimo>(&map, "vibratissimo");
-  add_to_protocol_map::<vorze_sa::VorzeSA>(&map, "vorze-sa");
-  add_to_protocol_map::<wevibe::WeVibe>(&map, "wevibe");
-  add_to_protocol_map::<wevibe8bit::WeVibe8Bit>(&map, "wevibe-8bit");
-  add_to_protocol_map::<xinput::XInput>(&map, "xinput");
-  add_to_protocol_map::<youcups::Youcups>(&map, "youcups");
-  add_to_protocol_map::<youou::Youou>(&map, "youou");
-  add_to_protocol_map::<zalo::Zalo>(&map, "zalo");
+  add_to_protocol_map(&map, aneros::AnerosFactory::default());
+  add_to_protocol_map(&map, ankni::AnkniFactory::default());
+  add_to_protocol_map(&map, buttplug_passthru::ButtplugPassthruFactory::default());
+  add_to_protocol_map(&map, cachito::CachitoFactory::default());
+  add_to_protocol_map(&map, fredorch::FredorchFactory::default());
+  add_to_protocol_map(&map, hismith::HismithFactory::default());
+  add_to_protocol_map(&map, hgod::HgodFactory::default());
+  add_to_protocol_map(&map, htk_bm::HtkBmFactory::default());
+  add_to_protocol_map(&map, jejoue::JeJoueFactory::default());
+  add_to_protocol_map(&map, kiiroo_v2::KiirooV2Factory::default());
+  add_to_protocol_map(&map, kiiroo_v2_vibrator::KiirooV2VibratorFactory::default());
+  add_to_protocol_map(&map, kiiroo_v21::KiirooV21Factory::default());
+  add_to_protocol_map(&map, kiiroo_v21_initialized::KiirooV21InitializedFactory::default());
+  add_to_protocol_map(&map, lelof1s::LeloF1sFactory::default());
+  add_to_protocol_map(&map, lelof1sv2::LeloF1sV2Factory::default());
+  add_to_protocol_map(&map, libo_elle::LiboElleFactory::default());
+  add_to_protocol_map(&map, libo_shark::LiboSharkFactory::default());
+  add_to_protocol_map(&map, libo_vibes::LiboVibesFactory::default());
+  add_to_protocol_map(&map, lovehoney_desire::LovehoneyDesireFactory::default());
+  add_to_protocol_map(&map, lovedistance::LoveDistanceFactory::default());
+  add_to_protocol_map(&map, lovense::LovenseFactory::default());
+  add_to_protocol_map(&map, lovense_connect_service::LovenseConnectServiceFactory::default());
+  add_to_protocol_map(&map, lovenuts::LoveNutsFactory::default());
+  add_to_protocol_map(&map, magic_motion_v1::MagicMotionV1Factory::default());
+  add_to_protocol_map(&map, magic_motion_v2::MagicMotionV2Factory::default());
+  add_to_protocol_map(&map, magic_motion_v3::MagicMotionV3Factory::default());
+  add_to_protocol_map(&map, magic_motion_v4::MagicMotionV4Factory::default());
+  add_to_protocol_map(&map, mannuo::ManNuoFactory::default());
+  add_to_protocol_map(&map, maxpro::MaxproFactory::default());
+  add_to_protocol_map(&map, mizzzee::MizzZeeFactory::default());
+  add_to_protocol_map(&map, motorbunny::MotorbunnyFactory::default());
+  add_to_protocol_map(&map, mysteryvibe::MysteryVibeFactory::default());
+  add_to_protocol_map(&map, nobra::NobraFactory::default());
+  add_to_protocol_map(&map, patoo::PatooFactory::default());
+  add_to_protocol_map(&map, picobong::PicobongFactory::default());
+  add_to_protocol_map(&map, prettylove::PrettyLoveFactory::default());
+  add_to_protocol_map(&map, raw_protocol::RawProtocolFactory::default());
+  add_to_protocol_map(&map, realov::RealovFactory::default());
+  add_to_protocol_map(&map, satisfyer::SatisfyerFactory::default());
+  add_to_protocol_map(&map, svakom::SvakomFactory::default());
+  add_to_protocol_map(&map, svakom_alex::SvakomAlexFactory::default());
+  add_to_protocol_map(&map, svakom_iker::SvakomIkerFactory::default());
+  add_to_protocol_map(&map, svakom_sam::SvakomSamFactory::default());
+  add_to_protocol_map(&map, tcode_v03::TCodeV03Factory::default());
+  add_to_protocol_map(&map, thehandy::TheHandyFactory::default());
+  add_to_protocol_map(&map, vibratissimo::VibratissimoFactory::default());
+  add_to_protocol_map(&map, vorze_sa::VorzeSAFactory::default());
+  add_to_protocol_map(&map, wevibe::WeVibeFactory::default());
+  add_to_protocol_map(&map, wevibe8bit::WeVibe8BitFactory::default());
+  add_to_protocol_map(&map, xinput::XInputFactory::default());
+  add_to_protocol_map(&map, youcups::YoucupsFactory::default());
+  add_to_protocol_map(&map, youou::YououFactory::default());
+  add_to_protocol_map(&map, zalo::ZaloFactory::default());
   map
 }
 
-pub trait ButtplugProtocol: ButtplugProtocolCommandHandler + Sync {
+pub trait ButtplugProtocolFactory: std::fmt::Debug + Send + Sync {
+  fn protocol_identifier(&self) -> &'static str;
+
   fn try_create(
+    &self,
     device_impl: Arc<DeviceImpl>,
     attributes_builder: DeviceAttributesBuilder,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>
-  where
-    Self: Sized;
+  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
 }
 
 pub trait ButtplugProtocolProperties {
   fn name(&self) -> &str;
+  fn protocol_identifier(&self) -> &str;
   fn device_attributes(&self) -> &ProtocolDeviceAttributes;
   fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion>;
 
@@ -258,7 +249,9 @@ fn print_type_of<T>(_: &T) -> &'static str {
   std::any::type_name::<T>()
 }
 
-pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
+pub trait ButtplugProtocol: ButtplugProtocolProperties + ButtplugProtocolCommandHandler + Send + Sync {}
+
+pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
   // In order to not have to worry about id setting at the protocol level (this
   // should be taken care of in the server's device manager), we return server
   // messages but Buttplug errors.
@@ -519,9 +512,31 @@ pub trait ButtplugProtocolCommandHandler: Send + ButtplugProtocolProperties {
 }
 
 #[macro_export]
-macro_rules! default_protocol_definition {
+macro_rules! default_protocol_properties_definition {
   ( $protocol_name:ident ) => {
-    #[derive(ButtplugProtocolProperties)]
+    impl ButtplugProtocolProperties for $protocol_name {
+      fn name(&self) -> &str {
+        self.device_attributes.name()
+      }
+
+      fn device_attributes(&self) -> &ProtocolDeviceAttributes {
+        &self.device_attributes
+      }
+
+      fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
+        self.stop_commands.clone()
+      }
+
+      fn protocol_identifier(&self) -> &str {
+        Self::PROTOCOL_IDENTIFIER
+      }
+    }
+  };
+}
+
+#[macro_export]
+macro_rules! default_protocol_definition {
+  ( $protocol_name:ident, $protocol_identifier:tt ) => {
     pub struct $protocol_name {
       device_attributes: ProtocolDeviceAttributes,
       #[allow(dead_code)]
@@ -529,7 +544,11 @@ macro_rules! default_protocol_definition {
       stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
     }
 
+    impl ButtplugProtocol for $protocol_name {}
+
     impl $protocol_name {
+      const PROTOCOL_IDENTIFIER: &'static str = $protocol_identifier;
+
       pub fn new(device_attributes: ProtocolDeviceAttributes) -> Self
       where
         Self: Sized,
@@ -543,33 +562,45 @@ macro_rules! default_protocol_definition {
         }
       }
     }
+
+    crate::default_protocol_properties_definition!($protocol_name);
   };
 }
 
 #[macro_export]
 macro_rules! default_protocol_trait_declaration {
   ( $protocol_name:ident ) => {
-    impl ButtplugProtocol for $protocol_name {
-      fn try_create(
-        device_impl: Arc<crate::device::DeviceImpl>,
-        attributes_builder: DeviceAttributesBuilder,
-      ) -> futures::future::BoxFuture<
-        'static,
-        Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-      > {
-        Box::pin(async move {
-          let attributes = attributes_builder.create_from_impl(&device_impl)?;
-          Ok(Box::new(Self::new(attributes)) as Box<dyn ButtplugProtocol>)
-        })
+    paste::paste! {
+      #[derive(Default, Debug)]
+      pub struct [< $protocol_name Factory >] {}
+
+      impl ButtplugProtocolFactory for [< $protocol_name Factory >] {
+        fn try_create(
+          &self,
+          device_impl: Arc<crate::device::DeviceImpl>,
+          attributes_builder: DeviceAttributesBuilder,
+        ) -> futures::future::BoxFuture<
+          'static,
+          Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
+        > {
+          Box::pin(async move {
+            let attributes = attributes_builder.create_from_impl(&device_impl)?;
+            Ok(Box::new($protocol_name::new(attributes)) as Box<dyn ButtplugProtocol>)
+          })
+        }
+  
+        fn protocol_identifier(&self) -> &'static str {
+          $protocol_name::PROTOCOL_IDENTIFIER
+        }
       }
     }
-  };
+  }
 }
 
 #[macro_export]
 macro_rules! default_protocol_declaration {
-  ( $protocol_name:ident ) => {
-    crate::default_protocol_definition!($protocol_name);
+  ( $protocol_name:ident, $protocol_identifier:tt ) => {
+    crate::default_protocol_definition!($protocol_name, $protocol_identifier);
 
     crate::default_protocol_trait_declaration!($protocol_name);
   };

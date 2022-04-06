@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -14,7 +14,7 @@ use std::sync::{
   Arc,
 };
 
-#[derive(ButtplugProtocolProperties)]
+
 pub struct Youou {
   device_attributes: ProtocolDeviceAttributes,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
@@ -22,6 +22,8 @@ pub struct Youou {
 }
 
 impl Youou {
+  const PROTOCOL_IDENTIFIER: &'static str = "youou";
+
   fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -33,8 +35,12 @@ impl Youou {
   }
 }
 
-impl ButtplugProtocol for Youou {
+#[derive(Default, Debug)]
+pub struct YououFactory {}
+
+impl ButtplugProtocolFactory for YououFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -45,10 +51,18 @@ impl ButtplugProtocol for Youou {
     // Force the identifier lookup to VX001_
     Box::pin(async move {
       let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier("VX001_".to_owned()), &device_impl.endpoints())?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(Youou::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
+
+  fn protocol_identifier(&self) -> &'static str {
+    Youou::PROTOCOL_IDENTIFIER
+  }
 }
+
+impl ButtplugProtocol for Youou {}
+
+crate::default_protocol_properties_definition!(Youou);
 
 impl ButtplugProtocolCommandHandler for Youou {
   fn handle_vibrate_cmd(

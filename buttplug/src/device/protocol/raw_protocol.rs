@@ -1,4 +1,4 @@
-use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, GenericCommandManager};
+use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler, GenericCommandManager};
 use crate::{
   core::messages::{ButtplugDeviceCommandMessageUnion, },
   device::{
@@ -8,7 +8,7 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_declaration!(RawProtocol);
+super::default_protocol_declaration!(RawProtocol, "raw");
 
 impl ButtplugProtocolCommandHandler for RawProtocol {
 }

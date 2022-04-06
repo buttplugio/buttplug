@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -23,7 +23,6 @@ use tokio::sync::{Mutex, RwLock};
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
 
-#[derive(ButtplugProtocolProperties)]
 pub struct Hgod {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -32,7 +31,11 @@ pub struct Hgod {
   updater_running: Arc<AtomicBool>,
 }
 
+crate::default_protocol_properties_definition!(Hgod);
+
 impl Hgod {
+  const PROTOCOL_IDENTIFIER: &'static str = "hgod";
+
   fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -45,6 +48,8 @@ impl Hgod {
     }
   }
 }
+
+impl ButtplugProtocol for Hgod {}
 
 super::default_protocol_trait_declaration!(Hgod);
 

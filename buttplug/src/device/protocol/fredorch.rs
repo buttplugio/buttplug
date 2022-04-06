@@ -2,6 +2,7 @@ use super::{
   fleshlight_launch_helper::calculate_speed,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
+  ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
@@ -65,29 +66,12 @@ pub fn crc16(data: &[u8]) -> [u8; 2] {
   [n, o]
 }
 
-#[derive(ButtplugProtocolProperties)]
-pub struct Fredorch {
-  device_attributes: ProtocolDeviceAttributes,
-  _manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  previous_position: Arc<AtomicU8>,
-}
+#[derive(Default, Debug)]
+pub struct FredorchFactory {}
 
-impl Fredorch {
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      _manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-impl ButtplugProtocol for Fredorch {
+impl ButtplugProtocolFactory for FredorchFactory {
   fn try_create(
+    &self,
     device_impl: Arc<DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -144,8 +128,38 @@ impl ButtplugProtocol for Fredorch {
         .await?;
 
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(Fredorch::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "fredorch"
+  }
+}
+
+crate::default_protocol_properties_definition!(Fredorch);
+
+pub struct Fredorch {
+  device_attributes: ProtocolDeviceAttributes,
+  _manager: Arc<Mutex<GenericCommandManager>>,
+  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  previous_position: Arc<AtomicU8>,
+}
+
+impl ButtplugProtocol for Fredorch {}
+
+impl Fredorch {
+  const PROTOCOL_IDENTIFIER: &'static str = "fredorch";
+  
+  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
+    let manager = GenericCommandManager::new(&device_attributes);
+
+    Self {
+      device_attributes,
+      stop_commands: manager.stop_commands(),
+      _manager: Arc::new(Mutex::new(manager)),
+      previous_position: Arc::new(AtomicU8::new(0)),
+    }
   }
 }
 

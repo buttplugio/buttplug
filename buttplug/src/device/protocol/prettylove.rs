@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -11,10 +11,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(PrettyLove);
+super::default_protocol_definition!(PrettyLove, "prettylove");
 
-impl ButtplugProtocol for PrettyLove {
+#[derive(Default, Debug)]
+pub struct PrettyLoveFactory {}
+
+impl ButtplugProtocolFactory for PrettyLoveFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -23,8 +27,12 @@ impl ButtplugProtocol for PrettyLove {
   > {
     Box::pin(async move {
       let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier("Aogu BLE".to_owned()), &device_impl.endpoints())?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(PrettyLove::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "prettylove"
   }
 }
 

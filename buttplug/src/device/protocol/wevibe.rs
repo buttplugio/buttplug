@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -13,10 +13,14 @@ use futures_timer::Delay;
 use std::sync::Arc;
 use std::time::Duration;
 
-super::default_protocol_definition!(WeVibe);
+super::default_protocol_definition!(WeVibe, "wevibe");
 
-impl ButtplugProtocol for WeVibe {
+#[derive(Default, Debug)]
+pub struct WeVibeFactory {}
+
+impl ButtplugProtocolFactory for WeVibeFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -39,8 +43,12 @@ impl ButtplugProtocol for WeVibe {
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(WeVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "wevibe"
   }
 }
 

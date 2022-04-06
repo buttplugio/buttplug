@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::device::DeviceSubscribeCmd;
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
@@ -12,10 +12,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(LeloF1s);
+super::default_protocol_definition!(LeloF1s, "lelof1s");
 
-impl ButtplugProtocol for LeloF1s {
+#[derive(Default, Debug)]
+pub struct LeloF1sFactory {}
+
+impl ButtplugProtocolFactory for LeloF1sFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -29,8 +33,12 @@ impl ButtplugProtocol for LeloF1s {
     Box::pin(async move {
       subscribe_fut.await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(LeloF1s::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "lelo-f1s"
   }
 }
 

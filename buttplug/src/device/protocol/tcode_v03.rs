@@ -2,6 +2,7 @@ use super::{
   generic_command_manager::GenericCommandManager,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
+  ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
@@ -13,7 +14,7 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_declaration!(TCodeV03);
+super::default_protocol_declaration!(TCodeV03, "tcode-v03");
 
 impl ButtplugProtocolCommandHandler for TCodeV03 {
   fn handle_linear_cmd(

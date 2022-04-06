@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
     errors::ButtplugMessageError,
@@ -15,10 +15,14 @@ use crate::{
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::sync::Arc;
 
-super::default_protocol_definition!(XInput);
+super::default_protocol_definition!(XInput, "xinput");
 
-impl ButtplugProtocol for XInput {
+#[derive(Default, Debug)]
+pub struct XInputFactory {}
+
+impl ButtplugProtocolFactory for XInputFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -39,8 +43,12 @@ impl ButtplugProtocol for XInput {
           .expect("We already set the address before getting here")
       );
       */
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(XInput::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "xinput"
   }
 }
 

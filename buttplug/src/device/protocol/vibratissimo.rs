@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
     self,
@@ -18,10 +18,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(Vibratissimo);
+super::default_protocol_definition!(Vibratissimo, "vibratissimo");
 
-impl ButtplugProtocol for Vibratissimo {
+#[derive(Default, Debug)]
+pub struct VibratissimoFactory {}
+
+impl ButtplugProtocolFactory for VibratissimoFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -35,8 +39,12 @@ impl ButtplugProtocol for Vibratissimo {
       let ident =
         String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
       let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(ident), &device_impl.endpoints())?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(Vibratissimo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    Vibratissimo::PROTOCOL_IDENTIFIER
   }
 }
 

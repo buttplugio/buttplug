@@ -2,6 +2,7 @@ use super::{
   fleshlight_launch_helper::calculate_speed,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
+  ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
@@ -25,7 +26,6 @@ use std::sync::{
 };
 use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
 pub struct KiirooV21 {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -34,6 +34,8 @@ pub struct KiirooV21 {
 }
 
 impl KiirooV21 {
+  const PROTOCOL_IDENTIFIER: &'static str = "kiiroo-v21";
+
   fn new(device_attributes: crate::device::configuration_manager::ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -46,7 +48,10 @@ impl KiirooV21 {
   }
 }
 
-super::default_protocol_trait_declaration!(KiirooV21);
+crate::default_protocol_trait_declaration!(KiirooV21);
+crate::default_protocol_properties_definition!(KiirooV21);
+
+impl ButtplugProtocol for KiirooV21 {}
 
 impl ButtplugProtocolCommandHandler for KiirooV21 {
   fn handle_vibrate_cmd(
