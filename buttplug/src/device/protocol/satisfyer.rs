@@ -44,7 +44,7 @@ async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>
         break;
       }
     }
-    tokio::time::sleep(Duration::from_secs(3)).await;
+    tokio::time::sleep(Duration::from_secs(1)).await;
   }
 }
 
