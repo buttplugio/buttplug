@@ -35,7 +35,7 @@ use crate::{
   },
   device::{
     configuration_manager::{DeviceConfigurationManager, ProtocolDeviceConfiguration},
-    protocol::ButtplugProtocol,
+    protocol::ButtplugProtocolFactory,
     ButtplugDevice,
   },
   server::ButtplugServerResultFuture,
@@ -327,20 +327,24 @@ impl DeviceManager {
     self.reserved_device_indexes.remove(address);
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugServerError>
+  pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugServerError>
   where
-    T: ButtplugProtocol,
+    T: ButtplugProtocolFactory + 'static,
   {
-    self.config.add_protocol::<T>(protocol_name).map_err(|_| ButtplugServerError::ProtocolAlreadyAdded(protocol_name.to_owned()))
+    let protocol_identifier = factory.protocol_identifier().to_owned();
+    self.config.add_protocol_factory(factory).map_err(|_| ButtplugServerError::ProtocolAlreadyAdded(protocol_identifier))
   }
 
-  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugServerError> {
-    self.config.remove_protocol(protocol_name).map_err(|_| ButtplugServerError::ProtocolDoesNotExist(protocol_name.to_owned()))
+  pub fn remove_protocol_factory<T>(&self, protocol_identifier: &str) -> Result<(), ButtplugServerError> 
+  where
+    T: ButtplugProtocolFactory + 'static 
+  {
+    self.config.remove_protocol_factory(protocol_identifier).map_err(|_| ButtplugServerError::ProtocolDoesNotExist(protocol_identifier.to_owned()))
   }
 
-  pub fn remove_all_protocols(&self) {
+  pub fn remove_all_protocol_factories(&self) {
     info!("Removed all protocols");
-    self.config.remove_all_protocols();
+    self.config.remove_all_protocol_factories();
   }
 
   pub fn add_protocol_device_configuration(&self, name: &str, config: &ProtocolDeviceConfiguration) -> Result<(), ButtplugError> {

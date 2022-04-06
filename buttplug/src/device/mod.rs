@@ -438,6 +438,10 @@ impl ButtplugDevice {
     self.device.address()
   }
 
+  pub fn protocol_identifier(&self) -> &str {
+    self.protocol.protocol_identifier()
+  }
+
   pub async fn try_create_device(
     device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,

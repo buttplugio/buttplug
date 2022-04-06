@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
     self,
@@ -20,7 +20,6 @@ use std::sync::{
 };
 use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
 pub struct LovenseConnectService {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -29,6 +28,8 @@ pub struct LovenseConnectService {
 }
 
 impl LovenseConnectService {
+  const PROTOCOL_IDENTIFIER: &'static str = "lovense-connect-service";
+
   // Due to this lacking the ability to take extra fields, we can't pass in our
   // event receiver from the subscription, which we'll need for things like
   // battery readings. Therefore, we expect initialize() to return the protocol
@@ -46,6 +47,9 @@ impl LovenseConnectService {
 }
 
 super::default_protocol_trait_declaration!(LovenseConnectService);
+crate::default_protocol_properties_definition!(LovenseConnectService);
+
+impl ButtplugProtocol for LovenseConnectService {}
 
 impl ButtplugProtocolCommandHandler for LovenseConnectService {
   fn handle_vibrate_cmd(

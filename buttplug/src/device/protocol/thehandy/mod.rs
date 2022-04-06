@@ -2,6 +2,7 @@ use super::{
   fleshlight_launch_helper,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
+  ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
@@ -37,7 +38,8 @@ mod handyplug {
   include!(concat!(env!("OUT_DIR"), "/handyplug.rs"));
 }
 
-#[derive(ButtplugProtocolProperties)]
+crate::default_protocol_properties_definition!(TheHandy);
+
 pub struct TheHandy {
   device_attributes: ProtocolDeviceAttributes,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
@@ -48,6 +50,8 @@ pub struct TheHandy {
 }
 
 impl TheHandy {
+  const PROTOCOL_IDENTIFIER: &'static str = "thehandy";
+
   pub fn new(device_attributes: ProtocolDeviceAttributes) -> Self
   where
     Self: Sized,
@@ -60,8 +64,18 @@ impl TheHandy {
   }
 }
 
-impl ButtplugProtocol for TheHandy {
+impl ButtplugProtocol for TheHandy {}
+
+#[derive(Default, Debug)]
+pub struct TheHandyFactory {}
+
+impl ButtplugProtocolFactory for TheHandyFactory {
+  fn protocol_identifier(&self) -> &'static str {
+    "thehandy"
+  }
+
   fn try_create(
+    &self,
     device_impl: Arc<DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -123,7 +137,7 @@ impl ButtplugProtocol for TheHandy {
       //
       // We have no device name updates here, so just return a device.
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(TheHandy::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 }

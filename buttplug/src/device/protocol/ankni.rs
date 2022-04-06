@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -11,10 +11,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(Ankni);
+super::default_protocol_definition!(Ankni, "ankni");
 
-impl ButtplugProtocol for Ankni {
+#[derive(Default, Debug)]
+pub struct AnkniFactory {}
+
+impl ButtplugProtocolFactory for AnkniFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -41,8 +45,12 @@ impl ButtplugProtocol for Ankni {
       );
       device_impl.write_value(msg).await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(Ankni::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self,) -> &'static str {
+    "ankni"
   }
 }
 

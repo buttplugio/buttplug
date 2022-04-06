@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -11,10 +11,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(LoveDistance);
+super::default_protocol_definition!(LoveDistance, "lovedistance");
 
-impl ButtplugProtocol for LoveDistance {
+#[derive(Default, Debug)]
+pub struct LoveDistanceFactory {}
+
+impl ButtplugProtocolFactory for LoveDistanceFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -27,8 +31,12 @@ impl ButtplugProtocol for LoveDistance {
       let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
       device_impl.write_value(msg).await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(LoveDistance::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "lovedistance"
   }
 }
 

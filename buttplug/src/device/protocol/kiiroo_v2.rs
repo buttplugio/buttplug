@@ -2,6 +2,7 @@ use super::{
   fleshlight_launch_helper::calculate_speed,
   ButtplugDeviceResultFuture,
   ButtplugProtocol,
+  ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
 };
 use crate::{
@@ -25,7 +26,6 @@ use std::sync::{
 };
 use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
 pub struct KiirooV2 {
   device_attributes: ProtocolDeviceAttributes,
   _manager: Arc<Mutex<GenericCommandManager>>,
@@ -33,7 +33,11 @@ pub struct KiirooV2 {
   previous_position: Arc<AtomicU8>,
 }
 
+crate::default_protocol_properties_definition!(KiirooV2);
+
 impl KiirooV2 {
+  const PROTOCOL_IDENTIFIER: &'static str = "kiiroo-v2";
+
   fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -46,8 +50,12 @@ impl KiirooV2 {
   }
 }
 
-impl ButtplugProtocol for KiirooV2 {
+#[derive(Default, Debug)]
+pub struct KiirooV2Factory {}
+
+impl ButtplugProtocolFactory for KiirooV2Factory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -59,10 +67,16 @@ impl ButtplugProtocol for KiirooV2 {
     Box::pin(async move {
       info_fut.await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(KiirooV2::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
+
+  fn protocol_identifier(&self) -> &'static str {
+    KiirooV2::PROTOCOL_IDENTIFIER
+  }
 }
+
+impl ButtplugProtocol for KiirooV2 {}
 
 impl ButtplugProtocolCommandHandler for KiirooV2 {
   fn handle_linear_cmd(

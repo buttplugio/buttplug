@@ -8,7 +8,7 @@
 //! Device specific identification and protocol implementations.
 
 use super::protocol::{
-  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, TryCreateProtocolFunc,
+  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,
 };
 use crate::{
   core::{
@@ -491,19 +491,19 @@ impl DeviceAttributesBuilder {
 #[derive(Clone, Debug)]
 pub struct ProtocolBuilder {
   allow_raw_messages: bool,
-  creator_func: TryCreateProtocolFunc,
+  protocol_factory: Arc<dyn ButtplugProtocolFactory>,
   configuration: ProtocolDeviceConfiguration,
 }
 
 impl ProtocolBuilder {
   fn new(
     allow_raw_messages: bool,
-    creator_func: TryCreateProtocolFunc,
+    protocol_factory: Arc<dyn ButtplugProtocolFactory>,
     configuration: ProtocolDeviceConfiguration,
   ) -> Self {
     Self {
       allow_raw_messages,
-      creator_func,
+      protocol_factory,
       configuration,
     }
   }
@@ -512,8 +512,7 @@ impl ProtocolBuilder {
     &self,
     device_impl: Arc<DeviceImpl>,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
-    let builder = DeviceAttributesBuilder::new(self.allow_raw_messages, self.configuration.clone());
-    (self.creator_func)(device_impl.clone(), builder).await
+    self.protocol_factory.try_create(device_impl.clone(), builder).await
   }
 
   pub fn configuration(&self) -> &ProtocolDeviceConfiguration {
@@ -524,7 +523,8 @@ impl ProtocolBuilder {
 pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
-  protocol_map: Arc<DashMap<String, TryCreateProtocolFunc>>,
+  protocol_map: Arc<DashMap<String, Arc<dyn ButtplugProtocolFactory>>>,
+  user_device_configs: Arc<DashMap<ProtocolAttributeIdentifier, ProtocolDeviceAttributes>>
 }
 
 impl Default for DeviceConfigurationManager {
@@ -561,40 +561,40 @@ impl DeviceConfigurationManager {
     self.protocol_device_configurations.remove(protocol_name);
   }
 
-  pub fn add_protocol<T>(&self, protocol_name: &str) -> Result<(), ButtplugDeviceError>
+  pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugDeviceError>
   where
-    T: ButtplugProtocol,
+    T: ButtplugProtocolFactory + 'static
   {
-    if !self.protocol_map.contains_key(protocol_name) {
-      add_to_protocol_map::<T>(&self.protocol_map, protocol_name);
+    if !self.protocol_map.contains_key(factory.protocol_identifier()) {
+      add_to_protocol_map(&self.protocol_map, factory);
       Ok(())
     } else {
       Err(ButtplugDeviceError::ProtocolAlreadyAdded(
-        protocol_name.to_owned(),
+        factory.protocol_identifier().to_owned(),
       ))
     }
   }
 
-  pub fn remove_protocol(&self, protocol_name: &str) -> Result<(), ButtplugDeviceError> {
-    if self.protocol_map.contains_key(protocol_name) {
-      self.protocol_map.remove(protocol_name);
+  pub fn remove_protocol_factory(&self, protocol_identifier: &str) -> Result<(), ButtplugDeviceError> {
+    if self.protocol_map.contains_key(protocol_identifier) {
+      self.protocol_map.remove(protocol_identifier);
       Ok(())
     } else {
       Err(ButtplugDeviceError::ProtocolNotImplemented(
-        protocol_name.to_owned(),
+        protocol_identifier.to_owned(),
       ))
     }
   }
 
-  pub fn remove_all_protocols(&self) {
+  pub fn remove_all_protocol_factories(&self) {
     self.protocol_map.clear();
   }
 
-  pub fn protocol_creator(&self, protocol_name: &str) -> Option<TryCreateProtocolFunc> {
+  pub fn protocol_factory(&self, protocol_name: &str) -> Option<Arc<dyn ButtplugProtocolFactory>> {
     self
       .protocol_map
       .get(protocol_name)
-      .map(|pair| *pair.value())
+      .and_then(|r| Some(r.value().clone()))
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly
@@ -628,14 +628,14 @@ impl DeviceConfigurationManager {
           return None;
         }
 
-        let creator_func = self
+        let protocol_factory = self
           .protocol_map
           .get(config.key())
-          .map(|pair| *pair.value())?;
+          .map(|pair| pair.value().clone())?;
 
         return Some(ProtocolBuilder::new(
           self.allow_raw_messages,
-          creator_func,
+          protocol_factory,
           config.value().clone(),
         ));
       }

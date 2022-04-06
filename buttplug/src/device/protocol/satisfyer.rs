@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -14,7 +14,7 @@ use crate::{
 use std::{sync::Arc, time::Duration};
 use tokio::sync::Mutex;
 
-#[derive(ButtplugProtocolProperties)]
+
 pub struct Satisfyer {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -49,6 +49,8 @@ async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>
 }
 
 impl Satisfyer {
+  const PROTOCOL_IDENTIFIER: &'static str = "satisfyer";
+
   fn new(
     device_attributes: ProtocolDeviceAttributes,
     last_command: Arc<Mutex<Vec<u8>>>,
@@ -63,8 +65,12 @@ impl Satisfyer {
   }
 }
 
-impl ButtplugProtocol for Satisfyer {
+#[derive(Default, Debug)]
+pub struct SatisfyerFactory {}
+
+impl ButtplugProtocolFactory for SatisfyerFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -93,14 +99,22 @@ impl ButtplugProtocol for Satisfyer {
       // Now that we've initialized and constructed the device, start the update cycle to make sure
       // we don't drop the connection.
       let last_command = Arc::new(Mutex::new(vec![0u8; 8]));
-      let device = Self::new(device_attributes, last_command.clone());
+      let device = Satisfyer::new(device_attributes, last_command.clone());
       async_manager::spawn(async move {
         send_satisfyer_updates(device_impl, last_command).await;
       });
       Ok(Box::new(device) as Box<dyn ButtplugProtocol>)
     })
   }
+
+  fn protocol_identifier(&self) -> &'static str {
+    Satisfyer::PROTOCOL_IDENTIFIER
+  }
 }
+
+impl ButtplugProtocol for Satisfyer {}
+
+crate::default_protocol_properties_definition!(Satisfyer);
 
 impl ButtplugProtocolCommandHandler for Satisfyer {
   fn handle_vibrate_cmd(

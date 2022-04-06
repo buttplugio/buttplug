@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
@@ -27,7 +27,7 @@ use tokio::sync::{Mutex, RwLock};
 //
 const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
 
-#[derive(ButtplugProtocolProperties)]
+
 pub struct MysteryVibe {
   device_attributes: ProtocolDeviceAttributes,
   manager: Arc<Mutex<GenericCommandManager>>,
@@ -37,6 +37,8 @@ pub struct MysteryVibe {
 }
 
 impl MysteryVibe {
+  const PROTOCOL_IDENTIFIER: &'static str = "mysteryvibe";
+
   fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
     let manager = GenericCommandManager::new(&device_attributes);
 
@@ -50,8 +52,12 @@ impl MysteryVibe {
   }
 }
 
-impl ButtplugProtocol for MysteryVibe {
+#[derive(Default, Debug)]
+pub struct MysteryVibeFactory {}
+
+impl ButtplugProtocolFactory for MysteryVibeFactory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -63,8 +69,12 @@ impl ButtplugProtocol for MysteryVibe {
     Box::pin(async move {
       info_fut.await?;
       let device_attributes = builder.create_from_impl(&device_impl)?;
-      Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Box::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "mysteryvibe"
   }
 }
 
@@ -86,6 +96,10 @@ async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<R
   }
   info!("Mysteryvibe control loop exiting, most likely due to device disconnection.");
 }
+
+crate::default_protocol_properties_definition!(MysteryVibe);
+
+impl ButtplugProtocol for MysteryVibe {}
 
 impl ButtplugProtocolCommandHandler for MysteryVibe {
   fn handle_vibrate_cmd(

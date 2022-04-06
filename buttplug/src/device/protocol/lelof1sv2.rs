@@ -1,4 +1,4 @@
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
+use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::core::errors::ButtplugDeviceError;
 use crate::device::{ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd};
 use crate::{
@@ -13,10 +13,14 @@ use crate::{
 };
 use std::sync::Arc;
 
-super::default_protocol_definition!(LeloF1sV2);
+super::default_protocol_definition!(LeloF1sV2, "lelof1sv2");
 
-impl ButtplugProtocol for LeloF1sV2 {
+#[derive(Default, Debug)]
+pub struct LeloF1sV2Factory {}
+
+impl ButtplugProtocolFactory for LeloF1sV2Factory {
   fn try_create(
+    &self,
     device_impl: Arc<crate::device::DeviceImpl>,
     builder: DeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
@@ -51,7 +55,7 @@ impl ButtplugProtocol for LeloF1sV2 {
           } else if n.eq(&authed) {
             debug!("Lelo F1s V2 is authorised!");
             let device_attributes = builder.create_from_impl(&device_impl)?;
-            return Ok(Box::new(Self::new(device_attributes)) as Box<dyn ButtplugProtocol>);
+            return Ok(Box::new(LeloF1sV2::new(device_attributes)) as Box<dyn ButtplugProtocol>);
           } else {
             debug!("Lelo F1s V2 gave us a password: {:?}", n);
             // Can't send whilst subscribed
@@ -78,6 +82,10 @@ impl ButtplugProtocol for LeloF1sV2 {
         }
       }
     })
+  }
+
+  fn protocol_identifier(&self) -> &'static str {
+    "lelof1sv2"
   }
 }
 
