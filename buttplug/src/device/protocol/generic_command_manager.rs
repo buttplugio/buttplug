@@ -298,7 +298,8 @@ impl GenericCommandManager {
 mod test {
 
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
-  use crate::core::messages::{
+  use crate::{
+    core::messages::{
     ButtplugDeviceMessageType,
     DeviceMessageAttributesBuilder,
     DeviceMessageAttributesMap,
@@ -306,6 +307,8 @@ mod test {
     RotationSubcommand,
     VibrateCmd,
     VibrateSubcommand,
+    },
+    device::configuration_manager::ProtocolAttributesIdentifier
   };
 
   #[test]
@@ -318,7 +321,7 @@ mod test {
       .build(&ButtplugDeviceMessageType::VibrateCmd)
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
-    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let device_attributes = ProtocolDeviceAttributes::new(ProtocolAttributesIdentifier::Default, None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = VibrateCmd::new(
       0,
@@ -369,7 +372,7 @@ mod test {
       .build(&ButtplugDeviceMessageType::VibrateCmd)
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
-    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let device_attributes = ProtocolDeviceAttributes::new(ProtocolAttributesIdentifier::Default, None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = VibrateCmd::new(
       0,
@@ -419,7 +422,7 @@ mod test {
       .build(&ButtplugDeviceMessageType::RotateCmd)
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
-    let device_attributes = ProtocolDeviceAttributes::new(None, None, attributes_map, None);
+    let device_attributes = ProtocolDeviceAttributes::new(ProtocolAttributesIdentifier::Default, None, None, attributes_map, None);
     let mut mgr = GenericCommandManager::new(&device_attributes);
 
     let rotate_msg = RotateCmd::new(

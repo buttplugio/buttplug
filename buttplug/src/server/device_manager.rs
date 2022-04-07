@@ -360,7 +360,7 @@ impl DeviceManager {
   pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {
     if let Some(device) = self.devices.get(&index) {
       Ok(DeviceInfo {
-        address: device.value().address().to_owned(),
+        address: device.value().device_identifier().to_owned(),
         display_name: device.value().display_name(),
       })
     } else {

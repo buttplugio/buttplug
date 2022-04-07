@@ -245,8 +245,9 @@ impl ProtocolDeviceSpecifier {
   }
 }
 
-#[derive(Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[derive(Debug, Clone, Getters, Setters, MutGetters)]
 pub struct ProtocolDeviceAttributes {
+  identifier: ProtocolAttributesIdentifier,
   parent: Option<Arc<ProtocolDeviceAttributes>>,
   name: Option<String>,
   display_name: Option<String>,
@@ -255,12 +256,14 @@ pub struct ProtocolDeviceAttributes {
 
 impl ProtocolDeviceAttributes {
   pub fn new(
+    identifier: ProtocolAttributesIdentifier,
     name: Option<String>,
     display_name: Option<String>,
     message_attributes: DeviceMessageAttributesMap,
     parent: Option<Arc<ProtocolDeviceAttributes>>,
   ) -> Self {
     Self {
+      identifier,
       name,
       display_name,
       message_attributes,
@@ -273,11 +276,33 @@ impl ProtocolDeviceAttributes {
   // flattened representation.
   pub fn new_flattened(other: &ProtocolDeviceAttributes) -> Self {
     Self {
+      identifier: other.identifier().clone(),
       parent: None,
       name: Some(other.name().to_owned()),
       display_name: other.display_name(),
       message_attributes: other.message_attributes_map(),
     }
+  }
+
+  pub fn new_with_parent(&self, parent: Arc<ProtocolDeviceAttributes>) -> Self {
+    Self {
+      parent: Some(parent),
+      .. self.clone()
+    }
+  }
+
+  fn is_valid(&self) -> Result<(), ButtplugError> { 
+    for (message_type, message_attrs) in self.message_attributes_map() {
+      message_attrs.check(&message_type).map_err(|err| {
+        info!("Error in {}: {:?}", message_type, message_attrs);
+        ButtplugError::from(err)
+      })?;
+    }
+    Ok(())
+  }
+  
+  pub fn identifier(&self) -> &ProtocolAttributesIdentifier {
+    &self.identifier
   }
 
   pub fn name(&self) -> &str {
@@ -286,7 +311,7 @@ impl ProtocolDeviceAttributes {
     } else if let Some(parent) = &self.parent {
       parent.name()
     } else {
-        "Unknown Buttplug Device"
+      "Unknown Buttplug Device"
     }
   }
 
@@ -366,16 +391,16 @@ impl ProtocolDeviceAttributes {
 }
 
 #[derive(Debug, Clone, Eq, Hash)]
-pub enum ProtocolAttributeIdentifier {
+pub enum ProtocolAttributesIdentifier {
   // The default protocol attribute identifier
   Default,
   Identifier(String),
   Address(String),
 }
 
-impl PartialEq for ProtocolAttributeIdentifier {
+impl PartialEq for ProtocolAttributesIdentifier {
   fn eq(&self, other: &Self) -> bool {
-    use ProtocolAttributeIdentifier::*;
+    use ProtocolAttributesIdentifier::*;
     match (self, other) {
       (Default, Default) => true,
       (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
@@ -390,13 +415,13 @@ pub struct ProtocolDeviceConfiguration {
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
   specifiers: Vec<ProtocolDeviceSpecifier>,
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  configurations: HashMap<ProtocolAttributeIdentifier, Arc<ProtocolDeviceAttributes>>,
+  configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
 }
 
 impl ProtocolDeviceConfiguration {
   pub fn new(
     specifiers: Vec<ProtocolDeviceSpecifier>,
-    configurations: HashMap<ProtocolAttributeIdentifier, Arc<ProtocolDeviceAttributes>>,
+    configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
   ) -> Self {
     Self {
       specifiers,
@@ -405,20 +430,15 @@ impl ProtocolDeviceConfiguration {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugError> {
-    for (ident, attrs) in &self.configurations {
-      for (message_type, message_attrs) in attrs.message_attributes_map() {
-        message_attrs.check(&message_type).map_err(|err| {
-          info!("Error in {:?} {}: {:?}", ident, message_type, message_attrs);
-          ButtplugError::from(err)
-        })?;
-      }
+    for (_, attrs) in &self.configurations {
+      attrs.is_valid()?;
     }
     Ok(())
   }
 
   pub fn device_attributes(
     &self,
-    identifier: &ProtocolAttributeIdentifier,
+    identifier: &ProtocolAttributesIdentifier,
   ) -> Option<&Arc<ProtocolDeviceAttributes>> {
     self.configurations.get(identifier)
   }
@@ -428,13 +448,15 @@ impl ProtocolDeviceConfiguration {
 pub struct DeviceAttributesBuilder {
   allow_raw_messages: bool,
   device_configuration: ProtocolDeviceConfiguration,
+  user_configs: Arc<DashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>>,
 }
 
 impl DeviceAttributesBuilder {
-  fn new(allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration) -> Self {
+  fn new(allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>>) -> Self {
     Self {
       allow_raw_messages,
       device_configuration,
+      user_configs
     }
   }
 
@@ -443,26 +465,26 @@ impl DeviceAttributesBuilder {
     device_impl: &Arc<DeviceImpl>,
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
     self.create(
-      &ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()),
-      &ProtocolAttributeIdentifier::Identifier(device_impl.name().to_owned()),
+      &ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()),
+      &ProtocolAttributesIdentifier::Identifier(device_impl.name().to_owned()),
       &device_impl.endpoints(),
     )
   }
 
   pub fn create(
     &self,
-    address: &ProtocolAttributeIdentifier,
-    identifier: &ProtocolAttributeIdentifier,
+    address: &ProtocolAttributesIdentifier,
+    identifier: &ProtocolAttributesIdentifier,
     endpoints: &[Endpoint],
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
+    // Skip checking for address here, addresses, should only be in the user config map
     let device_attributes = self
       .device_configuration
-      .device_attributes(address)
-      .or_else(|| self.device_configuration.device_attributes(identifier))
+      .device_attributes(identifier)
       .or_else(|| {
         self
           .device_configuration
-          .device_attributes(&ProtocolAttributeIdentifier::Default)
+          .device_attributes(&ProtocolAttributesIdentifier::Default)
       })
       .ok_or_else(|| ButtplugError::from(
         ButtplugDeviceError::DeviceConfigurationFileError(format!(
@@ -471,7 +493,20 @@ impl DeviceAttributesBuilder {
         )),
       ))?;
 
-    let mut attributes = ProtocolDeviceAttributes::new_flattened(device_attributes);
+    // In the case we have a user config that matches the address of our device, build a new
+    // ProtocolDeviceAttributes leaf node using our current identifier as the parent. Then check if
+    // the new attributes are valid, falling back if they aren't.
+    let mut attributes = if let Some(user_config) = self.user_configs.get(address) {
+      let new_attributes = user_config.new_with_parent(device_attributes.clone());
+      if new_attributes.is_valid().is_ok() {
+        ProtocolDeviceAttributes::new_flattened(&new_attributes)
+      } else {
+        error!("Invalid device attributes found in user config, falling back to main config attributes");
+        ProtocolDeviceAttributes::new_flattened(device_attributes)
+      }
+    } else {
+      ProtocolDeviceAttributes::new_flattened(device_attributes)
+    };
 
     // If we're allowing raw messages, tack those on beforehand also.
     if self.allow_raw_messages {
@@ -492,6 +527,7 @@ impl DeviceAttributesBuilder {
 pub struct ProtocolBuilder {
   allow_raw_messages: bool,
   protocol_factory: Arc<dyn ButtplugProtocolFactory>,
+  user_device_configs: Arc<DashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>>,
   configuration: ProtocolDeviceConfiguration,
 }
 
@@ -499,11 +535,13 @@ impl ProtocolBuilder {
   fn new(
     allow_raw_messages: bool,
     protocol_factory: Arc<dyn ButtplugProtocolFactory>,
+    user_device_configs: Arc<DashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>>,
     configuration: ProtocolDeviceConfiguration,
   ) -> Self {
     Self {
       allow_raw_messages,
       protocol_factory,
+      user_device_configs,
       configuration,
     }
   }
@@ -512,6 +550,11 @@ impl ProtocolBuilder {
     &self,
     device_impl: Arc<DeviceImpl>,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
+    let builder = DeviceAttributesBuilder::new(
+      self.allow_raw_messages, 
+      self.configuration.clone(), 
+      self.user_device_configs.clone()
+    );
     self.protocol_factory.try_create(device_impl.clone(), builder).await
   }
 
@@ -524,7 +567,7 @@ pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
   protocol_map: Arc<DashMap<String, Arc<dyn ButtplugProtocolFactory>>>,
-  user_device_configs: Arc<DashMap<ProtocolAttributeIdentifier, ProtocolDeviceAttributes>>
+  user_device_configs: Arc<DashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>>
 }
 
 impl Default for DeviceConfigurationManager {
@@ -541,7 +584,21 @@ impl DeviceConfigurationManager {
       allow_raw_messages,
       protocol_device_configurations: Arc::new(DashMap::new()),
       protocol_map: Arc::new(get_default_protocol_map()),
+      user_device_configs: Arc::new(DashMap::new()),
     }
+  }
+
+  pub fn add_user_device_config(&self, protocol_identifier: &ProtocolAttributesIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> Result<(), ButtplugError> {
+    self.user_device_configs.insert(protocol_identifier.clone(), protocol_attributes.clone());
+    Ok(())
+  }
+
+  pub fn remove_user_device_config(&self, protocol_identifier: &ProtocolAttributesIdentifier) {
+    self.user_device_configs.remove(protocol_identifier);
+  }
+
+  pub fn user_device_config(&self, protocol_identifier: &ProtocolAttributesIdentifier) -> Option<ProtocolDeviceAttributes> {
+    self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.value().clone()))
   }
 
   pub fn add_protocol_device_configuration(
@@ -636,6 +693,7 @@ impl DeviceConfigurationManager {
         return Some(ProtocolBuilder::new(
           self.allow_raw_messages,
           protocol_factory,
+          self.user_device_configs.clone(),
           config.value().clone(),
         ));
       }
@@ -661,7 +719,7 @@ mod test {
       advertised_services: HashSet::new()
     })];
     let mut attributes = HashMap::new();
-    attributes.insert(ProtocolAttributeIdentifier::Identifier("P".to_owned()), Arc::new(ProtocolDeviceAttributes::new(Some("Lovense Edge".to_owned()), None, HashMap::new(), None)));
+    attributes.insert(ProtocolAttributesIdentifier::Identifier("P".to_owned()), Arc::new(ProtocolDeviceAttributes::new(ProtocolAttributesIdentifier::Identifier("P".to_owned()), Some("Lovense Edge".to_owned()), None, HashMap::new(), None)));
     let pdc = ProtocolDeviceConfiguration::new(specifiers, attributes);
     dcm.add_protocol_device_configuration("lovense", &pdc).unwrap();
     dcm
@@ -698,7 +756,7 @@ mod test {
       .expect("Test, assuming infallible");
     let config = builder
       .configuration()
-      .device_attributes(&ProtocolAttributeIdentifier::Identifier("P".to_owned()))
+      .device_attributes(&ProtocolAttributesIdentifier::Identifier("P".to_owned()))
       .expect("Test, assuming infallible");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
@@ -723,9 +781,9 @@ mod test {
     let builder = config
       .protocol_builder(&lovense)
       .expect("Test, assuming infallible");
-    let device_attr_builder = DeviceAttributesBuilder::new(true, builder.configuration().clone());
+    let device_attr_builder = DeviceAttributesBuilder::new(true, builder.configuration().clone(), Arc::new(DashMap::new()));
     let config = device_attr_builder
-      .create(&ProtocolAttributeIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributeIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
+      .create(&ProtocolAttributesIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
       .expect("Test, assuming infallible");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
@@ -746,9 +804,9 @@ mod test {
     let builder = config
       .protocol_builder(&lovense)
       .expect("Test, assuming infallible");
-      let device_attr_builder = DeviceAttributesBuilder::new(false, builder.configuration().clone());
+      let device_attr_builder = DeviceAttributesBuilder::new(false, builder.configuration().clone(), Arc::new(DashMap::new()));
       let config = device_attr_builder
-        .create(&ProtocolAttributeIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributeIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
+        .create(&ProtocolAttributesIdentifier::Address("DoesNotMatter".to_owned()), &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
         .expect("Test, assuming infallible");
       // Make sure we got the right name
       assert_eq!(config.name(), "Lovense Edge");
