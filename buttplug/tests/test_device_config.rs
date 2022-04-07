@@ -69,9 +69,7 @@ fn test_valid_step_range() {
   {
     "version": 63,
     "user-configs": {
-      "kiiroo-v21": {
-        "configurations": {
-          "OhMiBod LUMEN": {
+      "devices": {
             "test-addr": {
               "messages": {
                 "VibrateCmd": {
@@ -82,8 +80,6 @@ fn test_valid_step_range() {
               }
             }
           }
-        }
-      }
     }
   }
   "#;
@@ -99,9 +95,7 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
   {
     "version": 63,
     "user-configs": {
-      "kiiroo-v21": {
-        "configurations": {
-          "OhMiBod LUMEN": {
+      "devices": {
             "test-addr": {
               "messages": {
                 "VibrateCmd": {
@@ -111,8 +105,6 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
                 }
               }
             }
-          }
-        }
       }
     }
   }
@@ -125,14 +117,12 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
 #[cfg(feature = "server")]
 #[test]
 fn test_invalid_step_range_device_config_wrong_order() {
-  //tracing_subscriber::fmt::init();
+  tracing_subscriber::fmt::init();
   let user_config_json = r#"
   {
     "version": 63,
     "user-configs": {
-      "kiiroo-v21": {
-        "configurations": {
-          "OhMiBod LUMEN": {
+      "devices": {
             "test-addr": {
               "messages": {
                 "VibrateCmd": {
@@ -143,13 +133,12 @@ fn test_invalid_step_range_device_config_wrong_order() {
               }
             }
           }
-        }
-      }
+
     }
   }
   "#;
   async_manager::block_on(async move {
-    tracing::error!("{:?}", ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish());
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_err());
+    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
+    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
   });
 }

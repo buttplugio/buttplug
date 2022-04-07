@@ -6,7 +6,7 @@ use crate::{
   },
   device::configuration_manager::{
     BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
-    ProtocolAttributeIdentifier, ProtocolDeviceAttributes, ProtocolDeviceConfiguration,
+    ProtocolAttributesIdentifier, ProtocolDeviceAttributes, ProtocolDeviceConfiguration,
     ProtocolDeviceSpecifier, SerialSpecifier, USBSpecifier, WebsocketSpecifier, XInputSpecifier,
   },
 };
@@ -51,15 +51,6 @@ pub struct ProtocolAttributes {
   messages: Option<DeviceMessageAttributesMap>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct UserConfigAttributes {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  identifier: Option<Vec<String>>,
-  #[serde(skip_serializing_if = "Option::is_none", rename = "user-configs")]
-  user_configs: Option<HashMap<String, DeviceUserConfig>>,
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct ProtocolDefinition {
@@ -84,34 +75,26 @@ pub struct ProtocolDefinition {
   #[serde(skip_serializing_if = "Option::is_none")]
   defaults: Option<ProtocolAttributes>,
   #[serde(default)]
-  configurations: Vec<ProtocolAttributes>,
+  configurations: Vec<ProtocolAttributes>
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
-  // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
-  // they're kept separate here, and we return them in specifiers(). Feels
-  // very clumsy, but we really don't do this a bunch during a session.
   #[serde(skip_serializing_if = "Option::is_none")]
-  usb: Option<Vec<USBSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  btle: Option<BluetoothLESpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  serial: Option<Vec<SerialSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  hid: Option<Vec<HIDSpecifier>>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  xinput: Option<XInputSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  websocket: Option<WebsocketSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  #[serde(rename = "lovense-connect-service")]
-  lovense_connect_service: Option<LovenseConnectServiceSpecifier>,
-  #[serde(skip_serializing_if = "Option::is_none")]
-  defaults: Option<UserConfigAttributes>,
-  #[serde(default)]
-  configurations: HashMap<String, HashMap<String, DeviceUserConfig>>,
+  specifiers: Option<HashMap<String, ProtocolDefinition>>,
+  #[serde(skip_serializing_if = "Option::is_none", rename = "devices")]
+  user_configs: Option<HashMap<String, DeviceUserConfig>>,
+}
+
+#[derive(Default, Debug, Getters)]
+#[getset(get="pub")]
+pub struct ExternalDeviceConfiguration {
+  allow_list: Vec<String>,
+  deny_list: Vec<String>,
+  reserved_indexes: HashMap<u32, String>,
+  protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
+  user_configs: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -150,29 +133,31 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
     let default_attrs = if let Some(defaults) = protocol_def.defaults {
       let default_attrs = Arc::new(ProtocolDeviceAttributes::new(
+        ProtocolAttributesIdentifier::Default,
         defaults.name,
         None,
         defaults.messages.unwrap_or_default(),
         None,
       ));
-      configurations.insert(ProtocolAttributeIdentifier::Default, default_attrs.clone());
+      configurations.insert(ProtocolAttributesIdentifier::Default, default_attrs.clone());
       Some(default_attrs)
     } else {
       None
     };
 
     for config in protocol_def.configurations {
-      let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
-        config.name,
-        None,
-        config.messages.unwrap_or_default(),
-        default_attrs.clone(),
-      ));
       if let Some(identifiers) = config.identifier {
         for identifier in identifiers {
+          let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
+            ProtocolAttributesIdentifier::Identifier(identifier.clone()),
+            config.name.clone(),
+            None,
+            config.messages.clone().unwrap_or_default(),
+            default_attrs.clone(),
+          ));
           configurations.insert(
-            ProtocolAttributeIdentifier::Identifier(identifier),
-            config_attrs.clone(),
+            ProtocolAttributesIdentifier::Identifier(identifier),
+            config_attrs,
           );
         }
       }
@@ -184,102 +169,70 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
 fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
-  user_config_def: HashMap<String, UserConfigDefinition>,
+  user_config_def: UserConfigDefinition
 ) {
-  for (user_config_protocol, protocol_def) in user_config_def {
-    if !external_config.protocol_configurations.contains_key(&user_config_protocol) {
-      continue;
-    }
-
-    let base_protocol_def = external_config.protocol_configurations.get_mut(&user_config_protocol).unwrap();
-
-    // Make a vector out of the protocol definition specifiers
-    if let Some(usb_vec) = protocol_def.usb {
-      usb_vec.iter().for_each(|spec| {
+  if let Some(specifiers) = user_config_def.specifiers() {
+    for (user_config_protocol, protocol_def) in specifiers {
+      if !external_config.protocol_configurations.contains_key(user_config_protocol) {
+        continue;
+      }
+  
+      let base_protocol_def = external_config.protocol_configurations.get_mut(user_config_protocol).unwrap();
+  
+      // Make a vector out of the protocol definition specifiers
+      if let Some(usb_vec) = &protocol_def.usb {
+        usb_vec.iter().for_each(|spec| {
+          base_protocol_def
+            .specifiers_mut()
+            .push(ProtocolDeviceSpecifier::USB(*spec))
+        });
+      }
+      if let Some(serial_vec) = &protocol_def.serial {
+        serial_vec.iter().for_each(|spec| {
+          base_protocol_def
+            .specifiers_mut()
+            .push(ProtocolDeviceSpecifier::Serial(spec.clone()))
+        });
+      }
+      if let Some(hid_vec) = &protocol_def.hid {
+        hid_vec.iter().for_each(|spec| {
+          base_protocol_def
+            .specifiers_mut()
+            .push(ProtocolDeviceSpecifier::HID(*spec))
+        });
+      }
+      if let Some(btle) = &protocol_def.btle {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolDeviceSpecifier::USB(*spec))
-      });
-    }
-    if let Some(serial_vec) = protocol_def.serial {
-      serial_vec.iter().for_each(|spec| {
+          .push(ProtocolDeviceSpecifier::BluetoothLE(btle.clone()));
+      }
+      if let Some(websocket) = &protocol_def.websocket {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolDeviceSpecifier::Serial(spec.clone()))
-      });
-    }
-    if let Some(hid_vec) = protocol_def.hid {
-      hid_vec.iter().for_each(|spec| {
-        base_protocol_def
-          .specifiers_mut()
-          .push(ProtocolDeviceSpecifier::HID(*spec))
-      });
-    }
-    if let Some(btle) = protocol_def.btle {
-      base_protocol_def
-        .specifiers_mut()
-        .push(ProtocolDeviceSpecifier::BluetoothLE(btle));
-    }
-    if let Some(xinput) = protocol_def.xinput {
-      base_protocol_def
-        .specifiers_mut()
-        .push(ProtocolDeviceSpecifier::XInput(xinput));
-    }
-    if let Some(websocket) = protocol_def.websocket {
-      base_protocol_def
-        .specifiers_mut()
-        .push(ProtocolDeviceSpecifier::Websocket(websocket));
-    }
-    if let Some(lcs) = protocol_def.lovense_connect_service {
-      base_protocol_def
-        .specifiers_mut()
-        .push(ProtocolDeviceSpecifier::LovenseConnectService(lcs));
-    }
-
-
-    let mut configurations = HashMap::new();
-    if let Some(defaults) = base_protocol_def
-      .configurations()
-      .get(&ProtocolAttributeIdentifier::Default)
-    {
-      if let Some(user_config_defaults) = protocol_def.defaults {
-        if let Some(user_config_defaults_config) = user_config_defaults.user_configs {
-          for (address, user_config) in user_config_defaults_config {
-            let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
-              None,
-              user_config.display_name,
-              user_config.messages.unwrap_or_default(),
-              Some(defaults.clone()),
-            ));
-            configurations.insert(ProtocolAttributeIdentifier::Address(address), config_attrs);
-          }
-        }
+          .push(ProtocolDeviceSpecifier::Websocket(websocket.clone()));
       }
     }
-
-    for (identifier, user_configuration) in protocol_def.configurations {
-      if let Some(parent) = base_protocol_def.configurations().get(&ProtocolAttributeIdentifier::Identifier(identifier)) {
-        for (address, user_config) in user_configuration {
-          if *user_config.allow().as_ref().unwrap_or(&false) {
-            external_config.allow_list.push(address.clone());
-          }
-          if *user_config.deny().as_ref().unwrap_or(&false) {
-            external_config.deny_list.push(address.clone());
-          }
-          if let Some(index) = user_config.index().as_ref() {
-            external_config.reserved_indexes.insert(*index, address.clone());
-          }
-          let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
-            None,
-            user_config.display_name,
-            user_config.messages.unwrap_or_default(),
-            Some(parent.clone()),
-          ));
-          configurations.insert(ProtocolAttributeIdentifier::Address(address.clone()), config_attrs);
-        }
+  }
+  if let Some(user_configs) = user_config_def.user_configs() {
+    for (address, user_config) in user_configs {
+      if *user_config.allow().as_ref().unwrap_or(&false) {
+        external_config.allow_list.push(address.clone());
       }
+      if *user_config.deny().as_ref().unwrap_or(&false) {
+        external_config.deny_list.push(address.clone());
+      }
+      if let Some(index) = user_config.index().as_ref() {
+        external_config.reserved_indexes.insert(*index, address.clone());
+      }
+      let config_attrs = ProtocolDeviceAttributes::new(
+        ProtocolAttributesIdentifier::Address(address.clone()),
+        None,
+        user_config.display_name.clone(),
+        user_config.messages.clone().unwrap_or_default(),
+        None,
+      );
+      external_config.user_configs.insert(ProtocolAttributesIdentifier::Address(address.clone()), config_attrs);
     }
-    base_protocol_def.configurations_mut().extend(configurations);
   }
 }
 
@@ -289,7 +242,7 @@ pub struct ProtocolConfiguration {
   #[serde(default)]
   pub protocols: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "user-configs", default)]
-  pub user_configs: Option<HashMap<String, UserConfigDefinition>>,
+  pub user_configs: Option<UserConfigDefinition>,
 }
 
 impl Default for ProtocolConfiguration {
@@ -297,7 +250,7 @@ impl Default for ProtocolConfiguration {
     Self {
       version: get_internal_config_version(),
       protocols: Some(HashMap::new()),
-      user_configs: Some(HashMap::new()),
+      user_configs: Some(UserConfigDefinition::default()),
     }
   }
 }
@@ -307,15 +260,6 @@ impl ProtocolConfiguration {
     serde_json::to_string(self)
       .expect("All types below this are Serialize, so this should be infallible.")
   }
-}
-
-#[derive(Default, Debug, Getters)]
-#[getset(get="pub")]
-pub struct ExternalDeviceConfiguration {
-  allow_list: Vec<String>,
-  deny_list: Vec<String>,
-  reserved_indexes: HashMap<u32, String>,
-  protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>
 }
 
 pub fn get_internal_config_version() -> u32 {

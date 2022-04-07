@@ -9,7 +9,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -38,7 +38,7 @@ impl ButtplugProtocolFactory for VibratissimoFactory {
         .await?;
       let ident =
         String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name.clone());
-      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(ident), &device_impl.endpoints())?;
+      let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier(ident), &device_impl.endpoints())?;
       Ok(Box::new(Vibratissimo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

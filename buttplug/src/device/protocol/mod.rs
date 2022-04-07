@@ -65,7 +65,7 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes},
+    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
     ButtplugDeviceResultFuture, DeviceReadCmd, Endpoint,
   },
 };
@@ -156,6 +156,9 @@ pub trait ButtplugProtocolFactory: std::fmt::Debug + Send + Sync {
 pub trait ButtplugProtocolProperties {
   fn name(&self) -> &str;
   fn protocol_identifier(&self) -> &str;
+  fn protocol_attributes_identifier(&self) -> &ProtocolAttributesIdentifier { 
+    self.device_attributes().identifier()
+  }
   fn device_attributes(&self) -> &ProtocolDeviceAttributes;
   fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion>;
 

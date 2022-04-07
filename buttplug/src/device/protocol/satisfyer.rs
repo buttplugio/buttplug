@@ -3,7 +3,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -94,7 +94,7 @@ impl ButtplugProtocolFactory for SatisfyerFactory {
         device_identifier
       );
       info_fut.await?;
-      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(device_identifier), &device_impl.endpoints())?;
+      let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier(device_identifier), &device_impl.endpoints())?;
 
       // Now that we've initialized and constructed the device, start the update cycle to make sure
       // we don't drop the connection.

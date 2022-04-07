@@ -3,7 +3,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -50,7 +50,7 @@ impl ButtplugProtocolFactory for YououFactory {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
     Box::pin(async move {
-      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier("VX001_".to_owned()), &device_impl.endpoints())?;
+      let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier("VX001_".to_owned()), &device_impl.endpoints())?;
       Ok(Box::new(Youou::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

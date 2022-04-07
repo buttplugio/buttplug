@@ -31,7 +31,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
+    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, ProtocolAttributesIdentifier},
     protocol::ButtplugProtocol,
   },
 };
@@ -399,20 +399,21 @@ pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Arc<DeviceImpl>,
   display_name: Option<String>,
+  device_identifier: String
 }
 
 impl Debug for ButtplugDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("ButtplugDevice")
       .field("name", &self.name())
-      .field("address", &self.address())
+      .field("identifier", &self.device_identifier())
       .finish()
   }
 }
 
 impl Hash for ButtplugDevice {
   fn hash<H: Hasher>(&self, state: &mut H) {
-    self.device.address().hash(state);
+    self.device_identifier().hash(state);
   }
 }
 
@@ -421,25 +422,34 @@ impl Eq for ButtplugDevice {
 
 impl PartialEq for ButtplugDevice {
   fn eq(&self, other: &Self) -> bool {
-    self.device.address() == other.device.address()
+    self.device_identifier() == other.device_identifier()
   }
 }
 
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
     Self {
+      device_identifier: format!("{}|{:?}|{}", protocol.protocol_identifier(), protocol.protocol_attributes_identifier(), device.address()),
       protocol,
       device,
       display_name: None,
     }
   }
 
-  pub fn address(&self) -> &str {
+  pub fn device_identifier(&self) -> &str {
+    &self.device_identifier
+  }
+
+  pub fn device_impl_address(&self) -> &str {
     self.device.address()
   }
 
   pub fn protocol_identifier(&self) -> &str {
     self.protocol.protocol_identifier()
+  }
+
+  pub fn protocol_attributes_identifier(&self) -> &ProtocolAttributesIdentifier {
+    self.protocol.protocol_attributes_identifier()
   }
 
   pub async fn try_create_device(
@@ -489,7 +499,7 @@ impl ButtplugDevice {
       "Adding display name {} to device {} ({})",
       name,
       self.name(),
-      self.address()
+      self.device_identifier()
     );
     self.display_name = Some(name.to_owned());
   }

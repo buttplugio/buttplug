@@ -3,7 +3,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -26,7 +26,7 @@ impl ButtplugProtocolFactory for PrettyLoveFactory {
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier("Aogu BLE".to_owned()), &device_impl.endpoints())?;
+      let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier("Aogu BLE".to_owned()), &device_impl.endpoints())?;
       Ok(Box::new(PrettyLove::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

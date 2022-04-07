@@ -219,6 +219,7 @@ mod test {
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
       // Check that we got an event back about a new device.
       let mut device_index = 0;
+      info!("Waiting on device");
       while let Some(msg) = recv.next().await {
         if let ButtplugServerMessage::DeviceAdded(da) = msg {
           assert_eq!(da.device_name(), "Aneros Vivi");
@@ -227,6 +228,7 @@ mod test {
         }
       }
       device.disconnect().await.expect("Test");
+      info!("waiting on removed device");
       // Check that we got an event back about a removed device.
       while let Some(msg) = recv.next().await {
         match msg {

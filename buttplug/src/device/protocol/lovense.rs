@@ -14,7 +14,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributeIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -91,7 +91,7 @@ impl ButtplugProtocolFactory for LovenseFactory {
               let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-              let device_attributes = builder.create(&ProtocolAttributeIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributeIdentifier::Identifier(identifier), &device_impl.endpoints())?;
+              let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier(identifier), &device_impl.endpoints())?;
               return Ok(Box::new(Lovense::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             } else {
               return Err(
