@@ -86,15 +86,7 @@ mod test {
         .get_endpoint_receiver(&Endpoint::TxMode)
         .expect("Test, assuming infallible");
       device
-        .parse_message(
-          VibrateCmd::new(
-            0,
-            vec![
-              VibrateSubcommand::new(0, 0.5),
-            ],
-          )
-          .into(),
-        )
+        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
         .await
         .expect("Test, assuming infallible");
       check_test_recv_value(

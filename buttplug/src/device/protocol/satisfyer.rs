@@ -80,7 +80,10 @@ impl ButtplugProtocol for Satisfyer {
       let result = device_impl
         .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
-      let device_identifier = format!("{}", u32::from_be_bytes(result.data().to_vec().try_into().unwrap_or([0;4])));
+      let device_identifier = format!(
+        "{}",
+        u32::from_be_bytes(result.data().to_vec().try_into().unwrap_or([0; 4]))
+      );
       info!(
         "Satisfyer Device Identifier: {:?} {}",
         result.data(),

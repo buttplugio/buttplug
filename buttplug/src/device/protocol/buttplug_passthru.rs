@@ -19,11 +19,16 @@ impl ButtplugProtocolCommandHandler for ButtplugPassthru {
     command_message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugDeviceResultFuture {
     Box::pin(async move {
-      device.write_value(DeviceWriteCmd::new(
-        Endpoint::Tx,
-        serde_json::to_string(&command_message).expect("Type is always serializable").as_bytes().to_vec(),
-        false,
-      )).await?;
+      device
+        .write_value(DeviceWriteCmd::new(
+          Endpoint::Tx,
+          serde_json::to_string(&command_message)
+            .expect("Type is always serializable")
+            .as_bytes()
+            .to_vec(),
+          false,
+        ))
+        .await?;
       Ok(messages::Ok::default().into())
     })
   }

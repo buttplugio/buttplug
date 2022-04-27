@@ -9,7 +9,7 @@ use crate::{
   util::async_manager,
 };
 use futures::{FutureExt, StreamExt};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use tokio::{net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
 

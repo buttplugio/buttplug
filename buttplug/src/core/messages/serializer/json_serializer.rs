@@ -1,35 +1,34 @@
 use super::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError};
-use crate::{
-  core::{
-    errors::{ButtplugError, ButtplugHandshakeError},
-    messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugMessage,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessage,
-      ButtplugSpecV0ClientMessage,
-      ButtplugSpecV0ServerMessage,
-      ButtplugSpecV1ClientMessage,
-      ButtplugSpecV1ServerMessage,
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
-    },
+use crate::core::{
+  errors::{ButtplugError, ButtplugHandshakeError},
+  messages::{
+    self,
+    ButtplugClientMessage,
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessage,
+    ButtplugSpecV0ClientMessage,
+    ButtplugSpecV0ServerMessage,
+    ButtplugSpecV1ClientMessage,
+    ButtplugSpecV1ServerMessage,
+    ButtplugSpecV2ClientMessage,
+    ButtplugSpecV2ServerMessage,
   },
 };
+use jsonschema::JSONSchema;
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
-use once_cell::sync::OnceCell;
-use jsonschema::JSONSchema;
 
 static MESSAGE_JSON_SCHEMA: &str =
   include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
 
 /// Creates a [jsonschema::JSONSchema] validator using the built in buttplug message schema.
 pub fn create_message_validator() -> JSONSchema {
-  let schema: serde_json::Value = serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("Built in schema better be valid");
+  let schema: serde_json::Value =
+    serde_json::from_str(MESSAGE_JSON_SCHEMA).expect("Built in schema better be valid");
   JSONSchema::compile(&schema).expect("Built in schema better be valid")
 }
 pub struct ButtplugServerJSONSerializer {
@@ -70,19 +69,22 @@ where
 {
   // We have to pass back a string formatted error, as SerdeJson's error type
   // isn't clonable.
-  serde_json::from_str::<serde_json::Value>(&msg).map_err(|e| {
-    ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
-  }).and_then(|json_msg| {
-    match validator.validate(&json_msg) {
+  serde_json::from_str::<serde_json::Value>(&msg)
+    .map_err(|e| {
+      ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
+    })
+    .and_then(|json_msg| match validator.validate(&json_msg) {
       Ok(_) => serde_json::from_value(json_msg.clone()).map_err(|e| {
         ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
       }),
       Err(e) => {
         let err_vec: Vec<jsonschema::ValidationError> = e.collect();
-        Err(ButtplugSerializerError::JsonSerializerError(format!("Error during JSON Schema Validation: {:?}", err_vec)))
+        Err(ButtplugSerializerError::JsonSerializerError(format!(
+          "Error during JSON Schema Validation: {:?}",
+          err_vec
+        )))
       }
-    }
-  })
+    })
 }
 
 fn serialize_to_version(
@@ -184,7 +186,10 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
         "Setting JSON Wrapper message version to {}",
         rsi.message_version()
       );
-      self.message_version.set(rsi.message_version()).expect("This should only ever be called once.");
+      self
+        .message_version
+        .set(rsi.message_version())
+        .expect("This should only ever be called once.");
     } else {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }
@@ -214,7 +219,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
 }
 
 pub struct ButtplugClientJSONSerializer {
-  validator: JSONSchema
+  validator: JSONSchema,
 }
 
 impl Default for ButtplugClientJSONSerializer {

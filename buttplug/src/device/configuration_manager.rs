@@ -21,12 +21,12 @@ use crate::{
   device::Endpoint,
 };
 use dashmap::DashMap;
+use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
   collections::{HashMap, HashSet},
   sync::Arc,
 };
-use getset::{Getters, Setters, MutGetters};
 use uuid::Uuid;
 
 // Note: There's a ton of extra structs in here just to deserialize the json

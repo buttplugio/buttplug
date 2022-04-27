@@ -14,7 +14,7 @@ use crate::core::messages::serializer::ButtplugSerializerError;
 use jsonschema::JSONSchema;
 
 pub struct JSONValidator {
-  schema: JSONSchema
+  schema: JSONSchema,
 }
 
 impl JSONValidator {
@@ -24,7 +24,8 @@ impl JSONValidator {
   ///
   /// - `schema`: JSON Schema that the validator should use.
   pub fn new(schema: &str) -> Self {
-    let schema_json: serde_json::Value = serde_json::from_str(schema).expect("Built in schema better be valid");
+    let schema_json: serde_json::Value =
+      serde_json::from_str(schema).expect("Built in schema better be valid");
     let schema = JSONSchema::compile(&schema_json).expect("Built in schema better be valid");
     Self { schema }
   }
@@ -44,7 +45,10 @@ impl JSONValidator {
     })?;
     self.schema.validate(&check_value).map_err(|err| {
       let err_vec: Vec<jsonschema::ValidationError> = err.collect();
-      ButtplugSerializerError::JsonSerializerError(format!("Error during JSON Schema Validation: {:?}", err_vec))
+      ButtplugSerializerError::JsonSerializerError(format!(
+        "Error during JSON Schema Validation: {:?}",
+        err_vec
+      ))
     })
   }
 }
