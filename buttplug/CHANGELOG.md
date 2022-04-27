@@ -1,3 +1,14 @@
+# 5.1.9 (2022-04-26)
+
+## Features
+
+- Added MagicMotion Crystal Support
+
+## Bugfixes
+
+- Fixed issue with connection timeouts on Satisfyer Plugalicious
+- Use product IDs for identifying Satisfyer toys
+
 # 5.1.8 (2022-03-05)
 
 ## Features
