@@ -34,7 +34,7 @@ impl ButtplugProtocolFactory for PatooFactory {
     }
     let name: String = c[0..i].iter().collect();
     Box::pin(async move {
-      let device_attributes = builder.create(&ProtocolAttributesIdentifier::Address(device_impl.address().to_owned()), &ProtocolAttributesIdentifier::Identifier(name), &device_impl.endpoints())?;
+      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier(name), &device_impl.endpoints())?;
       Ok(Box::new(Patoo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

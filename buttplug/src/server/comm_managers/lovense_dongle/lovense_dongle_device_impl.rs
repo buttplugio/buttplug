@@ -12,7 +12,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{BluetoothLESpecifier, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
+    configuration_manager::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -35,7 +35,7 @@ use std::sync::{
 use tokio::sync::{broadcast, mpsc};
 
 pub struct LovenseDongleDeviceImplCreator {
-  specifier: ProtocolDeviceSpecifier,
+  specifier: ProtocolCommunicationSpecifier,
   id: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   device_incoming: Option<mpsc::Receiver<LovenseDongleIncomingMessage>>,
@@ -64,7 +64,7 @@ impl LovenseDongleDeviceImplCreator {
       // when we get the device, we can set up as we need.
       //
       // Hacky, but it works.
-      specifier: ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      specifier: ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
         "LVS-DongleDevice",
         &[],
       )),
@@ -77,7 +77,7 @@ impl LovenseDongleDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
-  fn specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
