@@ -7,7 +7,8 @@ use crate::{
   device::configuration_manager::{
     BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
     ProtocolAttributesIdentifier, ProtocolDeviceAttributes, ProtocolDeviceConfiguration,
-    ProtocolDeviceSpecifier, SerialSpecifier, USBSpecifier, WebsocketSpecifier, XInputSpecifier,
+    ProtocolCommunicationSpecifier, SerialSpecifier, USBSpecifier, WebsocketSpecifier, XInputSpecifier,
+    ProtocolDeviceSpecifier
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -94,7 +95,7 @@ pub struct ExternalDeviceConfiguration {
   deny_list: Vec<String>,
   reserved_indexes: HashMap<u32, String>,
   protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
-  user_configs: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>
+  user_configs: HashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -104,29 +105,29 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     if let Some(usb_vec) = protocol_def.usb {
       usb_vec
         .iter()
-        .for_each(|spec| specifiers.push(ProtocolDeviceSpecifier::USB(*spec)));
+        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::USB(*spec)));
     }
     if let Some(serial_vec) = protocol_def.serial {
       serial_vec
         .iter()
-        .for_each(|spec| specifiers.push(ProtocolDeviceSpecifier::Serial(spec.clone())));
+        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::Serial(spec.clone())));
     }
     if let Some(hid_vec) = protocol_def.hid {
       hid_vec
         .iter()
-        .for_each(|spec| specifiers.push(ProtocolDeviceSpecifier::HID(*spec)));
+        .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::HID(*spec)));
     }
     if let Some(btle) = protocol_def.btle {
-      specifiers.push(ProtocolDeviceSpecifier::BluetoothLE(btle));
+      specifiers.push(ProtocolCommunicationSpecifier::BluetoothLE(btle));
     }
     if let Some(xinput) = protocol_def.xinput {
-      specifiers.push(ProtocolDeviceSpecifier::XInput(xinput));
+      specifiers.push(ProtocolCommunicationSpecifier::XInput(xinput));
     }
     if let Some(websocket) = protocol_def.websocket {
-      specifiers.push(ProtocolDeviceSpecifier::Websocket(websocket));
+      specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket));
     }
     if let Some(lcs) = protocol_def.lovense_connect_service {
-      specifiers.push(ProtocolDeviceSpecifier::LovenseConnectService(lcs));
+      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(lcs));
     }
 
     let mut configurations = HashMap::new();
@@ -184,32 +185,32 @@ fn add_user_configs_to_protocol(
         usb_vec.iter().for_each(|spec| {
           base_protocol_def
             .specifiers_mut()
-            .push(ProtocolDeviceSpecifier::USB(*spec))
+            .push(ProtocolCommunicationSpecifier::USB(*spec))
         });
       }
       if let Some(serial_vec) = &protocol_def.serial {
         serial_vec.iter().for_each(|spec| {
           base_protocol_def
             .specifiers_mut()
-            .push(ProtocolDeviceSpecifier::Serial(spec.clone()))
+            .push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
         });
       }
       if let Some(hid_vec) = &protocol_def.hid {
         hid_vec.iter().for_each(|spec| {
           base_protocol_def
             .specifiers_mut()
-            .push(ProtocolDeviceSpecifier::HID(*spec))
+            .push(ProtocolCommunicationSpecifier::HID(*spec))
         });
       }
       if let Some(btle) = &protocol_def.btle {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolDeviceSpecifier::BluetoothLE(btle.clone()));
+          .push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
       }
       if let Some(websocket) = &protocol_def.websocket {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolDeviceSpecifier::Websocket(websocket.clone()));
+          .push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
       }
     }
   }
@@ -224,14 +225,15 @@ fn add_user_configs_to_protocol(
       if let Some(index) = user_config.index().as_ref() {
         external_config.reserved_indexes.insert(*index, address.clone());
       }
+      let protocol_device_specifier: ProtocolDeviceSpecifier = serde_json::from_str(address).unwrap();
       let config_attrs = ProtocolDeviceAttributes::new(
-        ProtocolAttributesIdentifier::Address(address.clone()),
+        protocol_device_specifier.identifier().clone(),
         None,
         user_config.display_name.clone(),
         user_config.messages.clone().unwrap_or_default(),
         None,
       );
-      external_config.user_configs.insert(ProtocolAttributesIdentifier::Address(address.clone()), config_attrs);
+      external_config.user_configs.insert(protocol_device_specifier, config_attrs);
     }
   }
 }

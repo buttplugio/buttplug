@@ -5,7 +5,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
+    configuration_manager::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -36,14 +36,14 @@ use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
 pub struct SerialPortDeviceImplCreator {
-  specifier: ProtocolDeviceSpecifier,
+  specifier: ProtocolCommunicationSpecifier,
   port_info: SerialPortInfo,
 }
 
 impl SerialPortDeviceImplCreator {
   pub fn new(port_info: &SerialPortInfo) -> Self {
     Self {
-      specifier: ProtocolDeviceSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
+      specifier: ProtocolCommunicationSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
       port_info: port_info.clone(),
     }
   }
@@ -59,7 +59,7 @@ impl Debug for SerialPortDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
-  fn specifier(&self) -> ProtocolDeviceSpecifier {
+  fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
@@ -154,7 +154,7 @@ impl SerialPortDeviceImpl {
     // If we've gotten this far, we can expect we have a serial port definition.
     let mut port_def = None;
     for specifier in protocol_def.specifiers() {
-      if let ProtocolDeviceSpecifier::Serial(serial) = specifier {
+      if let ProtocolCommunicationSpecifier::Serial(serial) = specifier {
         if port_info.port_name == *serial.port() {
           port_def = Some(serial.clone());
           break;

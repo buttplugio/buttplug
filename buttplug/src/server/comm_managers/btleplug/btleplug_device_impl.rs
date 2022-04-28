@@ -5,7 +5,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{BluetoothLESpecifier, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration},
+    configuration_manager::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -75,8 +75,8 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 
 #[async_trait]
 impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
-  fn specifier(&self) -> ProtocolDeviceSpecifier {
-    ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+  fn specifier(&self) -> ProtocolCommunicationSpecifier {
+    ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
       &self.services,
     ))
@@ -113,7 +113,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
 
-    if let Some(ProtocolDeviceSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolDeviceSpecifier::BluetoothLE(_))) {
+    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
       for (proto_uuid, proto_service) in btle.services() {
         for service in self.device.services() {
           if service.uuid != *proto_uuid {

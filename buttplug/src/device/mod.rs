@@ -31,7 +31,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, ProtocolAttributesIdentifier},
+    configuration_manager::{DeviceConfigurationManager, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, ProtocolAttributesIdentifier},
     protocol::ButtplugProtocol,
   },
 };
@@ -388,7 +388,7 @@ pub trait DeviceImplInternal: Sync + Send {
 
 #[async_trait]
 pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
-  fn specifier(&self) -> ProtocolDeviceSpecifier;
+  fn specifier(&self) -> ProtocolCommunicationSpecifier;
   async fn try_create_device_impl(
     &mut self,
     protocol: ProtocolDeviceConfiguration,
@@ -426,10 +426,14 @@ impl PartialEq for ButtplugDevice {
   }
 }
 
+pub fn form_device_identifier(protocol_identifier: &str, protocol_attributes_identifier: &ProtocolAttributesIdentifier, device_address: &str ) -> String {
+  format!("{}|{:?}|{}", protocol_identifier, protocol_attributes_identifier, device_address)
+}
+
 impl ButtplugDevice {
   pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
     Self {
-      device_identifier: format!("{}|{:?}|{}", protocol.protocol_identifier(), protocol.protocol_attributes_identifier(), device.address()),
+      device_identifier: form_device_identifier(protocol.protocol_identifier(), protocol.protocol_attributes_identifier(), device.address()),
       protocol,
       device,
       display_name: None,

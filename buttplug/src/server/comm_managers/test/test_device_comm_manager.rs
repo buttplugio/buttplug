@@ -2,7 +2,7 @@ use super::test_device::{TestDeviceImplCreator, TestDeviceInternal};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   device::{
-    configuration_manager::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolDeviceSpecifier},
+    configuration_manager::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
     ButtplugDevice,
   },
   server::comm_managers::{
@@ -35,7 +35,7 @@ fn new_uninitialized_ble_test_device(
       .subsec_nanos()
       .to_string()
   });
-  let specifier = ProtocolDeviceSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
+  let specifier = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
   let device_impl = Arc::new(TestDeviceInternal::new(name, &address));
   let device_impl_clone = device_impl.clone();
   let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);

@@ -10,7 +10,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
+    configuration_manager::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -54,8 +54,8 @@ impl Debug for XInputDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
-  fn specifier(&self) -> ProtocolDeviceSpecifier {
-    ProtocolDeviceSpecifier::XInput(XInputSpecifier::default())
+  fn specifier(&self) -> ProtocolCommunicationSpecifier {
+    ProtocolCommunicationSpecifier::XInput(XInputSpecifier::default())
   }
 
   async fn try_create_device_impl(

@@ -6,7 +6,7 @@ use crate::{
     ButtplugResultFuture,
   },
   device::{
-    configuration_manager::{ProtocolDeviceSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
+    configuration_manager::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,
@@ -196,8 +196,8 @@ impl Debug for WebsocketServerDeviceImplCreator {
 
 #[async_trait]
 impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
-  fn specifier(&self) -> ProtocolDeviceSpecifier {
-    ProtocolDeviceSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
+  fn specifier(&self) -> ProtocolCommunicationSpecifier {
+    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
 
   async fn try_create_device_impl(
