@@ -4735,6 +4735,32 @@
           }
         }
       }
+    },
+    "meese": {
+      "btle": {
+        "names": [
+          "Meese-V389"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Meese Tera"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 2,
+            "StepCount": [
+              10,
+              3
+            ]
+          }
+        }
+      }
     }
   }
 }

@@ -30,6 +30,7 @@ pub mod magic_motion_v3;
 pub mod magic_motion_v4;
 pub mod mannuo;
 pub mod maxpro;
+pub mod meese;
 pub mod mizzzee;
 pub mod motorbunny;
 pub mod mysteryvibe;
@@ -136,6 +137,7 @@ pub fn get_default_protocol_map() -> DashMap<String, TryCreateProtocolFunc> {
   add_to_protocol_map::<magic_motion_v4::MagicMotionV4>(&map, "magic-motion-4");
   add_to_protocol_map::<mannuo::ManNuo>(&map, "mannuo");
   add_to_protocol_map::<maxpro::Maxpro>(&map, "maxpro");
+  add_to_protocol_map::<meese::Meese>(&map, "meese");
   add_to_protocol_map::<mizzzee::MizzZee>(&map, "mizzzee");
   add_to_protocol_map::<motorbunny::Motorbunny>(&map, "motorbunny");
   add_to_protocol_map::<mysteryvibe::MysteryVibe>(&map, "mysteryvibe");
