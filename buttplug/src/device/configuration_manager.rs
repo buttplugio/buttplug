@@ -254,7 +254,7 @@ pub struct ProtocolDeviceSpecifier {
 }
 
 impl ProtocolDeviceSpecifier { 
-  fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
+  pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
     Self {
       address: address.to_owned(),
       protocol: protocol.to_owned(),

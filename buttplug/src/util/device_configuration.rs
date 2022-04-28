@@ -6,9 +6,9 @@ use crate::{
   },
   device::configuration_manager::{
     BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
-    ProtocolAttributesIdentifier, ProtocolDeviceAttributes, ProtocolDeviceConfiguration,
-    ProtocolCommunicationSpecifier, SerialSpecifier, USBSpecifier, WebsocketSpecifier, XInputSpecifier,
-    ProtocolDeviceSpecifier
+    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+    ProtocolDeviceConfiguration, ProtocolDeviceSpecifier, SerialSpecifier, USBSpecifier,
+    WebsocketSpecifier, XInputSpecifier,
   },
 };
 use getset::{Getters, MutGetters, Setters};
@@ -76,26 +76,25 @@ pub struct ProtocolDefinition {
   #[serde(skip_serializing_if = "Option::is_none")]
   defaults: Option<ProtocolAttributes>,
   #[serde(default)]
-  configurations: Vec<ProtocolAttributes>
+  configurations: Vec<ProtocolAttributes>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
-  #[serde(skip_serializing_if = "Option::is_none")]
-  specifiers: Option<HashMap<String, ProtocolDefinition>>,
-  #[serde(skip_serializing_if = "Option::is_none", rename = "devices")]
-  user_configs: Option<HashMap<String, DeviceUserConfig>>,
+  specifiers: HashMap<String, ProtocolDefinition>,
+  #[serde(rename = "devices", with = "vectorize")]
+  user_configs: HashMap<ProtocolDeviceSpecifier, DeviceUserConfig>,
 }
 
 #[derive(Default, Debug, Getters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ExternalDeviceConfiguration {
   allow_list: Vec<String>,
   deny_list: Vec<String>,
   reserved_indexes: HashMap<u32, String>,
   protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
-  user_configs: HashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>
+  user_configs: HashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>,
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -170,71 +169,76 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
 fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
-  user_config_def: UserConfigDefinition
+  user_config_def: UserConfigDefinition,
 ) {
-  if let Some(specifiers) = user_config_def.specifiers() {
-    for (user_config_protocol, protocol_def) in specifiers {
-      if !external_config.protocol_configurations.contains_key(user_config_protocol) {
-        continue;
-      }
-  
-      let base_protocol_def = external_config.protocol_configurations.get_mut(user_config_protocol).unwrap();
-  
-      // Make a vector out of the protocol definition specifiers
-      if let Some(usb_vec) = &protocol_def.usb {
-        usb_vec.iter().for_each(|spec| {
-          base_protocol_def
-            .specifiers_mut()
-            .push(ProtocolCommunicationSpecifier::USB(*spec))
-        });
-      }
-      if let Some(serial_vec) = &protocol_def.serial {
-        serial_vec.iter().for_each(|spec| {
-          base_protocol_def
-            .specifiers_mut()
-            .push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
-        });
-      }
-      if let Some(hid_vec) = &protocol_def.hid {
-        hid_vec.iter().for_each(|spec| {
-          base_protocol_def
-            .specifiers_mut()
-            .push(ProtocolCommunicationSpecifier::HID(*spec))
-        });
-      }
-      if let Some(btle) = &protocol_def.btle {
+  for (user_config_protocol, protocol_def) in user_config_def.specifiers() {
+    if !external_config
+      .protocol_configurations
+      .contains_key(user_config_protocol)
+    {
+      continue;
+    }
+
+    let base_protocol_def = external_config
+      .protocol_configurations
+      .get_mut(user_config_protocol)
+      .unwrap();
+
+    // Make a vector out of the protocol definition specifiers
+    if let Some(usb_vec) = &protocol_def.usb {
+      usb_vec.iter().for_each(|spec| {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
-      }
-      if let Some(websocket) = &protocol_def.websocket {
+          .push(ProtocolCommunicationSpecifier::USB(*spec))
+      });
+    }
+    if let Some(serial_vec) = &protocol_def.serial {
+      serial_vec.iter().for_each(|spec| {
         base_protocol_def
           .specifiers_mut()
-          .push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
-      }
+          .push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
+      });
+    }
+    if let Some(hid_vec) = &protocol_def.hid {
+      hid_vec.iter().for_each(|spec| {
+        base_protocol_def
+          .specifiers_mut()
+          .push(ProtocolCommunicationSpecifier::HID(*spec))
+      });
+    }
+    if let Some(btle) = &protocol_def.btle {
+      base_protocol_def
+        .specifiers_mut()
+        .push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
+    }
+    if let Some(websocket) = &protocol_def.websocket {
+      base_protocol_def
+        .specifiers_mut()
+        .push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
   }
-  if let Some(user_configs) = user_config_def.user_configs() {
-    for (address, user_config) in user_configs {
-      if *user_config.allow().as_ref().unwrap_or(&false) {
-        external_config.allow_list.push(address.clone());
-      }
-      if *user_config.deny().as_ref().unwrap_or(&false) {
-        external_config.deny_list.push(address.clone());
-      }
-      if let Some(index) = user_config.index().as_ref() {
-        external_config.reserved_indexes.insert(*index, address.clone());
-      }
-      let protocol_device_specifier: ProtocolDeviceSpecifier = serde_json::from_str(address).unwrap();
-      let config_attrs = ProtocolDeviceAttributes::new(
-        protocol_device_specifier.identifier().clone(),
-        None,
-        user_config.display_name.clone(),
-        user_config.messages.clone().unwrap_or_default(),
-        None,
-      );
-      external_config.user_configs.insert(protocol_device_specifier, config_attrs);
+  for (specifier, user_config) in user_config_def.user_configs() {
+    if *user_config.allow().as_ref().unwrap_or(&false) {
+      external_config.allow_list.push(specifier.address().clone());
     }
+    if *user_config.deny().as_ref().unwrap_or(&false) {
+      external_config.deny_list.push(specifier.address().clone());
+    }
+    if let Some(index) = user_config.index().as_ref() {
+      external_config
+        .reserved_indexes
+        .insert(*index, specifier.address().clone());
+    }
+    let config_attrs = ProtocolDeviceAttributes::new(
+      specifier.identifier().clone(),
+      None,
+      user_config.display_name.clone(),
+      user_config.messages.clone().unwrap_or_default(),
+      None,
+    );
+    external_config
+      .user_configs
+      .insert(specifier.clone(), config_attrs);
   }
 }
 
@@ -322,7 +326,7 @@ pub fn load_protocol_configs_from_json(
 
   let mut external_config = ExternalDeviceConfiguration {
     protocol_configurations: protocols,
-    .. Default::default()
+    ..Default::default()
   };
 
   // Then load the user config
