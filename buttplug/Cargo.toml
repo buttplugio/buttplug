@@ -79,6 +79,7 @@ serde-aux = "3.0.1"
 getset = "0.1.2"
 os_info = "3.2.0"
 jsonschema = "0.16.0"
+vectorize = "0.2.0"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"
