@@ -18,6 +18,7 @@ use buttplug::client::{
 use futures::StreamExt;
 use futures_timer::Delay;
 use std::{sync::Arc, time::Duration};
+use tracing::Level;
 
 async fn device_control_example() {
   // Onto the final example! Controlling devices.
@@ -143,5 +144,9 @@ async fn device_control_example() {
 
 #[tokio::main]
 async fn main() {
+
+  tracing_subscriber::fmt()
+      // filter spans/events with level TRACE or higher.
+      .with_max_level(Level::DEBUG).init();
   device_control_example().await;
 }

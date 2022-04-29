@@ -24,6 +24,8 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use std::time::Duration;
+use futures_timer::Delay;
 use tokio::sync::{broadcast, mpsc};
 use tracing;
 use tracing_futures::Instrument;
@@ -183,12 +185,26 @@ impl DeviceManagerEventLoop {
         // device, due to how things like advertisements work. We'll filter this at the
         // DeviceManager level to make sure that even if a badly coded DCM throws multiple found
         // events, we only listen to the first one.
-        if !self.connecting_devices.insert(address.clone()) {
+        while !self.connecting_devices.insert(address.clone()) {
           info!(
-            "Device {} currently trying to connect, ignoring new device event.",
+            "Device {} currently trying to connect, delaying new device event.",
             address
           );
-          return;
+
+          Delay::new(Duration::from_millis(100)).await;
+
+          // Check to make sure the device isn't already connected. If it is, drop it.
+          if self
+              .device_map
+              .iter()
+              .any(|entry| entry.value().device_impl_address() == address)
+          {
+            debug!(
+            "Device {} already connected, ignoring new device event.",
+            address
+          );
+            return;
+          }
         }
         trace!("Inserted device address {} into connecting list {:?}.", address, self.connecting_devices);
 

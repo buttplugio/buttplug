@@ -494,7 +494,10 @@ impl ButtplugDevice {
       {
         Ok(pi) => pi,
         Err(err) => {
-          sharable_device_impl.disconnect();
+          let res = sharable_device_impl.disconnect().await;
+          if res.is_err() {
+            trace!("Device disconnect error: {:?}", res.err());
+          }
           error!(
                     "Failed to create protocol implementation for protocol {}: {:?}",
                     "how-do-we-get-this-now?", err
