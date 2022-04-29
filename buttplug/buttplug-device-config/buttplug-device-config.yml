@@ -452,7 +452,7 @@ protocols:
             tx: 00006001-0000-1000-8000-00805f9b34fb
             txmode: 00006002-0000-1000-8000-00805f9b34fb
       defaults:
-        name: Libo Elle Device      
+        name: Libo Elle Device
         messages:
           VibrateCmd:
             FeatureCount: 1
@@ -475,7 +475,7 @@ protocols:
             tx: 00006001-0000-1000-8000-00805f9b34fb
             txmode: 00006002-0000-1000-8000-00805f9b34fb
       defaults:
-        name: Libo Shark          
+        name: Libo Shark
         messages:
           VibrateCmd:
             FeatureCount: 2
@@ -495,7 +495,7 @@ protocols:
           00006050-0000-1000-8000-00805f9b34fb:
             rxpressure: 00006051-0000-1000-8000-00805f9b34fb
       defaults:
-        name: Libo Karen        
+        name: Libo Karen
         messages: {}
   libo-vibes:
       btle:
@@ -1491,7 +1491,7 @@ protocols:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
           rx: 0000ffe2-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Pretty Love Device      
+      name: Pretty Love Device
       messages:
         VibrateCmd:
           FeatureCount: 1
@@ -1582,7 +1582,7 @@ protocols:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Realov Device      
+      name: Realov Device
       messages:
         VibrateCmd:
           FeatureCount: 1
@@ -1670,7 +1670,7 @@ protocols:
           tx: 0000fff6-0000-1000-8000-00805f9b34fb
           rx: 0000fff8-0000-1000-8000-00805f9b34fb
     defaults:
-      name: SayberX Device      
+      name: SayberX Device
       messages: {}
     configurations:
       - identifier:
@@ -1693,7 +1693,7 @@ protocols:
         0000aaa0-0000-1000-8000-00805f9b34fb:
           tx: 0000aaa1-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Muse Device      
+      name: Muse Device
       messages:
         VibrateCmd:
           FeatureCount: 1
@@ -1720,7 +1720,7 @@ protocols:
           # I figure we'll add them as support for those sensor
           # types is added to Buttplug
     defaults:
-      name: Lelo F1s 
+      name: Lelo F1s
       messages:        
         VibrateCmd:
           FeatureCount: 2
@@ -1760,7 +1760,7 @@ protocols:
         0000ff00-0000-1000-8000-00805f9b34fb:
           tx: 0000ff01-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Aneros Vivi         
+      name: Aneros Vivi
       messages:
         VibrateCmd:
           FeatureCount: 2
@@ -1777,7 +1777,7 @@ protocols:
         0000ff00-0000-1000-8000-00805f9b34fb:
           tx: 0000ff01-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Lovehoney Device         
+      name: Lovehoney Device
       messages:
         VibrateCmd:
           FeatureCount: 2
@@ -1815,7 +1815,7 @@ protocols:
           tx: 00000a66-0000-1000-8000-00805f9b34fb
           rx: 00000a67-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Twerking Butt         
+      name: Twerking Butt
       messages: {}
         # Vibration and Rotation protocols still need to be establised
         # Twerk mode will be represented as a vibrator
@@ -1827,7 +1827,7 @@ protocols:
         6e400001-b5a3-f393-e0a9-e50e24dcca9e:
           tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
     defaults:
-      name: MaxPro 2         
+      name: MaxPro 2
       messages:
         VibrateCmd:
           FeatureCount: 1
@@ -1860,7 +1860,7 @@ protocols:
           tx: 1775ff55-6b43-439b-877c-060f2d9bed07
           # There are 5 other characteristics, all of which seem to be unused.
     defaults:
-      name: The Handy         
+      name: The Handy
       messages:
         LinearCmd:
           FeatureCount: 1
@@ -2448,7 +2448,7 @@ protocols:
         name: Satisfyer E-Love G-Spotter
         messages:
           VibrateCmd:
-            FeatureCount: 2 # 4?
+            FeatureCount: 1 # 4?
             StepCount:
               - 100
               # - 100 e-amplitude
@@ -2770,6 +2770,41 @@ protocols:
           FeatureCount: 1
           StepCount:
             - 3
+  hismith:
+    btle:
+      names:
+        - HISMITH
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+        0000ff90-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Hismith device
+      messages:
+        VibrateCmd:
+          FeatureCount: 1
+          StepCount:
+            - 100
+    configurations:
+      - identifier:
+          - "1001"
+        name: Hismith Sex Machine
+      - identifier:
+          - "1002"
+        name: Hismith Pro Traveler
+      - identifier:
+          - "1003"
+        name: Hismith Capsule
+      - identifier:
+          - "2001"
+        name: Hismith Thrusting Cup
+        messages:
+          VibrateCmd:
+            FeatureCount: 2
+            StepCount:
+              - 100 # Oscillate
+              - 1 # Vibe
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
