@@ -4761,6 +4761,77 @@
           }
         }
       }
+    },
+    "hismith": {
+      "btle": {
+        "names": [
+          "HISMITH"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+          },
+          "0000ff90-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": {
+          "en-us": "Hismith device"
+        },
+        "messages": {
+          "VibrateCmd": {
+            "FeatureCount": 1,
+            "StepCount": [
+              100
+            ]
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "1001"
+          ],
+          "name": {
+            "en-us": "Hismith Sex Machine"
+          }
+        },
+        {
+          "identifier": [
+            "1002"
+          ],
+          "name": {
+            "en-us": "Hismith Pro Traveler"
+          }
+        },
+        {
+          "identifier": [
+            "1003"
+          ],
+          "name": {
+            "en-us": "Hismith Capsule"
+          }
+        },
+        {
+          "identifier": [
+            "2001"
+          ],
+          "name": {
+            "en-us": "Hismith Thrusting Cup"
+          },
+          "messages": {
+            "VibrateCmd": {
+              "FeatureCount": 2,
+              "StepCount": [
+                100,
+                1
+              ]
+            }
+          }
+        }
+      ]
     }
   }
 }
