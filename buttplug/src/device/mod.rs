@@ -465,37 +465,51 @@ impl ButtplugDevice {
     // because this isn't actually an error. However, if we *do* have a
     // configuration but something goes wrong after this, then it's an
     // error.
-    let protocol_builder = match device_config_mgr.protocol_builder(&device_creator.specifier()) {
-      Some(builder) => builder,
+    let protocol_builders = match device_config_mgr.protocol_builders(&device_creator.specifier()) {
+      Some(builders) => builders,
       None => return Ok(None)
     };
-      
 
-    // Now that we have both a possible device implementation and a
-    // configuration for that device, try to initialize the implementation.
-    // This usually means trying to connect to whatever the device is,
-    // finding endpoints, etc.
-    let device_impl = device_creator.try_create_device_impl(protocol_builder.configuration().clone()).await?;
-    info!(
-      address = tracing::field::display(device_impl.address()),
-      "Found Buttplug Device {}",
-      device_impl.name()
-    );
+    for protocol_builder in protocol_builders {
+      // Now that we have both a possible device implementation and a
+      // configuration for that device, try to initialize the implementation.
+      // This usually means trying to connect to whatever the device is,
+      // finding endpoints, etc.
+      let device_impl = device_creator.try_create_device_impl(protocol_builder.configuration().clone()).await?;
+      info!(
+        address = tracing::field::display(device_impl.address()),
+        "Found Buttplug Device {}",
+        device_impl.name()
+      );
 
-    // If we've made it this far, we now have a connected device
-    // implementation with endpoints set up. We now need to run whatever
-    // protocol initialization might need to happen. We'll fetch a protocol
-    // creator, pass the device implementation to it, then let it do
-    // whatever it needs. For most protocols, this is a no-op. However, for
-    // devices like Lovense, some Kiiroo, etc, this can get fairly
-    // complicated.
-    let sharable_device_impl = Arc::new(device_impl);
-    let protocol_impl =
-      protocol_builder.create(sharable_device_impl.clone()).await?;
-    Ok(Some(ButtplugDevice::new(
-      protocol_impl,
-      sharable_device_impl,
-    )))
+      // If we've made it this far, we now have a connected device
+      // implementation with endpoints set up. We now need to run whatever
+      // protocol initialization might need to happen. We'll fetch a protocol
+      // creator, pass the device implementation to it, then let it do
+      // whatever it needs. For most protocols, this is a no-op. However, for
+      // devices like Lovense, some Kiiroo, etc, this can get fairly
+      // complicated.
+      let sharable_device_impl = Arc::new(device_impl);
+      let protocol_impl = match protocol_builder.create(sharable_device_impl.clone()).await
+      {
+        Ok(pi) => pi,
+        Err(err) => {
+          sharable_device_impl.disconnect();
+          error!(
+                    "Failed to create protocol implementation for protocol {}: {:?}",
+                    "how-do-we-get-this-now?", err
+                  );
+          continue;
+        }
+      };
+      return Ok(Some(ButtplugDevice::new(
+        protocol_impl,
+        sharable_device_impl,
+      )));
+    }
+
+    info!("No protocol were matched");
+    Ok(None)
   }
 
   pub fn set_display_name(&mut self, name: &str) {

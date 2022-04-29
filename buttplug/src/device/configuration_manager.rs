@@ -249,11 +249,11 @@ impl ProtocolCommunicationSpecifier {
 #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
 pub struct ProtocolDeviceSpecifier {
   address: String,
-  protocol: String,  
+  protocol: String,
   identifier: ProtocolAttributesIdentifier
 }
 
-impl ProtocolDeviceSpecifier { 
+impl ProtocolDeviceSpecifier {
   pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
     Self {
       address: address.to_owned(),
@@ -309,7 +309,7 @@ impl ProtocolDeviceAttributes {
     }
   }
 
-  fn is_valid(&self) -> Result<(), ButtplugError> { 
+  fn is_valid(&self) -> Result<(), ButtplugError> {
     for (message_type, message_attrs) in self.message_attributes_map() {
       message_attrs.check(&message_type).map_err(|err| {
         info!("Error in {}: {:?}", message_type, message_attrs);
@@ -318,7 +318,7 @@ impl ProtocolDeviceAttributes {
     }
     Ok(())
   }
-  
+
   pub fn identifier(&self) -> &ProtocolAttributesIdentifier {
     &self.identifier
   }
@@ -572,8 +572,8 @@ impl ProtocolBuilder {
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
     let builder = DeviceAttributesBuilder::new(
       self.protocol_factory.protocol_identifier(),
-      self.allow_raw_messages, 
-      self.configuration.clone(), 
+      self.allow_raw_messages,
+      self.configuration.clone(),
       self.user_device_configs.clone()
     );
     self.protocol_factory.try_create(device_impl.clone(), builder).await
@@ -684,13 +684,14 @@ impl DeviceConfigurationManager {
     self.protocol_device_configurations.clone()
   }
 
-  pub fn protocol_builder(&self, specifier: &ProtocolCommunicationSpecifier) -> Option<ProtocolBuilder> {
+  pub fn protocol_builders(&self, specifier: &ProtocolCommunicationSpecifier) -> Option<Vec<ProtocolBuilder>> {
     debug!(
-      "Looking for protocol that matches specifier: {:?}",
+      "Looking for protocols that matches specifier: {:?}",
       specifier
     );
-    for config in self.protocol_device_configurations.iter() {
-      if config.value().specifiers.contains(specifier) {
+    let protocols: Vec<ProtocolBuilder> = self.protocol_device_configurations.iter()
+      .filter(|config| config.value().specifiers.contains(specifier))
+      .filter_map(|config| {
         info!(
           "Found protocol configuration {:?} for specifier {:?}.",
           config.key(),
@@ -711,16 +712,19 @@ impl DeviceConfigurationManager {
           .get(config.key())
           .map(|pair| pair.value().clone())?;
 
-        return Some(ProtocolBuilder::new(
+        Some(ProtocolBuilder::new(
           self.allow_raw_messages,
           protocol_factory,
           self.user_device_configs.clone(),
           config.value().clone(),
-        ));
-      }
+        ))
+      })
+      .collect();
+    if protocols.is_empty() {
+      debug!("No protocol found for specifier {:?}.", specifier);
+      return None;
     }
-    debug!("No protocol found for specifier {:?}.", specifier);
-    None
+    Some(protocols)
   }
 }
 
@@ -751,7 +755,7 @@ mod test {
     let config = create_unit_test_dcm(false);
     let launch =
       ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]));
-    assert!(config.protocol_builder(&launch).is_some());
+    assert!(config.protocol_builders(&launch).is_some());
   }
 
   #[test]
@@ -761,7 +765,7 @@ mod test {
       "LVS-Whatever",
       &[],
     ));
-    assert!(config.protocol_builder(&lovense).is_some());
+    assert!(config.protocol_builders(&lovense).is_some());
   }
 
   #[test]
@@ -772,8 +776,11 @@ mod test {
       "LVS-Whatever",
       &[],
     ));
-    let builder = config
-      .protocol_builder(&lovense)
+    let builders = config
+      .protocol_builders(&lovense)
+      .expect("Test, assuming infallible");
+    let builder = builders
+      .first()
       .expect("Test, assuming infallible");
     let config = builder
       .configuration()
@@ -799,9 +806,12 @@ mod test {
       "LVS-Whatever",
       &[],
     ));
-    let builder = config
-      .protocol_builder(&lovense)
-      .expect("Test, assuming infallible");
+    let builders = config
+        .protocol_builders(&lovense)
+        .expect("Test, assuming infallible");
+    let builder = builders
+        .first()
+        .expect("Test, assuming infallible");
     let device_attr_builder = DeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), Arc::new(DashMap::new()));
     let config = device_attr_builder
       .create("DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
@@ -822,9 +832,12 @@ mod test {
       "LVS-Whatever",
       &[],
     ));
-    let builder = config
-      .protocol_builder(&lovense)
-      .expect("Test, assuming infallible");
+    let builders = config
+        .protocol_builders(&lovense)
+        .expect("Test, assuming infallible");
+    let builder = builders
+        .first()
+        .expect("Test, assuming infallible");
       let device_attr_builder = DeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), Arc::new(DashMap::new()));
       let config = device_attr_builder
         .create(&"DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
