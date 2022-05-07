@@ -4139,7 +4139,7 @@
           },
           "messages": {
             "VibrateCmd": {
-              "FeatureCount": 2,
+              "FeatureCount": 1,
               "StepCount": [
                 100
               ]

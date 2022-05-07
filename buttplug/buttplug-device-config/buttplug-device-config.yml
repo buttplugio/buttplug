@@ -2700,7 +2700,7 @@ protocols:
           en-us: Satisfyer E-Love G-Spotter
         messages:
           VibrateCmd:
-            FeatureCount: 2 # 4?
+            FeatureCount: 1 # 4?
             StepCount:
               - 100
               # - 100 e-amplitude
