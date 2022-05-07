@@ -1,9 +1,11 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
+
+
 
 use super::*;
 #[cfg(feature = "serialize-json")]
@@ -20,6 +22,7 @@ where
   ordered.serialize(serializer)
 }
 
+/// Substructure of device messages, used for attribute information (name, messages supported, etc...)
 #[derive(Clone, Debug, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {

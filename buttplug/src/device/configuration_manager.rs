@@ -1,11 +1,13 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2021 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Device specific identification and protocol implementations.
+//! Management of support devices, including identifying information and configurations
+//! 
+//! 
 
 use super::protocol::{
   add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,

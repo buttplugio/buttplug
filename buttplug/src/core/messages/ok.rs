@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -9,8 +9,7 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-/// Represents the Buttplug Protocol Ok message, as documented in the [Buttplug
-/// Protocol Spec](https://buttplug-spec.docs.buttplug.io/status.html#ok).
+/// Ok message, signifying successful response to a command. [Spec link](https://buttplug-spec.docs.buttplug.io/status.html#ok).
 #[derive(Debug, PartialEq, ButtplugMessage, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Ok {

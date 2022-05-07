@@ -1,3 +1,10 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use super::btleplug_device_impl::BtlePlugDeviceImplCreator;
 use crate::server::comm_managers::DeviceCommunicationEvent;
 use btleplug::{

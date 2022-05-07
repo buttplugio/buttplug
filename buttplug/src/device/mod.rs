@@ -1,3 +1,16 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
+
+//! Device identification and configuration, and protocol definitions
+//!
+//! The device module is used by the Buttplug Server to identify devices that buttplug can connect
+//! to, and match them to supported protocols in order to establish communication. 
+
 pub mod configuration_manager;
 pub mod protocol;
 use serde::{
@@ -39,6 +52,7 @@ use async_trait::async_trait;
 use core::hash::{Hash, Hasher};
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
+
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature

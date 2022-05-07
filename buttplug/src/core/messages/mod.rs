@@ -1,18 +1,17 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Representations of low level [Buttplug
-//! Protocol](https://buttplug-spec.docs.buttplug.io) messages
+//! Representations of low level [Buttplug Protocol](https://buttplug-spec.docs.buttplug.io)
+//! messages
 //!
-//! The messages module contains the core communication types for the Buttplug
-//! protocol. There are structs for each message type, sometimes with multiple
-//! versions of the same message relating to different spec versions. There are
-//! also enum types that are used to classify messages into categories, for
-//! instance, messages that only should be sent by a client or server.
+//! The core communication types for the Buttplug protocol. There are structs for each message type,
+//! sometimes with multiple versions of the same message relating to different spec versions. There
+//! are also enum types that are used to classify messages into categories, for instance, messages
+//! that only should be sent by a client or server.
 
 mod battery_level_cmd;
 mod battery_level_reading;

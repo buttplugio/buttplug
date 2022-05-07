@@ -5,10 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+
+
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
+/// Generic command for setting a level (single magnitude value) of a device feature.
 #[derive(Debug, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LevelSubcommand {

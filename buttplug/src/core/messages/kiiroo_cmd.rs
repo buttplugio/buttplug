@@ -1,15 +1,17 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2020 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
+
 
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-// Dear god this needs to be deprecated
+/// Kiiroo Command (Version 0 Message, Deprecated)
+#[deprecated(since="0.0.0", note="Buttplug Spec Version 0 message, no longer used and not supported by any device.")]
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
