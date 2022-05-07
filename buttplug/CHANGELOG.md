@@ -1,3 +1,9 @@
+# 5.1.10 (2022-05-07)
+
+## Bugfixes
+
+- Fix issue with invalid configuration of certain Satisfyer devices that could cause crashes
+
 # 5.1.9 (2022-04-26)
 
 ## Features
