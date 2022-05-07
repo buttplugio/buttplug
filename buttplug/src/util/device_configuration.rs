@@ -284,7 +284,7 @@ pub fn load_protocol_config_from_json(
       Ok(protocol_config) => {
         let internal_config_version = get_internal_config_version();
         if !skip_version_check && protocol_config.version < internal_config_version {
-          Err(ButtplugDeviceError::DeviceConfigurationFileError(format!(
+          Err(ButtplugDeviceError::DeviceConfigurationError(format!(
             "Device configuration file version {} is older than internal version {}. Please use a newer file.",
             protocol_config.version,
             internal_config_version
@@ -293,9 +293,9 @@ pub fn load_protocol_config_from_json(
           Ok(protocol_config)
         }
       }
-      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)).into()),
+      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err)).into()),
     },
-    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationFileError(format!("{}", err)).into()),
+    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err)).into()),
   }
 }
 

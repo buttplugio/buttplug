@@ -446,8 +446,8 @@ impl ProtocolDeviceConfiguration {
   }
 
   pub fn is_valid(&self) -> Result<(), ButtplugError> {
-    for (_, attrs) in &self.configurations {
-      attrs.is_valid()?;
+    for (ident, attrs) in &self.configurations {
+      attrs.is_valid().map_err(|e| ButtplugDeviceError::DeviceConfigurationError(format!("Error in {ident:?} configuration: {e}")))?;
     }
     Ok(())
   }
@@ -505,7 +505,7 @@ impl DeviceAttributesBuilder {
           .device_attributes(&ProtocolAttributesIdentifier::Default)
       })
       .ok_or_else(|| ButtplugError::from(
-        ButtplugDeviceError::DeviceConfigurationFileError(format!(
+        ButtplugDeviceError::DeviceConfigurationError(format!(
           "Configuration not found for device identifier '{:?}' Address '{:?}'",
           identifier, address
         )),

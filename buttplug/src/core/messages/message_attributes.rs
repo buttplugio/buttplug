@@ -153,7 +153,6 @@ impl DeviceMessageAttributes {
   }
 
   fn check_feature_count_validity(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), String> {
-    info!("Feature count");
     if self.feature_count.is_none() {
       info!("Feature count error");
       Err(format!("Feature count is required for {}.", message_type))
@@ -163,7 +162,6 @@ impl DeviceMessageAttributes {
   }
 
   fn check_step_count(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), String> {
-    info!("Step count");
     if self.step_count.is_none() {
       Err(format!("Step count is required for {}.", message_type))
     } else if self.step_count.as_ref().expect("Checked").len() != *self.feature_count.as_ref().expect("Already checked in feature count check.") as usize {
@@ -174,7 +172,6 @@ impl DeviceMessageAttributes {
   }
 
   fn check_step_range(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), String> {
-    info!("Step range: {:?}", self.step_range);
     if let Some(step_range) = &self.step_range {
       // if step ranges are set up manually, they must be included for all acutators.
       if step_range.len() != *self.feature_count.as_ref().expect("Already checked in feature count check.") as usize {
@@ -222,7 +219,7 @@ impl DeviceMessageAttributes {
         self.endpoints.is_some().then(|| ()).ok_or(format!("Endpoints vector must exist for {}.", message_type))
       },
       _ => Ok(())
-    }.map_err(ButtplugDeviceError::DeviceConfigurationFileError)
+    }.map_err(ButtplugDeviceError::DeviceConfigurationError)
   }
 
   pub fn merge(&self, other: &DeviceMessageAttributes) -> DeviceMessageAttributes {
