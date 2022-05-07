@@ -1,5 +1,5 @@
 {
-  "version": 64,
+  "version": 65,
   "protocols": {
     "lovense": {
       "btle": {
