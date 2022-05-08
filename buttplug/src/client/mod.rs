@@ -7,7 +7,7 @@
 
 //! Communications API for accessing Buttplug Servers
 pub mod client_event_loop;
-mod client_message_sorter;
+pub mod client_message_sorter;
 pub mod device;
 
 #[cfg(feature = "server")]
@@ -75,22 +75,18 @@ pub(crate) type ButtplugServerMessageStateShared =
 /// Future type that expects server responses.
 pub(crate) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessageResult>;
 
-/// Future state for messages sent from the client that expect a server
-/// response.
+/// Future state for messages sent from the client that expect a server response.
 ///
-/// When a message is sent from the client and expects a response from the
-/// server, we'd like to know when that response arrives, and usually we'll want
-/// to wait for it. We can do so by creating a future that will be resolved when
-/// a response is received from the server.
+/// When a message is sent from the client and expects a response from the server, we'd like to know
+/// when that response arrives, and usually we'll want to wait for it. We can do so by creating a
+/// future that will be resolved when a response is received from the server.
 ///
-/// To do this, we build a [ButtplugFuture], then take its waker and pass it
-/// along with the message we send to the connector, using the
-/// [ButtplugClientMessageFuturePair] type. We can then expect the connector to
-/// get the response from the server, match it with our message (using something
-/// like the
-/// [ClientMessageSorter][crate::client::client_message_sorter::ClientMessageSorter]),
-/// and set the reply in the waker we've sent along. This will resolve the
-/// future we're waiting on and allow us to continue execution.
+/// To do this, we build a [ButtplugFuture], then take its waker and pass it along with the message
+/// we send to the connector, using the [ButtplugClientMessageFuturePair] type. We can then expect
+/// the connector to get the response from the server, match it with our message (using something
+/// like the ClientMessageSorter, an internal structure in the Buttplug library), and set the reply
+/// in the waker we've sent along. This will resolve the future we're waiting on and allow us to
+/// continue execution.
 #[derive(Clone)]
 pub struct ButtplugClientMessageFuturePair {
   pub msg: ButtplugCurrentSpecClientMessage,
@@ -110,9 +106,8 @@ impl ButtplugClientMessageFuturePair {
 ///
 /// Clients can return two types of errors:
 ///
-/// - [ButtplugConnectorError], which means there was a problem with the
-/// connection between the client and the server, like a network connection
-/// issue.
+/// - [ButtplugConnectorError], which means there was a problem with the connection between the
+/// client and the server, like a network connection issue.
 /// - [ButtplugError], which is an error specific to the Buttplug Protocol.
 #[derive(Debug, Error)]
 pub enum ButtplugClientError {

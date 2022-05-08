@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+//! Implementations of communication protocols for hardware supported by Buttplug
+
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
 pub mod ankni;
