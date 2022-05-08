@@ -249,13 +249,13 @@ impl ProtocolCommunicationSpecifier {
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, Setters, MutGetters, Serialize, Deserialize)]
 #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-pub struct ProtocolDeviceSpecifier {
+pub struct ProtocolDeviceIdentifier {
   address: String,
   protocol: String,  
   identifier: ProtocolAttributesIdentifier
 }
 
-impl ProtocolDeviceSpecifier { 
+impl ProtocolDeviceIdentifier { 
   pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
     Self {
       address: address.to_owned(),
@@ -467,11 +467,11 @@ pub struct DeviceAttributesBuilder {
   protocol_identifier: String,
   allow_raw_messages: bool,
   device_configuration: ProtocolDeviceConfiguration,
-  user_configs: Arc<DashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>>,
+  user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
 }
 
 impl DeviceAttributesBuilder {
-  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>>) -> Self {
+  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>) -> Self {
     Self {
       protocol_identifier: protocol_identifier.to_owned(),
       allow_raw_messages,
@@ -513,7 +513,7 @@ impl DeviceAttributesBuilder {
         )),
       ))?;
 
-    let device_identifier = ProtocolDeviceSpecifier::new(address, &self.protocol_identifier, identifier);
+    let device_identifier = ProtocolDeviceIdentifier::new(address, &self.protocol_identifier, identifier);
 
     // In the case we have a user config that matches the address of our device, build a new
     // ProtocolDeviceAttributes leaf node using our current identifier as the parent. Then check if
@@ -549,7 +549,7 @@ impl DeviceAttributesBuilder {
 pub struct ProtocolBuilder {
   allow_raw_messages: bool,
   protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-  user_device_configs: Arc<DashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>>,
+  user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
   configuration: ProtocolDeviceConfiguration,
 }
 
@@ -557,7 +557,7 @@ impl ProtocolBuilder {
   fn new(
     allow_raw_messages: bool,
     protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-    user_device_configs: Arc<DashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>>,
+    user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
     configuration: ProtocolDeviceConfiguration,
   ) -> Self {
     Self {
@@ -590,7 +590,7 @@ pub struct DeviceConfigurationManager {
   allow_raw_messages: bool,
   protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
   protocol_map: Arc<DashMap<String, Arc<dyn ButtplugProtocolFactory>>>,
-  user_device_configs: Arc<DashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>>
+  user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>
 }
 
 impl Default for DeviceConfigurationManager {
@@ -611,16 +611,16 @@ impl DeviceConfigurationManager {
     }
   }
 
-  pub fn add_user_device_config(&self, protocol_identifier: &ProtocolDeviceSpecifier, protocol_attributes: &ProtocolDeviceAttributes) -> Result<(), ButtplugError> {
+  pub fn add_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> Result<(), ButtplugError> {
     self.user_device_configs.insert(protocol_identifier.clone(), protocol_attributes.clone());
     Ok(())
   }
 
-  pub fn remove_user_device_config(&self, protocol_identifier: &ProtocolDeviceSpecifier) {
+  pub fn remove_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) {
     self.user_device_configs.remove(protocol_identifier);
   }
 
-  pub fn user_device_config(&self, protocol_identifier: &ProtocolDeviceSpecifier) -> Option<ProtocolDeviceAttributes> {
+  pub fn user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) -> Option<ProtocolDeviceAttributes> {
     self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.value().clone()))
   }
 

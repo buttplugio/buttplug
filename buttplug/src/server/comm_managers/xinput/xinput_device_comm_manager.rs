@@ -82,7 +82,7 @@ async fn check_gamepad_connectivity(
         connected_gamepads.store(new_connected_gamepads, Ordering::SeqCst);
         if let Some(send) = &sender {
           send
-            .send(ButtplugDeviceEvent::Removed(create_address(*index)))
+            .send(ButtplugDeviceEvent::Disconnected(create_address(*index)))
             .expect("Infallible, device manager listening or this doesn't exist.");
         }
         // If we're out of gamepads to track, return immediately.

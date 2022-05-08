@@ -245,7 +245,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                 );
                 if event_stream_clone.receiver_count() != 0 {
                   if let Err(err) = event_stream_clone
-                  .send(ButtplugDeviceEvent::Removed(
+                  .send(ButtplugDeviceEvent::Disconnected(
                     format!("{:?}", address)
                   )) {
                     error!(

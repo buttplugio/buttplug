@@ -241,7 +241,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
               }
             }
           }
-          ButtplugDeviceEvent::Removed(_) => {
+          ButtplugDeviceEvent::Disconnected(_) => {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
                 "Lovense".to_owned(),

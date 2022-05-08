@@ -14,7 +14,7 @@ use crate::{
   device::configuration_manager::{
     BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
     ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
-    ProtocolDeviceConfiguration, ProtocolDeviceSpecifier, SerialSpecifier, USBSpecifier,
+    ProtocolDeviceConfiguration, ProtocolDeviceIdentifier, SerialSpecifier, USBSpecifier,
     WebsocketSpecifier, XInputSpecifier,
   },
 };
@@ -91,7 +91,7 @@ pub struct ProtocolDefinition {
 pub struct UserConfigDefinition {
   specifiers: HashMap<String, ProtocolDefinition>,
   #[serde(rename = "devices", with = "vectorize")]
-  user_configs: HashMap<ProtocolDeviceSpecifier, DeviceUserConfig>,
+  user_configs: HashMap<ProtocolDeviceIdentifier, DeviceUserConfig>,
 }
 
 #[derive(Default, Debug, Getters)]
@@ -99,9 +99,9 @@ pub struct UserConfigDefinition {
 pub struct ExternalDeviceConfiguration {
   allow_list: Vec<String>,
   deny_list: Vec<String>,
-  reserved_indexes: HashMap<u32, String>,
+  reserved_indexes: HashMap<u32, ProtocolDeviceIdentifier>,
   protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
-  user_configs: HashMap<ProtocolDeviceSpecifier, ProtocolDeviceAttributes>,
+  user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
@@ -234,7 +234,7 @@ fn add_user_configs_to_protocol(
     if let Some(index) = user_config.index().as_ref() {
       external_config
         .reserved_indexes
-        .insert(*index, specifier.address().clone());
+        .insert(*index, specifier.clone());
     }
     let config_attrs = ProtocolDeviceAttributes::new(
       specifier.identifier().clone(),

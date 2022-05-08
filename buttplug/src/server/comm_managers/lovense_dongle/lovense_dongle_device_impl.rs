@@ -154,7 +154,7 @@ impl LovenseDongleDeviceImpl {
       }
       info!("Lovense dongle device disconnected",);
       if device_event_sender_clone
-        .send(ButtplugDeviceEvent::Removed(address_clone.clone()))
+        .send(ButtplugDeviceEvent::Disconnected(address_clone.clone()))
         .is_err()
       {
         error!("Device Manager no longer alive, cannot send removed event.");

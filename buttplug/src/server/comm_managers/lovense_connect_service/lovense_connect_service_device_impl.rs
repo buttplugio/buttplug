@@ -98,7 +98,7 @@ impl LovenseServiceDeviceImpl {
       while toy_info_clone.read().await.connected {
         Delay::new(Duration::from_secs(1)).await;
       }
-      let _ = sender_clone.send(ButtplugDeviceEvent::Removed(toy_id));
+      let _ = sender_clone.send(ButtplugDeviceEvent::Disconnected(toy_id));
       info!("Exiting lovense service device connection check loop.");
     });
     Self {

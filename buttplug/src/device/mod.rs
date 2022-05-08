@@ -412,8 +412,8 @@ pub trait ButtplugDeviceImplCreator: Sync + Send + Debug {
 pub struct ButtplugDevice {
   protocol: Box<dyn ButtplugProtocol>,
   device: Arc<DeviceImpl>,
-  display_name: Option<String>,
-  device_identifier: String
+  display_name: OnceCell<String>,
+  device_identifier: ProtocolDeviceIdentifier
 }
 
 impl Debug for ButtplugDevice {
@@ -440,17 +440,14 @@ impl PartialEq for ButtplugDevice {
   }
 }
 
-pub fn form_device_identifier(protocol_identifier: &str, protocol_attributes_identifier: &ProtocolAttributesIdentifier, device_address: &str ) -> String {
-  format!("{}|{:?}|{}", protocol_identifier, protocol_attributes_identifier, device_address)
-}
-
 impl ButtplugDevice {
-  pub fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
+  /// Given a protocol and a device impl, create a new ButtplugDevice instance
+  fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
     Self {
-      device_identifier: form_device_identifier(protocol.protocol_identifier(), protocol.protocol_attributes_identifier(), device.address()),
+      device_identifier: ProtocolDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
       protocol,
       device,
-      display_name: None,
+      display_name: OnceCell::new(),
     }
   }
 
@@ -523,7 +520,7 @@ impl ButtplugDevice {
   }
 
   pub fn display_name(&self) -> Option<String> {
-    self.display_name.clone()
+    self.display_name.get().and_then(|name| Some(name.clone()))
   }
 
   pub fn name(&self) -> String {

@@ -34,7 +34,7 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceConfiguration},
+    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
     ButtplugDevice,
   },
@@ -54,7 +54,7 @@ use tokio::sync::{broadcast, mpsc};
 
 #[derive(Debug)]
 pub struct DeviceInfo {
-  pub address: String,
+  pub identifier: ProtocolDeviceIdentifier,
   pub display_name: Option<String>,
 }
 
@@ -72,7 +72,7 @@ pub struct DeviceManager {
   /// List of device addresses we are not allowed to connect to.
   denied_devices: Arc<DashSet<String>>,
   /// Map of device address to related index, if index is stored.
-  reserved_device_indexes: Arc<DashMap<String, u32>>
+  reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
 }
 
 impl DeviceManager {
@@ -319,12 +319,12 @@ impl DeviceManager {
     self.denied_devices.remove(address);
   }
 
-  pub fn add_reserved_device_index(&self, address: &str, index: u32) {
-    self.reserved_device_indexes.insert(address.to_owned(), index);
+  pub fn add_reserved_device_index(&self, identifier: &ProtocolDeviceIdentifier, index: u32) {
+    self.reserved_device_indexes.insert(identifier.clone(), index);
   }
 
-  pub fn remove_reserved_device_index(&self, address: &str) {
-    self.reserved_device_indexes.remove(address);
+  pub fn remove_reserved_device_index(&self, identifier: &ProtocolDeviceIdentifier) {
+    self.reserved_device_indexes.remove(identifier);
   }
 
   pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugServerError>
@@ -360,7 +360,7 @@ impl DeviceManager {
   pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {
     if let Some(device) = self.devices.get(&index) {
       Ok(DeviceInfo {
-        address: device.value().device_identifier().to_owned(),
+        identifier: device.value().device_identifier().clone(),
         display_name: device.value().display_name(),
       })
     } else {

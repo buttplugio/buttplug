@@ -18,7 +18,7 @@ use crate::{
     StopDeviceCmd,
   },
   device::{
-    configuration_manager::{DeviceConfigurationManager},
+    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceIdentifier},
     ButtplugDevice,
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
@@ -42,7 +42,7 @@ pub struct DeviceManagerEventLoop {
   device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
   ping_timer: Arc<PingTimer>,
   /// Maps device implementation addresses to indexes, so they can be reused on reconnect.
-  device_index_map: Arc<DashMap<String, u32>>,
+  device_index_map: Arc<DashMap<ProtocolDeviceIdentifier, u32>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessage>,
@@ -66,7 +66,7 @@ pub struct DeviceManagerEventLoop {
   /// List of device addresses we are not allowed to connect to.
   denied_devices: Arc<DashSet<String>>,
   /// Map of device address to related index, if index is stored.
-  reserved_device_indexes: Arc<DashMap<String, u32>>
+  reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
 }
 
 impl DeviceManagerEventLoop {
@@ -78,7 +78,7 @@ impl DeviceManagerEventLoop {
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
     allowed_devices: Arc<DashSet<String>>,
     denied_devices: Arc<DashSet<String>>,
-    reserved_device_indexes: Arc<DashMap<String, u32>>
+    reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -226,7 +226,7 @@ impl DeviceManagerEventLoop {
         let span = info_span!(
           "device registration",
           name = tracing::field::display(device.name()),
-          address = tracing::field::display(device.device_identifier())
+          identifier = tracing::field::debug(device.device_identifier())
         );
         let _enter = span.enter();
 
@@ -243,7 +243,7 @@ impl DeviceManagerEventLoop {
           self.device_index_generator += 1;
           self
             .device_index_map
-            .insert(device.device_impl_address().to_owned(), generated_device_index);
+            .insert(device.device_identifier().clone(), generated_device_index);
           generated_device_index
         };
         // Since we can now reuse device indexes, this means we might possibly

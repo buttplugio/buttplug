@@ -175,7 +175,7 @@ impl TestDeviceInternal {
     let address = self.address.clone();
     Box::pin(async move {
       sender
-        .send(ButtplugDeviceEvent::Removed(address))
+        .send(ButtplugDeviceEvent::Disconnected(address))
         .expect("Test");
       Ok(())
     })
@@ -217,7 +217,7 @@ impl DeviceImplInternal for TestDevice {
     let address = self.address.clone();
     Box::pin(async move {
       sender
-        .send(ButtplugDeviceEvent::Removed(address))
+        .send(ButtplugDeviceEvent::Disconnected(address))
         .expect("Test");
       Ok(())
     })

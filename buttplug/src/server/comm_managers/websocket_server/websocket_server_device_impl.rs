@@ -118,7 +118,7 @@ async fn run_connection_loop<S>(
                 async_tungstenite::tungstenite::Message::Close(_) => {
                   // Drop the error if no one receives the message, we're breaking anyways.
                   let _ = event_sender
-                    .send(ButtplugDeviceEvent::Removed(
+                    .send(ButtplugDeviceEvent::Disconnected(
                       address.to_owned()
                     ));
                   break;
