@@ -626,8 +626,8 @@ impl ButtplugDevice {
   /// port matching, etc...
   /// 
   /// If a matching protocol is found, we then call
-  /// [DeviceImpl::try_create_device_impl](crate::device::DeviceImpl::try_create_device_impl) with
-  /// the related protocol information, in order to connect and initialize the device.
+  /// [ButtplugDeviceImplCreator::try_create_device_impl](crate::device::ButtplugDeviceImplCreator::try_create_device_impl)
+  /// with the related protocol information, in order to connect and initialize the device.
   /// 
   /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
   /// client and use.
