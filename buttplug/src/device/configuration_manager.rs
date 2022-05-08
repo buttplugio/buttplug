@@ -5,9 +5,90 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Management of support devices, including identifying information and configurations
+//! Management of support devices, including identifying information and configurations.
 //! 
+//! ## Device Configuration and Discovery in Buttplug
 //! 
+//! Buttplug can handle device communication over several different mediums, including bluetooth,
+//! usb, serial, various network protocols, and other means. The library can also identify which
+//! protocol each device needs to use for command and control. All of this information is stored in
+//! the [DeviceConfigurationManager], a structure that is built whenever a [buttplug
+//! server](crate::server::ButtplugServer) instance is created, and which is immutable for the life
+//! of the server instance.
+//! 
+//! The [DeviceConfigurationManager] contains all of the APIs needed to load protocol configurations
+//! into the system, as well as match newly discovered devices to protocols. Protocols come with
+//! "specifiers" (like [BluetoothLESpecifier], [USBSpecifier], etc...) which contain device
+//! identification and connection information. If a discovered device matches one or more protocol
+//! specifiers, a connection attempt begins, where each matched protocol is given a chance to see if
+//! it can identify and communicate with the device. If a protocol and device are matched, and
+//! connection is successful the initialized protocol instance is returned, and becomes part of the
+//! [ButtplugDevice](crate::device::ButtplugDevice) instance used by the
+//! [ButtplugServer](crate::server::ButtplugServer).
+//! 
+//! ## Device Identification
+//! 
+//! Once devices are connected, they are identified via the following properties:
+//! 
+//! - Their communication bus address (BLE address, serial port name, etc... For devices that
+//!   connect via network protocols, this may be a generated value, but should be unique.)
+//! - Their protocol name
+//! - Their protocol identifier
+//! 
+//! These values are held in [ProtocolDeviceIdentifier] instances, and used around the codebase to
+//! identify a device. This identifier is used so that if a device somehow shares addresses with
+//! another device but identifies under a different protocol, they will still be seen as separate
+//! devices.
+//! 
+//! As an example, let's say we have a Lovense Hush. The protocol will be "lovense" (which is
+//! configuration string version of the [Lovense Protocol](crate::device::protocol::lovense) name),
+//! its identifier will be "Z" (the identification letter for Hush in Lovense's proprietary
+//! protocol), and the address will be something like "AA:BB:CC:DD:EE:FF", which is the BLE address
+//! of the device on platforms that provide BLE addresses. Using these 3 values means that, even if
+//! for some reason the BLE address stays the same, if a device identifies differently (say, as a
+//! Domi instead of a Hush), we won't try to reuse the same configuration.
+//! 
+//! **NOTE THAT DEVICE IDENTIFIERS MAY NOT BE PORTABLE ACROSS PLATFORMS.** While these are used as
+//! internal identifers as well as keys for user configurations, they may not work if used between,
+//! say, Windows BLE and WebBluetooth, which provide different addressing schemes for devices.
+//! 
+//! ## Device Configurations versus User Configurations
+//! 
+//! Device Configurations are provided by the core Buttplug Team, and the configuration of all
+//! currently supported devices is both compiled into the library as well as distributed as external
+//! files (see the Device Configuration Files section below). However, users may want to set certain
+//! per-device configurations, in which case, User Configurations can be used.
+//! 
+//! User configurations include:
+//! 
+//! - Device Allow/Deny Lists: library will either only connect to certain devices, or never connect
+//!   to them, respectively.
+//! - Reserved indexes: allows the same device to show up to clients on the same device index every
+//!   time it connects
+//! - Device configuration extensions: If a new device from a brand comes out and has not been added
+//!   to the main Device Configuration file, or else a user creates their own DIY device that uses
+//!   another protocol (hence it will never be in the main Device Configuration file as there may
+//!   only be one of the device, period), a user can add an extension to an established protocol to
+//!   provide new identifier information.
+//! - User configured message attributes: limits that can be set for certain messages a device
+//!   takes. For instance, setting an upper limit on the vibration speed of a vibrator so it will
+//!   only go to 80% instead of 100%.
+//! 
+//! User configurations can be added to the [DeviceConfigurationManager].
+//! 
+//! ## Device Configuration Files
+//! 
+//! While all device configuration can be created and handled via API calls, the library supports
+//! 100s of devices, meaning doing this in code would be rather unwieldy, and any new device
+//! additions would require library version revs. To allow for adding and updating configurations
+//! possibly without the need for library updates, we externalize this configuration to JSON files.
+//! 
+//! Similarly, GUIs and other utilities have been created to facilitate creation of User
+//! Configurations, and these are also stored to files and loadable by the library.
+//! 
+//! These files are handled in the [Device Configuration File Module in the Utils portion of the
+//! library](crate::util::device_configuration). More information on the file format and loading
+//! strategies can be found there.
 
 use super::protocol::{
   add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,
@@ -34,13 +115,21 @@ use uuid::Uuid;
 // gonna hurt anything and making a ton of serde attributes is just going to get
 // confusing (see the messages impl).
 
+/// Specifier for Bluetooth LE Devices
+/// 
+/// Used by protocols for identifying bluetooth devices via their advertisements, as well as
+/// defining the services and characteristics they are expected to have.
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct BluetoothLESpecifier {
+  /// Set of expected advertised names for this device.
   names: HashSet<String>,
+  /// Set of expected advertised services for this device.
   #[serde(default, rename = "advertised-services")]
   advertised_services: HashSet<Uuid>,
-  // Set of services that we may have gotten as part of the advertisement.
+  /// Services we expect the device may have. More services may be listed in a specifier than any
+  /// one device may have, but we expect at least one to be matched by a device in order to consider
+  /// the device part of the protocol that has this specifier.
   services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
 }
 
@@ -84,6 +173,7 @@ impl PartialEq for BluetoothLESpecifier {
 }
 
 impl BluetoothLESpecifier {
+  /// Creates a specifier from a BLE device advertisement.
   pub fn new_from_device(name: &str, advertised_services: &[Uuid]) -> BluetoothLESpecifier {
     let mut name_set = HashSet::new();
     name_set.insert(name.to_string());
@@ -95,6 +185,8 @@ impl BluetoothLESpecifier {
     }
   }
 
+  /// Merge with another BLE specifier, used when loading user configs that extend a protocol
+  /// definition.
   pub fn merge(&mut self, other: BluetoothLESpecifier) {
     // Add any new names.
     self.names = self.names.union(&other.names).cloned().collect();
@@ -104,6 +196,12 @@ impl BluetoothLESpecifier {
   }
 }
 
+/// Specifier for [Lovense Connect
+/// Service](crate::server::comm_managers::lovense_connect_service) devices
+/// 
+/// Network based services, has no attributes because the [Lovense Connect
+/// Service](crate::server::comm_managers::lovense_connect_service) device communication manager
+/// handles all device discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
   // Needed for proper deserialization, but clippy will complain.
@@ -123,6 +221,11 @@ impl PartialEq for LovenseConnectServiceSpecifier {
   }
 }
 
+/// Specifier for [XInput](crate::server::comm_managers::xinput) devices
+/// 
+/// Network based services, has no attributes because the
+/// [XInput](crate::server::comm_managers::xinput) device communication manager handles all device
+/// discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
   // Needed for deserialziation but unused.
@@ -142,6 +245,9 @@ impl PartialEq for XInputSpecifier {
   }
 }
 
+/// Specifier for HID (USB, Bluetooth) devices
+/// 
+/// Handles devices managed by the operating system's HID manager.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct HIDSpecifier {
@@ -151,6 +257,9 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
+/// Specifier for Serial devices
+/// 
+/// Handles serial port device identification (via port names) and configuration.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct SerialSpecifier {
@@ -165,6 +274,8 @@ pub struct SerialSpecifier {
 }
 
 impl SerialSpecifier {
+  /// Given a serial port name (the only identifier we have for this type of device), create a
+  /// specifier instance.
   pub fn new_from_name(port: &str) -> Self {
     SerialSpecifier {
       port: port.to_owned(),
@@ -179,6 +290,7 @@ impl PartialEq for SerialSpecifier {
   }
 }
 
+/// Specifier for USB devices
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct USBSpecifier {
@@ -188,6 +300,10 @@ pub struct USBSpecifier {
   product_id: u16,
 }
 
+/// Specifier for Websocket Device Manager devices
+///
+/// The websocket device manager is a network based manager, so we have no info other than possibly
+/// a device name that is provided as part of the connection handshake.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub")]
 pub struct WebsocketSpecifier {
@@ -218,7 +334,11 @@ impl WebsocketSpecifier {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+/// Enum that covers all types of communication specifiers.
+/// 
+/// Allows generalization of specifiers to handle checking for equality. Used for testing newly discovered
+/// devices against the list of known devices for a protocol.
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ProtocolCommunicationSpecifier {
   BluetoothLE(BluetoothLESpecifier),
   HID(HIDSpecifier),
@@ -229,8 +349,8 @@ pub enum ProtocolCommunicationSpecifier {
   Websocket(WebsocketSpecifier),
 }
 
-impl ProtocolCommunicationSpecifier {
-  pub fn matches(&self, other: &ProtocolCommunicationSpecifier) -> bool {
+impl PartialEq for ProtocolCommunicationSpecifier {
+  fn eq(&self, other: &ProtocolCommunicationSpecifier) -> bool {
     use ProtocolCommunicationSpecifier::*;
     match (self, other) {
       (USB(self_spec), USB(other_spec)) => self_spec == other_spec,
@@ -247,15 +367,24 @@ impl ProtocolCommunicationSpecifier {
   }
 }
 
+impl Eq for ProtocolCommunicationSpecifier {}
+
+/// Identifying information for a connected devices
+/// 
+/// Contains the 3 fields needed to uniquely identify a device in the system.
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, Setters, MutGetters, Serialize, Deserialize)]
 #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
 pub struct ProtocolDeviceIdentifier {
+  /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
   address: String,
-  protocol: String,  
+  /// Name of the protocol used
+  protocol: String,
+  /// Internal identifier for the protocol used
   identifier: ProtocolAttributesIdentifier
 }
 
-impl ProtocolDeviceIdentifier { 
+impl ProtocolDeviceIdentifier {
+  /// Creates a new instance
   pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
     Self {
       address: address.to_owned(),
