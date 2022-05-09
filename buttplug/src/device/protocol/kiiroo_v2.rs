@@ -21,7 +21,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -64,7 +64,7 @@ impl ButtplugProtocolFactory for KiirooV2Factory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -73,7 +73,7 @@ impl ButtplugProtocolFactory for KiirooV2Factory {
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      let device_attributes = builder.create_from_impl(&device_impl)?;
+      let device_attributes = builder.create_from_device_impl(&device_impl)?;
       Ok(Box::new(KiirooV2::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

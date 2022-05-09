@@ -592,14 +592,14 @@ impl ProtocolDeviceConfiguration {
 }
 
 #[derive(Clone, Debug)]
-pub struct DeviceAttributesBuilder {
+pub struct ProtocolDeviceAttributesBuilder {
   protocol_identifier: String,
   allow_raw_messages: bool,
   device_configuration: ProtocolDeviceConfiguration,
   user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
 }
 
-impl DeviceAttributesBuilder {
+impl ProtocolDeviceAttributesBuilder {
   fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>) -> Self {
     Self {
       protocol_identifier: protocol_identifier.to_owned(),
@@ -609,7 +609,7 @@ impl DeviceAttributesBuilder {
     }
   }
 
-  pub fn create_from_impl(
+  pub fn create_from_device_impl(
     &self,
     device_impl: &Arc<DeviceImpl>,
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
@@ -675,7 +675,7 @@ impl DeviceAttributesBuilder {
 }
 
 #[derive(Clone, Debug)]
-pub struct ProtocolBuilder {
+pub struct ProtocolInstanceFactory {
   allow_raw_messages: bool,
   protocol_factory: Arc<dyn ButtplugProtocolFactory>,
   user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
@@ -701,7 +701,7 @@ impl ProtocolBuilder {
     &self,
     device_impl: Arc<DeviceImpl>,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
-    let builder = DeviceAttributesBuilder::new(
+    let builder = ProtocolDeviceAttributesBuilder::new(
       self.protocol_factory.protocol_identifier(),
       self.allow_raw_messages, 
       self.configuration.clone(), 
@@ -815,7 +815,7 @@ impl DeviceConfigurationManager {
     self.protocol_device_configurations.clone()
   }
 
-  pub fn protocol_builder(&self, specifier: &ProtocolCommunicationSpecifier) -> Option<ProtocolBuilder> {
+  pub fn protocol_instance_factory(&self, specifier: &ProtocolCommunicationSpecifier) -> Option<ProtocolInstanceFactory> {
     debug!(
       "Looking for protocol that matches specifier: {:?}",
       specifier
@@ -842,7 +842,7 @@ impl DeviceConfigurationManager {
           .get(config.key())
           .map(|pair| pair.value().clone())?;
 
-        return Some(ProtocolBuilder::new(
+        return Some(ProtocolInstanceFactory::new(
           self.allow_raw_messages,
           protocol_factory,
           self.user_device_configs.clone(),
@@ -882,7 +882,7 @@ mod test {
     let config = create_unit_test_dcm(false);
     let launch =
       ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]));
-    assert!(config.protocol_builder(&launch).is_some());
+    assert!(config.protocol_instance_factory(&launch).is_some());
   }
 
   #[test]
@@ -892,7 +892,7 @@ mod test {
       "LVS-Whatever",
       &[],
     ));
-    assert!(config.protocol_builder(&lovense).is_some());
+    assert!(config.protocol_instance_factory(&lovense).is_some());
   }
 
   #[test]
@@ -904,7 +904,7 @@ mod test {
       &[],
     ));
     let builder = config
-      .protocol_builder(&lovense)
+      .protocol_instance_factory(&lovense)
       .expect("Test, assuming infallible");
     let config = builder
       .configuration()
@@ -931,9 +931,9 @@ mod test {
       &[],
     ));
     let builder = config
-      .protocol_builder(&lovense)
+      .protocol_instance_factory(&lovense)
       .expect("Test, assuming infallible");
-    let device_attr_builder = DeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), Arc::new(DashMap::new()));
+    let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), Arc::new(DashMap::new()));
     let config = device_attr_builder
       .create("DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
       .expect("Test, assuming infallible");
@@ -954,9 +954,9 @@ mod test {
       &[],
     ));
     let builder = config
-      .protocol_builder(&lovense)
+      .protocol_instance_factory(&lovense)
       .expect("Test, assuming infallible");
-      let device_attr_builder = DeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), Arc::new(DashMap::new()));
+      let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), Arc::new(DashMap::new()));
       let config = device_attr_builder
         .create(&"DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
         .expect("Test, assuming infallible");

@@ -16,7 +16,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceReadCmd,
     DeviceWriteCmd,
@@ -34,7 +34,7 @@ impl ButtplugProtocolFactory for VibratissimoFactory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,

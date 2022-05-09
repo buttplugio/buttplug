@@ -13,7 +13,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -31,14 +31,14 @@ impl ButtplugProtocolFactory for XInputFactory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
       // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-      let device_attributes = builder.create_from_impl(&device_impl)?;
+      let device_attributes = builder.create_from_device_impl(&device_impl)?;
       /*
       let name = format!(
         "{} {}",

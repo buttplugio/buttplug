@@ -74,7 +74,7 @@ use crate::{
     },
   },
   device::{
-    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
+    configuration_manager::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
     ButtplugDeviceResultFuture, DeviceReadCmd, Endpoint,
   },
 };
@@ -158,7 +158,7 @@ pub trait ButtplugProtocolFactory: std::fmt::Debug + Send + Sync {
   fn try_create(
     &self,
     device_impl: Arc<DeviceImpl>,
-    attributes_builder: DeviceAttributesBuilder,
+    attributes_builder: ProtocolDeviceAttributesBuilder,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
 }
 
@@ -590,13 +590,13 @@ macro_rules! default_protocol_trait_declaration {
         fn try_create(
           &self,
           device_impl: Arc<crate::device::DeviceImpl>,
-          attributes_builder: DeviceAttributesBuilder,
+          attributes_builder: ProtocolDeviceAttributesBuilder,
         ) -> futures::future::BoxFuture<
           'static,
           Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
         > {
           Box::pin(async move {
-            let attributes = attributes_builder.create_from_impl(&device_impl)?;
+            let attributes = attributes_builder.create_from_device_impl(&device_impl)?;
             Ok(Box::new($protocol_name::new(attributes)) as Box<dyn ButtplugProtocol>)
           })
         }

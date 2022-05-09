@@ -16,7 +16,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::ButtplugProtocolProperties, 
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
     DeviceImpl, DeviceWriteCmd, Endpoint},
 };
 use std::sync::Arc;

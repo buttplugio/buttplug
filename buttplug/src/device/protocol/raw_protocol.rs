@@ -10,7 +10,7 @@ use crate::{
   core::messages::{ButtplugDeviceCommandMessageUnion, },
   device::{
     protocol::ButtplugProtocolProperties,
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
   },
 };
 use std::sync::Arc;

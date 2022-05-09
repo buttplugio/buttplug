@@ -10,7 +10,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -27,7 +27,7 @@ impl ButtplugProtocolFactory for PatooFactory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,

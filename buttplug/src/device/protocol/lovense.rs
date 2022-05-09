@@ -21,7 +21,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder, ProtocolAttributesIdentifier},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -75,7 +75,7 @@ impl ButtplugProtocolFactory for LovenseFactory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -114,7 +114,7 @@ impl ButtplugProtocolFactory for LovenseFactory {
             count += 1;
             if count > LOVENSE_COMMAND_RETRY {
               warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
-              let device_attributes = builder.create_from_impl(&device_impl)?;
+              let device_attributes = builder.create_from_device_impl(&device_impl)?;
               return Ok(Box::new(Lovense::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             }
           }

@@ -10,7 +10,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -27,7 +27,7 @@ impl ButtplugProtocolFactory for LoveDistanceFactory {
   fn try_create(
     &self,
     device_impl: Arc<crate::device::DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -37,7 +37,7 @@ impl ButtplugProtocolFactory for LoveDistanceFactory {
       device_impl.write_value(msg).await?;
       let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
       device_impl.write_value(msg).await?;
-      let device_attributes = builder.create_from_impl(&device_impl)?;
+      let device_attributes = builder.create_from_device_impl(&device_impl)?;
       Ok(Box::new(LoveDistance::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

@@ -21,7 +21,7 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{DeviceAttributesBuilder, ProtocolDeviceAttributes},
+    configuration_manager::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
@@ -80,7 +80,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
   fn try_create(
     &self,
     device_impl: Arc<DeviceImpl>,
-    builder: DeviceAttributesBuilder,
+    builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
@@ -134,7 +134,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
         .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      let device_attributes = builder.create_from_impl(&device_impl)?;
+      let device_attributes = builder.create_from_device_impl(&device_impl)?;
       Ok(Box::new(Fredorch::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

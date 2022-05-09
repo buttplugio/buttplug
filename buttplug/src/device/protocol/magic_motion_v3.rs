@@ -10,7 +10,7 @@ use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion},
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration_manager::{ProtocolDeviceAttributes, DeviceAttributesBuilder},
+    configuration_manager::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
     DeviceImpl,
     DeviceWriteCmd,
     Endpoint,
