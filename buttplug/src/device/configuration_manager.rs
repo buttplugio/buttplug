@@ -5,26 +5,19 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Management of support devices, including identifying information and configurations.
-//! 
-//! ## Device Configuration and Discovery in Buttplug
+//! Management of devices, including identification and protocol information
 //! 
 //! Buttplug can handle device communication over several different mediums, including bluetooth,
-//! usb, serial, various network protocols, and other means. The library can also identify which
-//! protocol each device needs to use for command and control. All of this information is stored in
-//! the [DeviceConfigurationManager], a structure that is built whenever a [buttplug
+//! usb, serial, various network protocols, and others. The library also provides multiple protocols
+//! to communicate with this hardware. All of this information is stored in the
+//! [DeviceConfigurationManager] (aka the DCM), a structure that is built whenever a [buttplug
 //! server](crate::server::ButtplugServer) instance is created, and which is immutable for the life
 //! of the server instance.
 //! 
-//! The [DeviceConfigurationManager] contains all of the APIs needed to load protocol configurations
-//! into the system, as well as match newly discovered devices to protocols. Protocols come with
-//! "specifiers" (like [BluetoothLESpecifier], [USBSpecifier], etc...) which contain device
-//! identification and connection information. If a discovered device matches one or more protocol
-//! specifiers, a connection attempt begins, where each matched protocol is given a chance to see if
-//! it can identify and communicate with the device. If a protocol and device are matched, and
-//! connection is successful the initialized protocol instance is returned, and becomes part of the
-//! [ButtplugDevice](crate::device::ButtplugDevice) instance used by the
-//! [ButtplugServer](crate::server::ButtplugServer).
+//! The [DeviceConfigurationManager]'s main job is to take a newly discovered piece of hardware and
+//! figure out if the library supports that hardware. To that end, the [DeviceConfigurationManager]
+//! contains all of the APIs needed to load protocol configurations into the system, as well as
+//! match newly discovered devices to protocols.
 //! 
 //! ## Device Identification
 //! 
@@ -89,6 +82,60 @@
 //! These files are handled in the [Device Configuration File Module in the Utils portion of the
 //! library](crate::util::device_configuration). More information on the file format and loading
 //! strategies can be found there.
+//! 
+//! ## Architecture
+//! 
+//! The [DeviceConfigurationManager] consists of a tree of types and usage flow that may be a bit
+//! confusing, so we'll outline and summarize them here.
+//! 
+//! At the top level is the [DeviceConfigurationManager] itself. It contains 4 different pieces of
+//! information:
+//! 
+//! - Protocol device specifiers and attributes
+//! - Factory/Builder instances for [ButtplugProtocols](crate::device::protocol::ButtplugProtocol)
+//! - Whether or not Raw Messages are allowed
+//! - User configuration information (allow/deny lists, per-device protocol attributes, etc...)
+//! 
+//! The [DeviceConfigurationManager] is created when a ButtplugServer comes up, and which time
+//! protocols and user configurations can be added. After this, it is queried any time a new device
+//! is found, to see whether a registered protocol is usable with that device.
+//! 
+//! ### Adding Protocols
+//! 
+//! Adding protocols to the DCM happens via the add_protocol_factory and remove_protocol_factory
+//! methods.
+//! 
+//! ### Protocol Device Specifiers
+//! 
+//! In order to know if a discovered device can be used by Buttplug, it needs to be checked for
+//! identifying information. The library use "specifiers" (like [BluetoothLESpecifier],
+//! [USBSpecifier], etc...) for this. Specifiers contain device identification and connection
+//! information, and we compare groups of specifiers in protocol configurations (as part of the
+//! [ProtocolDeviceConfiguration] instance) with a specifier built from discovered devices to see if
+//! there are any matches.
+//! 
+//! For instance, we know the Bluetooth LE information for WeVibe toys, all of which is stored with
+//! the WeVibe protocol configuration. The WeVibe protocol configuration has a Bluetooth LE
+//! specifier with all of that information. When someone has a, say, WeVibe Ditto, they can turn it
+//! on and put it into bluetooth discovery mode. If Buttplug is scanning for devices, we'll see the
+//! Ditto, via its corresponding Bluetooth advertisement. Data from this advertisement can be turned
+//! into a Bluetooth LE specifier. We can then match the specifier made from the advertisement
+//! against all the protocol specifiers in the system, and find that this device will work with the
+//! WeVibe protocol, at which point we'll move to the next step, protocol building.
+//! 
+//! ### Protocol Building
+//! 
+//! If a discovered device matches one or more protocol specifiers, a connection attempt begins,
+//! where each matched protocol is given a chance to see if it can identify and communicate with the
+//! device. If a protocol and device are matched, and connection is successful the initialized
+//! protocol instance is returned, and becomes part of the
+//! [ButtplugDevice](crate::device::ButtplugDevice) instance used by the
+//! [ButtplugServer](crate::server::ButtplugServer).
+//! 
+//! ### Raw Messages
+//! 
+//! ### User Configurations
+//! 
 
 use super::protocol::{
   add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,
@@ -369,6 +416,28 @@ impl PartialEq for ProtocolCommunicationSpecifier {
 
 impl Eq for ProtocolCommunicationSpecifier {}
 
+/// Denotes what set of protocols attributes should be used: Default (generic) or device class
+/// specific.
+#[derive(Debug, Clone, Eq, Hash, Serialize, Deserialize)]
+pub enum ProtocolAttributesIdentifier {
+  /// Default for all devices supported by a protocol
+  Default,
+  /// Device class specific identification, with a string specific to the protocol.
+  Identifier(String),
+}
+
+impl PartialEq for ProtocolAttributesIdentifier {
+  fn eq(&self, other: &Self) -> bool {
+    use ProtocolAttributesIdentifier::*;
+    match (self, other) {
+      (Default, Default) => true,
+      (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
+      _ => false,
+    }
+  }
+}
+
+
 /// Identifying information for a connected devices
 /// 
 /// Contains the 3 fields needed to uniquely identify a device in the system.
@@ -394,16 +463,48 @@ impl ProtocolDeviceIdentifier {
   }
 }
 
+/// Device attribute storage and handling
+/// 
+/// ProtocolDeviceAttributes represent information about a device in relation to its protocol. This
+/// includes the device name, its identifier (assuming it has one), its user created display name
+/// (if it has one), and its message attributes.
+/// 
+/// Device attributes can exist in 3 different forms for a protocol, as denoted by the
+/// [ProtocolAttributesIdentifier].
+/// 
+/// - Default: The basis for all message attributes for a protocol. Used when a protocol supports
+///   many different devices, all with at least one or more similar features. For instances, we can
+///   assume all Lovense devices have a single vibrator with a common power level count, so the
+///   Default identifier instance of the ProtocolDeviceAttributes for Lovense will have a
+///   message_attributes with VibrateCmd (assuming 1 vibration motor, as all Lovense devices have at
+///   least one motor) available.
+/// - Identifier: Specifies a specific device for a protocol, which may have its own attributes.
+///   Continuing with the Lovense Example, we know a Edge will have 2 motors. We can set the
+///   specific Identifier version of the ProtocolDeviceAttributes to have a VibrateCmd
+///   message_attributes entry which will override the Default identifier version.
+/// - User Configuration: Users may set configurations specific to their setup, like reducing the
+///   maximum power available on a device to a certain level. User configurations override the
+///   previous Identifier and Default configurations.
+/// 
+///  This type of tree/list encoding preserves the structure of configuration, which allows for
+///  easier debugging, as well as the ability to serialize the structure back down to files.
 #[derive(Debug, Clone, Getters, Setters, MutGetters)]
 pub struct ProtocolDeviceAttributes {
+  /// Identifies which type of attributes this instance represents for a protocol (Protocol default or device specific)
   identifier: ProtocolAttributesIdentifier,
+  /// Parent of this device attributes instance. If any attribute is missing from this instance,
+  /// we'll fall back to the parent to try and resolve it.
   parent: Option<Arc<ProtocolDeviceAttributes>>,
+  /// Given name of the device this instance represents.
   name: Option<String>,
+  /// User configured name of the device this instance represents, assuming one exists.
   display_name: Option<String>,
+  /// Message attributes for this device instance.
   pub(super) message_attributes: DeviceMessageAttributesMap,
 }
 
 impl ProtocolDeviceAttributes {
+  /// Create a new instance
   pub fn new(
     identifier: ProtocolAttributesIdentifier,
     name: Option<String>,
@@ -420,9 +521,11 @@ impl ProtocolDeviceAttributes {
     }
   }
 
-  // We only need to preserve the tree encoding inside of the DeviceConfigurationManager. Once a
-  // attributes struct is handed out to the world, it is considered static, so we can provide a
-  // flattened representation.
+  /// Create a new instance from an already created instance, compressing any call to parent nodes.
+  /// 
+  /// We only need to preserve the tree encoding inside of the DeviceConfigurationManager. Once a
+  /// attributes struct is handed out to the world, it is considered static, so we can provide a
+  /// flattened representation.
   pub fn new_flattened(other: &ProtocolDeviceAttributes) -> Self {
     Self {
       identifier: other.identifier().clone(),
@@ -433,6 +536,7 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Create a copy of an instance, but with a new parent.
   pub fn new_with_parent(&self, parent: Arc<ProtocolDeviceAttributes>) -> Self {
     Self {
       parent: Some(parent),
@@ -440,6 +544,8 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Check to make sure the message attributes of an instance are valid.
+  // TODO Can we do this in new() instead and return a result there?
   fn is_valid(&self) -> Result<(), ButtplugError> { 
     for (message_type, message_attrs) in self.message_attributes_map() {
       message_attrs.check(&message_type).map_err(|err| {
@@ -450,10 +556,12 @@ impl ProtocolDeviceAttributes {
     Ok(())
   }
   
+  /// Return the protocol identifier for this instance
   pub fn identifier(&self) -> &ProtocolAttributesIdentifier {
     &self.identifier
   }
 
+  /// Return the device name for this instance, or "Unknown Buttplug Device" if no name exists.
   pub fn name(&self) -> &str {
     if let Some(name) = &self.name {
       name
@@ -464,6 +572,7 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Return the user configured display name for this instance, assuming one exists.
   pub fn display_name(&self) -> Option<String> {
     if let Some(name) = &self.display_name {
       Some(name.clone())
@@ -474,6 +583,7 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Check if a type of device message is supported by this instance.
   pub fn allows_message(
     &self,
     message_type: &ButtplugDeviceMessageType,
@@ -483,6 +593,8 @@ impl ProtocolDeviceAttributes {
       .contains_key(message_type)
   }
 
+  /// Retreive the message attributes for a specific type of message supported by this instance, or
+  /// None if the message is not supported.
   pub fn message_attributes(
     &self,
     message_type: &ButtplugDeviceMessageType,
@@ -496,6 +608,7 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Retreive a map of all message attributes for this instance.
   pub fn message_attributes_map(&self) -> DeviceMessageAttributesMap {
     if let Some(parent) = &self.parent {
       let mut map = parent.message_attributes_map();
@@ -514,6 +627,8 @@ impl ProtocolDeviceAttributes {
     }
   }
 
+  /// Add raw message support to the attributes of this instance. Requires a list of all endpoints a
+  /// device supports.
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
     let endpoint_attributes = DeviceMessageAttributesBuilder::default()
       .endpoints(endpoints.to_owned())
@@ -539,67 +654,27 @@ impl ProtocolDeviceAttributes {
   }
 }
 
-#[derive(Debug, Clone, Eq, Hash, Serialize, Deserialize)]
-pub enum ProtocolAttributesIdentifier {
-  // The default protocol attribute identifier
-  Default,
-  Identifier(String),
-}
 
-impl PartialEq for ProtocolAttributesIdentifier {
-  fn eq(&self, other: &Self) -> bool {
-    use ProtocolAttributesIdentifier::*;
-    match (self, other) {
-      (Default, Default) => true,
-      (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
-      _ => false,
-    }
-  }
-}
-
-#[derive(Debug, Clone, Getters, MutGetters, Default)]
-pub struct ProtocolDeviceConfiguration {
-  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  specifiers: Vec<ProtocolCommunicationSpecifier>,
-  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-  configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
-}
-
-impl ProtocolDeviceConfiguration {
-  pub fn new(
-    specifiers: Vec<ProtocolCommunicationSpecifier>,
-    configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
-  ) -> Self {
-    Self {
-      specifiers,
-      configurations,
-    }
-  }
-
-  pub fn is_valid(&self) -> Result<(), ButtplugError> {
-    for (ident, attrs) in &self.configurations {
-      attrs.is_valid().map_err(|e| ButtplugDeviceError::DeviceConfigurationError(format!("Error in {ident:?} configuration: {e}")))?;
-    }
-    Ok(())
-  }
-
-  pub fn device_attributes(
-    &self,
-    identifier: &ProtocolAttributesIdentifier,
-  ) -> Option<&Arc<ProtocolDeviceAttributes>> {
-    self.configurations.get(identifier)
-  }
-}
-
+/// Builder for [ProtocolDeviceAttributes] instances.
+/// 
+/// Builds [ProtocolDeviceAttributes] instances, either from configuration information for storage
+/// as part of the [DeviceConfigurationManager] tree, or from device specifications given by
+/// [ButtplugProtocolFactories](crate::device::protocol::ButtplugProtocolFactory) in order to create
+/// a new device instance.
 #[derive(Clone, Debug)]
 pub struct ProtocolDeviceAttributesBuilder {
+  /// Name of the protocol this builder is representing
   protocol_identifier: String,
+  /// Whether raw messages should be added to attributes created by this builder.
   allow_raw_messages: bool,
+  /// Set of possible device configurations for this protocol
   device_configuration: ProtocolDeviceConfiguration,
+  /// Set of device specific user configs for this protocol
   user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
 }
 
 impl ProtocolDeviceAttributesBuilder {
+  /// Create a new instance 
   fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>) -> Self {
     Self {
       protocol_identifier: protocol_identifier.to_owned(),
@@ -609,6 +684,7 @@ impl ProtocolDeviceAttributesBuilder {
     }
   }
 
+  /// Create a new instance based on a device implementation instance
   pub fn create_from_device_impl(
     &self,
     device_impl: &Arc<DeviceImpl>,
@@ -620,13 +696,16 @@ impl ProtocolDeviceAttributesBuilder {
     )
   }
 
+  /// Look up device attributes via identifier (for general configurations) and possibly device
+  /// address (for user configuration). Endpoints are passed in case they are needed for raw message
+  /// attribute generation.
   pub fn create(
     &self,
     address: &str,
     identifier: &ProtocolAttributesIdentifier,
     endpoints: &[Endpoint],
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
-    // Skip checking for address here, addresses, should only be in the user config map
+    // Skip checking for address here, addresses should only be in the user config map
     let device_attributes = self
       .device_configuration
       .device_attributes(identifier)
@@ -674,6 +753,56 @@ impl ProtocolDeviceAttributesBuilder {
   }
 }
 
+/// The top level configuration for a protocol. Contains all data about devices that can use the
+/// protocol, as well as names, message attributes, etc... for different devices.
+/// 
+/// Example: A Kiiroo ProtocolDeviceConfiguration would contain the Bluetooth LE information for all
+/// devices supported under the Kiiroo protocol. It would also contain information about the names
+/// and capabilities of different Kiiroo devices (Cliona, Onyx, Keon, etc...).
+#[derive(Debug, Clone, Getters, MutGetters, Default)]
+pub struct ProtocolDeviceConfiguration {
+  /// BLE/USB/etc info for device identification.
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  specifiers: Vec<ProtocolCommunicationSpecifier>,
+  /// Names and message attributes for all possible devices that use this protocol
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
+}
+
+impl ProtocolDeviceConfiguration {
+  /// Create a new instance
+  pub fn new(
+    specifiers: Vec<ProtocolCommunicationSpecifier>,
+    configurations: HashMap<ProtocolAttributesIdentifier, Arc<ProtocolDeviceAttributes>>,
+  ) -> Self {
+    Self {
+      specifiers,
+      configurations,
+    }
+  }
+
+  /// Check for validity
+  pub fn is_valid(&self) -> Result<(), ButtplugError> {
+    for (ident, attrs) in &self.configurations {
+      attrs.is_valid().map_err(|e| ButtplugDeviceError::DeviceConfigurationError(format!("Error in {ident:?} configuration: {e}")))?;
+    }
+    Ok(())
+  }
+
+  /// Retreive the device attributes of related to a given identifier in the protocol, if they exist.
+  pub fn device_attributes(
+    &self,
+    identifier: &ProtocolAttributesIdentifier,
+  ) -> Option<&Arc<ProtocolDeviceAttributes>> {
+    self.configurations.get(identifier)
+  }
+}
+
+/// Given information about a device, tries to build a protocol instance for it.
+/// 
+/// A protocol builder is handed out when a device has been identified as supporting a protocol. The
+/// builder takes the device impl, and uses a [ButtplugProtocolFactory] to create a protocol
+/// instance, possibly running protocol-specific initialization steps along the way.
 #[derive(Clone, Debug)]
 pub struct ProtocolInstanceFactory {
   allow_raw_messages: bool,
@@ -682,7 +811,8 @@ pub struct ProtocolInstanceFactory {
   configuration: ProtocolDeviceConfiguration,
 }
 
-impl ProtocolBuilder {
+impl ProtocolInstanceFactory {
+  /// Creates a factory instance 
   fn new(
     allow_raw_messages: bool,
     protocol_factory: Arc<dyn ButtplugProtocolFactory>,
@@ -697,6 +827,7 @@ impl ProtocolBuilder {
     }
   }
 
+  /// Given a device implementation, tries to create a protocol instance for the device.
   pub async fn create(
     &self,
     device_impl: Arc<DeviceImpl>,
@@ -710,6 +841,8 @@ impl ProtocolBuilder {
     self.protocol_factory.try_create(device_impl.clone(), builder).await
   }
 
+  /// Retreives the protocol configuration
+  // TODO This is only used by ButtplugDevice and tests. Is there another way we could get the configuration there?
   pub fn configuration(&self) -> &ProtocolDeviceConfiguration {
     &self.configuration
   }

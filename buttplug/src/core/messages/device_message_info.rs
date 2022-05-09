@@ -12,6 +12,12 @@ use super::*;
 use serde::{Deserialize, Serialize, Serializer};
 use std::collections::{BTreeMap, HashMap};
 
+/// A map pairing device message types (device commands like VibrateCmd, LinearCmd, StopDeviceCmd,
+/// etc...) to configuration information about those commands. This includes information about
+/// number of features (vibration motor count, rotator count, etc...), power levels and ranges,
+/// etc...
+/// 
+/// If a message type is in this map, it is assumed to be supported by a device and its protocol.
 pub type DeviceMessageAttributesMap = HashMap<ButtplugDeviceMessageType, DeviceMessageAttributes>;
 
 fn ordered_map<S>(value: &DeviceMessageAttributesMap, serializer: S) -> Result<S::Ok, S::Error>
