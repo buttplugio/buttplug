@@ -6,12 +6,50 @@
 // for full license information.
 
 //! Handles client sessions, as well as discovery and communication with hardware.
+//!
+//! The Buttplug Server is just a thin frontend for device connection and communication. The server
+//! itself doesn't do much other than configuring the device system and handling a few non-device
+//! related tasks like [initial connection
+//! handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages) and system timeouts.
+//! Once a connection is made from a [ButtplugClient](crate::client::ButtplugClient) to a
+//! [ButtplugServer], the server mostly acts as a pass-thru frontend to the [DeviceManager].
+//!
+//! ## Server Lifetime
+//!
+//! The server has following lifetime stages:
+//!
+//! - Configuration
+//!   - This happens across the [ButtplugServerBuilder], as well as the [ButtplugServer] instance it
+//!     returns. During this time, we can specify attributes of the server like its name and if it
+//!     will have a ping timer. It also allows for addition of protocols and device configurations
+//!     to the system, either via configuration files or through manual API calls.
+//! - Connection
+//!   - After configuration is done, the server can be put into a listening mode (assuming
+//!     [RemoteServer](ButtplugRemoteServer) is being used. for [in-process
+//!     servers](crate::connector::ButtplugInProcessClientConnector), the client own the server and just
+//!     connects to it directly). At this point, a [ButtplugClient](crate::client::ButtplugClient)
+//!     can connect and start the
+//!     [handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages) process.
+//! - Pass-thru
+//!   - Once the handshake has succeeded, the server basically becomes a pass-thru to the
+//!     [DeviceManager], which manages discovery of and communication with devices. The only thing
+//!     the server instance manages at this point is ownership of the [DeviceManager] and
+//!     ping timer, but doesn't really do much itself. The server remains in this state until the
+//!     connection to the client is severed, at which point all devices connected to the device
+//!     manager will be stopped.
+//! - Disconnection
+//!   - The server can be put back in Connection mode without being recreated after disconnection,
+//!     to listen for another client connection while still maintaining connection to whatever
+//!     devices the [DeviceManager] has.
+//! - Destruction
+//!   - If the server object is dropped, all devices are stopped and disconnected as part
+//!     of the [DeviceManager] teardown.
 
 pub mod comm_managers;
 pub mod device_manager;
 mod device_manager_event_loop;
 mod ping_timer;
-pub mod remote_server;
+mod remote_server;
 
 pub use remote_server::ButtplugRemoteServer;
 
@@ -19,15 +57,9 @@ use crate::{
   core::{
     errors::*,
     messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugMessage,
-      ButtplugServerMessage,
-      StopAllDevices,
-      StopScanning,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
+      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{
@@ -46,33 +78,51 @@ use std::{
   fmt,
   sync::{
     atomic::{AtomicBool, Ordering},
-    Arc
+    Arc,
   },
 };
 use thiserror::Error;
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;
 
+/// Result type for Buttplug Server methods, as the server will always communicate in
+/// [ButtplugServerMessage] instances in order to follow the [Buttplug
+/// Spec](http://buttplug-spec.docs.buttplug.io).
 pub type ButtplugServerResult = Result<ButtplugServerMessage, ButtplugError>;
+/// Future type for Buttplug Server futures, as the server will always communicate in
+/// [ButtplugServerMessage] instances in order to follow the [Buttplug
+/// Spec](http://buttplug-spec.docs.buttplug.io).
 pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 
+/// Error enum for Buttplug Server configuration errors.
 #[derive(Error, Debug)]
 pub enum ButtplugServerError {
+  /// DeviceCommunicationManager type has already been added to the system.
   #[error("DeviceManager of type {0} has already been added.")]
   DeviceManagerTypeAlreadyAdded(String),
+  /// Protocol has already been added to the system.
   #[error("Buttplug Protocol of type {0} has already been added to the system.")]
   ProtocolAlreadyAdded(String),
+  /// Requested protocol has not been registered with the system.
   #[error("Buttplug Protocol of type {0} does not exist in the system and cannot be removed.")]
   ProtocolDoesNotExist(String),
 }
 
+/// Configures and creates [ButtplugServer] instances.
 #[derive(Debug, Clone)]
 pub struct ButtplugServerBuilder {
-  pub name: String,
-  pub max_ping_time: Option<u32>,
-  pub allow_raw_messages: bool,
-  pub device_configuration_json: Option<String>,
-  pub user_device_configuration_json: Option<String>,
+  /// Name of the server, will be sent to the client as part of the [initial connection
+  /// handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages).
+  name: String,
+  /// Maximum time system will live without receiving a Ping message before disconnecting. If None,
+  /// ping timer does not run.
+  max_ping_time: Option<u32>,
+  /// If true, allows sending/receiving of raw binary data from devices.
+  allow_raw_messages: bool,
+  /// JSON string, with the contents of the base Device Configuration file
+  device_configuration_json: Option<String>,
+  /// JSON string, with the contents of the User Device Configuration file
+  user_device_configuration_json: Option<String>,
 }
 
 impl Default for ButtplugServerBuilder {
@@ -88,48 +138,99 @@ impl Default for ButtplugServerBuilder {
 }
 
 impl ButtplugServerBuilder {
+  /// Set the name of the server, which is relayed to the client on connection (mostly for
+  /// confirmation in UI dialogs)
   pub fn name(&mut self, name: &str) -> &mut Self {
     self.name = name.to_owned();
     self
   }
 
+  /// Set the maximum ping time, in milliseconds, for the server. If the server does not receive a
+  /// [Ping](crate::core::messages::Ping) message in this amount of time after the handshake has
+  /// succeeded, the server will automatically disconnect. If this is not called, the ping timer
+  /// will not be activated.
+  ///
+  /// Note that this has nothing to do with communication medium specific pings, like those built
+  /// into the Websocket protocol. This ping is specific to the Buttplug protocol.
   pub fn max_ping_time(&mut self, ping_time: u32) -> &mut Self {
     self.max_ping_time = Some(ping_time);
     self
   }
 
+  /// If set to true, devices will be allowed to use Raw Messages.
+  ///
+  /// **Be careful with this.** Raw messages being allowed on devices can open up security issues
+  /// like allowing for device firmware updates through library calls.
   pub fn allow_raw_messages(&mut self, allow: bool) -> &mut Self {
     self.allow_raw_messages = allow;
     self
   }
 
+  /// Set the device configuration json file contents, to be loaded during build.
   pub fn device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
     self.device_configuration_json = config_json;
     self
   }
 
+  /// Set the user device configuration json file contents, to be loaded during build.
   pub fn user_device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
     self.user_device_configuration_json = config_json;
     self
   }
 
+  /// Try to build a [ButtplugServer] using the parameters given.
   pub fn finish(&self) -> Result<ButtplugServer, ButtplugError> {
-
-    let protocol_map = load_protocol_configs_from_json(self.device_configuration_json.clone(), self.user_device_configuration_json.clone(), false)?;
-
     // Create the server
     debug!("Creating server '{}'", self.name);
     info!("Buttplug Server Operating System Info: {}", os_info::get());
-    let (send, _) = broadcast::channel(256);
-    let output_sender_clone = send.clone();
+
+    // First, try loading our configs. If this doesn't work, nothing else will, so get it out of
+    // the way first.
+    let protocol_map = load_protocol_configs_from_json(
+      self.device_configuration_json.clone(),
+      self.user_device_configuration_json.clone(),
+      false,
+    )?;
+
+    // Set up our channels to different parts of the system.
+    let (output_sender, _) = broadcast::channel(256);
+    let output_sender_clone = output_sender.clone();
     let connected = Arc::new(AtomicBool::new(false));
+    let connected_clone = connected.clone();
+
+    // Create the ping timer, since we'll need to pass it in to the DeviceManager on creation
+    //
+    // TODO this should use a cancellation token instead of passing around the timer itself.
     let ping_time = self.max_ping_time.unwrap_or(0);
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
-    let connected_clone = connected.clone();
 
-    let device_manager =
-      DeviceManager::new(send.clone(), ping_timer.clone(), self.allow_raw_messages);
+    // Spawn the ping timer task, assuming the ping time is > 0.
+    if ping_time > 0 {
+      async_manager::spawn(
+        async move {
+          // This will only exit if we've pinged out.
+          ping_timeout_notifier.await;
+          error!("Ping out signal received, stopping server");
+          connected_clone.store(false, Ordering::SeqCst);
+          // TODO Should the event sender return a result instead of an error message?
+          if output_sender_clone
+            .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
+            .is_err()
+          {
+            error!("Server disappeared, cannot update about ping out.");
+          };
+        }
+        .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
+      );
+    }
+
+    // Set up the device manager, using the information loaded out of the JSON files, if any exists.
+    let device_manager = DeviceManager::new(
+      output_sender.clone(),
+      ping_timer.clone(),
+      self.allow_raw_messages,
+    );
 
     for address in protocol_map.allow_list() {
       device_manager.add_allowed_device(address);
@@ -147,48 +248,40 @@ impl ButtplugServerBuilder {
       device_manager.add_protocol_device_configuration(name, def)?;
     }
 
-    async_manager::spawn(
-      async move {
-        // This will only exit if we've pinged out.
-        ping_timeout_notifier.await;
-        error!("Ping out signal received, stopping server");
-        connected_clone.store(false, Ordering::SeqCst);
-        // TODO Should the event sender return a result instead of an error message?
-        if output_sender_clone
-          .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
-          .is_err()
-        {
-          error!("Server disappeared, cannot update about ping out.");
-        };
-      }
-      .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
-    );
-
-    let server = ButtplugServer {
+    // Assuming everything passed, return the server.
+    Ok(ButtplugServer {
       server_name: self.name.clone(),
       max_ping_time: ping_time,
       device_manager,
       ping_timer,
       connected,
-      output_sender: send,
-    };
-
-    // Add the device config
-
-    // Update with the user config
-
-    // Assuming everything passed, return the server.
-    Ok(server)
+      output_sender,
+    })
   }
 }
 
-/// Represents a ButtplugServer.
+/// The server side of the Buttplug protocol. Frontend for connection to device management and
+/// communication.
 pub struct ButtplugServer {
+  /// The name of the server, which is relayed to the client on connection (mostly for
+  /// confirmation in UI dialogs)
   server_name: String,
+  /// The maximum ping time, in milliseconds, for the server. If the server does not receive a
+  /// [Ping](crate::core::messages::Ping) message in this amount of time after the handshake has
+  /// succeeded, the server will automatically disconnect. If this is not called, the ping timer
+  /// will not be activated.
+  ///
+  /// Note that this has nothing to do with communication medium specific pings, like those built
+  /// into the Websocket protocol. This ping is specific to the Buttplug protocol.
   max_ping_time: u32,
-  device_manager: DeviceManager,
+  /// Timer for managing ping time tracking, if max_ping_time > 0.
   ping_timer: Arc<PingTimer>,
+  /// Manages device discovery and communication.
+  device_manager: DeviceManager,
+  /// If true, client is currently connected to server
   connected: Arc<AtomicBool>,
+  /// Broadcaster for server events. Receivers for this are handed out through the
+  /// [ButtplugServer::event_stream()] method.
   output_sender: broadcast::Sender<ButtplugServerMessage>,
 }
 
@@ -203,6 +296,7 @@ impl std::fmt::Debug for ButtplugServer {
 }
 
 impl Default for ButtplugServer {
+  /// Creates a default Buttplug Server, with no ping time, and no raw message support.
   fn default() -> Self {
     // We can unwrap here because if default init fails, so will pretty much every test.
     ButtplugServerBuilder::default()
@@ -212,20 +306,26 @@ impl Default for ButtplugServer {
 }
 
 impl ButtplugServer {
+  /// Retreive an async stream of ButtplugServerMessages. This is how the server sends out
+  /// non-query-related updates to the system, including information on devices being added/removed,
+  /// client disconnection, etc...
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
     convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
   }
 
+  /// Returns a references to the internal device manager, for handling configuration.
   pub fn device_manager(&self) -> &DeviceManager {
     &self.device_manager
   }
 
+  /// If true, client is currently connected to the server.
   pub fn connected(&self) -> bool {
     self.connected.load(Ordering::SeqCst)
   }
 
+  /// Disconnects the server from a client, if it is connected.
   pub fn disconnect(&self) -> BoxFuture<Result<(), messages::Error>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
@@ -247,8 +347,9 @@ impl ButtplugServer {
     })
   }
 
-  // This is the only method that returns ButtplugServerResult, as it handles
-  // the packing of the message ID.
+
+  /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
+  /// into the server's [DeviceManager] for communication with devices.
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessage,
@@ -316,6 +417,11 @@ impl ButtplugServer {
     )
   }
 
+  /// Performs the [RequestServerInfo]([ServerInfo](crate::core::message::RequestServerInfo) /
+  /// [ServerInfo](crate::core::message::ServerInfo) handshake, as specified in the [Buttplug
+  /// Protocol Spec](https://buttplug-spec.docs.buttplug.io). This is the first thing that must
+  /// happens upon connection to the server, in order to make sure the server can speak the same
+  /// protocol version as the client.
   fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
@@ -348,6 +454,7 @@ impl ButtplugServer {
     })
   }
 
+  /// Update the [PingTimer] with the latest received ping message.
   fn handle_ping(&self, msg: messages::Ping) -> ButtplugServerResultFuture {
     if self.max_ping_time == 0 {
       return ButtplugPingError::PingTimerNotRunning.into();
