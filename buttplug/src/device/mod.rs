@@ -635,6 +635,8 @@ impl ButtplugDevice {
     device_config_mgr: Arc<DeviceConfigurationManager>,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
+    // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
+    
     // First off, we need to see if we even have a configuration available for the device we're
     // trying to create. If we don't, return Ok(None), because this isn't actually an error.
     // However, if we *do* have a configuration but something goes wrong after this, then it's an

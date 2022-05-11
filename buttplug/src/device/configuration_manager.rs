@@ -848,14 +848,30 @@ impl ProtocolInstanceFactory {
   }
 }
 
+/// Correlates information about protocols and which devices they support.
+/// 
+/// The [DeviceConfigurationManager] handles stores information about which device protocols the
+/// library supports, as well as which devices can use those protocols. When a
+/// [DeviceCommunicationManager](crate::server::comm_managers) finds a device during scanning,
+/// device information is given to the [DeviceConfigurationManager] to decide whether Buttplug
+/// should try to connect to and communicate with the device.
+/// 
+/// Assuming the device is supported by the library, the [DeviceConfigurationManager] also stores
+/// information about what commands can be sent to the device (Vibrate, Rotate, etc...), and the
+/// parameters for those commands (number of power levels, stroke distances, etc...).
 pub struct DeviceConfigurationManager {
+  /// If true, add raw message support to connected devices
   allow_raw_messages: bool,
+  /// Map of protocol names to which devices they support
   protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
+  /// Map of protocol names to their respective protocol instance factories
   protocol_map: Arc<DashMap<String, Arc<dyn ButtplugProtocolFactory>>>,
+  /// Per-specific-device user configurations
   user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>
 }
 
 impl Default for DeviceConfigurationManager {
+  /// Create a new instance with Raw Message support turned off
   fn default() -> Self {
     // Unwrap allowed here because we assume our built in device config will
     // always work. System won't pass tests or possibly even build otherwise.
@@ -864,6 +880,7 @@ impl Default for DeviceConfigurationManager {
 }
 
 impl DeviceConfigurationManager {
+  /// Create a new instance, populating it with protocol factories for all internally implemented [ButtplugProtocol]s.
   pub fn new(allow_raw_messages: bool) -> Self {
     Self {
       allow_raw_messages,
@@ -873,19 +890,23 @@ impl DeviceConfigurationManager {
     }
   }
 
+  /// Add a device-specific user configuration
   pub fn add_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> Result<(), ButtplugError> {
     self.user_device_configs.insert(protocol_identifier.clone(), protocol_attributes.clone());
     Ok(())
   }
 
+  /// Remove a device-specific user configuration
   pub fn remove_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) {
     self.user_device_configs.remove(protocol_identifier);
   }
 
+  /// Fetch a user configuration for a specific device, if one exists
   pub fn user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) -> Option<ProtocolDeviceAttributes> {
     self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.value().clone()))
   }
 
+  /// Add device configuration info for a [ButtplugProtocol]
   pub fn add_protocol_device_configuration(
     &self,
     protocol_name: &str,
@@ -899,10 +920,12 @@ impl DeviceConfigurationManager {
     Ok(())
   }
 
+  /// Remove device configuration info for a [ButtplugProtocol]
   pub fn remove_protocol_device_configuration(&self, protocol_name: &str) {
     self.protocol_device_configurations.remove(protocol_name);
   }
 
+  /// Add a protocol instance factory for a [ButtplugProtocol]
   pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugDeviceError>
   where
     T: ButtplugProtocolFactory + 'static
@@ -917,6 +940,7 @@ impl DeviceConfigurationManager {
     }
   }
 
+  /// Remove a protocol instance factory for a [ButtplugProtocol]
   pub fn remove_protocol_factory(&self, protocol_identifier: &str) -> Result<(), ButtplugDeviceError> {
     if self.protocol_map.contains_key(protocol_identifier) {
       self.protocol_map.remove(protocol_identifier);
@@ -928,15 +952,13 @@ impl DeviceConfigurationManager {
     }
   }
 
+  /// Remove all protocol instance factories for a [ButtplugProtocol]
+  /// 
+  /// As a default [DeviceConfigurationManager] will contain all protocols implemented by the
+  /// library, this is useful for users who may only want to use one or a few protocols for whatever
+  /// reason.
   pub fn remove_all_protocol_factories(&self) {
     self.protocol_map.clear();
-  }
-
-  pub fn protocol_factory(&self, protocol_name: &str) -> Option<Arc<dyn ButtplugProtocolFactory>> {
-    self
-      .protocol_map
-      .get(protocol_name)
-      .and_then(|r| Some(r.value().clone()))
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly
@@ -948,7 +970,13 @@ impl DeviceConfigurationManager {
     self.protocol_device_configurations.clone()
   }
 
+  /// Given information about a certain device, see if we can create a [ProtocolInstanceFactory]
+  /// that can be used to initialize the device and prepare it for communication.
   pub fn protocol_instance_factory(&self, specifier: &ProtocolCommunicationSpecifier) -> Option<ProtocolInstanceFactory> {
+    // TODO This seems needlessly complex.
+    //
+    // It'd be nice if we could someone take a device instance and handle all of this, versus
+    // bouncing between the config manager, comm manager, and ButtplugDevice.
     debug!(
       "Looking for protocol that matches specifier: {:?}",
       specifier
