@@ -487,7 +487,7 @@ impl DeviceImpl {
 /// Internal representation of device implementations
 /// 
 /// This trait is implemented by
-/// [DeviceCommunicationManager](crate::server::comm_managers::DeviceCommunicationManager) modules
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
 /// to represent and communicate with devices. It provides an abstract way to represent devices
 /// without having to consider what type of communication bus they may be using.
 pub trait DeviceImplInternal: Sync + Send {
@@ -509,10 +509,10 @@ pub trait DeviceImplInternal: Sync + Send {
 }
 
 /// Factory trait for [DeviceImpl](crate::device::DeviceImpl) instances in
-/// [DeviceCommunicationManager](crate::server::comm_managers::DeviceCommunicationManager) modules
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
 /// 
 /// This trait is implemented by
-/// [DeviceCommunicationManager](crate::server::comm_managers::DeviceCommunicationManager) modules
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
 /// to handle initial device connection and setup based on the specific communication bus that is
 /// being implemented by the DCM. This may handle things like connection and finding characteristics
 /// for Bluetooth LE, connection to USB devices and checking descriptors/endpoints, etc...

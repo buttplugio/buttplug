@@ -12,7 +12,7 @@ use crate::{
     configuration_manager::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
     ButtplugDevice,
   },
-  server::comm_managers::{
+  server::device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
@@ -197,7 +197,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    server::comm_managers::test::TestDeviceCommunicationManagerBuilder,
+    server::device::communication_manager::test::TestDeviceCommunicationManagerBuilder,
     server::ButtplugServer,
     util::async_manager,
   };

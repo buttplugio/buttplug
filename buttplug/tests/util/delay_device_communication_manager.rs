@@ -7,7 +7,7 @@
 
 use buttplug::{
   core::ButtplugResultFuture,
-  server::comm_managers::{
+  server::device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

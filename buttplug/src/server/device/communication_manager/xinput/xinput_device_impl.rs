@@ -28,7 +28,7 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  server::comm_managers::ButtplugDeviceSpecificError,
+  server::device::communication_manager::ButtplugDeviceSpecificError,
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};

@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::{
-  comm_managers::DeviceCommunicationEvent,
+  device::communication_manager::DeviceCommunicationEvent,
   ping_timer::PingTimer,
 };
 use crate::{

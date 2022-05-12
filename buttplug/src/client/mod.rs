@@ -285,7 +285,7 @@ impl ButtplugClient {
     let connector = ButtplugInProcessClientConnector::new(server);
     #[cfg(feature = "btleplug-manager")]
     {
-      use crate::server::comm_managers::btleplug::BtlePlugCommunicationManagerBuilder;
+      use crate::server::device::communication_manager::btleplug::BtlePlugCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()
@@ -294,7 +294,7 @@ impl ButtplugClient {
     }
     #[cfg(feature = "websocket-server-manager")]
     {
-      use crate::server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
+      use crate::server::device::communication_manager::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()
@@ -306,7 +306,7 @@ impl ButtplugClient {
     }
     #[cfg(feature = "serial-manager")]
     {
-      use crate::server::comm_managers::serialport::SerialPortCommunicationManagerBuilder;
+      use crate::server::device::communication_manager::serialport::SerialPortCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()
@@ -315,7 +315,7 @@ impl ButtplugClient {
     }
     #[cfg(feature = "lovense-connect-service-manager")]
     {
-      use crate::server::comm_managers::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
+      use crate::server::device::communication_manager::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()
@@ -324,7 +324,7 @@ impl ButtplugClient {
     }
     #[cfg(feature = "lovense-dongle-manager")]
     {
-      use crate::server::comm_managers::lovense_dongle::{
+      use crate::server::device::communication_manager::lovense_dongle::{
         LovenseHIDDongleCommunicationManagerBuilder,
         LovenseSerialDongleCommunicationManagerBuilder,
       };
@@ -341,7 +341,7 @@ impl ButtplugClient {
     }
     #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
     {
-      use crate::server::comm_managers::xinput::XInputDeviceCommunicationManagerBuilder;
+      use crate::server::device::communication_manager::xinput::XInputDeviceCommunicationManagerBuilder;
       connector
         .server_ref()
         .device_manager()

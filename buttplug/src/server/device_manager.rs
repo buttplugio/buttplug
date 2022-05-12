@@ -9,7 +9,7 @@
 //! specific) Managers
 
 use super::{
-  comm_managers::{
+  device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

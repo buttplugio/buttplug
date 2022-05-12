@@ -9,7 +9,7 @@ use super::xinput_device_impl::XInputDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
   device::ButtplugDeviceEvent,
-  server::comm_managers::{
+  server::device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

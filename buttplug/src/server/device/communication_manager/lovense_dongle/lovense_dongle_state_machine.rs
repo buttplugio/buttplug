@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::{lovense_dongle_device_impl::*, lovense_dongle_messages::*};
-use crate::server::comm_managers::DeviceCommunicationEvent;
+use crate::server::device::communication_manager::DeviceCommunicationEvent;
 use async_trait::async_trait;
 use futures::{select, FutureExt};
 use std::sync::{

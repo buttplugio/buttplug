@@ -21,7 +21,7 @@ use buttplug::{
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-  server::comm_managers::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+  server::device::communication_manager::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
   server::ButtplugServerBuilder,
   util::async_manager,
 };

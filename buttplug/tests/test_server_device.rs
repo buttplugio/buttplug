@@ -17,7 +17,7 @@ use buttplug::{
     },
   },
   device::Endpoint,
-  server::comm_managers::test::TestDeviceCommunicationManagerBuilder,
+  server::device::communication_manager::test::TestDeviceCommunicationManagerBuilder,
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };

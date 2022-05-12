@@ -94,7 +94,7 @@ impl<'a> ButtplugInProcessClientConnector {
   ///
   /// Allows the owner to manipulate the internal server instance. Useful for
   /// setting up
-  /// [DeviceCommunicationManager][crate::server::comm_managers::DeviceCommunicationManager]s
+  /// [DeviceCommunicationManager][crate::server::device::communication_manager::DeviceCommunicationManager]s
   /// before connection.
   pub fn server_ref(&'a self) -> &'a ButtplugServer {
     &self.server

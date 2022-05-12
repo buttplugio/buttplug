@@ -20,7 +20,7 @@ mod test {
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+    server::device::communication_manager::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
     server::ButtplugServer,
     util::async_manager,
   };

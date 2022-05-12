@@ -23,7 +23,7 @@ use crate::{
     DeviceWriteCmd,
     Endpoint,
   },
-  server::comm_managers::ButtplugDeviceSpecificError,
+  server::device::communication_manager::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;

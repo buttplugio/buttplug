@@ -244,10 +244,10 @@ impl BluetoothLESpecifier {
 }
 
 /// Specifier for [Lovense Connect
-/// Service](crate::server::comm_managers::lovense_connect_service) devices
+/// Service](crate::server::device::communication_manager::lovense_connect_service) devices
 /// 
 /// Network based services, has no attributes because the [Lovense Connect
-/// Service](crate::server::comm_managers::lovense_connect_service) device communication manager
+/// Service](crate::server::device::communication_manager::lovense_connect_service) device communication manager
 /// handles all device discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LovenseConnectServiceSpecifier {
@@ -268,10 +268,10 @@ impl PartialEq for LovenseConnectServiceSpecifier {
   }
 }
 
-/// Specifier for [XInput](crate::server::comm_managers::xinput) devices
+/// Specifier for [XInput](crate::server::device::communication_manager::xinput) devices
 /// 
 /// Network based services, has no attributes because the
-/// [XInput](crate::server::comm_managers::xinput) device communication manager handles all device
+/// [XInput](crate::server::device::communication_manager::xinput) device communication manager handles all device
 /// discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
@@ -852,7 +852,7 @@ impl ProtocolInstanceFactory {
 /// 
 /// The [DeviceConfigurationManager] handles stores information about which device protocols the
 /// library supports, as well as which devices can use those protocols. When a
-/// [DeviceCommunicationManager](crate::server::comm_managers) finds a device during scanning,
+/// [DeviceCommunicationManager](crate::server::device::communication_manager) finds a device during scanning,
 /// device information is given to the [DeviceConfigurationManager] to decide whether Buttplug
 /// should try to connect to and communicate with the device.
 /// 

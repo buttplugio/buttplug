@@ -8,7 +8,7 @@
 use super::websocket_server_device_impl::WebsocketServerDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
-  server::comm_managers::{
+  server::device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

@@ -11,7 +11,7 @@ use super::messages::serializer::ButtplugSerializerError;
 use super::messages::{self, ButtplugDeviceMessageType, ButtplugMessageSpecVersion, ErrorCode};
 use crate::device::Endpoint;
 #[cfg(feature = "server")]
-use crate::server::comm_managers::ButtplugDeviceSpecificError;
+use crate::server::device::communication_manager::ButtplugDeviceSpecificError;
 use displaydoc::Display;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};

@@ -129,7 +129,7 @@ mod test {
   use crate::{
     core::messages::{StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::comm_managers::test::{
+    server::device::communication_manager::test::{
       check_test_recv_empty,
       check_test_recv_value,
       new_bluetoothle_test_device,

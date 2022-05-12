@@ -8,7 +8,7 @@
 use super::lovense_connect_service_device_impl::LovenseServiceDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
-  server::comm_managers::{
+  server::device::communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
