@@ -5,10 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  device::communication_manager::DeviceCommunicationEvent,
-  ping_timer::PingTimer,
-};
 use crate::{
   core::messages::{
     ButtplugServerMessage,
@@ -22,6 +18,10 @@ use crate::{
     ButtplugDevice,
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
+  },
+  server::{
+    ping_timer::PingTimer,
+    device::communication_manager::DeviceCommunicationEvent,
   },
   util::async_manager,
 };
@@ -292,7 +292,7 @@ impl DeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      ButtplugDeviceEvent::Removed(address) => {
+      ButtplugDeviceEvent::Disconnected(address) => {
         let device_index = *self
           .device_index_map
           .get(&address)

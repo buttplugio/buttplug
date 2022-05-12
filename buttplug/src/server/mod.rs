@@ -46,8 +46,6 @@
 //!     of the [DeviceManager] teardown.
 
 pub mod device;
-pub mod device_manager;
-mod device_manager_event_loop;
 mod ping_timer;
 mod remote_server;
 
@@ -68,7 +66,7 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use device_manager::DeviceManager;
+use device::manager::DeviceManager;
 use futures::{
   future::{self, BoxFuture},
   Stream,

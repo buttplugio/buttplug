@@ -8,15 +8,15 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
+mod device_manager_event_loop;
+
+use device_manager_event_loop::DeviceManagerEventLoop;
 use super::{
-  device::communication_manager::{
+  communication_manager::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
   },
-  device_manager_event_loop::DeviceManagerEventLoop,
-  ping_timer::PingTimer,
-  ButtplugServerError,
 };
 use crate::{
   core::{
@@ -38,7 +38,11 @@ use crate::{
     protocol::ButtplugProtocolFactory,
     ButtplugDevice,
   },
-  server::ButtplugServerResultFuture,
+  server::{
+    ButtplugServerResultFuture,
+    ping_timer::PingTimer,
+    ButtplugServerError,
+  },  
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
