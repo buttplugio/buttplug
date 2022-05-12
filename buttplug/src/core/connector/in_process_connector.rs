@@ -8,8 +8,10 @@
 //! In-process communication between clients and servers
 
 use crate::{
+  core::{
   connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-  core::messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+  messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+  },
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };

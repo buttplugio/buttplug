@@ -10,13 +10,13 @@ extern crate buttplug;
 
 use buttplug::{
   client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
-  connector::{
-    ButtplugConnector,
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
-    ButtplugInProcessClientConnector,
-  },
   core::{
+    connector::{
+      ButtplugConnector,
+      ButtplugConnectorError,
+      ButtplugConnectorResultFuture,
+      ButtplugInProcessClientConnector,
+    },
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },

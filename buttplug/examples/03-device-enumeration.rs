@@ -14,14 +14,16 @@ use buttplug::{
   util::async_manager,
 };
 use buttplug::{
-  connector::{
+  core::{
+    connector::{
     ButtplugPipeClientTransportBuilder,
     ButtplugPipeServerTransportBuilder,
     ButtplugRemoteClientConnector,
     ButtplugRemoteServerConnector,
     ButtplugWebsocketClientTransport,
   },
-  core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
+  messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
+},
   server::{comm_managers::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer},
 };
 use futures::StreamExt;

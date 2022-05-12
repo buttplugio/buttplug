@@ -14,8 +14,8 @@ use buttplug::{
     ButtplugClientEvent,
     VibrateCommand,
   },
-  connector::ButtplugInProcessClientConnector,
   core::{
+    connector::ButtplugInProcessClientConnector,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage},
   },

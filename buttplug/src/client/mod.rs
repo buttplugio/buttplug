@@ -13,8 +13,8 @@ pub mod device;
 #[cfg(feature = "server")]
 use crate::server::ButtplugServer;
 use crate::{
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
   core::{
+    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
       ButtplugCurrentSpecClientMessage,
@@ -280,7 +280,7 @@ impl ButtplugClient {
     &self,
     server: Option<ButtplugServer>,
   ) -> Result<(), ButtplugClientError> {
-    use crate::connector::ButtplugInProcessClientConnector;
+    use crate::core::connector::ButtplugInProcessClientConnector;
 
     let connector = ButtplugInProcessClientConnector::new(server);
     #[cfg(feature = "btleplug-manager")]

@@ -9,7 +9,7 @@ mod util;
 
 use buttplug::{
   client::ButtplugClient,
-  connector::ButtplugInProcessClientConnector,
+  core::connector::ButtplugInProcessClientConnector,
   server::comm_managers::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
   server::ButtplugServerBuilder,
   util::async_manager,

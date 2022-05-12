@@ -7,8 +7,8 @@
 
 use super::{ButtplugServer, ButtplugServerBuilder, DeviceManager};
 use crate::{
-  connector::ButtplugConnector,
   core::{
+    connector::ButtplugConnector,
     errors::ButtplugError,
     messages::{
       self,

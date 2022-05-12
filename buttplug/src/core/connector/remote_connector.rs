@@ -7,9 +7,11 @@
 
 //! Generic remote transport handling methods and traits
 
-use super::transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage};
+use super::{
+  ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
+  transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage}
+};
 use crate::{
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
   core::messages::{
     serializer::{
       ButtplugClientJSONSerializer,

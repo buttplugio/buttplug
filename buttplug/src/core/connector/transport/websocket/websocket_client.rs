@@ -8,7 +8,8 @@
 //! Handling of websockets using async-tungstenite
 
 use crate::{
-  connector::{
+  core::{
+    connector::{
     transport::{
       ButtplugConnectorTransport,
       ButtplugConnectorTransportSpecificError,
@@ -17,7 +18,8 @@ use crate::{
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
   },
-  core::messages::serializer::ButtplugSerializedMessage,
+  messages::serializer::ButtplugSerializedMessage,
+},
   util::async_manager,
 };
 use async_tungstenite::{tokio::connect_async_with_tls_connector, tungstenite::protocol::Message};

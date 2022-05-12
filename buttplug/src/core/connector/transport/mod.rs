@@ -11,7 +11,7 @@
 mod pipe;
 #[cfg(feature = "websockets")]
 mod websocket;
-use crate::connector::{
+use crate::core::connector::{
   ButtplugConnectorError,
   ButtplugConnectorResultFuture,
   ButtplugSerializedMessage,

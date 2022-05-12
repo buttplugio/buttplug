@@ -7,11 +7,10 @@
 
 //! Representation and management of devices connected to the server.
 
-use super::{ButtplugClientError, ButtplugClientRequest, ButtplugClientResultFuture};
+use super::{ButtplugClientError, ButtplugClientRequest, ButtplugClientResultFuture, ButtplugClientMessageFuturePair, ButtplugServerMessageFuture};
 use crate::{
-  client::{ButtplugClientMessageFuturePair, ButtplugServerMessageFuture},
-  connector::ButtplugConnectorError,
   core::{
+    connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
       BatteryLevelCmd,

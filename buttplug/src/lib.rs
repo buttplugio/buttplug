@@ -48,6 +48,4 @@ pub mod client;
 pub mod server;
 pub mod util;
 
-#[cfg(any(feature = "client", feature = "server"))]
-pub mod connector;
 pub mod device;

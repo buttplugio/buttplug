@@ -9,8 +9,8 @@ mod util;
 
 use buttplug::{
   client::ButtplugClientError,
-  connector::transport::ButtplugTransportIncomingMessage,
   core::{
+    connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
     messages::{
       self,

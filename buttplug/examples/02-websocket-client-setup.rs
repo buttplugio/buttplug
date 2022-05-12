@@ -8,8 +8,10 @@
 #[cfg(feature = "websockets")]
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
+  core::{
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
-  core::messages::serializer::ButtplugClientJSONSerializer,
+  messages::serializer::ButtplugClientJSONSerializer,
+  }
 };
 use futures::StreamExt;
 use tracing_subscriber;

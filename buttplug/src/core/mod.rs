@@ -7,6 +7,8 @@
 
 //! Protocol message and error definitions.
 
+#[cfg(any(feature = "client", feature = "server"))]
+pub mod connector;
 pub mod errors;
 pub mod messages;
 

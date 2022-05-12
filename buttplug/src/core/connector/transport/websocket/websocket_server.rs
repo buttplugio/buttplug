@@ -1,4 +1,12 @@
+// Buttplug Rust Source Code File - See https://buttplug.io for more info.
+//
+// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+//
+// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
+// for full license information.
+
 use crate::{
+  core::{
   connector::{
     transport::{
       ButtplugConnectorTransport,
@@ -8,7 +16,8 @@ use crate::{
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
   },
-  core::messages::serializer::ButtplugSerializedMessage,
+  messages::serializer::ButtplugSerializedMessage,
+},
   util::async_manager,
 };
 use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
