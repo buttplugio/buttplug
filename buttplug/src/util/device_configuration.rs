@@ -11,7 +11,7 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::DeviceMessageAttributesMap,
   },
-  device::configuration_manager::{
+  server::device::configuration::{
     BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
     ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
     ProtocolDeviceConfiguration, ProtocolDeviceIdentifier, SerialSpecifier, USBSpecifier,

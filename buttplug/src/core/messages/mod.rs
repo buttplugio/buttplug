@@ -52,6 +52,7 @@ mod stop_scanning;
 mod test;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
+mod endpoint;
 
 pub use self::log::Log;
 pub use battery_level_cmd::BatteryLevelCmd;
@@ -60,6 +61,7 @@ pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
 pub use device_message_info::{DeviceMessageAttributesMap, DeviceMessageInfo};
 pub use device_removed::DeviceRemoved;
+pub use endpoint::Endpoint;
 pub use error::{Error, ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
 pub use kiiroo_cmd::KiirooCmd;

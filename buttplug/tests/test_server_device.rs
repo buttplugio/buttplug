@@ -14,10 +14,10 @@ use buttplug::{
       ButtplugDeviceMessageType,
       ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      Endpoint
     },
   },
-  device::Endpoint,
-  server::device::communication_manager::test::TestDeviceCommunicationManagerBuilder,
+  server::device::communication::test::TestDeviceCommunicationManagerBuilder,
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };

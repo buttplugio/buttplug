@@ -6,7 +6,6 @@
 // for full license information.
 
 use super::*;
-use crate::device::Endpoint;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
@@ -47,8 +46,7 @@ impl RawReading {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugCurrentSpecServerMessage, RawReading};
-  use crate::device::Endpoint;
+  use crate::core::messages::{ButtplugCurrentSpecServerMessage, Endpoint, RawReading};
 
   #[test]
   fn test_endpoint_deserialize() {

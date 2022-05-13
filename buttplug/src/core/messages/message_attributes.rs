@@ -8,9 +8,8 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::ButtplugDeviceMessageType,
+    messages::{ButtplugDeviceMessageType, Endpoint}
   },
-  device::Endpoint,
 };
 use serde::{Deserialize, Serialize};
 use getset::{Getters, Setters};

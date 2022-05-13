@@ -21,6 +21,7 @@ use crate::{
       DeviceMessageAttributes,
       DeviceMessageAttributesMap,
       DeviceMessageInfo,
+      Endpoint,
       LinearCmd,
       RSSILevelCmd,
       RawReadCmd,
@@ -35,7 +36,6 @@ use crate::{
       VibrateSubcommand,
     },
   },
-  device::Endpoint,
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, Stream};

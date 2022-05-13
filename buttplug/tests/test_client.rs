@@ -18,11 +18,15 @@ use buttplug::{
       ButtplugInProcessClientConnector,
     },
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, Endpoint},
   },
-  device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-  server::device::communication_manager::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
-  server::ButtplugServerBuilder,
+  server::{
+    device::{
+      communication::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+      device::device_impl::{DeviceImplCommand, DeviceWriteCmd,}
+    },
+    ButtplugServerBuilder,
+  },
   util::async_manager,
 };
 use futures::{future::BoxFuture, StreamExt};

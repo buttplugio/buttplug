@@ -12,6 +12,7 @@ mod test {
   use buttplug::{
     core::messages::{
       self,
+      Endpoint,
       serializer::{
         ButtplugMessageSerializer,
         ButtplugSerializedMessage,
@@ -19,9 +20,13 @@ mod test {
       },
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
-    device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-    server::device::communication_manager::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
-    server::ButtplugServer,
+    server::{
+      device::{
+        communication::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+        device::device_impl::{DeviceImplCommand, DeviceWriteCmd}
+      },
+      ButtplugServer,
+    },
     util::async_manager,
   };
   use futures::{pin_mut, StreamExt};

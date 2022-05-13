@@ -15,11 +15,17 @@ use buttplug::{
       ButtplugMessageSpecVersion,
       ButtplugServerMessage,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      Endpoint
     },
   },
-  device::{DeviceImplCommand, DeviceWriteCmd, Endpoint},
-  server::device::communication_manager::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
-  server::{ButtplugServer, ButtplugServerBuilder},
+  server::{
+    device::{
+      communication::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
+      device::device_impl::{DeviceImplCommand, DeviceWriteCmd}
+    },
+    ButtplugServer, 
+    ButtplugServerBuilder
+  },
   util::async_manager,
 };
 use futures::{pin_mut, Stream, StreamExt};

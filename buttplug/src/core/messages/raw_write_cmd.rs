@@ -6,7 +6,6 @@
 // for full license information.
 
 use super::*;
-use crate::device::Endpoint;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 

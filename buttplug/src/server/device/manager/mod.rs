@@ -12,7 +12,7 @@ mod device_manager_event_loop;
 
 use device_manager_event_loop::DeviceManagerEventLoop;
 use super::{
-  communication_manager::{
+  communication::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
@@ -33,10 +33,10 @@ use crate::{
       DeviceMessageInfo,
     },
   },
-  device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
+  server::device::{
+    configuration::{DeviceConfigurationManager, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
-    ButtplugDevice,
+    device::ButtplugDevice,
   },
   server::{
     ButtplugServerResultFuture,

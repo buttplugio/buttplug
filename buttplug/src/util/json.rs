@@ -6,7 +6,7 @@
 // for full license information.
 
 //! JSON Schema validator structure, used by the
-//! [DeviceConfigurationManager][crate::device::configuration_manager::DeviceConfigurationManager] and
+//! [DeviceConfigurationManager][crate::server::device::configuration::DeviceConfigurationManager] and
 //! buttplug message de/serializers in both the client and server. Uses the
 //! jsonschema library.
 

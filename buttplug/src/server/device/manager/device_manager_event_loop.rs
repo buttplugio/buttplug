@@ -13,15 +13,16 @@ use crate::{
     ScanningFinished,
     StopDeviceCmd,
   },
-  device::{
-    configuration_manager::{DeviceConfigurationManager, ProtocolDeviceIdentifier},
-    ButtplugDevice,
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-  },
   server::{
+    device::{
+      configuration::{DeviceConfigurationManager, ProtocolDeviceIdentifier},
+      communication::DeviceCommunicationEvent,
+      device::{
+        ButtplugDevice,
+        device_impl::{ButtplugDeviceImplCreator, ButtplugDeviceEvent}
+      }
+    },
     ping_timer::PingTimer,
-    device::communication_manager::DeviceCommunicationEvent,
   },
   util::async_manager,
 };

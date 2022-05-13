@@ -19,7 +19,7 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage},
   },
-  server::device::communication_manager::test::TestDeviceCommunicationManagerBuilder,
+  server::device::communication::test::TestDeviceCommunicationManagerBuilder,
   util::async_manager,
 };
 use futures::StreamExt;
