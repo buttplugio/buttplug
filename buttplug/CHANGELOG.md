@@ -1,3 +1,22 @@
+# 6.0.0 (Unknown)
+
+## Breaking Changes
+
+- `connector` module moved to `core` instead of top level
+- Renamed `messages` module to `message` (to stay with singular style module naming)
+- `device` module now split between `core` (Endpoints struct now in `message` module) and server
+  (impl, protocols, configs, everything that is server specific now lives there)
+- Device configuration file format changed to remove language for naming
+- User Device Configuration File format changed completely
+
+## Features
+
+- Overhauled device configuration system so it can de/serialize and handle user configuration
+  stacking. This is important for being able to load, edit, and save configs from outside the
+  library, in applications like Intiface Desktop.
+- Simplified the device creation system.
+- Added LevelCmd
+
 # 5.1.10 (2022-05-07)
 
 ## Bugfixes
