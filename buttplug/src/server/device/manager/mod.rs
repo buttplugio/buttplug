@@ -254,7 +254,7 @@ impl DeviceManager {
     }
   }
 
-  fn stop_all_devices(&self) -> ButtplugServerResultFuture {
+  pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {
     let device_map = self.devices.clone();
     // TODO This could use some error reporting.
     Box::pin(async move {

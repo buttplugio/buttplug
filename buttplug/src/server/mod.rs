@@ -202,32 +202,10 @@ impl ButtplugServerBuilder {
     let connected = Arc::new(AtomicBool::new(false));
     let connected_clone = connected.clone();
 
-    // Create the ping timer, since we'll need to pass it in to the DeviceManager on creation
-    //
     // TODO this should use a cancellation token instead of passing around the timer itself.
     let ping_time = self.max_ping_time.unwrap_or(0);
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
-
-    // Spawn the ping timer task, assuming the ping time is > 0.
-    if ping_time > 0 {
-      async_manager::spawn(
-        async move {
-          // This will only exit if we've pinged out.
-          ping_timeout_notifier.await;
-          error!("Ping out signal received, stopping server");
-          connected_clone.store(false, Ordering::SeqCst);
-          // TODO Should the event sender return a result instead of an error message?
-          if output_sender_clone
-            .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
-            .is_err()
-          {
-            error!("Server disappeared, cannot update about ping out.");
-          };
-        }
-        .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
-      );
-    }
 
     if self.allow_raw_messages {
       self.device_manager_builder.allow_raw_messages();
@@ -249,13 +227,39 @@ impl ButtplugServerBuilder {
       self.device_manager_builder.protocol_device_configuration(name, def);
     }
 
-    let device_manager = self.device_manager_builder.finish(output_sender.clone())?;
+    let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);
+
+    // Spawn the ping timer task, assuming the ping time is > 0.
+    if ping_time > 0 {
+      let device_manager_clone = device_manager.clone();
+      async_manager::spawn(
+        async move {
+          // This will only exit if we've pinged out.
+          ping_timeout_notifier.await;
+          error!("Ping out signal received, stopping server");
+          connected_clone.store(false, Ordering::SeqCst);
+          async_manager::spawn(async move {
+            if let Err(e) = device_manager_clone.stop_all_devices().await {
+              error!("Could not stop devices on ping timeout: {:?}", e);
+            }
+          });
+          // TODO Should the event sender return a result instead of an error message?
+          if output_sender_clone
+            .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
+            .is_err()
+          {
+            error!("Server disappeared, cannot update about ping out.");
+          };
+        }
+        .instrument(tracing::info_span!("Buttplug Server Ping Timeout Task")),
+      );
+    }
 
     // Assuming everything passed, return the server.
     Ok(ButtplugServer {
       server_name: self.name.clone(),
       max_ping_time: ping_time,
-      device_manager,
+      device_manager: device_manager,
       ping_timer,
       connected,
       output_sender,
@@ -280,7 +284,7 @@ pub struct ButtplugServer {
   /// Timer for managing ping time tracking, if max_ping_time > 0.
   ping_timer: Arc<PingTimer>,
   /// Manages device discovery and communication.
-  device_manager: DeviceManager,
+  device_manager: Arc<DeviceManager>,
   /// If true, client is currently connected to server
   connected: Arc<AtomicBool>,
   /// Broadcaster for server events. Receivers for this are handed out through the
