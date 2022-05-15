@@ -263,7 +263,7 @@ mod test {
   }
 
   #[test]
-  #[ignore] // Disabled since none of the vibrator devices need initialisation yet
+  #[ignore = "None of the vibrator devices need initialisation yet"]
   pub fn test_kiiroov21initialized_vibratecmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Cliona")

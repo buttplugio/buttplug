@@ -61,6 +61,24 @@ pub async fn test_client_with_device() -> (ButtplugClient, Arc<TestDeviceInterna
 }
 
 #[allow(dead_code)]
+pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
+  let builder = DelayDeviceCommunicationManagerBuilder::default();
+
+  let mut server_builder = ButtplugServerBuilder::default();
+  server_builder.device_manager_builder().comm_manager(builder);
+  let connector = ButtplugInProcessClientConnectorBuilder::default().server(server_builder.finish().unwrap()).finish();
+
+  let client = ButtplugClient::new("Test Client");
+  assert!(!client.connected());
+  client
+    .connect(connector)
+    .await
+    .expect("Test, assuming infallible.");
+  assert!(client.connected());
+  client
+}
+
+#[allow(dead_code)]
 pub async fn test_server_with_device(device_type: &str) -> (ButtplugServer, Arc<TestDeviceInternal>) {
   let mut server_builder = ButtplugServerBuilder::default();
   let builder = TestDeviceCommunicationManagerBuilder::default();

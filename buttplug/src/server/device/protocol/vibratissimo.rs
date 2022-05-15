@@ -190,7 +190,7 @@ mod test {
   }
 
   #[test]
-  #[ignore] // Need to be able to set BLE model info to be read on test device
+  #[ignore = "Need to be able to set BLE model info to be read on test device"]
   pub fn test_vibratissimo_protocol_licker() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Vibratissimo")
@@ -286,7 +286,7 @@ mod test {
   }
 
   #[test]
-  #[ignore] // Need to be able to set BLE model info to be read on test device
+  #[ignore = "Need to be able to set BLE model info to be read on test device"]
   pub fn test_vibratissimo_protocol_rabbit() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Vibratissimo")

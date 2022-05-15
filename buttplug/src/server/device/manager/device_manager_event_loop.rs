@@ -9,6 +9,7 @@ use crate::{
   core::messages::{
     ButtplugServerMessage,
     DeviceAdded,
+    DeviceRemoved,
     ScanningFinished,
   },
   server::{
@@ -87,6 +88,7 @@ impl DeviceManagerEventLoop {
     device_address: String,
     device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) {
+    debug!("Trying to create device at address {}", device_address);
     let device_event_sender_clone = self.device_event_sender.clone();
 
     // First off, we need to see if we even have a configuration available for the device we're
@@ -94,7 +96,10 @@ impl DeviceManagerEventLoop {
     // *do* have a configuration but something goes wrong after this, then it's an error.
     let protocol_builder = match self.device_config_manager.protocol_instance_factory(&device_creator.specifier()) {
       Some(builder) => builder,
-      None => return 
+      None => {
+        debug!("Device {} not matched to protocol, ignoring.", device_address);
+        return;
+      }
     };
 
     let create_device_future =
@@ -158,13 +163,13 @@ impl DeviceManagerEventLoop {
       } => {
         let span = info_span!(
           "device creation",
-          name = tracing::field::display(name),
+          name = tracing::field::display(name.clone()),
           address = tracing::field::display(address.clone())
         );
         let _enter = span.enter();
-
+        info!("Device {} ({}) found.", name, address);
         // Make sure the device isn't on the deny list, or is on the allow list if anything is on it.
-        if self.device_config_manager.address_allowed(&address) {
+        if !self.device_config_manager.address_allowed(&address) {
           return;
         }
         debug!("Device {} allowed via configuration file, continuing.", address);
@@ -263,21 +268,25 @@ impl DeviceManagerEventLoop {
         }
       }
       ButtplugDeviceEvent::Disconnected(address) => {
-        let device_index = *self
-          .device_index_map
-          .get(&address)
-          .expect("Index must exist to get here.")
-          .value();
-        self
-          .device_map
-          .remove(&device_index)
-          .expect("Remove will always work.");
-        if self
-          .server_sender
-          .send(DeviceRemoved::new(device_index).into())
-          .is_err()
-        {
-          debug!("Server not currently available, dropping Device Removed event.");
+        let mut device_index = None;
+        for device_pair in self.device_map.iter() {
+          if device_pair.value().device_identifier().address() == &address {
+            device_index = Some(*device_pair.key());
+            break;
+          }
+        }
+        if let Some(device_index) = device_index {
+          self
+            .device_map
+            .remove(&device_index)
+            .expect("Remove will always work.");
+          if self
+            .server_sender
+            .send(DeviceRemoved::new(device_index).into())
+            .is_err()
+          {
+            debug!("Server not currently available, dropping Device Removed event.");
+          }
         }
       }
       ButtplugDeviceEvent::Notification(_address, _endpoint, _data) => {
@@ -304,6 +313,10 @@ impl DeviceManagerEventLoop {
             panic!("We shouldn't be able to get here since we also own the sender.");
           }
         },
+        _ = self.loop_cancellation_token.cancelled().fuse() => {
+          info!("Device event loop cancelled, exiting.");
+          return
+        }
       }
     }
   }

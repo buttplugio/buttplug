@@ -26,7 +26,7 @@ use crate::{
 };
 use futures::future;
 use std::{
-  sync::Arc,
+  sync::{Arc, atomic::{AtomicBool, Ordering}},
   time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::{mpsc::Sender, Mutex};
@@ -128,6 +128,7 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<DeviceCommunicationEvent>,
   devices: WaitingDeviceList,
+  is_scanning: Arc<AtomicBool>
 }
 
 impl TestDeviceCommunicationManager {
@@ -135,6 +136,7 @@ impl TestDeviceCommunicationManager {
     Self {
       device_sender,
       devices,
+      is_scanning: Arc::new(AtomicBool::new(false))
     }
   }
 }
@@ -147,12 +149,15 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
   fn start_scanning(&self) -> ButtplugResultFuture {
     let devices_vec = self.devices.clone();
     let device_sender = self.device_sender.clone();
+    let is_scanning = self.is_scanning.clone();
     Box::pin(async move {
+      is_scanning.store(true, Ordering::SeqCst);
       let mut devices = devices_vec.lock().await;
       if devices.is_empty() {
-        panic!("No devices for test device comm manager to emit!");
+        warn!("No devices for test device comm manager to emit, did you mean to do this?");
       }
-      while let Some(d) = devices.pop() {
+      while let Some(d) = devices.pop() {      
+        let device_name = d.device().as_ref().unwrap().name();  
         if device_sender
           .send(DeviceCommunicationEvent::DeviceFound {
             name: d
@@ -169,8 +174,12 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
           .is_err()
         {
           error!("Device channel no longer open.");
+        } else {
+          info!("Test DCM emitting device: {}", device_name);
         }
+        
       }
+      is_scanning.store(false, Ordering::SeqCst);
       if device_sender
         .send(DeviceCommunicationEvent::ScanningFinished)
         .await
@@ -190,6 +199,10 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
   // testing later.
   fn can_scan(&self) -> bool {
     true
+  }
+
+  fn scanning_status(&self) -> Arc<AtomicBool> {
+    Arc::new(AtomicBool::new(false))
   }
 }
 
@@ -215,11 +228,11 @@ mod test {
       let server = builder.finish().expect("Test");
       let recv = server.event_stream();
       pin_mut!(recv);
-      let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);
       let mut reply = server.parse_message(msg.into()).await;
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
+      let device = helper.add_ble_device("Massage Demo").await;
       reply = server
         .parse_message(messages::StartScanning::default().into())
         .await;

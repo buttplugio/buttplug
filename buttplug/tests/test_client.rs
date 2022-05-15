@@ -6,8 +6,10 @@
 // for full license information.
 
 mod util;
-use util::{test_client, test_client_with_device};
+use util::{test_client, test_client_with_device, test_client_with_delayed_device_manager};
 extern crate buttplug;
+#[macro_use]
+extern crate tracing;
 
 use buttplug::{
   client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
@@ -122,7 +124,6 @@ fn test_start_scanning() {
 
 #[cfg(feature = "server")]
 #[test]
-#[ignore]
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;
@@ -143,9 +144,19 @@ fn test_stop_scanning_when_not_scanning() {
 #[test]
 fn test_start_scanning_when_already_scanning() {
   async_manager::block_on(async {
+    let client = test_client_with_delayed_device_manager().await;
+    assert!(client.start_scanning().await.is_ok());
+    assert!(client.start_scanning().await.is_ok());
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_successive_start_scanning() {
+  async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;
     assert!(client.start_scanning().await.is_ok());
-    assert!(client.start_scanning().await.is_err());
+    assert!(client.start_scanning().await.is_ok());
   });
 }
 
@@ -156,7 +167,6 @@ fn test_client_scanning_finished() {
     let (client, _) = test_client_with_device().await;
     let mut recv = client.event_stream();
     assert!(client.start_scanning().await.is_ok());
-    assert!(client.stop_scanning().await.is_ok());
     assert!(matches!(
       recv.next().await.expect("Test, assuming infallible."),
       ButtplugClientEvent::ScanningFinished
@@ -193,6 +203,7 @@ fn test_stop_all_devices_and_device_command_range() {
   async_manager::block_on(async {
     let (client, test_device) = test_client_with_device().await;
     let mut event_stream = client.event_stream();
+    assert!(client.start_scanning().await.is_ok());
 
     while let Some(event) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(dev) = event {

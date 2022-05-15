@@ -87,11 +87,8 @@ fn test_server_version_lt() {
   });
 }
 
-// TODO Now that we're moving to a spec version enum, this test is invalid
-// because we can't just pass a u8 in. This should be rebuilt using the
-// JSON parser, and it should fail to deserialize the message.
 #[test]
-#[ignore]
+#[ignore = "Needs to be rewritten to send in via the JSON parser, otherwise we're type bound due to the enum and can't fail"]
 fn test_server_version_gt() {
   let server = ButtplugServer::default();
   let msg =
@@ -142,26 +139,21 @@ fn test_ping_timeout() {
 }
 
 #[test]
-#[ignore]
 fn test_device_stop_on_ping_timeout() {
-  /*
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default()
-      .max_ping_time(100)
-      .finish()
-      .expect("Test, assuming infallible.");
-    let recv = server.event_stream();
-    pin_mut!(recv);
+    let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-
-    // TODO This should probably use a test protocol we control, not the aneros protocol
+    server_builder
+      .max_ping_time(100)
+      .device_manager_builder()
+      .comm_manager(builder);
+    let server = server_builder.finish().unwrap();
     let device = helper.add_ble_device("Massage Demo").await;
 
+    let recv = server.event_stream();
+    pin_mut!(recv);
+    
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.into()).await;
@@ -213,9 +205,8 @@ fn test_device_stop_on_ping_timeout() {
       &command_receiver,
       DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
     );
-    */
+     */
   });
-  */
 }
 
 #[test]
@@ -250,21 +241,20 @@ fn test_invalid_device_index() {
 }
 
 #[test]
-#[ignore]
 fn test_device_index_generation() {
-  /*
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
+    let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Massage Demo").await;
-    helper.add_ble_device("Massage Demo").await;
+    server_builder
+      .device_manager_builder()
+      .comm_manager(builder);
+    let server = server_builder.finish().unwrap();
+    let _ = helper.add_ble_device("Massage Demo").await;
+    let _ = helper.add_ble_device("Massage Demo").await;
+
+    let recv = server.event_stream();
+    pin_mut!(recv);
     assert!(server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
@@ -300,26 +290,23 @@ fn test_device_index_generation() {
       }
     }
   });
-  */
 }
 
 #[test]
-#[ignore]
 fn test_server_scanning_finished() {
-  /*
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
+    let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
+    server_builder
+      .device_manager_builder()
+      .comm_manager(builder);
+    let server = server_builder.finish().unwrap();
+    let _ = helper.add_ble_device("Massage Demo").await;
+    let _ = helper.add_ble_device("Massage Demo").await;
 
-    helper.add_ble_device("Massage Demo").await;
-    helper.add_ble_device("Massage Demo").await;
+    let recv = server.event_stream();
+    pin_mut!(recv);
     assert!(server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
@@ -346,17 +333,7 @@ fn test_server_scanning_finished() {
       }
     }
     assert!(finish_received);
-    server
-      .device_manager()
-      .add_comm_manager(util::DelayDeviceCommunicationManagerBuilder::default())
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Massage Demo").await;
-    assert!(server
-      .parse_message(messages::StartScanning::default().into())
-      .await
-      .is_ok());
   });
-  */
 }
 
 #[test]
@@ -504,9 +481,8 @@ fn test_server_builder_user_device_config_schema_break() {
   });
 }
 
-// Skip until we've figured out whether we actually want version differences to fail.
 #[test]
-#[ignore]
+#[ignore = "Skip until we've figured out whether we actually want version differences to fail."]
 fn test_server_builder_user_device_config_old_config_version() {
   async_manager::block_on(async {
     let mut builder = ButtplugServerBuilder::default();

@@ -18,6 +18,7 @@ use buttplug::{
       Endpoint
     },
   },
+  server::{ButtplugServerBuilder, device::communication::test::TestDeviceCommunicationManagerBuilder},
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
@@ -67,7 +68,17 @@ fn test_capabilities_exposure() {
 #[test]
 fn test_server_raw_message() {
   async_manager::block_on(async {
-    let (server, _) = test_server_with_device("Message Demo").await;
+    let mut server_builder = ButtplugServerBuilder::default();
+    let builder = TestDeviceCommunicationManagerBuilder::default();
+    let helper = builder.helper();
+    server_builder
+      .allow_raw_messages(true)
+      .device_manager_builder()
+      .comm_manager(builder);
+    let server = server_builder.finish().unwrap();
+    helper
+      .add_ble_device("Massage Demo")
+      .await;
     let recv = server.event_stream();
     pin_mut!(recv);
     assert!(server
@@ -85,7 +96,6 @@ fn test_server_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
         assert!(da
           .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
@@ -98,6 +108,7 @@ fn test_server_raw_message() {
         assert!(da
           .device_messages()
           .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
+        assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
         return;
       } else {
         panic!(
@@ -112,7 +123,7 @@ fn test_server_raw_message() {
 #[test]
 fn test_server_no_raw_message() {
   async_manager::block_on(async {
-    let (server, _) = test_server_with_device("Message Demo").await;
+    let (server, _) = test_server_with_device("Massage Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
     assert!(server
@@ -157,7 +168,7 @@ fn test_server_no_raw_message() {
 #[test]
 fn test_reject_on_no_raw_message() {
   async_manager::block_on(async {
-    let (server, _) = test_server_with_device("Message Demo").await;
+    let (server, _) = test_server_with_device("Massage Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
     assert!(server
@@ -225,19 +236,20 @@ fn test_reject_on_no_raw_message() {
   });
 }
 
-#[cfg(target = "windows")]
+#[cfg(target_os = "windows")]
+#[ignore="Has weird timeout issues"]
 #[test]
 fn test_repeated_address_additions() {
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
-    let recv = server.event_stream();
-    pin_mut!(recv);
+    let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
+    server_builder
+      .device_manager_builder()
+      .comm_manager(builder);
+    let server = server_builder.finish().unwrap();
+    let recv = server.event_stream();
+    pin_mut!(recv);
     helper
       .add_ble_device_with_address("Massage Demo", "SameAddress")
       .await;

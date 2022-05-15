@@ -144,7 +144,7 @@ mod test {
   };
 
   #[test]
-  #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
+  #[ignore = "None of the linear devices have known issues with initialisation yet"]
   pub fn test_kiiroov21_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1")
@@ -170,7 +170,7 @@ mod test {
   }
 
   #[test]
-  #[ignore] // Disabled since none of the linear devices have known issues with initialisation yet
+  #[ignore = "None of the linear devices have known issues with initialisation yet"]
   pub fn test_kiiroov21_linearcmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("Onyx2.1")

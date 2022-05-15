@@ -67,7 +67,7 @@ fn test_client_device_connected_status() {
 #[test]
 fn test_client_device_client_disconnected_status() {
   async_manager::block_on(async {
-    let client = test_client().await;
+    let (client, _) = test_client_with_device().await;
     
     let mut event_stream = client.event_stream();
     client
@@ -132,7 +132,7 @@ fn test_client_device_connected_no_event_listener() {
 #[test]
 fn test_client_device_invalid_command() {
   async_manager::block_on(async {
-    let client = test_client().await;
+    let (client, _) = test_client_with_device().await;
     
     let mut event_stream = client.event_stream();
     client

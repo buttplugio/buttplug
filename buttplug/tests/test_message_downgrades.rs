@@ -80,7 +80,7 @@ fn test_version2_connection() {
 #[test]
 fn test_version0_device_added_device_list() {
   async_manager::block_on(async {
-    let (server, _) = test_server_with_device("Message Demo").await;
+    let (server, _) = test_server_with_device("Massage Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
     let serializer = ButtplugServerJSONSerializer::default();
@@ -133,7 +133,7 @@ fn test_version0_device_added_device_list() {
 #[test]
 fn test_version0_singlemotorvibratecmd() {
   async_manager::block_on(async {
-    let (server, device) = test_server_with_device("Message Demo").await;
+    let (server, device) = test_server_with_device("Massage Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
     let serializer = ButtplugServerJSONSerializer::default();

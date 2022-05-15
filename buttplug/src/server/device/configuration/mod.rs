@@ -1144,7 +1144,7 @@ mod test {
   }
 
   #[test]
-  #[ignore]
+  #[ignore = "Still need to update message attributes in create_unit_test_dcm"]
   fn test_specific_device_config_creation() {
     let config = create_unit_test_dcm(false);
     let lovense = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(

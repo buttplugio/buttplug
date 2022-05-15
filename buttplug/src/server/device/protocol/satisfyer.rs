@@ -180,9 +180,8 @@ mod test {
     util::async_manager,
   };
 
-  // TODO Reimplement with name readout and timing fixes (#414)
   #[test]
-  #[ignore]
+  #[ignore = "Reimplement with name readout and timing fixes (#414)"]
   pub fn test_satisfyer_2v_protocol() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("SF Curvy 2+")
@@ -246,9 +245,8 @@ mod test {
     });
   }
 
-  // TODO Reimplement with name readout and timing fixes (#414)
   #[test]
-  #[ignore]
+  #[ignore = "Reimplement with name readout and timing fixes (#414)"]
   pub fn test_satisfyer_1v_protocol() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("SF Royal One")
