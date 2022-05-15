@@ -4,12 +4,16 @@
 
 - `connector` module moved to `core` instead of top level
 - Renamed `messages` module to `message` (to stay with singular style module naming)
-- `device` module now split between `core` (Endpoints struct now in `message` module) and server
+- `device` module now split between `core` (Endpoints struct now in `message` module) and `server`
   (impl, protocols, configs, everything that is server specific now lives there)
-- Device configuration file format changed to remove language for naming
-- User Device Configuration File format changed completely
+- Device configuration file format changed to remove language specifier for device names, as these
+  were never actually used.
+- User Device Configuration File format completely overhauled to handle device specifiers
 - Move in-process client creation utility method to util module
-- ButtplugServer and child managers moved to builder patterns, now immutable after construction
+- Buttplug Server and its components are now constructable via builders, and are immutable after
+  construction. This makes management and additions far easier to reason about, and there was no
+  reason for mutability there anyways.
+- Running StartScanning when a scan is already running no longer throws an error.
 
 ## Features
 

@@ -185,7 +185,6 @@ impl DeviceManager {
       let mgrs = self.comm_managers.clone();
       let sender = self.device_event_sender.clone();
       Box::pin(async move {
-        info!("RUNNING SCANNING TASK");
         // TODO Does this really matter? If we're already scanning, who cares?
         for mgr in mgrs.iter() {
           if mgr.scanning_status().load(Ordering::SeqCst) {
