@@ -26,7 +26,7 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
+      configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration},
       protocol::ButtplugProtocolFactory,
       hardware::{
         communication::{
@@ -36,6 +36,7 @@ use crate::{
         },
       },
       ServerDevice,
+      ServerDeviceIdentifier,
     },
     ButtplugServerResultFuture
   },
@@ -55,7 +56,7 @@ use tokio::sync::{broadcast, mpsc};
 
 #[derive(Debug)]
 pub struct DeviceInfo {
-  pub identifier: ProtocolDeviceIdentifier,
+  pub identifier: ServerDeviceIdentifier,
   pub display_name: Option<String>,
 }
 
@@ -84,7 +85,7 @@ impl DeviceManagerBuilder {
     self
   }
 
-  pub fn reserved_index(&mut self, identifier: &ProtocolDeviceIdentifier, index: u32) -> &mut Self {
+  pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
     self.configuration_manager_builder.reserved_index(identifier, index);
     self
   }

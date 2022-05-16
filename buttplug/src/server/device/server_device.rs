@@ -26,14 +26,40 @@ use crate::{
     ButtplugServerResultFuture,
     device::{
       hardware::{Hardware, HardwareCreator, HardwareEvent},
-      configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
+      configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier},
       protocol::ButtplugProtocol,
     },
   },
 };
+use getset::{Getters, Setters, MutGetters};
+use serde::{Serialize, Deserialize};
 use core::hash::{Hash, Hasher};
 use tokio::sync::broadcast;
 
+/// Identifying information for a connected devices
+/// 
+/// Contains the 3 fields needed to uniquely identify a device in the system.
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, Setters, MutGetters, Serialize, Deserialize)]
+#[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+pub struct ServerDeviceIdentifier {
+  /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
+  address: String,
+  /// Name of the protocol used
+  protocol: String,
+  /// Internal identifier for the protocol used
+  identifier: ProtocolAttributesIdentifier
+}
+
+impl ServerDeviceIdentifier {
+  /// Creates a new instance
+  pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
+    Self {
+      address: address.to_owned(),
+      protocol: protocol.to_owned(),
+      identifier: identifier.clone()
+    }
+  }
+}
 
 /// Main internal device representation structure
 /// 
@@ -56,7 +82,7 @@ pub struct ServerDevice {
   /// Display name for the device
   display_name: OnceCell<String>,
   /// Unique identifier for the device
-  device_identifier: ProtocolDeviceIdentifier
+  device_identifier: ServerDeviceIdentifier
 }
 
 impl Debug for ServerDevice {
@@ -87,7 +113,7 @@ impl ServerDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<Hardware>) -> Self {
     Self {
-      device_identifier: ProtocolDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
+      device_identifier: ServerDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
       protocol,
       device,
       display_name: OnceCell::new(),
@@ -95,7 +121,7 @@ impl ServerDevice {
   }
 
   /// Returns the device identifier
-  pub fn device_identifier(&self) -> &ProtocolDeviceIdentifier {
+  pub fn device_identifier(&self) -> &ServerDeviceIdentifier {
     &self.device_identifier
   }
 

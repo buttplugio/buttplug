@@ -11,12 +11,15 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::DeviceMessageAttributesMap,
   },
-  server::device::configuration::{
-    BluetoothLESpecifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier,
-    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
-    ProtocolDeviceConfiguration, ProtocolDeviceIdentifier, SerialSpecifier, USBSpecifier,
-    WebsocketSpecifier, XInputSpecifier,
-  },
+  server::device::{
+    configuration::{
+      BluetoothLESpecifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier,
+      ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+      ProtocolDeviceConfiguration, SerialSpecifier, USBSpecifier,
+      WebsocketSpecifier, XInputSpecifier,
+    },
+    ServerDeviceIdentifier,
+  }
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -91,7 +94,7 @@ pub struct ProtocolDefinition {
 pub struct UserConfigDefinition {
   specifiers: HashMap<String, ProtocolDefinition>,
   #[serde(rename = "devices", with = "vectorize")]
-  user_configs: HashMap<ProtocolDeviceIdentifier, DeviceUserConfig>,
+  user_configs: HashMap<ServerDeviceIdentifier, DeviceUserConfig>,
 }
 
 #[derive(Default, Debug, Getters)]
@@ -99,9 +102,9 @@ pub struct UserConfigDefinition {
 pub struct ExternalDeviceConfiguration {
   allow_list: Vec<String>,
   deny_list: Vec<String>,
-  reserved_indexes: HashMap<u32, ProtocolDeviceIdentifier>,
+  reserved_indexes: HashMap<u32, ServerDeviceIdentifier>,
   protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
-  user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+  user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
 }
 
 impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {

@@ -148,7 +148,10 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap, Endpoint},
   },
-  server::device::hardware::Hardware,
+  server::device::{
+    ServerDeviceIdentifier,
+    hardware::Hardware,
+  }
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -174,32 +177,6 @@ impl PartialEq for ProtocolAttributesIdentifier {
       (Default, Default) => true,
       (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
       _ => false,
-    }
-  }
-}
-
-
-/// Identifying information for a connected devices
-/// 
-/// Contains the 3 fields needed to uniquely identify a device in the system.
-#[derive(Debug, Eq, PartialEq, Hash, Clone, Getters, Setters, MutGetters, Serialize, Deserialize)]
-#[getset(get = "pub(crate)", get_mut = "pub(crate)")]
-pub struct ProtocolDeviceIdentifier {
-  /// Address, as possibly serialized by whatever the managing library for the Device Communication Manager is.
-  address: String,
-  /// Name of the protocol used
-  protocol: String,
-  /// Internal identifier for the protocol used
-  identifier: ProtocolAttributesIdentifier
-}
-
-impl ProtocolDeviceIdentifier {
-  /// Creates a new instance
-  pub fn new(address: &str, protocol: &str, identifier: &ProtocolAttributesIdentifier) -> Self {
-    Self {
-      address: address.to_owned(),
-      protocol: protocol.to_owned(),
-      identifier: identifier.clone()
     }
   }
 }
@@ -411,12 +388,12 @@ pub struct ProtocolDeviceAttributesBuilder {
   /// Set of possible device configurations for this protocol
   device_configuration: ProtocolDeviceConfiguration,
   /// Set of device specific user configs for this protocol
-  user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+  user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
 }
 
 impl ProtocolDeviceAttributesBuilder {
   /// Create a new instance 
-  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>) -> Self {
+  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>) -> Self {
     Self {
       protocol_identifier: protocol_identifier.to_owned(),
       allow_raw_messages,
@@ -462,7 +439,7 @@ impl ProtocolDeviceAttributesBuilder {
         )),
       ))?;
 
-    let device_identifier = ProtocolDeviceIdentifier::new(address, &self.protocol_identifier, identifier);
+    let device_identifier = ServerDeviceIdentifier::new(address, &self.protocol_identifier, identifier);
 
     // In the case we have a user config that matches the address of our device, build a new
     // ProtocolDeviceAttributes leaf node using our current identifier as the parent. Then check if
@@ -548,7 +525,7 @@ impl ProtocolDeviceConfiguration {
 pub struct ProtocolInstanceFactory {
   allow_raw_messages: bool,
   protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-  user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+  user_device_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
   configuration: ProtocolDeviceConfiguration,
 }
 
@@ -557,7 +534,7 @@ impl ProtocolInstanceFactory {
   fn new(
     allow_raw_messages: bool,
     protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-    user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+    user_device_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
     configuration: ProtocolDeviceConfiguration,
   ) -> Self {
     Self {
@@ -594,19 +571,19 @@ pub struct DeviceConfigurationManagerBuilder {
   no_default_protocols: bool,
   allow_raw_messages: bool,
   /// Per-specific-device user configurations
-  user_device_configs: Vec<(ProtocolDeviceIdentifier, ProtocolDeviceAttributes)>,
+  user_device_configs: Vec<(ServerDeviceIdentifier, ProtocolDeviceAttributes)>,
   /// Map of protocol names to which devices they support
   protocol_device_configurations: Vec<(String, ProtocolDeviceConfiguration)>,
   /// Map of protocol names to their respective protocol instance factories
   protocols: Vec<(String, Arc<dyn ButtplugProtocolFactory>)>,
   allowed_addresses: Vec<String>,
   denied_addresses: Vec<String>,
-  reserved_indexes: Vec<(ProtocolDeviceIdentifier, u32)>
+  reserved_indexes: Vec<(ServerDeviceIdentifier, u32)>
 }
 
 impl DeviceConfigurationManagerBuilder {
   /// Add a device-specific user configuration
-  pub fn user_device_config(&mut self, protocol_identifier: &ProtocolDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> &mut Self {
+  pub fn user_device_config(&mut self, protocol_identifier: &ServerDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> &mut Self {
     self.user_device_configs.push((protocol_identifier.clone(), protocol_attributes.clone()));
     self
   }
@@ -652,7 +629,7 @@ impl DeviceConfigurationManagerBuilder {
     self
   }
 
-  pub fn reserved_index(&mut self, identifier: &ProtocolDeviceIdentifier, index: u32) -> &mut Self {
+  pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
     self.reserved_indexes.push((identifier.clone(), index));
     self
 
@@ -691,7 +668,7 @@ impl DeviceConfigurationManagerBuilder {
       user_device_configs.insert(ident.clone(), config.clone());
     }
 
-    let mut reserved_indexes: HashMap<ProtocolDeviceIdentifier, u32> = HashMap::new();
+    let mut reserved_indexes: HashMap<ServerDeviceIdentifier, u32> = HashMap::new();
     for (identifier, index) in &self.reserved_indexes {
       if reserved_indexes.contains_key(&identifier) {
         // TODO Fill in error
@@ -734,10 +711,10 @@ pub struct DeviceConfigurationManager {
   /// Map of protocol names to their respective protocol instance factories
   protocol_map: HashMap<String, Arc<dyn ButtplugProtocolFactory>>,
   /// Per-specific-device user configurations
-  user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+  user_device_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
   allowed_addresses: Vec<String>,
   denied_addresses: Vec<String>,
-  reserved_indexes: HashMap<ProtocolDeviceIdentifier, u32>,
+  reserved_indexes: HashMap<ServerDeviceIdentifier, u32>,
   current_index: u32
 }
 
@@ -752,7 +729,7 @@ impl Default for DeviceConfigurationManager {
 
 impl DeviceConfigurationManager {
   /// Fetch a user configuration for a specific device, if one exists
-  pub fn user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) -> Option<ProtocolDeviceAttributes> {
+  pub fn user_device_config(&self, protocol_identifier: &ServerDeviceIdentifier) -> Option<ProtocolDeviceAttributes> {
     self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.clone()))
   }
 
@@ -772,7 +749,7 @@ impl DeviceConfigurationManager {
     }
   }
 
-  pub fn device_index(&mut self, identifier: &ProtocolDeviceIdentifier) -> u32 {    
+  pub fn device_index(&mut self, identifier: &ServerDeviceIdentifier) -> u32 {    
     // See if we have a reserved or reusable device index here.
     if let Some(id) = self.reserved_indexes.get(identifier)  {
       *id
