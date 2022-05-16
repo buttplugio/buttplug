@@ -54,7 +54,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      communication::test::{check_test_recv_value, new_bluetoothle_test_device},
+      hardware::communication::test::{check_test_recv_value, new_bluetoothle_test_device},
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     util::async_manager,

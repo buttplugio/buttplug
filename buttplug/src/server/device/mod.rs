@@ -95,7 +95,6 @@
 //! 
 //! 
 
-pub mod communication;
 pub mod manager;
 pub mod configuration;
 pub mod hardware;

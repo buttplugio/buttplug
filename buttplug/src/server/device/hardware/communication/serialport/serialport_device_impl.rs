@@ -24,7 +24,7 @@ use crate::{
     HardwareWriteCmd,
     },
   },
-  server::device::communication::ButtplugDeviceSpecificError,
+  server::device::hardware::communication::ButtplugDeviceSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;

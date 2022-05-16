@@ -16,7 +16,7 @@ use buttplug::{
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
   },
-  server::{ButtplugServerBuilder, ButtplugServer, device::communication::test::{TestDeviceCommunicationManagerBuilder, TestDeviceInternal}},
+  server::{ButtplugServerBuilder, ButtplugServer, device::hardware::communication::test::{TestDeviceCommunicationManagerBuilder, TestDeviceInternal}},
 };
 use std::sync::Arc;
 

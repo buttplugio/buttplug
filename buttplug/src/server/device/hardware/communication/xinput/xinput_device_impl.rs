@@ -29,7 +29,7 @@ use crate::{
     HardwareWriteCmd,
     },
   },
-  server::device::communication::ButtplugDeviceSpecificError,
+  server::device::hardware::communication::ButtplugDeviceSpecificError,
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};

@@ -24,7 +24,7 @@ use buttplug::{
   },
   messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
 },
-  server::{device::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
+  server::{device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
 };
 use futures::StreamExt;
 use futures_timer::Delay;

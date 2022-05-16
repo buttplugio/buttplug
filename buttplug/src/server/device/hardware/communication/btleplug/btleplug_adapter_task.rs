@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::btleplug_device_impl::BtlePlugDeviceImplCreator;
-use crate::server::device::communication::DeviceCommunicationEvent;
+use crate::server::device::hardware::communication::DeviceCommunicationEvent;
 use btleplug::{
   api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
   platform::{Adapter, Manager, PeripheralId},

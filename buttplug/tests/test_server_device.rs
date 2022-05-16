@@ -18,7 +18,7 @@ use buttplug::{
       Endpoint
     },
   },
-  server::{ButtplugServerBuilder, device::communication::test::TestDeviceCommunicationManagerBuilder},
+  server::{ButtplugServerBuilder, device::hardware::communication::test::TestDeviceCommunicationManagerBuilder},
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};

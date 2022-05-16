@@ -129,7 +129,7 @@ mod test {
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
       device::device_impl::{DeviceImplCommand, DeviceWriteCmd},
-      communication::test::{
+      hardware::communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
         new_bluetoothle_test_device,

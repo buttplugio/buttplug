@@ -8,7 +8,7 @@
 use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
-  server::device::communication::{
+  server::device::hardware::communication::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

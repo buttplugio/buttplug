@@ -15,8 +15,8 @@ use crate::{
   server::{
     device::{
       configuration::DeviceConfigurationManager,
-      communication::DeviceCommunicationEvent,
       hardware::{
+        communication::DeviceCommunicationEvent,
         ButtplugDevice,
         HardwareCreator,
         HardwareEvent

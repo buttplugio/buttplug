@@ -8,7 +8,7 @@
 use super::SerialPortDeviceImplCreator;
 use crate::{
   core::ButtplugResultFuture,
-  server::device::communication::{
+  server::device::hardware::communication::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

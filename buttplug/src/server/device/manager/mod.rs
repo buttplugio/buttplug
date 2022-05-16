@@ -11,13 +11,6 @@
 mod device_manager_event_loop;
 
 use device_manager_event_loop::DeviceManagerEventLoop;
-use super::{
-  communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
-  },
-};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -36,7 +29,14 @@ use crate::{
   server::device::{
     configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
-    hardware::ButtplugDevice,
+    hardware::{
+      ButtplugDevice,
+      communication::{
+        DeviceCommunicationEvent,
+        DeviceCommunicationManager,
+        DeviceCommunicationManagerBuilder,
+      },
+    }
   },
   server::{
     ButtplugServerResultFuture,

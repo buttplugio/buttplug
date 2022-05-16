@@ -19,7 +19,7 @@ use buttplug::{
   },
   server::{
     device::{
-      communication::test::check_test_recv_value,
+      hardware::communication::test::check_test_recv_value,
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServer,

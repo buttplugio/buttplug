@@ -15,7 +15,7 @@ use super::{
 };
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
-  server::device::communication::{
+  server::device::hardware::communication::{
     DeviceCommunicationEvent,
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,

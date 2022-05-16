@@ -15,7 +15,7 @@ use crate::{
   server::{
     device::{
       hardware::HardwareCreator,
-      communication::{
+      hardware::communication::{
         DeviceCommunicationEvent,
         DeviceCommunicationManager,
         DeviceCommunicationManagerBuilder,
@@ -210,7 +210,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    server::device::communication::{test::TestDeviceCommunicationManagerBuilder},
+    server::device::hardware::communication::{test::TestDeviceCommunicationManagerBuilder},
     server::ButtplugServerBuilder,
     util::async_manager,
   };

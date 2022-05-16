@@ -62,14 +62,14 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
 
   #[cfg(feature = "btleplug-manager")]
   {
-    use crate::server::device::communication::btleplug::BtlePlugCommunicationManagerBuilder;
+    use crate::server::device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder;
     server_builder
       .device_manager_builder()
       .comm_manager(BtlePlugCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "websocket-server-manager")]
   {
-    use crate::server::device::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
+    use crate::server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
     server_builder
       .device_manager_builder()
       .comm_manager(
@@ -78,21 +78,21 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   }
   #[cfg(feature = "serial-manager")]
   {
-    use crate::server::device::communication::serialport::SerialPortCommunicationManagerBuilder;
+    use crate::server::device::hardware::communication::serialport::SerialPortCommunicationManagerBuilder;
     server_builder
       .device_manager_builder()
       .comm_manager(SerialPortCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-connect-service-manager")]
   {
-    use crate::server::device::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
+    use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
     server_builder
       .device_manager_builder()
       .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-dongle-manager")]
   {
-    use crate::server::device::communication::lovense_dongle::{
+    use crate::server::device::hardware::communication::lovense_dongle::{
       LovenseHIDDongleCommunicationManagerBuilder, LovenseSerialDongleCommunicationManagerBuilder,
     };
     server_builder
@@ -104,7 +104,7 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
-    use crate::server::device::communication::xinput::XInputDeviceCommunicationManagerBuilder;
+    use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
     server_builder
       .device_manager_builder()
       .comm_manager(XInputDeviceCommunicationManagerBuilder::default());
