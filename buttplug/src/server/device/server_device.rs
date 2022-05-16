@@ -22,10 +22,13 @@ use crate::{
     },
     ButtplugResultFuture,
   },
-  server::device::{
-    hardware::{Hardware, HardwareCreator, ServerDeviceResultFuture, HardwareEvent},
-    configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
-    protocol::ButtplugProtocol,
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      hardware::{Hardware, HardwareCreator, HardwareEvent},
+      configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
+      protocol::ButtplugProtocol,
+    },
   },
 };
 use core::hash::{Hash, Hasher};
@@ -200,7 +203,7 @@ impl ServerDevice {
   pub fn parse_message(
     &self,
     message: ButtplugDeviceCommandMessageUnion,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
   }
 

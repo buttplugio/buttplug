@@ -5,14 +5,17 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ServerDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareWriteCmd, HardwareSubscribeCmd},
-  },
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+      hardware::{Hardware, HardwareSubscribeCmd, HardwareWriteCmd},
+    },
+  }
 };
 use std::sync::Arc;
 
@@ -51,7 +54,7 @@ impl ButtplugProtocolCommandHandler for LeloF1s {
     &self,
     device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {

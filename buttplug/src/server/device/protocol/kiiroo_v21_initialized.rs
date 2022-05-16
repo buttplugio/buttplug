@@ -19,11 +19,14 @@ use crate::{
     Endpoint,
     FleshlightLaunchFW12Cmd,
   },
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareWriteCmd, ServerDeviceResultFuture},
-  },
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+      hardware::{Hardware, HardwareWriteCmd},
+    },
+  }
 };
 use futures_timer::Delay;
 use std::sync::{
@@ -101,7 +104,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
     &self,
     device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {
@@ -123,7 +126,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
     &self,
     device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -141,7 +144,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
     &self,
     device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let previous_position = self.previous_position.clone();
     let position = message.position();
     let msg = HardwareWriteCmd::new(

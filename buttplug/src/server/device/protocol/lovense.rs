@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ServerDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugDeviceError},
@@ -16,10 +16,13 @@ use crate::{
       Endpoint
     },
   },
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd},
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
+      hardware::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd},
+    },
   },
 };
 use futures::FutureExt;
@@ -132,7 +135,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.
@@ -175,7 +178,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     &self,
     device: Arc<Hardware>,
     msg: messages::RotateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let manager = self.manager.clone();
     let direction = self.rotation_direction.clone();
     Box::pin(async move {
@@ -204,7 +207,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
     &self,
     device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let mut device_notification_receiver = device.event_stream();
     Box::pin(async move {
       let write_fut = device.write_value(HardwareWriteCmd::new(

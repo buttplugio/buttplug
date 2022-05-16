@@ -15,10 +15,13 @@ use crate::{
     VibrateCmd,
     VibrateSubcommand,
   },
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd, ServerDeviceResultFuture},
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
+      hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
+    },
   },
 };
 use std::sync::Arc;
@@ -58,7 +61,7 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
     &self,
     device: Arc<Hardware>,
     message: messages::StopDeviceCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     self.handle_vibrate_cmd(
       device,
       VibrateCmd::new(
@@ -72,7 +75,7 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
     &self,
     device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {

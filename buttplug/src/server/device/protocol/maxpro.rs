@@ -8,11 +8,14 @@
 use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
-  },
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+      hardware::{Hardware, HardwareWriteCmd},
+    },
+  }
 };
 use std::sync::Arc;
 
@@ -23,7 +26,7 @@ impl ButtplugProtocolCommandHandler for Maxpro {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     // TODO Convert to using generic command manager
 
     // Speed range for Maxpro toys are 10-100 for some reason.

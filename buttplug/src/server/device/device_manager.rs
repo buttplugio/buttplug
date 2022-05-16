@@ -24,21 +24,21 @@ use crate::{
       DeviceMessageInfo,
     },
   },
-  server::device::{
-    configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
-    protocol::ButtplugProtocolFactory,
-    hardware::{
-      communication::{
-        DeviceCommunicationEvent,
-        DeviceCommunicationManager,
-        DeviceCommunicationManagerBuilder,
-      },
-    },
-    ServerDevice,
-  },
   server::{
-    ButtplugServerResultFuture,
-  },  
+    device::{
+      configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
+      protocol::ButtplugProtocolFactory,
+      hardware::{
+        communication::{
+          DeviceCommunicationEvent,
+          DeviceCommunicationManager,
+          DeviceCommunicationManagerBuilder,
+        },
+      },
+      ServerDevice,
+    },
+    ButtplugServerResultFuture
+  },
   util::async_manager,
 };
 use dashmap::DashMap;

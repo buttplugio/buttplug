@@ -5,19 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  generic_command_manager::GenericCommandManager,
-  ServerDeviceResultFuture,
-  ButtplugProtocol,
-  ButtplugProtocolFactory,
-  ButtplugProtocolCommandHandler,
-};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::device::{
-    protocol::ButtplugProtocolProperties, 
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareWriteCmd}, 
+  server::{
+    device::{
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+      hardware::{Hardware, HardwareWriteCmd},
+      protocol::{
+        generic_command_manager::GenericCommandManager, ButtplugProtocol,
+        ButtplugProtocolCommandHandler, ButtplugProtocolFactory, ButtplugProtocolProperties,
+      },
+    },
+    ButtplugServerResultFuture,
   },
 };
 use std::sync::Arc;
@@ -29,7 +28,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     &self,
     device: Arc<Hardware>,
     msg: messages::LinearCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     Box::pin(async move {
       let mut fut_vec = vec![];
       for v in msg.vectors() {
@@ -53,7 +52,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.

@@ -12,10 +12,13 @@ use crate::{
     ButtplugDeviceCommandMessageUnion,
     Endpoint
   },
-  server::device::{
-    protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-    configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
+  server::{
+    ButtplugServerResultFuture,
+    device::{
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+      hardware::{Hardware, HardwareWriteCmd},
+    },
   },
   util::async_manager,
 };
@@ -82,7 +85,7 @@ impl ButtplugProtocolCommandHandler for Hgod {
     &self,
     device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ServerDeviceResultFuture {
+  ) -> ButtplugServerResultFuture {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();

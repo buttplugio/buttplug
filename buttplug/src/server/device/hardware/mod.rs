@@ -9,7 +9,6 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      ButtplugServerMessage,
       Endpoint,
       RawReadCmd,
       RawReading,
@@ -27,10 +26,6 @@ use crate::{
 use async_trait::async_trait;
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
-
-/// Future that executes and returns a response from a client command or request
-pub type ServerDeviceResultFuture =
-  BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 /// 
