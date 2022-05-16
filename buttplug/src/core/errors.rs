@@ -9,7 +9,7 @@
 
 use super::messages::{self, serializer::ButtplugSerializerError, ButtplugDeviceMessageType, ButtplugMessageSpecVersion, Endpoint, ErrorCode};
 #[cfg(feature = "server")]
-use crate::server::device::hardware::communication::ButtplugDeviceSpecificError;
+use crate::server::device::hardware::communication::HardwareSpecificError;
 use displaydoc::Display;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
@@ -136,7 +136,7 @@ pub enum ButtplugDeviceError {
   #[cfg(feature = "server")]
   #[error(transparent)]
   /// Device type specific error: {0}.
-  DeviceSpecificError(#[from] ButtplugDeviceSpecificError),
+  DeviceSpecificError(#[from] HardwareSpecificError),
   #[cfg(not(feature = "server"))]
   /// Device type specific error: {0}.
   DeviceSpecificError(String),

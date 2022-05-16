@@ -24,7 +24,7 @@ use crate::{
     HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::ButtplugDeviceSpecificError,
+  server::device::hardware::communication::HardwareSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
@@ -204,7 +204,7 @@ impl SerialPortHardware {
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
         ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
-          ButtplugDeviceSpecificError::SerialError(e.to_string()),
+          HardwareSpecificError::SerialError(e.to_string()),
         ))
       })?;
     debug!("Serial port received from thread.");

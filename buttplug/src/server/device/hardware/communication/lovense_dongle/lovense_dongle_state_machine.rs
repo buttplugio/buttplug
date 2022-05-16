@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::{lovense_dongle_hardware::*, lovense_dongle_messages::*};
-use crate::server::device::hardware::communication::DeviceCommunicationEvent;
+use crate::server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use async_trait::async_trait;
 use futures::{select, FutureExt};
 use std::sync::{
@@ -36,7 +36,7 @@ struct ChannelHub {
   comm_manager_incoming: Receiver<LovenseDeviceCommand>,
   dongle_outgoing: Sender<OutgoingLovenseData>,
   dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
-  event_outgoing: Sender<DeviceCommunicationEvent>,
+  event_outgoing: Sender<HardwareCommunicationManagerEvent>,
   is_scanning: Arc<AtomicBool>,
 }
 
@@ -45,7 +45,7 @@ impl ChannelHub {
     comm_manager_incoming: Receiver<LovenseDeviceCommand>,
     dongle_outgoing: Sender<OutgoingLovenseData>,
     dongle_incoming: Receiver<LovenseDongleIncomingMessage>,
-    event_outgoing: Sender<DeviceCommunicationEvent>,
+    event_outgoing: Sender<HardwareCommunicationManagerEvent>,
     is_scanning: Arc<AtomicBool>,
   ) -> Self {
     Self {
@@ -143,7 +143,7 @@ impl ChannelHub {
       .expect("Won't get here without owner being alive.");
   }
 
-  pub async fn send_event(&self, msg: DeviceCommunicationEvent) {
+  pub async fn send_event(&self, msg: HardwareCommunicationManagerEvent) {
     self
       .event_outgoing
       .send(msg)
@@ -157,7 +157,7 @@ impl ChannelHub {
 }
 
 pub fn create_lovense_dongle_machine(
-  event_outgoing: Sender<DeviceCommunicationEvent>,
+  event_outgoing: Sender<HardwareCommunicationManagerEvent>,
   comm_incoming_receiver: Receiver<LovenseDeviceCommand>,
   is_scanning: Arc<AtomicBool>,
 ) -> Box<dyn LovenseDongleState> {
@@ -202,14 +202,14 @@ macro_rules! device_state_definition {
 #[derive(Debug)]
 struct LovenseDongleWaitForDongle {
   comm_receiver: Receiver<LovenseDeviceCommand>,
-  event_sender: Sender<DeviceCommunicationEvent>,
+  event_sender: Sender<HardwareCommunicationManagerEvent>,
   is_scanning: Arc<AtomicBool>,
 }
 
 impl LovenseDongleWaitForDongle {
   pub fn new(
     comm_receiver: Receiver<LovenseDeviceCommand>,
-    event_sender: Sender<DeviceCommunicationEvent>,
+    event_sender: Sender<HardwareCommunicationManagerEvent>,
     is_scanning: Arc<AtomicBool>,
   ) -> Self {
     Self {
@@ -252,7 +252,7 @@ impl LovenseDongleState for LovenseDongleWaitForDongle {
           // If we were requested to scan and then asked to stop, act like we at least tried.
           self
             .event_sender
-            .send(DeviceCommunicationEvent::ScanningFinished)
+            .send(HardwareCommunicationManagerEvent::ScanningFinished)
             .await
             .expect("Won't get here without owner being alive.");
         }
@@ -551,7 +551,7 @@ impl LovenseDongleState for LovenseDongleStopScanning {
     self.hub.set_scanning_status(false);
     self
       .hub
-      .send_event(DeviceCommunicationEvent::ScanningFinished)
+      .send_event(HardwareCommunicationManagerEvent::ScanningFinished)
       .await;
     Some(Box::new(LovenseDongleIdle::new(self.hub)))
   }
@@ -608,7 +608,7 @@ impl LovenseDongleState for LovenseDongleStopScanningAndConnect {
     }
     self
       .hub
-      .send_event(DeviceCommunicationEvent::ScanningFinished)
+      .send_event(HardwareCommunicationManagerEvent::ScanningFinished)
       .await;
     Some(Box::new(LovenseDongleDeviceLoop::new(
       self.hub,
@@ -627,7 +627,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
     let (device_read_sender, device_read_receiver) = channel(256);
     self
       .hub
-      .send_event(DeviceCommunicationEvent::DeviceFound {
+      .send_event(HardwareCommunicationManagerEvent::DeviceFound {
         name: "Lovense Dongle Device".to_owned(),
         address: self.device_id.clone(),
         creator: Box::new(LovenseDongleHardwareCreator::new(
@@ -667,14 +667,14 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
             self.hub.set_scanning_status(false);
             self
               .hub
-              .send_event(DeviceCommunicationEvent::ScanningFinished)
+              .send_event(HardwareCommunicationManagerEvent::ScanningFinished)
               .await;
           }
           LovenseDeviceCommand::StopScanning => {
             self.hub.set_scanning_status(false);
             self
               .hub
-              .send_event(DeviceCommunicationEvent::ScanningFinished)
+              .send_event(HardwareCommunicationManagerEvent::ScanningFinished)
               .await;
           }
           _ => warn!(

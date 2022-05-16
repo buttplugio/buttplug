@@ -16,9 +16,9 @@ use super::{
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -138,8 +138,8 @@ fn serial_read_thread(
 #[derive(Default, Clone)]
 pub struct LovenseSerialDongleCommunicationManagerBuilder {}
 
-impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseSerialDongleCommunicationManager::new(sender))
   }
 }
@@ -155,7 +155,7 @@ pub struct LovenseSerialDongleCommunicationManager {
 }
 
 impl LovenseSerialDongleCommunicationManager {
-  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(event_sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     trace!("Lovense dongle serial port created");
     let (machine_sender, machine_receiver) = channel(256);
     let dongle_available = Arc::new(AtomicBool::new(false));
@@ -274,7 +274,7 @@ impl LovenseSerialDongleCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for LovenseSerialDongleCommunicationManager {
+impl HardwareCommunicationManager for LovenseSerialDongleCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseSerialDongleCommunicationManager"
   }

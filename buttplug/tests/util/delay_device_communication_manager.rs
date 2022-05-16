@@ -8,9 +8,9 @@
 use buttplug::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
 };
 use std::sync::{
@@ -22,19 +22,19 @@ use tokio::sync::mpsc::Sender;
 #[derive(Default)]
 pub struct DelayDeviceCommunicationManagerBuilder {}
 
-impl DeviceCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(DelayDeviceCommunicationManager::new(sender))
   }
 }
 
 pub struct DelayDeviceCommunicationManager {
-  sender: Sender<DeviceCommunicationEvent>,
+  sender: Sender<HardwareCommunicationManagerEvent>,
   is_scanning: Arc<AtomicBool>,
 }
 
 impl DelayDeviceCommunicationManager {
-  fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     Self {
       sender,
       is_scanning: Arc::new(AtomicBool::new(false)),
@@ -42,7 +42,7 @@ impl DelayDeviceCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for DelayDeviceCommunicationManager {
+impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
   fn name(&self) -> &'static str {
     "DelayDeviceCommunicationManager"
   }
@@ -61,7 +61,7 @@ impl DeviceCommunicationManager for DelayDeviceCommunicationManager {
     Box::pin(async move {
       is_scanning.store(false, Ordering::SeqCst);
       sender
-        .send(DeviceCommunicationEvent::ScanningFinished)
+        .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
         .expect("Test, assuming infallible");
       Ok(())

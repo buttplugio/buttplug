@@ -16,9 +16,9 @@ use super::{
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -153,8 +153,8 @@ fn hid_read_thread(
 #[derive(Default, Clone)]
 pub struct LovenseHIDDongleCommunicationManagerBuilder {}
 
-impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseHIDDongleCommunicationManager::new(sender))
   }
 }
@@ -169,7 +169,7 @@ pub struct LovenseHIDDongleCommunicationManager {
 }
 
 impl LovenseHIDDongleCommunicationManager {
-  fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(event_sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     trace!("Lovense dongle HID Manager created");
     let (machine_sender, machine_receiver) = channel(256);
     let dongle_available = Arc::new(AtomicBool::new(false));
@@ -267,7 +267,7 @@ impl LovenseHIDDongleCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for LovenseHIDDongleCommunicationManager {
+impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseHIDDongleCommunicationManager"
   }

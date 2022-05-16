@@ -16,9 +16,9 @@ use crate::{
     device::{
       hardware::HardwareCreator,
       hardware::communication::{
-        DeviceCommunicationEvent,
-        DeviceCommunicationManager,
-        DeviceCommunicationManagerBuilder,
+        HardwareCommunicationManagerEvent,
+        HardwareCommunicationManager,
+        HardwareCommunicationManagerBuilder,
       }      
     }
   },
@@ -116,8 +116,8 @@ impl TestDeviceCommunicationManagerBuilder {
   }
 }
 
-impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
       sender,
       self.devices.clone(),
@@ -126,13 +126,13 @@ impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder
 }
 
 pub struct TestDeviceCommunicationManager {
-  device_sender: Sender<DeviceCommunicationEvent>,
+  device_sender: Sender<HardwareCommunicationManagerEvent>,
   devices: WaitingDeviceList,
   is_scanning: Arc<AtomicBool>
 }
 
 impl TestDeviceCommunicationManager {
-  pub fn new(device_sender: Sender<DeviceCommunicationEvent>, devices: WaitingDeviceList) -> Self {
+  pub fn new(device_sender: Sender<HardwareCommunicationManagerEvent>, devices: WaitingDeviceList) -> Self {
     Self {
       device_sender,
       devices,
@@ -141,7 +141,7 @@ impl TestDeviceCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for TestDeviceCommunicationManager {
+impl HardwareCommunicationManager for TestDeviceCommunicationManager {
   fn name(&self) -> &'static str {
     "TestDeviceCommunicationManager"
   }
@@ -159,7 +159,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
       while let Some(d) = devices.pop() {      
         let device_name = d.device().as_ref().unwrap().name();  
         if device_sender
-          .send(DeviceCommunicationEvent::DeviceFound {
+          .send(HardwareCommunicationManagerEvent::DeviceFound {
             name: d
               .device()
               .as_ref()
@@ -181,7 +181,7 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
       }
       is_scanning.store(false, Ordering::SeqCst);
       if device_sender
-        .send(DeviceCommunicationEvent::ScanningFinished)
+        .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
         .is_err()
       {

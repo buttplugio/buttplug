@@ -30,9 +30,9 @@ use crate::{
       protocol::ButtplugProtocolFactory,
       hardware::{
         communication::{
-          DeviceCommunicationEvent,
-          DeviceCommunicationManager,
-          DeviceCommunicationManagerBuilder,
+          HardwareCommunicationManagerEvent,
+          HardwareCommunicationManager,
+          HardwareCommunicationManagerBuilder,
         },
       },
       ServerDevice,
@@ -62,13 +62,13 @@ pub struct DeviceInfo {
 #[derive(Default)]
 pub struct DeviceManagerBuilder {
   configuration_manager_builder: DeviceConfigurationManagerBuilder,
-  comm_managers: Vec<Box<dyn DeviceCommunicationManagerBuilder>>,
+  comm_managers: Vec<Box<dyn HardwareCommunicationManagerBuilder>>,
 }
 
 impl DeviceManagerBuilder {
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
   where
-    T: DeviceCommunicationManagerBuilder + 'static,
+    T: HardwareCommunicationManagerBuilder + 'static,
   {    
     self.comm_managers.push(Box::new(builder));
     self
@@ -121,7 +121,7 @@ impl DeviceManagerBuilder {
     for builder in &self.comm_managers {
       let comm_mgr = builder.finish(device_event_sender.clone());
 
-      if comm_managers.iter().any(|mgr: &Box<dyn DeviceCommunicationManager>| &mgr.name() == &comm_mgr.name()) {
+      if comm_managers.iter().any(|mgr: &Box<dyn HardwareCommunicationManager>| &mgr.name() == &comm_mgr.name()) {
         // TODO Fill in error
       }
 
@@ -169,9 +169,9 @@ impl DeviceManagerBuilder {
 pub struct DeviceManager {
   // This uses a map to make sure we don't have 2 comm managers of the same type
   // register. Also means we can do lockless access since it's a Dashmap.
-  comm_managers: Arc<Vec<Box<dyn DeviceCommunicationManager>>>,
+  comm_managers: Arc<Vec<Box<dyn HardwareCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
-  device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
+  device_event_sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   loop_cancellation_token: CancellationToken
 }
 
@@ -211,11 +211,11 @@ impl DeviceManager {
         // So complain if our sends error out, but don't worry about returning
         // an error.
         if sender
-          .send(DeviceCommunicationEvent::ScanningStarted)
+          .send(HardwareCommunicationManagerEvent::ScanningStarted)
           .await
           .is_err()
           || sender
-            .send(DeviceCommunicationEvent::ScanningFinished)
+            .send(HardwareCommunicationManagerEvent::ScanningFinished)
             .await
             .is_err()
         {

@@ -9,9 +9,9 @@ use super::lovense_connect_service_hardware::LovenseServiceHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -105,7 +105,7 @@ struct LovenseServiceLocalInfo {
 type LovenseServiceInfo = HashMap<String, LovenseServiceHostInfo>;
 
 async fn lovense_local_service_check(
-  event_sender: mpsc::Sender<DeviceCommunicationEvent>,
+  event_sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   is_scanning: Arc<AtomicBool>,
   known_hosts: Arc<Mutex<Vec<String>>>,
 ) {
@@ -178,7 +178,7 @@ async fn lovense_local_service_check(
                 .clone(),
             ));
             if event_sender
-              .send(DeviceCommunicationEvent::DeviceFound {
+              .send(HardwareCommunicationManagerEvent::DeviceFound {
                 name: toy.name.clone(),
                 address: toy.id.clone(),
                 creator: device_creator,
@@ -209,8 +209,8 @@ async fn lovense_local_service_check(
 pub struct LovenseConnectServiceCommunicationManagerBuilder {
 }
 
-impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseConnectServiceCommunicationManager::new(
         sender
     ))
@@ -218,13 +218,13 @@ impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationMan
 }
 
 pub struct LovenseConnectServiceCommunicationManager {
-  sender: mpsc::Sender<DeviceCommunicationEvent>,
+  sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   known_hosts: Arc<Mutex<Vec<String>>>,
   is_scanning: Arc<AtomicBool>,
 }
 
 impl LovenseConnectServiceCommunicationManager {
-  fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
     Self {
       sender,
       known_hosts: Arc::new(Mutex::new(vec![])),
@@ -233,7 +233,7 @@ impl LovenseConnectServiceCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for LovenseConnectServiceCommunicationManager {
+impl HardwareCommunicationManager for LovenseConnectServiceCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseServiceDeviceCommManager"
   }

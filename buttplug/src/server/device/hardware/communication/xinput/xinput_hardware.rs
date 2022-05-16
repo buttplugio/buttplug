@@ -29,7 +29,7 @@ use crate::{
     HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::ButtplugDeviceSpecificError,
+  server::device::hardware::communication::HardwareSpecificError,
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -138,7 +138,7 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(ButtplugDeviceSpecificError::XInputError(format!("{:?}", e)))
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
             .into()
         })
     })

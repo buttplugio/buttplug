@@ -9,9 +9,9 @@ use super::SerialPortHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
 };
 use futures::future;
@@ -22,24 +22,24 @@ use tracing_futures::Instrument;
 #[derive(Default, Clone)]
 pub struct SerialPortCommunicationManagerBuilder {}
 
-impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(SerialPortCommunicationManager::new(sender))
   }
 }
 
 pub struct SerialPortCommunicationManager {
-  sender: Sender<DeviceCommunicationEvent>,
+  sender: Sender<HardwareCommunicationManagerEvent>,
 }
 
 impl SerialPortCommunicationManager {
-  fn new(sender: Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     trace!("Serial port created.");
     Self { sender }
   }
 }
 
-impl DeviceCommunicationManager for SerialPortCommunicationManager {
+impl HardwareCommunicationManager for SerialPortCommunicationManager {
   fn name(&self) -> &'static str {
     "SerialPortCommunicationManager"
   }
@@ -59,7 +59,7 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
                 p
               );
               if sender
-                .send(DeviceCommunicationEvent::DeviceFound {
+                .send(HardwareCommunicationManagerEvent::DeviceFound {
                   name: format!("Serial Port Device {}", p.port_name),
                   address: p.port_name.clone(),
                   creator: Box::new(SerialPortHardwareCreator::new(&p)),
@@ -77,7 +77,7 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
           }
         }
         if sender
-          .send(DeviceCommunicationEvent::ScanningFinished)
+          .send(HardwareCommunicationManagerEvent::ScanningFinished)
           .await
           .is_err()
         {

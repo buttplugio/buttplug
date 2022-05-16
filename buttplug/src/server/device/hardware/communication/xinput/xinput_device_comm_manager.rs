@@ -10,9 +10,9 @@ use crate::{
   core::ButtplugResultFuture,
   server::device::{
     hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
     },
     hardware::HardwareEvent,
   },
@@ -140,20 +140,20 @@ impl XInputConnectionTracker {
 #[derive(Default, Clone)]
 pub struct XInputDeviceCommunicationManagerBuilder {}
 
-impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: mpsc::Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
+  fn finish(&self, sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(XInputDeviceCommunicationManager::new(sender))
   }
 }
 
 pub struct XInputDeviceCommunicationManager {
-  sender: mpsc::Sender<DeviceCommunicationEvent>,
+  sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   scanning_notifier: Arc<Notify>,
   connected_gamepads: Arc<XInputConnectionTracker>,
 }
 
 impl XInputDeviceCommunicationManager {
-  fn new(sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
+  fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
     Self {
       sender,
       scanning_notifier: Arc::new(Notify::new()),
@@ -162,7 +162,7 @@ impl XInputDeviceCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
+impl HardwareCommunicationManager for XInputDeviceCommunicationManager {
   fn name(&self) -> &'static str {
     "XInputDeviceCommunicationManager"
   }
@@ -194,7 +194,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
               let device_creator = Box::new(XInputHardwareCreator::new(*i));
               connected_gamepads.add(*i);
               if sender
-                .send(DeviceCommunicationEvent::DeviceFound {
+                .send(HardwareCommunicationManagerEvent::DeviceFound {
                   name: i.to_string(),
                   address: i.to_string(),
                   creator: device_creator,
@@ -230,7 +230,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
     let sender = self.sender.clone();
     Box::pin(async move {
       if sender
-        .send(DeviceCommunicationEvent::ScanningFinished)
+        .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
         .is_err()
       {

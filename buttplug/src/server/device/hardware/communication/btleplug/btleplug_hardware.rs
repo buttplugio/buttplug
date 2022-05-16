@@ -24,7 +24,7 @@ use crate::{
     HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::ButtplugDeviceSpecificError,
+  server::device::hardware::communication::HardwareSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
@@ -102,7 +102,7 @@ impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
     {
       if let Err(err) = self.device.connect().await {
         let return_err = ButtplugDeviceError::DeviceSpecificError(
-          ButtplugDeviceSpecificError::BtleplugError(format!("{:?}", err)),
+          HardwareSpecificError::BtleplugError(format!("{:?}", err)),
         );
         return Err(return_err.into());
       }
@@ -315,7 +315,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
           Err(
-            ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+            ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
               format!("{:?}", err),
             ))
             .into(),
@@ -349,7 +349,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);
           Err(
-            ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+            ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
               format!("{:?}", err),
             ))
             .into(),
@@ -371,7 +371,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     Box::pin(async move {
       device.subscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
           format!("{:?}", e),
         ))
         .into()
@@ -391,7 +391,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     Box::pin(async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(ButtplugDeviceSpecificError::BtleplugError(
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
           format!("{:?}", e),
         ))
         .into()

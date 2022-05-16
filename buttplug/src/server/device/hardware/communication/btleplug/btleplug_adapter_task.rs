@@ -6,7 +6,7 @@
 // for full license information.
 
 use super::btleplug_hardware::BtlePlugHardwareCreator;
-use crate::server::device::hardware::communication::DeviceCommunicationEvent;
+use crate::server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use btleplug::{
   api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
   platform::{Adapter, Manager, PeripheralId},
@@ -36,14 +36,14 @@ struct PeripheralInfo {
 }
 
 pub struct BtleplugAdapterTask {
-  event_sender: Sender<DeviceCommunicationEvent>,
+  event_sender: Sender<HardwareCommunicationManagerEvent>,
   command_receiver: Receiver<BtleplugAdapterCommand>,
   adapter_connected: Arc<AtomicBool>,
 }
 
 impl BtleplugAdapterTask {
   pub fn new(
-    event_sender: Sender<DeviceCommunicationEvent>,
+    event_sender: Sender<HardwareCommunicationManagerEvent>,
     command_receiver: Receiver<BtleplugAdapterCommand>,
     adapter_connected: Arc<AtomicBool>,
   ) -> Self {
@@ -113,7 +113,7 @@ impl BtleplugAdapterTask {
       ));
       if self
         .event_sender
-        .send(DeviceCommunicationEvent::DeviceFound {
+        .send(HardwareCommunicationManagerEvent::DeviceFound {
           name: device_name,
           address: format!("{:?}", peripheral_id),
           creator: device_creator,

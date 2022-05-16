@@ -9,9 +9,9 @@ use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -26,8 +26,8 @@ use tokio::sync::mpsc::{channel, Sender};
 pub struct BtlePlugCommunicationManagerBuilder {
 }
 
-impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(BtlePlugCommunicationManager::new(sender))
   }
 }
@@ -39,7 +39,7 @@ pub struct BtlePlugCommunicationManager {
 }
 
 impl BtlePlugCommunicationManager {
-  pub fn new(event_sender: Sender<DeviceCommunicationEvent>) -> Self {
+  pub fn new(event_sender: Sender<HardwareCommunicationManagerEvent>) -> Self {
     let (sender, receiver) = channel(256);
     let adapter_connected = Arc::new(AtomicBool::new(false));
     let adapter_connected_clone = adapter_connected.clone();
@@ -55,7 +55,7 @@ impl BtlePlugCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for BtlePlugCommunicationManager {
+impl HardwareCommunicationManager for BtlePlugCommunicationManager {
   fn name(&self) -> &'static str {
     "BtlePlugCommunicationManager"
   }

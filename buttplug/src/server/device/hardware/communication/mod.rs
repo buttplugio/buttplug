@@ -28,7 +28,7 @@ use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
-pub enum DeviceCommunicationEvent {
+pub enum HardwareCommunicationManagerEvent {
   // This event only means that a device has been found. The work still needs
   // to be done to make sure we can use it.
   DeviceFound {
@@ -41,11 +41,11 @@ pub enum DeviceCommunicationEvent {
   ScanningFinished,
 }
 
-pub trait DeviceCommunicationManagerBuilder: Send {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager>;
+pub trait HardwareCommunicationManagerBuilder: Send {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager>;
 }
 
-pub trait DeviceCommunicationManager: Send + Sync {
+pub trait HardwareCommunicationManager: Send + Sync {
   fn name(&self) -> &'static str;
   fn start_scanning(&self) -> ButtplugResultFuture;
   fn stop_scanning(&self) -> ButtplugResultFuture;
@@ -57,7 +57,7 @@ pub trait DeviceCommunicationManager: Send + Sync {
 }
 
 #[derive(Error, Debug, Clone, Serialize, Deserialize)]
-pub enum ButtplugDeviceSpecificError {
+pub enum HardwareSpecificError {
   // XInput library doesn't derive error on its error enum. :(
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   #[error("XInput usage error: {0}")]

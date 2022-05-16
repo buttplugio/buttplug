@@ -16,7 +16,7 @@ use crate::{
     device::{
       configuration::DeviceConfigurationManager,
       hardware::{
-        communication::DeviceCommunicationEvent,
+        communication::HardwareCommunicationManagerEvent,
         HardwareCreator,
         HardwareEvent
       },
@@ -45,7 +45,7 @@ pub struct DeviceManagerEventLoop {
   server_sender: broadcast::Sender<ButtplugServerMessage>,
   /// As the device manager owns the Device Communication Managers, it will have
   /// a receiver that the comm managers all send thru.
-  device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
+  device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
   /// Sender for device events, passed to new devices when they are created.
   device_event_sender: mpsc::Sender<HardwareEvent>,
   /// Receiver for device events, which the event loops to handle events.
@@ -67,7 +67,7 @@ impl DeviceManagerEventLoop {
     device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
-    device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
+    device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
@@ -126,12 +126,12 @@ impl DeviceManagerEventLoop {
     }.instrument(tracing::Span::current()));
   }
 
-  async fn handle_device_communication(&mut self, event: DeviceCommunicationEvent) {
+  async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
     match event {
-      DeviceCommunicationEvent::ScanningStarted => {
+      HardwareCommunicationManagerEvent::ScanningStarted => {
         self.scanning_in_progress = true;
       }
-      DeviceCommunicationEvent::ScanningFinished => {
+      HardwareCommunicationManagerEvent::ScanningFinished => {
         debug!(
           "System signaled that scanning was finished, check to see if all managers are finished."
         );
@@ -157,7 +157,7 @@ impl DeviceManagerEventLoop {
           info!("Server disappeared, exiting loop.");
         }
       }
-      DeviceCommunicationEvent::DeviceFound {
+      HardwareCommunicationManagerEvent::DeviceFound {
         name,
         address,
         creator,
@@ -203,7 +203,7 @@ impl DeviceManagerEventLoop {
         self.connecting_devices.insert(address.clone());
         self.try_create_new_device(address, creator);
       }
-      DeviceCommunicationEvent::DeviceManagerAdded(status) => {
+      HardwareCommunicationManagerEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
       }
     }

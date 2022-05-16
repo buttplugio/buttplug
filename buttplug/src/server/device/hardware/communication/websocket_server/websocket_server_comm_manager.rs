@@ -9,9 +9,9 @@ use super::websocket_server_hardware::WebsocketServerHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
   },
   util::async_manager,
 };
@@ -55,8 +55,8 @@ impl WebsocketServerDeviceCommunicationManagerBuilder {
   }
 }
 
-impl DeviceCommunicationManagerBuilder for WebsocketServerDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+impl HardwareCommunicationManagerBuilder for WebsocketServerDeviceCommunicationManagerBuilder {
+  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(
         sender,
         self.server_port,
@@ -71,7 +71,7 @@ pub struct WebsocketServerDeviceCommunicationManager {
 
 impl WebsocketServerDeviceCommunicationManager {
   fn new(
-    sender: Sender<DeviceCommunicationEvent>,
+    sender: Sender<HardwareCommunicationManagerEvent>,
     port: u16,
     listen_on_all_interfaces: bool,
   ) -> Self {
@@ -137,7 +137,7 @@ impl WebsocketServerDeviceCommunicationManager {
                     return;
                   };
                 if sender_clone
-                  .send(DeviceCommunicationEvent::DeviceFound {
+                  .send(HardwareCommunicationManagerEvent::DeviceFound {
                     name: format!("Websocket Device {}", info_packet.identifier),
                     address: info_packet.address.clone(),
                     creator: Box::new(WebsocketServerHardwareCreator::new(
@@ -168,7 +168,7 @@ impl WebsocketServerDeviceCommunicationManager {
   }
 }
 
-impl DeviceCommunicationManager for WebsocketServerDeviceCommunicationManager {
+impl HardwareCommunicationManager for WebsocketServerDeviceCommunicationManager {
   fn name(&self) -> &'static str {
     "WebsocketServerCommunicationManager"
   }
