@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -23,7 +23,7 @@ impl ButtplugProtocolCommandHandler for ButtplugPassthru {
     &self,
     device: Arc<Hardware>,
     command_message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     Box::pin(async move {
       device
         .write_value(HardwareWriteCmd::new(

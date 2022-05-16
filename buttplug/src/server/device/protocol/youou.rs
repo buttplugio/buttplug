@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::{
@@ -74,7 +74,7 @@ impl ButtplugProtocolCommandHandler for Youou {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // TODO Convert to using generic command manager
 
     // Byte 2 seems to be a monotonically increasing packet id of some kind

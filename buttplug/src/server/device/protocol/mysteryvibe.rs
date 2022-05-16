@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::{ServerDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
   server::device::{
@@ -111,7 +111,7 @@ impl ButtplugProtocolCommandHandler for MysteryVibe {
     &self,
     device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();

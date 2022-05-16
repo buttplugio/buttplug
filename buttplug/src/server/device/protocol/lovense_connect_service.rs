@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::{ServerDeviceResultFuture, ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
   core::messages::{
     self,
@@ -61,7 +61,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.
@@ -110,7 +110,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     &self,
     device: Arc<Hardware>,
     msg: messages::RotateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     let direction = self.rotation_direction.clone();
     Box::pin(async move {
@@ -141,7 +141,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
     &self,
     device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     Box::pin(async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.

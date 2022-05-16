@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -23,7 +23,7 @@ impl ButtplugProtocolCommandHandler for Picobong {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // TODO Convert to using generic command manager
     let speed = (msg.speeds()[0].speed() * 10.0) as u8;
     let mode: u8 = if speed == 0 { 0xff } else { 0x01 };

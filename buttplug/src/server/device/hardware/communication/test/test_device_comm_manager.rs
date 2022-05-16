@@ -10,7 +10,7 @@ use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   server::device::{
     configuration::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
-    hardware::ButtplugDevice,
+    hardware::ServerDevice,
   },
   server::{
     device::{
@@ -57,14 +57,14 @@ fn new_uninitialized_ble_test_device(
 async fn new_bluetoothle_test_device_with_cfg(
   name: &str,
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
-) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
+) -> Result<(ServerDevice, Arc<TestDeviceInternal>), ButtplugError> {
   let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
   let (hardware, hardware_creator) = new_uninitialized_ble_test_device(name, None);
   let hardware_clone = hardware.clone();
   let err_str = &format!("No protocol found for device {}", name);
   let protocol_builder = config_mgr.protocol_instance_factory(&hardware_creator.specifier()).expect("Test code, should exist.");
-  let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(protocol_builder, Box::new(hardware_creator))
+  let device: ServerDevice =
+    ServerDevice::try_create_device(protocol_builder, Box::new(hardware_creator))
       .await
       .expect("Empty option shouldn't be possible")
       .expect(err_str);
@@ -73,7 +73,7 @@ async fn new_bluetoothle_test_device_with_cfg(
 
 pub async fn new_bluetoothle_test_device(
   name: &str,
-) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
+) -> Result<(ServerDevice, Arc<TestDeviceInternal>), ButtplugError> {
   new_bluetoothle_test_device_with_cfg(name, None).await
 }
 

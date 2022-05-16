@@ -17,7 +17,7 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{
         communication::DeviceCommunicationEvent,
-        ButtplugDevice,
+        ServerDevice,
         HardwareCreator,
         HardwareEvent
       }
@@ -39,7 +39,7 @@ use tracing_futures::Instrument;
 pub struct DeviceManagerEventLoop {
   device_config_manager: DeviceConfigurationManager,
   /// Maps device index (exposed to the outside world) to actual device objects held by the server.
-  device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+  device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessage>,
@@ -64,7 +64,7 @@ pub struct DeviceManagerEventLoop {
 impl DeviceManagerEventLoop {
   pub fn new(
     device_config_manager: DeviceConfigurationManager,
-    device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+    device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
@@ -104,7 +104,7 @@ impl DeviceManagerEventLoop {
     };
 
     let create_device_future =
-      ButtplugDevice::try_create_device(protocol_builder, device_creator);
+      ServerDevice::try_create_device(protocol_builder, device_creator);
     let connecting_devices = self.connecting_devices.clone();
 
     async_manager::spawn(async move {

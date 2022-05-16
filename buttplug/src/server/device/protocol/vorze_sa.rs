@@ -16,7 +16,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
+    hardware::{Hardware, HardwareWriteCmd, ServerDeviceResultFuture},
   },
 };
 use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
@@ -98,7 +98,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     let dev_id = if self.name().to_ascii_lowercase().contains("rocket") {
       VorzeDevices::Rocket
@@ -128,7 +128,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Hardware>,
     msg: messages::RotateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     // This will never change, so we can process it before the future.
     let dev_id = if self.name().contains("UFO") {
@@ -158,7 +158,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Hardware>,
     msg: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let v = msg.vectors()[0].clone();
 
     let previous_position = self.previous_position.load(SeqCst);
@@ -185,7 +185,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
     &self,
     device: Arc<Hardware>,
     msg: messages::VorzeA10CycloneCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.handle_rotate_cmd(
       device,
       messages::RotateCmd::new(

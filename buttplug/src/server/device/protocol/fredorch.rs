@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ServerDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::{
@@ -173,7 +173,7 @@ impl ButtplugProtocolCommandHandler for Fredorch {
     &self,
     device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -191,7 +191,7 @@ impl ButtplugProtocolCommandHandler for Fredorch {
     &self,
     device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let previous_position = self.previous_position.clone();
     let position = ((message.position() as f64 / 99.0) * 150.0) as u8;
     let speed = ((message.speed() as f64 / 99.0) * 15.0) as u8;

@@ -23,7 +23,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    hardware::{Hardware, HardwareCreator, ButtplugDeviceResultFuture, HardwareEvent},
+    hardware::{Hardware, HardwareCreator, ServerDeviceResultFuture, HardwareEvent},
     configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocol,
   },
@@ -45,7 +45,7 @@ use tokio::sync::broadcast;
 /// connected and has been successfully initialized. The instance will manage communication of all
 /// commands sent from a [client](crate::client::ButtplugClient) that pertain to this specific
 /// hardware.
-pub struct ButtplugDevice {
+pub struct ServerDevice {
   /// Protocol instance for the device
   protocol: Box<dyn ButtplugProtocol>,
   /// Hardware implementation for the device
@@ -56,7 +56,7 @@ pub struct ButtplugDevice {
   device_identifier: ProtocolDeviceIdentifier
 }
 
-impl Debug for ButtplugDevice {
+impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("ButtplugDevice")
       .field("name", &self.name())
@@ -65,22 +65,22 @@ impl Debug for ButtplugDevice {
   }
 }
 
-impl Hash for ButtplugDevice {
+impl Hash for ServerDevice {
   fn hash<H: Hasher>(&self, state: &mut H) {
     self.device_identifier().hash(state);
   }
 }
 
-impl Eq for ButtplugDevice {
+impl Eq for ServerDevice {
 }
 
-impl PartialEq for ButtplugDevice {
+impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
     self.device_identifier() == other.device_identifier()
   }
 }
 
-impl ButtplugDevice {
+impl ServerDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<Hardware>) -> Self {
     Self {
@@ -130,7 +130,7 @@ impl ButtplugDevice {
   pub async fn try_create_device(
     protocol_builder: ProtocolInstanceFactory,
     mut device_creator: Box<dyn HardwareCreator>,
-  ) -> Result<Option<ButtplugDevice>, ButtplugError> {
+  ) -> Result<Option<ServerDevice>, ButtplugError> {
     // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
     
     // Now that we have both a possible device implementation and a configuration for that device,
@@ -151,7 +151,7 @@ impl ButtplugDevice {
     let sharable_hardware = Arc::new(hardware);
     let protocol_impl =
       protocol_builder.create(sharable_hardware.clone()).await?;
-    Ok(Some(ButtplugDevice::new(
+    Ok(Some(ServerDevice::new(
       protocol_impl,
       sharable_hardware,
     )))
@@ -200,7 +200,7 @@ impl ButtplugDevice {
   pub fn parse_message(
     &self,
     message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.protocol.handle_command(self.device.clone(), message)
   }
 

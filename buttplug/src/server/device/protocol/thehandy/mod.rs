@@ -24,7 +24,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd, ButtplugDeviceResultFuture},
+    hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd, ServerDeviceResultFuture},
   },
 };
 use futures::future;
@@ -151,7 +151,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
     &self,
     device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
     // work backward from fleshlight to my own Linear format that Handy uses.
     //
@@ -177,7 +177,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
     &self,
     device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // What is "How not to implement a command structure for your device that
     // does one thing", Alex?
 

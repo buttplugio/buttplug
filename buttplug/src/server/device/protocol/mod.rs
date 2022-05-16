@@ -74,7 +74,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
-    hardware::{ButtplugDeviceResultFuture, HardwareReadCmd, Hardware},
+    hardware::{ServerDeviceResultFuture, HardwareReadCmd, Hardware},
   },
 };
 use futures::future::{self, BoxFuture};
@@ -272,7 +272,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     command_message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     if let Err(err) = self.supports_message(&command_message) {
       return Box::pin(future::ready(Err(err)));
     }
@@ -315,9 +315,9 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::StopDeviceCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let ok_return = messages::Ok::new(message.id());
-    let fut_vec: Vec<ButtplugDeviceResultFuture> = self
+    let fut_vec: Vec<ServerDeviceResultFuture> = self
       .stop_commands()
       .iter()
       .map(|cmd| self.handle_command(device.clone(), cmd.clone()))
@@ -337,7 +337,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::SingleMotorVibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // Time for sadness! In order to handle conversion of SingleMotorVibrateCmd, we need to know how
     // many vibrators a device has. We don't actually know that until we get to the protocol level,
     // so we're stuck parsing this here. Since we can assume SingleMotorVibrateCmd will ALWAYS map
@@ -379,7 +379,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::RawWriteCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let id = message.id();
     let fut = device.write_value(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
@@ -389,7 +389,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::RawReadCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let id = message.id();
     let fut = device.read_value(message.into());
     Box::pin(async move {
@@ -404,7 +404,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::RawUnsubscribeCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let id = message.id();
     let fut = device.unsubscribe(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
@@ -414,13 +414,13 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::RawSubscribeCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let id = message.id();
     let fut = device.subscribe(message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
-  fn command_unimplemented(&self, command: &str) -> ButtplugDeviceResultFuture {
+  fn command_unimplemented(&self, command: &str) -> ServerDeviceResultFuture {
     #[cfg(build = "debug")]
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
@@ -437,7 +437,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::LevelCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -445,7 +445,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::VorzeA10CycloneCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -453,7 +453,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::KiirooCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -461,7 +461,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -469,7 +469,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -477,7 +477,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::RotateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -485,7 +485,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 
@@ -493,7 +493,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
@@ -517,7 +517,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     &self,
     _device: Arc<Hardware>,
     message: messages::RSSILevelCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
   }
 }

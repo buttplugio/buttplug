@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
+    hardware::{Hardware, HardwareWriteCmd, ServerDeviceResultFuture},
   },
 };
 use std::sync::{
@@ -88,7 +88,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
     &self,
     device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
@@ -106,7 +106,7 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
     &self,
     device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let previous_position = self.previous_position.clone();
     let position = message.position();
     let msg = HardwareWriteCmd::new(

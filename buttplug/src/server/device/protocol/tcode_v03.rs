@@ -7,7 +7,7 @@
 
 use super::{
   generic_command_manager::GenericCommandManager,
-  ButtplugDeviceResultFuture,
+  ServerDeviceResultFuture,
   ButtplugProtocol,
   ButtplugProtocolFactory,
   ButtplugProtocolCommandHandler,
@@ -29,7 +29,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     &self,
     device: Arc<Hardware>,
     msg: messages::LinearCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     Box::pin(async move {
       let mut fut_vec = vec![];
       for v in msg.vectors() {
@@ -53,7 +53,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
     &self,
     device: Arc<Hardware>,
     msg: messages::VibrateCmd,
-  ) -> ButtplugDeviceResultFuture {
+  ) -> ServerDeviceResultFuture {
     let manager = self.manager.clone();
     Box::pin(async move {
       // Store off result before the match, so we drop the lock ASAP.

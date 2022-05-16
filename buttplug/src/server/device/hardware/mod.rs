@@ -2,7 +2,7 @@
 // TODO This shouldn't exist in hardware but we need to keep it here temporarily.
 mod device;
 pub mod communication;
-pub use device::ButtplugDevice;
+pub use device::ServerDevice;
 
 use std::{
   fmt::Debug,
@@ -32,7 +32,7 @@ use futures::future::BoxFuture;
 use tokio::sync::broadcast;
 
 /// Future that executes and returns a response from a client command or request
-pub type ButtplugDeviceResultFuture =
+pub type ServerDeviceResultFuture =
   BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
@@ -219,7 +219,7 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
 #[derive(Debug, Clone)]
 pub enum HardwareEvent {
   /// Device connected
-  Connected(Arc<ButtplugDevice>),
+  Connected(Arc<ServerDevice>),
   /// Device received data
   Notification(String, Endpoint, Vec<u8>),
   /// Device disconnected

@@ -30,7 +30,7 @@ use crate::{
     configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
     hardware::{
-      ButtplugDevice,
+      ServerDevice,
       communication::{
         DeviceCommunicationEvent,
         DeviceCommunicationManager,
@@ -172,7 +172,7 @@ pub struct DeviceManager {
   // This uses a map to make sure we don't have 2 comm managers of the same type
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<Vec<Box<dyn DeviceCommunicationManager>>>,
-  devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+  devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
   device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
   loop_cancellation_token: CancellationToken
 }
