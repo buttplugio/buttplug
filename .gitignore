@@ -13,3 +13,6 @@ Cargo.lock
 
 # book output
 /buttplug/docs/book
+
+# Intermediate directories that should be ignored
+**/*-ignore
