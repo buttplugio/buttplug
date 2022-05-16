@@ -8,7 +8,7 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-use super::device_manager_event_loop::DeviceManagerEventLoop;
+use super::server_device_manager_event_loop::ServerDeviceManagerEventLoop;
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -55,18 +55,18 @@ use std::{
 use tokio::sync::{broadcast, mpsc};
 
 #[derive(Debug)]
-pub struct DeviceInfo {
+pub struct ServerDeviceInfo {
   pub identifier: ServerDeviceIdentifier,
   pub display_name: Option<String>,
 }
 
 #[derive(Default)]
-pub struct DeviceManagerBuilder {
+pub struct ServerDeviceManagerBuilder {
   configuration_manager_builder: DeviceConfigurationManagerBuilder,
   comm_managers: Vec<Box<dyn HardwareCommunicationManagerBuilder>>,
 }
 
-impl DeviceManagerBuilder {
+impl ServerDeviceManagerBuilder {
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
   where
     T: HardwareCommunicationManagerBuilder + 'static,
@@ -114,7 +114,7 @@ impl DeviceManagerBuilder {
     self
   }
 
-  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<DeviceManager, ButtplugError> {
+  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<ServerDeviceManager, ButtplugError> {
     let config_mgr = self.configuration_manager_builder.finish()?;
 
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
@@ -148,7 +148,7 @@ impl DeviceManagerBuilder {
     let devices = Arc::new(DashMap::new());
     let loop_cancellation_token = CancellationToken::new();
 
-    let mut event_loop = DeviceManagerEventLoop::new(
+    let mut event_loop = ServerDeviceManagerEventLoop::new(
       config_mgr,
       devices.clone(),
       loop_cancellation_token.child_token(),
@@ -158,7 +158,7 @@ impl DeviceManagerBuilder {
     async_manager::spawn(async move {
       event_loop.run().await;
     });
-    Ok(DeviceManager {
+    Ok(ServerDeviceManager {
       comm_managers: Arc::new(comm_managers),
       devices,
       device_event_sender,
@@ -167,7 +167,7 @@ impl DeviceManagerBuilder {
   }
 }
 
-pub struct DeviceManager {
+pub struct ServerDeviceManager {
   // This uses a map to make sure we don't have 2 comm managers of the same type
   // register. Also means we can do lockless access since it's a Dashmap.
   comm_managers: Arc<Vec<Box<dyn HardwareCommunicationManager>>>,
@@ -176,7 +176,7 @@ pub struct DeviceManager {
   loop_cancellation_token: CancellationToken
 }
 
-impl DeviceManager {
+impl ServerDeviceManager {
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
@@ -322,9 +322,9 @@ impl DeviceManager {
     }
   }
 
-  pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {
+  pub fn device_info(&self, index: u32) -> Result<ServerDeviceInfo, ButtplugDeviceError> {
     if let Some(device) = self.devices.get(&index) {
-      Ok(DeviceInfo {
+      Ok(ServerDeviceInfo {
         identifier: device.value().device_identifier().clone(),
         display_name: device.value().display_name(),
       })
@@ -334,7 +334,7 @@ impl DeviceManager {
   }
 }
 
-impl Drop for DeviceManager {
+impl Drop for ServerDeviceManager {
   fn drop(&mut self) {
     info!("Dropping device manager!");
     self.loop_cancellation_token.cancel();

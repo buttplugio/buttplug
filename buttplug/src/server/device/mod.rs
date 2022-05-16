@@ -95,12 +95,12 @@
 //! 
 //! 
 
-mod device_manager;
-mod device_manager_event_loop;
+mod server_device_manager;
+mod server_device_manager_event_loop;
 pub mod server_device;
 pub mod configuration;
 pub mod hardware;
 pub mod protocol;
 
-pub use device_manager::{DeviceManager, DeviceManagerBuilder};
+pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};
 pub use server_device::{ServerDeviceIdentifier, ServerDevice};

@@ -66,7 +66,7 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use device::{DeviceManager, DeviceManagerBuilder};
+use device::{ServerDeviceManager, ServerDeviceManagerBuilder};
 use futures::{
   future::{self, BoxFuture},
   Stream,
@@ -121,7 +121,7 @@ pub struct ButtplugServerBuilder {
   /// JSON string, with the contents of the User Device Configuration file
   user_device_configuration_json: Option<String>,
   /// Device manager builder for the server
-  device_manager_builder: DeviceManagerBuilder
+  device_manager_builder: ServerDeviceManagerBuilder
 }
 
 impl Default for ButtplugServerBuilder {
@@ -132,7 +132,7 @@ impl Default for ButtplugServerBuilder {
       allow_raw_messages: false,
       device_configuration_json: Some(DEVICE_CONFIGURATION_JSON.to_owned()),
       user_device_configuration_json: None,
-      device_manager_builder: DeviceManagerBuilder::default()
+      device_manager_builder: ServerDeviceManagerBuilder::default()
     }
   }
 }
@@ -178,7 +178,7 @@ impl ButtplugServerBuilder {
     self
   }
 
-  pub fn device_manager_builder(&mut self) -> &mut DeviceManagerBuilder {
+  pub fn device_manager_builder(&mut self) -> &mut ServerDeviceManagerBuilder {
     &mut self.device_manager_builder
   }
 
@@ -284,7 +284,7 @@ pub struct ButtplugServer {
   /// Timer for managing ping time tracking, if max_ping_time > 0.
   ping_timer: Arc<PingTimer>,
   /// Manages device discovery and communication.
-  device_manager: Arc<DeviceManager>,
+  device_manager: Arc<ServerDeviceManager>,
   /// If true, client is currently connected to server
   connected: Arc<AtomicBool>,
   /// Broadcaster for server events. Receivers for this are handed out through the
@@ -323,7 +323,7 @@ impl ButtplugServer {
   }
 
   /// Returns a references to the internal device manager, for handling configuration.
-  pub fn device_manager(&self) -> &DeviceManager {
+  pub fn device_manager(&self) -> &ServerDeviceManager {
     &self.device_manager
   }
 

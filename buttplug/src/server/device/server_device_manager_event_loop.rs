@@ -36,7 +36,7 @@ use tokio_util::sync::CancellationToken;
 use tracing;
 use tracing_futures::Instrument;
 
-pub struct DeviceManagerEventLoop {
+pub struct ServerDeviceManagerEventLoop {
   device_config_manager: DeviceConfigurationManager,
   /// Maps device index (exposed to the outside world) to actual device objects held by the server.
   device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
@@ -61,7 +61,7 @@ pub struct DeviceManagerEventLoop {
   loop_cancellation_token: CancellationToken
 }
 
-impl DeviceManagerEventLoop {
+impl ServerDeviceManagerEventLoop {
   pub fn new(
     device_config_manager: DeviceConfigurationManager,
     device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
