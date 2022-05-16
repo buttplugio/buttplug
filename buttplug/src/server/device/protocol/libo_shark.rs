@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(LiboShark, "libo-shark");
 impl ButtplugProtocolCommandHandler for LiboShark {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -37,7 +37,7 @@ impl ButtplugProtocolCommandHandler for LiboShark {
           data |= speed as u8;
         }
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![data], false))
+          .write_value(HardwareWriteCmd::new(Endpoint::Tx, vec![data], false))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -50,7 +50,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -87,7 +87,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x22], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x22], false)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
 
@@ -97,7 +97,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x23], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x23], false)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
 
@@ -113,7 +113,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x00], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x00], false)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_tx_mode));

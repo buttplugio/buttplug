@@ -20,7 +20,7 @@ use buttplug::{
   server::{
     device::{
       communication::test::check_test_recv_value,
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServer,
   },
@@ -189,7 +189,7 @@ fn test_version0_singlemotorvibratecmd() {
       .expect("Test, assuming infallible.");
     check_test_recv_value(
       &command_receiver,
-      DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
+      HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
     );
   });
 }

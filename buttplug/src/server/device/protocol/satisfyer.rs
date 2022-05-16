@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::device_impl::{DeviceImpl, DeviceReadCmd, DeviceWriteCmd},
+    hardware::device_impl::{Hardware, HardwareReadCmd, HardwareWriteCmd},
   },
   util::async_manager,
 };
@@ -28,13 +28,13 @@ pub struct Satisfyer {
 
 // Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
 // Therefore we try to send a command every ~3s unless something is sent/updated sooner.
-async fn send_satisfyer_updates(device: Arc<DeviceImpl>, data: Arc<Mutex<Vec<u8>>>) {
+async fn send_satisfyer_updates(device: Arc<Hardware>, data: Arc<Mutex<Vec<u8>>>) {
   while device.connected() {
     // Scope to make sure we drop the lock before sleeping.
     {
       let current_data = data.lock().await.clone();
       if let Err(e) = device
-        .write_value(DeviceWriteCmd::new(
+        .write_value(HardwareWriteCmd::new(
           Endpoint::Tx,
           current_data.clone().to_vec(),
           false,
@@ -75,18 +75,18 @@ pub struct SatisfyerFactory {}
 impl ButtplugProtocolFactory for SatisfyerFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
-    let msg = DeviceWriteCmd::new(Endpoint::Command, vec![0x01], true);
+    let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = device_impl.write_value(msg);
 
     Box::pin(async move {
       let result = device_impl
-        .read_value(DeviceReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+        .read_value(HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
       let device_identifier = format!(
         "{}",
@@ -123,7 +123,7 @@ crate::default_protocol_properties_definition!(Satisfyer);
 impl ButtplugProtocolCommandHandler for Satisfyer {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -157,7 +157,7 @@ impl ButtplugProtocolCommandHandler for Satisfyer {
         };
         *last_command.lock().await = data.clone();
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, false))
+          .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, false))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -170,7 +170,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -206,7 +206,7 @@ mod test {
        */
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0, 0, 0, 0, 50, 50, 50, 50],
           false,
@@ -224,7 +224,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![90, 90, 90, 90, 50, 50, 50, 50],
           false,
@@ -236,7 +236,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0, 0, 0, 0, 0, 0, 0, 0],
           false,
@@ -261,7 +261,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0, 0, 0, 0, 50, 50, 50, 50],
           false,
@@ -279,7 +279,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0, 0, 0, 0, 0, 0, 0, 0],
           false,

@@ -14,14 +14,14 @@ use crate::{
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   server::device::communication::ButtplugDeviceSpecificError,
@@ -82,7 +82,7 @@ impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
 }
 
 #[async_trait]
-impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
+impl<T: Peripheral> HardwareCreator for BtlePlugDeviceImplCreator<T> {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
@@ -90,10 +90,10 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
     ))
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     if !self
       .device
       .is_connected()
@@ -171,7 +171,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
       endpoints.clone(),
       uuid_map,
     );
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &self.name,
       &format!("{:?}", self.address),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
@@ -183,7 +183,7 @@ impl<T: Peripheral> ButtplugDeviceImplCreator for BtlePlugDeviceImplCreator<T> {
 
 pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
   device: T,
-  event_stream: broadcast::Sender<ButtplugDeviceEvent>,
+  event_stream: broadcast::Sender<HardwareEvent>,
   connected: Arc<AtomicBool>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
@@ -224,7 +224,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
               if event_stream_clone.receiver_count() == 0 {
                 continue;
               }
-              if let Err(err) = event_stream_clone.send(ButtplugDeviceEvent::Notification(
+              if let Err(err) = event_stream_clone.send(HardwareEvent::Notification(
                 format!("{:?}", address),
                 endpoint,
                 notification.value,
@@ -246,7 +246,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
                 );
                 if event_stream_clone.receiver_count() != 0 {
                   if let Err(err) = event_stream_clone
-                  .send(ButtplugDeviceEvent::Disconnected(
+                  .send(HardwareEvent::Disconnected(
                     format!("{:?}", address)
                   )) {
                     error!(
@@ -277,8 +277,8 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   }
 }
 
-impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl<T: Peripheral + 'static> HardwareInternal for BtlePlugDeviceImpl<T> {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_stream.subscribe()
   }
 
@@ -294,7 +294,7 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     })
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -327,7 +327,7 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
 
   fn read_value(
     &self,
-    msg: DeviceReadCmd,
+    msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
@@ -359,7 +359,7 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     })
   }
 
-  fn subscribe(&self, msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -379,7 +379,7 @@ impl<T: Peripheral + 'static> DeviceImplInternal for BtlePlugDeviceImpl<T> {
     })
   }
 
-  fn unsubscribe(&self, msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {

@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -24,7 +24,7 @@ pub struct PatooFactory {}
 impl ButtplugProtocolFactory for PatooFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -52,7 +52,7 @@ impl ButtplugProtocolFactory for PatooFactory {
 impl ButtplugProtocolCommandHandler for Patoo {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -81,8 +81,8 @@ impl ButtplugProtocolCommandHandler for Patoo {
           mode |= 0x80;
         }
 
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, vec![speed], true)));
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::TxMode, vec![mode], true)));
+        fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::Tx, vec![speed], true)));
+        fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::TxMode, vec![mode], true)));
       }
 
       // TODO Just use join_all here
@@ -100,7 +100,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -129,11 +129,11 @@ mod test {
       // We just vibe 1 so expect 2 writes (mode 0x04)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![50], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![50], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x04], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0x04], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -162,11 +162,11 @@ mod test {
       // setting second vibe whilst changing vibe 1, 2 writes (mode 1)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![10], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![10], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x84], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0x84], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -187,11 +187,11 @@ mod test {
       // only vibe 1 changed, 2 writes, same data
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![10], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![10], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x84], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0x84], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -212,11 +212,11 @@ mod test {
       // turn off vibe 1, 2 writes (mode 0x80)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![90], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![90], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x80], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0x80], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -228,11 +228,11 @@ mod test {
       // stop on both, 2 writes (mode 0)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -259,11 +259,11 @@ mod test {
       // We just vibe 1 so expect 2 writes (mode 0x04)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![50], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![50], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0x04], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0x04], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));
@@ -299,11 +299,11 @@ mod test {
       // stop on both, 2 writes (mode 0)
       check_test_recv_value(
         &command_receiver_tx,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0], true)),
       );
       check_test_recv_value(
         &command_receiver_txmode,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::TxMode, vec![0], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::TxMode, vec![0], true)),
       );
       assert!(check_test_recv_empty(&command_receiver_tx));
       assert!(check_test_recv_empty(&command_receiver_txmode));

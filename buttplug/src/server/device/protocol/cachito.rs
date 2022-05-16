@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(Cachito, "cachito");
 impl ButtplugProtocolCommandHandler for Cachito {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -32,7 +32,7 @@ impl ButtplugProtocolCommandHandler for Cachito {
       if let Some(cmds) = result {
         for (index, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               vec![2u8 + (index as u8), 1u8 + (index as u8), *speed as u8, 0u8],
               false,
@@ -55,7 +55,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -81,7 +81,7 @@ mod test {
       // We just vibe 1 so expect 1 write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![2, 1, 3, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 3, 0], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -108,11 +108,11 @@ mod test {
       // fianlly setting second vibe whilst changing vibe 1, 2 writes
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![2, 1, 1, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 1, 0], false)),
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![3, 2, 50, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![3, 2, 50, 0], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -132,7 +132,7 @@ mod test {
       // only vibe 1 changed
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![3, 2, 90, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![3, 2, 90, 0], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -143,11 +143,11 @@ mod test {
       // stop on both
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![2, 1, 0, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 0, 0], false)),
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![3, 2, 0, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![3, 2, 0, 0], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
     });

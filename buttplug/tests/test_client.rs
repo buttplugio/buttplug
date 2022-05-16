@@ -25,7 +25,7 @@ use buttplug::{
   server::{
     device::{
       communication::test::check_test_recv_value,
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd,}
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd,}
     },
     ButtplugServerBuilder,
   },
@@ -214,29 +214,29 @@ fn test_stop_all_devices_and_device_command_range() {
           .expect("Test, assuming infallible.");
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
         );
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
         );
         assert!(dev.vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 127], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 127], false)),
         );
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 127], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 127], false)),
         );
         assert!(client.stop_all_devices().await.is_ok());
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
         );
         check_test_recv_value(
           &command_receiver,
-          DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
+          HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
         );
         break;
       }

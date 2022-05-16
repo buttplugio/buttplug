@@ -18,7 +18,7 @@ use crate::{
       communication::DeviceCommunicationEvent,
       hardware::{
         ButtplugDevice,
-        device_impl::{ButtplugDeviceImplCreator, ButtplugDeviceEvent}
+        device_impl::{HardwareCreator, HardwareEvent}
       }
     },
   },
@@ -46,9 +46,9 @@ pub struct DeviceManagerEventLoop {
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
   /// Sender for device events, passed to new devices when they are created.
-  device_event_sender: mpsc::Sender<ButtplugDeviceEvent>,
+  device_event_sender: mpsc::Sender<HardwareEvent>,
   /// Receiver for device events, which the event loops to handle events.
-  device_event_receiver: mpsc::Receiver<ButtplugDeviceEvent>,
+  device_event_receiver: mpsc::Receiver<HardwareEvent>,
   /// True if StartScanning has been called but no ScanningFinished has been
   /// emitted yet.
   scanning_in_progress: bool,
@@ -86,7 +86,7 @@ impl DeviceManagerEventLoop {
   fn try_create_new_device(
     &mut self,
     device_address: String,
-    device_creator: Box<dyn ButtplugDeviceImplCreator>,
+    device_creator: Box<dyn HardwareCreator>,
   ) {
     debug!("Trying to create device at address {}", device_address);
     let device_event_sender_clone = self.device_event_sender.clone();
@@ -111,7 +111,7 @@ impl DeviceManagerEventLoop {
         Ok(option_dev) => match option_dev {
           Some(device) => {
             if device_event_sender_clone
-              .send(ButtplugDeviceEvent::Connected(Arc::new(device)))
+              .send(HardwareEvent::Connected(Arc::new(device)))
               .await
               .is_err() {
               error!("Device manager disappeared before connection established, device will be dropped.");
@@ -208,10 +208,10 @@ impl DeviceManagerEventLoop {
     }
   }
 
-  async fn handle_device_event(&mut self, device_event: ButtplugDeviceEvent) {
+  async fn handle_device_event(&mut self, device_event: HardwareEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
-      ButtplugDeviceEvent::Connected(device) => {
+      HardwareEvent::Connected(device) => {
         let span = info_span!(
           "device registration",
           name = tracing::field::display(device.name()),
@@ -267,7 +267,7 @@ impl DeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      ButtplugDeviceEvent::Disconnected(address) => {
+      HardwareEvent::Disconnected(address) => {
         let mut device_index = None;
         for device_pair in self.device_map.iter() {
           if device_pair.value().device_identifier().address() == &address {
@@ -289,7 +289,7 @@ impl DeviceManagerEventLoop {
           }
         }
       }
-      ButtplugDeviceEvent::Notification(_address, _endpoint, _data) => {
+      HardwareEvent::Notification(_address, _endpoint, _data) => {
         // TODO At some point here we need to fill this in for RawSubscribe and
         // other sensor subscriptions.
       }

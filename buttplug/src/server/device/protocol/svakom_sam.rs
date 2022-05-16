@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(SvakomSam, "svakom-sam");
 impl ButtplugProtocolCommandHandler for SvakomSam {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -30,7 +30,7 @@ impl ButtplugProtocolCommandHandler for SvakomSam {
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
           device
-            .write_value(DeviceWriteCmd::new(
+            .write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               [18, 1, 3, 0, 5, speed as u8].to_vec(),
               true,
@@ -40,7 +40,7 @@ impl ButtplugProtocolCommandHandler for SvakomSam {
         if cmds.len() > 1 {
           if let Some(speed) = cmds[1] {
             device
-              .write_value(DeviceWriteCmd::new(
+              .write_value(HardwareWriteCmd::new(
                 Endpoint::Tx,
                 [18, 6, 1, speed as u8].to_vec(),
                 true,
@@ -60,7 +60,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -85,7 +85,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![18, 1, 3, 0, 5, 5],
           true,
@@ -108,7 +108,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![18, 6, 1, 1], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![18, 6, 1, 1], true)),
       );
       // Since we only created one subcommand, we should only receive one command.
       device
@@ -122,7 +122,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![18, 1, 3, 0, 5, 0],
           true,
@@ -130,7 +130,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![18, 6, 1, 0], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![18, 6, 1, 0], true)),
       );
       assert!(check_test_recv_empty(&command_receiver));
     });

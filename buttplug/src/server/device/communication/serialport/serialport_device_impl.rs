@@ -14,14 +14,14 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   server::device::communication::ButtplugDeviceSpecificError,
@@ -66,17 +66,17 @@ impl Debug for SerialPortDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for SerialPortDeviceImplCreator {
+impl HardwareCreator for SerialPortDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     let device_impl_internal = SerialPortDeviceImpl::try_create(&self.port_info, protocol).await?;
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
       &[Endpoint::Rx, Endpoint::Tx],
@@ -145,7 +145,7 @@ pub struct SerialPortDeviceImpl {
   port_receiver: Arc<Mutex<mpsc::Receiver<Vec<u8>>>>,
   port_sender: mpsc::Sender<Vec<u8>>,
   connected: Arc<AtomicBool>,
-  device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  device_event_sender: broadcast::Sender<HardwareEvent>,
   // TODO These aren't actually read, do we need to hold them?
   _read_thread: thread::JoinHandle<()>,
   _write_thread: thread::JoinHandle<()>,
@@ -249,8 +249,8 @@ impl SerialPortDeviceImpl {
   }
 }
 
-impl DeviceImplInternal for SerialPortDeviceImpl {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for SerialPortDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.device_event_sender.subscribe()
   }
 
@@ -268,7 +268,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
 
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Should check endpoint validity and length requirements
     let receiver = self.port_receiver.clone();
@@ -286,7 +286,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
     })
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let sender = self.port_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
@@ -298,7 +298,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     // TODO Should check endpoint validity
     let data_receiver = self.port_receiver.clone();
     let event_sender = self.device_event_sender.clone();
@@ -314,7 +314,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
             Some(data) => {
               info!("Got serial data! {:?}", data);
               event_sender
-                .send(ButtplugDeviceEvent::Notification(
+                .send(HardwareEvent::Notification(
                   address.clone(),
                   Endpoint::Tx,
                   data,
@@ -332,7 +332,7 @@ impl DeviceImplInternal for SerialPortDeviceImpl {
     })
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     unimplemented!();
   }
 }

@@ -19,7 +19,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceEvent, DeviceSubscribeCmd},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd},
   },
 };
 use futures::FutureExt;
@@ -69,7 +69,7 @@ pub struct LovenseFactory {}
 impl ButtplugProtocolFactory for LovenseFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -80,16 +80,16 @@ impl ButtplugProtocolFactory for LovenseFactory {
       let identifier;
       let mut count = 0;
       device_impl
-        .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx))
+        .subscribe(HardwareSubscribeCmd::new(Endpoint::Rx))
         .await?;
 
       loop {
-        let msg = DeviceWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+        let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
         device_impl.write_value(msg).await?;
 
         select! {
           event = event_receiver.recv().fuse() => {
-            if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+            if let Ok(HardwareEvent::Notification(_, _, n)) = event {
               let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
@@ -130,7 +130,7 @@ impl ButtplugProtocol for Lovense {}
 impl ButtplugProtocolCommandHandler for Lovense {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -153,14 +153,14 @@ impl ButtplugProtocolCommandHandler for Lovense {
           let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity"))
             .as_bytes()
             .to_vec();
-          let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+          let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
           fut.await?;
           return Ok(messages::Ok::default().into());
         }
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
             let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
           }
         }
       }
@@ -173,7 +173,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -182,13 +182,13 @@ impl ButtplugProtocolCommandHandler for Lovense {
       let result = manager.lock().await.update_rotation(&msg)?;
       if let Some((speed, clockwise)) = result[0] {
         let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
-        let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+        let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
         fut.await?;
         let dir = direction.load(Ordering::SeqCst);
         // TODO Should we store speed and direction as an option for rotation caching? This is weird.
         if dir != clockwise {
           direction.store(clockwise, Ordering::SeqCst);
-          let fut = device.write_value(DeviceWriteCmd::new(
+          let fut = device.write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             b"RotateChange;".to_vec(),
             false,
@@ -202,12 +202,12 @@ impl ButtplugProtocolCommandHandler for Lovense {
 
   fn handle_battery_level_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
     let mut device_notification_receiver = device.event_stream();
     Box::pin(async move {
-      let write_fut = device.write_value(DeviceWriteCmd::new(
+      let write_fut = device.write_value(HardwareWriteCmd::new(
         Endpoint::Tx,
         b"Battery;".to_vec(),
         false,
@@ -215,7 +215,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
       write_fut.await?;
       while let Ok(event) = device_notification_receiver.recv().await {
         match event {
-          ButtplugDeviceEvent::Notification(_, _, data) => {
+          HardwareEvent::Notification(_, _, data) => {
             if let Ok(data_str) = std::str::from_utf8(&data) {
               debug!("Lovense event received: {}", data_str);
               let len = data_str.len();
@@ -236,7 +236,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
               }
             }
           }
-          ButtplugDeviceEvent::Disconnected(_) => {
+          HardwareEvent::Disconnected(_) => {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
                 "Lovense".to_owned(),
@@ -245,7 +245,7 @@ impl ButtplugProtocolCommandHandler for Lovense {
               .into(),
             )
           }
-          ButtplugDeviceEvent::Connected(_) => {
+          HardwareEvent::Connected(_) => {
             unimplemented!("Shouldn't get here as device will always be connected.");
           }
         }

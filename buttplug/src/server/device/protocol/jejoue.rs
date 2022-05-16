@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(JeJoue, "jejoue");
 impl ButtplugProtocolCommandHandler for JeJoue {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -51,7 +51,7 @@ impl ButtplugProtocolCommandHandler for JeJoue {
         }
 
         device
-          .write_value(DeviceWriteCmd::new(
+          .write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![pattern, speed],
             false,
@@ -69,7 +69,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -95,7 +95,7 @@ mod test {
       // We just vibe 1 so expect 1 write (mode 2)
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![2, 3], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 3], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -122,7 +122,7 @@ mod test {
       // setting second vibe whilst changing vibe 1, 1 writes (mode 1)
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![1, 1], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![1, 1], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -142,7 +142,7 @@ mod test {
       // only vibe 1 changed, 1 write, same data
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![1, 1], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![1, 1], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -162,7 +162,7 @@ mod test {
       // turn off vibe 1, 1 write (mode 3)
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![3, 5], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![3, 5], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -173,7 +173,7 @@ mod test {
       // stop on both, 1 write (mode 1)
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![1, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![1, 0], false)),
       );
       assert!(check_test_recv_empty(&command_receiver));
     });

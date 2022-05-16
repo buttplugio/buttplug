@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(MagicMotionV3, "magic-motion-3");
 impl ButtplugProtocolCommandHandler for MagicMotionV3 {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -30,7 +30,7 @@ impl ButtplugProtocolCommandHandler for MagicMotionV3 {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         device
-          .write_value(DeviceWriteCmd::new(
+          .write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![
               0x0b,
@@ -60,7 +60,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -85,7 +85,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x27, 0x64, 0x00,
@@ -105,7 +105,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x0b, 0xff, 0x04, 0x0a, 0x46, 0x46, 0x00, 0x04, 0x08, 0x00, 0x64, 0x00,

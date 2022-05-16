@@ -15,7 +15,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
   util::async_manager,
 };
@@ -62,11 +62,11 @@ impl ButtplugProtocol for Hgod {}
 
 super::default_protocol_trait_declaration!(Hgod);
 
-async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<RwLock<Vec<u8>>>) {
+async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Hgod Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device
-    .write_value(DeviceWriteCmd::new(Endpoint::Tx, current_command, true))
+    .write_value(HardwareWriteCmd::new(Endpoint::Tx, current_command, true))
     .await
     .is_ok()
   {
@@ -80,7 +80,7 @@ async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<R
 impl ButtplugProtocolCommandHandler for Hgod {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();

@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(Nobra, "nobra");
 impl ButtplugProtocolCommandHandler for Nobra {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -33,7 +33,7 @@ impl ButtplugProtocolCommandHandler for Nobra {
         for (_, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
             let output_speed = if *speed == 0 { 0x70 } else { 0x60 + speed };
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               vec![output_speed as u8],
               false,

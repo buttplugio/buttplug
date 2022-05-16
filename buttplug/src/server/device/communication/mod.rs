@@ -21,7 +21,7 @@ pub mod websocket_server;
 
 pub mod test;
 
-use crate::{core::ButtplugResultFuture, server::device::hardware::device_impl::ButtplugDeviceImplCreator};
+use crate::{core::ButtplugResultFuture, server::device::hardware::device_impl::HardwareCreator};
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
@@ -34,7 +34,7 @@ pub enum DeviceCommunicationEvent {
   DeviceFound {
     name: String,
     address: String,
-    creator: Box<dyn ButtplugDeviceImplCreator>,
+    creator: Box<dyn HardwareCreator>,
   },
   DeviceManagerAdded(Arc<AtomicBool>),
   ScanningStarted,

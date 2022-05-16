@@ -24,7 +24,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceReadCmd, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{Hardware, HardwareReadCmd, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use futures::future;
@@ -80,7 +80,7 @@ impl ButtplugProtocolFactory for TheHandyFactory {
 
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -131,8 +131,8 @@ impl ButtplugProtocolFactory for TheHandyFactory {
       session_req
         .encode(&mut sec_buf)
         .expect("Infallible encode.");
-      device_impl.write_value(DeviceWriteCmd::new(Endpoint::Firmware, sec_buf, false));
-      let _ = device_impl.read_value(DeviceReadCmd::new(Endpoint::Firmware, 100, 500));
+      device_impl.write_value(HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
+      let _ = device_impl.read_value(HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
 
       // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
       // messages that it can use. However, having removed these and still tried to run the system,
@@ -149,7 +149,7 @@ impl ButtplugProtocolFactory for TheHandyFactory {
 impl ButtplugProtocolCommandHandler for TheHandy {
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
@@ -175,7 +175,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     // What is "How not to implement a command structure for your device that
@@ -232,7 +232,7 @@ impl ButtplugProtocolCommandHandler for TheHandy {
       .expect("Infallible encode.");
     Box::pin(async move {
       device
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, linear_buf, true))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true))
         .await?;
       Ok(messages::Ok::default().into())
     })

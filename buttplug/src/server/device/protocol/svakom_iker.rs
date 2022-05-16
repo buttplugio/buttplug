@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(SvakomIker, "svakom-iker");
 impl ButtplugProtocolCommandHandler for SvakomIker {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -34,7 +34,7 @@ impl ButtplugProtocolCommandHandler for SvakomIker {
             vibe_off = true;
           }
           device
-            .write_value(DeviceWriteCmd::new(
+            .write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               [0x55, 0x03, 0x03, 0x00, 0x01, speed as u8].to_vec(),
               true,
@@ -45,7 +45,7 @@ impl ButtplugProtocolCommandHandler for SvakomIker {
           if let Some(speed) = cmds[1] {
             if speed != 0 || !vibe_off {
               device
-                .write_value(DeviceWriteCmd::new(
+                .write_value(HardwareWriteCmd::new(
                   Endpoint::Tx,
                   [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
                   true,
@@ -59,7 +59,7 @@ impl ButtplugProtocolCommandHandler for SvakomIker {
             if let Some(speed) = all_results[1] {
               if speed != 0 {
                 device
-                  .write_value(DeviceWriteCmd::new(
+                  .write_value(HardwareWriteCmd::new(
                     Endpoint::Tx,
                     [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
                     true,
@@ -81,7 +81,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -109,7 +109,7 @@ mod test {
       // Test the vibe write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 3, 3, 0, 1, 5],
           true,
@@ -135,7 +135,7 @@ mod test {
       // Test the pulser write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 7, 0, 0, 5, 0],
           true,
@@ -152,7 +152,7 @@ mod test {
       // Test the vibe write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 3, 3, 0, 1, 0],
           true,
@@ -161,7 +161,7 @@ mod test {
       // Test the pulse write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 7, 0, 0, 5, 0],
           true,
@@ -178,7 +178,7 @@ mod test {
       // Test the vibe write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 3, 3, 0, 1, 5],
           true,
@@ -195,7 +195,7 @@ mod test {
       // Test the pulse write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 7, 0, 0, 0, 0],
           true,
@@ -212,7 +212,7 @@ mod test {
       // Test the pulser write
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 7, 0, 0, 5, 0],
           true,
@@ -228,7 +228,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![85, 3, 3, 0, 1, 0],
           true,

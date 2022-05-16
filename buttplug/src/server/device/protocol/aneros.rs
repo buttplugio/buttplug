@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(Aneros, "aneros");
 impl ButtplugProtocolCommandHandler for Aneros {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -32,7 +32,7 @@ impl ButtplugProtocolCommandHandler for Aneros {
       if let Some(cmds) = result {
         for (index, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               vec![0xF1 + (index as u8), *speed as u8],
               false,
@@ -55,7 +55,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -80,7 +80,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
       );
       // Since we only created one subcommand, we should only receive one command.
       device
@@ -104,11 +104,11 @@ mod test {
       // TODO There's probably a more concise way to do this.
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)),
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
       );
       device
         .parse_message(StopDeviceCmd::new(0).into())
@@ -116,11 +116,11 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 0], false)),
       );
     });
   }

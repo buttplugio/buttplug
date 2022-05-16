@@ -14,7 +14,7 @@ use crate::{
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
     },
-    hardware::device_impl::ButtplugDeviceEvent,
+    hardware::device_impl::HardwareEvent,
   },
   util::async_manager,
 };
@@ -57,7 +57,7 @@ pub(super) fn create_address(index: XInputControllerIndex) -> String {
 async fn check_gamepad_connectivity(
   connected_gamepads: Arc<AtomicU8>,
   check_running: Arc<AtomicBool>,
-  sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
+  sender: Option<broadcast::Sender<HardwareEvent>>,
 ) {
   check_running.store(true, Ordering::SeqCst);
   let handle = rusty_xinput::XInputHandle::load_default()
@@ -84,7 +84,7 @@ async fn check_gamepad_connectivity(
         connected_gamepads.store(new_connected_gamepads, Ordering::SeqCst);
         if let Some(send) = &sender {
           send
-            .send(ButtplugDeviceEvent::Disconnected(create_address(*index)))
+            .send(HardwareEvent::Disconnected(create_address(*index)))
             .expect("Infallible, device manager listening or this doesn't exist.");
         }
         // If we're out of gamepads to track, return immediately.
@@ -117,7 +117,7 @@ impl XInputConnectionTracker {
   pub fn add_with_sender(
     &self,
     index: XInputControllerIndex,
-    sender: broadcast::Sender<ButtplugDeviceEvent>,
+    sender: broadcast::Sender<HardwareEvent>,
   ) {
     let mut connected = self.connected_gamepads.load(Ordering::SeqCst);
     let should_start = connected == 0;

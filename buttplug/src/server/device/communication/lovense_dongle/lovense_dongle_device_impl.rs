@@ -21,14 +21,14 @@ use crate::{
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -84,15 +84,15 @@ impl LovenseDongleDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
+impl HardwareCreator for LovenseDongleDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     let device_impl_internal = LovenseDongleDeviceImpl::new(
       &self.id,
       self.device_outgoing.clone(),
@@ -101,7 +101,7 @@ impl ButtplugDeviceImplCreator for LovenseDongleDeviceImplCreator {
         .take()
         .expect("We'll always have a device here"),
     );
-    let device = DeviceImpl::new(
+    let device = Hardware::new(
       "Lovense Dongle Device",
       &self.id,
       &[Endpoint::Rx, Endpoint::Tx],
@@ -116,7 +116,7 @@ pub struct LovenseDongleDeviceImpl {
   address: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   connected: Arc<AtomicBool>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
 }
 
 impl LovenseDongleDeviceImpl {
@@ -139,7 +139,7 @@ impl LovenseDongleDeviceImpl {
           .data
           .expect("USB format shouldn't change");
         if device_event_sender_clone
-          .send(ButtplugDeviceEvent::Notification(
+          .send(HardwareEvent::Notification(
             address_clone.clone(),
             Endpoint::Rx,
             data_str.into_bytes(),
@@ -155,7 +155,7 @@ impl LovenseDongleDeviceImpl {
       }
       info!("Lovense dongle device disconnected",);
       if device_event_sender_clone
-        .send(ButtplugDeviceEvent::Disconnected(address_clone.clone()))
+        .send(HardwareEvent::Disconnected(address_clone.clone()))
         .is_err()
       {
         error!("Device Manager no longer alive, cannot send removed event.");
@@ -170,8 +170,8 @@ impl LovenseDongleDeviceImpl {
   }
 }
 
-impl DeviceImplInternal for LovenseDongleDeviceImpl {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for LovenseDongleDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }
 
@@ -189,12 +189,12 @@ impl DeviceImplInternal for LovenseDongleDeviceImpl {
 
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     unimplemented!()
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
     Box::pin(async move {
@@ -221,11 +221,11 @@ impl DeviceImplInternal for LovenseDongleDeviceImpl {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     // unimplemented!();
     Box::pin(future::ready(Ok(())))
   }

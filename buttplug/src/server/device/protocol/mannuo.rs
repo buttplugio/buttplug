@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(ManNuo, "mannuo");
 impl ButtplugProtocolCommandHandler for ManNuo {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -41,7 +41,7 @@ impl ButtplugProtocolCommandHandler for ManNuo {
             data.push(crc);
 
             device
-              .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, true))
+              .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, true))
               .await?;
           }
         }
@@ -56,7 +56,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
     communication::test::{
       check_test_recv_empty,
       check_test_recv_value,
@@ -80,7 +80,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![170, 85, 6, 1, 1, 1, 2, 250, 0],
           true,

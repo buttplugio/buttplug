@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,12 +21,12 @@ super::default_protocol_declaration!(ButtplugPassthru, "buttplug-passthru");
 impl ButtplugProtocolCommandHandler for ButtplugPassthru {
   fn handle_command(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     command_message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugDeviceResultFuture {
     Box::pin(async move {
       device
-        .write_value(DeviceWriteCmd::new(
+        .write_value(HardwareWriteCmd::new(
           Endpoint::Tx,
           serde_json::to_string(&command_message)
             .expect("Type is always serializable")

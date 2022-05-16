@@ -14,15 +14,15 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplCommand,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareCommand,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
 };
@@ -63,15 +63,15 @@ impl Debug for TestDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
+impl HardwareCreator for TestDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     let device = self
       .device_impl
       .take()
@@ -89,7 +89,7 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
       .map(|el| *el.key())
       .collect();
     let device_impl_internal = TestDevice::new(&device);
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &device.name(),
       &device.address(),
       &endpoints,
@@ -101,15 +101,15 @@ impl ButtplugDeviceImplCreator for TestDeviceImplCreator {
 
 #[derive(Clone)]
 pub struct TestDeviceEndpointChannel {
-  pub sender: Arc<mpsc::Sender<DeviceImplCommand>>,
+  pub sender: Arc<mpsc::Sender<HardwareCommand>>,
   // This is a sync mutex because tests should run procedurally and not conflict
-  pub receiver: Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>,
+  pub receiver: Arc<std::sync::Mutex<mpsc::Receiver<HardwareCommand>>>,
 }
 
 impl TestDeviceEndpointChannel {
   pub fn new(
-    sender: mpsc::Sender<DeviceImplCommand>,
-    receiver: mpsc::Receiver<DeviceImplCommand>,
+    sender: mpsc::Sender<HardwareCommand>,
+    receiver: mpsc::Receiver<HardwareCommand>,
   ) -> Self {
     Self {
       sender: Arc::new(sender),
@@ -122,7 +122,7 @@ pub struct TestDeviceInternal {
   name: String,
   address: String,
   endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
 }
 
 impl TestDeviceInternal {
@@ -136,11 +136,11 @@ impl TestDeviceInternal {
     }
   }
 
-  pub fn sender(&self) -> broadcast::Sender<ButtplugDeviceEvent> {
+  pub fn sender(&self) -> broadcast::Sender<HardwareEvent> {
     self.event_sender.clone()
   }
 
-  pub fn send_event(&self, event: ButtplugDeviceEvent) {
+  pub fn send_event(&self, event: HardwareEvent) {
     self.event_sender.send(event).expect("Test");
   }
 
@@ -155,7 +155,7 @@ impl TestDeviceInternal {
   pub fn endpoint_receiver(
     &self,
     endpoint: &Endpoint,
-  ) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<DeviceImplCommand>>>> {
+  ) -> Option<Arc<std::sync::Mutex<mpsc::Receiver<HardwareCommand>>>> {
     self
       .endpoint_channels
       .get(endpoint)
@@ -176,7 +176,7 @@ impl TestDeviceInternal {
     let address = self.address.clone();
     Box::pin(async move {
       sender
-        .send(ButtplugDeviceEvent::Disconnected(address))
+        .send(HardwareEvent::Disconnected(address))
         .expect("Test");
       Ok(())
     })
@@ -190,7 +190,7 @@ pub struct TestDevice {
   // for creation in ButtplugDevice, so initialization and cloning order
   // matters here.
   pub endpoint_channels: Arc<DashMap<Endpoint, TestDeviceEndpointChannel>>,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
 }
 
 impl TestDevice {
@@ -204,8 +204,8 @@ impl TestDevice {
   }
 }
 
-impl DeviceImplInternal for TestDevice {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for TestDevice {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }
 
@@ -218,7 +218,7 @@ impl DeviceImplInternal for TestDevice {
     let address = self.address.clone();
     Box::pin(async move {
       sender
-        .send(ButtplugDeviceEvent::Disconnected(address))
+        .send(HardwareEvent::Disconnected(address))
         .expect("Test");
       Ok(())
     })
@@ -226,12 +226,12 @@ impl DeviceImplInternal for TestDevice {
 
   fn read_value(
     &self,
-    msg: DeviceReadCmd,
+    msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let channels = self.endpoint_channels.clone();
     Box::pin(async move {
       // Since we're only accessing a channel, we can use a read lock here.
@@ -246,11 +246,11 @@ impl DeviceImplInternal for TestDevice {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 }

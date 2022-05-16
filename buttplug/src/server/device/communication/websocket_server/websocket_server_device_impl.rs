@@ -15,14 +15,14 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -54,7 +54,7 @@ use tokio_util::sync::CancellationToken;
 
 async fn run_connection_loop<S>(
   address: &str,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
   ws_stream: async_tungstenite::WebSocketStream<S>,
   mut request_receiver: Receiver<Vec<u8>>,
   response_sender: broadcast::Sender<Vec<u8>>,
@@ -119,7 +119,7 @@ async fn run_connection_loop<S>(
                 async_tungstenite::tungstenite::Message::Close(_) => {
                   // Drop the error if no one receives the message, we're breaking anyways.
                   let _ = event_sender
-                    .send(ButtplugDeviceEvent::Disconnected(
+                    .send(HardwareEvent::Disconnected(
                       address.to_owned()
                     ));
                   break;
@@ -158,7 +158,7 @@ pub struct WebsocketServerDeviceImplCreator {
   info: WebsocketServerDeviceCommManagerInitInfo,
   outgoing_sender: Option<Sender<Vec<u8>>>,
   incoming_broadcaster: Option<broadcast::Sender<Vec<u8>>>,
-  device_event_sender: Option<broadcast::Sender<ButtplugDeviceEvent>>,
+  device_event_sender: Option<broadcast::Sender<HardwareEvent>>,
 }
 
 impl WebsocketServerDeviceImplCreator {
@@ -203,15 +203,15 @@ impl Debug for WebsocketServerDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
+impl HardwareCreator for WebsocketServerDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     _: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     let device_impl_internal = WebsocketServerDeviceImpl::new(
       self
         .device_event_sender
@@ -227,7 +227,7 @@ impl ButtplugDeviceImplCreator for WebsocketServerDeviceImplCreator {
         .take()
         .expect("We own this so we can always take."),
     );
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &self.info.identifier,
       &self.info.address,
       &[Endpoint::Rx, Endpoint::Tx],
@@ -244,12 +244,12 @@ pub struct WebsocketServerDeviceImpl {
   info: WebsocketServerDeviceCommManagerInitInfo,
   outgoing_sender: Sender<Vec<u8>>,
   incoming_broadcaster: broadcast::Sender<Vec<u8>>,
-  device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  device_event_sender: broadcast::Sender<HardwareEvent>,
 }
 
 impl WebsocketServerDeviceImpl {
   pub fn new(
-    device_event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+    device_event_sender: broadcast::Sender<HardwareEvent>,
     info: WebsocketServerDeviceCommManagerInitInfo,
     outgoing_sender: Sender<Vec<u8>>,
     incoming_broadcaster: broadcast::Sender<Vec<u8>>,
@@ -266,8 +266,8 @@ impl WebsocketServerDeviceImpl {
   }
 }
 
-impl DeviceImplInternal for WebsocketServerDeviceImpl {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for WebsocketServerDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.device_event_sender.subscribe()
   }
 
@@ -285,12 +285,12 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
 
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     unimplemented!("Not implemented for websockets");
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let sender = self.outgoing_sender.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
@@ -304,7 +304,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     if self.subscribed.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Ok(())));
     }
@@ -327,7 +327,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
                   debug!("Got websocket data! {:?}", data);
                   // We don't really care if there's no one to send the error to here.
                   let _ = event_sender
-                    .send(ButtplugDeviceEvent::Notification(
+                    .send(HardwareEvent::Notification(
                       address.clone(),
                       Endpoint::Tx,
                       data,
@@ -347,7 +347,7 @@ impl DeviceImplInternal for WebsocketServerDeviceImpl {
     })
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     if self.subscribed.load(Ordering::SeqCst) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();

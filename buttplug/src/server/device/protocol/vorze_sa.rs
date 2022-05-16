@@ -16,7 +16,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
@@ -96,7 +96,7 @@ impl ButtplugProtocol for VorzeSA {}
 impl ButtplugProtocolCommandHandler for VorzeSA {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -110,7 +110,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          fut_vec.push(device.write_value(DeviceWriteCmd::new(
+          fut_vec.push(device.write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
             true,
@@ -126,7 +126,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -141,7 +141,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
       let mut fut_vec = vec![];
       if let Some((speed, clockwise)) = result[0] {
         let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(
+        fut_vec.push(device.write_value(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![dev_id as u8, VorzeActions::Rotate as u8, data],
           true,
@@ -156,7 +156,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = msg.vectors()[0].clone();
@@ -169,7 +169,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
     self.previous_position.store(position as u8, SeqCst);
 
-    let fut = device.write_value(DeviceWriteCmd::new(
+    let fut = device.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
       true,
@@ -183,7 +183,7 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VorzeA10CycloneCmd,
   ) -> ButtplugDeviceResultFuture {
     self.handle_rotate_cmd(
@@ -214,7 +214,7 @@ mod test {
       VibrateSubcommand,
     },
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd}, 
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd}, 
     communication::test::{
       check_test_recv_empty,
       check_test_recv_value,
@@ -239,7 +239,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 50],
           true,
@@ -253,7 +253,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x06, 0x03, 0x0],
           true,
@@ -278,7 +278,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x07, 0x03, 50],
           true,
@@ -292,7 +292,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x07, 0x03, 0x0],
           true,
@@ -317,7 +317,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 50],
           true,
@@ -331,7 +331,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 178],
           true,
@@ -345,7 +345,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x01, 0x0],
           true,
@@ -370,7 +370,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x03, 190, 92], true)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x03, 190, 92], true)),
       );
       assert!(check_test_recv_empty(&command_receiver));
 
@@ -380,7 +380,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03, 190, 100],
           true,
@@ -394,7 +394,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03, 100, 100],
           true,

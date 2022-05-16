@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, DeviceSubscribeCmd},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, HardwareSubscribeCmd},
   },
 };
 use std::sync::Arc;
@@ -24,7 +24,7 @@ pub struct LeloF1sFactory {}
 impl ButtplugProtocolFactory for LeloF1sFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -33,7 +33,7 @@ impl ButtplugProtocolFactory for LeloF1sFactory {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
-    let subscribe_fut = device_impl.subscribe(DeviceSubscribeCmd::new(Endpoint::Rx));
+    let subscribe_fut = device_impl.subscribe(HardwareSubscribeCmd::new(Endpoint::Rx));
     Box::pin(async move {
       subscribe_fut.await?;
       let device_attributes = builder.create_from_device_impl(&device_impl)?;
@@ -49,7 +49,7 @@ impl ButtplugProtocolFactory for LeloF1sFactory {
 impl ButtplugProtocolCommandHandler for LeloF1s {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -63,7 +63,7 @@ impl ButtplugProtocolCommandHandler for LeloF1s {
           cmd_vec.push(cmd.expect("Test, assuming infallible") as u8);
         }
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd_vec, false))
+          .write_value(HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -76,7 +76,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -101,7 +101,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x32, 0x0],
           false,
@@ -130,7 +130,7 @@ mod test {
       // TODO There's probably a more concise way to do this.
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x1, 0xa, 0x32],
           false,
@@ -142,7 +142,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x1, 0x0, 0x0],
           false,

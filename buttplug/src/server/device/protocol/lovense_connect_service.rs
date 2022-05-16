@@ -16,7 +16,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceReadCmd, DeviceWriteCmd},
+    hardware::device_impl::{Hardware, HardwareReadCmd, HardwareWriteCmd},
   },
 };
 use std::sync::{
@@ -59,7 +59,7 @@ impl ButtplugProtocol for LovenseConnectService {}
 impl ButtplugProtocolCommandHandler for LovenseConnectService {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -86,7 +86,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
           )
           .as_bytes()
           .to_vec();
-          let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+          let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
           fut.await?;
           return Ok(messages::Ok::default().into());
         }
@@ -95,7 +95,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
             let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address())
               .as_bytes()
               .to_vec();
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
           }
         }
       }
@@ -108,7 +108,7 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -119,13 +119,13 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
         let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address())
           .as_bytes()
           .to_vec();
-        let fut = device.write_value(DeviceWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
+        let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
         fut.await?;
         let dir = direction.load(Ordering::SeqCst);
         // TODO Should we store speed and direction as an option for rotation caching? This is weird.
         if dir != clockwise {
           direction.store(clockwise, Ordering::SeqCst);
-          let fut = device.write_value(DeviceWriteCmd::new(
+          let fut = device.write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             b"RotateChange?".to_vec(),
             false,
@@ -139,14 +139,14 @@ impl ButtplugProtocolCommandHandler for LovenseConnectService {
 
   fn handle_battery_level_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
     Box::pin(async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
       let reading = device
-        .read_value(DeviceReadCmd::new(Endpoint::Rx, 0, 0))
+        .read_value(HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(

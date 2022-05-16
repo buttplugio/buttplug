@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::{
@@ -77,7 +77,7 @@ pub struct FredorchFactory {}
 impl ButtplugProtocolFactory for FredorchFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -90,7 +90,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Set the program mode to record
@@ -99,7 +99,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Program the device to move to position 0 at speed 5
@@ -111,7 +111,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Run the program
@@ -120,7 +120,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Set the program to repeat
@@ -129,7 +129,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       let device_attributes = builder.create_from_device_impl(&device_impl)?;
@@ -171,7 +171,7 @@ impl Fredorch {
 impl ButtplugProtocolCommandHandler for Fredorch {
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = message.vectors()[0].clone();
@@ -189,7 +189,7 @@ impl ButtplugProtocolCommandHandler for Fredorch {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();
@@ -202,7 +202,7 @@ impl ButtplugProtocolCommandHandler for Fredorch {
     let crc = crc16(&data);
     data.push(crc[0]);
     data.push(crc[1]);
-    let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
+    let msg = HardwareWriteCmd::new(Endpoint::Tx, data, false);
     let fut = device.write_value(msg);
     Box::pin(async move {
       previous_position.store(position, SeqCst);
@@ -217,7 +217,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -240,7 +240,7 @@ mod test {
       // Initialisation
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5],
           false,
@@ -248,7 +248,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6],
           false,
@@ -256,7 +256,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
@@ -267,7 +267,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16],
           false,
@@ -275,7 +275,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16],
           false,
@@ -290,7 +290,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x07, 0x00, 0x07, 0x00, 0x4b, 0x00,
@@ -307,7 +307,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x0f, 0x00, 0x0f, 0x00, 0x96, 0x00,
@@ -333,7 +333,7 @@ mod test {
       // Initialisation
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5],
           false,
@@ -341,7 +341,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6],
           false,
@@ -349,7 +349,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
@@ -360,7 +360,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16],
           false,
@@ -368,7 +368,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16],
           false,
@@ -383,7 +383,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x07, 0x00, 0x07, 0x00, 0x4b, 0x00,
@@ -400,7 +400,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x0f, 0x00, 0x0f, 0x00, 0x96, 0x00,

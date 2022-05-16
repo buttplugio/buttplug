@@ -14,7 +14,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceEvent, DeviceSubscribeCmd, DeviceUnsubscribeCmd},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd, HardwareUnsubscribeCmd},
   },
 };
 use std::sync::Arc;
@@ -27,7 +27,7 @@ pub struct LeloF1sV2Factory {}
 impl ButtplugProtocolFactory for LeloF1sV2Factory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -46,14 +46,14 @@ impl ButtplugProtocolFactory for LeloF1sV2Factory {
     Box::pin(async move {
       let mut event_receiver = device_impl.event_stream();
       device_impl
-        .subscribe(DeviceSubscribeCmd::new(Endpoint::Whitelist))
+        .subscribe(HardwareSubscribeCmd::new(Endpoint::Whitelist))
         .await?;
       let noauth: Vec<u8> = vec![0; 8];
       let authed: Vec<u8> = vec![1, 0, 0, 0, 0, 0, 0, 0];
 
       loop {
         let event = event_receiver.recv().await;
-        if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+        if let Ok(HardwareEvent::Notification(_, _, n)) = event {
           if n.eq(&noauth) {
             info!(
               "Lelo F1s V2 isn't authorised: Tap the device's power button to complete connection."
@@ -66,15 +66,15 @@ impl ButtplugProtocolFactory for LeloF1sV2Factory {
             debug!("Lelo F1s V2 gave us a password: {:?}", n);
             // Can't send whilst subscribed
             device_impl
-              .unsubscribe(DeviceUnsubscribeCmd::new(Endpoint::Whitelist))
+              .unsubscribe(HardwareUnsubscribeCmd::new(Endpoint::Whitelist))
               .await?;
             // Send with response
             device_impl
-              .write_value(DeviceWriteCmd::new(Endpoint::Whitelist, n, true))
+              .write_value(HardwareWriteCmd::new(Endpoint::Whitelist, n, true))
               .await?;
             // Get back to the loop
             device_impl
-              .subscribe(DeviceSubscribeCmd::new(Endpoint::Whitelist))
+              .subscribe(HardwareSubscribeCmd::new(Endpoint::Whitelist))
               .await?;
           }
         } else {
@@ -98,7 +98,7 @@ impl ButtplugProtocolFactory for LeloF1sV2Factory {
 impl ButtplugProtocolCommandHandler for LeloF1sV2 {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -112,7 +112,7 @@ impl ButtplugProtocolCommandHandler for LeloF1sV2 {
           cmd_vec.push(cmd.expect("Test, assuming infallible") as u8);
         }
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd_vec, false))
+          .write_value(HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false))
           .await?;
       }
       Ok(messages::Ok::default().into())

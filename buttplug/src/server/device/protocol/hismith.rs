@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(Hismith, "hismith");
 impl ButtplugProtocolCommandHandler for Hismith {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -31,7 +31,7 @@ impl ButtplugProtocolCommandHandler for Hismith {
       let mut fut_vec = vec![];
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
-          fut_vec.push(device.write_value(DeviceWriteCmd::new(
+          fut_vec.push(device.write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![0xAA, 0x04, speed as u8, (speed + 4) as u8],
             false,

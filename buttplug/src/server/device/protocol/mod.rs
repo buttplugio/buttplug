@@ -74,7 +74,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceReadCmd, DeviceImpl},
+    hardware::device_impl::{ButtplugDeviceResultFuture, HardwareReadCmd, Hardware},
   },
 };
 use futures::future::{self, BoxFuture};
@@ -158,7 +158,7 @@ pub trait ButtplugProtocolFactory: std::fmt::Debug + Send + Sync {
 
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     attributes_builder: ProtocolDeviceAttributesBuilder,
   ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
 }
@@ -270,7 +270,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
   // messages but Buttplug errors.
   fn handle_command(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     command_message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugDeviceResultFuture {
     if let Err(err) = self.supports_message(&command_message) {
@@ -313,7 +313,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_stop_device_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::StopDeviceCmd,
   ) -> ButtplugDeviceResultFuture {
     let ok_return = messages::Ok::new(message.id());
@@ -335,7 +335,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_single_motor_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Time for sadness! In order to handle conversion of SingleMotorVibrateCmd, we need to know how
@@ -377,7 +377,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_raw_write_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::RawWriteCmd,
   ) -> ButtplugDeviceResultFuture {
     let id = message.id();
@@ -387,7 +387,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_raw_read_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::RawReadCmd,
   ) -> ButtplugDeviceResultFuture {
     let id = message.id();
@@ -402,7 +402,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::RawUnsubscribeCmd,
   ) -> ButtplugDeviceResultFuture {
     let id = message.id();
@@ -412,7 +412,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::RawSubscribeCmd,
   ) -> ButtplugDeviceResultFuture {
     let id = message.id();
@@ -435,7 +435,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_level_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::LevelCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -443,7 +443,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::VorzeA10CycloneCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -451,7 +451,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_kiiroo_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::KiirooCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -459,7 +459,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -467,7 +467,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_vibrate_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -475,7 +475,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_rotate_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::RotateCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -483,7 +483,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_linear_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -491,14 +491,14 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_battery_level_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
   ) -> ButtplugDeviceResultFuture {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
       info!("Trying to get battery reading.");
-      let msg = DeviceReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
+      let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
       let fut = device.read_value(msg);
       Box::pin(async move {
         let raw_msg: RawReading = fut.await?;
@@ -515,7 +515,7 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
 
   fn handle_rssi_level_cmd(
     &self,
-    _device: Arc<DeviceImpl>,
+    _device: Arc<Hardware>,
     message: messages::RSSILevelCmd,
   ) -> ButtplugDeviceResultFuture {
     self.command_unimplemented(print_type_of(&message))
@@ -588,7 +588,7 @@ macro_rules! default_protocol_trait_declaration {
       impl ButtplugProtocolFactory for [< $protocol_name Factory >] {
         fn try_create(
           &self,
-          device_impl: Arc<DeviceImpl>,
+          device_impl: Arc<Hardware>,
           attributes_builder: ProtocolDeviceAttributesBuilder,
         ) -> futures::future::BoxFuture<
           'static,

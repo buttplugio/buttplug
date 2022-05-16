@@ -17,7 +17,7 @@ use crate::{
   server::device::{
     protocol::ButtplugProtocolProperties, 
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd}, 
+    hardware::device_impl::{Hardware, HardwareWriteCmd}, 
   },
 };
 use std::sync::Arc;
@@ -27,7 +27,7 @@ super::default_protocol_declaration!(TCodeV03, "tcode-v03");
 impl ButtplugProtocolCommandHandler for TCodeV03 {
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     Box::pin(async move {
@@ -36,7 +36,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
         let position = (v.position * 99f64) as u32;
 
         let command = format!("L{}{:02}I{}\n", v.index, position, v.duration);
-        fut_vec.push(device.write_value(DeviceWriteCmd::new(
+        fut_vec.push(device.write_value(HardwareWriteCmd::new(
           Endpoint::Tx,
           command.as_bytes().to_vec(),
           false,
@@ -51,7 +51,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
 
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -63,7 +63,7 @@ impl ButtplugProtocolCommandHandler for TCodeV03 {
         for (i, cmd) in cmds.iter().enumerate() {
           if let Some(speed) = cmd {
             let tcode_vibrate_cmd = format!("V{}{:02}\n", i, speed).as_bytes().to_vec();
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               tcode_vibrate_cmd,
               false,

@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use futures_timer::Delay;
@@ -63,19 +63,19 @@ pub struct KiirooV21InitializedFactory {}
 impl ButtplugProtocolFactory for KiirooV21InitializedFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     debug!("calling Onyx+ init");
-    let init_fut1 = device_impl.write_value(DeviceWriteCmd::new(
+    let init_fut1 = device_impl.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
       true,
     ));
-    let init_fut2 = device_impl.write_value(DeviceWriteCmd::new(
+    let init_fut2 = device_impl.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
       true,
@@ -99,7 +99,7 @@ impl ButtplugProtocol for KiirooV21Initialized {}
 impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -108,7 +108,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
       let result = manager.lock().await.update_vibration(&message, false)?;
       if let Some(cmds) = result {
         device
-          .write_value(DeviceWriteCmd::new(
+          .write_value(HardwareWriteCmd::new(
             Endpoint::Tx,
             vec![0x01, cmds.get(0).unwrap_or(&None).unwrap_or(0) as u8],
             false,
@@ -121,7 +121,7 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = message.vectors()[0].clone();
@@ -139,12 +139,12 @@ impl ButtplugProtocolCommandHandler for KiirooV21Initialized {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();
     let position = message.position();
-    let msg = DeviceWriteCmd::new(
+    let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
       [0x03, 0x00, message.speed(), message.position()].to_vec(),
       false,
@@ -171,7 +171,7 @@ mod test {
       VibrateSubcommand,
     },
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -192,7 +192,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
           true,
@@ -200,7 +200,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
           true,
@@ -213,7 +213,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03, 0x00, 50, 50],
           false,
@@ -233,7 +233,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
           true,
@@ -241,7 +241,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
           true,
@@ -253,7 +253,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03, 0x00, 19, 49],
           false,
@@ -274,7 +274,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
           true,
@@ -282,7 +282,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
           true,
@@ -294,7 +294,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 50], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x01, 50], false)),
       );
       // Since we only created one subcommand, we should only receive one command.
       device
@@ -308,7 +308,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0x01, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x01, 0], false)),
       );
     });
   }

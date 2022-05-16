@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,11 +21,11 @@ super::default_protocol_declaration!(Youcups, "youcups");
 impl ButtplugProtocolCommandHandler for Youcups {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
-    let msg = DeviceWriteCmd::new(
+    let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
       format!("$SYS,{}?", (msg.speeds()[0].speed() * 8.0) as u8)
         .as_bytes()

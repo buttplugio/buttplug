@@ -145,7 +145,7 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap, Endpoint},
   },
-  server::device::hardware::device_impl::DeviceImpl,
+  server::device::hardware::device_impl::Hardware,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -686,7 +686,7 @@ impl ProtocolDeviceAttributesBuilder {
   /// Create a new instance based on a device implementation instance
   pub fn create_from_device_impl(
     &self,
-    device_impl: &Arc<DeviceImpl>,
+    device_impl: &Arc<Hardware>,
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
     self.create(
       device_impl.address(),
@@ -829,7 +829,7 @@ impl ProtocolInstanceFactory {
   /// Given a device implementation, tries to create a protocol instance for the device.
   pub async fn create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
     let builder = ProtocolDeviceAttributesBuilder::new(
       self.protocol_factory.protocol_identifier(),

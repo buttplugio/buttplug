@@ -14,7 +14,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use byteorder::{LittleEndian, WriteBytesExt};
@@ -28,7 +28,7 @@ pub struct XInputFactory {}
 impl ButtplugProtocolFactory for XInputFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -60,7 +60,7 @@ impl ButtplugProtocolFactory for XInputFactory {
 impl ButtplugProtocolCommandHandler for XInput {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -95,7 +95,7 @@ impl ButtplugProtocolCommandHandler for XInput {
                 .into(),
               );
             }
-            fut_vec.push(device.write_value(DeviceWriteCmd::new(Endpoint::Tx, cmd, false)));
+            fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::Tx, cmd, false)));
           }
 
           for fut in fut_vec {

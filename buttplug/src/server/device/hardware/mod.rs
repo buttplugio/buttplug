@@ -25,7 +25,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    hardware::device_impl::{DeviceImpl, ButtplugDeviceImplCreator, ButtplugDeviceResultFuture, ButtplugDeviceEvent},
+    hardware::device_impl::{Hardware, HardwareCreator, ButtplugDeviceResultFuture, HardwareEvent},
     configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocol,
   },
@@ -51,7 +51,7 @@ pub struct ButtplugDevice {
   /// Protocol instance for the device
   protocol: Box<dyn ButtplugProtocol>,
   /// Hardware implementation for the device
-  device: Arc<DeviceImpl>,
+  device: Arc<Hardware>,
   /// Display name for the device
   display_name: OnceCell<String>,
   /// Unique identifier for the device
@@ -84,7 +84,7 @@ impl PartialEq for ButtplugDevice {
 
 impl ButtplugDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
-  fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<DeviceImpl>) -> Self {
+  fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<Hardware>) -> Self {
     Self {
       device_identifier: ProtocolDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
       protocol,
@@ -124,21 +124,21 @@ impl ButtplugDevice {
   /// port matching, etc...
   /// 
   /// If a matching protocol is found, we then call
-  /// [ButtplugDeviceImplCreator::try_create_device_impl](crate::device::ButtplugDeviceImplCreator::try_create_device_impl)
+  /// [ButtplugDeviceImplCreator::try_create_hardware](crate::device::ButtplugDeviceImplCreator::try_create_hardware)
   /// with the related protocol information, in order to connect and initialize the device.
   /// 
   /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
   /// client and use.
   pub async fn try_create_device(
     protocol_builder: ProtocolInstanceFactory,
-    mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
+    mut device_creator: Box<dyn HardwareCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
     // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
     
     // Now that we have both a possible device implementation and a configuration for that device,
     // try to initialize the implementation. This usually means trying to connect to whatever the
     // device is, finding endpoints, etc.
-    let device_impl = device_creator.try_create_device_impl(protocol_builder.configuration().clone()).await?;
+    let device_impl = device_creator.try_create_hardware(protocol_builder.configuration().clone()).await?;
     info!(
       address = tracing::field::display(device_impl.address()),
       "Found Buttplug Device {}",
@@ -210,7 +210,7 @@ impl ButtplugDevice {
   /// 
   /// This will include connections, disconnections, and notification events from subscribed
   /// endpoints.
-  pub fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+  pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.device.event_stream()
   }
 }

@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{Hardware, HardwareWriteCmd},
   },
   util::async_manager,
 };
@@ -63,13 +63,13 @@ pub struct MysteryVibeFactory {}
 impl ButtplugProtocolFactory for MysteryVibeFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
-    let msg = DeviceWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
+    let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
@@ -83,11 +83,11 @@ impl ButtplugProtocolFactory for MysteryVibeFactory {
   }
 }
 
-async fn vibration_update_handler(device: Arc<DeviceImpl>, command_holder: Arc<RwLock<Vec<u8>>>) {
+async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Mysteryvibe Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device
-    .write_value(DeviceWriteCmd::new(
+    .write_value(HardwareWriteCmd::new(
       Endpoint::TxVibrate,
       current_command,
       false,
@@ -109,7 +109,7 @@ impl ButtplugProtocol for MysteryVibe {}
 impl ButtplugProtocolCommandHandler for MysteryVibe {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();

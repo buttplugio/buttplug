@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -21,7 +21,7 @@ super::default_protocol_declaration!(Maxpro, "maxpro");
 impl ButtplugProtocolCommandHandler for Maxpro {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     msg: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // TODO Convert to using generic command manager
@@ -38,7 +38,7 @@ impl ButtplugProtocolCommandHandler for Maxpro {
 
     data[9] = crc;
 
-    let msg = DeviceWriteCmd::new(Endpoint::Tx, data, false);
+    let msg = HardwareWriteCmd::new(Endpoint::Tx, data, false);
     // device.write_value(msg.into()).await?;
     let fut = device.write_value(msg);
     Box::pin(async move {

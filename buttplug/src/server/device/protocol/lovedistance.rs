@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -24,16 +24,16 @@ pub struct LoveDistanceFactory {}
 impl ButtplugProtocolFactory for LoveDistanceFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
+      let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
       device_impl.write_value(msg).await?;
-      let msg = DeviceWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
+      let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
       device_impl.write_value(msg).await?;
       let device_attributes = builder.create_from_device_impl(&device_impl)?;
       Ok(Box::new(LoveDistance::new(device_attributes)) as Box<dyn ButtplugProtocol>)
@@ -48,7 +48,7 @@ impl ButtplugProtocolFactory for LoveDistanceFactory {
 impl ButtplugProtocolCommandHandler for LoveDistance {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     let manager = self.manager.clone();
@@ -57,7 +57,7 @@ impl ButtplugProtocolCommandHandler for LoveDistance {
       if let Some(cmds) = result {
         if let Some(speed) = cmds[0] {
           device
-            .write_value(DeviceWriteCmd::new(
+            .write_value(HardwareWriteCmd::new(
               Endpoint::Tx,
               vec![0xf3, 0x00, speed as u8],
               false,
@@ -77,7 +77,7 @@ mod test {
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
       communication::test::{check_test_recv_value, new_bluetoothle_test_device},
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
     },
     util::async_manager,
   };
@@ -93,11 +93,11 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf4, 01], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 01], false)),
       );
 
       device
@@ -106,7 +106,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0xf3, 0, 0x3d],
           false,
@@ -119,7 +119,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false)),
       );
     });
   }

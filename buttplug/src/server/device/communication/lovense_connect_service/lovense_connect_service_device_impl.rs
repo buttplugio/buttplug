@@ -15,14 +15,14 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, LovenseConnectServiceSpecifier, ProtocolDeviceConfiguration},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -59,20 +59,20 @@ impl Debug for LovenseServiceDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
+impl HardwareCreator for LovenseServiceDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::LovenseConnectService(LovenseConnectServiceSpecifier::default())
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     let toy_info = self.toy_info.read().await;
 
     let device_impl_internal =
       LovenseServiceDeviceImpl::new(&self.http_host, self.toy_info.clone(), &toy_info.id);
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &toy_info.name,
       &toy_info.id,
       &[Endpoint::Tx],
@@ -84,7 +84,7 @@ impl ButtplugDeviceImplCreator for LovenseServiceDeviceImplCreator {
 
 #[derive(Clone, Debug)]
 pub struct LovenseServiceDeviceImpl {
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
   http_host: String,
   toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
 }
@@ -99,7 +99,7 @@ impl LovenseServiceDeviceImpl {
       while toy_info_clone.read().await.connected {
         Delay::new(Duration::from_secs(1)).await;
       }
-      let _ = sender_clone.send(ButtplugDeviceEvent::Disconnected(toy_id));
+      let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id));
       info!("Exiting lovense service device connection check loop.");
     });
     Self {
@@ -110,8 +110,8 @@ impl LovenseServiceDeviceImpl {
   }
 }
 
-impl DeviceImplInternal for LovenseServiceDeviceImpl {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for LovenseServiceDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }
 
@@ -126,7 +126,7 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
   // Assume the only thing we'll read is battery.
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     let toy_info = self.toy_info.clone();
     Box::pin(async move {
@@ -135,7 +135,7 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     })
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let command_url = format!(
       "{}/{}",
       self.http_host,
@@ -153,11 +153,11 @@ impl DeviceImplInternal for LovenseServiceDeviceImpl {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 }

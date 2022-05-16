@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use std::sync::{
@@ -61,13 +61,13 @@ pub struct KiirooV2Factory {}
 impl ButtplugProtocolFactory for KiirooV2Factory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
-    let msg = DeviceWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
+    let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     let info_fut = device_impl.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
@@ -86,7 +86,7 @@ impl ButtplugProtocol for KiirooV2 {}
 impl ButtplugProtocolCommandHandler for KiirooV2 {
   fn handle_linear_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::LinearCmd,
   ) -> ButtplugDeviceResultFuture {
     let v = message.vectors()[0].clone();
@@ -104,12 +104,12 @@ impl ButtplugProtocolCommandHandler for KiirooV2 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
   ) -> ButtplugDeviceResultFuture {
     let previous_position = self.previous_position.clone();
     let position = message.position();
-    let msg = DeviceWriteCmd::new(
+    let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
       [message.position(), message.speed()].to_vec(),
       false,
@@ -129,7 +129,7 @@ mod test {
     core::messages::{Endpoint, FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     server::device::{
       communication::test::{check_test_recv_value, new_bluetoothle_test_device},
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
     },
     util::async_manager,
   };
@@ -149,7 +149,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![50, 50], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![50, 50], false)),
       );
     });
   }
@@ -169,7 +169,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![49, 19], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![49, 19], false)),
       );
     });
   }

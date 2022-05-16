@@ -10,7 +10,7 @@ mod test_device;
 mod test_device_comm_manager;
 
 use crate::{
-  server::device::hardware::device_impl::DeviceImplCommand,
+  server::device::hardware::device_impl::HardwareCommand,
   util::stream::{iffy_is_empty_check, recv_now},
 };
 use std::sync::{Arc, Mutex};
@@ -31,8 +31,8 @@ use tokio::sync::mpsc::Receiver;
 
 #[allow(dead_code)]
 pub fn check_test_recv_value(
-  receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>,
-  command: DeviceImplCommand,
+  receiver: &Arc<Mutex<Receiver<HardwareCommand>>>,
+  command: HardwareCommand,
 ) {
   assert_eq!(
     recv_now(&mut receiver.lock().expect("Test"))
@@ -43,6 +43,6 @@ pub fn check_test_recv_value(
 }
 
 #[allow(dead_code)]
-pub fn check_test_recv_empty(receiver: &Arc<Mutex<Receiver<DeviceImplCommand>>>) -> bool {
+pub fn check_test_recv_empty(receiver: &Arc<Mutex<Receiver<HardwareCommand>>>) -> bool {
   iffy_is_empty_check(&mut receiver.lock().expect("Test"))
 }

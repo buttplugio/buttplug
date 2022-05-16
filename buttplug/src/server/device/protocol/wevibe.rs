@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use futures_timer::Delay;
@@ -26,19 +26,19 @@ pub struct WeVibeFactory {}
 impl ButtplugProtocolFactory for WeVibeFactory {
   fn try_create(
     &self,
-    device_impl: Arc<DeviceImpl>,
+    device_impl: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     debug!("calling WeVibe init");
-    let vibration_on = device_impl.write_value(DeviceWriteCmd::new(
+    let vibration_on = device_impl.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
       true,
     ));
-    let vibration_off = device_impl.write_value(DeviceWriteCmd::new(
+    let vibration_off = device_impl.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
       true,
@@ -60,7 +60,7 @@ impl ButtplugProtocolFactory for WeVibeFactory {
 impl ButtplugProtocolCommandHandler for WeVibe {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<DeviceImpl>,
+    device: Arc<Hardware>,
     message: messages::VibrateCmd,
   ) -> ButtplugDeviceResultFuture {
     // Store off result before the match, so we drop the lock ASAP.
@@ -85,7 +85,7 @@ impl ButtplugProtocolCommandHandler for WeVibe {
           ]
         };
         device
-          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data, true))
+          .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, true))
           .await?;
       }
       Ok(messages::Ok::default().into())
@@ -98,7 +98,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -119,7 +119,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
           true,
@@ -127,7 +127,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
           true,
@@ -139,7 +139,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x80, 0x00, 0x03, 0x00, 0x00],
           true,
@@ -167,7 +167,7 @@ mod test {
       // TODO There's probably a more concise way to do this.
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x4c, 0x00, 0x03, 0x00, 0x00],
           true,
@@ -179,7 +179,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
           true,
@@ -199,7 +199,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
           true,
@@ -207,7 +207,7 @@ mod test {
       );
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
           true,
@@ -219,7 +219,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x03, 0x00, 0x88, 0x00, 0x03, 0x00, 0x00],
           true,
@@ -237,7 +237,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
           true,

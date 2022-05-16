@@ -19,14 +19,14 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
     hardware::device_impl::{
-    ButtplugDeviceEvent,
-    ButtplugDeviceImplCreator,
-    DeviceImpl,
-    DeviceImplInternal,
-    DeviceReadCmd,
-    DeviceSubscribeCmd,
-    DeviceUnsubscribeCmd,
-    DeviceWriteCmd,
+    HardwareEvent,
+    HardwareCreator,
+    Hardware,
+    HardwareInternal,
+    HardwareReadCmd,
+    HardwareSubscribeCmd,
+    HardwareUnsubscribeCmd,
+    HardwareWriteCmd,
     },
   },
   server::device::communication::ButtplugDeviceSpecificError,
@@ -61,18 +61,18 @@ impl Debug for XInputDeviceImplCreator {
 }
 
 #[async_trait]
-impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
+impl HardwareCreator for XInputDeviceImplCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::XInput(XInputSpecifier::default())
   }
 
-  async fn try_create_device_impl(
+  async fn try_create_hardware(
     &mut self,
     _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<DeviceImpl, ButtplugError> {
+  ) -> Result<Hardware, ButtplugError> {
     debug!("Emitting a new xbox device impl.");
     let device_impl_internal = XInputDeviceImpl::new(self.index);
-    let device_impl = DeviceImpl::new(
+    let device_impl = Hardware::new(
       &self.index.to_string(),
       &create_address(self.index),
       &[Endpoint::Tx],
@@ -86,7 +86,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
 pub struct XInputDeviceImpl {
   handle: XInputHandle,
   index: XInputControllerIndex,
-  event_sender: broadcast::Sender<ButtplugDeviceEvent>,
+  event_sender: broadcast::Sender<HardwareEvent>,
   connection_tracker: XInputConnectionTracker,
 }
 
@@ -104,8 +104,8 @@ impl XInputDeviceImpl {
   }
 }
 
-impl DeviceImplInternal for XInputDeviceImpl {
-  fn event_stream(&self) -> broadcast::Receiver<ButtplugDeviceEvent> {
+impl HardwareInternal for XInputDeviceImpl {
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }
 
@@ -119,12 +119,12 @@ impl DeviceImplInternal for XInputDeviceImpl {
 
   fn read_value(
     &self,
-    _msg: DeviceReadCmd,
+    _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     panic!("We should never get here!");
   }
 
-  fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
     let handle = self.handle.clone();
     let index = self.index;
     Box::pin(async move {
@@ -144,11 +144,11 @@ impl DeviceImplInternal for XInputDeviceImpl {
     })
   }
 
-  fn subscribe(&self, _msg: DeviceSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 
-  fn unsubscribe(&self, _msg: DeviceUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 }
