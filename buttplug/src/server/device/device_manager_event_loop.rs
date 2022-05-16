@@ -17,10 +17,10 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{
         communication::DeviceCommunicationEvent,
-        ServerDevice,
         HardwareCreator,
         HardwareEvent
-      }
+      },
+      ServerDevice,
     },
   },
   util::async_manager,

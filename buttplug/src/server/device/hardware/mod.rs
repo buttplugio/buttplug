@@ -1,8 +1,4 @@
-
-// TODO This shouldn't exist in hardware but we need to keep it here temporarily.
-mod device;
 pub mod communication;
-pub use device::ServerDevice;
 
 use std::{
   fmt::Debug,
@@ -24,6 +20,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
+    ServerDevice,
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
   },
 };

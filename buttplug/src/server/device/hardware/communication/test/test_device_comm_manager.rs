@@ -10,7 +10,7 @@ use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   server::device::{
     configuration::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
-    hardware::ServerDevice,
+    ServerDevice,
   },
   server::{
     device::{

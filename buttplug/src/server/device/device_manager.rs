@@ -8,9 +8,7 @@
 //! Buttplug Device Manager, manages Device Subtype (Platform/Communication bus
 //! specific) Managers
 
-mod device_manager_event_loop;
-
-use device_manager_event_loop::DeviceManagerEventLoop;
+use super::device_manager_event_loop::DeviceManagerEventLoop;
 use crate::{
   core::{
     errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
@@ -30,13 +28,13 @@ use crate::{
     configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
     hardware::{
-      ServerDevice,
       communication::{
         DeviceCommunicationEvent,
         DeviceCommunicationManager,
         DeviceCommunicationManagerBuilder,
       },
-    }
+    },
+    ServerDevice,
   },
   server::{
     ButtplugServerResultFuture,

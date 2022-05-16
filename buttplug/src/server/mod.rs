@@ -66,7 +66,7 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use device::manager::{DeviceManager, DeviceManagerBuilder};
+use device::{DeviceManager, DeviceManagerBuilder};
 use futures::{
   future::{self, BoxFuture},
   Stream,
