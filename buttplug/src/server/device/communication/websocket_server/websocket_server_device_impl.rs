@@ -14,7 +14,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
-    hardware::device_impl::{
+    hardware::{
     HardwareEvent,
     HardwareCreator,
     Hardware,

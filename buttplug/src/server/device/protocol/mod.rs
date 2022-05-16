@@ -74,7 +74,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
-    hardware::device_impl::{ButtplugDeviceResultFuture, HardwareReadCmd, Hardware},
+    hardware::{ButtplugDeviceResultFuture, HardwareReadCmd, Hardware},
   },
 };
 use futures::future::{self, BoxFuture};

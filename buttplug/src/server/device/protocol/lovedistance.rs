@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -77,7 +77,7 @@ mod test {
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
       communication::test::{check_test_recv_value, new_bluetoothle_test_device},
-      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
+      hardware::{HardwareCommand, HardwareWriteCmd},
     },
     util::async_manager,
   };

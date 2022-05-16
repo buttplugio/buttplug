@@ -14,7 +14,7 @@ use crate::{
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
     },
-    hardware::device_impl::HardwareEvent,
+    hardware::HardwareEvent,
   },
   util::async_manager,
 };

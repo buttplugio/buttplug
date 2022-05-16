@@ -10,7 +10,7 @@ mod test_device;
 mod test_device_comm_manager;
 
 use crate::{
-  server::device::hardware::device_impl::HardwareCommand,
+  server::device::hardware::HardwareCommand,
   util::stream::{iffy_is_empty_check, recv_now},
 };
 use std::sync::{Arc, Mutex};

@@ -16,7 +16,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{Hardware, HardwareReadCmd, HardwareWriteCmd},
+    hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
   },
 };
 use std::sync::{

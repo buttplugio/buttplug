@@ -1,15 +1,10 @@
-// Buttplug Rust Source Code File - See https://buttplug.io for more info.
-//
-// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
-//
-// Licensed under the BSD 3-Clause license. See LICENSE file in the project root
-// for full license information.
 
-pub mod device_impl;
+// TODO This shouldn't exist in hardware but we need to keep it here temporarily.
+mod device;
+pub use device::ButtplugDevice;
 
-use once_cell::sync::OnceCell;
 use std::{
-  fmt::{self, Debug},
+  fmt::Debug,
   sync::Arc,
 };
 
@@ -17,200 +12,355 @@ use crate::{
   core::{
     errors::ButtplugError,
     messages::{
-      ButtplugDeviceCommandMessageUnion,
-      DeviceMessageAttributesMap,
+      ButtplugServerMessage,
       Endpoint,
+      RawReadCmd,
+      RawReading,
       RawSubscribeCmd,
+      RawUnsubscribeCmd,
+      RawWriteCmd,
     },
     ButtplugResultFuture,
   },
   server::device::{
-    hardware::device_impl::{Hardware, HardwareCreator, ButtplugDeviceResultFuture, HardwareEvent},
-    configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
-    protocol::ButtplugProtocol,
+    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
   },
 };
-use core::hash::{Hash, Hasher};
+use async_trait::async_trait;
+use futures::future::BoxFuture;
 use tokio::sync::broadcast;
 
+/// Future that executes and returns a response from a client command or request
+pub type ButtplugDeviceResultFuture =
+  BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
-/// Main internal device representation structure
+/// Parameters for reading data from a [DeviceImpl](crate::device::DeviceImpl) endpoint
 /// 
-/// A ButtplugDevice is made up of 2 components:
-/// 
-/// - A [Device Implementation](crate::device::DeviceImpl), which handles hardware connection and
-///   communication.
-/// - A [Protocol](crate::device::protocol::ButtplugProtocol), which takes Buttplug Commands and
-///   translated them into propreitary commands to send to a device.
-/// 
-/// When a ButtplugDevice instance is created, it can be assumed that it represents a device that is
-/// connected and has been successfully initialized. The instance will manage communication of all
-/// commands sent from a [client](crate::client::ButtplugClient) that pertain to this specific
-/// hardware.
-pub struct ButtplugDevice {
-  /// Protocol instance for the device
-  protocol: Box<dyn ButtplugProtocol>,
-  /// Hardware implementation for the device
-  device: Arc<Hardware>,
-  /// Display name for the device
-  display_name: OnceCell<String>,
-  /// Unique identifier for the device
-  device_identifier: ProtocolDeviceIdentifier
+/// Low level read command structure, used by
+/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
+/// [DeviceImpl](crate::device::DeviceImpl) structures.
+#[derive(PartialEq, Debug)]
+pub struct HardwareReadCmd {
+  /// Endpoint to read from
+  pub endpoint: Endpoint,
+  /// Amount of data to read from endpoint
+  pub length: u32,
+  /// Timeout for reading data
+  pub timeout_ms: u32,
 }
 
-impl Debug for ButtplugDevice {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("ButtplugDevice")
-      .field("name", &self.name())
-      .field("identifier", &self.device_identifier())
-      .finish()
-  }
-}
-
-impl Hash for ButtplugDevice {
-  fn hash<H: Hasher>(&self, state: &mut H) {
-    self.device_identifier().hash(state);
-  }
-}
-
-impl Eq for ButtplugDevice {
-}
-
-impl PartialEq for ButtplugDevice {
-  fn eq(&self, other: &Self) -> bool {
-    self.device_identifier() == other.device_identifier()
-  }
-}
-
-impl ButtplugDevice {
-  /// Given a protocol and a device impl, create a new ButtplugDevice instance
-  fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<Hardware>) -> Self {
+impl HardwareReadCmd {
+  /// Creates a new DeviceReadCmd instance
+  pub fn new(endpoint: Endpoint, length: u32, timeout_ms: u32) -> Self {
     Self {
-      device_identifier: ProtocolDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
-      protocol,
-      device,
-      display_name: OnceCell::new(),
+      endpoint,
+      length,
+      timeout_ms,
+    }
+  }
+}
+
+impl From<RawReadCmd> for HardwareReadCmd {
+  fn from(msg: RawReadCmd) -> Self {
+    Self {
+      endpoint: msg.endpoint(),
+      length: msg.expected_length(),
+      timeout_ms: msg.timeout(),
+    }
+  }
+}
+
+/// Parameters for writing data to a [DeviceImpl](crate::device::DeviceImpl) endpoint
+/// 
+/// Low level write command structure, used by
+/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
+/// [DeviceImpl](crate::device::DeviceImpl) structures.
+#[derive(PartialEq, Debug)]
+pub struct HardwareWriteCmd {
+  /// Endpoint to write to
+  pub endpoint: Endpoint,
+  /// Data to write to endpoint
+  pub data: Vec<u8>,
+  /// Only used with Bluetooth LE writing. If true, use WriteWithResponse commands when sending data to device.
+  pub write_with_response: bool,
+}
+
+impl HardwareWriteCmd {
+  /// Create a new DeviceWriteCmd instance.
+  pub fn new(endpoint: Endpoint, data: Vec<u8>, write_with_response: bool) -> Self {
+    Self {
+      endpoint,
+      data,
+      write_with_response,
+    }
+  }
+}
+
+impl From<RawWriteCmd> for HardwareWriteCmd {
+  fn from(msg: RawWriteCmd) -> Self {
+    Self {
+      endpoint: msg.endpoint(),
+      data: msg.data().clone(),
+      write_with_response: msg.write_with_response(),
+    }
+  }
+}
+
+/// Parameters for subscribing to a [DeviceImpl](crate::device::DeviceImpl) endpoint
+/// 
+/// Low level subscribe structure, used by
+/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
+/// [DeviceImpl](crate::device::DeviceImpl) structures.
+/// 
+/// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
+/// with any read endpoint to signal that any information received should be automatically passed to
+/// the protocol implementation.
+#[derive(PartialEq, Debug)]
+pub struct HardwareSubscribeCmd {
+  /// Endpoint to subscribe to notifications from.
+  pub endpoint: Endpoint,
+}
+
+impl HardwareSubscribeCmd {
+  /// Create a new DeviceSubscribeCmd instance
+  pub fn new(endpoint: Endpoint) -> Self {
+    Self { endpoint }
+  }
+}
+
+impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
+  fn from(msg: RawSubscribeCmd) -> Self {
+    Self {
+      endpoint: msg.endpoint(),
+    }
+  }
+}
+
+/// Parameters for unsubscribing from a [DeviceImpl](crate::device::DeviceImpl) endpoint that has
+/// previously been subscribed.
+/// 
+/// Low level subscribe structure, used by
+/// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
+/// [DeviceImpl](crate::device::DeviceImpl) structures.
+#[derive(PartialEq, Debug)]
+pub struct HardwareUnsubscribeCmd {
+  pub endpoint: Endpoint,
+}
+
+impl HardwareUnsubscribeCmd {
+  /// Create a new DeviceUnsubscribeCmd instance
+  pub fn new(endpoint: Endpoint) -> Self {
+    Self { endpoint }
+  }
+}
+
+impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
+  fn from(msg: RawUnsubscribeCmd) -> Self {
+    Self {
+      endpoint: msg.endpoint(),
+    }
+  }
+}
+
+/// Enumeration of all possible commands that can be sent to a
+/// [DeviceImpl](crate::device::DeviceImpl).
+#[derive(PartialEq, Debug)]
+pub enum HardwareCommand {
+  Write(HardwareWriteCmd),
+  Read(HardwareReadCmd),
+  Subscribe(HardwareSubscribeCmd),
+  Unsubscribe(HardwareUnsubscribeCmd),
+}
+
+impl From<RawWriteCmd> for HardwareCommand {
+  fn from(msg: RawWriteCmd) -> Self {
+    HardwareCommand::Write(msg.into())
+  }
+}
+
+impl From<RawSubscribeCmd> for HardwareCommand {
+  fn from(msg: RawSubscribeCmd) -> Self {
+    HardwareCommand::Subscribe(msg.into())
+  }
+}
+
+impl From<RawUnsubscribeCmd> for HardwareCommand {
+  fn from(msg: RawUnsubscribeCmd) -> Self {
+    HardwareCommand::Unsubscribe(msg.into())
+  }
+}
+
+impl From<HardwareReadCmd> for HardwareCommand {
+  fn from(msg: HardwareReadCmd) -> Self {
+    HardwareCommand::Read(msg)
+  }
+}
+
+impl From<HardwareWriteCmd> for HardwareCommand {
+  fn from(msg: HardwareWriteCmd) -> Self {
+    HardwareCommand::Write(msg)
+  }
+}
+
+impl From<HardwareSubscribeCmd> for HardwareCommand {
+  fn from(msg: HardwareSubscribeCmd) -> Self {
+    HardwareCommand::Subscribe(msg)
+  }
+}
+
+impl From<HardwareUnsubscribeCmd> for HardwareCommand {
+  fn from(msg: HardwareUnsubscribeCmd) -> Self {
+    HardwareCommand::Unsubscribe(msg)
+  }
+}
+
+/// Events that can be emitted from a [DeviceImpl](crate::device::DeviceImpl).
+#[derive(Debug, Clone)]
+pub enum HardwareEvent {
+  /// Device connected
+  Connected(Arc<ButtplugDevice>),
+  /// Device received data
+  Notification(String, Endpoint, Vec<u8>),
+  /// Device disconnected
+  Disconnected(String),
+}
+
+/// Hardware implementation and communication portion of a
+/// [ButtplugDevice](crate::device::ButtplugDevice) instance. The DeviceImpl contains a
+/// DeviceImplInternal, which handles all of the actual hardware communication. However, the struct
+/// also needs to carry around identifying information, so we wrap it in this type instead of
+/// requiring that all implementors of deal with name/address/endpoint accessors.
+pub struct Hardware {
+  /// Device name
+  name: String,
+  /// Device address
+  address: String,
+  /// Communication endpoints
+  endpoints: Vec<Endpoint>,
+  /// Internal implementation details
+  internal_impl: Box<dyn HardwareInternal>,
+}
+
+impl Hardware {
+  pub fn new(
+    name: &str,
+    address: &str,
+    endpoints: &[Endpoint],
+    internal_impl: Box<dyn HardwareInternal>,
+  ) -> Self {
+    Self {
+      name: name.to_owned(),
+      address: address.to_owned(),
+      endpoints: endpoints.into(),
+      internal_impl,
     }
   }
 
-  /// Returns the device identifier
-  pub fn device_identifier(&self) -> &ProtocolDeviceIdentifier {
-    &self.device_identifier
+  /// Returns the device name
+  pub fn name(&self) -> &str {
+    &self.name
   }
 
-  /// Returns the address of the device implementation
-  pub fn device_impl_address(&self) -> &str {
-    self.device.address()
+  /// Returns the device address
+  pub fn address(&self) -> &str {
+    &self.address
   }
 
-  /// Returns the protocol identifier
-  pub fn protocol_identifier(&self) -> &str {
-    self.protocol.protocol_identifier()
+  /// If true, device is currently connected to system
+  pub fn connected(&self) -> bool {
+    self.internal_impl.connected()
   }
 
-  /// Returns the protocol attribute identifier
-  pub fn protocol_attributes_identifier(&self) -> &ProtocolAttributesIdentifier {
-    self.protocol.protocol_attributes_identifier()
-  }
-
-  /// Given a possibly usable device, see if any protocol matches. If so, connect and initialize.
+  /// Returns a receiver for any events the device may emit.
   /// 
-  /// This is called any time we get a device detection or advertisement from one of our
-  /// DeviceCommunicationManager instances. This could be anything from a Bluetooth advertisement,
-  /// to detection of a USB device, to one of the various network systems declaring they've found
-  /// something. Given the information we've received from that, plus our
-  /// [DeviceConfigurationManager](crate::server::device::configuration::DeviceConfigurationManager),
-  /// try to find a protocol that has information matching this device. This may include name match,
-  /// port matching, etc...
-  /// 
-  /// If a matching protocol is found, we then call
-  /// [ButtplugDeviceImplCreator::try_create_hardware](crate::device::ButtplugDeviceImplCreator::try_create_hardware)
-  /// with the related protocol information, in order to connect and initialize the device.
-  /// 
-  /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
-  /// client and use.
-  pub async fn try_create_device(
-    protocol_builder: ProtocolInstanceFactory,
-    mut device_creator: Box<dyn HardwareCreator>,
-  ) -> Result<Option<ButtplugDevice>, ButtplugError> {
-    // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
-    
-    // Now that we have both a possible device implementation and a configuration for that device,
-    // try to initialize the implementation. This usually means trying to connect to whatever the
-    // device is, finding endpoints, etc.
-    let device_impl = device_creator.try_create_hardware(protocol_builder.configuration().clone()).await?;
-    info!(
-      address = tracing::field::display(device_impl.address()),
-      "Found Buttplug Device {}",
-      device_impl.name()
-    );
-
-    // If we've made it this far, we now have a connected device implementation with endpoints set
-    // up. We now need to run whatever protocol initialization might need to happen. We'll fetch a
-    // protocol creator, pass the device implementation to it, then let it do whatever it needs. For
-    // most protocols, this is a no-op. However, for devices like Lovense, some Kiiroo, etc, this
-    // can get fairly complicated.
-    let sharable_device_impl = Arc::new(device_impl);
-    let protocol_impl =
-      protocol_builder.create(sharable_device_impl.clone()).await?;
-    Ok(Some(ButtplugDevice::new(
-      protocol_impl,
-      sharable_device_impl,
-    )))
-  }
-
-  /// Get the user created display name for a device, if one exists.
-  pub fn display_name(&self) -> Option<String> {
-    self.display_name.get().and_then(|name| Some(name.clone()))
-  }
-
-  /// Get the name of the device as set in the Device Configuration File.
-  /// 
-  /// This will also append "(Raw Messaged Allowed)" to the device name if raw mode is on, to warn
-  /// users that the device is capable of direct communication.
-  pub fn name(&self) -> String {
-    // Instead of checking for raw messages at the protocol level, add the raw
-    // call here, since this is the only way to access devices in the library
-    // anyways.
-    //
-    // Having raw turned on means it'll work for read/write/sub/unsub on any
-    // endpoint so just use an arbitrary message here to check.
-    if self
-      .protocol
-      .supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(
-        RawSubscribeCmd::new(1, Endpoint::Tx),
-      ))
-      .is_ok()
-    {
-      format!("{} (Raw Messages Allowed)", self.protocol.name())
-    } else {
-      self.protocol.name().to_owned()
-    }
-  }
-
-  /// Disconnect from the device, if it's connected.
-  pub fn disconnect(&self) -> ButtplugResultFuture {
-    self.device.disconnect()
-  }
-
-  /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> DeviceMessageAttributesMap {
-    self.protocol.device_attributes().message_attributes_map()
-  }
-
-  /// Parse and route a client command sent for this device.
-  pub fn parse_message(
-    &self,
-    message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugDeviceResultFuture {
-    self.protocol.handle_command(self.device.clone(), message)
-  }
-
-  /// Retreive the event stream for the device.
-  /// 
-  /// This will include connections, disconnections, and notification events from subscribed
-  /// endpoints.
+  /// This uses a broadcast channel and can be called multiple times to create multiple streams if
+  /// needed.
   pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
-    self.device.event_stream()
+    self.internal_impl.event_stream()
   }
+
+  /// Returns the device endpoint list
+  pub fn endpoints(&self) -> Vec<Endpoint> {
+    self.endpoints.clone()
+  }
+
+  /// Disconnect from the device (if it is connected)
+  pub fn disconnect(&self) -> ButtplugResultFuture {
+    self.internal_impl.disconnect()
+  }
+
+  /// Read a value from the device
+  pub fn read_value(
+    &self,
+    msg: HardwareReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+    self.internal_impl.read_value(msg)
+  }
+
+  /// Write a value to the device
+  pub fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+    self.internal_impl.write_value(msg)
+  }
+
+  /// Subscribe to a device endpoint, if it exists
+  pub fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+    self.internal_impl.subscribe(msg)
+  }
+
+  /// Unsubscribe from a device endpoint, if it exists
+  pub fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+    self.internal_impl.unsubscribe(msg)
+  }
+}
+
+/// Internal representation of device implementations
+/// 
+/// This trait is implemented by
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
+/// to represent and communicate with devices. It provides an abstract way to represent devices
+/// without having to consider what type of communication bus they may be using.
+pub trait HardwareInternal: Sync + Send {
+  /// If true, device is currently connected to system
+  fn connected(&self) -> bool;
+  /// Disconnect from the device (if it is connected)
+  fn disconnect(&self) -> ButtplugResultFuture;
+  /// Returns a receiver for any events the device may emit.
+  fn event_stream(&self) -> broadcast::Receiver<HardwareEvent>;
+  /// Read a value from the device
+  fn read_value(&self, msg: HardwareReadCmd)
+    -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
+  /// Write a value to the device
+  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture;
+  /// Subscribe to a device endpoint, if it exists
+  fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture;
+  /// Unsubscribe from a device endpoint, if it exists
+  fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture;
+}
+
+/// Factory trait for [DeviceImpl](crate::device::DeviceImpl) instances in
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
+/// 
+/// This trait is implemented by
+/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
+/// to handle initial device connection and setup based on the specific communication bus that is
+/// being implemented by the DCM. This may handle things like connection and finding characteristics
+/// for Bluetooth LE, connection to USB devices and checking descriptors/endpoints, etc...
+/// 
+/// If a [DeviceImpl](crate::device::DeviceImpl) is returned from the try_create_hardware method,
+/// it is assumed the device is connected and ready to be used.
+#[async_trait]
+pub trait HardwareCreator: Sync + Send + Debug {
+  /// Return the hardware identifier for the device. Depends on the communication bus type, so may
+  /// be a bluetooth name, serial port name, etc...
+  fn specifier(&self) -> ProtocolCommunicationSpecifier;
+  /// Try to connect to and initialize a device.
+  /// 
+  /// Given a
+  /// [ProtocolDeviceConfiguration](crate::server::device::configuration::ProtocolDeviceConfiguration)
+  /// which will contain information about what a protocol needs to communicate with a device, try
+  /// to connect to the device and identify all required endpoints.
+  async fn try_create_hardware(
+    &mut self,
+    protocol: ProtocolDeviceConfiguration,
+  ) -> Result<Hardware, ButtplugError>;
 }

@@ -21,7 +21,7 @@ use buttplug::{
   server::{
     device::{
       communication::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
-      hardware::device_impl::{HardwareCommand, HardwareWriteCmd}
+      hardware::{HardwareCommand, HardwareWriteCmd}
     },
     ButtplugServer, 
     ButtplugServerBuilder

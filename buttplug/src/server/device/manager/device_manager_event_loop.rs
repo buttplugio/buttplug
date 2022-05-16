@@ -18,7 +18,8 @@ use crate::{
       communication::DeviceCommunicationEvent,
       hardware::{
         ButtplugDevice,
-        device_impl::{HardwareCreator, HardwareEvent}
+        HardwareCreator,
+        HardwareEvent
       }
     },
   },

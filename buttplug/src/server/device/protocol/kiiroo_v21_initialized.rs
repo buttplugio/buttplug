@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    hardware::device_impl::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
+    hardware::{Hardware, HardwareWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use futures_timer::Delay;
@@ -171,7 +171,7 @@ mod test {
       VibrateSubcommand,
     },
     server::device::{
-      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
+      hardware::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,

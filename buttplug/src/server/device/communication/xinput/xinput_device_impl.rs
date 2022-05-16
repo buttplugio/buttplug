@@ -18,7 +18,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
-    hardware::device_impl::{
+    hardware::{
     HardwareEvent,
     HardwareCreator,
     Hardware,

@@ -19,7 +19,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-    hardware::device_impl::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd},
+    hardware::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd},
   },
 };
 use futures::FutureExt;

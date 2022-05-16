@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
 };
 use std::sync::{
@@ -217,7 +217,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
     server::device::{
-      hardware::device_impl::{HardwareCommand, HardwareWriteCmd},
+      hardware::{HardwareCommand, HardwareWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,

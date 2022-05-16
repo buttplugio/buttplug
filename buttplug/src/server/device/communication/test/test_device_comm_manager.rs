@@ -14,7 +14,7 @@ use crate::{
   },
   server::{
     device::{
-      hardware::device_impl::HardwareCreator,
+      hardware::HardwareCreator,
       communication::{
         DeviceCommunicationEvent,
         DeviceCommunicationManager,

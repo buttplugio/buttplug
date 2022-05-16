@@ -15,7 +15,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes},
-    hardware::device_impl::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
+    hardware::{ButtplugDeviceResultFuture, Hardware, HardwareWriteCmd},
   },
   util::async_manager,
 };

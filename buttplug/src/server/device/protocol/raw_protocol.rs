@@ -9,7 +9,7 @@ use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHa
 use crate::{
   core::messages::{ButtplugDeviceCommandMessageUnion, },
   server::device::{
-    hardware::device_impl::Hardware,
+    hardware::Hardware,
     protocol::ButtplugProtocolProperties,
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
   },
