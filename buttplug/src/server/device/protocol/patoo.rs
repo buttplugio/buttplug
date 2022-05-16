@@ -24,7 +24,7 @@ pub struct PatooFactory {}
 impl ButtplugProtocolFactory for PatooFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -32,14 +32,14 @@ impl ButtplugProtocolFactory for PatooFactory {
   > {
     // Patoo Love devices have wildcarded names of ([A-Z]+)\d*
     // Force the identifier lookup to the non-numeric portion
-    let c: Vec<char> = device_impl.name().chars().collect();
+    let c: Vec<char> = hardware.name().chars().collect();
     let mut i = 0;
     while i < c.len() && !c[i].is_digit(10) {
       i += 1;
     }
     let name: String = c[0..i].iter().collect();
     Box::pin(async move {
-      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier(name), &device_impl.endpoints())?;
+      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier(name), &hardware.endpoints())?;
       Ok(Box::new(Patoo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

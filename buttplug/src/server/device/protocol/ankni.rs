@@ -24,7 +24,7 @@ pub struct AnkniFactory {}
 impl ButtplugProtocolFactory for AnkniFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -39,7 +39,7 @@ impl ButtplugProtocolFactory for AnkniFactory {
         ],
         true,
       );
-      device_impl.write_value(msg).await?;
+      hardware.write_value(msg).await?;
       let msg = HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![
@@ -48,8 +48,8 @@ impl ButtplugProtocolFactory for AnkniFactory {
         ],
         true,
       );
-      device_impl.write_value(msg).await?;
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      hardware.write_value(msg).await?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(Ankni::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

@@ -42,23 +42,23 @@ use std::sync::{
 };
 use tokio::sync::{broadcast, mpsc};
 
-pub struct LovenseDongleDeviceImplCreator {
+pub struct LovenseDongleHardwareCreator {
   specifier: ProtocolCommunicationSpecifier,
   id: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   device_incoming: Option<mpsc::Receiver<LovenseDongleIncomingMessage>>,
 }
 
-impl Debug for LovenseDongleDeviceImplCreator {
+impl Debug for LovenseDongleHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LovenseDongleDeviceImplCreator")
+    f.debug_struct("LovenseDongleHardwareCreator")
       .field("id", &self.id)
       .field("specifier", &self.specifier)
       .finish()
   }
 }
 
-impl LovenseDongleDeviceImplCreator {
+impl LovenseDongleHardwareCreator {
   pub fn new(
     id: &str,
     device_outgoing: mpsc::Sender<OutgoingLovenseData>,
@@ -84,7 +84,7 @@ impl LovenseDongleDeviceImplCreator {
 }
 
 #[async_trait]
-impl HardwareCreator for LovenseDongleDeviceImplCreator {
+impl HardwareCreator for LovenseDongleHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
@@ -93,7 +93,7 @@ impl HardwareCreator for LovenseDongleDeviceImplCreator {
     &mut self,
     _protocol: ProtocolDeviceConfiguration,
   ) -> Result<Hardware, ButtplugError> {
-    let device_impl_internal = LovenseDongleDeviceImpl::new(
+    let hardware_internal = LovenseDongleHardware::new(
       &self.id,
       self.device_outgoing.clone(),
       self
@@ -105,21 +105,21 @@ impl HardwareCreator for LovenseDongleDeviceImplCreator {
       "Lovense Dongle Device",
       &self.id,
       &[Endpoint::Rx, Endpoint::Tx],
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
     Ok(device)
   }
 }
 
 #[derive(Clone)]
-pub struct LovenseDongleDeviceImpl {
+pub struct LovenseDongleHardware {
   address: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   connected: Arc<AtomicBool>,
   event_sender: broadcast::Sender<HardwareEvent>,
 }
 
-impl LovenseDongleDeviceImpl {
+impl LovenseDongleHardware {
   pub fn new(
     address: &str,
     device_outgoing: mpsc::Sender<OutgoingLovenseData>,
@@ -170,7 +170,7 @@ impl LovenseDongleDeviceImpl {
   }
 }
 
-impl HardwareInternal for LovenseDongleDeviceImpl {
+impl HardwareInternal for LovenseDongleHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }

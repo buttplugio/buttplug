@@ -46,7 +46,7 @@ pub struct YououFactory {}
 impl ButtplugProtocolFactory for YououFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -55,7 +55,7 @@ impl ButtplugProtocolFactory for YououFactory {
     // Youou devices have wildcarded names of VX001_*
     // Force the identifier lookup to VX001_
     Box::pin(async move {
-      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier("VX001_".to_owned()), &device_impl.endpoints())?;
+      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier("VX001_".to_owned()), &hardware.endpoints())?;
       Ok(Box::new(Youou::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

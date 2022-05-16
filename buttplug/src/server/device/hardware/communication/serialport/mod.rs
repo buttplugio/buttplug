@@ -6,10 +6,10 @@
 // for full license information.
 
 mod serialport_comm_manager;
-mod serialport_device_impl;
+mod serialport_hardware;
 
 pub use serialport_comm_manager::{
   SerialPortCommunicationManager,
   SerialPortCommunicationManagerBuilder,
 };
-pub use serialport_device_impl::{SerialPortDeviceImpl, SerialPortDeviceImplCreator};
+pub use serialport_hardware::{SerialPortHardware, SerialPortHardwareCreator};

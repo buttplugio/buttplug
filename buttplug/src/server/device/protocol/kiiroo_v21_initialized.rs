@@ -63,19 +63,19 @@ pub struct KiirooV21InitializedFactory {}
 impl ButtplugProtocolFactory for KiirooV21InitializedFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     debug!("calling Onyx+ init");
-    let init_fut1 = device_impl.write_value(HardwareWriteCmd::new(
+    let init_fut1 = hardware.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
       true,
     ));
-    let init_fut2 = device_impl.write_value(HardwareWriteCmd::new(
+    let init_fut2 = hardware.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
       true,
@@ -84,7 +84,7 @@ impl ButtplugProtocolFactory for KiirooV21InitializedFactory {
       init_fut1.await?;
       Delay::new(Duration::from_millis(100)).await;
       init_fut2.await?;
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(KiirooV21Initialized::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

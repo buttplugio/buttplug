@@ -69,23 +69,23 @@ pub struct LovenseFactory {}
 impl ButtplugProtocolFactory for LovenseFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      let mut event_receiver = device_impl.event_stream();
+      let mut event_receiver = hardware.event_stream();
       let identifier;
       let mut count = 0;
-      device_impl
+      hardware
         .subscribe(HardwareSubscribeCmd::new(Endpoint::Rx))
         .await?;
 
       loop {
         let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
-        device_impl.write_value(msg).await?;
+        hardware.write_value(msg).await?;
 
         select! {
           event = event_receiver.recv().fuse() => {
@@ -93,7 +93,7 @@ impl ButtplugProtocolFactory for LovenseFactory {
               let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugError::from(ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned())))?.to_owned();
               info!("Lovense Device Type Response: {}", type_response);
               identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-              let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier(identifier), &device_impl.endpoints())?;
+              let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier(identifier), &hardware.endpoints())?;
               return Ok(Box::new(Lovense::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             } else {
               return Err(
@@ -109,7 +109,7 @@ impl ButtplugProtocolFactory for LovenseFactory {
             count += 1;
             if count > LOVENSE_COMMAND_RETRY {
               warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
-              let device_attributes = builder.create_from_device_impl(&device_impl)?;
+              let device_attributes = builder.create_from_hardware(&hardware)?;
               return Ok(Box::new(Lovense::new(device_attributes)) as Box<dyn ButtplugProtocol>);
             }
           }

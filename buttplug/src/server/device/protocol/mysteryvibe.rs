@@ -63,17 +63,17 @@ pub struct MysteryVibeFactory {}
 impl ButtplugProtocolFactory for MysteryVibeFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
-    let info_fut = device_impl.write_value(msg);
+    let info_fut = hardware.write_value(msg);
     Box::pin(async move {
       info_fut.await?;
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

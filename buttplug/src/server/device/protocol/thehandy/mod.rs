@@ -80,7 +80,7 @@ impl ButtplugProtocolFactory for TheHandyFactory {
 
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -131,8 +131,8 @@ impl ButtplugProtocolFactory for TheHandyFactory {
       session_req
         .encode(&mut sec_buf)
         .expect("Infallible encode.");
-      device_impl.write_value(HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
-      let _ = device_impl.read_value(HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
+      hardware.write_value(HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
+      let _ = hardware.read_value(HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
 
       // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
       // messages that it can use. However, having removed these and still tried to run the system,
@@ -140,7 +140,7 @@ impl ButtplugProtocolFactory for TheHandyFactory {
       // does not seem needless.
       //
       // We have no device name updates here, so just return a device.
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(TheHandy::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

@@ -35,11 +35,11 @@ use tokio::sync::broadcast;
 pub type ButtplugDeviceResultFuture =
   BoxFuture<'static, Result<ButtplugServerMessage, ButtplugError>>;
 
-/// Parameters for reading data from a [DeviceImpl](crate::device::DeviceImpl) endpoint
+/// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 /// 
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [DeviceImpl](crate::device::DeviceImpl) structures.
+/// [Hardware](crate::device::Hardware) structures.
 #[derive(PartialEq, Debug)]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
@@ -71,11 +71,11 @@ impl From<RawReadCmd> for HardwareReadCmd {
   }
 }
 
-/// Parameters for writing data to a [DeviceImpl](crate::device::DeviceImpl) endpoint
+/// Parameters for writing data to a [Hardware](crate::device::Hardware) endpoint
 /// 
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [DeviceImpl](crate::device::DeviceImpl) structures.
+/// [Hardware](crate::device::Hardware) structures.
 #[derive(PartialEq, Debug)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
@@ -107,11 +107,11 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
   }
 }
 
-/// Parameters for subscribing to a [DeviceImpl](crate::device::DeviceImpl) endpoint
+/// Parameters for subscribing to a [Hardware](crate::device::Hardware) endpoint
 /// 
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [DeviceImpl](crate::device::DeviceImpl) structures.
+/// [Hardware](crate::device::Hardware) structures.
 /// 
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
@@ -137,12 +137,12 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
   }
 }
 
-/// Parameters for unsubscribing from a [DeviceImpl](crate::device::DeviceImpl) endpoint that has
+/// Parameters for unsubscribing from a [Hardware](crate::device::Hardware) endpoint that has
 /// previously been subscribed.
 /// 
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
-/// [DeviceImpl](crate::device::DeviceImpl) structures.
+/// [Hardware](crate::device::Hardware) structures.
 #[derive(PartialEq, Debug)]
 pub struct HardwareUnsubscribeCmd {
   pub endpoint: Endpoint,
@@ -164,7 +164,7 @@ impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
 }
 
 /// Enumeration of all possible commands that can be sent to a
-/// [DeviceImpl](crate::device::DeviceImpl).
+/// [Hardware](crate::device::Hardware).
 #[derive(PartialEq, Debug)]
 pub enum HardwareCommand {
   Write(HardwareWriteCmd),
@@ -215,7 +215,7 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
   }
 }
 
-/// Events that can be emitted from a [DeviceImpl](crate::device::DeviceImpl).
+/// Events that can be emitted from a [Hardware](crate::device::Hardware).
 #[derive(Debug, Clone)]
 pub enum HardwareEvent {
   /// Device connected
@@ -227,8 +227,8 @@ pub enum HardwareEvent {
 }
 
 /// Hardware implementation and communication portion of a
-/// [ButtplugDevice](crate::device::ButtplugDevice) instance. The DeviceImpl contains a
-/// DeviceImplInternal, which handles all of the actual hardware communication. However, the struct
+/// [ButtplugDevice](crate::device::ButtplugDevice) instance. The Hardware contains a
+/// HardwareInternal, which handles all of the actual hardware communication. However, the struct
 /// also needs to carry around identifying information, so we wrap it in this type instead of
 /// requiring that all implementors of deal with name/address/endpoint accessors.
 pub struct Hardware {
@@ -338,7 +338,7 @@ pub trait HardwareInternal: Sync + Send {
   fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture;
 }
 
-/// Factory trait for [DeviceImpl](crate::device::DeviceImpl) instances in
+/// Factory trait for [Hardware](crate::device::Hardware) instances in
 /// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
 /// 
 /// This trait is implemented by
@@ -347,7 +347,7 @@ pub trait HardwareInternal: Sync + Send {
 /// being implemented by the DCM. This may handle things like connection and finding characteristics
 /// for Bluetooth LE, connection to USB devices and checking descriptors/endpoints, etc...
 /// 
-/// If a [DeviceImpl](crate::device::DeviceImpl) is returned from the try_create_hardware method,
+/// If a [Hardware](crate::device::Hardware) is returned from the try_create_hardware method,
 /// it is assumed the device is connected and ready to be used.
 #[async_trait]
 pub trait HardwareCreator: Sync + Send + Debug {

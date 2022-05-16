@@ -24,7 +24,7 @@ pub struct LeloF1sFactory {}
 impl ButtplugProtocolFactory for LeloF1sFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -33,10 +33,10 @@ impl ButtplugProtocolFactory for LeloF1sFactory {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
-    let subscribe_fut = device_impl.subscribe(HardwareSubscribeCmd::new(Endpoint::Rx));
+    let subscribe_fut = hardware.subscribe(HardwareSubscribeCmd::new(Endpoint::Rx));
     Box::pin(async move {
       subscribe_fut.await?;
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(LeloF1s::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

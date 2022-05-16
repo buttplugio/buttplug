@@ -41,27 +41,27 @@ use std::{
 };
 use tokio::sync::broadcast;
 
-pub struct XInputDeviceImplCreator {
+pub struct XInputHardwareCreator {
   index: XInputControllerIndex,
 }
 
-impl XInputDeviceImplCreator {
+impl XInputHardwareCreator {
   pub fn new(index: XInputControllerIndex) -> Self {
     debug!("Emitting a new xbox device impl creator!");
     Self { index }
   }
 }
 
-impl Debug for XInputDeviceImplCreator {
+impl Debug for XInputHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("XInputDeviceImplCreator")
+    f.debug_struct("XInputHardwareCreator")
       .field("index", &self.index)
       .finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for XInputDeviceImplCreator {
+impl HardwareCreator for XInputHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::XInput(XInputSpecifier::default())
   }
@@ -71,26 +71,26 @@ impl HardwareCreator for XInputDeviceImplCreator {
     _protocol: ProtocolDeviceConfiguration,
   ) -> Result<Hardware, ButtplugError> {
     debug!("Emitting a new xbox device impl.");
-    let device_impl_internal = XInputDeviceImpl::new(self.index);
-    let device_impl = Hardware::new(
+    let hardware_internal = XInputHardware::new(self.index);
+    let hardware = Hardware::new(
       &self.index.to_string(),
       &create_address(self.index),
       &[Endpoint::Tx],
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 
 #[derive(Clone, Debug)]
-pub struct XInputDeviceImpl {
+pub struct XInputHardware {
   handle: XInputHandle,
   index: XInputControllerIndex,
   event_sender: broadcast::Sender<HardwareEvent>,
   connection_tracker: XInputConnectionTracker,
 }
 
-impl XInputDeviceImpl {
+impl XInputHardware {
   pub fn new(index: XInputControllerIndex) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let connection_tracker = XInputConnectionTracker::default();
@@ -104,7 +104,7 @@ impl XInputDeviceImpl {
   }
 }
 
-impl HardwareInternal for XInputDeviceImpl {
+impl HardwareInternal for XInputHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }

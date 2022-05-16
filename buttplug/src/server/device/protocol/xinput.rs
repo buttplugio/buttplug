@@ -28,7 +28,7 @@ pub struct XInputFactory {}
 impl ButtplugProtocolFactory for XInputFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -36,12 +36,12 @@ impl ButtplugProtocolFactory for XInputFactory {
   > {
     Box::pin(async move {
       // This must match the identifier in the device config, otherwise we'll fail to load controllers.
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       /*
       let name = format!(
         "{} {}",
         name,
-        device_impl
+        hardware
           .address()
           .chars()
           .last()

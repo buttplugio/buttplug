@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{lovense_dongle_device_impl::*, lovense_dongle_messages::*};
+use super::{lovense_dongle_hardware::*, lovense_dongle_messages::*};
 use crate::server::device::hardware::communication::DeviceCommunicationEvent;
 use async_trait::async_trait;
 use futures::{select, FutureExt};
@@ -630,7 +630,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
       .send_event(DeviceCommunicationEvent::DeviceFound {
         name: "Lovense Dongle Device".to_owned(),
         address: self.device_id.clone(),
-        creator: Box::new(LovenseDongleDeviceImplCreator::new(
+        creator: Box::new(LovenseDongleHardwareCreator::new(
           &self.device_id,
           device_write_sender,
           device_read_receiver,

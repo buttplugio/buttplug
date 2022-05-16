@@ -43,12 +43,12 @@ use std::{
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
-pub struct SerialPortDeviceImplCreator {
+pub struct SerialPortHardwareCreator {
   specifier: ProtocolCommunicationSpecifier,
   port_info: SerialPortInfo,
 }
 
-impl SerialPortDeviceImplCreator {
+impl SerialPortHardwareCreator {
   pub fn new(port_info: &SerialPortInfo) -> Self {
     Self {
       specifier: ProtocolCommunicationSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
@@ -57,16 +57,16 @@ impl SerialPortDeviceImplCreator {
   }
 }
 
-impl Debug for SerialPortDeviceImplCreator {
+impl Debug for SerialPortHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("SerialPortDeviceImplCreator")
+    f.debug_struct("SerialPortHardwareCreator")
       .field("port_info", &self.port_info)
       .finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for SerialPortDeviceImplCreator {
+impl HardwareCreator for SerialPortHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
@@ -75,14 +75,14 @@ impl HardwareCreator for SerialPortDeviceImplCreator {
     &mut self,
     protocol: ProtocolDeviceConfiguration,
   ) -> Result<Hardware, ButtplugError> {
-    let device_impl_internal = SerialPortDeviceImpl::try_create(&self.port_info, protocol).await?;
-    let device_impl = Hardware::new(
+    let hardware_internal = SerialPortHardware::try_create(&self.port_info, protocol).await?;
+    let hardware = Hardware::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
       &[Endpoint::Rx, Endpoint::Tx],
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 
@@ -140,7 +140,7 @@ fn serial_read_thread(
   }
 }
 
-pub struct SerialPortDeviceImpl {
+pub struct SerialPortHardware {
   address: String,
   port_receiver: Arc<Mutex<mpsc::Receiver<Vec<u8>>>>,
   port_sender: mpsc::Sender<Vec<u8>>,
@@ -153,7 +153,7 @@ pub struct SerialPortDeviceImpl {
   thread_cancellation_token: CancellationToken,
 }
 
-impl SerialPortDeviceImpl {
+impl SerialPortHardware {
   pub async fn try_create(
     port_info: &SerialPortInfo,
     protocol_def: ProtocolDeviceConfiguration,
@@ -249,7 +249,7 @@ impl SerialPortDeviceImpl {
   }
 }
 
-impl HardwareInternal for SerialPortDeviceImpl {
+impl HardwareInternal for SerialPortHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.device_event_sender.subscribe()
   }
@@ -337,7 +337,7 @@ impl HardwareInternal for SerialPortDeviceImpl {
   }
 }
 
-impl Drop for SerialPortDeviceImpl {
+impl Drop for SerialPortHardware {
   fn drop(&mut self) {
     self.thread_cancellation_token.cancel();
   }

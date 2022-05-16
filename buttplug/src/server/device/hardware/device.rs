@@ -36,7 +36,7 @@ use tokio::sync::broadcast;
 /// 
 /// A ButtplugDevice is made up of 2 components:
 /// 
-/// - A [Device Implementation](crate::device::DeviceImpl), which handles hardware connection and
+/// - A [Device Implementation](crate::device::Hardware), which handles hardware connection and
 ///   communication.
 /// - A [Protocol](crate::device::protocol::ButtplugProtocol), which takes Buttplug Commands and
 ///   translated them into propreitary commands to send to a device.
@@ -97,7 +97,7 @@ impl ButtplugDevice {
   }
 
   /// Returns the address of the device implementation
-  pub fn device_impl_address(&self) -> &str {
+  pub fn hardware_address(&self) -> &str {
     self.device.address()
   }
 
@@ -122,7 +122,7 @@ impl ButtplugDevice {
   /// port matching, etc...
   /// 
   /// If a matching protocol is found, we then call
-  /// [ButtplugDeviceImplCreator::try_create_hardware](crate::device::ButtplugDeviceImplCreator::try_create_hardware)
+  /// [ButtplugHardwareCreator::try_create_hardware](crate::device::ButtplugHardwareCreator::try_create_hardware)
   /// with the related protocol information, in order to connect and initialize the device.
   /// 
   /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
@@ -136,11 +136,11 @@ impl ButtplugDevice {
     // Now that we have both a possible device implementation and a configuration for that device,
     // try to initialize the implementation. This usually means trying to connect to whatever the
     // device is, finding endpoints, etc.
-    let device_impl = device_creator.try_create_hardware(protocol_builder.configuration().clone()).await?;
+    let hardware = device_creator.try_create_hardware(protocol_builder.configuration().clone()).await?;
     info!(
-      address = tracing::field::display(device_impl.address()),
+      address = tracing::field::display(hardware.address()),
       "Found Buttplug Device {}",
-      device_impl.name()
+      hardware.name()
     );
 
     // If we've made it this far, we now have a connected device implementation with endpoints set
@@ -148,12 +148,12 @@ impl ButtplugDevice {
     // protocol creator, pass the device implementation to it, then let it do whatever it needs. For
     // most protocols, this is a no-op. However, for devices like Lovense, some Kiiroo, etc, this
     // can get fairly complicated.
-    let sharable_device_impl = Arc::new(device_impl);
+    let sharable_hardware = Arc::new(hardware);
     let protocol_impl =
-      protocol_builder.create(sharable_device_impl.clone()).await?;
+      protocol_builder.create(sharable_hardware.clone()).await?;
     Ok(Some(ButtplugDevice::new(
       protocol_impl,
-      sharable_device_impl,
+      sharable_hardware,
     )))
   }
 

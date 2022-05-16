@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::lovense_connect_service_device_impl::LovenseServiceDeviceImplCreator;
+use super::lovense_connect_service_hardware::LovenseServiceHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
@@ -170,7 +170,7 @@ async fn lovense_local_service_check(
               continue;
             }
             connected_device_info.insert(toy.id.clone(), Arc::new(RwLock::new((*toy).clone())));
-            let device_creator = Box::new(LovenseServiceDeviceImplCreator::new(
+            let device_creator = Box::new(LovenseServiceHardwareCreator::new(
               &host,
               connected_device_info
                 .get(&toy.id)

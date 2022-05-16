@@ -19,7 +19,7 @@
 //! 
 //! Devices in buttplug consist of two components:
 //! 
-//! - Implementations (represented by [DeviceImpl]), which handle the actual communication with
+//! - Implementations (represented by [Hardware]), which handle the actual communication with
 //!   hardware. Implementations are created by a [DeviceCommunicationManager], which handles the
 //!   discovery method for that type of hardware (Bluetooth scanning, USB bus scanning, listening on
 //!   network ports, etc...)

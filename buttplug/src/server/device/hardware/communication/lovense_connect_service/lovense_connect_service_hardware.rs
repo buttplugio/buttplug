@@ -37,12 +37,12 @@ use std::{
 };
 use tokio::sync::{broadcast, RwLock};
 
-pub struct LovenseServiceDeviceImplCreator {
+pub struct LovenseServiceHardwareCreator {
   http_host: String,
   toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
 }
 
-impl LovenseServiceDeviceImplCreator {
+impl LovenseServiceHardwareCreator {
   pub(super) fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>) -> Self {
     debug!("Emitting a new lovense service device impl creator!");
     Self {
@@ -52,14 +52,14 @@ impl LovenseServiceDeviceImplCreator {
   }
 }
 
-impl Debug for LovenseServiceDeviceImplCreator {
+impl Debug for LovenseServiceHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LovenseServiceDeviceImplCreator").finish()
+    f.debug_struct("LovenseServiceHardwareCreator").finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for LovenseServiceDeviceImplCreator {
+impl HardwareCreator for LovenseServiceHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::LovenseConnectService(LovenseConnectServiceSpecifier::default())
   }
@@ -70,26 +70,26 @@ impl HardwareCreator for LovenseServiceDeviceImplCreator {
   ) -> Result<Hardware, ButtplugError> {
     let toy_info = self.toy_info.read().await;
 
-    let device_impl_internal =
-      LovenseServiceDeviceImpl::new(&self.http_host, self.toy_info.clone(), &toy_info.id);
-    let device_impl = Hardware::new(
+    let hardware_internal =
+      LovenseServiceHardware::new(&self.http_host, self.toy_info.clone(), &toy_info.id);
+    let hardware = Hardware::new(
       &toy_info.name,
       &toy_info.id,
       &[Endpoint::Tx],
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 
 #[derive(Clone, Debug)]
-pub struct LovenseServiceDeviceImpl {
+pub struct LovenseServiceHardware {
   event_sender: broadcast::Sender<HardwareEvent>,
   http_host: String,
   toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
 }
 
-impl LovenseServiceDeviceImpl {
+impl LovenseServiceHardware {
   fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>, toy_id: &str) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let sender_clone = device_event_sender.clone();
@@ -110,7 +110,7 @@ impl LovenseServiceDeviceImpl {
   }
 }
 
-impl HardwareInternal for LovenseServiceDeviceImpl {
+impl HardwareInternal for LovenseServiceHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
   }

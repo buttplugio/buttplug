@@ -26,19 +26,19 @@ pub struct WeVibeFactory {}
 impl ButtplugProtocolFactory for WeVibeFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     debug!("calling WeVibe init");
-    let vibration_on = device_impl.write_value(HardwareWriteCmd::new(
+    let vibration_on = hardware.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
       true,
     ));
-    let vibration_off = device_impl.write_value(HardwareWriteCmd::new(
+    let vibration_off = hardware.write_value(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
       true,
@@ -47,7 +47,7 @@ impl ButtplugProtocolFactory for WeVibeFactory {
       vibration_on.await?;
       Delay::new(Duration::from_millis(100)).await;
       vibration_off.await?;
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(WeVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

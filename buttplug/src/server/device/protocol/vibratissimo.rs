@@ -31,19 +31,19 @@ pub struct VibratissimoFactory {}
 impl ButtplugProtocolFactory for VibratissimoFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      let result = device_impl
+      let result = hardware
         .read_value(HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
       let ident =
-        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| device_impl.name().to_owned());
-      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier(ident), &device_impl.endpoints())?;
+        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
+      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier(ident), &hardware.endpoints())?;
       Ok(Box::new(Vibratissimo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

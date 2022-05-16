@@ -24,14 +24,14 @@ pub struct PrettyLoveFactory {}
 impl ButtplugProtocolFactory for PrettyLoveFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier("Aogu BLE".to_owned()), &device_impl.endpoints())?;
+      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier("Aogu BLE".to_owned()), &hardware.endpoints())?;
       Ok(Box::new(PrettyLove::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

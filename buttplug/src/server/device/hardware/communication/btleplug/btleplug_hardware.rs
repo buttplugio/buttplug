@@ -49,7 +49,7 @@ use std::{
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
-pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
+pub struct BtlePlugHardwareCreator<T: Peripheral + 'static> {
   name: String,
   address: PeripheralId,
   services: Vec<Uuid>,
@@ -57,7 +57,7 @@ pub struct BtlePlugDeviceImplCreator<T: Peripheral + 'static> {
   adapter: Adapter,
 }
 
-impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
+impl<T: Peripheral> BtlePlugHardwareCreator<T> {
   pub fn new(
     name: &str,
     address: &PeripheralId,
@@ -75,14 +75,14 @@ impl<T: Peripheral> BtlePlugDeviceImplCreator<T> {
   }
 }
 
-impl<T: Peripheral> Debug for BtlePlugDeviceImplCreator<T> {
+impl<T: Peripheral> Debug for BtlePlugHardwareCreator<T> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("BtlePlugDeviceImplCreator").finish()
+    f.debug_struct("BtlePlugHardwareCreator").finish()
   }
 }
 
 #[async_trait]
-impl<T: Peripheral> HardwareCreator for BtlePlugDeviceImplCreator<T> {
+impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
@@ -158,7 +158,7 @@ impl<T: Peripheral> HardwareCreator for BtlePlugDeviceImplCreator<T> {
       .notifications()
       .await
       .expect("Should always be able to get notifications");
-    let device_internal_impl = BtlePlugDeviceImpl::new(
+    let device_internal_impl = BtlePlugHardware::new(
       self.device.clone(),
       &self.name,
       self.address.clone(),
@@ -171,24 +171,24 @@ impl<T: Peripheral> HardwareCreator for BtlePlugDeviceImplCreator<T> {
       endpoints.clone(),
       uuid_map,
     );
-    let device_impl = Hardware::new(
+    let hardware = Hardware::new(
       &self.name,
       &format!("{:?}", self.address),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
       Box::new(device_internal_impl),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 
-pub struct BtlePlugDeviceImpl<T: Peripheral + 'static> {
+pub struct BtlePlugHardware<T: Peripheral + 'static> {
   device: T,
   event_stream: broadcast::Sender<HardwareEvent>,
   connected: Arc<AtomicBool>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
-impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
+impl<T: Peripheral + 'static> BtlePlugHardware<T> {
   pub fn new(
     device: T,
     name: &str,
@@ -277,7 +277,7 @@ impl<T: Peripheral + 'static> BtlePlugDeviceImpl<T> {
   }
 }
 
-impl<T: Peripheral + 'static> HardwareInternal for BtlePlugDeviceImpl<T> {
+impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_stream.subscribe()
   }

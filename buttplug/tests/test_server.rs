@@ -203,7 +203,7 @@ fn test_device_stop_on_ping_timeout() {
     }
     check_test_recv_value(
       &command_receiver,
-      DeviceImplCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
+      HardwareCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
     );
      */
   });

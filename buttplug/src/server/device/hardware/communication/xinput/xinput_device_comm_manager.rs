@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::xinput_device_impl::XInputDeviceImplCreator;
+use super::xinput_hardware::XInputHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::{
@@ -191,7 +191,7 @@ impl DeviceCommunicationManager for XInputDeviceCommunicationManager {
                 continue;
               }
               info!("XInput manager found device {}", index);
-              let device_creator = Box::new(XInputDeviceImplCreator::new(*i));
+              let device_creator = Box::new(XInputHardwareCreator::new(*i));
               connected_gamepads.add(*i);
               if sender
                 .send(DeviceCommunicationEvent::DeviceFound {

@@ -75,17 +75,17 @@ pub struct SatisfyerFactory {}
 impl ButtplugProtocolFactory for SatisfyerFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
-    let info_fut = device_impl.write_value(msg);
+    let info_fut = hardware.write_value(msg);
 
     Box::pin(async move {
-      let result = device_impl
+      let result = hardware
         .read_value(HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
       let device_identifier = format!(
@@ -98,14 +98,14 @@ impl ButtplugProtocolFactory for SatisfyerFactory {
         device_identifier
       );
       info_fut.await?;
-      let device_attributes = builder.create(device_impl.address(), &ProtocolAttributesIdentifier::Identifier(device_identifier), &device_impl.endpoints())?;
+      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier(device_identifier), &hardware.endpoints())?;
 
       // Now that we've initialized and constructed the device, start the update cycle to make sure
       // we don't drop the connection.
       let last_command = Arc::new(Mutex::new(vec![0u8; 8]));
       let device = Satisfyer::new(device_attributes, last_command.clone());
       async_manager::spawn(async move {
-        send_satisfyer_updates(device_impl, last_command).await;
+        send_satisfyer_updates(hardware, last_command).await;
       });
       Ok(Box::new(device) as Box<dyn ButtplugProtocol>)
     })
@@ -197,7 +197,7 @@ mod test {
       /*
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0, 0, 0, 0, 0, 0, 0, 0],
           false,

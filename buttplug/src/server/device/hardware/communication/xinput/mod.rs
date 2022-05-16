@@ -6,7 +6,7 @@
 // for full license information.
 
 mod xinput_device_comm_manager;
-mod xinput_device_impl;
+mod xinput_hardware;
 
 pub use xinput_device_comm_manager::{
   XInputDeviceCommunicationManager,

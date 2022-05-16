@@ -154,14 +154,14 @@ async fn run_connection_loop<S>(
   debug!("Exiting Websocket Server Device control loop.");
 }
 
-pub struct WebsocketServerDeviceImplCreator {
+pub struct WebsocketServerHardwareCreator {
   info: WebsocketServerDeviceCommManagerInitInfo,
   outgoing_sender: Option<Sender<Vec<u8>>>,
   incoming_broadcaster: Option<broadcast::Sender<Vec<u8>>>,
   device_event_sender: Option<broadcast::Sender<HardwareEvent>>,
 }
 
-impl WebsocketServerDeviceImplCreator {
+impl WebsocketServerHardwareCreator {
   pub fn new<S>(
     info: WebsocketServerDeviceCommManagerInitInfo,
     ws_stream: async_tungstenite::WebSocketStream<S>,
@@ -194,16 +194,16 @@ impl WebsocketServerDeviceImplCreator {
   }
 }
 
-impl Debug for WebsocketServerDeviceImplCreator {
+impl Debug for WebsocketServerHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("WebsocketServerDeviceImplCreator")
+    f.debug_struct("WebsocketServerHardwareCreator")
       .field("info", &self.info)
       .finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for WebsocketServerDeviceImplCreator {
+impl HardwareCreator for WebsocketServerHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
@@ -212,7 +212,7 @@ impl HardwareCreator for WebsocketServerDeviceImplCreator {
     &mut self,
     _: ProtocolDeviceConfiguration,
   ) -> Result<Hardware, ButtplugError> {
-    let device_impl_internal = WebsocketServerDeviceImpl::new(
+    let hardware_internal = WebsocketServerHardware::new(
       self
         .device_event_sender
         .take()
@@ -227,17 +227,17 @@ impl HardwareCreator for WebsocketServerDeviceImplCreator {
         .take()
         .expect("We own this so we can always take."),
     );
-    let device_impl = Hardware::new(
+    let hardware = Hardware::new(
       &self.info.identifier,
       &self.info.address,
       &[Endpoint::Rx, Endpoint::Tx],
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 
-pub struct WebsocketServerDeviceImpl {
+pub struct WebsocketServerHardware {
   connected: Arc<AtomicBool>,
   subscribed: Arc<AtomicBool>,
   subscribe_token: Arc<Mutex<Option<CancellationToken>>>,
@@ -247,7 +247,7 @@ pub struct WebsocketServerDeviceImpl {
   device_event_sender: broadcast::Sender<HardwareEvent>,
 }
 
-impl WebsocketServerDeviceImpl {
+impl WebsocketServerHardware {
   pub fn new(
     device_event_sender: broadcast::Sender<HardwareEvent>,
     info: WebsocketServerDeviceCommManagerInitInfo,
@@ -266,7 +266,7 @@ impl WebsocketServerDeviceImpl {
   }
 }
 
-impl HardwareInternal for WebsocketServerDeviceImpl {
+impl HardwareInternal for WebsocketServerHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.device_event_sender.subscribe()
   }

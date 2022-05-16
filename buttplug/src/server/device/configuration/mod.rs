@@ -684,14 +684,14 @@ impl ProtocolDeviceAttributesBuilder {
   }
 
   /// Create a new instance based on a device implementation instance
-  pub fn create_from_device_impl(
+  pub fn create_from_hardware(
     &self,
-    device_impl: &Arc<Hardware>,
+    hardware: &Arc<Hardware>,
   ) -> Result<ProtocolDeviceAttributes, ButtplugError> {
     self.create(
-      device_impl.address(),
-      &ProtocolAttributesIdentifier::Identifier(device_impl.name().to_owned()),
-      &device_impl.endpoints(),
+      hardware.address(),
+      &ProtocolAttributesIdentifier::Identifier(hardware.name().to_owned()),
+      &hardware.endpoints(),
     )
   }
 
@@ -829,7 +829,7 @@ impl ProtocolInstanceFactory {
   /// Given a device implementation, tries to create a protocol instance for the device.
   pub async fn create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ButtplugProtocol>, ButtplugError> {
     let builder = ProtocolDeviceAttributesBuilder::new(
       self.protocol_factory.protocol_identifier(),
@@ -837,7 +837,7 @@ impl ProtocolInstanceFactory {
       self.configuration.clone(), 
       self.user_device_configs.clone()
     );
-    self.protocol_factory.try_create(device_impl.clone(), builder).await
+    self.protocol_factory.try_create(hardware.clone(), builder).await
   }
 
   /// Retreives the protocol configuration

@@ -35,35 +35,35 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc};
 
-pub struct TestDeviceImplCreator {
+pub struct TestHardwareCreator {
   specifier: ProtocolCommunicationSpecifier,
-  device_impl: Option<Arc<TestDeviceInternal>>,
+  hardware: Option<Arc<TestDeviceInternal>>,
 }
 
-impl TestDeviceImplCreator {
+impl TestHardwareCreator {
   #[allow(dead_code)]
-  pub fn new(specifier: ProtocolCommunicationSpecifier, device_impl: Arc<TestDeviceInternal>) -> Self {
+  pub fn new(specifier: ProtocolCommunicationSpecifier, hardware: Arc<TestDeviceInternal>) -> Self {
     Self {
       specifier,
-      device_impl: Some(device_impl),
+      hardware: Some(hardware),
     }
   }
 
   pub fn device(&self) -> &Option<Arc<TestDeviceInternal>> {
-    &self.device_impl
+    &self.hardware
   }
 }
 
-impl Debug for TestDeviceImplCreator {
+impl Debug for TestHardwareCreator {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("TestDeviceImplCreator")
+    f.debug_struct("TestHardwareCreator")
       .field("specifier", &self.specifier)
       .finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for TestDeviceImplCreator {
+impl HardwareCreator for TestHardwareCreator {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
@@ -73,7 +73,7 @@ impl HardwareCreator for TestDeviceImplCreator {
     protocol: ProtocolDeviceConfiguration,
   ) -> Result<Hardware, ButtplugError> {
     let device = self
-      .device_impl
+      .hardware
       .take()
       .expect("We'll always have this at this point");
     if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
@@ -88,14 +88,14 @@ impl HardwareCreator for TestDeviceImplCreator {
       .iter()
       .map(|el| *el.key())
       .collect();
-    let device_impl_internal = TestDevice::new(&device);
-    let device_impl = Hardware::new(
+    let hardware_internal = TestDevice::new(&device);
+    let hardware = Hardware::new(
       &device.name(),
       &device.address(),
       &endpoints,
-      Box::new(device_impl_internal),
+      Box::new(hardware_internal),
     );
-    Ok(device_impl)
+    Ok(hardware)
   }
 }
 

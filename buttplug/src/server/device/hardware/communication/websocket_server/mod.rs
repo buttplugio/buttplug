@@ -6,4 +6,4 @@
 // for full license information.
 
 pub mod websocket_server_comm_manager;
-pub mod websocket_server_device_impl;
+pub mod websocket_server_hardware;

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::test_device::{TestDeviceImplCreator, TestDeviceInternal};
+use super::test_device::{TestHardwareCreator, TestDeviceInternal};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   server::device::{
@@ -31,13 +31,13 @@ use std::{
 };
 use tokio::sync::{mpsc::Sender, Mutex};
 
-type WaitingDeviceList = Arc<Mutex<Vec<TestDeviceImplCreator>>>;
+type WaitingDeviceList = Arc<Mutex<Vec<TestHardwareCreator>>>;
 
 #[allow(dead_code)]
 fn new_uninitialized_ble_test_device(
   name: &str,
   address: Option<String>,
-) -> (Arc<TestDeviceInternal>, TestDeviceImplCreator) {
+) -> (Arc<TestDeviceInternal>, TestHardwareCreator) {
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
   let address = address.unwrap_or_else(|| {
@@ -48,10 +48,10 @@ fn new_uninitialized_ble_test_device(
       .to_string()
   });
   let specifier = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
-  let device_impl = Arc::new(TestDeviceInternal::new(name, &address));
-  let device_impl_clone = device_impl.clone();
-  let device_impl_creator = TestDeviceImplCreator::new(specifier, device_impl);
-  (device_impl_clone, device_impl_creator)
+  let hardware = Arc::new(TestDeviceInternal::new(name, &address));
+  let hardware_clone = hardware.clone();
+  let hardware_creator = TestHardwareCreator::new(specifier, hardware);
+  (hardware_clone, hardware_creator)
 }
 
 async fn new_bluetoothle_test_device_with_cfg(
@@ -59,16 +59,16 @@ async fn new_bluetoothle_test_device_with_cfg(
   device_config_mgr: Option<Arc<DeviceConfigurationManager>>,
 ) -> Result<(ButtplugDevice, Arc<TestDeviceInternal>), ButtplugError> {
   let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
-  let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
-  let device_impl_clone = device_impl.clone();
+  let (hardware, hardware_creator) = new_uninitialized_ble_test_device(name, None);
+  let hardware_clone = hardware.clone();
   let err_str = &format!("No protocol found for device {}", name);
-  let protocol_builder = config_mgr.protocol_instance_factory(&device_impl_creator.specifier()).expect("Test code, should exist.");
+  let protocol_builder = config_mgr.protocol_instance_factory(&hardware_creator.specifier()).expect("Test code, should exist.");
   let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(protocol_builder, Box::new(device_impl_creator))
+    ButtplugDevice::try_create_device(protocol_builder, Box::new(hardware_creator))
       .await
       .expect("Empty option shouldn't be possible")
       .expect(err_str);
-  Ok((device, device_impl_clone))
+  Ok((device, hardware_clone))
 }
 
 pub async fn new_bluetoothle_test_device(

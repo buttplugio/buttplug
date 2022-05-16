@@ -27,7 +27,7 @@ pub struct LeloF1sV2Factory {}
 impl ButtplugProtocolFactory for LeloF1sV2Factory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -44,8 +44,8 @@ impl ButtplugProtocolFactory for LeloF1sV2Factory {
     // * Once the password has been sent, the endpoint can be read for status again
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection is authorised
     Box::pin(async move {
-      let mut event_receiver = device_impl.event_stream();
-      device_impl
+      let mut event_receiver = hardware.event_stream();
+      hardware
         .subscribe(HardwareSubscribeCmd::new(Endpoint::Whitelist))
         .await?;
       let noauth: Vec<u8> = vec![0; 8];
@@ -60,20 +60,20 @@ impl ButtplugProtocolFactory for LeloF1sV2Factory {
             )
           } else if n.eq(&authed) {
             debug!("Lelo F1s V2 is authorised!");
-            let device_attributes = builder.create_from_device_impl(&device_impl)?;
+            let device_attributes = builder.create_from_hardware(&hardware)?;
             return Ok(Box::new(LeloF1sV2::new(device_attributes)) as Box<dyn ButtplugProtocol>);
           } else {
             debug!("Lelo F1s V2 gave us a password: {:?}", n);
             // Can't send whilst subscribed
-            device_impl
+            hardware
               .unsubscribe(HardwareUnsubscribeCmd::new(Endpoint::Whitelist))
               .await?;
             // Send with response
-            device_impl
+            hardware
               .write_value(HardwareWriteCmd::new(Endpoint::Whitelist, n, true))
               .await?;
             // Get back to the loop
-            device_impl
+            hardware
               .subscribe(HardwareSubscribeCmd::new(Endpoint::Whitelist))
               .await?;
           }
@@ -128,7 +128,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      device::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      device::hardware::{HardwareCommand, DeviceWriteCmd},
       hardware::communication::test::{
         check_test_recv_empty,
         check_test_recv_value,
@@ -156,7 +156,7 @@ mod test {
       whitelist_sender.send(vec![1,2,3,4,5,6,7,8]);
       check_test_recv_value(
         &whitelist_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(DeviceWriteCmd::new(
           Endpoint::Whitelist,
           vec![1,2,3,4,5,6,7,8],
           false,
@@ -173,7 +173,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x01, 0x32, 0x0],
           false,
@@ -202,7 +202,7 @@ mod test {
       // TODO There's probably a more concise way to do this.
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x1, 0xa, 0x32],
           false,
@@ -214,7 +214,7 @@ mod test {
         .expect("Test, assuming infallible");
       check_test_recv_value(
         &command_receiver,
-        DeviceImplCommand::Write(DeviceWriteCmd::new(
+        HardwareCommand::Write(DeviceWriteCmd::new(
           Endpoint::Tx,
           vec![0x1, 0x0, 0x0],
           false,

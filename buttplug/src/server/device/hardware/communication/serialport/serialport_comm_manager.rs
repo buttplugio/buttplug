@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::SerialPortDeviceImplCreator;
+use super::SerialPortHardwareCreator;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
@@ -62,7 +62,7 @@ impl DeviceCommunicationManager for SerialPortCommunicationManager {
                 .send(DeviceCommunicationEvent::DeviceFound {
                   name: format!("Serial Port Device {}", p.port_name),
                   address: p.port_name.clone(),
-                  creator: Box::new(SerialPortDeviceImplCreator::new(&p)),
+                  creator: Box::new(SerialPortHardwareCreator::new(&p)),
                 })
                 .await
                 .is_err()

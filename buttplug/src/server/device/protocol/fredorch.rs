@@ -77,7 +77,7 @@ pub struct FredorchFactory {}
 impl ButtplugProtocolFactory for FredorchFactory {
   fn try_create(
     &self,
-    device_impl: Arc<Hardware>,
+    hardware: Arc<Hardware>,
     builder: ProtocolDeviceAttributesBuilder,
   ) -> futures::future::BoxFuture<
     'static,
@@ -89,7 +89,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       let mut crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
-      device_impl
+      hardware
         .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
@@ -98,7 +98,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
-      device_impl
+      hardware
         .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
@@ -110,7 +110,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
-      device_impl
+      hardware
         .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
@@ -119,7 +119,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
-      device_impl
+      hardware
         .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
@@ -128,11 +128,11 @@ impl ButtplugProtocolFactory for FredorchFactory {
       crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
-      device_impl
+      hardware
         .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      let device_attributes = builder.create_from_device_impl(&device_impl)?;
+      let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Box::new(Fredorch::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }

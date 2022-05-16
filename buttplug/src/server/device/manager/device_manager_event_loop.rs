@@ -179,7 +179,7 @@ impl DeviceManagerEventLoop {
         if self
           .device_map
           .iter()
-          .any(|entry| entry.value().device_impl_address() == address)
+          .any(|entry| entry.value().hardware_address() == address)
         {
           debug!(
             "Device {} already connected, ignoring new device event.",
