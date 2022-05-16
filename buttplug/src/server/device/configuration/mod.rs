@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-//! Management of devices, including identification and protocol information
+//! Management of protocol and device hardware configurations
 //! 
 //! Buttplug can handle device communication over several different mediums, including bluetooth,
 //! usb, serial, various network protocols, and others. The library also provides multiple protocols
@@ -138,7 +138,7 @@
 //! 
 
 use super::protocol::{
-  add_to_protocol_map, get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,
+  get_default_protocol_map, ButtplugProtocol, ButtplugProtocolFactory,
 };
 use crate::{
   core::{
@@ -147,7 +147,6 @@ use crate::{
   },
   server::device::device::device_impl::DeviceImpl,
 };
-use dashmap::DashMap;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -670,12 +669,12 @@ pub struct ProtocolDeviceAttributesBuilder {
   /// Set of possible device configurations for this protocol
   device_configuration: ProtocolDeviceConfiguration,
   /// Set of device specific user configs for this protocol
-  user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
+  user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
 }
 
 impl ProtocolDeviceAttributesBuilder {
   /// Create a new instance 
-  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>) -> Self {
+  fn new(protocol_identifier: &str, allow_raw_messages: bool, device_configuration: ProtocolDeviceConfiguration, user_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>) -> Self {
     Self {
       protocol_identifier: protocol_identifier.to_owned(),
       allow_raw_messages,
@@ -807,7 +806,7 @@ impl ProtocolDeviceConfiguration {
 pub struct ProtocolInstanceFactory {
   allow_raw_messages: bool,
   protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-  user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
+  user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
   configuration: ProtocolDeviceConfiguration,
 }
 
@@ -816,7 +815,7 @@ impl ProtocolInstanceFactory {
   fn new(
     allow_raw_messages: bool,
     protocol_factory: Arc<dyn ButtplugProtocolFactory>,
-    user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>,
+    user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
     configuration: ProtocolDeviceConfiguration,
   ) -> Self {
     Self {
@@ -848,6 +847,132 @@ impl ProtocolInstanceFactory {
   }
 }
 
+#[derive(Default)]
+pub struct DeviceConfigurationManagerBuilder {
+  no_default_protocols: bool,
+  allow_raw_messages: bool,
+  /// Per-specific-device user configurations
+  user_device_configs: Vec<(ProtocolDeviceIdentifier, ProtocolDeviceAttributes)>,
+  /// Map of protocol names to which devices they support
+  protocol_device_configurations: Vec<(String, ProtocolDeviceConfiguration)>,
+  /// Map of protocol names to their respective protocol instance factories
+  protocols: Vec<(String, Arc<dyn ButtplugProtocolFactory>)>,
+  allowed_addresses: Vec<String>,
+  denied_addresses: Vec<String>,
+  reserved_indexes: Vec<(ProtocolDeviceIdentifier, u32)>
+}
+
+impl DeviceConfigurationManagerBuilder {
+  /// Add a device-specific user configuration
+  pub fn user_device_config(&mut self, protocol_identifier: &ProtocolDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> &mut Self {
+    self.user_device_configs.push((protocol_identifier.clone(), protocol_attributes.clone()));
+    self
+  }
+  
+  /// Add device configuration info for a [ButtplugProtocol]
+  pub fn protocol_device_configuration(
+    &mut self,
+    protocol_name: &str,
+    protocol_definition: &ProtocolDeviceConfiguration,
+  ) -> &mut Self {
+    self
+      .protocol_device_configurations
+      .push((protocol_name.to_owned(), protocol_definition.clone()));
+    self
+  }
+ 
+  /// Add a protocol instance factory for a [ButtplugProtocol]
+  pub fn protocol_factory<'a, T>(&mut self, factory: T) -> &mut Self
+  where
+    T: ButtplugProtocolFactory + 'static
+  {
+    self.protocols.push((factory.protocol_identifier().to_owned(), Arc::new(factory)));
+    self
+  }
+
+  pub fn no_default_protocols(&mut self) -> &mut Self {
+    self.no_default_protocols = true;
+    self
+  }
+
+  pub fn allow_raw_messages(&mut self) -> &mut Self {
+    self.allow_raw_messages = true;
+    self
+  }
+
+  pub fn allowed_address(&mut self, address: &str) -> &mut Self {
+    self.allowed_addresses.push(address.to_owned());
+    self
+  }
+
+  pub fn denied_address(&mut self, address: &str) -> &mut Self {
+    self.denied_addresses.push(address.to_owned());
+    self
+  }
+
+  pub fn reserved_index(&mut self, identifier: &ProtocolDeviceIdentifier, index: u32) -> &mut Self {
+    self.reserved_indexes.push((identifier.clone(), index));
+    self
+
+  }
+
+  pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugError> {
+    // Map of protocol names to which devices they support
+    let mut protocol_device_configurations = HashMap::new();
+    for (name, config) in &self.protocol_device_configurations {
+      if protocol_device_configurations.contains_key(name) {
+        // TODO Fill in error
+      }
+      protocol_device_configurations.insert(name.clone(), config.clone());
+    }
+
+    // Map of protocol names to their respective protocol instance factories
+    let mut protocol_map = if !self.no_default_protocols {
+      get_default_protocol_map()
+    } else {
+      HashMap::new()
+    };
+
+    for (name, protocol) in &self.protocols {
+      if protocol_map.contains_key(name) {
+        // TODO Fill in error
+      }
+      protocol_map.insert(name.clone(), protocol.clone());
+    }
+
+    // Per-specific-device user configurations
+    let mut user_device_configs = HashMap::new();
+    for (ident, config) in &self.user_device_configs {
+      if user_device_configs.contains_key(ident) {
+        // TODO Fill in error
+      }
+      user_device_configs.insert(ident.clone(), config.clone());
+    }
+
+    let mut reserved_indexes: HashMap<ProtocolDeviceIdentifier, u32> = HashMap::new();
+    for (identifier, index) in &self.reserved_indexes {
+      if reserved_indexes.contains_key(&identifier) {
+        // TODO Fill in error
+      }
+      if reserved_indexes.values().any(|entered_index| *entered_index == *index) {
+        // TODO Fill in error
+      }
+      reserved_indexes.insert(identifier.clone(), index.clone());
+    }
+
+    Ok(DeviceConfigurationManager {
+      allow_raw_messages: self.allow_raw_messages,
+      protocol_device_configurations,
+      protocol_map,
+      user_device_configs,
+      allowed_addresses: self.allowed_addresses.clone(),
+      denied_addresses: self.denied_addresses.clone(),
+      reserved_indexes: reserved_indexes,
+      current_index: 0
+    })
+  }
+}
+
 /// Correlates information about protocols and which devices they support.
 /// 
 /// The [DeviceConfigurationManager] handles stores information about which device protocols the
@@ -863,11 +988,15 @@ pub struct DeviceConfigurationManager {
   /// If true, add raw message support to connected devices
   allow_raw_messages: bool,
   /// Map of protocol names to which devices they support
-  protocol_device_configurations: Arc<DashMap<String, ProtocolDeviceConfiguration>>,
+  protocol_device_configurations: HashMap<String, ProtocolDeviceConfiguration>,
   /// Map of protocol names to their respective protocol instance factories
-  protocol_map: Arc<DashMap<String, Arc<dyn ButtplugProtocolFactory>>>,
+  protocol_map: HashMap<String, Arc<dyn ButtplugProtocolFactory>>,
   /// Per-specific-device user configurations
-  user_device_configs: Arc<DashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>>
+  user_device_configs: HashMap<ProtocolDeviceIdentifier, ProtocolDeviceAttributes>,
+  allowed_addresses: Vec<String>,
+  denied_addresses: Vec<String>,
+  reserved_indexes: HashMap<ProtocolDeviceIdentifier, u32>,
+  current_index: u32
 }
 
 impl Default for DeviceConfigurationManager {
@@ -875,90 +1004,47 @@ impl Default for DeviceConfigurationManager {
   fn default() -> Self {
     // Unwrap allowed here because we assume our built in device config will
     // always work. System won't pass tests or possibly even build otherwise.
-    Self::new(false)
+    DeviceConfigurationManagerBuilder::default().finish().expect("Default creation of a DCM should always work.")
   }
 }
 
 impl DeviceConfigurationManager {
-  /// Create a new instance, populating it with protocol factories for all internally implemented [ButtplugProtocol]s.
-  pub fn new(allow_raw_messages: bool) -> Self {
-    Self {
-      allow_raw_messages,
-      protocol_device_configurations: Arc::new(DashMap::new()),
-      protocol_map: Arc::new(get_default_protocol_map()),
-      user_device_configs: Arc::new(DashMap::new()),
-    }
-  }
-
-  /// Add a device-specific user configuration
-  pub fn add_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier, protocol_attributes: &ProtocolDeviceAttributes) -> Result<(), ButtplugError> {
-    self.user_device_configs.insert(protocol_identifier.clone(), protocol_attributes.clone());
-    Ok(())
-  }
-
-  /// Remove a device-specific user configuration
-  pub fn remove_user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) {
-    self.user_device_configs.remove(protocol_identifier);
-  }
-
   /// Fetch a user configuration for a specific device, if one exists
   pub fn user_device_config(&self, protocol_identifier: &ProtocolDeviceIdentifier) -> Option<ProtocolDeviceAttributes> {
-    self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.value().clone()))
+    self.user_device_configs.get(protocol_identifier).and_then(|p| Some(p.clone()))
   }
 
-  /// Add device configuration info for a [ButtplugProtocol]
-  pub fn add_protocol_device_configuration(
-    &self,
-    protocol_name: &str,
-    protocol_definition: &ProtocolDeviceConfiguration,
-  ) -> Result<(), ButtplugError> {
-    protocol_definition.is_valid()?;
-
-    self
-      .protocol_device_configurations
-      .insert(protocol_name.to_owned(), protocol_definition.clone());
-    Ok(())
-  }
-
-  /// Remove device configuration info for a [ButtplugProtocol]
-  pub fn remove_protocol_device_configuration(&self, protocol_name: &str) {
-    self.protocol_device_configurations.remove(protocol_name);
-  }
-
-  /// Add a protocol instance factory for a [ButtplugProtocol]
-  pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugDeviceError>
-  where
-    T: ButtplugProtocolFactory + 'static
-  {
-    if !self.protocol_map.contains_key(factory.protocol_identifier()) {
-      add_to_protocol_map(&self.protocol_map, factory);
-      Ok(())
+  pub fn address_allowed(&self, address: &str) -> bool {
+    let address = address.to_owned();
+    // Make sure the device isn't on the deny list
+    if self.denied_addresses.contains(&address) {
+      // If device is outright denied, deny
+      info!("Device {} denied by configuration, not connecting.", address);
+      false
+    } else if !self.allowed_addresses.is_empty() && !self.allowed_addresses.contains(&address) {
+      // If device is not on allow list and allow list isn't empty, deny
+      info!("Device {} not on allow list and allow list not empty, not connecting.", address);
+      false
     } else {
-      Err(ButtplugDeviceError::ProtocolAlreadyAdded(
-        factory.protocol_identifier().to_owned(),
-      ))
+      true
     }
   }
 
-  /// Remove a protocol instance factory for a [ButtplugProtocol]
-  pub fn remove_protocol_factory(&self, protocol_identifier: &str) -> Result<(), ButtplugDeviceError> {
-    if self.protocol_map.contains_key(protocol_identifier) {
-      self.protocol_map.remove(protocol_identifier);
-      Ok(())
+  pub fn device_index(&mut self, identifier: &ProtocolDeviceIdentifier) -> u32 {    
+    // See if we have a reserved or reusable device index here.
+    if let Some(id) = self.reserved_indexes.get(identifier)  {
+      *id
     } else {
-      Err(ButtplugDeviceError::ProtocolNotImplemented(
-        protocol_identifier.to_owned(),
-      ))
+      while self.reserved_indexes.iter().any(|(_, x)| *x == self.current_index) {
+        self.current_index += 1;
+      }
+      let generated_device_index = self.current_index;
+      self.current_index += 1;
+      self
+        .reserved_indexes
+        .insert(identifier.clone(), generated_device_index);
+      generated_device_index
     }
-  }
-
-  /// Remove all protocol instance factories for a [ButtplugProtocol]
-  /// 
-  /// As a default [DeviceConfigurationManager] will contain all protocols implemented by the
-  /// library, this is useful for users who may only want to use one or a few protocols for whatever
-  /// reason.
-  pub fn remove_all_protocol_factories(&self) {
-    self.protocol_map.clear();
   }
 
   /// Provides read-only access to the internal protocol/identifier map. Mainly
@@ -966,7 +1052,7 @@ impl DeviceConfigurationManager {
   /// listing capabilities in UI, etc.
   pub fn protocol_device_configurations(
     &self,
-  ) -> Arc<DashMap<String, ProtocolDeviceConfiguration>> {
+  ) -> HashMap<String, ProtocolDeviceConfiguration> {
     self.protocol_device_configurations.clone()
   }
 
@@ -981,18 +1067,18 @@ impl DeviceConfigurationManager {
       "Looking for protocol that matches specifier: {:?}",
       specifier
     );
-    for config in self.protocol_device_configurations.iter() {
-      if config.value().specifiers.contains(specifier) {
+    for (name, config) in self.protocol_device_configurations.iter() {
+      if config.specifiers.contains(specifier) {
         info!(
           "Found protocol configuration {:?} for specifier {:?}.",
-          config.key(),
+          name,
           specifier
         );
 
-        if !self.protocol_map.contains_key(config.key()) {
+        if !self.protocol_map.contains_key(name) {
           warn!(
             "No protocol implementation for {:?} found for specifier {:?}.",
-            config.key(),
+            name,
             specifier
           );
           return None;
@@ -1000,14 +1086,14 @@ impl DeviceConfigurationManager {
 
         let protocol_factory = self
           .protocol_map
-          .get(config.key())
-          .map(|pair| pair.value().clone())?;
+          .get(name)
+          .map(|factory| factory.clone())?;
 
         return Some(ProtocolInstanceFactory::new(
           self.allow_raw_messages,
           protocol_factory,
           self.user_device_configs.clone(),
-          config.value().clone(),
+          config.clone(),
         ));
       }
     }
@@ -1023,7 +1109,10 @@ mod test {
   use crate::core::messages::{ButtplugDeviceMessageType, Endpoint};
 
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-    let dcm = DeviceConfigurationManager::new(allow_raw_messages);
+    let mut builder = DeviceConfigurationManagerBuilder::default();
+    if allow_raw_messages {
+      builder.allow_raw_messages();
+    }
     let specifiers = vec![ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier {
       names: HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
       services: HashMap::new(),
@@ -1032,8 +1121,8 @@ mod test {
     let mut attributes = HashMap::new();
     attributes.insert(ProtocolAttributesIdentifier::Identifier("P".to_owned()), Arc::new(ProtocolDeviceAttributes::new(ProtocolAttributesIdentifier::Identifier("P".to_owned()), Some("Lovense Edge".to_owned()), None, HashMap::new(), None)));
     let pdc = ProtocolDeviceConfiguration::new(specifiers, attributes);
-    dcm.add_protocol_device_configuration("lovense", &pdc).unwrap();
-    dcm
+    builder.protocol_device_configuration("lovense", &pdc);
+    builder.finish().unwrap()
   }
 
   #[test]
@@ -1092,7 +1181,7 @@ mod test {
     let builder = config
       .protocol_instance_factory(&lovense)
       .expect("Test, assuming infallible");
-    let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), Arc::new(DashMap::new()));
+    let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), HashMap::new());
     let config = device_attr_builder
       .create("DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
       .expect("Test, assuming infallible");
@@ -1115,7 +1204,7 @@ mod test {
     let builder = config
       .protocol_instance_factory(&lovense)
       .expect("Test, assuming infallible");
-      let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), Arc::new(DashMap::new()));
+      let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), HashMap::new());
       let config = device_attr_builder
         .create(&"DoesNotMatter", &ProtocolAttributesIdentifier::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
         .expect("Test, assuming infallible");

@@ -19,24 +19,12 @@ use serialport::available_ports;
 use tokio::sync::mpsc::Sender;
 use tracing_futures::Instrument;
 
-#[derive(Default)]
-pub struct SerialPortCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-}
+#[derive(Default, Clone)]
+pub struct SerialPortCommunicationManagerBuilder {}
 
 impl DeviceCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(SerialPortCommunicationManager::new(
-      self
-        .sender
-        .take()
-        .expect("We'll always be able to take this"),
-    ))
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(SerialPortCommunicationManager::new(sender))
   }
 }
 

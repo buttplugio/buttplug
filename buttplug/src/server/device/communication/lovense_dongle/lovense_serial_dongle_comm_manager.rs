@@ -135,24 +135,12 @@ fn serial_read_thread(
   debug!("Exiting lovense dongle read thread.");
 }
 
-#[derive(Default)]
-pub struct LovenseSerialDongleCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-}
+#[derive(Default, Clone)]
+pub struct LovenseSerialDongleCommunicationManagerBuilder {}
 
 impl DeviceCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(LovenseSerialDongleCommunicationManager::new(
-      self
-        .sender
-        .take()
-        .expect("We own this so take will always work."),
-    ))
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(LovenseSerialDongleCommunicationManager::new(sender))
   }
 }
 

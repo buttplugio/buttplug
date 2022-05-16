@@ -8,6 +8,8 @@
   (impl, protocols, configs, everything that is server specific now lives there)
 - Device configuration file format changed to remove language for naming
 - User Device Configuration File format changed completely
+- Move in-process client creation utility method to util module
+- ButtplugServer and child managers moved to builder patterns, now immutable after construction
 
 ## Features
 

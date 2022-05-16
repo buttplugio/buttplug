@@ -42,8 +42,7 @@ pub enum DeviceCommunicationEvent {
 }
 
 pub trait DeviceCommunicationManagerBuilder: Send {
-  fn event_sender(self, sender: Sender<DeviceCommunicationEvent>) -> Self;
-  fn finish(self) -> Box<dyn DeviceCommunicationManager>;
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager>;
 }
 
 pub trait DeviceCommunicationManager: Send + Sync {

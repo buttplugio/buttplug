@@ -9,9 +9,7 @@ use crate::{
   core::messages::{
     ButtplugServerMessage,
     DeviceAdded,
-    DeviceRemoved,
     ScanningFinished,
-    StopDeviceCmd,
   },
   server::{
     device::{
@@ -22,28 +20,24 @@ use crate::{
         device_impl::{ButtplugDeviceImplCreator, ButtplugDeviceEvent}
       }
     },
-    ping_timer::PingTimer,
   },
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
+use futures::FutureExt;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use tokio::sync::{broadcast, mpsc};
+use tokio_util::sync::CancellationToken;
 use tracing;
 use tracing_futures::Instrument;
 
 pub struct DeviceManagerEventLoop {
-  device_config_manager: Arc<DeviceConfigurationManager>,
-  device_index_generator: u32,
+  device_config_manager: DeviceConfigurationManager,
   /// Maps device index (exposed to the outside world) to actual device objects held by the server.
   device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-  ping_timer: Arc<PingTimer>,
-  /// Maps device implementation addresses to indexes, so they can be reused on reconnect.
-  device_index_map: Arc<DashMap<ProtocolDeviceIdentifier, u32>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
   /// whoever owns the Buttplug Server.
   server_sender: broadcast::Sender<ButtplugServerMessage>,
@@ -61,43 +55,30 @@ pub struct DeviceManagerEventLoop {
   comm_manager_scanning_statuses: Vec<Arc<AtomicBool>>,
   /// Devices currently trying to connect.
   connecting_devices: Arc<DashSet<String>>,
-  /// List of device addresses we are ONLY allowed to connect to. If no addresses available, connect
-  /// to any device.
-  allowed_devices: Arc<DashSet<String>>,
-  /// List of device addresses we are not allowed to connect to.
-  denied_devices: Arc<DashSet<String>>,
-  /// Map of device address to related index, if index is stored.
-  reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
+  /// Cancellation token for the event loop
+  loop_cancellation_token: CancellationToken
 }
 
 impl DeviceManagerEventLoop {
   pub fn new(
-    device_config_manager: Arc<DeviceConfigurationManager>,
-    server_sender: broadcast::Sender<ButtplugServerMessage>,
+    device_config_manager: DeviceConfigurationManager,
     device_map: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-    ping_timer: Arc<PingTimer>,
+    loop_cancellation_token: CancellationToken,
+    server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_comm_receiver: mpsc::Receiver<DeviceCommunicationEvent>,
-    allowed_devices: Arc<DashSet<String>>,
-    denied_devices: Arc<DashSet<String>>,
-    reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
-      device_config_manager,
+      device_config_manager: device_config_manager,
       server_sender,
       device_map,
-      ping_timer,
       device_comm_receiver,
-      device_index_generator: 0,
-      device_index_map: Arc::new(DashMap::new()),
       device_event_sender,
       device_event_receiver,
       scanning_in_progress: false,
       comm_manager_scanning_statuses: vec![],
       connecting_devices: Arc::new(DashSet::new()),
-      allowed_devices,
-      denied_devices,
-      reserved_device_indexes
+      loop_cancellation_token
     }
   }
 
@@ -107,8 +88,17 @@ impl DeviceManagerEventLoop {
     device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) {
     let device_event_sender_clone = self.device_event_sender.clone();
+
+    // First off, we need to see if we even have a configuration available for the device we're
+    // trying to create. If we don't, exit, because this isn't actually an error. However, if we
+    // *do* have a configuration but something goes wrong after this, then it's an error.
+    let protocol_builder = match self.device_config_manager.protocol_instance_factory(&device_creator.specifier()) {
+      Some(builder) => builder,
+      None => return 
+    };
+
     let create_device_future =
-      ButtplugDevice::try_create_device(self.device_config_manager.clone(), device_creator);
+      ButtplugDevice::try_create_device(protocol_builder, device_creator);
     let connecting_devices = self.connecting_devices.clone();
 
     async_manager::spawn(async move {
@@ -173,6 +163,12 @@ impl DeviceManagerEventLoop {
         );
         let _enter = span.enter();
 
+        // Make sure the device isn't on the deny list, or is on the allow list if anything is on it.
+        if self.device_config_manager.address_allowed(&address) {
+          return;
+        }
+        debug!("Device {} allowed via configuration file, continuing.", address);
+
         // Check to make sure the device isn't already connected. If it is, drop it.
         if self
           .device_map
@@ -199,19 +195,6 @@ impl DeviceManagerEventLoop {
         }
 
         self.connecting_devices.insert(address.clone());
-
-        // Make sure the device isn't on the deny list
-        if self.denied_devices.contains(&address) {
-          // If device is outright denied, deny
-          info!("Device {} denied by configuration, not connecting.", address);
-          return;
-        } else if !self.allowed_devices.is_empty() && !self.allowed_devices.contains(&address) {
-          // If device is not on allow list and allow list isn't empty, deny
-          info!("Device {} not on allow list and allow list not empty, not connecting.", address);
-          return;
-        }
-        debug!("Device {} allowed via configuration file, continuing.", address);
-
         self.try_create_new_device(address, creator);
       }
       DeviceCommunicationEvent::DeviceManagerAdded(status) => {
@@ -232,21 +215,7 @@ impl DeviceManagerEventLoop {
         let _enter = span.enter();
 
         // See if we have a reserved or reusable device index here.
-        let device_index = if let Some(id) = self.reserved_device_indexes.get(device.device_identifier())  {
-          *id.value()
-        } else if let Some(id) = self.device_index_map.get(device.device_identifier()) {
-          *id.value()
-        } else {
-          while self.reserved_device_indexes.iter().any(|x| *x.value() == self.device_index_generator) {
-            self.device_index_generator += 1;
-          }
-          let generated_device_index = self.device_index_generator;
-          self.device_index_generator += 1;
-          self
-            .device_index_map
-            .insert(device.device_identifier().clone(), generated_device_index);
-          generated_device_index
-        };
+        let device_index = self.device_config_manager.device_index(device.device_identifier());
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -318,31 +287,9 @@ impl DeviceManagerEventLoop {
     }
   }
 
-  async fn handle_ping_timeout(&self) {
-    error!("Pinged out, stopping devices");
-    let mut fut_vec = FuturesUnordered::new();
-    self.device_map.iter().for_each(|dev| {
-      let device = dev.value();
-      fut_vec.push(device.parse_message(StopDeviceCmd::new(1).into()))
-    });
-    async_manager::spawn(async move {
-      while let Some(val) = fut_vec.next().await {
-        // Device index doesn't matter here, since we're sending the
-        // message directly to the device itself.
-        if let Err(e) = val {
-          error!("Error stopping device on ping timeout: {}", e);
-        }
-      }
-    });
-  }
-
   pub async fn run(&mut self) {
     loop {
       select! {
-        // If we have a ping timeout, stop all devices
-        _ = self.ping_timer.ping_timeout_waiter().fuse() => {
-          self.handle_ping_timeout().await;
-        },
         device_comm_msg = self.device_comm_receiver.recv().fuse() => {
           if let Some(msg) = device_comm_msg {
             self.handle_device_communication(msg).await;

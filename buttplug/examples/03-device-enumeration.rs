@@ -24,7 +24,7 @@ use buttplug::{
   },
   messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
 },
-  server::{device::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer},
+  server::{device::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -47,10 +47,9 @@ async fn device_enumeration_example() {
   // let connector = ButtplugRemoteClientConnector::<ButtplugWebsocketClientTransport, ButtplugClientJSONSerializer>::new(ButtplugWebsocketClientTransport::new_insecure_connector("ws://localhost:12345"));
 
   tokio::spawn(async move {
-    let server = ButtplugRemoteServer::default(); //ButtplugPipeServerTransportBuilder::default().finish();
-    server
-      .device_manager()
-      .add_comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    let mut builder = ButtplugServerBuilder::default();
+    builder.device_manager_builder().comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    let server = ButtplugRemoteServer::new(builder.finish().unwrap()); //ButtplugPipeServerTransportBuilder::default().finish();
     server
       .start(ButtplugRemoteServerConnector::<
         _,

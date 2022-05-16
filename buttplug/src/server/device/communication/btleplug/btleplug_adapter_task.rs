@@ -66,8 +66,7 @@ impl BtleplugAdapterTask {
       error!("Peripheral with address {:?} not found.", peripheral_id);
       return;
     };
-    // If a device has no discernable name, we can't do anything
-    // with it, just ignore it.
+    // If a device has no discernable name, we can't do anything with it, just ignore it.
     let properties = if let Ok(Some(properties)) = peripheral.properties().await {
       properties
     } else {

@@ -26,7 +26,7 @@ use crate::{
   },
   server::device::{
     device::device_impl::{DeviceImpl, ButtplugDeviceImplCreator, ButtplugDeviceResultFuture, ButtplugDeviceEvent},
-    configuration::{DeviceConfigurationManager, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
+    configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocol,
   },
 };
@@ -130,21 +130,11 @@ impl ButtplugDevice {
   /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
   /// client and use.
   pub async fn try_create_device(
-    device_config_mgr: Arc<DeviceConfigurationManager>,
+    protocol_builder: ProtocolInstanceFactory,
     mut device_creator: Box<dyn ButtplugDeviceImplCreator>,
   ) -> Result<Option<ButtplugDevice>, ButtplugError> {
     // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
     
-    // First off, we need to see if we even have a configuration available for the device we're
-    // trying to create. If we don't, return Ok(None), because this isn't actually an error.
-    // However, if we *do* have a configuration but something goes wrong after this, then it's an
-    // error.
-    let protocol_builder = match device_config_mgr.protocol_instance_factory(&device_creator.specifier()) {
-      Some(builder) => builder,
-      None => return Ok(None)
-    };
-      
-
     // Now that we have both a possible device implementation and a configuration for that device,
     // try to initialize the implementation. This usually means trying to connect to whatever the
     // device is, finding endpoints, etc.

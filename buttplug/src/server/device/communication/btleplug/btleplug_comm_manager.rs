@@ -22,24 +22,13 @@ use std::sync::{
 
 use tokio::sync::mpsc::{channel, Sender};
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct BtlePlugCommunicationManagerBuilder {
-  sender: Option<Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(BtlePlugCommunicationManager::new(
-      self
-        .sender
-        .take()
-        .expect("Device Manager will set this during initialization."),
-    ))
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(BtlePlugCommunicationManager::new(sender))
   }
 }
 

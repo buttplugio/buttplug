@@ -12,7 +12,7 @@ use crate::{
     messages::DeviceMessageAttributesMap,
   },
   server::device::configuration::{
-    BluetoothLESpecifier, DeviceConfigurationManager, HIDSpecifier, LovenseConnectServiceSpecifier,
+    BluetoothLESpecifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier,
     ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
     ProtocolDeviceConfiguration, ProtocolDeviceIdentifier, SerialSpecifier, USBSpecifier,
     WebsocketSpecifier, XInputSpecifier,
@@ -350,11 +350,13 @@ pub fn load_protocol_configs_from_json(
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
   let devices = load_protocol_configs_from_json(None, None, false)
     .expect("If this fails, the whole library goes with it.");
-  let dcm = DeviceConfigurationManager::new(allow_raw_messages);
-  for (name, def) in devices.protocol_configurations {
-    dcm
-      .add_protocol_device_configuration(&name, &def)
-      .expect("If this fails, the whole library goes with it.");
+  let mut builder = DeviceConfigurationManagerBuilder::default();
+   if allow_raw_messages {
+    builder.allow_raw_messages();
   }
-  dcm
+  for (name, def) in devices.protocol_configurations {
+    builder
+      .protocol_device_configuration(&name, &def);
+  }
+  builder.finish().expect("If this fails, the whole library goes with it.")
 }

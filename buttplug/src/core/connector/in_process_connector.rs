@@ -29,6 +29,22 @@ use std::{
 use tokio::sync::mpsc::{channel, Sender};
 use tracing_futures::Instrument;
 
+#[derive(Default)]
+pub struct ButtplugInProcessClientConnectorBuilder {
+  server: Option<ButtplugServer>
+}
+
+impl ButtplugInProcessClientConnectorBuilder {
+  pub fn server(mut self, server: ButtplugServer) -> Self {
+    self.server = Some(server);
+    self
+  }
+
+  pub fn finish(self) -> ButtplugInProcessClientConnector {
+    ButtplugInProcessClientConnector::new(self.server)
+  }
+}
+
 /// In-process Buttplug Server Connector
 ///
 /// The In-Process Connector contains a [ButtplugServer], meaning that both the
@@ -64,8 +80,7 @@ pub struct ButtplugInProcessClientConnector {
 #[cfg(feature = "server")]
 impl<'a> Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
-    // Unwrap is fine here, if we pass in default options we'll never fail.
-    ButtplugInProcessClientConnector::new(None)
+    ButtplugInProcessClientConnectorBuilder::default().finish()
   }
 }
 
@@ -76,7 +91,7 @@ impl<'a> ButtplugInProcessClientConnector {
   /// Sets up a server, using the basic [ButtplugServer] construction arguments.
   /// Takes the server's name and the ping time it should use, with a ping time
   /// of 0 meaning infinite ping.
-  pub fn new(server: Option<ButtplugServer>) -> Self {
+  fn new(server: Option<ButtplugServer>) -> Self {
     // Create a dummy channel, will just be overwritten on connect.
     let (server_outbound_sender, _) = channel(256);
     Self {

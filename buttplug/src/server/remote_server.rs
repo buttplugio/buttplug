@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugServer, ButtplugServerBuilder, DeviceManager};
+use super::{ButtplugServer, ButtplugServerBuilder};
 use crate::{
   core::{
     connector::ButtplugConnector,
@@ -197,10 +197,6 @@ impl ButtplugRemoteServer {
   pub async fn disconnect(&self) -> Result<(), ButtplugError> {
     self.disconnect_notifier.notify_waiters();
     Ok(())
-  }
-
-  pub fn device_manager(&self) -> &DeviceManager {
-    self.server.device_manager()
   }
 }
 

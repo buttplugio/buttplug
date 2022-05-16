@@ -12,10 +12,15 @@ use crate::{
     configuration::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
     device::ButtplugDevice,
   },
-  server::device::communication::{
-    DeviceCommunicationEvent,
-    DeviceCommunicationManager,
-    DeviceCommunicationManagerBuilder,
+  server::{
+    device::{
+      device::device_impl::ButtplugDeviceImplCreator,
+      communication::{
+        DeviceCommunicationEvent,
+        DeviceCommunicationManager,
+        DeviceCommunicationManagerBuilder,
+      }      
+    }
   },
   util::device_configuration::create_test_dcm,
 };
@@ -57,8 +62,9 @@ async fn new_bluetoothle_test_device_with_cfg(
   let (device_impl, device_impl_creator) = new_uninitialized_ble_test_device(name, None);
   let device_impl_clone = device_impl.clone();
   let err_str = &format!("No protocol found for device {}", name);
+  let protocol_builder = config_mgr.protocol_instance_factory(&device_impl_creator.specifier()).expect("Test code, should exist.");
   let device: ButtplugDevice =
-    ButtplugDevice::try_create_device(config_mgr, Box::new(device_impl_creator))
+    ButtplugDevice::try_create_device(protocol_builder, Box::new(device_impl_creator))
       .await
       .expect("Empty option shouldn't be possible")
       .expect(err_str);
@@ -99,9 +105,8 @@ impl TestDeviceCommunicationManagerHelper {
   }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TestDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
   devices: WaitingDeviceList,
 }
 
@@ -112,15 +117,10 @@ impl TestDeviceCommunicationManagerBuilder {
 }
 
 impl DeviceCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
-      self.sender.take().expect("We always have this."),
-      self.devices,
+      sender,
+      self.devices.clone(),
     ))
   }
 }
@@ -197,8 +197,8 @@ impl DeviceCommunicationManager for TestDeviceCommunicationManager {
 mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    server::device::communication::test::TestDeviceCommunicationManagerBuilder,
-    server::ButtplugServer,
+    server::device::communication::{test::TestDeviceCommunicationManagerBuilder},
+    server::ButtplugServerBuilder,
     util::async_manager,
   };
   use futures::StreamExt;
@@ -206,15 +206,15 @@ mod test {
   #[test]
   fn test_test_device_comm_manager() {
     async_manager::block_on(async {
-      let server = ButtplugServer::default();
+      let mut builder = ButtplugServerBuilder::default();
+      let comm_builder = TestDeviceCommunicationManagerBuilder::default();
+      let helper = comm_builder.helper();
+      builder
+        .device_manager_builder()
+        .comm_manager(comm_builder);
+      let server = builder.finish().expect("Test");
       let recv = server.event_stream();
       pin_mut!(recv);
-      let builder = TestDeviceCommunicationManagerBuilder::default();
-      let helper = builder.helper();
-      server
-        .device_manager()
-        .add_comm_manager(builder)
-        .expect("Test");
       let device = helper.add_ble_device("Massage Demo").await;
       let msg =
         messages::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2);

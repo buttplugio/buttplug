@@ -8,12 +8,15 @@
 // Let's make something move! In this example, we'll see how to tell what a
 // device can do, then send it a command (assuming it vibrates)!
 
-use buttplug::client::{
-  ButtplugClient,
-  ButtplugClientDevice,
-  ButtplugClientDeviceMessageType,
-  ButtplugClientEvent,
-  VibrateCommand,
+use buttplug::{
+  client::{
+    ButtplugClient,
+    ButtplugClientDevice,
+    ButtplugClientDeviceMessageType,
+    ButtplugClientEvent,
+    VibrateCommand,
+  },
+  util::in_process_client
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -26,12 +29,8 @@ async fn device_control_example() {
   // connect_in_process convenience method. This creates an in process connector
   // for us, and also adds all of the device managers built into the library to
   // the server it uses. Handy!
-  let client = ButtplugClient::new("Example Client");
+  let client = in_process_client("Test Client").await;
   let mut event_stream = client.event_stream();
-  client
-    .connect_in_process(None)
-    .await
-    .expect("Simple in process creation should always succeed");
 
   // We'll mostly be doing the same thing we did in example #3, up until we get
   // a device.

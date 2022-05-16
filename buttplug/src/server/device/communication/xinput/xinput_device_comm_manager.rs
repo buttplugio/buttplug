@@ -137,21 +137,12 @@ impl XInputConnectionTracker {
   }
 }
 
-#[derive(Default)]
-pub struct XInputDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-}
+#[derive(Default, Clone)]
+pub struct XInputDeviceCommunicationManagerBuilder {}
 
 impl DeviceCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: mpsc::Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(XInputDeviceCommunicationManager::new(
-      self.sender.take().expect("We own it, we'll take it."),
-    ))
+  fn finish(&self, sender: mpsc::Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(XInputDeviceCommunicationManager::new(sender))
   }
 }
 

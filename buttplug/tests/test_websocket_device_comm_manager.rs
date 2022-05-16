@@ -9,26 +9,27 @@ mod util;
 
 use buttplug::{
   client::ButtplugClient,
-  core::connector::ButtplugInProcessClientConnector,
+  core::connector::ButtplugInProcessClientConnectorBuilder,
   server::device::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
   server::ButtplugServerBuilder,
   util::async_manager,
 };
 
 async fn setup_test_client() -> ButtplugClient {
-  let server = ButtplugServerBuilder::default()
-    .name("Websocket DCM Test Server")
-    .finish()
-    .expect("Test, assuming infallible.");
-  server
-    .device_manager()
-    .add_comm_manager(
+  let mut builder = ButtplugServerBuilder::default();
+  
+  builder
+  .name("Websocket DCM Test Server")
+  .device_manager_builder()
+    .comm_manager(
       WebsocketServerDeviceCommunicationManagerBuilder::default()
         .server_port(51283)
         .listen_on_all_interfaces(true),
-    )
+    );
+  let server = builder
+    .finish()
     .expect("Test, assuming infallible.");
-  let connector = ButtplugInProcessClientConnector::new(Some(server));
+  let connector = ButtplugInProcessClientConnectorBuilder::default().server(server).finish();
 
   let client = ButtplugClient::new("Websocket DCM Test Client");
   client

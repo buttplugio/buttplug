@@ -66,7 +66,7 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use device::manager::DeviceManager;
+use device::manager::{DeviceManager, DeviceManagerBuilder};
 use futures::{
   future::{self, BoxFuture},
   Stream,
@@ -107,7 +107,6 @@ pub enum ButtplugServerError {
 }
 
 /// Configures and creates [ButtplugServer] instances.
-#[derive(Debug, Clone)]
 pub struct ButtplugServerBuilder {
   /// Name of the server, will be sent to the client as part of the [initial connection
   /// handshake](https://buttplug-spec.docs.buttplug.io/architecture.html#stages).
@@ -121,6 +120,8 @@ pub struct ButtplugServerBuilder {
   device_configuration_json: Option<String>,
   /// JSON string, with the contents of the User Device Configuration file
   user_device_configuration_json: Option<String>,
+  /// Device manager builder for the server
+  device_manager_builder: DeviceManagerBuilder
 }
 
 impl Default for ButtplugServerBuilder {
@@ -131,6 +132,7 @@ impl Default for ButtplugServerBuilder {
       allow_raw_messages: false,
       device_configuration_json: Some(DEVICE_CONFIGURATION_JSON.to_owned()),
       user_device_configuration_json: None,
+      device_manager_builder: DeviceManagerBuilder::default()
     }
   }
 }
@@ -176,8 +178,12 @@ impl ButtplugServerBuilder {
     self
   }
 
+  pub fn device_manager_builder(&mut self) -> &mut DeviceManagerBuilder {
+    &mut self.device_manager_builder
+  }
+
   /// Try to build a [ButtplugServer] using the parameters given.
-  pub fn finish(&self) -> Result<ButtplugServer, ButtplugError> {
+  pub fn finish(&mut self) -> Result<ButtplugServer, ButtplugError> {
     // Create the server
     debug!("Creating server '{}'", self.name);
     info!("Buttplug Server Operating System Info: {}", os_info::get());
@@ -223,28 +229,27 @@ impl ButtplugServerBuilder {
       );
     }
 
-    // Set up the device manager, using the information loaded out of the JSON files, if any exists.
-    let device_manager = DeviceManager::new(
-      output_sender.clone(),
-      ping_timer.clone(),
-      self.allow_raw_messages,
-    );
+    if self.allow_raw_messages {
+      self.device_manager_builder.allow_raw_messages();
+    }
 
     for address in protocol_map.allow_list() {
-      device_manager.add_allowed_device(address);
+      self.device_manager_builder.allowed_address(address);
     }
 
     for address in protocol_map.deny_list() {
-      device_manager.add_denied_device(address);
+      self.device_manager_builder.denied_address(address);
     }
 
     for (index, address) in protocol_map.reserved_indexes() {
-      device_manager.add_reserved_device_index(address, *index);
+      self.device_manager_builder.reserved_index(address, *index);
     }
 
     for (name, def) in protocol_map.protocol_configurations() {
-      device_manager.add_protocol_device_configuration(name, def)?;
+      self.device_manager_builder.protocol_device_configuration(name, def);
     }
+
+    let device_manager = self.device_manager_builder.finish(output_sender.clone())?;
 
     // Assuming everything passed, return the server.
     Ok(ButtplugServer {

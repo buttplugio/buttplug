@@ -34,23 +34,22 @@ use crate::{
     },
   },
   server::device::{
-    configuration::{DeviceConfigurationManager, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
+    configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
     device::ButtplugDevice,
   },
   server::{
     ButtplugServerResultFuture,
-    ping_timer::PingTimer,
-    ButtplugServerError,
   },  
   util::async_manager,
 };
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use futures::future;
+use tokio_util::sync::CancellationToken;
 use std::{
   convert::TryFrom,
   sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::Ordering,
     Arc,
   },
 };
@@ -62,98 +61,138 @@ pub struct DeviceInfo {
   pub display_name: Option<String>,
 }
 
-pub struct DeviceManager {
-  // This uses a map to make sure we don't have 2 comm managers of the same type
-  // register. Also means we can do lockless access since it's a Dashmap.
-  comm_managers: Arc<DashMap<String, Box<dyn DeviceCommunicationManager>>>,
-  devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
-  device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
-  config: Arc<DeviceConfigurationManager>,
-  has_run_first_scan_status: Arc<AtomicBool>,
-  /// List of device addresses we are ONLY allowed to connect to. If no addresses available, connect
-  /// to any device.
-  allowed_devices: Arc<DashSet<String>>,
-  /// List of device addresses we are not allowed to connect to.
-  denied_devices: Arc<DashSet<String>>,
-  /// Map of device address to related index, if index is stored.
-  reserved_device_indexes: Arc<DashMap<ProtocolDeviceIdentifier, u32>>
+#[derive(Default)]
+pub struct DeviceManagerBuilder {
+  configuration_manager_builder: DeviceConfigurationManagerBuilder,
+  comm_managers: Vec<Box<dyn DeviceCommunicationManagerBuilder>>,
 }
 
-impl DeviceManager {
-  pub fn new(
-    output_sender: broadcast::Sender<ButtplugServerMessage>,
-    ping_timer: Arc<PingTimer>,
-    allow_raw_messages: bool,
-  ) -> Self {
-    let config = Arc::new(DeviceConfigurationManager::new(allow_raw_messages));
-    let devices = Arc::new(DashMap::new());
+impl DeviceManagerBuilder {
+  pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
+  where
+    T: DeviceCommunicationManagerBuilder + 'static,
+  {    
+    self.comm_managers.push(Box::new(builder));
+    self
+  }
+
+  pub fn allowed_address(&mut self, address: &str) -> &mut Self {
+    self.configuration_manager_builder.allowed_address(address);
+    self
+  }
+
+  pub fn denied_address(&mut self, address: &str) -> &mut Self {
+    self.configuration_manager_builder.denied_address(address);
+    self
+  }
+
+  pub fn reserved_index(&mut self, identifier: &ProtocolDeviceIdentifier, index: u32) -> &mut Self {
+    self.configuration_manager_builder.reserved_index(identifier, index);
+    self
+  }
+
+  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
+  where
+    T: ButtplugProtocolFactory + 'static,
+  {
+    self.configuration_manager_builder.protocol_factory(factory);
+    self
+  }
+
+  pub fn protocol_device_configuration(&mut self, name: &str, config: &ProtocolDeviceConfiguration) -> &mut Self {
+    self.configuration_manager_builder.protocol_device_configuration(name, config);
+    self
+  }
+
+  pub fn no_default_protocols(&mut self) -> &mut Self {
+    self.configuration_manager_builder.no_default_protocols();
+    self
+  }
+  
+  pub fn allow_raw_messages(&mut self) -> &mut Self {
+    self.configuration_manager_builder.allow_raw_messages();
+    self
+  }
+
+  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<DeviceManager, ButtplugError> {
+    let config_mgr = self.configuration_manager_builder.finish()?;
+
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let allowed_devices = Arc::new(DashSet::new());
-    let denied_devices = Arc::new(DashSet::new());
-    let reserved_device_indexes = Arc::new(DashMap::new());
+    let mut comm_managers = Vec::new();
+    for builder in &self.comm_managers {
+      let comm_mgr = builder.finish(device_event_sender.clone());
+
+      if comm_managers.iter().any(|mgr: &Box<dyn DeviceCommunicationManager>| &mgr.name() == &comm_mgr.name()) {
+        // TODO Fill in error
+      }
+
+      comm_managers.push(comm_mgr);
+    }
+    
+    let mut colliding_dcms = vec![];
+    for mgr in comm_managers.iter() {
+      info!("{}: {}", mgr.name(), mgr.can_scan());
+      // Hack: Lovense and Bluetooth dongles will fight with each other over devices, possibly
+      // interrupting each other connecting and causing very weird issues for users. Print a
+      // warning message to logs if more than one is active and available to scan.
+      if ["BtlePlugCommunicationManager", "LovenseSerialDongleCommunicationManager", "LovenseHIDDongleCommunicationManager"].iter().any(|x| x == &mgr.name())
+        && mgr.can_scan()
+      {
+        colliding_dcms.push(mgr.name().clone());
+      }
+    }
+    if colliding_dcms.len() > 1 {
+      warn!("The following device connection methods may collide: {}. This may mean you have lovense dongles and bluetooth dongles connected at the same time. Please disconnect the lovense dongles or turn off the Lovense HID/Serial Dongle support in Intiface/Buttplug. Lovense devices will work with the Bluetooth dongle.", colliding_dcms.join(", "));
+    }
+
+    let devices = Arc::new(DashMap::new());
+    let loop_cancellation_token = CancellationToken::new();
+
     let mut event_loop = DeviceManagerEventLoop::new(
-      config.clone(),
-      output_sender,
+      config_mgr,
       devices.clone(),
-      ping_timer,
+      loop_cancellation_token.child_token(),
+      output_sender,
       device_event_receiver,
-      allowed_devices.clone(),
-      denied_devices.clone(),
-      reserved_device_indexes.clone()
     );
     async_manager::spawn(async move {
       event_loop.run().await;
     });
-    Self {
-      device_event_sender,
+    Ok(DeviceManager {
+      comm_managers: Arc::new(comm_managers),
       devices,
-      comm_managers: Arc::new(DashMap::new()),
-      config,
-      has_run_first_scan_status: Arc::new(AtomicBool::new(false)),
-      allowed_devices,
-      denied_devices,
-      reserved_device_indexes
-    }
+      device_event_sender,
+      loop_cancellation_token
+    })
   }
+}
 
+pub struct DeviceManager {
+  // This uses a map to make sure we don't have 2 comm managers of the same type
+  // register. Also means we can do lockless access since it's a Dashmap.
+  comm_managers: Arc<Vec<Box<dyn DeviceCommunicationManager>>>,
+  devices: Arc<DashMap<u32, Arc<ButtplugDevice>>>,
+  device_event_sender: mpsc::Sender<DeviceCommunicationEvent>,
+  loop_cancellation_token: CancellationToken
+}
+
+impl DeviceManager {
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     if self.comm_managers.is_empty() {
       ButtplugUnknownError::NoDeviceCommManagers.into()
     } else {
       let mgrs = self.comm_managers.clone();
       let sender = self.device_event_sender.clone();
-      let has_run_first_scan_status = self.has_run_first_scan_status.clone();
       Box::pin(async move {
-        if !has_run_first_scan_status.load(Ordering::SeqCst) {
-          info!("Scanning Status (Only shown on first scan)");
-          let mut colliding_dcms = vec![];
-          for mgr in mgrs.iter() {
-            info!("{}: {}", mgr.key(), mgr.value().can_scan());
-            // Hack: Lovense and Bluetooth dongles will fight with each other over devices, possibly
-            // interrupting each other connecting and causing very weird issues for users. Print a
-            // warning message to logs if more than one is active and available to scan.
-            if (mgr.key() == "BtlePlugCommunicationManager"
-              || mgr.key() == "LovenseSerialDongleCommunicationManager"
-              || mgr.key() == "LovenseHIDDongleCommunicationManager")
-              && mgr.value().can_scan()
-            {
-              colliding_dcms.push(mgr.key().clone());
-            }
-          }
-          if colliding_dcms.len() > 1 {
-            warn!("The following device connection methods may collide: {}. This may mean you have lovense dongles and bluetooth dongles connected at the same time. Please disconnect the lovense dongles or turn off the Lovense HID/Serial Dongle support in Intiface/Buttplug. Lovense devices will work with the Bluetooth dongle.", colliding_dcms.join(", "));
-          }
-          has_run_first_scan_status.store(true, Ordering::SeqCst);
-        }
-
+        // TODO Does this really matter? If we're already scanning, who cares?
         for mgr in mgrs.iter() {
-          if mgr.value().scanning_status().load(Ordering::SeqCst) {
+          if mgr.scanning_status().load(Ordering::SeqCst) {
             return Err(ButtplugDeviceError::DeviceScanningAlreadyStarted.into());
           }
         }
         let fut_vec: Vec<_> = mgrs
           .iter()
-          .map(|guard| guard.value().start_scanning())
+          .map(|guard| guard.start_scanning())
           .collect();
         // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
         future::join_all(fut_vec).await;
@@ -194,8 +233,8 @@ impl DeviceManager {
       Box::pin(async move {
         let mut scanning_stopped = true;
         for mgr in mgrs.iter() {
-          if mgr.value().scanning_status().load(Ordering::SeqCst) {
-            debug!("Device manager {} has not stopped scanning yet.", mgr.key());
+          if mgr.scanning_status().load(Ordering::SeqCst) {
+            debug!("Device manager {} has not stopped scanning yet.", mgr.name());
             scanning_stopped = false;
             break;
           }
@@ -206,7 +245,7 @@ impl DeviceManager {
 
         let fut_vec: Vec<_> = mgrs
           .iter()
-          .map(|guard| guard.value().stop_scanning())
+          .map(|guard| guard.stop_scanning())
           .collect();
         // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
         future::join_all(fut_vec).await;
@@ -281,86 +320,6 @@ impl DeviceManager {
     }
   }
 
-  pub fn add_comm_manager<T>(&self, builder: T) -> Result<(), ButtplugServerError>
-  where
-    T: DeviceCommunicationManagerBuilder,
-  {
-    let mgr = builder
-      .event_sender(self.device_event_sender.clone())
-      .finish();
-    if self.comm_managers.contains_key(mgr.name()) {
-      return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
-        mgr.name().to_owned(),
-      ));
-    }
-    let status = mgr.scanning_status();
-    let sender = self.device_event_sender.clone();
-    // TODO This could run out of order and possibly cause weird scanning finished bugs?
-    async_manager::spawn(async move {
-      sender
-        .send(DeviceCommunicationEvent::DeviceManagerAdded(status))
-        .await
-        .expect("We should always have an event loop for this to go to.");
-    });
-    info!("Added device comm manager {}", mgr.name().to_owned());
-    self.comm_managers.insert(mgr.name().to_owned(), mgr);
-    Ok(())
-  }
-
-  pub fn add_allowed_device(&self, address: &str) {
-    self.allowed_devices.insert(address.to_owned());
-  }
-
-  pub fn remove_allowed_device(&self, address: &str) {
-    self.allowed_devices.remove(address);
-  }
-
-  pub fn add_denied_device(&self, address: &str) {
-    self.denied_devices.insert(address.to_owned());
-  }
-
-  pub fn remove_denied_device(&self, address: &str) {
-    self.denied_devices.remove(address);
-  }
-
-  pub fn add_reserved_device_index(&self, identifier: &ProtocolDeviceIdentifier, index: u32) {
-    self.reserved_device_indexes.insert(identifier.clone(), index);
-  }
-
-  pub fn remove_reserved_device_index(&self, identifier: &ProtocolDeviceIdentifier) {
-    self.reserved_device_indexes.remove(identifier);
-  }
-
-  pub fn add_protocol_factory<T>(&self, factory: T) -> Result<(), ButtplugServerError>
-  where
-    T: ButtplugProtocolFactory + 'static,
-  {
-    let protocol_identifier = factory.protocol_identifier().to_owned();
-    self.config.add_protocol_factory(factory).map_err(|_| ButtplugServerError::ProtocolAlreadyAdded(protocol_identifier))
-  }
-
-  pub fn remove_protocol_factory<T>(&self, protocol_identifier: &str) -> Result<(), ButtplugServerError> 
-  where
-    T: ButtplugProtocolFactory + 'static 
-  {
-    self.config.remove_protocol_factory(protocol_identifier).map_err(|_| ButtplugServerError::ProtocolDoesNotExist(protocol_identifier.to_owned()))
-  }
-
-  pub fn remove_all_protocol_factories(&self) {
-    info!("Removed all protocols");
-    self.config.remove_all_protocol_factories();
-  }
-
-  pub fn add_protocol_device_configuration(&self, name: &str, config: &ProtocolDeviceConfiguration) -> Result<(), ButtplugError> {
-    info!("Adding protocol device config {}", name);
-    self.config.add_protocol_device_configuration(name, config)
-  }
-
-  pub fn remove_protocol_device_configuration(&self, name: &str) {
-    info!("Removing protocol device config {}", name);
-    self.config.remove_protocol_device_configuration(name);
-  }
-
   pub fn device_info(&self, index: u32) -> Result<DeviceInfo, ButtplugDeviceError> {
     if let Some(device) = self.devices.get(&index) {
       Ok(DeviceInfo {
@@ -376,5 +335,6 @@ impl DeviceManager {
 impl Drop for DeviceManager {
   fn drop(&mut self) {
     info!("Dropping device manager!");
+    self.loop_cancellation_token.cancel();
   }
 }

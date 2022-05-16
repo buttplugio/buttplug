@@ -6,6 +6,7 @@
 // for full license information.
 
 mod util;
+use util::test_server_with_device;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -17,8 +18,6 @@ use buttplug::{
       Endpoint
     },
   },
-  server::device::communication::test::TestDeviceCommunicationManagerBuilder,
-  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
@@ -30,16 +29,10 @@ use std::matches;
 #[test]
 fn test_capabilities_exposure() {
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
+    let (server, _) = test_server_with_device("Onyx+").await;
     let recv = server.event_stream();
     pin_mut!(recv);
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Onyx+").await;
+
     server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
@@ -74,19 +67,9 @@ fn test_capabilities_exposure() {
 #[test]
 fn test_server_raw_message() {
   async_manager::block_on(async {
-    let server = ButtplugServerBuilder::default()
-      .allow_raw_messages(true)
-      .finish()
-      .expect("Test, assuming infallible.");
+    let (server, _) = test_server_with_device("Message Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
@@ -129,16 +112,9 @@ fn test_server_raw_message() {
 #[test]
 fn test_server_no_raw_message() {
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
+    let (server, _) = test_server_with_device("Message Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
@@ -181,16 +157,9 @@ fn test_server_no_raw_message() {
 #[test]
 fn test_reject_on_no_raw_message() {
   async_manager::block_on(async {
-    let server = ButtplugServer::default();
+    let (server, _) = test_server_with_device("Message Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    server
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    helper.add_ble_device("Massage Demo").await;
     assert!(server
       .parse_message(
         messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)

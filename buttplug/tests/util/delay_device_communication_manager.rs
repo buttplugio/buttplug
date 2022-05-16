@@ -20,20 +20,11 @@ use std::sync::{
 use tokio::sync::mpsc::Sender;
 
 #[derive(Default)]
-pub struct DelayDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-}
+pub struct DelayDeviceCommunicationManagerBuilder {}
 
 impl DeviceCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(DelayDeviceCommunicationManager::new(
-      self.sender.take().expect("Test, assuming infallible"),
-    ))
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(DelayDeviceCommunicationManager::new(sender))
   }
 }
 

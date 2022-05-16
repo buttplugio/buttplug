@@ -150,21 +150,12 @@ fn hid_read_thread(
   trace!("Leaving HID dongle read thread");
 }
 
-#[derive(Default)]
-pub struct LovenseHIDDongleCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
-}
+#[derive(Default, Clone)]
+pub struct LovenseHIDDongleCommunicationManagerBuilder {}
 
 impl DeviceCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
-    Box::new(LovenseHIDDongleCommunicationManager::new(
-      self.sender.take().expect("It's ours, we know we have it."),
-    ))
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
+    Box::new(LovenseHIDDongleCommunicationManager::new(sender))
   }
 }
 

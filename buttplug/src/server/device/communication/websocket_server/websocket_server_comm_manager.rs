@@ -28,8 +28,8 @@ pub struct WebsocketServerDeviceCommManagerInitInfo {
   pub version: u32,
 }
 
+#[derive(Clone)]
 pub struct WebsocketServerDeviceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
   listen_on_all_interfaces: bool,
   server_port: u16,
 }
@@ -37,7 +37,6 @@ pub struct WebsocketServerDeviceCommunicationManagerBuilder {
 impl Default for WebsocketServerDeviceCommunicationManagerBuilder {
   fn default() -> Self {
     Self {
-      sender: None,
       listen_on_all_interfaces: false,
       server_port: 54817,
     }
@@ -57,19 +56,11 @@ impl WebsocketServerDeviceCommunicationManagerBuilder {
 }
 
 impl DeviceCommunicationManagerBuilder for WebsocketServerDeviceCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(
-      self
-        .sender
-        .take()
-        .expect("We'll always be able to take this"),
-      self.server_port,
-      self.listen_on_all_interfaces,
+        sender,
+        self.server_port,
+        self.listen_on_all_interfaces,
     ))
   }
 }

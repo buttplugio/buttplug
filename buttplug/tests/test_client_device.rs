@@ -6,20 +6,18 @@
 // for full license information.
 
 mod util;
+use util::{test_client, test_client_with_device};
 use buttplug::{
   client::{
-    ButtplugClient,
     ButtplugClientDeviceEvent,
     ButtplugClientError,
     ButtplugClientEvent,
     VibrateCommand,
   },
   core::{
-    connector::ButtplugInProcessClientConnector,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage},
   },
-  server::device::communication::test::TestDeviceCommunicationManagerBuilder,
   util::async_manager,
 };
 use futures::StreamExt;
@@ -30,23 +28,9 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 #[test]
 fn test_client_device_connected_status() {
   async_manager::block_on(async {
-    let client = ButtplugClient::new("Test Client");
+    let (client, device) = test_client_with_device().await;
+    
     let mut event_stream = client.event_stream();
-    let connector = ButtplugInProcessClientConnector::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    connector
-      .server_ref()
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    let device = helper.add_ble_device("Massage Demo").await;
-    assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(client.connected());
     client
       .start_scanning()
       .await
@@ -83,23 +67,9 @@ fn test_client_device_connected_status() {
 #[test]
 fn test_client_device_client_disconnected_status() {
   async_manager::block_on(async {
-    let client = ButtplugClient::new("Test Client");
+    let client = test_client().await;
+    
     let mut event_stream = client.event_stream();
-    let connector = ButtplugInProcessClientConnector::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    connector
-      .server_ref()
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    let _ = helper.add_ble_device("Massage Demo").await;
-    assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(client.connected());
     client
       .start_scanning()
       .await
@@ -137,22 +107,8 @@ fn test_client_device_client_disconnected_status() {
 #[test]
 fn test_client_device_connected_no_event_listener() {
   async_manager::block_on(async {
-    let client = ButtplugClient::new("Test Client");
-    let connector = ButtplugInProcessClientConnector::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    connector
-      .server_ref()
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    let device = helper.add_ble_device("Massage Demo").await;
-    assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(client.connected());
+    let (client, device) = test_client_with_device().await;
+    
     client
       .start_scanning()
       .await
@@ -176,23 +132,9 @@ fn test_client_device_connected_no_event_listener() {
 #[test]
 fn test_client_device_invalid_command() {
   async_manager::block_on(async {
-    let client = ButtplugClient::new("Test Client");
+    let client = test_client().await;
+    
     let mut event_stream = client.event_stream();
-    let connector = ButtplugInProcessClientConnector::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    connector
-      .server_ref()
-      .device_manager()
-      .add_comm_manager(builder)
-      .expect("Test, assuming infallible.");
-    let _ = helper.add_ble_device("Massage Demo").await;
-    assert!(!client.connected());
-    client
-      .connect(connector)
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(client.connected());
     client
       .start_scanning()
       .await

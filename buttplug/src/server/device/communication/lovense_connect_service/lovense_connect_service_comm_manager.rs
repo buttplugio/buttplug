@@ -205,23 +205,14 @@ async fn lovense_local_service_check(
   }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LovenseConnectServiceCommunicationManagerBuilder {
-  sender: Option<tokio::sync::mpsc::Sender<DeviceCommunicationEvent>>,
 }
 
 impl DeviceCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
-  fn event_sender(mut self, sender: Sender<DeviceCommunicationEvent>) -> Self {
-    self.sender = Some(sender);
-    self
-  }
-
-  fn finish(mut self) -> Box<dyn DeviceCommunicationManager> {
+  fn finish(&self, sender: Sender<DeviceCommunicationEvent>) -> Box<dyn DeviceCommunicationManager> {
     Box::new(LovenseConnectServiceCommunicationManager::new(
-      self
-        .sender
-        .take()
-        .expect("We're creating/moving this, so we can take it."),
+        sender
     ))
   }
 }

@@ -77,77 +77,79 @@ use crate::{
     device::device_impl::{ButtplugDeviceResultFuture, DeviceReadCmd, DeviceImpl},
   },
 };
-use dashmap::DashMap;
 use futures::future::{self, BoxFuture};
 use generic_command_manager::GenericCommandManager;
-use std::sync::Arc;
+use std::{
+  collections::HashMap,
+  sync::Arc,
+};
 
-pub fn add_to_protocol_map<T>(map: &DashMap<String, Arc<dyn ButtplugProtocolFactory>>, factory: T)
-where
+pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ButtplugProtocolFactory>> {
+  let mut map = HashMap::new();
+  fn add_to_protocol_map<T>(map: &mut HashMap<String, Arc<dyn ButtplugProtocolFactory>>, factory: T)
+    where
   T: ButtplugProtocolFactory + 'static
-{
-  let factory = Arc::new(factory);
-  map.insert(
-    factory.protocol_identifier().to_owned(),
-    factory
-  );
-}
+  {
+    let factory = Arc::new(factory);
+    map.insert(
+      factory.protocol_identifier().to_owned(),
+      factory
+    );
+  }
 
-pub fn get_default_protocol_map() -> DashMap<String, Arc<dyn ButtplugProtocolFactory>> {
-  let map = DashMap::new();
-  add_to_protocol_map(&map, aneros::AnerosFactory::default());
-  add_to_protocol_map(&map, ankni::AnkniFactory::default());
-  add_to_protocol_map(&map, buttplug_passthru::ButtplugPassthruFactory::default());
-  add_to_protocol_map(&map, cachito::CachitoFactory::default());
-  add_to_protocol_map(&map, fredorch::FredorchFactory::default());
-  add_to_protocol_map(&map, hismith::HismithFactory::default());
-  add_to_protocol_map(&map, hgod::HgodFactory::default());
-  add_to_protocol_map(&map, htk_bm::HtkBmFactory::default());
-  add_to_protocol_map(&map, jejoue::JeJoueFactory::default());
-  add_to_protocol_map(&map, kiiroo_v2::KiirooV2Factory::default());
-  add_to_protocol_map(&map, kiiroo_v2_vibrator::KiirooV2VibratorFactory::default());
-  add_to_protocol_map(&map, kiiroo_v21::KiirooV21Factory::default());
-  add_to_protocol_map(&map, kiiroo_v21_initialized::KiirooV21InitializedFactory::default());
-  add_to_protocol_map(&map, lelof1s::LeloF1sFactory::default());
-  add_to_protocol_map(&map, lelof1sv2::LeloF1sV2Factory::default());
-  add_to_protocol_map(&map, libo_elle::LiboElleFactory::default());
-  add_to_protocol_map(&map, libo_shark::LiboSharkFactory::default());
-  add_to_protocol_map(&map, libo_vibes::LiboVibesFactory::default());
-  add_to_protocol_map(&map, lovehoney_desire::LovehoneyDesireFactory::default());
-  add_to_protocol_map(&map, lovedistance::LoveDistanceFactory::default());
-  add_to_protocol_map(&map, lovense::LovenseFactory::default());
-  add_to_protocol_map(&map, lovense_connect_service::LovenseConnectServiceFactory::default());
-  add_to_protocol_map(&map, lovenuts::LoveNutsFactory::default());
-  add_to_protocol_map(&map, magic_motion_v1::MagicMotionV1Factory::default());
-  add_to_protocol_map(&map, magic_motion_v2::MagicMotionV2Factory::default());
-  add_to_protocol_map(&map, magic_motion_v3::MagicMotionV3Factory::default());
-  add_to_protocol_map(&map, magic_motion_v4::MagicMotionV4Factory::default());
-  add_to_protocol_map(&map, mannuo::ManNuoFactory::default());
-  add_to_protocol_map(&map, maxpro::MaxproFactory::default());
-  add_to_protocol_map(&map, mizzzee::MizzZeeFactory::default());
-  add_to_protocol_map(&map, motorbunny::MotorbunnyFactory::default());
-  add_to_protocol_map(&map, mysteryvibe::MysteryVibeFactory::default());
-  add_to_protocol_map(&map, nobra::NobraFactory::default());
-  add_to_protocol_map(&map, patoo::PatooFactory::default());
-  add_to_protocol_map(&map, picobong::PicobongFactory::default());
-  add_to_protocol_map(&map, prettylove::PrettyLoveFactory::default());
-  add_to_protocol_map(&map, raw_protocol::RawProtocolFactory::default());
-  add_to_protocol_map(&map, realov::RealovFactory::default());
-  add_to_protocol_map(&map, satisfyer::SatisfyerFactory::default());
-  add_to_protocol_map(&map, svakom::SvakomFactory::default());
-  add_to_protocol_map(&map, svakom_alex::SvakomAlexFactory::default());
-  add_to_protocol_map(&map, svakom_iker::SvakomIkerFactory::default());
-  add_to_protocol_map(&map, svakom_sam::SvakomSamFactory::default());
-  add_to_protocol_map(&map, tcode_v03::TCodeV03Factory::default());
-  add_to_protocol_map(&map, thehandy::TheHandyFactory::default());
-  add_to_protocol_map(&map, vibratissimo::VibratissimoFactory::default());
-  add_to_protocol_map(&map, vorze_sa::VorzeSAFactory::default());
-  add_to_protocol_map(&map, wevibe::WeVibeFactory::default());
-  add_to_protocol_map(&map, wevibe8bit::WeVibe8BitFactory::default());
-  add_to_protocol_map(&map, xinput::XInputFactory::default());
-  add_to_protocol_map(&map, youcups::YoucupsFactory::default());
-  add_to_protocol_map(&map, youou::YououFactory::default());
-  add_to_protocol_map(&map, zalo::ZaloFactory::default());
+  add_to_protocol_map(&mut map, aneros::AnerosFactory::default());
+  add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
+  add_to_protocol_map(&mut map, buttplug_passthru::ButtplugPassthruFactory::default());
+  add_to_protocol_map(&mut map, cachito::CachitoFactory::default());
+  add_to_protocol_map(&mut map, fredorch::FredorchFactory::default());
+  add_to_protocol_map(&mut map, hismith::HismithFactory::default());
+  add_to_protocol_map(&mut map, hgod::HgodFactory::default());
+  add_to_protocol_map(&mut map, htk_bm::HtkBmFactory::default());
+  add_to_protocol_map(&mut map, jejoue::JeJoueFactory::default());
+  add_to_protocol_map(&mut map, kiiroo_v2::KiirooV2Factory::default());
+  add_to_protocol_map(&mut map, kiiroo_v2_vibrator::KiirooV2VibratorFactory::default());
+  add_to_protocol_map(&mut map, kiiroo_v21::KiirooV21Factory::default());
+  add_to_protocol_map(&mut map, kiiroo_v21_initialized::KiirooV21InitializedFactory::default());
+  add_to_protocol_map(&mut map, lelof1s::LeloF1sFactory::default());
+  add_to_protocol_map(&mut map, lelof1sv2::LeloF1sV2Factory::default());
+  add_to_protocol_map(&mut map, libo_elle::LiboElleFactory::default());
+  add_to_protocol_map(&mut map, libo_shark::LiboSharkFactory::default());
+  add_to_protocol_map(&mut map, libo_vibes::LiboVibesFactory::default());
+  add_to_protocol_map(&mut map, lovehoney_desire::LovehoneyDesireFactory::default());
+  add_to_protocol_map(&mut map, lovedistance::LoveDistanceFactory::default());
+  add_to_protocol_map(&mut map, lovense::LovenseFactory::default());
+  add_to_protocol_map(&mut map, lovense_connect_service::LovenseConnectServiceFactory::default());
+  add_to_protocol_map(&mut map, lovenuts::LoveNutsFactory::default());
+  add_to_protocol_map(&mut map, magic_motion_v1::MagicMotionV1Factory::default());
+  add_to_protocol_map(&mut map, magic_motion_v2::MagicMotionV2Factory::default());
+  add_to_protocol_map(&mut map, magic_motion_v3::MagicMotionV3Factory::default());
+  add_to_protocol_map(&mut map, magic_motion_v4::MagicMotionV4Factory::default());
+  add_to_protocol_map(&mut map, mannuo::ManNuoFactory::default());
+  add_to_protocol_map(&mut map, maxpro::MaxproFactory::default());
+  add_to_protocol_map(&mut map, mizzzee::MizzZeeFactory::default());
+  add_to_protocol_map(&mut map, motorbunny::MotorbunnyFactory::default());
+  add_to_protocol_map(&mut map, mysteryvibe::MysteryVibeFactory::default());
+  add_to_protocol_map(&mut map, nobra::NobraFactory::default());
+  add_to_protocol_map(&mut map, patoo::PatooFactory::default());
+  add_to_protocol_map(&mut map, picobong::PicobongFactory::default());
+  add_to_protocol_map(&mut map, prettylove::PrettyLoveFactory::default());
+  add_to_protocol_map(&mut map, raw_protocol::RawProtocolFactory::default());
+  add_to_protocol_map(&mut map, realov::RealovFactory::default());
+  add_to_protocol_map(&mut map, satisfyer::SatisfyerFactory::default());
+  add_to_protocol_map(&mut map, svakom::SvakomFactory::default());
+  add_to_protocol_map(&mut map, svakom_alex::SvakomAlexFactory::default());
+  add_to_protocol_map(&mut map, svakom_iker::SvakomIkerFactory::default());
+  add_to_protocol_map(&mut map, svakom_sam::SvakomSamFactory::default());
+  add_to_protocol_map(&mut map, tcode_v03::TCodeV03Factory::default());
+  add_to_protocol_map(&mut map, thehandy::TheHandyFactory::default());
+  add_to_protocol_map(&mut map, vibratissimo::VibratissimoFactory::default());
+  add_to_protocol_map(&mut map, vorze_sa::VorzeSAFactory::default());
+  add_to_protocol_map(&mut map, wevibe::WeVibeFactory::default());
+  add_to_protocol_map(&mut map, wevibe8bit::WeVibe8BitFactory::default());
+  add_to_protocol_map(&mut map, xinput::XInputFactory::default());
+  add_to_protocol_map(&mut map, youcups::YoucupsFactory::default());
+  add_to_protocol_map(&mut map, youou::YououFactory::default());
+  add_to_protocol_map(&mut map, zalo::ZaloFactory::default());
   map
 }
 
@@ -336,14 +338,12 @@ pub trait ButtplugProtocolCommandHandler: ButtplugProtocolProperties {
     device: Arc<DeviceImpl>,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugDeviceResultFuture {
-    // Time for sadness! In order to handle conversion of
-    // SingleMotorVibrateCmd, we need to know how many vibrators a device
-    // has. We don't actually know that until we get to the protocol level,
-    // so we're stuck parsing this here. Since we can assume
-    // SingleMotorVibrateCmd will ALWAYS map to vibration, we can convert to
-    // VibrateCmd here and save ourselves having to handle it in every
-    // protocol, meaning spec v0 and v1 programs will still be forward
-    // compatible with vibrators.
+    // Time for sadness! In order to handle conversion of SingleMotorVibrateCmd, we need to know how
+    // many vibrators a device has. We don't actually know that until we get to the protocol level,
+    // so we're stuck parsing this here. Since we can assume SingleMotorVibrateCmd will ALWAYS map
+    // to vibration, we can convert to VibrateCmd here and save ourselves having to handle it in
+    // every protocol, meaning spec v0 and v1 programs will still be forward compatible with
+    // vibrators.
     let vibrator_count;
     if let Some(attr) = self
       .device_attributes()
