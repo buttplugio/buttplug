@@ -8,7 +8,6 @@
 mod util;
 use util::{test_client, test_client_with_device, test_client_with_delayed_device_manager};
 extern crate buttplug;
-#[macro_use]
 extern crate tracing;
 
 use buttplug::{

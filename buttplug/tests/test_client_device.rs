@@ -6,7 +6,7 @@
 // for full license information.
 
 mod util;
-use util::{test_client, test_client_with_device};
+use util::test_client_with_device;
 use buttplug::{
   client::{
     ButtplugClientDeviceEvent,

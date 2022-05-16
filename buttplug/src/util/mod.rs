@@ -18,7 +18,7 @@ pub mod stream;
 #[cfg(all(feature = "server", feature = "client"))]
 use crate::{
   core::connector::ButtplugInProcessClientConnectorBuilder,
-  client::{ButtplugClient, ButtplugClientError},
+  client::ButtplugClient,
   server::ButtplugServerBuilder,
 };
 

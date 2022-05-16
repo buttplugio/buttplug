@@ -101,10 +101,6 @@ impl PingTimer {
     }
   }
 
-  pub fn max_ping_time(&self) -> u32 {
-    self.max_ping_time
-  }
-
   pub fn ping_timeout_waiter(&self) -> impl Future<Output = ()> {
     let notify = self.ping_timeout_notifier.clone();
     async move {

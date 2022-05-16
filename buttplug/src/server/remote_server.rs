@@ -40,10 +40,6 @@ pub enum ButtplugServerConnectorError {
   ConnectorError(String),
 }
 
-pub enum ButtplugServerCommand {
-  Disconnect,
-}
-
 pub struct ButtplugRemoteServer {
   server: Arc<ButtplugServer>,
   event_sender: broadcast::Sender<ButtplugRemoteServerEvent>,
