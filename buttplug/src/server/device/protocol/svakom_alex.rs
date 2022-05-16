@@ -11,7 +11,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    device::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
+    hardware::device_impl::{ButtplugDeviceResultFuture, DeviceImpl, DeviceWriteCmd},
   },
 };
 use std::sync::Arc;
@@ -48,7 +48,7 @@ mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      device::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,

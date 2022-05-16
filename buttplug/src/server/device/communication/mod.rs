@@ -21,7 +21,7 @@ pub mod websocket_server;
 
 pub mod test;
 
-use crate::{core::ButtplugResultFuture, server::device::device::device_impl::ButtplugDeviceImplCreator};
+use crate::{core::ButtplugResultFuture, server::device::hardware::device_impl::ButtplugDeviceImplCreator};
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;

@@ -22,7 +22,7 @@ use crate::{
   server::device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    device::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
+    hardware::device_impl::{DeviceImpl, DeviceWriteCmd, ButtplugDeviceResultFuture},
   },
 };
 use std::sync::{
@@ -133,7 +133,7 @@ mod test {
       VibrateSubcommand,
     },
     server::device::{
-      device::device_impl::{DeviceImplCommand, DeviceWriteCmd},
+      hardware::device_impl::{DeviceImplCommand, DeviceWriteCmd},
       communication::test::{
         check_test_recv_empty,
         check_test_recv_value,

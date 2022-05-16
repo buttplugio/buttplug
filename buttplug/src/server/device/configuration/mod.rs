@@ -145,7 +145,7 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap, Endpoint},
   },
-  server::device::device::device_impl::DeviceImpl,
+  server::device::hardware::device_impl::DeviceImpl,
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};

@@ -14,7 +14,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
-    device::device_impl::{
+    hardware::device_impl::{
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,

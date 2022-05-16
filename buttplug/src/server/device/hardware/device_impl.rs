@@ -18,7 +18,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    device::{ButtplugDevice},
+    hardware::{ButtplugDevice},
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
   },
 };
@@ -222,7 +222,10 @@ pub enum ButtplugDeviceEvent {
 }
 
 /// Hardware implementation and communication portion of a
-/// [ButtplugDevice](crate::device::ButtplugDevice) instance.
+/// [ButtplugDevice](crate::device::ButtplugDevice) instance. The DeviceImpl contains a
+/// DeviceImplInternal, which handles all of the actual hardware communication. However, the struct
+/// also needs to carry around identifying information, so we wrap it in this type instead of
+/// requiring that all implementors of deal with name/address/endpoint accessors.
 pub struct DeviceImpl {
   /// Device name
   name: String,

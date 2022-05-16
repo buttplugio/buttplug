@@ -25,7 +25,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    device::device_impl::{DeviceImpl, ButtplugDeviceImplCreator, ButtplugDeviceResultFuture, ButtplugDeviceEvent},
+    hardware::device_impl::{DeviceImpl, ButtplugDeviceImplCreator, ButtplugDeviceResultFuture, ButtplugDeviceEvent},
     configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocol,
   },

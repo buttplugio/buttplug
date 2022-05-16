@@ -36,7 +36,7 @@ use crate::{
   server::device::{
     configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration, ProtocolDeviceIdentifier},
     protocol::ButtplugProtocolFactory,
-    device::ButtplugDevice,
+    hardware::ButtplugDevice,
   },
   server::{
     ButtplugServerResultFuture,

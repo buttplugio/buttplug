@@ -17,7 +17,7 @@ use crate::{
   server::device::{
     protocol::ButtplugProtocolProperties, 
     configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-    device::device_impl::{DeviceImpl, DeviceWriteCmd}, 
+    hardware::device_impl::{DeviceImpl, DeviceWriteCmd}, 
   },
 };
 use std::sync::Arc;

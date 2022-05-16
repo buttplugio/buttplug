@@ -14,7 +14,7 @@ use crate::{
     DeviceCommunicationManager,
     DeviceCommunicationManagerBuilder,
     },
-    device::device_impl::ButtplugDeviceEvent,
+    hardware::device_impl::ButtplugDeviceEvent,
   },
   util::async_manager,
 };

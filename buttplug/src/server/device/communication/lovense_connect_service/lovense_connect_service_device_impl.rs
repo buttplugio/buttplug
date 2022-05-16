@@ -14,7 +14,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, LovenseConnectServiceSpecifier, ProtocolDeviceConfiguration},
-    device::device_impl::{
+    hardware::device_impl::{
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,

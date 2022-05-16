@@ -16,7 +16,7 @@ use crate::{
     device::{
       configuration::DeviceConfigurationManager,
       communication::DeviceCommunicationEvent,
-      device::{
+      hardware::{
         ButtplugDevice,
         device_impl::{ButtplugDeviceImplCreator, ButtplugDeviceEvent}
       }

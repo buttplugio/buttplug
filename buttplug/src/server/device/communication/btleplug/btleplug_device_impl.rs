@@ -13,7 +13,7 @@ use crate::{
   },
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
-    device::device_impl::{
+    hardware::device_impl::{
     ButtplugDeviceEvent,
     ButtplugDeviceImplCreator,
     DeviceImpl,

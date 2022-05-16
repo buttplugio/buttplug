@@ -96,10 +96,7 @@
 //! 
 
 pub mod communication;
-//pub mod hardware;
 pub mod manager;
 pub mod configuration;
-pub mod device;
+pub mod hardware;
 pub mod protocol;
-
-//pub mod new_device;
