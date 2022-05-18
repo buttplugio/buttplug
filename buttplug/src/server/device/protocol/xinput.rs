@@ -5,20 +5,23 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::{ButtplugProtocol, ButtplugProtocolCommandHandler, ButtplugProtocolFactory};
 use crate::{
   core::{
-    errors::ButtplugMessageError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
+    errors::{ButtplugDeviceError, ButtplugMessageError},
+    messages::{
+      self, BatteryLevelReading, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage,
+      ButtplugServerMessage, Endpoint,
+    },
   },
   server::{
-    ButtplugServerResultFuture,
     device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
       configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
+      hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
+      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     },
-  }
+    ButtplugServerResultFuture,
+  },
 };
 use byteorder::{LittleEndian, WriteBytesExt};
 use std::sync::Arc;
@@ -108,6 +111,33 @@ impl ButtplugProtocolCommandHandler for XInput {
         }
         Err(e) => Err(e),
       }
+    })
+  }
+
+  fn handle_battery_level_cmd(
+    &self,
+    device: Arc<Hardware>,
+    _message: messages::BatteryLevelCmd,
+  ) -> ButtplugServerResultFuture {
+    Box::pin(async move {
+      let rawreading = device
+        .read_value(HardwareReadCmd::new(Endpoint::Rx, 0, 0))
+        .await?;
+      let id = rawreading.device_index();
+      let battery = match rawreading.data()[0] {
+        0 => 0.0,
+        1 => 0.33,
+        2 => 0.66,
+        3 => 1.0,
+        _ => {
+          return Err(
+            ButtplugDeviceError::DeviceCommunicationError(format!("something went wrong")).into(),
+          )
+        }
+      };
+      Ok(ButtplugServerMessage::BatteryLevelReading(
+        BatteryLevelReading::new(id, battery),
+      ))
     })
   }
 }
