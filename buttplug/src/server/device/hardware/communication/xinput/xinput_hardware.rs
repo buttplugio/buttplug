@@ -75,7 +75,7 @@ impl HardwareCreator for XInputHardwareCreator {
     let hardware = Hardware::new(
       &self.index.to_string(),
       &create_address(self.index),
-      &[Endpoint::Tx],
+      &[Endpoint::Tx, Endpoint::Rx],
       Box::new(hardware_internal),
     );
     Ok(hardware)
@@ -121,7 +121,16 @@ impl HardwareInternal for XInputHardware {
     &self,
     _msg: HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
-    panic!("We should never get here!");
+    let handle = self.handle.clone();
+    let index = self.index;
+    Box::pin(async move {
+      let battery = handle
+        .get_gamepad_battery_information(index as u32)
+        .map_err(|e| {
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
+        })?;
+      Ok(RawReading::new(index as u32, Endpoint::Rx, vec![battery.battery_level.0]))
+    })
   }
 
   fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
