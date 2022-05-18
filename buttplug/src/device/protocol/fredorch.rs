@@ -5,6 +5,7 @@ use super::{
   ButtplugProtocolCommandHandler,
 };
 use crate::{
+  core::errors::ButtplugDeviceError,
   core::messages::{
     self,
     ButtplugDeviceCommandMessageUnion,
@@ -14,17 +15,26 @@ use crate::{
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
+    ButtplugDeviceEvent,
     DeviceImpl,
     DeviceProtocolConfiguration,
+    DeviceSubscribeCmd,
     DeviceWriteCmd,
     Endpoint,
   },
 };
-use std::sync::{
-  atomic::{AtomicU8, Ordering::SeqCst},
-  Arc,
+use futures::FutureExt;
+use futures_timer::Delay;
+use std::{
+  sync::{
+    atomic::{AtomicU8, Ordering::SeqCst},
+    Arc,
+  },
+  time::Duration,
 };
 use tokio::sync::Mutex;
+
+const FREDORCH_TIMEOUT_MS: u64 = 500;
 
 const CRC_HI: [u8; 256] = [
   0, 193, 129, 64, 1, 192, 128, 65, 1, 192, 128, 65, 0, 193, 129, 64, 1, 192, 128, 65, 0, 193, 129,
@@ -98,53 +108,91 @@ impl ButtplugProtocol for Fredorch {
     Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
   > {
     Box::pin(async move {
-      // Set the device to program mode
-      let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
-      let mut crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
+      let mut event_receiver = device_impl.event_stream();
       device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .subscribe(DeviceSubscribeCmd::new(Endpoint::Rx))
         .await?;
 
-      // Set the program mode to record
-      data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
-
-      // Program the device to move to position 0 at speed 5
-      data = vec![
-        0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x01,
+      let init: Vec<(String, Vec<u8>)> = vec![
+        (
+          "Set the device to program mode".to_owned(),
+          vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01],
+        ),
+        (
+          "Set the program mode to record".to_owned(),
+          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00],
+        ),
+        (
+          "Program the device to move to position 0 at speed 5".to_owned(),
+          vec![
+            0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x01,
+          ],
+        ),
+        (
+          "Run the program".to_owned(),
+          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01],
+        ),
+        (
+          "Set the program to repeat".to_owned(),
+          vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01],
+        ),
       ];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
 
-      // Run the program
-      data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+      // expect 0, 1, 0, 1, 1 on connect
+      select! {
+        event = event_receiver.recv().fuse() => {
+          if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+            debug!("Fredorch: wake up - received {:?}", n);
+          } else {
+            return Err(
+              ButtplugDeviceError::ProtocolSpecificError(
+                "Fredorch".to_owned(),
+                "Fredorch Device disconnected while initialising.".to_owned(),
+              )
+              .into(),
+            );
+          }
+        }
+        _ = Delay::new(Duration::from_millis(FREDORCH_TIMEOUT_MS)).fuse() => {
+          // Or not?
+        }
+      }
 
-      // Set the program to repeat
-      data = vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      device_impl
-        .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+      for mut data in init {
+        let crc = crc16(&data.1);
+        data.1.push(crc[0]);
+        data.1.push(crc[1]);
+        debug!("Fredorch: {} - sent {:?}", data.0, data.1);
+        device_impl
+          .write_value(DeviceWriteCmd::new(Endpoint::Tx, data.1.clone(), false))
+          .await?;
+
+        select! {
+          event = event_receiver.recv().fuse() => {
+            if let Ok(ButtplugDeviceEvent::Notification(_, _, n)) = event {
+              debug!("Fredorch: {} - received {:?}", data.0, n);
+            } else {
+              return Err(
+                ButtplugDeviceError::ProtocolSpecificError(
+                  "Fredorch".to_owned(),
+                  "Fredorch Device disconnected while initialising.".to_owned(),
+                )
+                .into(),
+              );
+            }
+          }
+          _ = Delay::new(Duration::from_millis(FREDORCH_TIMEOUT_MS)).fuse() => {
+            return Err(
+                ButtplugDeviceError::ProtocolSpecificError(
+                  "Fredorch".to_owned(),
+                  "Fredorch Device timed out while initialising.".to_owned(),
+                )
+                .into(),
+              );
+          }
+        }
+      }
 
       let (name, attrs) =
         crate::device::protocol::get_protocol_features(device_impl, None, config)?;
@@ -180,6 +228,7 @@ impl ButtplugProtocolCommandHandler for Fredorch {
     let previous_position = self.previous_position.clone();
     let position = ((message.position() as f64 / 99.0) * 150.0) as u8;
     let speed = ((message.speed() as f64 / 99.0) * 15.0) as u8;
+    debug!("Fredorch: move to {} at speed {}", position, speed);
     let mut data: Vec<u8> = vec![
       0x01, 0x10, 0x00, 0x6B, 0x00, 0x05, 0x0a, 0x00, speed, 0x00, speed, 0x00, position, 0x00,
       position, 0x00, 0x01,
@@ -211,6 +260,7 @@ mod test {
   };
 
   #[test]
+  #[ignore]
   pub fn test_fredorch_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("YXlinksSPP")
@@ -304,6 +354,7 @@ mod test {
   }
 
   #[test]
+  #[ignore]
   pub fn test_fredorch_linearcmd() {
     async_manager::block_on(async move {
       let (device, test_device) = new_bluetoothle_test_device("YXlinksSPP")
