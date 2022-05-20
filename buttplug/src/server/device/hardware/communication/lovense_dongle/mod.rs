@@ -11,7 +11,7 @@ mod lovense_dongle_state_machine;
 pub mod lovense_hid_dongle_comm_manager;
 pub mod lovense_serial_dongle_comm_manager;
 
-pub use lovense_dongle_hardware::{LovenseDongleHardware, LovenseDongleHardwareCreator};
+pub use lovense_dongle_hardware::{LovenseDongleHardware, LovenseDongleHardwareConnector};
 pub use lovense_hid_dongle_comm_manager::{
   LovenseHIDDongleCommunicationManager,
   LovenseHIDDongleCommunicationManagerBuilder,

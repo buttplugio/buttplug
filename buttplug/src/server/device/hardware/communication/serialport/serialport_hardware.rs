@@ -15,7 +15,8 @@ use crate::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
     hardware::{
     HardwareEvent,
-    HardwareCreator,
+    HardwareConnector,
+    HardwareSpecializer,
     Hardware,
     HardwareInternal,
     HardwareReadCmd,
@@ -43,12 +44,12 @@ use std::{
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
-pub struct SerialPortHardwareCreator {
+pub struct SerialPortHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
   port_info: SerialPortInfo,
 }
 
-impl SerialPortHardwareCreator {
+impl SerialPortHardwareConnector {
   pub fn new(port_info: &SerialPortInfo) -> Self {
     Self {
       specifier: ProtocolCommunicationSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
@@ -57,7 +58,7 @@ impl SerialPortHardwareCreator {
   }
 }
 
-impl Debug for SerialPortHardwareCreator {
+impl Debug for SerialPortHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("SerialPortHardwareCreator")
       .field("port_info", &self.port_info)
@@ -66,15 +67,36 @@ impl Debug for SerialPortHardwareCreator {
 }
 
 #[async_trait]
-impl HardwareCreator for SerialPortHardwareCreator {
+impl HardwareConnector for SerialPortHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_hardware(
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
+    Ok(Box::new(SerialPortHardwareSpecialzier::new(&self.port_info)))
+  }
+}
+
+pub struct SerialPortHardwareSpecialzier {
+  port_info: SerialPortInfo,
+}
+
+impl SerialPortHardwareSpecialzier {
+  pub fn new(port_info: &SerialPortInfo) -> Self {
+    Self {
+      port_info: port_info.clone(),
+    }
+  }
+}
+
+#[async_trait]
+impl HardwareSpecializer for SerialPortHardwareSpecialzier {
+  // For serial, connection happens during specialize because we can't find the port until we have
+  // the protocol def.
+  async fn specialize(
     &mut self,
-    protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+    protocol: &ProtocolDeviceConfiguration,
+  ) -> Result<Hardware, ButtplugDeviceError> {
     let hardware_internal = SerialPortHardware::try_create(&self.port_info, protocol).await?;
     let hardware = Hardware::new(
       &self.port_info.port_name,
@@ -156,8 +178,8 @@ pub struct SerialPortHardware {
 impl SerialPortHardware {
   pub async fn try_create(
     port_info: &SerialPortInfo,
-    protocol_def: ProtocolDeviceConfiguration,
-  ) -> Result<Self, ButtplugError> {
+    protocol_def: &ProtocolDeviceConfiguration,
+  ) -> Result<Self, ButtplugDeviceError> {
     let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.
     let mut port_def = None;
@@ -203,9 +225,9 @@ impl SerialPortHardware {
       .await
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
-        ButtplugError::from(ButtplugDeviceError::DeviceSpecificError(
+        ButtplugDeviceError::DeviceSpecificError(
           HardwareSpecificError::SerialError(e.to_string()),
-        ))
+        )
       })?;
     debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);

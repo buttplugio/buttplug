@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::websocket_server_hardware::WebsocketServerHardwareCreator;
+use super::websocket_server_hardware::WebsocketServerHardwareConnector;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
@@ -140,7 +140,7 @@ impl WebsocketServerDeviceCommunicationManager {
                   .send(HardwareCommunicationManagerEvent::DeviceFound {
                     name: format!("Websocket Device {}", info_packet.identifier),
                     address: info_packet.address.clone(),
-                    creator: Box::new(WebsocketServerHardwareCreator::new(
+                    creator: Box::new(WebsocketServerHardwareConnector::new(
                       info_packet,
                       ws_stream,
                     )),

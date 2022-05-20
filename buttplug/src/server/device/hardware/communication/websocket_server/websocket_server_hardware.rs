@@ -13,10 +13,12 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, WebsocketSpecifier},
+    configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},
     hardware::{
     HardwareEvent,
-    HardwareCreator,
+    HardwareConnector,
+    HardwareSpecializer,
+    GenericHardwareSpecializer,
     Hardware,
     HardwareInternal,
     HardwareReadCmd,
@@ -154,14 +156,23 @@ async fn run_connection_loop<S>(
   debug!("Exiting Websocket Server Device control loop.");
 }
 
-pub struct WebsocketServerHardwareCreator {
-  info: WebsocketServerDeviceCommManagerInitInfo,
-  outgoing_sender: Option<Sender<Vec<u8>>>,
-  incoming_broadcaster: Option<broadcast::Sender<Vec<u8>>>,
-  device_event_sender: Option<broadcast::Sender<HardwareEvent>>,
+
+impl Debug for WebsocketServerHardwareConnector {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("WebsocketServerHardwareConnector")
+    .field("info", &self.info)
+      .finish()
+  }
 }
 
-impl WebsocketServerHardwareCreator {
+pub struct WebsocketServerHardwareConnector {
+  info: WebsocketServerDeviceCommManagerInitInfo,
+  outgoing_sender: Sender<Vec<u8>>,
+  incoming_broadcaster: broadcast::Sender<Vec<u8>>,
+  device_event_sender: broadcast::Sender<HardwareEvent>,
+}
+
+impl WebsocketServerHardwareConnector {
   pub fn new<S>(
     info: WebsocketServerDeviceCommManagerInitInfo,
     ws_stream: async_tungstenite::WebSocketStream<S>,
@@ -187,45 +198,33 @@ impl WebsocketServerHardwareCreator {
     });
     Self {
       info,
-      outgoing_sender: Some(outgoing_sender),
-      incoming_broadcaster: Some(incoming_broadcaster),
-      device_event_sender: Some(device_event_sender),
+      outgoing_sender: outgoing_sender,
+      incoming_broadcaster: incoming_broadcaster,
+      device_event_sender: device_event_sender,
     }
   }
 }
 
-impl Debug for WebsocketServerHardwareCreator {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("WebsocketServerHardwareCreator")
-      .field("info", &self.info)
-      .finish()
-  }
-}
-
 #[async_trait]
-impl HardwareCreator for WebsocketServerHardwareCreator {
+impl HardwareConnector for WebsocketServerHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
 
-  async fn try_create_hardware(
-    &mut self,
-    _: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+  async fn connect(
+    &mut self
+  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     let hardware_internal = WebsocketServerHardware::new(
       self
         .device_event_sender
-        .take()
-        .expect("We own this so we can always take."),
+        .clone(),
       self.info.clone(),
       self
         .outgoing_sender
-        .take()
-        .expect("We own this so we can always take."),
+        .clone(),
       self
         .incoming_broadcaster
-        .take()
-        .expect("We own this so we can always take."),
+        .clone(),
     );
     let hardware = Hardware::new(
       &self.info.identifier,
@@ -233,7 +232,7 @@ impl HardwareCreator for WebsocketServerHardwareCreator {
       &[Endpoint::Rx, Endpoint::Tx],
       Box::new(hardware_internal),
     );
-    Ok(hardware)
+    Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
   }
 }
 

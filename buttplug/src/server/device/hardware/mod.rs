@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
   core::{
-    errors::ButtplugError,
+    errors::{ButtplugError, ButtplugDeviceError},
     messages::{
       Endpoint,
       RawReadCmd,
@@ -330,30 +330,41 @@ pub trait HardwareInternal: Sync + Send {
   fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture;
 }
 
-/// Factory trait for [Hardware](crate::device::Hardware) instances in
-/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
-/// 
-/// This trait is implemented by
-/// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
-/// to handle initial device connection and setup based on the specific communication bus that is
-/// being implemented by the DCM. This may handle things like connection and finding characteristics
-/// for Bluetooth LE, connection to USB devices and checking descriptors/endpoints, etc...
-/// 
-/// If a [Hardware](crate::device::Hardware) is returned from the try_create_hardware method,
-/// it is assumed the device is connected and ready to be used.
 #[async_trait]
-pub trait HardwareCreator: Sync + Send + Debug {
+pub trait HardwareConnector: Sync + Send + Debug {
   /// Return the hardware identifier for the device. Depends on the communication bus type, so may
   /// be a bluetooth name, serial port name, etc...
   fn specifier(&self) -> ProtocolCommunicationSpecifier;
-  /// Try to connect to and initialize a device.
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError>;
+}
+
+#[async_trait]
+pub trait HardwareSpecializer: Sync + Send {
+  /// Try to initialize a device.
   /// 
   /// Given a
   /// [ProtocolDeviceConfiguration](crate::server::device::configuration::ProtocolDeviceConfiguration)
   /// which will contain information about what a protocol needs to communicate with a device, try
-  /// to connect to the device and identify all required endpoints.
-  async fn try_create_hardware(
-    &mut self,
-    protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError>;
+  /// to identify all required endpoints on the hardware.
+  async fn specialize(&mut self, protocol: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError>;
+}
+
+/// Used in cases where there's nothing to specialize for the protocol.
+pub struct GenericHardwareSpecializer {
+  hardware: Option<Hardware>
+}
+
+impl GenericHardwareSpecializer {
+  pub fn new(hardware: Hardware) -> Self {
+    Self {
+      hardware: Some(hardware)
+    }
+  }
+}
+
+#[async_trait]
+impl HardwareSpecializer for GenericHardwareSpecializer {
+  async fn specialize(&mut self, _: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError> {
+    Ok(self.hardware.take().expect("This should only be run once"))
+  }
 }

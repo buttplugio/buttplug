@@ -7,6 +7,7 @@
 
 //! Implementations of communication protocols for hardware supported by Buttplug
 
+pub mod generic_command_manager;
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
 pub mod ankni;
@@ -14,7 +15,7 @@ pub mod buttplug_passthru;
 pub mod cachito;
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
-pub mod generic_command_manager;
+
 pub mod hgod;
 pub mod hismith;
 pub mod htk_bm;

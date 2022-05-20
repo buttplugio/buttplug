@@ -630,7 +630,7 @@ impl LovenseDongleState for LovenseDongleDeviceLoop {
       .send_event(HardwareCommunicationManagerEvent::DeviceFound {
         name: "Lovense Dongle Device".to_owned(),
         address: self.device_id.clone(),
-        creator: Box::new(LovenseDongleHardwareCreator::new(
+        creator: Box::new(LovenseDongleHardwareConnector::new(
           &self.device_id,
           device_write_sender,
           device_read_receiver,

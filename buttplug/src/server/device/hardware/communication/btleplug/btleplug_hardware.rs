@@ -14,8 +14,9 @@ use crate::{
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     hardware::{
+      HardwareConnector,
+      HardwareSpecializer,
     HardwareEvent,
-    HardwareCreator,
     Hardware,
     HardwareInternal,
     HardwareReadCmd,
@@ -30,7 +31,7 @@ use crate::{
 use async_trait::async_trait;
 use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
-  platform::{Adapter, PeripheralId},
+  platform::Adapter,
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -49,51 +50,50 @@ use std::{
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
-pub struct BtlePlugHardwareCreator<T: Peripheral + 'static> {
+pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
+  // Passed in and stored as a member because otherwise it's annoying to get (properties require await)
   name: String,
-  address: PeripheralId,
+  // Passed in and stored as a member because otherwise it's annoying to get (properties require await)
   services: Vec<Uuid>,
   device: T,
   adapter: Adapter,
 }
 
-impl<T: Peripheral> BtlePlugHardwareCreator<T> {
+impl<T: Peripheral> BtleplugHardwareConnector<T> {
   pub fn new(
     name: &str,
-    address: &PeripheralId,
-    services: &[Uuid],
+    services: &Vec<Uuid>,
     device: T,
     adapter: Adapter,
   ) -> Self {
     Self {
       name: name.to_owned(),
-      address: address.to_owned(),
-      services: services.to_vec(),
+      services: services.clone(),
       device,
-      adapter,
+      adapter
     }
   }
 }
 
-impl<T: Peripheral> Debug for BtlePlugHardwareCreator<T> {
+impl<T: Peripheral> Debug for BtleplugHardwareConnector<T> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("BtlePlugHardwareCreator").finish()
+    f.debug_struct("BtleplugHardwareCreator")
+    .field("name", &self.name)
+    .field("address", &self.device.id())
+    .finish()
   }
 }
 
 #[async_trait]
-impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
+impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
-      &self.services,
+      &self.services
     ))
   }
 
-  async fn try_create_hardware(
-    &mut self,
-    protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     if !self
       .device
       .is_connected()
@@ -117,9 +117,37 @@ impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
         );
       }
     }
+    Ok(Box::new(BtleplugHardwareSpecializer::new(&self.name, self.device.clone(), self.adapter.clone())))
+  }
+}
+
+pub struct BtleplugHardwareSpecializer<T: Peripheral + 'static> {
+  name: String,
+  device: T,
+  adapter: Adapter
+}
+
+impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
+  pub(super) fn new(
+    name: &str,
+    device: T,
+    adapter: Adapter,
+  ) -> Self {
+    Self {
+      name: name.to_owned(),
+      device,
+      adapter
+    }
+  }
+}
+
+#[async_trait]
+impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
+  async fn specialize(&mut self, protocol: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError> {
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
+    let address = self.device.id();
 
     if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
       for (proto_uuid, proto_service) in btle.services() {
@@ -147,9 +175,9 @@ impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
         }
       }
     } else {
-      error!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, self.address);
+      error!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, address);
       return Err(
-        ButtplugDeviceError::DeviceConnectionError(format!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, self.address))
+        ButtplugDeviceError::DeviceConnectionError(format!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, address))
         .into(),
       );
     }
@@ -158,10 +186,10 @@ impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
       .notifications()
       .await
       .expect("Should always be able to get notifications");
+  
     let device_internal_impl = BtlePlugHardware::new(
       self.device.clone(),
       &self.name,
-      self.address.clone(),
       self
         .adapter
         .events()
@@ -173,7 +201,7 @@ impl<T: Peripheral> HardwareCreator for BtlePlugHardwareCreator<T> {
     );
     let hardware = Hardware::new(
       &self.name,
-      &format!("{:?}", self.address),
+      &format!("{:?}", address),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
       Box::new(device_internal_impl),
     );
@@ -192,7 +220,6 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
   pub fn new(
     device: T,
     name: &str,
-    address: PeripheralId,
     mut adapter_event_stream: Pin<Box<dyn Stream<Item = CentralEvent> + Send>>,
     mut notification_stream: Pin<Box<dyn Stream<Item = ValueNotification> + Send>>,
     endpoints: HashMap<Endpoint, Characteristic>,
@@ -200,7 +227,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
   ) -> Self {
     let (event_stream, _) = broadcast::channel(256);
     let event_stream_clone = event_stream.clone();
-    let address_clone = address.clone();
+    let address = device.id();
     let name_clone = name.to_owned();
     async_manager::spawn(async move {
       let mut error_notification = false;
@@ -239,7 +266,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
           }
           adapter_event = adapter_event_stream.next().fuse() => {
             if let Some(CentralEvent::DeviceDisconnected(addr)) = adapter_event {
-              if address_clone == addr {
+              if address == addr {
                 info!(
                   "Device {:?} disconnected",
                   name_clone
@@ -265,7 +292,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
       }
       info!(
         "Exiting btleplug notification/event loop for device {:?}",
-        address_clone
+        address
       )
     });
     Self {

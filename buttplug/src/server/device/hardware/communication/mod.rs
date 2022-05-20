@@ -19,9 +19,10 @@ pub mod xinput;
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;
 
+
 pub mod test;
 
-use crate::{core::ButtplugResultFuture, server::device::hardware::HardwareCreator};
+use crate::{core::ButtplugResultFuture, server::device::hardware::HardwareConnector};
 use serde::{Deserialize, Serialize};
 use std::sync::{atomic::AtomicBool, Arc};
 use thiserror::Error;
@@ -34,7 +35,7 @@ pub enum HardwareCommunicationManagerEvent {
   DeviceFound {
     name: String,
     address: String,
-    creator: Box<dyn HardwareCreator>,
+    creator: Box<dyn HardwareConnector>,
   },
   DeviceManagerAdded(Arc<AtomicBool>),
   ScanningStarted,

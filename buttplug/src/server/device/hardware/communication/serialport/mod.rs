@@ -12,4 +12,4 @@ pub use serialport_comm_manager::{
   SerialPortCommunicationManager,
   SerialPortCommunicationManagerBuilder,
 };
-pub use serialport_hardware::{SerialPortHardware, SerialPortHardwareCreator};
+pub use serialport_hardware::{SerialPortHardware, SerialPortHardwareConnector};

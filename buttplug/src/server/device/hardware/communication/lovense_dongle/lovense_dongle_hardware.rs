@@ -6,11 +6,8 @@
 // for full license information.
 
 use super::lovense_dongle_messages::{
-  LovenseDongleIncomingMessage,
-  LovenseDongleMessageFunc,
-  LovenseDongleMessageType,
-  LovenseDongleOutgoingMessage,
-  OutgoingLovenseData,
+  LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
+  LovenseDongleOutgoingMessage, OutgoingLovenseData,
 };
 use crate::{
   core::{
@@ -19,16 +16,13 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
+    configuration::{
+      BluetoothLESpecifier, ProtocolCommunicationSpecifier
+    },
     hardware::{
-    HardwareEvent,
-    HardwareCreator,
-    Hardware,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      Hardware, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd,
+      HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
+      GenericHardwareSpecializer
     },
   },
   util::async_manager,
@@ -42,23 +36,23 @@ use std::sync::{
 };
 use tokio::sync::{broadcast, mpsc};
 
-pub struct LovenseDongleHardwareCreator {
+pub struct LovenseDongleHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
   id: String,
   device_outgoing: mpsc::Sender<OutgoingLovenseData>,
   device_incoming: Option<mpsc::Receiver<LovenseDongleIncomingMessage>>,
 }
 
-impl Debug for LovenseDongleHardwareCreator {
+impl Debug for LovenseDongleHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LovenseDongleHardwareCreator")
+    f.debug_struct("LovenseDongleHardwareConnector")
       .field("id", &self.id)
       .field("specifier", &self.specifier)
       .finish()
   }
 }
 
-impl LovenseDongleHardwareCreator {
+impl LovenseDongleHardwareConnector {
   pub fn new(
     id: &str,
     device_outgoing: mpsc::Sender<OutgoingLovenseData>,
@@ -72,10 +66,9 @@ impl LovenseDongleHardwareCreator {
       // when we get the device, we can set up as we need.
       //
       // Hacky, but it works.
-      specifier: ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-DongleDevice",
-        &[],
-      )),
+      specifier: ProtocolCommunicationSpecifier::BluetoothLE(
+        BluetoothLESpecifier::new_from_device("LVS-DongleDevice", &[]),
+      ),
       id: id.to_string(),
       device_outgoing,
       device_incoming: Some(device_incoming),
@@ -84,15 +77,14 @@ impl LovenseDongleHardwareCreator {
 }
 
 #[async_trait]
-impl HardwareCreator for LovenseDongleHardwareCreator {
+impl HardwareConnector for LovenseDongleHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_hardware(
+  async fn connect(
     &mut self,
-    _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     let hardware_internal = LovenseDongleHardware::new(
       &self.id,
       self.device_outgoing.clone(),
@@ -107,7 +99,7 @@ impl HardwareCreator for LovenseDongleHardwareCreator {
       &[Endpoint::Rx, Endpoint::Tx],
       Box::new(hardware_internal),
     );
-    Ok(device)
+    Ok(Box::new(GenericHardwareSpecializer::new(device)))
   }
 }
 

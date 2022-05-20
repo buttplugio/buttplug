@@ -14,8 +14,9 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
     hardware::{
+      HardwareConnector,
+      HardwareSpecializer,
     HardwareEvent,
-    HardwareCreator,
     Hardware,
     HardwareCommand,
     HardwareInternal,
@@ -35,26 +36,26 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc};
 
-pub struct TestHardwareCreator {
+pub struct TestHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
-  hardware: Option<Arc<TestDeviceInternal>>,
+  hardware: Arc<TestDeviceInternal>,
 }
 
-impl TestHardwareCreator {
+impl TestHardwareConnector {
   #[allow(dead_code)]
   pub fn new(specifier: ProtocolCommunicationSpecifier, hardware: Arc<TestDeviceInternal>) -> Self {
     Self {
       specifier,
-      hardware: Some(hardware),
+      hardware,
     }
   }
 
-  pub fn device(&self) -> &Option<Arc<TestDeviceInternal>> {
-    &self.hardware
+  pub fn device(&self) -> Arc<TestDeviceInternal> {
+    self.hardware.clone()
   }
 }
 
-impl Debug for TestHardwareCreator {
+impl Debug for TestHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("TestHardwareCreator")
       .field("specifier", &self.specifier)
@@ -63,19 +64,35 @@ impl Debug for TestHardwareCreator {
 }
 
 #[async_trait]
-impl HardwareCreator for TestHardwareCreator {
+impl HardwareConnector for TestHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     self.specifier.clone()
   }
 
-  async fn try_create_hardware(
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
+    Ok(Box::new(TestHardwareSpecializer::new(self.hardware.clone())))
+  }
+}
+
+pub struct TestHardwareSpecializer {
+  hardware: Arc<TestDeviceInternal>,
+}
+
+impl TestHardwareSpecializer {
+  fn new(hardware: Arc<TestDeviceInternal>) -> Self {
+    Self {
+      hardware
+    }
+  }
+}
+
+#[async_trait]
+impl HardwareSpecializer for TestHardwareSpecializer {
+  async fn specialize(
     &mut self,
-    protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
-    let device = self
-      .hardware
-      .take()
-      .expect("We'll always have this at this point");
+    protocol: &ProtocolDeviceConfiguration,
+  ) -> Result<Hardware, ButtplugDeviceError> {
+    let device = self.hardware.clone();
     if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
       for endpoint_map in btle.services().values() {
         for endpoint in endpoint_map.keys() {

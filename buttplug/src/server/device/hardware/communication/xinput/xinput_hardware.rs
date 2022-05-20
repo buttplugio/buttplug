@@ -17,10 +17,12 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, XInputSpecifier},
+    configuration::{ProtocolCommunicationSpecifier, XInputSpecifier},
     hardware::{
     HardwareEvent,
-    HardwareCreator,
+    HardwareConnector,
+    GenericHardwareSpecializer,
+    HardwareSpecializer,
     Hardware,
     HardwareInternal,
     HardwareReadCmd,
@@ -41,35 +43,34 @@ use std::{
 };
 use tokio::sync::broadcast;
 
-pub struct XInputHardwareCreator {
+pub struct XInputHardwareConnector {
   index: XInputControllerIndex,
 }
 
-impl XInputHardwareCreator {
+impl XInputHardwareConnector {
   pub fn new(index: XInputControllerIndex) -> Self {
     debug!("Emitting a new xbox device impl creator!");
     Self { index }
   }
 }
 
-impl Debug for XInputHardwareCreator {
+impl Debug for XInputHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("XInputHardwareCreator")
+    f.debug_struct("XInputHardwareConnector")
       .field("index", &self.index)
       .finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for XInputHardwareCreator {
+impl HardwareConnector for XInputHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::XInput(XInputSpecifier::default())
   }
 
-  async fn try_create_hardware(
+  async fn connect(
     &mut self,
-    _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     debug!("Emitting a new xbox device impl.");
     let hardware_internal = XInputHardware::new(self.index);
     let hardware = Hardware::new(
@@ -78,7 +79,7 @@ impl HardwareCreator for XInputHardwareCreator {
       &[Endpoint::Tx, Endpoint::Rx],
       Box::new(hardware_internal),
     );
-    Ok(hardware)
+    Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
   }
 }
 

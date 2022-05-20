@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::btleplug_hardware::BtlePlugHardwareCreator;
+use super::btleplug_hardware::BtleplugHardwareConnector;
 use crate::server::device::hardware::communication::HardwareCommunicationManagerEvent;
 use btleplug::{
   api::{Central, CentralEvent, Manager as _, Peripheral, ScanFilter},
@@ -104,9 +104,8 @@ impl BtleplugAdapterTask {
         peripheral_info
       );
       tried_addresses.push(peripheral_info.clone());
-      let device_creator = Box::new(BtlePlugHardwareCreator::new(
+      let device_creator = Box::new(BtleplugHardwareConnector::new(
         &device_name,
-        peripheral_id,
         &properties.services,
         peripheral.clone(),
         adapter.clone(),

@@ -25,7 +25,7 @@ use crate::{
   server::{
     ButtplugServerResultFuture,
     device::{
-      hardware::{Hardware, HardwareCreator, HardwareEvent},
+      hardware::{Hardware, HardwareConnector, HardwareEvent},
       configuration::{ProtocolInstanceFactory, ProtocolAttributesIdentifier},
       protocol::ButtplugProtocol,
     },
@@ -158,14 +158,16 @@ impl ServerDevice {
   /// client and use.
   pub async fn try_create_device(
     protocol_builder: ProtocolInstanceFactory,
-    mut device_creator: Box<dyn HardwareCreator>,
+    mut device_connector: Box<dyn HardwareConnector>,
   ) -> Result<Option<ServerDevice>, ButtplugError> {
     // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
     
+    let mut hardware_specializer = device_connector.connect().await?;
+
     // Now that we have both a possible device implementation and a configuration for that device,
     // try to initialize the implementation. This usually means trying to connect to whatever the
     // device is, finding endpoints, etc.
-    let hardware = device_creator.try_create_hardware(protocol_builder.configuration().clone()).await?;
+    let hardware = hardware_specializer.specialize(&protocol_builder.configuration()).await?;
     info!(
       address = tracing::field::display(hardware.address()),
       "Found Buttplug Device {}",

@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::test_device::{TestHardwareCreator, TestDeviceInternal};
+use super::test_device::{TestHardwareConnector, TestDeviceInternal};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   server::device::{
@@ -14,7 +14,7 @@ use crate::{
   },
   server::{
     device::{
-      hardware::HardwareCreator,
+      hardware::HardwareConnector,
       hardware::communication::{
         HardwareCommunicationManagerEvent,
         HardwareCommunicationManager,
@@ -31,13 +31,13 @@ use std::{
 };
 use tokio::sync::{mpsc::Sender, Mutex};
 
-type WaitingDeviceList = Arc<Mutex<Vec<TestHardwareCreator>>>;
+type WaitingDeviceList = Arc<Mutex<Vec<TestHardwareConnector>>>;
 
 #[allow(dead_code)]
 fn new_uninitialized_ble_test_device(
   name: &str,
   address: Option<String>,
-) -> (Arc<TestDeviceInternal>, TestHardwareCreator) {
+) -> (Arc<TestDeviceInternal>, TestHardwareConnector) {
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
   let address = address.unwrap_or_else(|| {
@@ -50,7 +50,7 @@ fn new_uninitialized_ble_test_device(
   let specifier = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
   let hardware = Arc::new(TestDeviceInternal::new(name, &address));
   let hardware_clone = hardware.clone();
-  let hardware_creator = TestHardwareCreator::new(specifier, hardware);
+  let hardware_creator = TestHardwareConnector::new(specifier, hardware);
   (hardware_clone, hardware_creator)
 }
 
@@ -157,17 +157,15 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
         warn!("No devices for test device comm manager to emit, did you mean to do this?");
       }
       while let Some(d) = devices.pop() {      
-        let device_name = d.device().as_ref().unwrap().name();  
+        let device_name = d.device().name();  
         if device_sender
           .send(HardwareCommunicationManagerEvent::DeviceFound {
             name: d
               .device()
-              .as_ref()
-              .map_or("Test device".to_owned(), |x| x.name()),
+              .name(),
             address: d
               .device()
-              .as_ref()
-              .map_or("Test device address".to_owned(), |x| x.address()),
+              .address(),
             creator: Box::new(d),
           })
           .await

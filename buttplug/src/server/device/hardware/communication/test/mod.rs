@@ -17,7 +17,7 @@ use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
   TestDeviceEndpointChannel,
-  TestHardwareCreator,
+  TestHardwareConnector,
   TestDeviceInternal,
 };
 #[cfg(feature = "server")]

@@ -17,7 +17,7 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{
         communication::HardwareCommunicationManagerEvent,
-        HardwareCreator,
+        HardwareConnector,
         HardwareEvent
       },
       ServerDevice,
@@ -87,7 +87,7 @@ impl ServerDeviceManagerEventLoop {
   fn try_create_new_device(
     &mut self,
     device_address: String,
-    device_creator: Box<dyn HardwareCreator>,
+    device_creator: Box<dyn HardwareConnector>,
   ) {
     debug!("Trying to create device at address {}", device_address);
     let device_event_sender_clone = self.device_event_sender.clone();

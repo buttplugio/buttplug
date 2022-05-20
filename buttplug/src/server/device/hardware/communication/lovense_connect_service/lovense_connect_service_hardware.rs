@@ -13,10 +13,12 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, LovenseConnectServiceSpecifier, ProtocolDeviceConfiguration},
+    configuration::{ProtocolCommunicationSpecifier, LovenseConnectServiceSpecifier},
     hardware::{
     HardwareEvent,
-    HardwareCreator,
+    HardwareConnector,
+    GenericHardwareSpecializer,
+    HardwareSpecializer,
     Hardware,
     HardwareInternal,
     HardwareReadCmd,
@@ -37,14 +39,14 @@ use std::{
 };
 use tokio::sync::{broadcast, RwLock};
 
-pub struct LovenseServiceHardwareCreator {
+pub struct LovenseServiceHardwareConnector {
   http_host: String,
   toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
 }
 
-impl LovenseServiceHardwareCreator {
+impl LovenseServiceHardwareConnector {
   pub(super) fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>) -> Self {
-    debug!("Emitting a new lovense service device impl creator!");
+    debug!("Emitting a new lovense service hardware connector!");
     Self {
       http_host: http_host.to_owned(),
       toy_info,
@@ -52,22 +54,19 @@ impl LovenseServiceHardwareCreator {
   }
 }
 
-impl Debug for LovenseServiceHardwareCreator {
+impl Debug for LovenseServiceHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("LovenseServiceHardwareCreator").finish()
+    f.debug_struct("LovenseServiceHardwareConnector").finish()
   }
 }
 
 #[async_trait]
-impl HardwareCreator for LovenseServiceHardwareCreator {
+impl HardwareConnector for LovenseServiceHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::LovenseConnectService(LovenseConnectServiceSpecifier::default())
   }
 
-  async fn try_create_hardware(
-    &mut self,
-    _protocol: ProtocolDeviceConfiguration,
-  ) -> Result<Hardware, ButtplugError> {
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     let toy_info = self.toy_info.read().await;
 
     let hardware_internal =
@@ -78,7 +77,7 @@ impl HardwareCreator for LovenseServiceHardwareCreator {
       &[Endpoint::Tx],
       Box::new(hardware_internal),
     );
-    Ok(hardware)
+    Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
   }
 }
 
