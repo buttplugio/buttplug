@@ -49,7 +49,7 @@ pub mod device;
 mod ping_timer;
 mod remote_server;
 
-pub use remote_server::ButtplugRemoteServer;
+pub use remote_server::*;
 
 use crate::{
   core::{
