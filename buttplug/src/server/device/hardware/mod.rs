@@ -20,7 +20,7 @@ use crate::{
   },
   server::device::{
     ServerDevice,
-    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
+    configuration::{ProtocolCommunicationSpecifier},
   },
 };
 use async_trait::async_trait;
@@ -259,6 +259,11 @@ impl Hardware {
     &self.address
   }
 
+  /// Returns the device endpoint list
+  pub fn endpoints(&self) -> Vec<Endpoint> {
+    self.endpoints.clone()
+  }
+
   /// If true, device is currently connected to system
   pub fn connected(&self) -> bool {
     self.internal_impl.connected()
@@ -270,11 +275,6 @@ impl Hardware {
   /// needed.
   pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.internal_impl.event_stream()
-  }
-
-  /// Returns the device endpoint list
-  pub fn endpoints(&self) -> Vec<Endpoint> {
-    self.endpoints.clone()
   }
 
   /// Disconnect from the device (if it is connected)
@@ -346,7 +346,7 @@ pub trait HardwareSpecializer: Sync + Send {
   /// [ProtocolDeviceConfiguration](crate::server::device::configuration::ProtocolDeviceConfiguration)
   /// which will contain information about what a protocol needs to communicate with a device, try
   /// to identify all required endpoints on the hardware.
-  async fn specialize(&mut self, protocol: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError>;
+  async fn specialize(&mut self, protocol: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError>;
 }
 
 /// Used in cases where there's nothing to specialize for the protocol.
@@ -364,7 +364,7 @@ impl GenericHardwareSpecializer {
 
 #[async_trait]
 impl HardwareSpecializer for GenericHardwareSpecializer {
-  async fn specialize(&mut self, _: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError> {
+  async fn specialize(&mut self, _: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError> {
     Ok(self.hardware.take().expect("This should only be run once"))
   }
 }

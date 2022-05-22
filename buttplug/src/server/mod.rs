@@ -223,8 +223,14 @@ impl ButtplugServerBuilder {
       self.device_manager_builder.reserved_index(address, *index);
     }
 
-    for (name, def) in protocol_map.protocol_configurations() {
-      self.device_manager_builder.protocol_device_configuration(name, def);
+    for (name, specifiers) in protocol_map.protocol_specifiers() {
+      for spec in specifiers {
+        self.device_manager_builder.communication_specifier(name, spec.clone());
+      }
+    }
+
+    for (ident, attributes) in protocol_map.protocol_attributes() {
+      self.device_manager_builder.protocol_attributes(ident.clone(), attributes.clone());
     }
 
     let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);

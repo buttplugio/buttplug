@@ -12,7 +12,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
+    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
     hardware::{
       HardwareConnector,
       HardwareSpecializer,
@@ -143,13 +143,13 @@ impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
 
 #[async_trait]
 impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
-  async fn specialize(&mut self, protocol: &ProtocolDeviceConfiguration) -> Result<Hardware, ButtplugDeviceError> {
+async fn specialize(&mut self, specifiers: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError> {
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
     let address = self.device.id();
 
-    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
+    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers.iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
       for (proto_uuid, proto_service) in btle.services() {
         for service in self.device.services() {
           if service.uuid != *proto_uuid {

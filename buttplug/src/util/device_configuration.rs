@@ -14,21 +14,51 @@ use crate::{
   server::device::{
     configuration::{
       BluetoothLESpecifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier,
-      ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
-      ProtocolDeviceConfiguration, SerialSpecifier, USBSpecifier,
-      WebsocketSpecifier, XInputSpecifier,
+      ProtocolAttributesType, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+      SerialSpecifier, USBSpecifier,
+      WebsocketSpecifier, XInputSpecifier, ProtocolAttributesIdentifier,
     },
     ServerDeviceIdentifier,
   }
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
+
+/// The top level configuration for a protocol. Contains all data about devices that can use the
+/// protocol, as well as names, message attributes, etc... for different devices.
+/// 
+/// Example: A Kiiroo ProtocolDeviceConfiguration would contain the Bluetooth LE information for all
+/// devices supported under the Kiiroo protocol. It would also contain information about the names
+/// and capabilities of different Kiiroo devices (Cliona, Onyx, Keon, etc...).
+#[derive(Debug, Clone, Getters, MutGetters, Default)]
+pub struct ProtocolDeviceConfiguration {
+  /// BLE/USB/etc info for device identification.
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  specifiers: Vec<ProtocolCommunicationSpecifier>,
+  /// Names and message attributes for all possible devices that use this protocol
+  #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
+  configurations: HashMap<ProtocolAttributesType, ProtocolDeviceAttributes>,
+}
+
+impl ProtocolDeviceConfiguration {
+  /// Create a new instance
+  pub fn new(
+    specifiers: Vec<ProtocolCommunicationSpecifier>,
+    configurations: HashMap<ProtocolAttributesType, ProtocolDeviceAttributes>,
+  ) -> Self {
+    Self {
+      specifiers,
+      configurations,
+    }
+  }
+
+}
 
 #[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq)]
 #[getset(get = "pub", set = "pub")]
@@ -103,7 +133,8 @@ pub struct ExternalDeviceConfiguration {
   allow_list: Vec<String>,
   deny_list: Vec<String>,
   reserved_indexes: HashMap<u32, ServerDeviceIdentifier>,
-  protocol_configurations: HashMap<String, ProtocolDeviceConfiguration>,
+  protocol_specifiers: HashMap<String, Vec<ProtocolCommunicationSpecifier>>,
+  protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
   user_configs: HashMap<ServerDeviceIdentifier, ProtocolDeviceAttributes>,
 }
 
@@ -141,32 +172,18 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
 
     let mut configurations = HashMap::new();
 
-    let default_attrs = if let Some(defaults) = protocol_def.defaults {
-      let default_attrs = Arc::new(ProtocolDeviceAttributes::new(
-        ProtocolAttributesIdentifier::Default,
-        defaults.name,
-        None,
-        defaults.messages.unwrap_or_default(),
-        None,
-      ));
-      configurations.insert(ProtocolAttributesIdentifier::Default, default_attrs.clone());
-      Some(default_attrs)
-    } else {
-      None
-    };
-
     for config in protocol_def.configurations {
       if let Some(identifiers) = config.identifier {
         for identifier in identifiers {
-          let config_attrs = Arc::new(ProtocolDeviceAttributes::new(
-            ProtocolAttributesIdentifier::Identifier(identifier.clone()),
+          let config_attrs = ProtocolDeviceAttributes::new(
+            ProtocolAttributesType::Identifier(identifier.clone()),
             config.name.clone(),
             None,
             config.messages.clone().unwrap_or_default(),
-            default_attrs.clone(),
-          ));
+            None,
+          );
           configurations.insert(
-            ProtocolAttributesIdentifier::Identifier(identifier),
+            ProtocolAttributesType::Identifier(identifier),
             config_attrs,
           );
         }
@@ -183,14 +200,14 @@ fn add_user_configs_to_protocol(
 ) {
   for (user_config_protocol, protocol_def) in user_config_def.specifiers() {
     if !external_config
-      .protocol_configurations
+      .protocol_specifiers
       .contains_key(user_config_protocol)
     {
       continue;
     }
 
     let base_protocol_def = external_config
-      .protocol_configurations
+      .protocol_specifiers
       .get_mut(user_config_protocol)
       .unwrap();
 
@@ -198,32 +215,27 @@ fn add_user_configs_to_protocol(
     if let Some(usb_vec) = &protocol_def.usb {
       usb_vec.iter().for_each(|spec| {
         base_protocol_def
-          .specifiers_mut()
           .push(ProtocolCommunicationSpecifier::USB(*spec))
       });
     }
     if let Some(serial_vec) = &protocol_def.serial {
       serial_vec.iter().for_each(|spec| {
         base_protocol_def
-          .specifiers_mut()
           .push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
       });
     }
     if let Some(hid_vec) = &protocol_def.hid {
       hid_vec.iter().for_each(|spec| {
         base_protocol_def
-          .specifiers_mut()
           .push(ProtocolCommunicationSpecifier::HID(*spec))
       });
     }
     if let Some(btle) = &protocol_def.btle {
       base_protocol_def
-        .specifiers_mut()
         .push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
     }
     if let Some(websocket) = &protocol_def.websocket {
       base_protocol_def
-        .specifiers_mut()
         .push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
   }
@@ -240,7 +252,7 @@ fn add_user_configs_to_protocol(
         .insert(*index, specifier.clone());
     }
     let config_attrs = ProtocolDeviceAttributes::new(
-      specifier.identifier().clone(),
+      specifier.attributes_identifier().clone(),
       None,
       user_config.display_name.clone(),
       user_config.messages.clone().unwrap_or_default(),
@@ -326,16 +338,28 @@ pub fn load_protocol_configs_from_json(
   // - for each configuration and user config, we'll need to create message lists and figure out
   //   what to do with allow/deny/index.
 
-  let mut protocols: HashMap<String, ProtocolDeviceConfiguration> = HashMap::new();
+  let mut protocol_specifiers = HashMap::new();
+  let mut protocol_attributes = HashMap::new();
 
   // Iterate through all of the protocols in the main config first and build up a map of protocol
   // name to ProtocolDeviceConfiguration structs.
   for (protocol_name, protocol_def) in main_config.protocols.unwrap_or_default() {
-    protocols.insert(protocol_name, protocol_def.into());
+    let protocol_device_config: ProtocolDeviceConfiguration = protocol_def.into();
+    protocol_specifiers.insert(protocol_name.clone(), protocol_device_config.specifiers().clone());
+    for (config_ident, config) in protocol_device_config.configurations() {
+      let ident = ProtocolAttributesIdentifier::new(
+        &protocol_name,
+        &config_ident,
+        &None
+      );
+      protocol_attributes.insert(ident, config.clone());
+    }
   }
 
+  
   let mut external_config = ExternalDeviceConfiguration {
-    protocol_configurations: protocols,
+    protocol_specifiers,
+    protocol_attributes,
     ..Default::default()
   };
 
@@ -357,9 +381,15 @@ pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
    if allow_raw_messages {
     builder.allow_raw_messages();
   }
-  for (name, def) in devices.protocol_configurations {
+  for (name, specifiers) in devices.protocol_specifiers {
+    for spec in specifiers {
+      builder
+        .communication_specifier(&name, spec);
+    }
+  }
+  for (ident, def) in devices.protocol_attributes {
     builder
-      .protocol_device_configuration(&name, &def);
+      .protocol_attributes(ident, def);
   }
   builder.finish().expect("If this fails, the whole library goes with it.")
 }

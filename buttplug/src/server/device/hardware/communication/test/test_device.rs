@@ -12,7 +12,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration},
+    configuration::{ProtocolCommunicationSpecifier},
     hardware::{
       HardwareConnector,
       HardwareSpecializer,
@@ -90,10 +90,10 @@ impl TestHardwareSpecializer {
 impl HardwareSpecializer for TestHardwareSpecializer {
   async fn specialize(
     &mut self,
-    protocol: &ProtocolDeviceConfiguration,
+    specifiers: &Vec<ProtocolCommunicationSpecifier>,
   ) -> Result<Hardware, ButtplugDeviceError> {
     let device = self.hardware.clone();
-    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = protocol.specifiers().iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
+    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers.iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
       for endpoint_map in btle.services().values() {
         for endpoint in endpoint_map.keys() {
           device.add_endpoint(endpoint).await;

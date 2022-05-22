@@ -17,9 +17,9 @@ use crate::{
       configuration::DeviceConfigurationManager,
       hardware::{
         communication::HardwareCommunicationManagerEvent,
-        HardwareConnector,
         HardwareEvent
       },
+      server_device::build_server_device,
       ServerDevice,
     },
   },
@@ -37,7 +37,7 @@ use tracing;
 use tracing_futures::Instrument;
 
 pub struct ServerDeviceManagerEventLoop {
-  device_config_manager: DeviceConfigurationManager,
+  device_config_manager: Arc<DeviceConfigurationManager>,
   /// Maps device index (exposed to the outside world) to actual device objects held by the server.
   device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
@@ -71,7 +71,7 @@ impl ServerDeviceManagerEventLoop {
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
-      device_config_manager: device_config_manager,
+      device_config_manager: Arc::new(device_config_manager),
       server_sender,
       device_map,
       device_comm_receiver,
@@ -82,48 +82,6 @@ impl ServerDeviceManagerEventLoop {
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token
     }
-  }
-
-  fn try_create_new_device(
-    &mut self,
-    device_address: String,
-    device_creator: Box<dyn HardwareConnector>,
-  ) {
-    debug!("Trying to create device at address {}", device_address);
-    let device_event_sender_clone = self.device_event_sender.clone();
-
-    // First off, we need to see if we even have a configuration available for the device we're
-    // trying to create. If we don't, exit, because this isn't actually an error. However, if we
-    // *do* have a configuration but something goes wrong after this, then it's an error.
-    let protocol_builder = match self.device_config_manager.protocol_instance_factory(&device_creator.specifier()) {
-      Some(builder) => builder,
-      None => {
-        debug!("Device {} not matched to protocol, ignoring.", device_address);
-        return;
-      }
-    };
-
-    let create_device_future =
-      ServerDevice::try_create_device(protocol_builder, device_creator);
-    let connecting_devices = self.connecting_devices.clone();
-
-    async_manager::spawn(async move {
-      match create_device_future.await {
-        Ok(option_dev) => match option_dev {
-          Some(device) => {
-            if device_event_sender_clone
-              .send(HardwareEvent::Connected(Arc::new(device)))
-              .await
-              .is_err() {
-              error!("Device manager disappeared before connection established, device will be dropped.");
-            }
-          }
-          None => debug!("Device could not be matched to a protocol."),
-        },
-        Err(e) => error!("Device errored while trying to connect: {}", e),
-      }
-      connecting_devices.remove(&device_address);
-    }.instrument(tracing::Span::current()));
   }
 
   async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
@@ -179,7 +137,7 @@ impl ServerDeviceManagerEventLoop {
         if self
           .device_map
           .iter()
-          .any(|entry| entry.value().hardware_address() == address)
+          .any(|entry| *entry.value().identifier().address() == address)
         {
           debug!(
             "Device {} already connected, ignoring new device event.",
@@ -201,7 +159,26 @@ impl ServerDeviceManagerEventLoop {
         }
 
         self.connecting_devices.insert(address.clone());
-        self.try_create_new_device(address, creator);
+        let device_event_sender_clone = self.device_event_sender.clone();
+
+        let create_device_future =
+          build_server_device(self.device_config_manager.clone(), creator);
+        let connecting_devices = self.connecting_devices.clone();
+    
+        async_manager::spawn(async move {
+          match create_device_future.await {
+            Ok(device) => {
+                if device_event_sender_clone
+                  .send(HardwareEvent::Connected(Arc::new(device)))
+                  .await
+                  .is_err() {
+                  error!("Device manager disappeared before connection established, device will be dropped.");
+                }
+            },
+            Err(e) => error!("Device errored while trying to connect: {}", e),
+          }
+          connecting_devices.remove(&address);
+        }.instrument(tracing::Span::current()));
       }
       HardwareCommunicationManagerEvent::DeviceManagerAdded(status) => {
         self.comm_manager_scanning_statuses.push(status);
@@ -216,12 +193,12 @@ impl ServerDeviceManagerEventLoop {
         let span = info_span!(
           "device registration",
           name = tracing::field::display(device.name()),
-          identifier = tracing::field::debug(device.device_identifier())
+          identifier = tracing::field::debug(device.identifier())
         );
         let _enter = span.enter();
 
         // See if we have a reserved or reusable device index here.
-        let device_index = self.device_config_manager.device_index(device.device_identifier());
+        let device_index = self.device_config_manager.device_index(device.identifier());
         // Since we can now reuse device indexes, this means we might possibly
         // stomp on devices already in the map if they don't register a
         // disconnect before we try to insert the new device. If we have a
@@ -271,7 +248,7 @@ impl ServerDeviceManagerEventLoop {
       HardwareEvent::Disconnected(address) => {
         let mut device_index = None;
         for device_pair in self.device_map.iter() {
-          if device_pair.value().device_identifier().address() == &address {
+          if device_pair.value().identifier().address() == &address {
             device_index = Some(*device_pair.key());
             break;
           }

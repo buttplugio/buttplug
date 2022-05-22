@@ -10,6 +10,7 @@
 pub mod generic_command_manager;
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
+/*
 pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
@@ -64,6 +65,7 @@ pub mod xinput;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
+*/
 
 use crate::{
   core::{
@@ -76,32 +78,40 @@ use crate::{
   server::{
     ButtplugServerResultFuture,
     device::{
-      configuration::{ProtocolDeviceAttributesBuilder, ProtocolDeviceAttributes, ProtocolAttributesIdentifier},
-      hardware::{HardwareReadCmd, Hardware},
+      configuration::{ProtocolDeviceAttributes, ProtocolAttributesType, ProtocolCommunicationSpecifier},
+      hardware::{HardwareReadCmd, Hardware, HardwareCommand},
+      ServerDeviceIdentifier
     },
   },
 };
-use futures::future::{self, BoxFuture};
-use generic_command_manager::GenericCommandManager;
+use futures::future::{self};
+
 use std::{
   collections::HashMap,
   sync::Arc,
 };
+use async_trait::async_trait;
 
-pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ButtplugProtocolFactory>> {
+pub trait ProtocolIdentifierFactory: Send + Sync {
+  fn identifier(&self) -> &str;
+  fn create(&self) -> Box<dyn ProtocolIdentifier>;
+}
+
+pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierFactory>> {
   let mut map = HashMap::new();
-  fn add_to_protocol_map<T>(map: &mut HashMap<String, Arc<dyn ButtplugProtocolFactory>>, factory: T)
+  fn add_to_protocol_map<T>(map: &mut HashMap<String, Arc<dyn ProtocolIdentifierFactory>>, factory: T)
     where
-  T: ButtplugProtocolFactory + 'static
+  T: ProtocolIdentifierFactory + 'static
   {
     let factory = Arc::new(factory);
     map.insert(
-      factory.protocol_identifier().to_owned(),
+      factory.identifier().to_owned(),
       factory
     );
   }
 
-  add_to_protocol_map(&mut map, aneros::AnerosFactory::default());
+  add_to_protocol_map(&mut map, aneros::AnerosIdentifierFactory::default());
+  /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
   add_to_protocol_map(&mut map, buttplug_passthru::ButtplugPassthruFactory::default());
   add_to_protocol_map(&mut map, cachito::CachitoFactory::default());
@@ -154,23 +164,14 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ButtplugProtocolFac
   add_to_protocol_map(&mut map, youcups::YoucupsFactory::default());
   add_to_protocol_map(&mut map, youou::YououFactory::default());
   add_to_protocol_map(&mut map, zalo::ZaloFactory::default());
+  */
   map
-}
-
-pub trait ButtplugProtocolFactory: std::fmt::Debug + Send + Sync {
-  fn protocol_identifier(&self) -> &'static str;
-
-  fn try_create(
-    &self,
-    hardware: Arc<Hardware>,
-    attributes_builder: ProtocolDeviceAttributesBuilder,
-  ) -> BoxFuture<'static, Result<Box<dyn ButtplugProtocol>, ButtplugError>>;
 }
 
 pub trait ButtplugProtocolProperties {
   fn name(&self) -> &str;
   fn protocol_identifier(&self) -> &str;
-  fn protocol_attributes_identifier(&self) -> &ProtocolAttributesIdentifier { 
+  fn protocol_attributes_identifier(&self) -> &ProtocolAttributesType { 
     self.device_attributes().identifier()
   }
   fn device_attributes(&self) -> &ProtocolDeviceAttributes;
@@ -624,3 +625,170 @@ macro_rules! default_protocol_declaration {
 pub use default_protocol_declaration;
 pub use default_protocol_definition;
 pub use default_protocol_trait_declaration;
+
+pub struct ProtocolSpecializer {
+  specifiers: Vec<ProtocolCommunicationSpecifier>,
+  identifier: Box<dyn ProtocolIdentifier>
+}
+
+impl ProtocolSpecializer {
+  pub fn new(specifiers: Vec<ProtocolCommunicationSpecifier>, identifier: Box<dyn ProtocolIdentifier>) -> Self {
+    Self {
+      specifiers,
+      identifier
+    }
+  }
+
+  pub fn specifiers(&self) -> & Vec<ProtocolCommunicationSpecifier> {
+    &self.specifiers
+  }
+
+  pub fn identify(self) -> Box<dyn ProtocolIdentifier> {
+    self.identifier
+  }
+}
+
+#[async_trait]
+pub trait ProtocolIdentifier: Sync + Send {
+  async fn identify(&mut self, hardware: Arc<Hardware>) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
+}
+
+#[async_trait]
+pub trait ProtocolInitializer: Sync + Send {
+  async fn initialize(&mut self, hardware: Arc<Hardware>) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError>;
+}
+
+pub struct GenericProtocolIdentifier {
+  handler: Option<Box<dyn ProtocolHandler>>,
+  protocol_identifier: String
+}
+
+impl GenericProtocolIdentifier {
+  pub fn new(handler: Box<dyn ProtocolHandler>, protocol_identifier: &str) -> Self {
+    Self {
+      handler: Some(handler),
+      protocol_identifier: protocol_identifier.to_owned()
+    }
+  }
+}
+
+#[async_trait]
+impl ProtocolIdentifier for GenericProtocolIdentifier {
+  async fn identify(&mut self, hardware: Arc<Hardware>) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let device_identifier = ServerDeviceIdentifier::new(hardware.address(), &self.protocol_identifier, &ProtocolAttributesType::Identifier(hardware.name().to_owned()));
+    Ok((device_identifier, Box::new(GenericProtocolInitializer::new(self.handler.take().unwrap()))))
+  }
+}
+
+pub struct GenericProtocolInitializer {
+  handler: Option<Box<dyn ProtocolHandler>>
+}
+
+impl GenericProtocolInitializer {
+  pub fn new(handler: Box<dyn ProtocolHandler>) -> Self {
+    Self {
+      handler: Some(handler)
+    }
+  }
+}
+
+#[async_trait]
+impl ProtocolInitializer for GenericProtocolInitializer {
+  async fn initialize(&mut self, _: Arc<Hardware>) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(self.handler.take().unwrap())
+  }
+}
+
+pub trait ProtocolHandler: Sync + Send {
+fn command_unimplemented(&self, command: &str) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    #[cfg(build = "debug")]
+    unimplemented!("Command not implemented for this protocol");
+    #[cfg(not(build = "debug"))]
+    Err(ButtplugDeviceError::UnhandledCommand(format!(
+      "Command not implemented for this protocol: {}",
+      command
+    )))
+  }
+
+  fn handle_level_cmd(
+    &self,
+    message: messages::LevelCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_vorze_a10_cyclone_cmd(
+    &self,
+    message: messages::VorzeA10CycloneCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_kiiroo_cmd(
+    &self,
+    message: messages::KiirooCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_fleshlight_launch_fw12_cmd(
+    &self,
+    message: messages::FleshlightLaunchFW12Cmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_vibrate_cmd(
+    &self,
+    message: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_rotate_cmd(
+    &self,
+    message: messages::RotateCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_linear_cmd(
+    &self,
+    message: messages::LinearCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+
+  fn handle_battery_level_cmd(
+    &self,
+    _message: messages::BatteryLevelCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // If we have a standardized BLE Battery endpoint, handle that above the
+    // protocol, as it'll always be the same.
+    /*
+    if device.endpoints().contains(&Endpoint::RxBLEBattery) {
+      info!("Trying to get battery reading.");
+      let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
+      let fut = device.read_value(msg);
+      Box::pin(async move {
+        let raw_msg: RawReading = fut.await?;
+        let battery_level = raw_msg.data()[0] as f64 / 100f64;
+        let battery_reading =
+          messages::BatteryLevelReading::new(message.device_index(), battery_level);
+        info!("Got battery reading: {}", battery_level);
+        Ok(battery_reading.into())
+      })
+    } else {
+      self.command_unimplemented(print_type_of(&message))
+    }
+    */
+    Ok(vec!())
+  }
+
+  fn handle_rssi_level_cmd(
+    &self,
+    message: messages::RSSILevelCmd,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
+  }
+}

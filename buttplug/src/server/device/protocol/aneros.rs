@@ -5,65 +5,63 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{Endpoint},
+  },
   server::{
-    ButtplugServerResultFuture,
     device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
+      hardware::{HardwareWriteCmd, HardwareCommand},
+      protocol::{
+        GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory, ProtocolHandler
+      },
     },
-  }
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Aneros, "aneros");
 
-impl ButtplugProtocolCommandHandler for Aneros {
-  fn handle_vibrate_cmd(
-    &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        for (index, cmd) in cmds.iter().enumerate() {
-          if let Some(speed) = cmd {
-            fut_vec.push(device.write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![0xF1 + (index as u8), *speed as u8],
-              false,
-            )));
-          }
-        }
-      }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+#[derive(Default)]
+pub struct AnerosIdentifierFactory {}
+
+impl ProtocolIdentifierFactory for AnerosIdentifierFactory {
+  fn identifier(&self) -> &str {
+    "aneros"
+  }
+
+  fn create(&self) -> Box<dyn ProtocolIdentifier> {
+    Box::new(GenericProtocolIdentifier::new(Box::new(Aneros::default()), self.identifier()))
   }
 }
 
+#[derive(Default)]
+pub struct Aneros {}
+
+impl ProtocolHandler for Aneros {
+  fn handle_vibrate_cmd(&self, cmds: &Vec<Option<u32>>) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut cmd_vec = vec!();
+    for (index, cmd) in cmds.iter().enumerate() {
+      if let Some(speed) = cmd {
+        cmd_vec.push(HardwareWriteCmd::new(
+          Endpoint::Tx,
+          vec![0xF1 + (index as u8), *speed as u8],
+          false,
+        ).into());
+      }
+    }
+    Ok(cmd_vec)
+  }
+}
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
     core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
     server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
       hardware::communication::test::{
-        check_test_recv_empty,
-        check_test_recv_value,
-        new_bluetoothle_test_device,
+        check_test_recv_empty, check_test_recv_value, new_bluetoothle_test_device,
       },
+      hardware::{HardwareCommand, HardwareWriteCmd},
     },
     util::async_manager,
   };
@@ -128,3 +126,4 @@ mod test {
     });
   }
 }
+ */

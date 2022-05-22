@@ -12,7 +12,7 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier, ProtocolDeviceConfiguration, SerialSpecifier},
+    configuration::{ProtocolCommunicationSpecifier, SerialSpecifier},
     hardware::{
     HardwareEvent,
     HardwareConnector,
@@ -95,9 +95,9 @@ impl HardwareSpecializer for SerialPortHardwareSpecialzier {
   // the protocol def.
   async fn specialize(
     &mut self,
-    protocol: &ProtocolDeviceConfiguration,
+    specifiers: &Vec<ProtocolCommunicationSpecifier>,
   ) -> Result<Hardware, ButtplugDeviceError> {
-    let hardware_internal = SerialPortHardware::try_create(&self.port_info, protocol).await?;
+    let hardware_internal = SerialPortHardware::try_create(&self.port_info, specifiers).await?;
     let hardware = Hardware::new(
       &self.port_info.port_name,
       &self.port_info.port_name,
@@ -178,12 +178,12 @@ pub struct SerialPortHardware {
 impl SerialPortHardware {
   pub async fn try_create(
     port_info: &SerialPortInfo,
-    protocol_def: &ProtocolDeviceConfiguration,
+    specifiers: &Vec<ProtocolCommunicationSpecifier>,
   ) -> Result<Self, ButtplugDeviceError> {
     let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.
     let mut port_def = None;
-    for specifier in protocol_def.specifiers() {
+    for specifier in specifiers {
       if let ProtocolCommunicationSpecifier::Serial(serial) = specifier {
         if port_info.port_name == *serial.port() {
           port_def = Some(serial.clone());

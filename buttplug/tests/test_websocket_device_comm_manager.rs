@@ -7,42 +7,44 @@
 
 mod util;
 
-use buttplug::{
-  client::ButtplugClient,
-  core::connector::ButtplugInProcessClientConnectorBuilder,
-  server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
-  server::ButtplugServerBuilder,
-  util::async_manager,
-};
+#[cfg(feature = "websocket-server-manager")]
+mod test {
 
-async fn setup_test_client() -> ButtplugClient {
-  let mut builder = ButtplugServerBuilder::default();
-  
-  builder
-  .name("Websocket DCM Test Server")
-  .device_manager_builder()
-    .comm_manager(
-      WebsocketServerDeviceCommunicationManagerBuilder::default()
-        .server_port(51283)
-        .listen_on_all_interfaces(true),
-    );
-  let server = builder
-    .finish()
-    .expect("Test, assuming infallible.");
-  let connector = ButtplugInProcessClientConnectorBuilder::default().server(server).finish();
+  use buttplug::{
+    client::ButtplugClient, core::connector::ButtplugInProcessClientConnectorBuilder,
+    server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
+    server::ButtplugServerBuilder, util::async_manager,
+  };
 
-  let client = ButtplugClient::new("Websocket DCM Test Client");
-  client
-    .connect(connector)
-    .await
-    .expect("Test, assuming infallible.");
-  client
-}
+  async fn setup_test_client() -> ButtplugClient {
+    let mut builder = ButtplugServerBuilder::default();
 
-#[test]
-fn test_websocket_server_dcm_bringup() {
-  async_manager::block_on(async {
-    let client = setup_test_client().await;
-    assert!(client.connected());
-  });
+    builder
+      .name("Websocket DCM Test Server")
+      .device_manager_builder()
+      .comm_manager(
+        WebsocketServerDeviceCommunicationManagerBuilder::default()
+          .server_port(51283)
+          .listen_on_all_interfaces(true),
+      );
+    let server = builder.finish().expect("Test, assuming infallible.");
+    let connector = ButtplugInProcessClientConnectorBuilder::default()
+      .server(server)
+      .finish();
+
+    let client = ButtplugClient::new("Websocket DCM Test Client");
+    client
+      .connect(connector)
+      .await
+      .expect("Test, assuming infallible.");
+    client
+  }
+
+  #[test]
+  fn test_websocket_server_dcm_bringup() {
+    async_manager::block_on(async {
+      let client = setup_test_client().await;
+      assert!(client.connected());
+    });
+  }
 }

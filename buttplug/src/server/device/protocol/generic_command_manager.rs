@@ -310,7 +310,7 @@ mod test {
       ButtplugDeviceMessageType, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap,
       RotateCmd, RotationSubcommand, VibrateCmd, VibrateSubcommand,
     },
-    server::device::configuration::ProtocolAttributesIdentifier,
+    server::device::configuration::ProtocolAttributesType,
   };
 
   #[test]
@@ -324,7 +324,7 @@ mod test {
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesIdentifier::Default,
+      ProtocolAttributesType::Default,
       None,
       None,
       attributes_map,
@@ -381,7 +381,7 @@ mod test {
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesIdentifier::Default,
+      ProtocolAttributesType::Default,
       None,
       None,
       attributes_map,
@@ -437,7 +437,7 @@ mod test {
       .unwrap();
     attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
     let device_attributes = ProtocolDeviceAttributes::new(
-      ProtocolAttributesIdentifier::Default,
+      ProtocolAttributesType::Default,
       None,
       None,
       attributes_map,

@@ -26,8 +26,8 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{DeviceConfigurationManagerBuilder, ProtocolDeviceConfiguration},
-      protocol::ButtplugProtocolFactory,
+      configuration::{DeviceConfigurationManagerBuilder, ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes},
+      protocol::ProtocolIdentifierFactory,
       hardware::{
         communication::{
           HardwareCommunicationManagerEvent,
@@ -92,19 +92,34 @@ impl ServerDeviceManagerBuilder {
 
   pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
   where
-    T: ButtplugProtocolFactory + 'static,
+    T: ProtocolIdentifierFactory + 'static,
   {
     self.configuration_manager_builder.protocol_factory(factory);
     self
   }
 
-  pub fn protocol_device_configuration(&mut self, name: &str, config: &ProtocolDeviceConfiguration) -> &mut Self {
-    self.configuration_manager_builder.protocol_device_configuration(name, config);
+  pub fn communication_specifier(
+    &mut self,
+    protocol_name: &str,
+    specifier: ProtocolCommunicationSpecifier,
+  ) -> &mut Self {
+    self
+      .configuration_manager_builder
+      .communication_specifier(protocol_name, specifier);
+    self
+  }
+
+  pub fn protocol_attributes(
+    &mut self,
+    identifier: ProtocolAttributesIdentifier,
+    attributes: ProtocolDeviceAttributes,
+  ) -> &mut Self {
+    self.configuration_manager_builder.protocol_attributes(identifier, attributes);
     self
   }
 
   pub fn no_default_protocols(&mut self) -> &mut Self {
-    self.configuration_manager_builder.no_default_protocols();
+    self.configuration_manager_builder.skip_default_protocols();
     self
   }
   
@@ -325,7 +340,7 @@ impl ServerDeviceManager {
   pub fn device_info(&self, index: u32) -> Result<ServerDeviceInfo, ButtplugDeviceError> {
     if let Some(device) = self.devices.get(&index) {
       Ok(ServerDeviceInfo {
-        identifier: device.value().device_identifier().clone(),
+        identifier: device.value().identifier().clone(),
         display_name: device.value().display_name(),
       })
     } else {

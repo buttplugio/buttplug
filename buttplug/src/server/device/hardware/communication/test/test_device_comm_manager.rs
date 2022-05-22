@@ -14,7 +14,7 @@ use crate::{
   },
   server::{
     device::{
-      hardware::HardwareConnector,
+      server_device::build_server_device,
       hardware::communication::{
         HardwareCommunicationManagerEvent,
         HardwareCommunicationManager,
@@ -61,13 +61,11 @@ async fn new_bluetoothle_test_device_with_cfg(
   let config_mgr = device_config_mgr.unwrap_or_else(|| Arc::new(create_test_dcm(false)));
   let (hardware, hardware_creator) = new_uninitialized_ble_test_device(name, None);
   let hardware_clone = hardware.clone();
-  let err_str = &format!("No protocol found for device {}", name);
-  let protocol_builder = config_mgr.protocol_instance_factory(&hardware_creator.specifier()).expect("Test code, should exist.");
+  let _err_str = &format!("No protocol found for device {}", name);
   let device: ServerDevice =
-    ServerDevice::try_create_device(protocol_builder, Box::new(hardware_creator))
+    build_server_device(config_mgr.clone(), Box::new(hardware_creator))
       .await
-      .expect("Empty option shouldn't be possible")
-      .expect(err_str);
+      .expect("Empty option shouldn't be possible");
   Ok((device, hardware_clone))
 }
 
