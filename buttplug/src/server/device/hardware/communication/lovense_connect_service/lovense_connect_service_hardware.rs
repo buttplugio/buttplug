@@ -125,7 +125,7 @@ impl HardwareInternal for LovenseServiceHardware {
   // Assume the only thing we'll read is battery.
   fn read_value(
     &self,
-    _msg: HardwareReadCmd,
+    _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     let toy_info = self.toy_info.clone();
     Box::pin(async move {
@@ -134,7 +134,7 @@ impl HardwareInternal for LovenseServiceHardware {
     })
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let command_url = format!(
       "{}/{}",
       self.http_host,
@@ -152,11 +152,11 @@ impl HardwareInternal for LovenseServiceHardware {
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 }

@@ -284,16 +284,17 @@ impl HardwareInternal for WebsocketServerHardware {
 
   fn read_value(
     &self,
-    _msg: HardwareReadCmd,
+    _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     unimplemented!("Not implemented for websockets");
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let sender = self.outgoing_sender.clone();
+    let data = msg.data.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
-      sender.send(msg.data).await.map_err(|err| {
+      sender.send(data).await.map_err(|err| {
         ButtplugDeviceError::DeviceCommunicationError(format!(
           "Could not write value to websocket device: {}",
           err
@@ -303,7 +304,7 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     if self.subscribed.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Ok(())));
     }
@@ -346,7 +347,7 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     if self.subscribed.load(Ordering::SeqCst) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();

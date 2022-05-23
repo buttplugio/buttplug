@@ -120,7 +120,7 @@ impl HardwareInternal for XInputHardware {
 
   fn read_value(
     &self,
-    _msg: HardwareReadCmd,
+    _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     let handle = self.handle.clone();
     let index = self.index;
@@ -134,11 +134,12 @@ impl HardwareInternal for XInputHardware {
     })
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let handle = self.handle.clone();
     let index = self.index;
+    let data = msg.data.clone();
     Box::pin(async move {
-      let mut cursor = Cursor::new(msg.data);
+      let mut cursor = Cursor::new(data);
       let left_motor_speed = cursor
         .read_u16::<LittleEndian>()
         .expect("Packed in protocol, infallible");
@@ -154,11 +155,11 @@ impl HardwareInternal for XInputHardware {
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     panic!("We should never get here!");
   }
 }

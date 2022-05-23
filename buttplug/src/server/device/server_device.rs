@@ -17,20 +17,24 @@ use crate::{
     errors::{ButtplugError, ButtplugDeviceError},
     messages::{
       self,
+      ButtplugMessage,
+      ButtplugDeviceMessage,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessageType,
       DeviceMessageAttributesMap,
       Endpoint,
       RawSubscribeCmd,
+      VibrateCmd,
+      VibrateSubcommand,
     },
     ButtplugResultFuture,
   },
   server::{
     ButtplugServerResultFuture,
     device::{
-      hardware::{Hardware, HardwareConnector, HardwareEvent},
+      hardware::{Hardware, HardwareConnector, HardwareEvent, HardwareCommand},
       configuration::{ProtocolAttributesType, DeviceConfigurationManager},
-      protocol::{ProtocolIdentifier, ProtocolInitializer, ProtocolHandler}
+      protocol::{ProtocolHandler}
     },
   },
 };
@@ -53,7 +57,7 @@ pub struct ServerDeviceIdentifier {
   /// Name of the protocol used
   protocol: String,
   /// Internal identifier for the protocol used
-  attributes_identifier: ProtocolAttributesType
+  attributes_identifier: ProtocolAttributesType,
 }
 
 impl ServerDeviceIdentifier {
@@ -227,10 +231,6 @@ impl ServerDevice {
     self.hardware.event_stream()
   }  
   
-  pub fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
-    self.generic_command_manager.stop_commands()
-  }
-
   pub fn supports_message(
     &self,
     message: &ButtplugDeviceCommandMessageUnion,
@@ -273,61 +273,95 @@ impl ServerDevice {
       return Box::pin(future::ready(Err(err)));
     }
 
-    Box::pin(future::ready(Ok(messages::Ok::default().into())))
-    /*
-    let command_array = match command_message {
-      ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(msg) => self.handler.handle_fleshlight_launch_fw12_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::KiirooCmd(msg) => self.handler.handle_kiiroo_cmd( msg),
-      ButtplugDeviceCommandMessageUnion::LevelCmd(msg) => self.handler.handle_level_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => self.handler.handle_linear_cmd(msg),
+    match command_message {
+      // messages we can handle in this struct
       ButtplugDeviceCommandMessageUnion::RawReadCmd(msg) => self.handle_raw_read_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RawWriteCmd(msg) => self.handle_raw_write_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => self.handler.handle_rotate_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => self.handle_single_motor_vibrate_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::StopDeviceCmd(msg) => self.stop_commands.clone(),
       ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(msg) => self.handle_raw_subscribe_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RawUnsubscribeCmd(msg) => self.handle_raw_unsubscribe_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => self.handler.handle_vibrate_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => self.handler.handle_vorze_a10_cyclone_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(msg) => self.handler.handle_battery_level_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(msg) => self.handle_rssi_level_cmd(msg)
-    };
-    */
+      ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => self.handle_stop_device_cmd(),
+      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => self.handle_single_motor_vibrate_cmd(msg),
+      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => Box::pin(future::ready(Err(ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into()))), // self.handle_battery_level_cmd(msg),
+      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => Box::pin(future::ready(Err(ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into()))), //self.handle_rssi_level_cmd(msg),
+
+      // Message that return lists of hardware commands which we'll handle sending to the devices
+      // here, in order to reduce boilerplate in the implementations. Generic messages that we can
+      // use the generic command manager for, but still need protocol level translation.
+      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
+        let commands = match self.generic_command_manager.update_vibration(&msg, self.handler.needs_full_command_set()) {
+          Ok(values) => values,
+          Err(err) => return Box::pin(future::ready(Err(err)))
+        };
+        self.handle_generic_command_result(self.handler.handle_vibrate_cmd(&commands))
+      }
+      ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
+        let commands = match self.generic_command_manager.update_rotation(&msg) {
+          Ok(values) => values,
+          Err(err) => return Box::pin(future::ready(Err(err)))
+        };
+        self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
+      }
+      ButtplugDeviceCommandMessageUnion::LevelCmd(msg) => self.handle_generic_command_result(self.handler.handle_level_cmd(msg)),
+      ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => self.handle_generic_command_result(self.handler.handle_linear_cmd(msg)),
+      ButtplugDeviceCommandMessageUnion::FleshlightLaunchFW12Cmd(msg) => self.handle_generic_command_result(self.handler.handle_fleshlight_launch_fw12_cmd(msg)),
+      ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => self.handle_generic_command_result(self.handler.handle_vorze_a10_cyclone_cmd(msg)),
+
+      // Everything else, which is mostly older messages, or special things that require reads.
+      ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => Box::pin(future::ready(Err(ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into()))) //self.handler.handle_kiiroo_cmd( msg),
+    }
   }
 
-  /*
+  fn handle_hardware_commands(
+    &self,
+    commands: Vec<HardwareCommand>
+  ) -> ButtplugServerResultFuture {
+    let hardware = self.hardware.clone();
+    Box::pin(async move {
+      // Run commands in order, otherwise we may end up sending out of order. This may take a while,
+      // but it's what 99% of protocols expect. If they want something else, they can implement it
+      // themselves.
+      //
+      // If anything errors out, just bail on the command series. This most likely means the device
+      // disconnected.
+      for command in commands {
+        hardware.parse_message(&command).await?;
+      }
+      Ok(messages::Ok::default().into())
+    })
+  }
+
+  fn handle_generic_command_result(
+    &self,
+    command_result: Result<Vec<HardwareCommand>, ButtplugDeviceError>
+  ) -> ButtplugServerResultFuture {
+    let hardware_commands = match command_result {
+      Ok(commands) => commands,
+      Err(err) => return Box::pin(future::ready(Err(err.into())))
+    };
+    
+    self.handle_hardware_commands(hardware_commands)
+  }
+
   fn handle_stop_device_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::StopDeviceCmd,
   ) -> ButtplugServerResultFuture {
-    let ok_return = messages::Ok::new(message.id());
-    let fut_vec: Vec<ButtplugServerResultFuture> = self
-      .stop_commands()
+    let commands = self.generic_command_manager.stop_commands();
+    let mut fut_vec = vec![];
+    commands
       .iter()
-      .map(|cmd| self.handle_command(device.clone(), cmd.clone()))
-      .collect();
+      .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
     Box::pin(async move {
-      // TODO We should be able to run these concurrently, and should return any error we get.
       for fut in fut_vec {
-        if let Err(e) = fut.await {
-          error!("{:?}", e);
-        }
+        fut.await?;
       }
-      Ok(ok_return.into())
+      Ok(messages::Ok::default().into())
     })
   }
 
   fn handle_single_motor_vibrate_cmd(
     &self,
     message: messages::SingleMotorVibrateCmd,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Time for sadness! In order to handle conversion of SingleMotorVibrateCmd, we need to know how
-    // many vibrators a device has. We don't actually know that until we get to the protocol level,
-    // so we're stuck parsing this here. Since we can assume SingleMotorVibrateCmd will ALWAYS map
-    // to vibration, we can convert to VibrateCmd here and save ourselves having to handle it in
-    // every protocol, meaning spec v0 and v1 programs will still be forward compatible with
-    // vibrators.
+  ) -> ButtplugServerResultFuture {
     let vibrator_count;
     if let Some(attr) = self
       .attributes
@@ -356,26 +390,24 @@ impl ServerDevice {
     }
     let mut vibrate_cmd = VibrateCmd::new(message.device_index(), cmds);
     vibrate_cmd.set_id(message.id());
-    
+    self.parse_message(vibrate_cmd.into())
   }
 
   fn handle_raw_write_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::RawWriteCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
-    let fut = device.write_value(message.into());
+    let fut = self.hardware.write_value(&message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
   fn handle_raw_read_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::RawReadCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
-    let fut = device.read_value(message.into());
+    let fut = self.hardware.read_value(&message.into());
     Box::pin(async move {
       fut.await.map(|mut msg| {
         msg.set_id(id);
@@ -386,207 +418,19 @@ impl ServerDevice {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::RawUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
-    let fut = device.unsubscribe(message.into());
+    let fut = self.hardware.unsubscribe(&message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
 
   fn handle_raw_subscribe_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::RawSubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
-    let fut = device.subscribe(message.into());
+    let fut = self.hardware.subscribe(&message.into());
     Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
   }
-  */
 }
-
-/*
-/// Main internal device representation structure
-/// 
-/// A ButtplugDevice is made up of 2 components:
-/// 
-/// - A [Device Implementation](crate::device::Hardware), which handles hardware connection and
-///   communication.
-/// - A [Protocol](crate::device::protocol::ButtplugProtocol), which takes Buttplug Commands and
-///   translated them into propreitary commands to send to a device.
-/// 
-/// When a ButtplugDevice instance is created, it can be assumed that it represents a device that is
-/// connected and has been successfully initialized. The instance will manage communication of all
-/// commands sent from a [client](crate::client::ButtplugClient) that pertain to this specific
-/// hardware.
-pub struct ServerDevice {
-  /// Protocol instance for the device
-  protocol: Box<dyn ButtplugProtocol>,
-  /// Hardware implementation for the device
-  device: Arc<Hardware>,
-  /// Display name for the device
-  display_name: OnceCell<String>,
-  /// Unique identifier for the device
-  device_identifier: ServerDeviceIdentifier
-}
-
-impl Debug for ServerDevice {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_struct("ButtplugDevice")
-      .field("name", &self.name())
-      .field("identifier", &self.device_identifier())
-      .finish()
-  }
-}
-
-impl Hash for ServerDevice {
-  fn hash<H: Hasher>(&self, state: &mut H) {
-    self.device_identifier().hash(state);
-  }
-}
-
-impl Eq for ServerDevice {
-}
-
-impl PartialEq for ServerDevice {
-  fn eq(&self, other: &Self) -> bool {
-    self.device_identifier() == other.device_identifier()
-  }
-}
-
-impl ServerDevice {
-  /// Given a protocol and a device impl, create a new ButtplugDevice instance
-  fn new(protocol: Box<dyn ButtplugProtocol>, device: Arc<Hardware>) -> Self {
-    Self {
-      device_identifier: ServerDeviceIdentifier::new(device.address(), protocol.protocol_identifier(), protocol.protocol_attributes_identifier()),
-      protocol,
-      device,
-      display_name: OnceCell::new(),
-    }
-  }
-
-  /// Returns the device identifier
-  pub fn device_identifier(&self) -> &ServerDeviceIdentifier {
-    &self.device_identifier
-  }
-
-  /// Returns the address of the device implementation
-  pub fn hardware_address(&self) -> &str {
-    self.device.address()
-  }
-
-  /// Returns the protocol identifier
-  pub fn protocol_identifier(&self) -> &str {
-    self.protocol.protocol_identifier()
-  }
-
-  /// Returns the protocol attribute identifier
-  pub fn protocol_attributes_identifier(&self) -> &ProtocolAttributesIdentifier {
-    self.protocol.protocol_attributes_identifier()
-  }
-
-  /// Given a possibly usable device, see if any protocol matches. If so, connect and initialize.
-  /// 
-  /// This is called any time we get a device detection or advertisement from one of our
-  /// DeviceCommunicationManager instances. This could be anything from a Bluetooth advertisement,
-  /// to detection of a USB device, to one of the various network systems declaring they've found
-  /// something. Given the information we've received from that, plus our
-  /// [DeviceConfigurationManager](crate::server::device::configuration::DeviceConfigurationManager),
-  /// try to find a protocol that has information matching this device. This may include name match,
-  /// port matching, etc...
-  /// 
-  /// If a matching protocol is found, we then call
-  /// [ButtplugHardwareCreator::try_create_hardware](crate::device::ButtplugHardwareCreator::try_create_hardware)
-  /// with the related protocol information, in order to connect and initialize the device.
-  /// 
-  /// If all of that is successful, we return a ButtplugDevice that is ready to advertise to the
-  /// client and use.
-  pub async fn try_create_device(
-    protocol_builder: ProtocolInstanceFactory,
-    mut device_connector: Box<dyn HardwareConnector>,
-  ) -> Result<Option<ServerDevice>, ButtplugError> {
-    // TODO This seems needlessly complex, can we clean up how we pass the device builder and protocol factory around?
-    
-    let mut hardware_specializer = device_connector.connect().await?;
-
-    // Now that we have both a possible device implementation and a configuration for that device,
-    // try to initialize the implementation. This usually means trying to connect to whatever the
-    // device is, finding endpoints, etc.
-    let hardware = hardware_specializer.specialize(&protocol_builder.configuration()).await?;
-    info!(
-      address = tracing::field::display(hardware.address()),
-      "Found Buttplug Device {}",
-      hardware.name()
-    );
-
-    // If we've made it this far, we now have a connected device implementation with endpoints set
-    // up. We now need to run whatever protocol initialization might need to happen. We'll fetch a
-    // protocol creator, pass the device implementation to it, then let it do whatever it needs. For
-    // most protocols, this is a no-op. However, for devices like Lovense, some Kiiroo, etc, this
-    // can get fairly complicated.
-    let sharable_hardware = Arc::new(hardware);
-    let protocol_impl =
-      protocol_builder.create(sharable_hardware.clone()).await?;
-    Ok(Some(ServerDevice::new(
-      protocol_impl,
-      sharable_hardware,
-    )))
-  }
-
-  /// Get the user created display name for a device, if one exists.
-  pub fn display_name(&self) -> Option<String> {
-    self.display_name.get().and_then(|name| Some(name.clone()))
-  }
-
-  /// Get the name of the device as set in the Device Configuration File.
-  /// 
-  /// This will also append "(Raw Messaged Allowed)" to the device name if raw mode is on, to warn
-  /// users that the device is capable of direct communication.
-  pub fn name(&self) -> String {
-    // Instead of checking for raw messages at the protocol level, add the raw
-    // call here, since this is the only way to access devices in the library
-    // anyways.
-    //
-    // Having raw turned on means it'll work for read/write/sub/unsub on any
-    // endpoint so just use an arbitrary message here to check.
-    if self
-      .protocol
-      .supports_message(&ButtplugDeviceCommandMessageUnion::RawSubscribeCmd(
-        RawSubscribeCmd::new(1, Endpoint::Tx),
-      ))
-      .is_ok()
-    {
-      format!("{} (Raw Messages Allowed)", self.protocol.name())
-    } else {
-      self.protocol.name().to_owned()
-    }
-  }
-
-  /// Disconnect from the device, if it's connected.
-  pub fn disconnect(&self) -> ButtplugResultFuture {
-    self.device.disconnect()
-  }
-
-  /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> DeviceMessageAttributesMap {
-    self.protocol.device_attributes().message_attributes_map()
-  }
-
-  /// Parse and route a client command sent for this device.
-  pub fn parse_message(
-    &self,
-    message: ButtplugDeviceCommandMessageUnion,
-  ) -> ButtplugServerResultFuture {
-    self.protocol.handle_command(self.device.clone(), message)
-  }
-
-  /// Retreive the event stream for the device.
-  /// 
-  /// This will include connections, disconnections, and notification events from subscribed
-  /// endpoints.
-  pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
-    self.device.event_stream()
-  }
-}
-*/

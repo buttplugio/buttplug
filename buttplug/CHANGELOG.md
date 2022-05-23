@@ -14,6 +14,7 @@
   construction. This makes management and additions far easier to reason about, and there was no
   reason for mutability there anyways.
 - Running StartScanning when a scan is already running no longer throws an error.
+- GenericCommandManager is now internally mutable
 
 ## Features
 

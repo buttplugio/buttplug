@@ -243,31 +243,33 @@ impl HardwareInternal for TestDevice {
 
   fn read_value(
     &self,
-    msg: HardwareReadCmd,
+    msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let channels = self.endpoint_channels.clone();
+    let data_command = msg.clone().into();
+    let endpoint = msg.endpoint;
     Box::pin(async move {
       // Since we're only accessing a channel, we can use a read lock here.
-      match channels.get(&msg.endpoint) {
+      match channels.get(&endpoint) {
         Some(device_channel) => {
           // We hold both ends, can unwrap.
-          device_channel.sender.send(msg.into()).await.expect("Test");
+          device_channel.sender.send(data_command).await.expect("Test");
           Ok(())
         }
-        None => Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into()),
+        None => Err(ButtplugDeviceError::InvalidEndpoint(endpoint).into()),
       }
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 }

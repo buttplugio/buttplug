@@ -290,7 +290,7 @@ impl HardwareInternal for SerialPortHardware {
 
   fn read_value(
     &self,
-    _msg: HardwareReadCmd,
+    _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // TODO Should check endpoint validity and length requirements
     let receiver = self.port_receiver.clone();
@@ -308,19 +308,20 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let sender = self.port_sender.clone();
+    let data = msg.data.clone();
     // TODO Should check endpoint validity
     Box::pin(async move {
       sender
-        .send(msg.data)
+        .send(data)
         .await
         .expect("Tasks should exist if we get here.");
       Ok(())
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     // TODO Should check endpoint validity
     let data_receiver = self.port_receiver.clone();
     let event_sender = self.device_event_sender.clone();
@@ -354,7 +355,7 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     unimplemented!();
   }
 }

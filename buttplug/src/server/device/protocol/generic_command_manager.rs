@@ -15,14 +15,23 @@ use crate::{
   },
   server::device::configuration::ProtocolDeviceAttributes,
 };
+use std::sync::atomic::{AtomicU32, AtomicBool, Ordering::SeqCst};
 
+// In order to make our lives easier, we make some assumptions about what's internally mutable in
+// the GenericCommandManager (GCM). Once the GCM is configured for a device, it won't change sizes,
+// because we don't support things like adding motors to devices randomly while Buttplug is running.
+// Therefore we know that we'll just be storing values like vibration/rotation speeds. We can assume
+// our storage of those can stay immutable (the vec sizes won't change) and make their internals
+// mutable. While this could be RefCell'd or whatever, they're also always atomic types (until the
+// horrible day some sex toy decides to use floats in its protocol), so we can just use atomics and
+// call it done.
 pub struct GenericCommandManager {
-  sent_vibration: bool,
-  sent_rotation: bool,
+  sent_vibration: AtomicBool,
+  sent_rotation: AtomicBool,
   _sent_linear: bool,
-  vibrations: Vec<u32>,
+  vibrations: Vec<AtomicU32>,
   vibration_step_ranges: Vec<(u32, u32)>,
-  rotations: Vec<(u32, bool)>,
+  rotations: Vec<(AtomicU32, AtomicBool)>,
   rotation_step_ranges: Vec<(u32, u32)>,
   _linears: Vec<(u32, u32)>,
   _linear_step_counts: Vec<u32>,
@@ -31,21 +40,22 @@ pub struct GenericCommandManager {
 
 impl GenericCommandManager {
   pub fn new(attributes: &ProtocolDeviceAttributes) -> Self {
-    let mut vibrations: Vec<u32> = vec![];
-    let mut vibration_step_counts: Vec<u32> = vec![];
-    let mut vibration_step_ranges: Vec<(u32, u32)> = vec![];
-    let mut rotations: Vec<(u32, bool)> = vec![];
-    let mut rotation_step_counts: Vec<u32> = vec![];
-    let mut rotation_step_ranges: Vec<(u32, u32)> = vec![];
-    let mut linears: Vec<(u32, u32)> = vec![];
-    let mut linear_step_counts: Vec<u32> = vec![];
+    let mut vibrations = vec![];
+    let mut vibration_step_counts = vec![];
+    let mut vibration_step_ranges = vec![];
+    let mut rotations = vec![];
+    let mut rotation_step_counts = vec![];
+    let mut rotation_step_ranges = vec![];
+    let mut linears= vec![];
+    let mut linear_step_counts = vec![];
 
     let mut stop_commands = vec![];
 
     // TODO We should probably panic here if we don't have feature and step counts?
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::VibrateCmd) {
       if let Some(count) = attr.feature_count() {
-        vibrations = vec![0; *count as usize];
+        // We have to use resize_with here, since Atomic* aren't clonable.
+        vibrations.resize_with(*count as usize, || AtomicU32::new(0));
       }
       if let Some(step_counts) = &attr.step_count() {
         vibration_step_counts = step_counts.clone();
@@ -66,7 +76,8 @@ impl GenericCommandManager {
     }
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::RotateCmd) {
       if let Some(count) = attr.feature_count() {
-        rotations = vec![(0, true); *count as usize];
+        // We have to use resize_with here, since Atomic* aren't clonable.
+        rotations.resize_with(*count as usize, || (AtomicU32::new(0), AtomicBool::new(false)));
       }
       if let Some(step_counts) = &attr.step_count() {
         rotation_step_counts = step_counts.clone();
@@ -99,8 +110,8 @@ impl GenericCommandManager {
     }
 
     Self {
-      sent_vibration: false,
-      sent_rotation: false,
+      sent_vibration: AtomicBool::new(false),
+      sent_rotation: AtomicBool::new(false),
       _sent_linear: false,
       vibrations,
       rotations,
@@ -113,10 +124,10 @@ impl GenericCommandManager {
   }
 
   pub fn update_vibration(
-    &mut self,
+    &self,
     msg: &VibrateCmd,
     match_all: bool,
-  ) -> Result<Option<Vec<Option<u32>>>, ButtplugError> {
+  ) -> Result<Vec<Option<u32>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
     if msg.speeds().is_empty() {
@@ -134,13 +145,12 @@ impl GenericCommandManager {
     // If we've already sent commands before, we should check against our
     // old values. Otherwise, we should always send whatever command we're
     // going to send.
-    let mut changed_value = false;
     let mut result: Vec<Option<u32>> = vec![None; self.vibrations.len()];
     // If we're in a match all situation, set up the array with all prior
     // values before switching them out.
     if match_all {
       for (index, speed) in self.vibrations.iter().enumerate() {
-        result[index] = Some(*speed);
+        result[index] = Some(speed.load(SeqCst));
       }
     }
     for speed_command in msg.speeds() {
@@ -175,38 +185,28 @@ impl GenericCommandManager {
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
-      if !self.sent_vibration || speed != self.vibrations[index] || match_all {
-        // For some hardware, we always have to send all vibration
-        // values, otherwise if we update one motor but not the other,
-        // we'll stop the other motor completely if we send 0 to it.
-        // That's what "match_all" is used for, so we always fall
-        // through and set all of our values. However, in the case where
-        // *no* motor speed changed, we don't want to send anything.
-        // This is what changed_value checks.
-        if speed != self.vibrations[index] || !self.sent_vibration {
-          changed_value = true;
-        }
-        self.vibrations[index] = speed;
+      let current_speed = self.vibrations[index].load(SeqCst);
+      let sent_vibration = self.sent_vibration.load(SeqCst);
+      if !sent_vibration || speed != current_speed || match_all {
+        self.vibrations[index].store(speed, SeqCst);
         result[index] = Some(speed);
+      }
+
+      if !sent_vibration {
+        self.sent_vibration.store(true, SeqCst);
       }
     }
 
-    self.sent_vibration = true;
-
     // Return the command vector for the protocol to turn into proprietary commands
-    if !changed_value {
-      Ok(None)
-    } else {
-      Ok(Some(result))
-    }
+    Ok(result)
   }
 
-  pub fn vibration(&mut self) -> Vec<Option<u32>> {
-    self.vibrations.iter().map(|x| Some(*x)).collect()
+  pub fn vibration(&self) -> Vec<Option<u32>> {
+    self.vibrations.iter().map(|x| Some(x.load(SeqCst))).collect()
   }
 
   pub fn update_rotation(
-    &mut self,
+    &self,
     msg: &RotateCmd,
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
@@ -259,23 +259,26 @@ impl GenericCommandManager {
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
-      if !self.sent_rotation
-        || speed != self.rotations[index].0
-        || clockwise != self.rotations[index].1
+      let sent_rotation = self.sent_rotation.load(SeqCst);
+      if !sent_rotation
+        || speed != self.rotations[index].0.load(SeqCst)
+        || clockwise != self.rotations[index].1.load(SeqCst)
       {
-        self.rotations[index] = (speed, clockwise);
+        self.rotations[index].0.store(speed, SeqCst);
+        self.rotations[index].1.store(clockwise, SeqCst);
         result[index] = Some((speed, clockwise));
       }
+      if !sent_rotation {
+        self.sent_rotation.store(true, SeqCst);
+      }
     }
-
-    self.sent_rotation = true;
 
     // Return the command vector for the protocol to turn into proprietary commands
     Ok(result)
   }
 
   pub fn _update_linear(
-    &mut self,
+    &self,
     _msg: &LinearCmd,
   ) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
     // First, make sure this is a valid command, that doesn't contain an
@@ -330,7 +333,7 @@ mod test {
       attributes_map,
       None,
     );
-    let mut mgr = GenericCommandManager::new(&device_attributes);
+    let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = VibrateCmd::new(
       0,
       vec![
@@ -342,13 +345,13 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      Some(vec![Some(10), Some(10)])
+      vec![Some(10), Some(10)]
     );
     assert_eq!(
       mgr
         .update_vibration(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      None
+      vec![]
     );
     let vibrate_msg_2 = VibrateCmd::new(
       0,
@@ -361,7 +364,7 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg_2, false)
         .expect("Test, assuming infallible"),
-      Some(vec![None, Some(15)])
+      vec![None, Some(15)]
     );
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
     assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
@@ -387,7 +390,7 @@ mod test {
       attributes_map,
       None,
     );
-    let mut mgr = GenericCommandManager::new(&device_attributes);
+    let mgr = GenericCommandManager::new(&device_attributes);
     let vibrate_msg = VibrateCmd::new(
       0,
       vec![
@@ -399,13 +402,13 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      Some(vec![Some(13), Some(15)])
+      vec![Some(13), Some(15)]
     );
     assert_eq!(
       mgr
         .update_vibration(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      None
+      vec![]
     );
     let vibrate_msg_2 = VibrateCmd::new(
       0,
@@ -418,7 +421,7 @@ mod test {
       mgr
         .update_vibration(&vibrate_msg_2, false)
         .expect("Test, assuming infallible"),
-      Some(vec![None, Some(18)])
+      vec![None, Some(18)]
     );
     let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
     assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
@@ -443,7 +446,7 @@ mod test {
       attributes_map,
       None,
     );
-    let mut mgr = GenericCommandManager::new(&device_attributes);
+    let mgr = GenericCommandManager::new(&device_attributes);
 
     let rotate_msg = RotateCmd::new(
       0,

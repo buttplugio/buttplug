@@ -321,7 +321,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     })
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -336,8 +336,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     } else {
       WriteType::WithoutResponse
     };
+    let data = msg.data.clone();
     Box::pin(async move {
-      match device.write(&characteristic, &msg.data, write_type).await {
+      match device.write(&characteristic, &data, write_type).await {
         Ok(()) => Ok(()),
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
@@ -354,7 +355,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
 
   fn read_value(
     &self,
-    msg: HardwareReadCmd,
+    msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
@@ -367,11 +368,12 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       }
     };
     let device = self.device.clone();
+    let endpoint = msg.endpoint;
     Box::pin(async move {
       match device.read(&characteristic).await {
         Ok(data) => {
           trace!("Got reading: {:?}", data);
-          Ok(RawReading::new(0, msg.endpoint, data))
+          Ok(RawReading::new(0, endpoint, data))
         }
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);
@@ -386,7 +388,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     })
   }
 
-  fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -406,7 +408,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     })
   }
 
-  fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {

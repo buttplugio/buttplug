@@ -32,7 +32,7 @@ use tokio::sync::broadcast;
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
   pub endpoint: Endpoint,
@@ -68,7 +68,7 @@ impl From<RawReadCmd> for HardwareReadCmd {
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
   pub endpoint: Endpoint,
@@ -108,7 +108,7 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct HardwareSubscribeCmd {
   /// Endpoint to subscribe to notifications from.
   pub endpoint: Endpoint,
@@ -135,7 +135,7 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct HardwareUnsubscribeCmd {
   pub endpoint: Endpoint,
 }
@@ -160,7 +160,11 @@ impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
 #[derive(PartialEq, Debug)]
 pub enum HardwareCommand {
   Write(HardwareWriteCmd),
-  Read(HardwareReadCmd),
+  // TODO Figure out how to handle arbitrary reads/returns
+  //
+  // These don't happen a lot and are usually part of init right now.
+  
+  // Read(HardwareReadCmd),
   Subscribe(HardwareSubscribeCmd),
   Unsubscribe(HardwareUnsubscribeCmd),
 }
@@ -182,12 +186,13 @@ impl From<RawUnsubscribeCmd> for HardwareCommand {
     HardwareCommand::Unsubscribe(msg.into())
   }
 }
-
+/*
 impl From<HardwareReadCmd> for HardwareCommand {
   fn from(msg: HardwareReadCmd) -> Self {
     HardwareCommand::Read(msg)
   }
 }
+ */
 
 impl From<HardwareWriteCmd> for HardwareCommand {
   fn from(msg: HardwareWriteCmd) -> Self {
@@ -282,26 +287,37 @@ impl Hardware {
     self.internal_impl.disconnect()
   }
 
+  pub fn parse_message(
+    &self,
+    command: &HardwareCommand
+  ) -> ButtplugResultFuture {
+    match command {
+      HardwareCommand::Write(cmd) => self.write_value(cmd),
+      HardwareCommand::Subscribe(cmd) => self.subscribe(cmd),
+      HardwareCommand::Unsubscribe(cmd) => self.unsubscribe(cmd),
+    }
+  }
+
   /// Read a value from the device
   pub fn read_value(
     &self,
-    msg: HardwareReadCmd,
+    msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     self.internal_impl.read_value(msg)
   }
 
   /// Write a value to the device
-  pub fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  pub fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     self.internal_impl.write_value(msg)
   }
 
   /// Subscribe to a device endpoint, if it exists
-  pub fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  pub fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     self.internal_impl.subscribe(msg)
   }
 
   /// Unsubscribe from a device endpoint, if it exists
-  pub fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  pub fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     self.internal_impl.unsubscribe(msg)
   }
 }
@@ -320,14 +336,14 @@ pub trait HardwareInternal: Sync + Send {
   /// Returns a receiver for any events the device may emit.
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent>;
   /// Read a value from the device
-  fn read_value(&self, msg: HardwareReadCmd)
+  fn read_value(&self, msg: &HardwareReadCmd)
     -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
   /// Write a value to the device
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture;
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture;
   /// Subscribe to a device endpoint, if it exists
-  fn subscribe(&self, msg: HardwareSubscribeCmd) -> ButtplugResultFuture;
+  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture;
   /// Unsubscribe from a device endpoint, if it exists
-  fn unsubscribe(&self, msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture;
+  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture;
 }
 
 #[async_trait]

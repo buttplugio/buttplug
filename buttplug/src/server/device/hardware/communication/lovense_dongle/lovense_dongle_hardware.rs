@@ -181,21 +181,22 @@ impl HardwareInternal for LovenseDongleHardware {
 
   fn read_value(
     &self,
-    _msg: HardwareReadCmd,
+    _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
     unimplemented!()
   }
 
-  fn write_value(&self, msg: HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
+    let data = msg.data.clone();
     Box::pin(async move {
       let outgoing_msg = LovenseDongleOutgoingMessage {
         func: LovenseDongleMessageFunc::Command,
         message_type: LovenseDongleMessageType::Toy,
         id: Some(address),
         command: Some(
-          std::str::from_utf8(&msg.data)
+          std::str::from_utf8(&data)
             .expect("Got this from our own protocol code, we know it'll be a formattable string.")
             .to_string(),
         ),
@@ -213,11 +214,11 @@ impl HardwareInternal for LovenseDongleHardware {
     })
   }
 
-  fn subscribe(&self, _msg: HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
-  fn unsubscribe(&self, _msg: HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
     // unimplemented!();
     Box::pin(future::ready(Ok(())))
   }
