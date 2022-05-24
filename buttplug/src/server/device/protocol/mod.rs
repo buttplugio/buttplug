@@ -68,26 +68,22 @@ pub mod zalo;
 */
 
 use crate::{
-  core::{
-    errors::{ButtplugDeviceError},
-    messages,
-  },
+  core::{errors::ButtplugDeviceError, messages},
   server::{
-    ButtplugServerResultFuture,
     device::{
-      configuration::{ProtocolDeviceAttributes, ProtocolAttributesType, ProtocolCommunicationSpecifier},
-      hardware::{HardwareReadCmd, Hardware, HardwareCommand},
-      ServerDeviceIdentifier
+      configuration::{
+        ProtocolAttributesType, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+      },
+      hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+      ServerDeviceIdentifier,
     },
+    ButtplugServerResultFuture,
   },
 };
 use futures::future::{self};
 
-use std::{
-  collections::HashMap,
-  sync::Arc,
-};
 use async_trait::async_trait;
+use std::{collections::HashMap, sync::Arc};
 
 pub trait ProtocolIdentifierFactory: Send + Sync {
   fn identifier(&self) -> &str;
@@ -96,18 +92,17 @@ pub trait ProtocolIdentifierFactory: Send + Sync {
 
 pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierFactory>> {
   let mut map = HashMap::new();
-  fn add_to_protocol_map<T>(map: &mut HashMap<String, Arc<dyn ProtocolIdentifierFactory>>, factory: T)
-    where
-  T: ProtocolIdentifierFactory + 'static
+  fn add_to_protocol_map<T>(
+    map: &mut HashMap<String, Arc<dyn ProtocolIdentifierFactory>>,
+    factory: T,
+  ) where
+    T: ProtocolIdentifierFactory + 'static,
   {
     let factory = Arc::new(factory);
-    map.insert(
-      factory.identifier().to_owned(),
-      factory
-    );
+    map.insert(factory.identifier().to_owned(), factory);
   }
 
-  add_to_protocol_map(&mut map, aneros::AnerosIdentifierFactory::default());
+  add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
   /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
   add_to_protocol_map(&mut map, buttplug_passthru::ButtplugPassthruFactory::default());
@@ -171,18 +166,21 @@ fn print_type_of<T>(_: &T) -> &'static str {
 
 pub struct ProtocolSpecializer {
   specifiers: Vec<ProtocolCommunicationSpecifier>,
-  identifier: Box<dyn ProtocolIdentifier>
+  identifier: Box<dyn ProtocolIdentifier>,
 }
 
 impl ProtocolSpecializer {
-  pub fn new(specifiers: Vec<ProtocolCommunicationSpecifier>, identifier: Box<dyn ProtocolIdentifier>) -> Self {
+  pub fn new(
+    specifiers: Vec<ProtocolCommunicationSpecifier>,
+    identifier: Box<dyn ProtocolIdentifier>,
+  ) -> Self {
     Self {
       specifiers,
-      identifier
+      identifier,
     }
   }
 
-  pub fn specifiers(&self) -> & Vec<ProtocolCommunicationSpecifier> {
+  pub fn specifiers(&self) -> &Vec<ProtocolCommunicationSpecifier> {
     &self.specifiers
   }
 
@@ -193,51 +191,72 @@ impl ProtocolSpecializer {
 
 #[async_trait]
 pub trait ProtocolIdentifier: Sync + Send {
-  async fn identify(&mut self, hardware: Arc<Hardware>) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError>;
 }
 
 #[async_trait]
 pub trait ProtocolInitializer: Sync + Send {
-  async fn initialize(&mut self, hardware: Arc<Hardware>) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError>;
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
 pub struct GenericProtocolIdentifier {
   handler: Option<Box<dyn ProtocolHandler>>,
-  protocol_identifier: String
+  protocol_identifier: String,
 }
 
 impl GenericProtocolIdentifier {
   pub fn new(handler: Box<dyn ProtocolHandler>, protocol_identifier: &str) -> Self {
     Self {
       handler: Some(handler),
-      protocol_identifier: protocol_identifier.to_owned()
+      protocol_identifier: protocol_identifier.to_owned(),
     }
   }
 }
 
 #[async_trait]
 impl ProtocolIdentifier for GenericProtocolIdentifier {
-  async fn identify(&mut self, hardware: Arc<Hardware>) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
-    let device_identifier = ServerDeviceIdentifier::new(hardware.address(), &self.protocol_identifier, &ProtocolAttributesType::Identifier(hardware.name().to_owned()));
-    Ok((device_identifier, Box::new(GenericProtocolInitializer::new(self.handler.take().unwrap()))))
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let device_identifier = ServerDeviceIdentifier::new(
+      hardware.address(),
+      &self.protocol_identifier,
+      &ProtocolAttributesType::Identifier(hardware.name().to_owned()),
+    );
+    Ok((
+      device_identifier,
+      Box::new(GenericProtocolInitializer::new(
+        self.handler.take().unwrap(),
+      )),
+    ))
   }
 }
 
 pub struct GenericProtocolInitializer {
-  handler: Option<Box<dyn ProtocolHandler>>
+  handler: Option<Box<dyn ProtocolHandler>>,
 }
 
 impl GenericProtocolInitializer {
   pub fn new(handler: Box<dyn ProtocolHandler>) -> Self {
     Self {
-      handler: Some(handler)
+      handler: Some(handler),
     }
   }
 }
 
 #[async_trait]
 impl ProtocolInitializer for GenericProtocolInitializer {
-  async fn initialize(&mut self, _: Arc<Hardware>) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }
 }
@@ -247,7 +266,10 @@ pub trait ProtocolHandler: Sync + Send {
     false
   }
 
-  fn command_unimplemented(&self, command: &str) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+  fn command_unimplemented(
+    &self,
+    command: &str,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     #[cfg(build = "debug")]
     unimplemented!("Command not implemented for this protocol");
     #[cfg(not(build = "debug"))]
@@ -329,7 +351,7 @@ pub trait ProtocolHandler: Sync + Send {
       self.command_unimplemented(print_type_of(&message))
     }
     */
-    Ok(vec!())
+    Ok(vec![])
   }
 
   fn handle_rssi_level_cmd(
@@ -339,3 +361,33 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented(print_type_of(&message))
   }
 }
+
+#[macro_export]
+macro_rules! generic_protocol_setup {
+  ( $protocol_name:ident, $protocol_identifier:tt) => {
+    paste::paste! {
+      pub mod setup {
+        use crate::server::device::protocol::{
+          GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory,
+        };
+        #[derive(Default)]
+        pub struct [< $protocol_name IdentifierFactory >] {}
+
+        impl ProtocolIdentifierFactory for  [< $protocol_name IdentifierFactory >] {
+          fn identifier(&self) -> &str {
+            $protocol_identifier
+          }
+
+          fn create(&self) -> Box<dyn ProtocolIdentifier> {
+            Box::new(GenericProtocolIdentifier::new(
+              Box::new(super::$protocol_name::default()),
+              self.identifier(),
+            ))
+          }
+        }
+      }
+    }
+  }
+}
+
+pub use generic_protocol_setup;
