@@ -255,7 +255,7 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => check_msg(ButtplugDeviceMessageType::RSSILevelCmd),
       ButtplugDeviceCommandMessageUnion::LevelCmd(_) => check_msg(ButtplugDeviceMessageType::LevelCmd),
       // We translate SingleMotorVibrateCmd into Vibrate, so this one is special.
-      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => check_msg(ButtplugDeviceMessageType::SingleMotorVibrateCmd),
+      ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => check_msg(ButtplugDeviceMessageType::VibrateCmd),
       ButtplugDeviceCommandMessageUnion::StopDeviceCmd(_) => check_msg(ButtplugDeviceMessageType::StopDeviceCmd),
       ButtplugDeviceCommandMessageUnion::VibrateCmd(_) => check_msg(ButtplugDeviceMessageType::VibrateCmd),
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(_) => check_msg(ButtplugDeviceMessageType::VorzeA10CycloneCmd),
