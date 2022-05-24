@@ -10,6 +10,7 @@
 pub mod generic_command_manager;
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
+pub mod lovense;
 /*
 pub mod ankni;
 pub mod buttplug_passthru;
@@ -32,7 +33,7 @@ pub mod libo_shark;
 pub mod libo_vibes;
 pub mod lovedistance;
 pub mod lovehoney_desire;
-pub mod lovense;
+
 pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod magic_motion_v1;
@@ -68,20 +69,18 @@ pub mod zalo;
 */
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages},
+  core::{errors::ButtplugDeviceError, messages::{self, ButtplugServerMessage, ButtplugDeviceMessage, Endpoint, RawReading}},
   server::{
     device::{
       configuration::{
-        ProtocolAttributesType, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+        ProtocolAttributesType, ProtocolCommunicationSpecifier,
       },
       hardware::{Hardware, HardwareCommand, HardwareReadCmd},
       ServerDeviceIdentifier,
     },
-    ButtplugServerResultFuture,
   },
 };
-use futures::future::{self};
-
+use futures::future::{self, BoxFuture};
 use async_trait::async_trait;
 use std::{collections::HashMap, sync::Arc};
 
@@ -103,6 +102,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   }
 
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
+  add_to_protocol_map(&mut map, lovense::setup::LovenseIdentifierFactory::default());
   /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
   add_to_protocol_map(&mut map, buttplug_passthru::ButtplugPassthruFactory::default());
@@ -123,7 +123,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, libo_vibes::LiboVibesFactory::default());
   add_to_protocol_map(&mut map, lovehoney_desire::LovehoneyDesireFactory::default());
   add_to_protocol_map(&mut map, lovedistance::LoveDistanceFactory::default());
-  add_to_protocol_map(&mut map, lovense::LovenseFactory::default());
+
   add_to_protocol_map(&mut map, lovense_connect_service::LovenseConnectServiceFactory::default());
   add_to_protocol_map(&mut map, lovenuts::LoveNutsFactory::default());
   add_to_protocol_map(&mut map, magic_motion_v1::MagicMotionV1Factory::default());
@@ -330,15 +330,15 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_battery_level_cmd(
     &self,
-    _message: messages::BatteryLevelCmd,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    device: Arc<Hardware>,
+    message: messages::BatteryLevelCmd,
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
-    /*
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
       info!("Trying to get battery reading.");
       let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
-      let fut = device.read_value(msg);
+      let fut = device.read_value(&msg);
       Box::pin(async move {
         let raw_msg: RawReading = fut.await?;
         let battery_level = raw_msg.data()[0] as f64 / 100f64;
@@ -348,10 +348,8 @@ pub trait ProtocolHandler: Sync + Send {
         Ok(battery_reading.into())
       })
     } else {
-      self.command_unimplemented(print_type_of(&message))
+      Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(format!("Command not implemented for this protocol: BatteryCmd")))))
     }
-    */
-    Ok(vec![])
   }
 
   fn handle_rssi_level_cmd(
