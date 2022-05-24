@@ -142,35 +142,50 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
   fn from(protocol_def: ProtocolDefinition) -> Self {
     // Make a vector out of the protocol definition specifiers
     let mut specifiers = vec![];
-    if let Some(usb_vec) = protocol_def.usb {
+    if let Some(usb_vec) = &protocol_def.usb {
       usb_vec
         .iter()
         .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::USB(*spec)));
     }
-    if let Some(serial_vec) = protocol_def.serial {
+    if let Some(serial_vec) = &protocol_def.serial {
       serial_vec
         .iter()
         .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::Serial(spec.clone())));
     }
-    if let Some(hid_vec) = protocol_def.hid {
+    if let Some(hid_vec) = &protocol_def.hid {
       hid_vec
         .iter()
         .for_each(|spec| specifiers.push(ProtocolCommunicationSpecifier::HID(*spec)));
     }
-    if let Some(btle) = protocol_def.btle {
-      specifiers.push(ProtocolCommunicationSpecifier::BluetoothLE(btle));
+    if let Some(btle) = &protocol_def.btle {
+      specifiers.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
     }
-    if let Some(xinput) = protocol_def.xinput {
-      specifiers.push(ProtocolCommunicationSpecifier::XInput(xinput));
+    if let Some(xinput) = &protocol_def.xinput {
+      specifiers.push(ProtocolCommunicationSpecifier::XInput(xinput.clone()));
     }
-    if let Some(websocket) = protocol_def.websocket {
-      specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket));
+    if let Some(websocket) = &protocol_def.websocket {
+      specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
-    if let Some(lcs) = protocol_def.lovense_connect_service {
-      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(lcs));
+    if let Some(lcs) = &protocol_def.lovense_connect_service {
+      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(lcs.clone()));
     }
 
     let mut configurations = HashMap::new();
+
+    // TODO We should probably make a From for ProtocolAttributes into ProtocolDeviceAttributes.
+    if let Some(defaults) = protocol_def.defaults() {
+      let config_attrs = ProtocolDeviceAttributes::new(
+        ProtocolAttributesType::Default,
+        defaults.name.clone(),
+        None,
+        defaults.messages.clone().unwrap_or_default(),
+        None,
+      );
+      configurations.insert(
+        ProtocolAttributesType::Default,
+        config_attrs,
+      );
+    }
 
     for config in protocol_def.configurations {
       if let Some(identifiers) = config.identifier {
