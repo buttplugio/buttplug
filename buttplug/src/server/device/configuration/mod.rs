@@ -486,6 +486,20 @@ impl DeviceConfigurationManagerBuilder {
   }
 
   pub fn finish(&mut self) -> Result<DeviceConfigurationManager, ButtplugDeviceError> {
+    // Map of protocol names to their respective protocol instance factories
+    let mut protocol_map = if !self.skip_default_protocols {
+      get_default_protocol_map()
+    } else {
+      HashMap::new()
+    };
+
+    for (name, protocol) in &self.protocols {
+      if protocol_map.contains_key(name) {
+        // TODO Fill in error
+      }
+      protocol_map.insert(name.clone(), protocol.clone());
+    }
+
     // Build and validate the protocol attributes tree.
     let mut attribute_tree_map = HashMap::new();
 
@@ -493,6 +507,11 @@ impl DeviceConfigurationManagerBuilder {
     for (ident, attr) in self.protocol_attributes.iter().filter(|(ident, _)| {
       ident.attributes_identifier == ProtocolAttributesType::Default && ident.address.is_none()
     }) {
+      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
+      // anything with it anyways.
+      if !protocol_map.contains_key(&ident.protocol) {
+        continue;
+      }
       attribute_tree_map.insert(ident.clone(), Arc::new(attr.clone()));
     }
 
@@ -503,6 +522,11 @@ impl DeviceConfigurationManagerBuilder {
         ProtocolAttributesType::Identifier(_)
       ) && ident.address.is_none()
     }) {
+      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
+      // anything with it anyways.
+      if !protocol_map.contains_key(&ident.protocol) {
+        continue;
+      }
       if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
         address: None,
         protocol: ident.protocol.clone(),
@@ -521,6 +545,12 @@ impl DeviceConfigurationManagerBuilder {
       .iter()
       .filter(|(ident, _)| ident.address.is_some())
     {
+      // If we don't have a protocol loaded for this configuration block, just drop it. We can't do
+      // anything with it anyways.
+      if !protocol_map.contains_key(&ident.protocol) {
+        continue;
+      }
+
       // The protocol and attribute identifier of a user config will be its parent. If that doesn't exist, error.
       if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
         address: None,
@@ -532,20 +562,6 @@ impl DeviceConfigurationManagerBuilder {
       } else {
         return Err(ButtplugDeviceError::DeviceConfigurationError(format!("User configuration {:?} does not have a parent type, cannot create configuration. Please remove this user configuration, or make sure it has a parent.", ident)));
       }
-    }
-
-    // Map of protocol names to their respective protocol instance factories
-    let mut protocol_map = if !self.skip_default_protocols {
-      get_default_protocol_map()
-    } else {
-      HashMap::new()
-    };
-
-    for (name, protocol) in &self.protocols {
-      if protocol_map.contains_key(name) {
-        // TODO Fill in error
-      }
-      protocol_map.insert(name.clone(), protocol.clone());
     }
 
     // Align the implementation, communication specifier, and attribute maps so we only keep what we
