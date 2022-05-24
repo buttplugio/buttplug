@@ -28,6 +28,7 @@ use std::matches;
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
 // the device itself does not.
 #[test]
+#[ignore = "Onyx+ config currently turned off. TURN THIS BACK ON BEFORE RELEASING V6."]
 fn test_capabilities_exposure() {
   async_manager::block_on(async {
     let (server, _) = test_server_with_device("Onyx+").await;
