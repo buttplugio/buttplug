@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 pub type ButtplugSerializerResult<T> = Result<T, ButtplugSerializerError>;
 
-#[derive(Debug, Error, Clone, Serialize, Deserialize)]
+#[derive(Debug, Error, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ButtplugSerializerError {
   // jsonschema hands back a vector of errors that isn't easy to encase, so we just
   // turn it into a big string and pass that back.

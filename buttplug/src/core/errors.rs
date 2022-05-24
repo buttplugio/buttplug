@@ -30,7 +30,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone)]
+#[derive(Debug, Error, Display, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugHandshakeError {
   /// Expected either a ServerInfo or Error message, received {0}
@@ -56,7 +56,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone)]
+#[derive(Debug, Error, Display, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugMessageError {
   /// Got unexpected message type: {0}
@@ -90,7 +90,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone)]
+#[derive(Debug, Error, Display, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugPingError {
   /// Pinged timer exhausted, system has shut down.
@@ -114,7 +114,7 @@ where
     ButtplugError::from(err).into()
   }
 }
-#[derive(Debug, Error, Display, Clone)]
+#[derive(Debug, Error, Display, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugDeviceError {
   /// Device {0} not connected
@@ -175,7 +175,7 @@ where
   }
 }
 
-#[derive(Debug, Error, Display, Clone)]
+#[derive(Debug, Error, Display, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugUnknownError {
   /// Cannot start scanning, no device communication managers available to use for scanning.
@@ -187,7 +187,7 @@ pub enum ButtplugUnknownError {
 }
 
 /// Aggregation enum for protocol error types.
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, PartialEq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugError {
   #[error(transparent)]

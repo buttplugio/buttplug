@@ -57,7 +57,7 @@ pub trait HardwareCommunicationManager: Send + Sync {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug, Clone, Serialize, Deserialize)]
+#[derive(Error, Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum HardwareSpecificError {
   // XInput library doesn't derive error on its error enum. :(
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
