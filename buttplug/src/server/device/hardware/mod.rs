@@ -283,14 +283,14 @@ impl Hardware {
   }
 
   /// Disconnect from the device (if it is connected)
-  pub fn disconnect(&self) -> ButtplugResultFuture {
+  pub fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.disconnect()
   }
 
   pub fn parse_message(
     &self,
     command: &HardwareCommand
-  ) -> ButtplugResultFuture {
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     match command {
       HardwareCommand::Write(cmd) => self.write_value(cmd),
       HardwareCommand::Subscribe(cmd) => self.subscribe(cmd),
@@ -302,22 +302,22 @@ impl Hardware {
   pub fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     self.internal_impl.read_value(msg)
   }
 
   /// Write a value to the device
-  pub fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  pub fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.write_value(msg)
   }
 
   /// Subscribe to a device endpoint, if it exists
-  pub fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
+  pub fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.subscribe(msg)
   }
 
   /// Unsubscribe from a device endpoint, if it exists
-  pub fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  pub fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.unsubscribe(msg)
   }
 }
@@ -332,18 +332,18 @@ pub trait HardwareInternal: Sync + Send {
   /// If true, device is currently connected to system
   fn connected(&self) -> bool;
   /// Disconnect from the device (if it is connected)
-  fn disconnect(&self) -> ButtplugResultFuture;
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Returns a receiver for any events the device may emit.
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent>;
   /// Read a value from the device
   fn read_value(&self, msg: &HardwareReadCmd)
-    -> BoxFuture<'static, Result<RawReading, ButtplugError>>;
+    -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>>;
   /// Write a value to the device
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture;
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Subscribe to a device endpoint, if it exists
-  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture;
+  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Unsubscribe from a device endpoint, if it exists
-  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture;
+  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
 }
 
 #[async_trait]

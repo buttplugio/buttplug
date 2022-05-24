@@ -8,9 +8,8 @@
 use super::lovense_connect_service_comm_manager::LovenseServiceToyInfo;
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::{ButtplugDeviceError},
     messages::{Endpoint, RawReading},
-    ButtplugResultFuture,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, LovenseConnectServiceSpecifier},
@@ -118,7 +117,7 @@ impl HardwareInternal for LovenseServiceHardware {
     true
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     Box::pin(future::ready(Ok(())))
   }
 
@@ -126,7 +125,7 @@ impl HardwareInternal for LovenseServiceHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     let toy_info = self.toy_info.clone();
     Box::pin(async move {
       let battery_level = toy_info.read().await.battery.clamp(0, 100) as u8;
@@ -134,7 +133,7 @@ impl HardwareInternal for LovenseServiceHardware {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let command_url = format!(
       "{}/{}",
       self.http_host,
@@ -146,17 +145,17 @@ impl HardwareInternal for LovenseServiceHardware {
         Ok(_) => Ok(()),
         Err(err) => {
           error!("Got http error: {}", err);
-          Err(ButtplugDeviceError::UnhandledCommand(err.to_string()).into())
+          Err(ButtplugDeviceError::UnhandledCommand(err.to_string()))
         }
       }
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
-    panic!("We should never get here!");
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Lovense Connect does not support subscribe".to_owned()))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
-    panic!("We should never get here!");
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Lovense Connect does not support unsubscribe".to_owned()))))
   }
 }

@@ -7,9 +7,8 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
-    ButtplugResultFuture,
   },
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
@@ -313,7 +312,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     self.connected.load(Ordering::SeqCst)
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let device = self.device.clone();
     Box::pin(async move {
       let _ = device.disconnect().await;
@@ -321,7 +320,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -346,7 +345,6 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
             ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
               format!("{:?}", err),
             ))
-            .into(),
           )
         }
       }
@@ -356,7 +354,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
     let characteristic = match self.endpoints.get(&msg.endpoint) {
@@ -381,14 +379,13 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
             ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
               format!("{:?}", err),
             ))
-            .into(),
           )
         }
       }
     })
   }
 
-  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -403,12 +400,11 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
           format!("{:?}", e),
         ))
-        .into()
       })
     })
   }
 
-  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -423,7 +419,6 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
           format!("{:?}", e),
         ))
-        .into()
       })
     })
   }

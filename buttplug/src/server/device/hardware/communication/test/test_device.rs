@@ -230,7 +230,7 @@ impl HardwareInternal for TestDevice {
     true
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
     Box::pin(async move {
@@ -244,11 +244,11 @@ impl HardwareInternal for TestDevice {
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let channels = self.endpoint_channels.clone();
     let data_command = msg.clone().into();
     let endpoint = msg.endpoint;
@@ -260,16 +260,16 @@ impl HardwareInternal for TestDevice {
           device_channel.sender.send(data_command).await.expect("Test");
           Ok(())
         }
-        None => Err(ButtplugDeviceError::InvalidEndpoint(endpoint).into()),
+        None => Err(ButtplugDeviceError::InvalidEndpoint(endpoint)),
       }
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
-    Box::pin(future::ready(Ok(())))
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Test device does not support subscribe".to_owned()))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
-    Box::pin(future::ready(Ok(())))
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Test device does not support unsubscribe".to_owned()))))
   }
 }

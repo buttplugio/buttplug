@@ -215,7 +215,10 @@ impl ServerDevice {
 
   /// Disconnect from the device, if it's connected.
   pub fn disconnect(&self) -> ButtplugResultFuture {
-    self.hardware.disconnect()
+    let fut = self.hardware.disconnect();
+    Box::pin(async move { 
+      fut.await.map_err(|err| err.into())
+    })
   }
 
   /// Retreive the message attributes for the device.
@@ -399,7 +402,7 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.write_value(&message.into());
-    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()).map_err(|err| err.into()) })
   }
 
   fn handle_raw_read_cmd(
@@ -413,6 +416,7 @@ impl ServerDevice {
         msg.set_id(id);
         msg.into()
       })
+      .map_err(|err| err.into())
     })
   }
 
@@ -422,7 +426,7 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.unsubscribe(&message.into());
-    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()).map_err(|err| err.into()) })
   }
 
   fn handle_raw_subscribe_cmd(
@@ -431,6 +435,6 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.subscribe(&message.into());
-    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()) })
+    Box::pin(async move { fut.await.map(|_| messages::Ok::new(id).into()).map_err(|err| err.into()) })
   }
 }

@@ -274,7 +274,7 @@ impl HardwareInternal for WebsocketServerHardware {
     self.connected.load(Ordering::SeqCst)
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     Box::pin(async move {
       connected.store(false, Ordering::SeqCst);
@@ -285,11 +285,11 @@ impl HardwareInternal for WebsocketServerHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
-    unimplemented!("Not implemented for websockets");
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Websocket Hardware does not support read".to_owned()))))
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.outgoing_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
@@ -304,7 +304,7 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Ok(())));
     }
@@ -347,7 +347,7 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();
@@ -361,7 +361,7 @@ impl HardwareInternal for WebsocketServerHardware {
       })
     } else {
       Box::pin(future::ready(Err(
-        ButtplugDeviceError::DeviceCommunicationError("Device not subscribed.".to_owned()).into(),
+        ButtplugDeviceError::DeviceCommunicationError("Device not subscribed.".to_owned()),
       )))
     }
   }

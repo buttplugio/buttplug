@@ -114,14 +114,14 @@ impl HardwareInternal for XInputHardware {
     self.connection_tracker.connected(self.index)
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     Box::pin(future::ready(Ok(())))
   }
 
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
     Box::pin(async move {
@@ -134,7 +134,7 @@ impl HardwareInternal for XInputHardware {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
     let data = msg.data.clone();
@@ -155,11 +155,11 @@ impl HardwareInternal for XInputHardware {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
-    panic!("We should never get here!");
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("XInput hardware does not support subscribe".to_owned()))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
-    panic!("We should never get here!");
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("XInput hardware does not support unsubscribe".to_owned()))))
   }
 }

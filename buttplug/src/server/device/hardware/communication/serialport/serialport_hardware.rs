@@ -7,9 +7,8 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::{ButtplugDeviceError},
     messages::{Endpoint, RawReading},
-    ButtplugResultFuture,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, SerialSpecifier},
@@ -43,6 +42,7 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
+use futures::future;
 
 pub struct SerialPortHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
@@ -280,7 +280,7 @@ impl HardwareInternal for SerialPortHardware {
     self.connected.load(Ordering::SeqCst)
   }
 
-  fn disconnect(&self) -> ButtplugResultFuture {
+  fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     Box::pin(async move {
       connected.store(false, Ordering::SeqCst);
@@ -291,7 +291,7 @@ impl HardwareInternal for SerialPortHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     // TODO Should check endpoint validity and length requirements
     let receiver = self.port_receiver.clone();
     Box::pin(async move {
@@ -308,7 +308,7 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> ButtplugResultFuture {
+  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.port_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
@@ -321,7 +321,7 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> ButtplugResultFuture {
+  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     // TODO Should check endpoint validity
     let data_receiver = self.port_receiver.clone();
     let event_sender = self.device_event_sender.clone();
@@ -355,8 +355,8 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> ButtplugResultFuture {
-    unimplemented!();
+  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Serial port does not support unsubscribe".to_owned()))))
   }
 }
 
