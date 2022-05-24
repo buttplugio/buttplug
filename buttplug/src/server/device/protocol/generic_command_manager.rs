@@ -197,6 +197,12 @@ impl GenericCommandManager {
       }
     }
 
+    // If we have no changes to the device, just send back an empty command array. We have nothing
+    // to do.
+    if result.iter().all(|x| x.is_none()) {
+      result.clear();
+    }
+
     // Return the command vector for the protocol to turn into proprietary commands
     Ok(result)
   }
