@@ -12,9 +12,8 @@ use super::xinput_device_comm_manager::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
-    ButtplugResultFuture,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, XInputSpecifier},

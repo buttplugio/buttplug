@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugDeviceError},
+    errors::ButtplugDeviceError,
     messages::{
       Endpoint,
       RawReadCmd,
@@ -16,7 +16,6 @@ use crate::{
       RawUnsubscribeCmd,
       RawWriteCmd,
     },
-    ButtplugResultFuture,
   },
   server::device::{
     ServerDevice,

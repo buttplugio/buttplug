@@ -8,9 +8,8 @@
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
-    ButtplugResultFuture,
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},

@@ -7,7 +7,7 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
     ButtplugResultFuture,
   },
