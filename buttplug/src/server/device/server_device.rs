@@ -276,6 +276,15 @@ impl ServerDevice {
       return Box::pin(future::ready(Err(err)));
     }
 
+    // If a handler implements handle message, bypass all of our parsing and let it do its own
+    // thing. This should be a very rare thing.
+    if self.handler.has_handle_message() {
+      let fut = self.handle_generic_command_result(self.handler.handle_message(&command_message));
+      return Box::pin(async move {
+        fut.await
+      });
+    }
+
     match command_message {
       // messages we can handle in this struct
       ButtplugDeviceCommandMessageUnion::RawReadCmd(msg) => self.handle_raw_read_cmd(msg),

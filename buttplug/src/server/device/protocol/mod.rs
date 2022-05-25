@@ -10,11 +10,14 @@
 pub mod generic_command_manager;
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
-pub mod lovense;
-/*
-pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
+pub mod lovense;
+
+/*
+pub mod ankni;
+
+
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
 
@@ -69,7 +72,7 @@ pub mod zalo;
 */
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{self, ButtplugServerMessage, ButtplugDeviceMessage, Endpoint, RawReading}},
+  core::{errors::ButtplugDeviceError, messages::{self, ButtplugServerMessage, ButtplugDeviceMessage, Endpoint, RawReading, ButtplugDeviceCommandMessageUnion}},
   server::{
     device::{
       configuration::{
@@ -102,11 +105,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   }
 
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
+  add_to_protocol_map(&mut map, buttplug_passthru::setup::ButtplugPassthruIdentifierFactory::default());
+  add_to_protocol_map(&mut map, cachito::setup::CachitoIdentifierFactory::default());
   add_to_protocol_map(&mut map, lovense::setup::LovenseIdentifierFactory::default());
   /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
-  add_to_protocol_map(&mut map, buttplug_passthru::ButtplugPassthruFactory::default());
-  add_to_protocol_map(&mut map, cachito::CachitoFactory::default());
   add_to_protocol_map(&mut map, fredorch::FredorchFactory::default());
   add_to_protocol_map(&mut map, hismith::HismithFactory::default());
   add_to_protocol_map(&mut map, hgod::HgodFactory::default());
@@ -264,6 +267,17 @@ impl ProtocolInitializer for GenericProtocolInitializer {
 pub trait ProtocolHandler: Sync + Send {
   fn needs_full_command_set(&self) -> bool {
     false
+  }
+
+  fn has_handle_message(&self) -> bool {
+    false
+  }
+
+  fn handle_message(
+    &self,
+    message: &ButtplugDeviceCommandMessageUnion,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented(print_type_of(&message))
   }
 
   fn command_unimplemented(
