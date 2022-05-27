@@ -11,15 +11,15 @@ use crate::{
     configuration::DeviceConfigurationManager,
     hardware::{
       communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-      HardwareEvent,
     },
     server_device::build_server_device,
     ServerDevice,
+    ServerDeviceEvent,
   },
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{FutureExt, future};
+use futures::{FutureExt, future, StreamExt};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -44,9 +44,9 @@ pub(super) struct ServerDeviceManagerEventLoop {
   /// a receiver that the comm managers all send thru.
   device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
   /// Sender for device events, passed to new devices when they are created.
-  device_event_sender: mpsc::Sender<HardwareEvent>,
+  device_event_sender: mpsc::Sender<ServerDeviceEvent>,
   /// Receiver for device events, which the event loops to handle events.
-  device_event_receiver: mpsc::Receiver<HardwareEvent>,
+  device_event_receiver: mpsc::Receiver<ServerDeviceEvent>,
   /// True if StartScanning has been called but no ScanningFinished has been
   /// emitted yet.
   scanning_in_progress: bool,
@@ -190,7 +190,7 @@ impl ServerDeviceManagerEventLoop {
               // probably isn't supported by our library. Happens a lot with Bluetooth.
               if let Some(server_device) = device {
                 if device_event_sender_clone
-                  .send(HardwareEvent::Connected(Arc::new(server_device)))
+                  .send(ServerDeviceEvent::Connected(Arc::new(server_device)))
                   .await
                   .is_err() {
                   error!("Device manager disappeared before connection established, device will be dropped.");
@@ -207,10 +207,10 @@ impl ServerDeviceManagerEventLoop {
     }
   }
 
-  async fn handle_device_event(&mut self, device_event: HardwareEvent) {
+  async fn handle_device_event(&mut self, device_event: ServerDeviceEvent) {
     trace!("Got device event: {:?}", device_event);
     match device_event {
-      HardwareEvent::Connected(device) => {
+      ServerDeviceEvent::Connected(device) => {
         let span = info_span!(
           "device registration",
           name = tracing::field::display(device.name()),
@@ -241,10 +241,11 @@ impl ServerDeviceManagerEventLoop {
         }
 
         // Create event loop for forwarding device events into our selector.
-        let mut event_listener = device.event_stream();
+        let event_listener = device.event_stream();
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
-          while let Ok(event) = event_listener.recv().await {
+          pin_mut!(event_listener);
+          while let Some(event) = event_listener.next().await {
             event_sender
               .send(event)
               .await
@@ -266,10 +267,10 @@ impl ServerDeviceManagerEventLoop {
           debug!("Server not currently available, dropping Device Added event.");
         }
       }
-      HardwareEvent::Disconnected(address) => {
+      ServerDeviceEvent::Disconnected(identifier) => {
         let mut device_index = None;
         for device_pair in self.device_map.iter() {
-          if device_pair.value().identifier().address() == &address {
+          if *device_pair.value().identifier() == identifier {
             device_index = Some(*device_pair.key());
             break;
           }
@@ -288,7 +289,7 @@ impl ServerDeviceManagerEventLoop {
           }
         }
       }
-      HardwareEvent::Notification(_address, _endpoint, _data) => {
+      ServerDeviceEvent::Notification(_identifier, _message) => {
         // TODO At some point here we need to fill this in for RawSubscribe and
         // other sensor subscriptions.
       }

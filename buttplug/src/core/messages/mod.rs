@@ -398,6 +398,25 @@ pub enum ButtplugServerMessage {
   RSSILevelReading(RSSILevelReading),
 }
 
+/// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
+/// [ButtplugClient][crate::client::ButtplugClient] that denote a response from a device.
+#[derive(
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugServerMessageType,
+  FromSpecificButtplugMessage,
+)]
+pub enum ButtplugServerDeviceMessage {
+  // Generic commands
+  RawReading(RawReading),
+  // Sensor Reading Messages
+  BatteryLevelReading(BatteryLevelReading),
+  RSSILevelReading(RSSILevelReading),
+}
+
 /// Type alias for the latest version of client-to-server messages.
 pub type ButtplugCurrentSpecClientMessage = ButtplugSpecV3ClientMessage;
 /// Type alias for the latest version of server-to-client messages.

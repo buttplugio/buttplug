@@ -103,4 +103,4 @@ pub mod hardware;
 pub mod protocol;
 
 pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};
-pub use server_device::{ServerDeviceIdentifier, ServerDevice};
+pub use server_device::{ServerDeviceIdentifier, ServerDevice, ServerDeviceEvent};

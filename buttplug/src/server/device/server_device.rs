@@ -21,8 +21,10 @@ use crate::{
       ButtplugDeviceMessage,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessageType,
+      ButtplugServerDeviceMessage,
       DeviceMessageAttributesMap,
       Endpoint,
+      RawReading,
       RawSubscribeCmd,
       VibrateCmd,
       VibrateSubcommand,
@@ -36,15 +38,21 @@ use crate::{
       configuration::{ProtocolAttributesType, DeviceConfigurationManager},
       protocol::{ProtocolHandler}
     },
-  },
+  }, util::stream::convert_broadcast_receiver_to_stream,
 };
 use getset::{Getters, Setters, MutGetters};
 use serde::{Serialize, Deserialize};
 use core::hash::{Hash, Hasher};
-use tokio::sync::broadcast;
-use futures::future;
+use futures::{future, StreamExt};
 
 use super::{configuration::ProtocolDeviceAttributes, protocol::generic_command_manager::GenericCommandManager};
+
+#[derive(Debug)]
+pub enum ServerDeviceEvent {
+  Connected(Arc<ServerDevice>),
+  Notification(ServerDeviceIdentifier, ButtplugServerDeviceMessage),
+  Disconnected(ServerDeviceIdentifier)
+}
 
 /// Identifying information for a connected devices
 /// 
@@ -172,6 +180,9 @@ impl PartialEq for ServerDevice {
 impl ServerDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(identifier: ServerDeviceIdentifier, handler: Box<dyn ProtocolHandler>, hardware: Arc<Hardware>, attributes: &ProtocolDeviceAttributes) -> Self {
+
+    // Hook up our stream mapper now.
+
     Self {
       identifier,
       generic_command_manager: GenericCommandManager::new(attributes),
@@ -231,8 +242,18 @@ impl ServerDevice {
   /// 
   /// This will include connections, disconnections, and notification events from subscribed
   /// endpoints.
-  pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
-    self.hardware.event_stream()
+  pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> {
+    let identifier = self.identifier.clone();
+    convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(move |hardware_event| {
+      let id = identifier.clone();
+      match hardware_event {
+        HardwareEvent::Disconnected(_) => ServerDeviceEvent::Disconnected(id),
+        HardwareEvent::Notification(_address, endpoint,  data) => {
+          // TODO Figure out how we're going to parse raw data into something sendable to the client.
+          ServerDeviceEvent::Notification(id, ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)))
+        }
+      }
+    })
   }  
   
   pub fn supports_message(

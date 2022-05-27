@@ -229,9 +229,6 @@ impl ProtocolHandler for Lovense {
               .into(),
             )
           }
-          HardwareEvent::Connected(_) => {
-            unimplemented!("Shouldn't get here as device will always be connected.");
-          }
         }
       }
       Err(

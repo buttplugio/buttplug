@@ -1,9 +1,6 @@
 pub mod communication;
 
-use std::{
-  fmt::Debug,
-  sync::Arc,
-};
+use std::fmt::Debug;
 
 use crate::{
   core::{
@@ -18,7 +15,6 @@ use crate::{
     },
   },
   server::device::{
-    ServerDevice,
     configuration::{ProtocolCommunicationSpecifier},
   },
 };
@@ -214,8 +210,6 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
 /// Events that can be emitted from a [Hardware](crate::device::Hardware).
 #[derive(Debug, Clone)]
 pub enum HardwareEvent {
-  /// Device connected
-  Connected(Arc<ServerDevice>),
   /// Device received data
   Notification(String, Endpoint, Vec<u8>),
   /// Device disconnected
