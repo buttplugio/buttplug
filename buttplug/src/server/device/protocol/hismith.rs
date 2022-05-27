@@ -5,48 +5,35 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Hismith, "hismith");
+generic_protocol_setup!(Hismith, "hismith");
 
-impl ButtplugProtocolCommandHandler for Hismith {
+#[derive(Default)]
+pub struct Hismith {}
+
+impl ProtocolHandler for Hismith {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          fut_vec.push(device.write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0xAA, 0x04, speed as u8, (speed + 4) as u8],
-            false,
-          )));
-        }
-      }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut cmd_vec = vec![];
+    if let Some(speed) = cmds[0] {
+      cmd_vec.push(
+        HardwareWriteCmd::new(
+          Endpoint::Tx,
+          vec![0xAA, 0x04, speed as u8, (speed + 4) as u8],
+          false,
+        )
+        .into(),
+      );
+    }
+    Ok(cmd_vec)
   }
 }

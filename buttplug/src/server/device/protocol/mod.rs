@@ -12,18 +12,16 @@ pub mod generic_command_manager;
 pub mod aneros;
 pub mod buttplug_passthru;
 pub mod cachito;
+pub mod hismith;
+pub mod htk_bm;
 pub mod lovense;
 
 /*
 pub mod ankni;
-
-
 pub mod fleshlight_launch_helper;
 pub mod fredorch;
-
 pub mod hgod;
-pub mod hismith;
-pub mod htk_bm;
+
 pub mod jejoue;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
@@ -108,12 +106,14 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, buttplug_passthru::setup::ButtplugPassthruIdentifierFactory::default());
   add_to_protocol_map(&mut map, cachito::setup::CachitoIdentifierFactory::default());
   add_to_protocol_map(&mut map, lovense::setup::LovenseIdentifierFactory::default());
+  add_to_protocol_map(&mut map, hismith::setup::HismithIdentifierFactory::default());
+  add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
   /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
   add_to_protocol_map(&mut map, fredorch::FredorchFactory::default());
-  add_to_protocol_map(&mut map, hismith::HismithFactory::default());
+  
   add_to_protocol_map(&mut map, hgod::HgodFactory::default());
-  add_to_protocol_map(&mut map, htk_bm::HtkBmFactory::default());
+  
   add_to_protocol_map(&mut map, jejoue::JeJoueFactory::default());
   add_to_protocol_map(&mut map, kiiroo_v2::KiirooV2Factory::default());
   add_to_protocol_map(&mut map, kiiroo_v2_vibrator::KiirooV2VibratorFactory::default());
