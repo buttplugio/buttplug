@@ -21,7 +21,7 @@ mod test {
 
     builder
       .name("Websocket DCM Test Server")
-      .device_manager_builder()
+      
       .comm_manager(
         WebsocketServerDeviceCommunicationManagerBuilder::default()
           .server_port(51283)

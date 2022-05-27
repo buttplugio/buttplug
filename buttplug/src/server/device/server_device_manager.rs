@@ -119,7 +119,7 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn no_default_protocols(&mut self) -> &mut Self {
+  pub fn skip_default_protocols(&mut self) -> &mut Self {
     self.configuration_manager_builder.skip_default_protocols();
     self
   }

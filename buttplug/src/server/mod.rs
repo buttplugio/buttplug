@@ -51,6 +51,14 @@ mod remote_server;
 
 pub use remote_server::*;
 
+use self::device::{
+  configuration::{
+    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+  },
+  hardware::communication::HardwareCommunicationManagerBuilder,
+  protocol::ProtocolIdentifierFactory,
+  ServerDeviceIdentifier, ServerDeviceManager, ServerDeviceManagerBuilder,
+};
 use crate::{
   core::{
     errors::*,
@@ -66,7 +74,6 @@ use crate::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use device::{ServerDeviceManager, ServerDeviceManagerBuilder};
 use futures::{
   future::{self, BoxFuture},
   Stream,
@@ -117,14 +124,12 @@ pub struct ButtplugServerBuilder {
   /// Maximum time system will live without receiving a Ping message before disconnecting. If None,
   /// ping timer does not run.
   max_ping_time: Option<u32>,
-  /// If true, allows sending/receiving of raw binary data from devices.
-  allow_raw_messages: bool,
   /// JSON string, with the contents of the base Device Configuration file
   device_configuration_json: Option<String>,
   /// JSON string, with the contents of the User Device Configuration file
   user_device_configuration_json: Option<String>,
   /// Device manager builder for the server
-  device_manager_builder: ServerDeviceManagerBuilder
+  device_manager_builder: ServerDeviceManagerBuilder,
 }
 
 impl Default for ButtplugServerBuilder {
@@ -132,10 +137,9 @@ impl Default for ButtplugServerBuilder {
     Self {
       name: "Buttplug Server".to_owned(),
       max_ping_time: None,
-      allow_raw_messages: false,
       device_configuration_json: Some(DEVICE_CONFIGURATION_JSON.to_owned()),
       user_device_configuration_json: None,
-      device_manager_builder: ServerDeviceManagerBuilder::default()
+      device_manager_builder: ServerDeviceManagerBuilder::default(),
     }
   }
 }
@@ -160,15 +164,6 @@ impl ButtplugServerBuilder {
     self
   }
 
-  /// If set to true, devices will be allowed to use Raw Messages.
-  ///
-  /// **Be careful with this.** Raw messages being allowed on devices can open up security issues
-  /// like allowing for device firmware updates through library calls.
-  pub fn allow_raw_messages(&mut self, allow: bool) -> &mut Self {
-    self.allow_raw_messages = allow;
-    self
-  }
-
   /// Set the device configuration json file contents, to be loaded during build.
   pub fn device_configuration_json(&mut self, config_json: Option<String>) -> &mut Self {
     self.device_configuration_json = config_json;
@@ -181,8 +176,69 @@ impl ButtplugServerBuilder {
     self
   }
 
-  pub fn device_manager_builder(&mut self) -> &mut ServerDeviceManagerBuilder {
-    &mut self.device_manager_builder
+  pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
+  where
+    T: HardwareCommunicationManagerBuilder + 'static,
+  {
+    self.device_manager_builder.comm_manager(builder);
+    self
+  }
+
+  pub fn allowed_address(&mut self, address: &str) -> &mut Self {
+    self.device_manager_builder.allowed_address(address);
+    self
+  }
+
+  pub fn denied_address(&mut self, address: &str) -> &mut Self {
+    self.device_manager_builder.denied_address(address);
+    self
+  }
+
+  pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
+    self
+      .device_manager_builder
+      .reserved_index(identifier, index);
+    self
+  }
+
+  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
+  where
+    T: ProtocolIdentifierFactory + 'static,
+  {
+    self.device_manager_builder.protocol_factory(factory);
+    self
+  }
+
+  pub fn communication_specifier(
+    &mut self,
+    protocol_name: &str,
+    specifier: ProtocolCommunicationSpecifier,
+  ) -> &mut Self {
+    self
+      .device_manager_builder
+      .communication_specifier(protocol_name, specifier);
+    self
+  }
+
+  pub fn protocol_attributes(
+    &mut self,
+    identifier: ProtocolAttributesIdentifier,
+    attributes: ProtocolDeviceAttributes,
+  ) -> &mut Self {
+    self
+      .device_manager_builder
+      .protocol_attributes(identifier, attributes);
+    self
+  }
+
+  pub fn skip_default_protocols(&mut self) -> &mut Self {
+    self.device_manager_builder.skip_default_protocols();
+    self
+  }
+
+  pub fn allow_raw_messages(&mut self) -> &mut Self {
+    self.device_manager_builder.allow_raw_messages();
+    self
   }
 
   /// Try to build a [ButtplugServer] using the parameters given.
@@ -197,7 +253,8 @@ impl ButtplugServerBuilder {
       self.device_configuration_json.clone(),
       self.user_device_configuration_json.clone(),
       false,
-    ).map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
+    )
+    .map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
@@ -209,10 +266,6 @@ impl ButtplugServerBuilder {
     let ping_time = self.max_ping_time.unwrap_or(0);
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
-
-    if self.allow_raw_messages {
-      self.device_manager_builder.allow_raw_messages();
-    }
 
     for address in protocol_map.allow_list() {
       self.device_manager_builder.allowed_address(address);
@@ -362,7 +415,6 @@ impl ButtplugServer {
       Ok(())
     })
   }
-
 
   /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
   /// into the server's [DeviceManager] for communication with devices.

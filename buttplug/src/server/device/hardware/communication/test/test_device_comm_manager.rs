@@ -219,9 +219,7 @@ mod test {
       let mut builder = ButtplugServerBuilder::default();
       let comm_builder = TestDeviceCommunicationManagerBuilder::default();
       let helper = comm_builder.helper();
-      builder
-        .device_manager_builder()
-        .comm_manager(comm_builder);
+      builder.comm_manager(comm_builder);
       let server = builder.finish().expect("Test");
       let recv = server.event_stream();
       pin_mut!(recv);

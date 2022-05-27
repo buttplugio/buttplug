@@ -146,7 +146,7 @@ use super::protocol::{
 };
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::{
       ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder,
       DeviceMessageAttributesMap, Endpoint,
@@ -303,12 +303,9 @@ impl ProtocolDeviceAttributes {
 
   /// Check to make sure the message attributes of an instance are valid.
   // TODO Can we do this in new() instead and return a result there?
-  fn is_valid(&self) -> Result<(), ButtplugError> {
+  fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     for (message_type, message_attrs) in self.message_attributes_map() {
-      message_attrs.check(&message_type).map_err(|err| {
-        info!("Error in {}: {:?}", message_type, message_attrs);
-        ButtplugError::from(err)
-      })?;
+      message_attrs.check(&message_type).map_err(|err| ButtplugDeviceError::DeviceConfigurationError(format!("Configuration Error in {:?}: {}", self.identifier(), err.to_string())))?;
     }
     Ok(())
   }
@@ -585,6 +582,11 @@ impl DeviceConfigurationManagerBuilder {
         // TODO Fill in error
       }
       reserved_indexes.insert(identifier.clone(), index.clone());
+    }
+
+    // Make sure it's all valid.
+    for (_, attrs) in &attribute_tree_map {
+      attrs.is_valid()?;
     }
 
     Ok(DeviceConfigurationManager {

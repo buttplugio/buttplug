@@ -73,8 +73,7 @@ fn test_server_raw_message() {
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
     server_builder
-      .allow_raw_messages(true)
-      .device_manager_builder()
+      .allow_raw_messages()
       .comm_manager(builder);
     let server = server_builder.finish().unwrap();
     helper
@@ -246,7 +245,6 @@ fn test_repeated_address_additions() {
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
     server_builder
-      .device_manager_builder()
       .comm_manager(builder);
     let server = server_builder.finish().unwrap();
     let recv = server.event_stream();

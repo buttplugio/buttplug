@@ -64,14 +64,12 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   {
     use crate::server::device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder;
     server_builder
-      .device_manager_builder()
       .comm_manager(BtlePlugCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "websocket-server-manager")]
   {
     use crate::server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
     server_builder
-      .device_manager_builder()
       .comm_manager(
         WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
       );
@@ -80,14 +78,12 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   {
     use crate::server::device::hardware::communication::serialport::SerialPortCommunicationManagerBuilder;
     server_builder
-      .device_manager_builder()
       .comm_manager(SerialPortCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-connect-service-manager")]
   {
     use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
     server_builder
-      .device_manager_builder()
       .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-dongle-manager")]
@@ -96,17 +92,14 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
       LovenseHIDDongleCommunicationManagerBuilder, LovenseSerialDongleCommunicationManagerBuilder,
     };
     server_builder
-      .device_manager_builder()
       .comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
     server_builder
-      .device_manager_builder()
       .comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default());
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
     use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
     server_builder
-      .device_manager_builder()
       .comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
 
