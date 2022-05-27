@@ -41,10 +41,6 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   pin::Pin,
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
 };
 use tokio::sync::broadcast;
 use uuid::Uuid;
@@ -211,7 +207,6 @@ async fn specialize(&mut self, specifiers: &Vec<ProtocolCommunicationSpecifier>)
 pub struct BtlePlugHardware<T: Peripheral + 'static> {
   device: T,
   event_stream: broadcast::Sender<HardwareEvent>,
-  connected: Arc<AtomicBool>,
   endpoints: HashMap<Endpoint, Characteristic>,
 }
 
@@ -297,7 +292,6 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
     Self {
       device,
       endpoints,
-      connected: Arc::new(AtomicBool::new(true)),
       event_stream,
     }
   }
@@ -306,10 +300,6 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
 impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_stream.subscribe()
-  }
-
-  fn connected(&self) -> bool {
-    self.connected.load(Ordering::SeqCst)
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {

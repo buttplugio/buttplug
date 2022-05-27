@@ -173,12 +173,12 @@ impl HardwareCommunicationManager for WebsocketServerDeviceCommunicationManager 
     "WebsocketServerCommunicationManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     debug!("Websocket server manager scanning for devices.");
     Box::pin(async move { Ok(()) })
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
     Box::pin(async move { Ok(()) })
   }
 

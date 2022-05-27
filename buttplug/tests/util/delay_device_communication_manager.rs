@@ -47,7 +47,7 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
     "DelayDeviceCommunicationManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
     Box::pin(async move {
       is_scanning.store(true, Ordering::SeqCst);
@@ -55,7 +55,7 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
     })
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
     let sender = self.sender.clone();
     Box::pin(async move {
@@ -68,8 +68,8 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
     })
   }
 
-  fn scanning_status(&self) -> Arc<AtomicBool> {
-    self.is_scanning.clone()
+  fn scanning_status(&self) -> bool {
+    self.is_scanning.load(Ordering::SeqCst)
   }
 
   fn can_scan(&self) -> bool {

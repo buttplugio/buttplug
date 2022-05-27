@@ -226,10 +226,6 @@ impl HardwareInternal for TestDevice {
     self.event_sender.subscribe()
   }
 
-  fn connected(&self) -> bool {
-    true
-  }
-
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.event_sender.clone();
     let address = self.address.clone();

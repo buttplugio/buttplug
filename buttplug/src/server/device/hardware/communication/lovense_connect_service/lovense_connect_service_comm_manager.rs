@@ -7,34 +7,21 @@
 
 use super::lovense_connect_service_hardware::LovenseServiceHardwareConnector;
 use crate::{
-  core::ButtplugResultFuture,
+  core::errors::ButtplugDeviceError,
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
-    HardwareCommunicationManager,
-    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
+    TimedRetryCommunicationManagerImpl,
   },
-  util::async_manager,
 };
-use dashmap::DashMap;
-use futures::future;
-use futures_timer::Delay;
+use async_trait::async_trait;
+use dashmap::DashSet;
 use reqwest::StatusCode;
 use serde::Deserialize;
 use serde_aux::prelude::*;
-use std::{
-  collections::HashMap,
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
-  time::Duration,
-};
+use std::collections::HashMap;
+use tokio::sync::mpsc;
 use tokio::sync::mpsc::Sender;
-use tokio::sync::{mpsc, Mutex, RwLock};
-use tracing_futures::Instrument;
-
-const LOVENSE_LOCAL_SERVICE_CHECK_INTERVAL: u64 = 1;
-const LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL: u64 = 1;
 
 #[derive(Deserialize, Debug, Clone)]
 pub(super) struct LovenseServiceToyInfo {
@@ -86,7 +73,7 @@ struct LovenseServiceHostInfo {
 }
 
 #[derive(Deserialize, Debug)]
-struct LovenseServiceLocalInfo {
+pub(super) struct LovenseServiceLocalInfo {
   #[serde(
     rename = "type",
     skip,
@@ -104,80 +91,80 @@ struct LovenseServiceLocalInfo {
 
 type LovenseServiceInfo = HashMap<String, LovenseServiceHostInfo>;
 
-async fn lovense_local_service_check(
-  event_sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
-  is_scanning: Arc<AtomicBool>,
-  known_hosts: Arc<Mutex<Vec<String>>>,
-) {
-  let connected_device_info: Arc<DashMap<String, Arc<RwLock<LovenseServiceToyInfo>>>> =
-    Arc::new(DashMap::new());
-  loop {
-    let hosts = known_hosts.lock().await.clone();
-    if hosts.is_empty() {
-      break;
+#[derive(Default, Clone)]
+pub struct LovenseConnectServiceCommunicationManagerBuilder {}
+
+impl HardwareCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
+    Box::new(TimedRetryCommunicationManager::new(
+      LovenseConnectServiceCommunicationManager::new(sender),
+    ))
+  }
+}
+
+pub struct LovenseConnectServiceCommunicationManager {
+  sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
+  known_hosts: DashSet<String>,
+}
+
+pub(super) async fn get_local_info(host: &str) -> Option<LovenseServiceLocalInfo> {
+  match reqwest::get(format!("{}/GetToys", host)).await {
+    Ok(res) => {
+      if res.status() != StatusCode::OK {
+        error!(
+          "Error contacting Lovense Connect Local API endpoint. Status returned: {}",
+          res.status()
+        );
+        return None;
+      }
+
+      let text = res
+        .text()
+        .await
+        .expect("If we got a 200 back, we should at least have text.");
+      let info: LovenseServiceLocalInfo = serde_json::from_str(&text)
+        .expect("Should always get json back from service, if we got a response.");
+      Some(info)
     }
-    for host in hosts {
-      match reqwest::get(format!("{}/GetToys", host)).await {
-        Ok(res) => {
-          if res.status() != StatusCode::OK {
-            error!(
-              "Error contacting Lovense Connect Local API endpoint. Status returned: {}",
-              res.status()
-            );
-            tokio::time::sleep(Duration::from_secs(1)).await;
-            continue;
-          }
+    Err(err) => {
+      error!(
+        "Got http error from lovense service, assuming Lovense connect app shutdown: {}",
+        err
+      );
+      // 99% of the time, we'll only have one host. So just do the convenient thing and break.
+      // This'll get called again in 1s anyways.
+      None
+    }
+  }
+}
 
-          let text = res
-            .text()
-            .await
-            .expect("If we got a 200 back, we should at least have text.");
-          let info: LovenseServiceLocalInfo = serde_json::from_str(&text)
-            .expect("Should always get json back from service, if we got a response.");
+impl LovenseConnectServiceCommunicationManager {
+  fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
+    Self {
+      sender,
+      known_hosts: DashSet::new(),
+    }
+  }
 
-          // First off, remove all devices that are no longer in the list
-          // (devices turned off or removed from the Lovense Connect app)
-
-          for disconnected_device in connected_device_info
-            .iter()
-            .filter(|p| !info.data.contains_key(p.key()))
-          {
-            disconnected_device.value().write().await.connected = false;
-          }
-          connected_device_info.retain(|k, _| info.data.contains_key(k));
-
+  async fn lovense_local_service_check(&self) {
+    if self.known_hosts.is_empty() {
+      return;
+    }
+    for host in self.known_hosts.iter() {
+      match get_local_info(&*host).await {
+        Some(info) => {
           for (_, toy) in info.data.iter() {
-            if let Some(info_ref) = connected_device_info.get(&toy.id) {
-              // For some reason, this requires its own scoping block, otherwise
-              // the write lock will hold forever, which blocks the server? I'm
-              // guessing this has to do with loop hoisting but it still seems
-              // odd.
-              {
-                let mut info_lock = info_ref.write().await;
-                *info_lock = toy.clone();
-              }
-              // If the toy is no longer connected, remove it from our tracking.
-              if !toy.connected {
-                info!("Removing toy from main info map");
-                connected_device_info.retain(|k, _| *k != toy.id);
-              }
-              continue;
-            }
-            if !is_scanning.load(Ordering::SeqCst) {
-              continue;
-            }
             if !toy.connected {
               continue;
             }
-            connected_device_info.insert(toy.id.clone(), Arc::new(RwLock::new((*toy).clone())));
-            let device_creator = Box::new(LovenseServiceHardwareConnector::new(
-              &host,
-              connected_device_info
-                .get(&toy.id)
-                .expect("Just inserted this.")
-                .clone(),
-            ));
-            if event_sender
+            let device_creator = Box::new(LovenseServiceHardwareConnector::new(&host, toy));
+            // This will emit all of the toys as new devices every time we find them. Just let the
+            // Device Manager reject them as either connecting or already connected.
+            if self
+              .sender
               .send(HardwareCommunicationManagerEvent::DeviceFound {
                 name: toy.name.clone(),
                 address: toy.id.clone(),
@@ -189,143 +176,74 @@ async fn lovense_local_service_check(
               error!("Error sending device found message from HTTP Endpoint Manager.");
             }
           }
-
-          //connected_devices = new_connected_devices;
         }
-        Err(err) => {
-          error!(
-            "Got http error from lovense service, assuming Lovense connect app shutdown: {}",
-            err
-          );
-          (*known_hosts.lock().await).retain(|x| *x != host);
+        None => {
+          self.known_hosts.remove(&*host);
         }
       }
     }
-    Delay::new(Duration::from_secs(LOVENSE_LOCAL_SERVICE_CHECK_INTERVAL)).await;
   }
 }
 
-#[derive(Default, Clone)]
-pub struct LovenseConnectServiceCommunicationManagerBuilder {
-}
-
-impl HardwareCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
-    Box::new(LovenseConnectServiceCommunicationManager::new(
-        sender
-    ))
-  }
-}
-
-pub struct LovenseConnectServiceCommunicationManager {
-  sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
-  known_hosts: Arc<Mutex<Vec<String>>>,
-  is_scanning: Arc<AtomicBool>,
-}
-
-impl LovenseConnectServiceCommunicationManager {
-  fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
-    Self {
-      sender,
-      known_hosts: Arc::new(Mutex::new(vec![])),
-      is_scanning: Arc::new(AtomicBool::new(false)),
-    }
-  }
-}
-
-impl HardwareCommunicationManager for LovenseConnectServiceCommunicationManager {
+#[async_trait]
+impl TimedRetryCommunicationManagerImpl for LovenseConnectServiceCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseServiceDeviceCommManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
-    self.is_scanning.store(true, Ordering::SeqCst);
-    let sender = self.sender.clone();
-    let is_scanning = self.is_scanning.clone();
-    let known_hosts = self.known_hosts.clone();
-    async_manager::spawn(
-      async move {
-        debug!("Starting scanning");
-        let mut has_warned = false;
-        while is_scanning.load(Ordering::SeqCst) {
-          match reqwest::get("https://api.lovense.com/api/lan/getToys").await {
-            Ok(res) => {
-              if res.status() != StatusCode::OK {
-                error!("Error contacting Lovense Connect Remote API endpoint. Status returned: {}", res.status());
-                tokio::time::sleep(Duration::from_secs(1)).await;
-                continue;
-              }
-              let text = res.text().await.expect("Should always get json back from service, if we got a response.");
-              let info: LovenseServiceInfo = serde_json::from_str(&text).expect("Should always get json back from service, if we got a response.");
-              let mut current_known_hosts = known_hosts.lock().await;
-              let new_known_hosts: Vec<String> = info
-                .iter()
-                .map(|x| {
-                  // Lovense Connect uses [ip].lovense.club, which is a loopback DNS resolver that
-                  // should just point to [ip]. This is used for handling secure certificate
-                  // resolution when trying to use lovense connect over secure contexts. However,
-                  // this sometimes fails on DNS resolution. Since we aren't using secure contexts
-                  // at the moment, we can just cut out the IP from the domain and use that
-                  // directly, which has fixed issues for some users.
-                  let host_parts: Vec<&str> = x.0.split('.').collect();
-                  let new_http_host = host_parts[0].replace('-', ".");
-                  // We set the protocol type here so it'll just filter down, in case we want to move to secure.
-                  let host = format!("http://{}:{}", new_http_host, x.1.http_port);
-                  debug!("Lovense Connect converting IP to {}", host);
-                  host
-                })
-                .collect();
-              // check for both different numbers of elements as well as elements not being the same
-              if current_known_hosts.len() != new_known_hosts.len()
-                || !current_known_hosts
-                  .iter()
-                  .all(|item| new_known_hosts.contains(item))
-              {
-                *current_known_hosts = new_known_hosts.iter().map(|x| (*x).clone()).collect();
-              }
-              if current_known_hosts.is_empty() {
-                if !has_warned {
-                  warn!("Lovense Connect Service could not find any usable hosts. Will continue scanning until hosts are found or scanning is requested to stop.");
-                  has_warned = true;
-                }
-              } else {
-                let service_fut = lovense_local_service_check(
-                  sender.clone(),
-                  is_scanning.clone(),
-                  known_hosts.clone(),
-                );
-                info!("Lovense Connect Server API query returned: {}", text);
-                async_manager::spawn(async move {
-                  service_fut.await;
-                });
-                break;
-              }
-            }
-            Err(err) => error!("Got http error: {}", err),
-          };
-          Delay::new(Duration::from_secs(LOVENSE_REMOTE_SERVICE_CHECK_INTERVAL)).await;
+  async fn scan(&self) -> Result<(), ButtplugDeviceError> {
+    // If we already know about a local host, check it. Otherwise, query remotely to look for local
+    // hosts.
+    if !self.known_hosts.is_empty() {
+      self.lovense_local_service_check().await;
+    } else {
+      match reqwest::get("https://api.lovense.com/api/lan/getToys").await {
+        Ok(res) => {
+          if res.status() != StatusCode::OK {
+            error!(
+              "Error contacting Lovense Connect Remote API endpoint. Status returned: {}",
+              res.status()
+            );
+            return Ok(());
+          }
+          let text = res
+            .text()
+            .await
+            .expect("Should always get json back from service, if we got a response.");
+          let info: LovenseServiceInfo = serde_json::from_str(&text)
+            .expect("Should always get json back from service, if we got a response.");
+          info
+            .iter()
+            .for_each(|x| {
+              // Lovense Connect uses [ip].lovense.club, which is a loopback DNS resolver that
+              // should just point to [ip]. This is used for handling secure certificate
+              // resolution when trying to use lovense connect over secure contexts. However,
+              // this sometimes fails on DNS resolution. Since we aren't using secure contexts
+              // at the moment, we can just cut out the IP from the domain and use that
+              // directly, which has fixed issues for some users.
+              let host_parts: Vec<&str> = x.0.split('.').collect();
+              let new_http_host = host_parts[0].replace('-', ".");
+              // We set the protocol type here so it'll just filter down, in case we want to move to secure.
+              let host = format!("http://{}:{}", new_http_host, x.1.http_port);
+              debug!("Lovense Connect converting IP to {}", host);
+              self.known_hosts.insert(host);
+            });
+          // If we've found new hosts, go ahead and search them.
+          if !self.known_hosts.is_empty() {
+            self.lovense_local_service_check().await
+          }
         }
-        debug!("Stopping scanning");
+        Err(err) => {
+          error!("Got http error: {}", err);
+        }
       }
-      .instrument(info_span!("Lovense Connect Service Scanner")),
-    );
-    Box::pin(async move { Ok(()) })
-  }
-
-  fn stop_scanning(&self) -> ButtplugResultFuture {
-    self.is_scanning.store(false, Ordering::SeqCst);
-    Box::pin(future::ready(Ok(())))
+    }
+    Ok(())
   }
 
   // Assume we've already got network access. A bad assumption, but we'll need to figure out how to
   // make this work better later.
   fn can_scan(&self) -> bool {
     true
-  }
-}
-
-impl Drop for LovenseConnectServiceCommunicationManager {
-  fn drop(&mut self) {
-    self.is_scanning.store(false, Ordering::SeqCst);
   }
 }

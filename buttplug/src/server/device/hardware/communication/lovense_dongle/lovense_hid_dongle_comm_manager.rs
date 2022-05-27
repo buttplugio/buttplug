@@ -272,7 +272,7 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
     "LovenseHIDDongleCommunicationManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     debug!("Lovense Dongle Manager scanning for devices");
     let sender = self.machine_sender.clone();
     self.is_scanning.store(true, Ordering::SeqCst);
@@ -285,7 +285,7 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
     })
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let sender = self.machine_sender.clone();
     Box::pin(async move {
       sender
@@ -296,8 +296,8 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
     })
   }
 
-  fn scanning_status(&self) -> Arc<AtomicBool> {
-    self.is_scanning.clone()
+  fn scanning_status(&self) -> bool {
+    self.is_scanning.load(Ordering::SeqCst)
   }
 
   fn can_scan(&self) -> bool {

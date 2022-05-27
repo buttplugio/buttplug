@@ -85,16 +85,16 @@ impl ServerDeviceManagerEventLoop {
     }
   }
 
-  async fn handle_start_scanning(&self) {
+  async fn handle_start_scanning(&mut self) {
     info!("No scan currently in progress, starting new scan.");
-    let fut_vec: Vec<_> = self.comm_managers.iter().map(|guard| guard.start_scanning()).collect();
+    let fut_vec: Vec<_> = self.comm_managers.iter_mut().map(|guard| guard.start_scanning()).collect();
     // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
     debug!("All managers started, sending ScanningStarted (and invoking ScanningFinished hack) signal to event loop.");    
   }
 
-  async fn handle_stop_scanning(&self) {
-    let fut_vec: Vec<_> = self.comm_managers.iter().map(|guard| guard.stop_scanning()).collect();
+  async fn handle_stop_scanning(&mut self) {
+    let fut_vec: Vec<_> = self.comm_managers.iter_mut().map(|guard| guard.stop_scanning()).collect();
     // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
   }

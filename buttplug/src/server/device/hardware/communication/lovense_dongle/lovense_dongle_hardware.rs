@@ -166,10 +166,6 @@ impl HardwareInternal for LovenseDongleHardware {
     self.event_sender.subscribe()
   }
 
-  fn connected(&self) -> bool {
-    self.connected.load(Ordering::SeqCst)
-  }
-
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
     Box::pin(async move {

@@ -60,7 +60,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
     "BtlePlugCommunicationManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     let scanning_status = self.scanning_status.clone();
     // Set to true just to make sure we don't call ScanningFinished too early.
@@ -85,7 +85,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
     })
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     // Just assume any outcome of this means we're done scanning.
     self.scanning_status.store(false, Ordering::SeqCst);
@@ -108,8 +108,8 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
     })
   }
 
-  fn scanning_status(&self) -> Arc<AtomicBool> {
-    self.scanning_status.clone()
+  fn scanning_status(&self) -> bool {
+    self.scanning_status.load(Ordering::SeqCst)
   }
 
   fn can_scan(&self) -> bool {

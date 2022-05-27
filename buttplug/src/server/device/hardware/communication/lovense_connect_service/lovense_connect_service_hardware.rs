@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::lovense_connect_service_comm_manager::LovenseServiceToyInfo;
+use super::lovense_connect_service_comm_manager::{LovenseServiceToyInfo, get_local_info};
 use crate::{
   core::{
     errors::{ButtplugDeviceError},
@@ -30,25 +30,23 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture};
-use futures_timer::Delay;
 use std::{
   fmt::{self, Debug},
-  sync::Arc,
-  time::Duration,
+  sync::{Arc, atomic::{AtomicU8, Ordering}}
 };
-use tokio::sync::{broadcast, RwLock};
+use tokio::sync::broadcast;
 
 pub struct LovenseServiceHardwareConnector {
   http_host: String,
-  toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
+  toy_info: LovenseServiceToyInfo,
 }
 
 impl LovenseServiceHardwareConnector {
-  pub(super) fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>) -> Self {
+  pub(super) fn new(http_host: &str, toy_info: &LovenseServiceToyInfo) -> Self {
     debug!("Emitting a new lovense service hardware connector!");
     Self {
       http_host: http_host.to_owned(),
-      toy_info,
+      toy_info: toy_info.clone(),
     }
   }
 }
@@ -66,13 +64,11 @@ impl HardwareConnector for LovenseServiceHardwareConnector {
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
-    let toy_info = self.toy_info.read().await;
-
     let hardware_internal =
-      LovenseServiceHardware::new(&self.http_host, self.toy_info.clone(), &toy_info.id);
+      LovenseServiceHardware::new(&self.http_host, &self.toy_info.id);
     let hardware = Hardware::new(
-      &toy_info.name,
-      &toy_info.id,
+      &self.toy_info.name,
+      &self.toy_info.id,
       &[Endpoint::Tx],
       Box::new(hardware_internal),
     );
@@ -84,26 +80,46 @@ impl HardwareConnector for LovenseServiceHardwareConnector {
 pub struct LovenseServiceHardware {
   event_sender: broadcast::Sender<HardwareEvent>,
   http_host: String,
-  toy_info: Arc<RwLock<LovenseServiceToyInfo>>,
+  battery_level: Arc<AtomicU8>
 }
 
 impl LovenseServiceHardware {
-  fn new(http_host: &str, toy_info: Arc<RwLock<LovenseServiceToyInfo>>, toy_id: &str) -> Self {
+  fn new(http_host: &str, toy_id: &str) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
     let sender_clone = device_event_sender.clone();
     let toy_id = toy_id.to_owned();
-    let toy_info_clone = toy_info.clone();
+    let host = http_host.to_owned();
+    let battery_level = Arc::new(AtomicU8::new(100));
+    let battery_level_clone = battery_level.clone();
     async_manager::spawn(async move {
-      while toy_info_clone.read().await.connected {
-        Delay::new(Duration::from_secs(1)).await;
+      loop {
+        match get_local_info(&host).await {
+          Some(info) => {
+            for (_, toy) in info.data.iter() {
+              if toy.id != toy_id {
+                continue;
+              }
+              if !toy.connected {
+                let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
+                info!("Exiting lovense service device connection check loop.");
+                break;
+              }
+              battery_level_clone.store(toy.battery.clamp(0, 100) as u8, Ordering::SeqCst);
+              break;
+            }  
+          },
+          None => {
+            let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id.clone()));
+            info!("Exiting lovense service device connection check loop.");
+            break;
+          }
+        }
       }
-      let _ = sender_clone.send(HardwareEvent::Disconnected(toy_id));
-      info!("Exiting lovense service device connection check loop.");
     });
     Self {
       event_sender: device_event_sender,
       http_host: http_host.to_owned(),
-      toy_info,
+      battery_level,
     }
   }
 }
@@ -111,10 +127,6 @@ impl LovenseServiceHardware {
 impl HardwareInternal for LovenseServiceHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
-  }
-
-  fn connected(&self) -> bool {
-    true
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
@@ -126,10 +138,9 @@ impl HardwareInternal for LovenseServiceHardware {
     &self,
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    let toy_info = self.toy_info.clone();
+    let battery_level = self.battery_level.clone();
     Box::pin(async move {
-      let battery_level = toy_info.read().await.battery.clamp(0, 100) as u8;
-      Ok(RawReading::new(0, Endpoint::Rx, vec![battery_level]))
+      Ok(RawReading::new(0, Endpoint::Rx, vec![battery_level.load(Ordering::SeqCst)]))
     })
   }
 

@@ -262,11 +262,6 @@ impl Hardware {
     self.endpoints.clone()
   }
 
-  /// If true, device is currently connected to system
-  pub fn connected(&self) -> bool {
-    self.internal_impl.connected()
-  }
-
   /// Returns a receiver for any events the device may emit.
   /// 
   /// This uses a broadcast channel and can be called multiple times to create multiple streams if
@@ -322,8 +317,6 @@ impl Hardware {
 /// to represent and communicate with devices. It provides an abstract way to represent devices
 /// without having to consider what type of communication bus they may be using.
 pub trait HardwareInternal: Sync + Send {
-  /// If true, device is currently connected to system
-  fn connected(&self) -> bool;
   /// Disconnect from the device (if it is connected)
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Returns a receiver for any events the device may emit.

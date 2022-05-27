@@ -15,6 +15,8 @@
   reason for mutability there anyways.
 - Running StartScanning when a scan is already running no longer throws an error.
 - GenericCommandManager is now internally mutable
+- Removed "connected()" status getter from Hardware implementations. We assume that, if a device
+  instance is alive, it's connected. Otherwise the device manager will have dropped it. This assumption was made in earlier versions of the library because this was never used, it is now just being made explicit.
 
 ## Features
 
@@ -22,6 +24,8 @@
   stacking. This is important for being able to load, edit, and save configs from outside the
   library, in applications like Intiface Desktop.
 - Simplified the device creation system.
+- Added TimedRetryHardwareCommunicationManager wrapper, for generic handling of hot plugging in comm
+  managers that don't constantly scan (XInput, USB, etc...)
 - Added LevelCmd
 
 # 5.1.10 (2022-05-07)

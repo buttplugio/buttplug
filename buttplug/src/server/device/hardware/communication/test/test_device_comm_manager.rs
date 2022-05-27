@@ -145,7 +145,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     "TestDeviceCommunicationManager"
   }
 
-  fn start_scanning(&self) -> ButtplugResultFuture {
+  fn start_scanning(&mut self) -> ButtplugResultFuture {
     let devices_vec = self.devices.clone();
     let device_sender = self.device_sender.clone();
     let is_scanning = self.is_scanning.clone();
@@ -188,7 +188,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     })
   }
 
-  fn stop_scanning(&self) -> ButtplugResultFuture {
+  fn stop_scanning(&mut self) -> ButtplugResultFuture {
     Box::pin(future::ready(Ok(())))
   }
 
@@ -198,8 +198,8 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     true
   }
 
-  fn scanning_status(&self) -> Arc<AtomicBool> {
-    Arc::new(AtomicBool::new(false))
+  fn scanning_status(&self) -> bool {
+    false
   }
 }
 

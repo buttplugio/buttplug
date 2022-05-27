@@ -6,8 +6,6 @@
 // for full license information.
 
 use super::xinput_device_comm_manager::{
-  create_address,
-  XInputConnectionTracker,
   XInputControllerIndex,
 };
 use crate::{
@@ -31,6 +29,7 @@ use crate::{
     },
   },
   server::device::hardware::communication::HardwareSpecificError,
+  util::async_manager
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -39,8 +38,36 @@ use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::{
   fmt::{self, Debug},
   io::Cursor,
+  time::Duration,
 };
 use tokio::sync::broadcast;
+use tokio_util::sync::CancellationToken;
+
+pub(super) fn create_address(index: XInputControllerIndex) -> String {
+  index.to_string()
+}
+
+async fn check_gamepad_connectivity(
+  index: XInputControllerIndex,
+  sender: broadcast::Sender<HardwareEvent>,
+  cancellation_token: CancellationToken
+) {
+  let handle = rusty_xinput::XInputHandle::load_default()
+    .expect("Always loads in windows, this shouldn't run elsewhere.");
+  loop {
+    // If we can't get state, assume we have disconnected.
+    if handle.get_state(index as u32).is_err() {
+      info!("XInput gamepad {} has disconnected.", index);
+      // If this fails, we don't care because we're exiting anyways.
+      let _ = sender.send(HardwareEvent::Disconnected(create_address(index)));
+      return;
+    }
+    tokio::select! {
+      _ = cancellation_token.cancelled() => return,
+      _ = tokio::time::sleep(Duration::from_millis(500)) => continue
+    }    
+  }
+}
 
 pub struct XInputHardwareConnector {
   index: XInputControllerIndex,
@@ -48,7 +75,6 @@ pub struct XInputHardwareConnector {
 
 impl XInputHardwareConnector {
   pub fn new(index: XInputControllerIndex) -> Self {
-    debug!("Emitting a new xbox device impl creator!");
     Self { index }
   }
 }
@@ -87,19 +113,23 @@ pub struct XInputHardware {
   handle: XInputHandle,
   index: XInputControllerIndex,
   event_sender: broadcast::Sender<HardwareEvent>,
-  connection_tracker: XInputConnectionTracker,
+  cancellation_token: CancellationToken,
 }
 
 impl XInputHardware {
   pub fn new(index: XInputControllerIndex) -> Self {
     let (device_event_sender, _) = broadcast::channel(256);
-    let connection_tracker = XInputConnectionTracker::default();
-    connection_tracker.add_with_sender(index, device_event_sender.clone());
+    let token = CancellationToken::new();
+    let child = token.child_token();
+    let sender = device_event_sender.clone();
+    async_manager::spawn(async move {
+      check_gamepad_connectivity(index, sender, child).await;
+    });    
     Self {
       handle: rusty_xinput::XInputHandle::load_default().expect("The DLL should load as long as we're on windows, and we don't get here if we're not on windows."),
       index,
       event_sender: device_event_sender,
-      connection_tracker,
+      cancellation_token: token,
     }
   }
 }
@@ -107,10 +137,6 @@ impl XInputHardware {
 impl HardwareInternal for XInputHardware {
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
     self.event_sender.subscribe()
-  }
-
-  fn connected(&self) -> bool {
-    self.connection_tracker.connected(self.index)
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
@@ -160,5 +186,11 @@ impl HardwareInternal for XInputHardware {
 
   fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("XInput hardware does not support unsubscribe".to_owned()))))
+  }
+}
+
+impl Drop for XInputHardware {
+  fn drop(&mut self) {
+    self.cancellation_token.cancel();
   }
 }
