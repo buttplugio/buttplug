@@ -37,7 +37,6 @@ pub enum HardwareCommunicationManagerEvent {
     address: String,
     creator: Box<dyn HardwareConnector>,
   },
-  DeviceManagerAdded(Arc<AtomicBool>),
   ScanningStarted,
   ScanningFinished,
 }

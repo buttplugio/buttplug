@@ -11,7 +11,7 @@
 use super::server_device_manager_event_loop::ServerDeviceManagerEventLoop;
 use crate::{
   core::{
-    errors::{ButtplugError, ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
+    errors::{ButtplugDeviceError, ButtplugMessageError},
     messages::{
       self,
       ButtplugClientMessage,
@@ -30,7 +30,6 @@ use crate::{
       protocol::ProtocolIdentifierFactory,
       hardware::{
         communication::{
-          HardwareCommunicationManagerEvent,
           HardwareCommunicationManager,
           HardwareCommunicationManagerBuilder,
         },
@@ -38,7 +37,7 @@ use crate::{
       ServerDevice,
       ServerDeviceIdentifier,
     },
-    ButtplugServerResultFuture
+    ButtplugServerResultFuture, ButtplugServerError
   },
   util::async_manager,
 };
@@ -47,12 +46,14 @@ use futures::future;
 use tokio_util::sync::CancellationToken;
 use std::{
   convert::TryFrom,
-  sync::{
-    atomic::Ordering,
-    Arc,
-  },
+  sync::Arc,
 };
 use tokio::sync::{broadcast, mpsc};
+
+pub(super) enum DeviceManagerCommand {
+  StartScanning,
+  StopScanning
+}
 
 #[derive(Debug)]
 pub struct ServerDeviceInfo {
@@ -123,22 +124,22 @@ impl ServerDeviceManagerBuilder {
     self
   }
   
-  pub fn allow_raw_messages(&mut self) -> &mut Self {
-    
+  pub fn allow_raw_messages(&mut self) -> &mut Self {    
     self.configuration_manager_builder.allow_raw_messages();
     self
   }
 
-  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<ServerDeviceManager, ButtplugError> {
-    let config_mgr = self.configuration_manager_builder.finish()?;
+  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<ServerDeviceManager, ButtplugServerError> {
+    let config_mgr = self.configuration_manager_builder.finish().map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
 
+    let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut comm_managers = Vec::new();
     for builder in &self.comm_managers {
       let comm_mgr = builder.finish(device_event_sender.clone());
 
       if comm_managers.iter().any(|mgr: &Box<dyn HardwareCommunicationManager>| &mgr.name() == &comm_mgr.name()) {
-        // TODO Fill in error
+        return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(comm_mgr.name().to_owned()));
       }
 
       comm_managers.push(comm_mgr);
@@ -164,111 +165,51 @@ impl ServerDeviceManagerBuilder {
     let loop_cancellation_token = CancellationToken::new();
 
     let mut event_loop = ServerDeviceManagerEventLoop::new(
+      comm_managers,
       config_mgr,
       devices.clone(),
       loop_cancellation_token.child_token(),
       output_sender,
       device_event_receiver,
+      device_command_receiver,
     );
     async_manager::spawn(async move {
       event_loop.run().await;
     });
     Ok(ServerDeviceManager {
-      comm_managers: Arc::new(comm_managers),
       devices,
-      device_event_sender,
+      device_command_sender,
       loop_cancellation_token
     })
   }
 }
 
 pub struct ServerDeviceManager {
-  // This uses a map to make sure we don't have 2 comm managers of the same type
-  // register. Also means we can do lockless access since it's a Dashmap.
-  comm_managers: Arc<Vec<Box<dyn HardwareCommunicationManager>>>,
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
-  device_event_sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
+  device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken
 }
 
 impl ServerDeviceManager {
   fn start_scanning(&self) -> ButtplugServerResultFuture {
-    if self.comm_managers.is_empty() {
-      ButtplugUnknownError::NoDeviceCommManagers.into()
-    } else {
-      let mgrs = self.comm_managers.clone();
-      let sender = self.device_event_sender.clone();
-      Box::pin(async move {
-        // TODO Does this really matter? If we're already scanning, who cares?
-        for mgr in mgrs.iter() {
-          if mgr.scanning_status().load(Ordering::SeqCst) {
-            warn!("Scanning still in progress, returning.");
-            return Ok(messages::Ok::default().into());
-          }
-        }
-        info!("No scan currently in progress, starting new scan.");
-        let fut_vec: Vec<_> = mgrs
-          .iter()
-          .map(|guard| guard.start_scanning())
-          .collect();
-        // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
-        future::join_all(fut_vec).await;
-        debug!("All managers started, sending ScanningStarted (and invoking ScanningFinished hack) signal to event loop.");
-        // HACK: In case everything somehow exited between the time all of our
-        // futures resolved and when we updated the event loop, act like we're a
-        // device comm manager and send a ScanningFinished message. This will
-        // cause the finish check to run just in case, so we don't get stuck.
-        //
-        // Ideally, this should be some sort of state machine, but for now, we
-        // can deal with this.
-        //
-        // At this point, it doesn't really matter what we return, only way that
-        // event loop could shut down is if the whole system is shutting down.
-        // So complain if our sends error out, but don't worry about returning
-        // an error.
-        if sender
-          .send(HardwareCommunicationManagerEvent::ScanningStarted)
-          .await
-          .is_err()
-          || sender
-            .send(HardwareCommunicationManagerEvent::ScanningFinished)
-            .await
-            .is_err()
-        {
-          debug!("Device manager event loop shut down, cannot send ScanningStarted");
-        }
-        Ok(messages::Ok::default().into())
-      })
-    }
+    let command_sender = self.device_command_sender.clone();
+    Box::pin(async move {
+      if command_sender.send(DeviceManagerCommand::StartScanning).await.is_err() {
+        // TODO Fill in error.
+      }
+      Ok(messages::Ok::default().into())
+    })
   }
 
   fn stop_scanning(&self) -> ButtplugServerResultFuture {
-    if self.comm_managers.is_empty() {
-      ButtplugUnknownError::NoDeviceCommManagers.into()
-    } else {
-      let mgrs = self.comm_managers.clone();
-      Box::pin(async move {
-        let mut scanning_stopped = true;
-        for mgr in mgrs.iter() {
-          if mgr.scanning_status().load(Ordering::SeqCst) {
-            debug!("Device manager {} has not stopped scanning yet.", mgr.name());
-            scanning_stopped = false;
-            break;
-          }
-        }
-        if scanning_stopped {
-          return Err(ButtplugDeviceError::DeviceScanningAlreadyStopped.into());
-        }
+    let command_sender = self.device_command_sender.clone();
+    Box::pin(async move {
+      if command_sender.send(DeviceManagerCommand::StopScanning).await.is_err() {
+        // TODO Fill in error.
+      }
+      Ok(messages::Ok::default().into())
+    })
 
-        let fut_vec: Vec<_> = mgrs
-          .iter()
-          .map(|guard| guard.stop_scanning())
-          .collect();
-        // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
-        future::join_all(fut_vec).await;
-        Ok(messages::Ok::default().into())
-      })
-    }
   }
 
   pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {

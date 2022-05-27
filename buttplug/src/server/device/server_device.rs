@@ -71,7 +71,7 @@ impl ServerDeviceIdentifier {
   }
 }
 
-pub(super) async fn build_server_device(device_config_manager: Arc<DeviceConfigurationManager>, mut hardware_connector: Box<dyn HardwareConnector>) -> Result<ServerDevice, ButtplugDeviceError> {
+pub(super) async fn build_server_device(device_config_manager: Arc<DeviceConfigurationManager>, mut hardware_connector: Box<dyn HardwareConnector>) -> Result<Option<ServerDevice>, ButtplugDeviceError> {
 
   // First off, we need to see if we even have a configuration available for the device we're
   // trying to create. If we don't, exit, because this isn't actually an error. However, if we
@@ -80,7 +80,8 @@ pub(super) async fn build_server_device(device_config_manager: Arc<DeviceConfigu
 
   // If we have no identifiers, then there's nothing to do here. Throw an error.
   if protocol_specializers.is_empty() {
-    return Err(ButtplugDeviceError::DeviceConfigurationError("No viable protocols for hardware.".to_owned()));
+    debug!("{}", format!("No viable protocols for hardware {:?}, ignoring.", hardware_connector.specifier()));
+    return Ok(None)    
   }
 
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
@@ -127,12 +128,12 @@ pub(super) async fn build_server_device(device_config_manager: Arc<DeviceConfigu
   let handler = protocol_initializer.initialize(hardware.clone()).await?;
 
   // We now have fully initialized hardware, return a server device.
-  Ok(ServerDevice::new(
+  Ok(Some(ServerDevice::new(
     identifier,
     handler,
     hardware,
     &attrs
-  ))
+  )))
 }
 
 pub struct ServerDevice {

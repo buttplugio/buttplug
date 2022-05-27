@@ -6,27 +6,20 @@
 // for full license information.
 
 use crate::{
-  core::messages::{
-    ButtplugServerMessage,
-    DeviceAdded,
-    DeviceRemoved,
-    ScanningFinished,
-  },
-  server::{
-    device::{
-      configuration::DeviceConfigurationManager,
-      hardware::{
-        communication::HardwareCommunicationManagerEvent,
-        HardwareEvent
-      },
-      server_device::build_server_device,
-      ServerDevice,
+  core::messages::{ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished},
+  server::device::{
+    configuration::DeviceConfigurationManager,
+    hardware::{
+      communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
+      HardwareEvent,
     },
+    server_device::build_server_device,
+    ServerDevice,
   },
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::FutureExt;
+use futures::{FutureExt, future};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -36,8 +29,12 @@ use tokio_util::sync::CancellationToken;
 use tracing;
 use tracing_futures::Instrument;
 
-pub struct ServerDeviceManagerEventLoop {
+use super::server_device_manager::DeviceManagerCommand;
+
+pub(super) struct ServerDeviceManagerEventLoop {
+  comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
   device_config_manager: Arc<DeviceConfigurationManager>,
+  device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
   /// Maps device index (exposed to the outside world) to actual device objects held by the server.
   device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
   /// Broadcaster that relays device events in the form of Buttplug Messages to
@@ -58,30 +55,48 @@ pub struct ServerDeviceManagerEventLoop {
   /// Devices currently trying to connect.
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
-  loop_cancellation_token: CancellationToken
+  loop_cancellation_token: CancellationToken,
 }
 
 impl ServerDeviceManagerEventLoop {
   pub fn new(
+    comm_managers: Vec<Box<dyn HardwareCommunicationManager>>,
     device_config_manager: DeviceConfigurationManager,
     device_map: Arc<DashMap<u32, Arc<ServerDevice>>>,
     loop_cancellation_token: CancellationToken,
     server_sender: broadcast::Sender<ButtplugServerMessage>,
     device_comm_receiver: mpsc::Receiver<HardwareCommunicationManagerEvent>,
+    device_command_receiver: mpsc::Receiver<DeviceManagerCommand>,
   ) -> Self {
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     Self {
+      comm_managers,
       device_config_manager: Arc::new(device_config_manager),
       server_sender,
       device_map,
       device_comm_receiver,
       device_event_sender,
       device_event_receiver,
+      device_command_receiver,
       scanning_in_progress: false,
       comm_manager_scanning_statuses: vec![],
       connecting_devices: Arc::new(DashSet::new()),
-      loop_cancellation_token
+      loop_cancellation_token,
     }
+  }
+
+  async fn handle_start_scanning(&self) {
+    info!("No scan currently in progress, starting new scan.");
+    let fut_vec: Vec<_> = self.comm_managers.iter().map(|guard| guard.start_scanning()).collect();
+    // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
+    future::join_all(fut_vec).await;
+    debug!("All managers started, sending ScanningStarted (and invoking ScanningFinished hack) signal to event loop.");    
+  }
+
+  async fn handle_stop_scanning(&self) {
+    let fut_vec: Vec<_> = self.comm_managers.iter().map(|guard| guard.stop_scanning()).collect();
+    // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
+    future::join_all(fut_vec).await;
   }
 
   async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
@@ -131,7 +146,10 @@ impl ServerDeviceManagerEventLoop {
         if !self.device_config_manager.address_allowed(&address) {
           return;
         }
-        debug!("Device {} allowed via configuration file, continuing.", address);
+        debug!(
+          "Device {} allowed via configuration file, continuing.",
+          address
+        );
 
         // Check to make sure the device isn't already connected. If it is, drop it.
         if self
@@ -161,27 +179,30 @@ impl ServerDeviceManagerEventLoop {
         self.connecting_devices.insert(address.clone());
         let device_event_sender_clone = self.device_event_sender.clone();
 
-        let create_device_future =
-          build_server_device(self.device_config_manager.clone(), creator);
+        let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
-    
+
         async_manager::spawn(async move {
-          match create_device_future.await {
+          match build_server_device(device_config_manager, creator).await {
             Ok(device) => {
+              // We can receive back a Ok(None) from build_server_device if we can't match any
+              // protocol to the device. This isn't really an error, it just means the device
+              // probably isn't supported by our library. Happens a lot with Bluetooth.
+              if let Some(server_device) = device {
                 if device_event_sender_clone
-                  .send(HardwareEvent::Connected(Arc::new(device)))
+                  .send(HardwareEvent::Connected(Arc::new(server_device)))
                   .await
                   .is_err() {
                   error!("Device manager disappeared before connection established, device will be dropped.");
                 }
+              }
             },
-            Err(e) => error!("Device errored while trying to connect: {}", e),
+            Err(e) => {
+              error!("Device errored while trying to connect: {}", e);
+            }
           }
           connecting_devices.remove(&address);
         }.instrument(tracing::Span::current()));
-      }
-      HardwareCommunicationManagerEvent::DeviceManagerAdded(status) => {
-        self.comm_manager_scanning_statuses.push(status);
       }
     }
   }
@@ -276,21 +297,33 @@ impl ServerDeviceManagerEventLoop {
 
   pub async fn run(&mut self) {
     loop {
-      select! {
-        device_comm_msg = self.device_comm_receiver.recv().fuse() => {
+      tokio::select! {
+        device_comm_msg = self.device_comm_receiver.recv() => {
           if let Some(msg) = device_comm_msg {
             self.handle_device_communication(msg).await;
           } else {
             break;
           }
         }
-        device_event_msg = self.device_event_receiver.recv().fuse() => {
+        device_event_msg = self.device_event_receiver.recv() => {
           if let Some(msg) = device_event_msg {
             self.handle_device_event(msg).await;
           } else {
-            panic!("We shouldn't be able to get here since we also own the sender.");
+            error!("We shouldn't be able to get here since we also own the sender.");
+            break;
           }
         },
+        device_command_msg = self.device_command_receiver.recv() => {
+          if let Some(msg) = device_command_msg {
+            match msg {
+              DeviceManagerCommand::StartScanning => self.handle_start_scanning().await,
+              DeviceManagerCommand::StopScanning => self.handle_stop_scanning().await,
+            } 
+          } else {
+            info!("Channel to Device Manager frontend dropped, exiting event loop.");
+            break;
+          }
+        }
         _ = self.loop_cancellation_token.cancelled().fuse() => {
           info!("Device event loop cancelled, exiting.");
           return

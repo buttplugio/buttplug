@@ -95,6 +95,9 @@ pub type ButtplugServerResultFuture = BoxFuture<'static, ButtplugServerResult>;
 /// Error enum for Buttplug Server configuration errors.
 #[derive(Error, Debug)]
 pub enum ButtplugServerError {
+  /// DeviceConfigurationManager could not be built.
+  #[error("The DeviceConfigurationManager could not be built: {0}")]
+  DeviceConfigurationManagerError(ButtplugDeviceError),
   /// DeviceCommunicationManager type has already been added to the system.
   #[error("DeviceManager of type {0} has already been added.")]
   DeviceManagerTypeAlreadyAdded(String),
@@ -183,7 +186,7 @@ impl ButtplugServerBuilder {
   }
 
   /// Try to build a [ButtplugServer] using the parameters given.
-  pub fn finish(&mut self) -> Result<ButtplugServer, ButtplugError> {
+  pub fn finish(&mut self) -> Result<ButtplugServer, ButtplugServerError> {
     // Create the server
     debug!("Creating server '{}'", self.name);
     info!("Buttplug Server Operating System Info: {}", os_info::get());
@@ -194,7 +197,7 @@ impl ButtplugServerBuilder {
       self.device_configuration_json.clone(),
       self.user_device_configuration_json.clone(),
       false,
-    )?;
+    ).map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);

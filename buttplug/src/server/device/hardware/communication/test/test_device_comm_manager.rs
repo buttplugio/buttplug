@@ -65,6 +65,7 @@ async fn new_bluetoothle_test_device_with_cfg(
   let device: ServerDevice =
     build_server_device(config_mgr.clone(), Box::new(hardware_creator))
       .await
+      .expect("We'll always return Ok here, otherwise we should panic.")
       .expect("Empty option shouldn't be possible");
   Ok((device, hardware_clone))
 }

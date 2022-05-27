@@ -8,7 +8,7 @@
 use super::json::JSONValidator;
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugError},
+    errors::ButtplugDeviceError,
     messages::DeviceMessageAttributesMap,
   },
   server::device::{
@@ -314,7 +314,7 @@ pub fn get_internal_config_version() -> u32 {
 pub fn load_protocol_config_from_json(
   config_str: &str,
   skip_version_check: bool,
-) -> Result<ProtocolConfiguration, ButtplugError> {
+) -> Result<ProtocolConfiguration, ButtplugDeviceError> {
   let config_validator = JSONValidator::new(DEVICE_CONFIGURATION_JSON_SCHEMA);
   match config_validator.validate(config_str) {
     Ok(_) => match serde_json::from_str::<ProtocolConfiguration>(config_str) {
@@ -330,9 +330,9 @@ pub fn load_protocol_config_from_json(
           Ok(protocol_config)
         }
       }
-      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err)).into()),
+      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err))),
     },
-    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err)).into()),
+    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err))),
   }
 }
 
@@ -340,7 +340,7 @@ pub fn load_protocol_configs_from_json(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
   skip_version_check: bool,
-) -> Result<ExternalDeviceConfiguration, ButtplugError> {
+) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
   // Start by loading the main config
   let main_config = load_protocol_config_from_json(
     &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
