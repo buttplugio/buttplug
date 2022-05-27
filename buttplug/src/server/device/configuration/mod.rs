@@ -421,7 +421,13 @@ pub struct DeviceConfigurationManagerBuilder {
   protocol_attributes: HashMap<ProtocolAttributesIdentifier, ProtocolDeviceAttributes>,
   /// Map of protocol names to their respective protocol instance factories
   protocols: Vec<(String, Arc<dyn ProtocolIdentifierFactory>)>,
+  /// Addresses of devices that we will only connect to, if this list is not empty. As these are
+  /// checked before we actually connect to a device, they're the string serialized version of the
+  /// address, versus using a [ServerDeviceIdentifier].
   allowed_addresses: Vec<String>,
+  /// Address of devices we never want to connect to. As these are checked before we actually
+  /// connect to a device, they're the string serialized version of the address, versus using a
+  /// [ServerDeviceIdentifier].
   denied_addresses: Vec<String>,
   reserved_indexes: Vec<(ServerDeviceIdentifier, u32)>,
 }
