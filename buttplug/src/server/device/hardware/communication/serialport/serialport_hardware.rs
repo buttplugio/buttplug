@@ -99,7 +99,7 @@ impl HardwareSpecializer for SerialPortHardwareSpecialzier {
   // the protocol def.
   async fn specialize(
     &mut self,
-    specifiers: &Vec<ProtocolCommunicationSpecifier>,
+    specifiers: &[ProtocolCommunicationSpecifier],
   ) -> Result<Hardware, ButtplugDeviceError> {
     let hardware_internal = SerialPortHardware::try_create(&self.port_info, specifiers).await?;
     let hardware = Hardware::new(
@@ -182,7 +182,7 @@ pub struct SerialPortHardware {
 impl SerialPortHardware {
   pub async fn try_create(
     port_info: &SerialPortInfo,
-    specifiers: &Vec<ProtocolCommunicationSpecifier>,
+    specifiers: &[ProtocolCommunicationSpecifier],
   ) -> Result<Self, ButtplugDeviceError> {
     let (device_event_sender, _) = broadcast::channel(256);
     // If we've gotten this far, we can expect we have a serial port definition.

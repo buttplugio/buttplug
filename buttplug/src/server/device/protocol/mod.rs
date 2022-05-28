@@ -381,7 +381,7 @@ pub trait ProtocolHandler: Sync + Send {
       })
     } else {
       Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-        format!("Command not implemented for this protocol: BatteryCmd"),
+        "Command not implemented for this protocol: BatteryCmd".to_string(),
       ))))
     }
   }
@@ -399,7 +399,7 @@ macro_rules! generic_protocol_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
     paste::paste! {
       pub mod setup {
-        use crate::server::device::protocol::{
+        use $crate::server::device::protocol::{
           GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory,
         };
         #[derive(Default)]

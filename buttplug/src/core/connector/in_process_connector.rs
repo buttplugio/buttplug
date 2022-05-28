@@ -78,7 +78,7 @@ pub struct ButtplugInProcessClientConnector {
 }
 
 #[cfg(feature = "server")]
-impl<'a> Default for ButtplugInProcessClientConnector {
+impl Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
     ButtplugInProcessClientConnectorBuilder::default().finish()
   }

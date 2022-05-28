@@ -18,7 +18,7 @@ use tokio::sync::broadcast;
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
   pub endpoint: Endpoint,
@@ -54,7 +54,7 @@ impl From<RawReadCmd> for HardwareReadCmd {
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
   pub endpoint: Endpoint,
@@ -94,7 +94,7 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct HardwareSubscribeCmd {
   /// Endpoint to subscribe to notifications from.
   pub endpoint: Endpoint,
@@ -121,7 +121,7 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct HardwareUnsubscribeCmd {
   pub endpoint: Endpoint,
 }
@@ -143,7 +143,7 @@ impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
 
 /// Enumeration of all possible commands that can be sent to a
 /// [Hardware](crate::device::Hardware).
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum HardwareCommand {
   Write(HardwareWriteCmd),
   // TODO Figure out how to handle arbitrary reads/returns
@@ -361,7 +361,7 @@ pub trait HardwareSpecializer: Sync + Send {
   /// to identify all required endpoints on the hardware.
   async fn specialize(
     &mut self,
-    protocol: &Vec<ProtocolCommunicationSpecifier>,
+    protocol: &[ProtocolCommunicationSpecifier],
   ) -> Result<Hardware, ButtplugDeviceError>;
 }
 
@@ -382,7 +382,7 @@ impl GenericHardwareSpecializer {
 impl HardwareSpecializer for GenericHardwareSpecializer {
   async fn specialize(
     &mut self,
-    _: &Vec<ProtocolCommunicationSpecifier>,
+    _: &[ProtocolCommunicationSpecifier],
   ) -> Result<Hardware, ButtplugDeviceError> {
     Ok(self.hardware.take().expect("This should only be run once"))
   }

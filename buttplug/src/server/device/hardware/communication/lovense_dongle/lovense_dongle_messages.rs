@@ -26,7 +26,7 @@ pub enum LovenseDeviceCommand {
 }
 
 #[repr(u16)]
-#[derive(Serialize_repr, Deserialize_repr, Clone, Copy, Debug, PartialEq)]
+#[derive(Serialize_repr, Deserialize_repr, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LovenseDongleResultCode {
   DongleInitialized = 100,
   CommandSuccess = 200,
@@ -50,7 +50,7 @@ pub enum LovenseDongleMessageType {
   Toy,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LovenseDongleMessageFunc {
   #[serde(rename = "reset")]
   Reset,

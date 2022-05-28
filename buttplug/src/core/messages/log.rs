@@ -10,7 +10,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Log message received from server (Version 1 Message, Deprecated)
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Log {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

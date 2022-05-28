@@ -55,10 +55,10 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
-  pub fn new(name: &str, services: &Vec<Uuid>, device: T, adapter: Adapter) -> Self {
+  pub fn new(name: &str, services: &[Uuid], device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
-      services: services.clone(),
+      services: services.to_vec(),
       device,
       adapter,
     }
@@ -94,7 +94,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
         let return_err = ButtplugDeviceError::DeviceSpecificError(
           HardwareSpecificError::BtleplugError(format!("{:?}", err)),
         );
-        return Err(return_err.into());
+        return Err(return_err);
       }
       if let Err(err) = self.device.discover_services().await {
         error!("BTLEPlug error discovering characteristics: {:?}", err);
@@ -102,8 +102,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
           ButtplugDeviceError::DeviceConnectionError(format!(
             "BTLEPlug error discovering characteristics: {:?}",
             err
-          ))
-          .into(),
+          )),
         );
       }
     }
@@ -135,7 +134,7 @@ impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
 impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
   async fn specialize(
     &mut self,
-    specifiers: &Vec<ProtocolCommunicationSpecifier>,
+    specifiers: &[ProtocolCommunicationSpecifier],
   ) -> Result<Hardware, ButtplugDeviceError> {
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
@@ -179,8 +178,7 @@ impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
         ButtplugDeviceError::DeviceConnectionError(format!(
           "Can't find btle protocol specifier mapping for device {} {:?}",
           self.name, address
-        ))
-        .into(),
+        )),
       );
     }
     let notification_stream = self
@@ -325,7 +323,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       Some(chr) => chr.clone(),
       None => {
         return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
         )));
       }
     };
@@ -359,7 +357,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       Some(chr) => chr.clone(),
       None => {
         return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
         )));
       }
     };
@@ -389,7 +387,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       Some(chr) => chr.clone(),
       None => {
         return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
         )));
       }
     };
@@ -412,7 +410,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       Some(chr) => chr.clone(),
       None => {
         return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint).into(),
+          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
         )));
       }
     };

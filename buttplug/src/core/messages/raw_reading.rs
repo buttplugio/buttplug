@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageValidator, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageValidator, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -53,7 +53,7 @@ mod test {
     let endpoint_str =
       "{\"RawReading\":{\"Id\":1,\"DeviceIndex\":0,\"Endpoint\":\"tx\",\"Data\":[0]}}";
     let union: ButtplugCurrentSpecServerMessage =
-      serde_json::from_str(&endpoint_str).expect("Infallible deserialization.");
+      serde_json::from_str(endpoint_str).expect("Infallible deserialization.");
     assert_eq!(
       ButtplugCurrentSpecServerMessage::RawReading(RawReading::new(0, Endpoint::Tx, vec!(0))),
       union

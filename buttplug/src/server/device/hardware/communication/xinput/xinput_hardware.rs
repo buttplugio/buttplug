@@ -177,7 +177,7 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e))).into()
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
         })
     })
   }

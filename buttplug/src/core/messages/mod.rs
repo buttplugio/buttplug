@@ -587,7 +587,7 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
+  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV1ServerMessage {
@@ -672,7 +672,7 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
+  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub(crate) enum ButtplugSpecV0ServerMessage {
@@ -728,7 +728,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
 #[derive(
   Debug,
   Clone,
-  PartialEq,
+  PartialEq, Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugClientMessageType,

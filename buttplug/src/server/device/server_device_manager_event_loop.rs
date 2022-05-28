@@ -85,7 +85,7 @@ impl ServerDeviceManagerEventLoop {
       debug!("At least one manager still scanning, continuing event loop.");
       return true;
     }
-    return false;
+    false
   }
 
   async fn handle_start_scanning(&mut self) {

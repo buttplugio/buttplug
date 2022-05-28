@@ -65,7 +65,7 @@ impl ProtocolDeviceConfiguration {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq, Eq)]
 #[getset(get = "pub", set = "pub")]
 pub struct DeviceUserConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -166,7 +166,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
       specifiers.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
     }
     if let Some(xinput) = &protocol_def.xinput {
-      specifiers.push(ProtocolCommunicationSpecifier::XInput(xinput.clone()));
+      specifiers.push(ProtocolCommunicationSpecifier::XInput(*xinput));
     }
     if let Some(websocket) = &protocol_def.websocket {
       specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
@@ -321,7 +321,7 @@ pub fn load_protocol_config_from_json(
             "Device configuration file version {} is older than internal version {}. Please use a newer file.",
             protocol_config.version,
             internal_config_version
-          )).into())
+          )))
         } else {
           Ok(protocol_config)
         }
@@ -367,7 +367,7 @@ pub fn load_protocol_configs_from_json(
       protocol_device_config.specifiers().clone(),
     );
     for (config_ident, config) in protocol_device_config.configurations() {
-      let ident = ProtocolAttributesIdentifier::new(&protocol_name, &config_ident, &None);
+      let ident = ProtocolAttributesIdentifier::new(&protocol_name, config_ident, &None);
       protocol_attributes.insert(ident, config.clone());
     }
   }

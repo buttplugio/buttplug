@@ -62,7 +62,7 @@ pub trait HardwareCommunicationManager: Send + Sync {
   // Events happen via channel senders passed to the comm manager.
 }
 
-#[derive(Error, Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Error, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum HardwareSpecificError {
   // XInput library doesn't derive error on its error enum. :(
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
@@ -128,11 +128,11 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
-    if !self.cancellation_token.is_some() {
+    if self.cancellation_token.is_none() {
       return Box::pin(future::ready(Ok(())));
     }
     self.cancellation_token.take().unwrap().cancel();
-    return Box::pin(future::ready(Ok(())));
+    Box::pin(future::ready(Ok(())))
   }
 
   fn scanning_status(&self) -> bool {

@@ -90,7 +90,7 @@ impl TestHardwareSpecializer {
 impl HardwareSpecializer for TestHardwareSpecializer {
   async fn specialize(
     &mut self,
-    specifiers: &Vec<ProtocolCommunicationSpecifier>,
+    specifiers: &[ProtocolCommunicationSpecifier],
   ) -> Result<Hardware, ButtplugDeviceError> {
     let device = self.hardware.clone();
     if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers

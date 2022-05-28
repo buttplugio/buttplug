@@ -141,7 +141,7 @@ impl ServerDeviceManagerBuilder {
     let config_mgr = self
       .configuration_manager_builder
       .finish()
-      .map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
+      .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
@@ -151,7 +151,7 @@ impl ServerDeviceManagerBuilder {
 
       if comm_managers
         .iter()
-        .any(|mgr: &Box<dyn HardwareCommunicationManager>| &mgr.name() == &comm_mgr.name())
+        .any(|mgr: &Box<dyn HardwareCommunicationManager>| mgr.name() == comm_mgr.name())
       {
         return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
           comm_mgr.name().to_owned(),
@@ -176,7 +176,7 @@ impl ServerDeviceManagerBuilder {
       .any(|x| x == &mgr.name())
         && mgr.can_scan()
       {
-        colliding_dcms.push(mgr.name().clone());
+        colliding_dcms.push(mgr.name().to_owned());
       }
     }
     if colliding_dcms.len() > 1 {

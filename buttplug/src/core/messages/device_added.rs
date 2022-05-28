@@ -12,7 +12,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAdded {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -58,7 +58,7 @@ impl ButtplugMessageValidator for DeviceAdded {
   }
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -92,7 +92,7 @@ impl ButtplugMessageValidator for DeviceAddedV1 {
   }
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq)]
+#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

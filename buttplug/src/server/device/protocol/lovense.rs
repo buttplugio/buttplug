@@ -84,8 +84,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
               ButtplugDeviceError::ProtocolSpecificError(
                 "Lovense".to_owned(),
                 "Lovense Device disconnected while getting DeviceType info.".to_owned(),
-              )
-              .into(),
+              ),
             );
           }
         }
@@ -216,8 +215,7 @@ impl ProtocolHandler for Lovense {
               ButtplugDeviceError::ProtocolSpecificError(
                 "Lovense".to_owned(),
                 "Lovense Device disconnected while getting Battery info.".to_owned(),
-              )
-              .into(),
+              ),
             )
           }
         }
@@ -226,8 +224,7 @@ impl ProtocolHandler for Lovense {
         ButtplugDeviceError::ProtocolSpecificError(
           "Lovense".to_owned(),
           "Lovense Device disconnected while getting Battery info.".to_owned(),
-        )
-        .into(),
+        ),
       )
     })
   }

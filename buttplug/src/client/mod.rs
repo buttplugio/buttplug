@@ -409,7 +409,7 @@ impl ButtplugClient {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
-    Box::pin(async move { send_fut.await.map(|_| ()).map_err(|err| err) })
+    Box::pin(async move { send_fut.await.map(|_| ()) })
   }
 
   /// Retreives a list of currently connected devices.

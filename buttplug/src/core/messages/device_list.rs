@@ -11,7 +11,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceList {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -36,7 +36,7 @@ impl ButtplugMessageValidator for DeviceList {
   }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -64,7 +64,7 @@ impl ButtplugMessageValidator for DeviceListV1 {
   }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

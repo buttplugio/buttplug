@@ -9,7 +9,7 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -55,7 +55,7 @@ impl ButtplugMessageValidator for ServerInfo {
   }
 }
 
-#[derive(Debug, ButtplugMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

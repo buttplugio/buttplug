@@ -166,7 +166,7 @@ impl PartialEq for XInputSpecifier {
 /// Specifier for HID (USB, Bluetooth) devices
 ///
 /// Handles devices managed by the operating system's HID manager.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct HIDSpecifier {
   #[serde(rename = "vendor-id")]
@@ -209,7 +209,7 @@ impl PartialEq for SerialSpecifier {
 }
 
 /// Specifier for USB devices
-#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct USBSpecifier {
   #[serde(rename = "vendor-id")]

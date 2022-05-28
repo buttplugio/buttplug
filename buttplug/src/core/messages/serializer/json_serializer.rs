@@ -296,7 +296,7 @@ mod test {
       .deserialize(ButtplugSerializedMessage::Text(json.to_owned()))
       .expect("Infallible deserialization");
     assert_eq!(
-      *serializer.message_version.get().clone().unwrap(),
+      *serializer.message_version.get().unwrap(),
       ButtplugMessageSpecVersion::Version2
     );
   }

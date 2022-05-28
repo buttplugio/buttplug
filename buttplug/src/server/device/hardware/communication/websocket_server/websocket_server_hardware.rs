@@ -196,9 +196,9 @@ impl WebsocketServerHardwareConnector {
     });
     Self {
       info,
-      outgoing_sender: outgoing_sender,
-      incoming_broadcaster: incoming_broadcaster,
-      device_event_sender: device_event_sender,
+      outgoing_sender,
+      incoming_broadcaster,
+      device_event_sender,
     }
   }
 }
@@ -290,7 +290,6 @@ impl HardwareInternal for WebsocketServerHardware {
           "Could not write value to websocket device: {}",
           err
         ))
-        .into()
       })
     })
   }

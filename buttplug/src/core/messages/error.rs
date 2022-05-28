@@ -16,7 +16,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 
 /// Error codes pertaining to error classes that can be represented in the
 /// Buttplug [Error] message.
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize_repr, Deserialize_repr))]
 #[repr(u8)]
 pub enum ErrorCode {
@@ -109,7 +109,7 @@ impl From<ButtplugError> for Error {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
@@ -163,7 +163,7 @@ mod test {
   #[test]
   fn test_error_deserialize() {
     let union: ButtplugCurrentSpecServerMessage =
-      serde_json::from_str(&ERROR_STR).expect("Infallible deserialization");
+      serde_json::from_str(ERROR_STR).expect("Infallible deserialization");
     assert_eq!(
       ButtplugCurrentSpecServerMessage::Error(Error::new(
         ErrorCode::ErrorHandshake,

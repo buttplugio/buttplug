@@ -11,7 +11,7 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

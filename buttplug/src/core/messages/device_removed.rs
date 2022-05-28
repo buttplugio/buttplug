@@ -11,7 +11,7 @@ use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceRemoved {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

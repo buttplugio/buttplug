@@ -264,7 +264,7 @@ impl ButtplugServerBuilder {
       self.user_device_configuration_json.clone(),
       false,
     )
-    .map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
+    .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
@@ -335,7 +335,7 @@ impl ButtplugServerBuilder {
     Ok(ButtplugServer {
       server_name: self.name.clone(),
       max_ping_time: ping_time,
-      device_manager: device_manager,
+      device_manager,
       ping_timer,
       connected,
       output_sender,

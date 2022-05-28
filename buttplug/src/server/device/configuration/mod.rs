@@ -164,26 +164,17 @@ use std::{
     Arc,
   },
 };
+use derivative::Derivative;
 
 /// Denotes what set of protocols attributes should be used: Default (generic) or device class
 /// specific.
-#[derive(Debug, Clone, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Eq, Serialize, Deserialize, Derivative)]
+#[derivative(Hash, PartialEq)]
 pub enum ProtocolAttributesType {
   /// Default for all devices supported by a protocol
   Default,
   /// Device class specific identification, with a string specific to the protocol.
   Identifier(String),
-}
-
-impl PartialEq for ProtocolAttributesType {
-  fn eq(&self, other: &Self) -> bool {
-    use ProtocolAttributesType::*;
-    match (self, other) {
-      (Default, Default) => true,
-      (Identifier(ident1), Identifier(ident2)) => ident1 == ident2,
-      _ => false,
-    }
-  }
 }
 
 /// A version of [ServerDeviceIdentifier] used for protocol lookup and matching.
@@ -319,7 +310,7 @@ impl ProtocolDeviceAttributes {
         ButtplugDeviceError::DeviceConfigurationError(format!(
           "Configuration Error in {:?}: {}",
           self.identifier(),
-          err.to_string()
+          err
         ))
       })?;
     }
@@ -469,7 +460,7 @@ impl DeviceConfigurationManagerBuilder {
   }
 
   /// Add a protocol instance factory for a [ButtplugProtocol]
-  pub fn protocol_factory<'a, T>(&mut self, factory: T) -> &mut Self
+  pub fn protocol_factory<T>(&mut self, factory: T) -> &mut Self
   where
     T: ProtocolIdentifierFactory + 'static,
   {
@@ -594,11 +585,11 @@ impl DeviceConfigurationManagerBuilder {
       if reserved_indexes.iter().any(|pair| *pair == *index) {
         // TODO Fill in error
       }
-      reserved_indexes.insert(identifier.clone(), index.clone());
+      reserved_indexes.insert(identifier.clone(), *index);
     }
 
     // Make sure it's all valid.
-    for (_, attrs) in &attribute_tree_map {
+    for attrs in attribute_tree_map.values() {
       attrs.is_valid()?;
     }
 
@@ -609,7 +600,7 @@ impl DeviceConfigurationManagerBuilder {
       protocol_map,
       allowed_addresses: self.allowed_addresses.clone(),
       denied_addresses: self.denied_addresses.clone(),
-      reserved_indexes: reserved_indexes,
+      reserved_indexes,
       current_index: AtomicU32::new(0),
     })
   }
@@ -737,28 +728,24 @@ impl DeviceConfigurationManager {
   pub fn protocol_device_attributes(
     &self,
     identifier: &ServerDeviceIdentifier,
-    raw_endpoints: &Vec<Endpoint>,
+    raw_endpoints: &[Endpoint],
   ) -> Option<ProtocolDeviceAttributes> {
     let mut flat_attrs = if let Some(attrs) = self.protocol_attributes.get(&identifier.into()) {
       attrs.flatten()
+    } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
+      address: None,
+      attributes_identifier: identifier.attributes_identifier().clone(),
+      protocol: identifier.protocol().clone(),
+    }) {
+      attrs.flatten()
+    } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
+      address: None,
+      attributes_identifier: ProtocolAttributesType::Default,
+      protocol: identifier.protocol().clone(),
+    }) {
+      attrs.flatten()
     } else {
-      if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
-        address: None,
-        attributes_identifier: identifier.attributes_identifier().clone(),
-        protocol: identifier.protocol().clone(),
-      }) {
-        attrs.flatten()
-      } else {
-        if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
-          address: None,
-          attributes_identifier: ProtocolAttributesType::Default,
-          protocol: identifier.protocol().clone(),
-        }) {
-          attrs.flatten()
-        } else {
-          return None;
-        }
-      }
+      return None;
     };
 
     // Add Stop Device Command.

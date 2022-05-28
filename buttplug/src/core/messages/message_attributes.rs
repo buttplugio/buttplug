@@ -52,7 +52,7 @@ impl DeviceMessageAttributesBuilder {
     self,
     message_type: &ButtplugDeviceMessageType,
   ) -> Result<DeviceMessageAttributes, ButtplugDeviceError> {
-    self.attributes.check(&message_type)?;
+    self.attributes.check(message_type)?;
     Ok(self.attributes)
   }
 
@@ -65,7 +65,7 @@ impl DeviceMessageAttributesBuilder {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActuatorType {
   Vibrate,
   Rotate,
@@ -75,7 +75,7 @@ pub enum ActuatorType {
   Inflate,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SensorType {
   Button,
   Pressure,
@@ -93,7 +93,7 @@ pub enum SensorType {
 // immutable, we can leave the fields as public, versus trying to build
 // accessors to everything.
 
-#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, Serialize, Deserialize, Getters, Setters)]
 pub struct DeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureCount")]

@@ -27,7 +27,7 @@ where
 }
 
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -72,7 +72,7 @@ impl From<DeviceAdded> for DeviceMessageInfo {
   }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfoV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -116,7 +116,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
 
     // The only attribute in v1 was feature count, so that's all we should
     // preserve.
-    for (_, attributes) in &mut dmi_v1.device_messages {
+    for attributes in &mut dmi_v1.device_messages.values_mut() {
       if let Some(feature_count) = attributes.feature_count() {
         *attributes = DeviceMessageAttributesBuilder::default()
           .feature_count(*feature_count)
@@ -139,7 +139,7 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV1 {
   }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]

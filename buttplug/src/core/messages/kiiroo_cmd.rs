@@ -10,7 +10,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Kiiroo Command (Version 0 Message, Deprecated in spec)
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

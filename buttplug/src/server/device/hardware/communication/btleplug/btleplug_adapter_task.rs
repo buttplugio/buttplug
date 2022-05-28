@@ -28,7 +28,7 @@ pub enum BtleplugAdapterCommand {
   StopScanning,
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 struct PeripheralInfo {
   name: Option<String>,
   peripheral_id: PeripheralId,
