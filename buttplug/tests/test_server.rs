@@ -292,15 +292,12 @@ fn test_device_index_generation() {
 }
 
 #[test]
-#[ignore="Need to figure out what to do about ScanningFinished"]
 fn test_server_scanning_finished() {
   async_manager::block_on(async {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server_builder
-
-      .comm_manager(builder);
+    server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
     let _ = helper.add_ble_device("Massage Demo").await;
     let _ = helper.add_ble_device("Massage Demo").await;

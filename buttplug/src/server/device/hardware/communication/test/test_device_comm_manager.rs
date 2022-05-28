@@ -199,7 +199,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
   }
 
   fn scanning_status(&self) -> bool {
-    false
+    self.is_scanning.load(Ordering::SeqCst)
   }
 }
 

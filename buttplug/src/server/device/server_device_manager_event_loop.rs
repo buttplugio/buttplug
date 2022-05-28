@@ -9,21 +9,15 @@ use crate::{
   core::messages::{ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished},
   server::device::{
     configuration::DeviceConfigurationManager,
-    hardware::{
-      communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
-    },
+    hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
     server_device::build_server_device,
-    ServerDevice,
-    ServerDeviceEvent,
+    ServerDevice, ServerDeviceEvent,
   },
   util::async_manager,
 };
 use dashmap::{DashMap, DashSet};
-use futures::{FutureExt, future, StreamExt};
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
-};
+use futures::{future, FutureExt, StreamExt};
+use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 use tracing;
@@ -49,9 +43,9 @@ pub(super) struct ServerDeviceManagerEventLoop {
   device_event_receiver: mpsc::Receiver<ServerDeviceEvent>,
   /// True if StartScanning has been called but no ScanningFinished has been
   /// emitted yet.
-  scanning_in_progress: bool,
-  /// Holds the status of comm manager scanning states (scanning/not scanning).
-  comm_manager_scanning_statuses: Vec<Arc<AtomicBool>>,
+  scanning_bringup_in_progress: bool,
+  /// Denote whether scanning has been started since we last sent a ScanningFinished message.
+  scanning_started: bool,
   /// Devices currently trying to connect.
   connecting_devices: Arc<DashSet<String>>,
   /// Cancellation token for the event loop
@@ -78,56 +72,75 @@ impl ServerDeviceManagerEventLoop {
       device_event_sender,
       device_event_receiver,
       device_command_receiver,
-      scanning_in_progress: false,
-      comm_manager_scanning_statuses: vec![],
+      scanning_bringup_in_progress: false,
+      scanning_started: false,
       connecting_devices: Arc::new(DashSet::new()),
       loop_cancellation_token,
     }
   }
 
+  fn scanning_status(&self) -> bool {
+    if self
+      .comm_managers
+      .iter()
+      .any(|x| x.scanning_status())
+    {
+      debug!("At least one manager still scanning, continuing event loop.");
+      return true;
+    }
+    return false;
+  }
+
   async fn handle_start_scanning(&mut self) {
+    if self.scanning_status() || self.scanning_bringup_in_progress {
+      debug!("System already scanning, ignoring new scanning request");
+      return;
+    }
+
     info!("No scan currently in progress, starting new scan.");
-    let fut_vec: Vec<_> = self.comm_managers.iter_mut().map(|guard| guard.start_scanning()).collect();
+    self.scanning_bringup_in_progress = true;
+    self.scanning_started = true;
+    let fut_vec: Vec<_> = self
+      .comm_managers
+      .iter_mut()
+      .map(|guard| guard.start_scanning())
+      .collect();
     // TODO If start_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
-    debug!("All managers started, sending ScanningStarted (and invoking ScanningFinished hack) signal to event loop.");    
+    debug!("Scanning started for all hardware comm managers.");
+    self.scanning_bringup_in_progress = false;
   }
 
   async fn handle_stop_scanning(&mut self) {
-    let fut_vec: Vec<_> = self.comm_managers.iter_mut().map(|guard| guard.stop_scanning()).collect();
+    let fut_vec: Vec<_> = self
+      .comm_managers
+      .iter_mut()
+      .map(|guard| guard.stop_scanning())
+      .collect();
     // TODO If stop_scanning fails anywhere, this will ignore it. We should maybe at least log?
     future::join_all(fut_vec).await;
   }
 
   async fn handle_device_communication(&mut self, event: HardwareCommunicationManagerEvent) {
     match event {
-      HardwareCommunicationManagerEvent::ScanningStarted => {
-        self.scanning_in_progress = true;
-      }
       HardwareCommunicationManagerEvent::ScanningFinished => {
         debug!(
           "System signaled that scanning was finished, check to see if all managers are finished."
         );
-        if !self.scanning_in_progress {
-          debug!("Manager finished before scanning was fully started, continuing event loop.");
+        if self.scanning_bringup_in_progress {
+          debug!("Hardware Comm Manager finished before scanning was fully started, continuing event loop.");
           return;
         }
-        if self
-          .comm_manager_scanning_statuses
-          .iter()
-          .any(|x| x.load(Ordering::SeqCst))
-        {
-          debug!("At least one manager still scanning, continuing event loop.");
-          return;
-        }
-        debug!("All managers finished, emitting ScanningFinished");
-        self.scanning_in_progress = false;
-        if self
-          .server_sender
-          .send(ScanningFinished::default().into())
-          .is_err()
-        {
-          info!("Server disappeared, exiting loop.");
+        if !self.scanning_status() && self.scanning_started {
+          debug!("All managers finished, emitting ScanningFinished");
+          self.scanning_started = false;
+          if self
+            .server_sender
+            .send(ScanningFinished::default().into())
+            .is_err()
+          {
+            info!("Server disappeared, exiting loop.");
+          }  
         }
       }
       HardwareCommunicationManagerEvent::DeviceFound {
@@ -319,7 +332,7 @@ impl ServerDeviceManagerEventLoop {
             match msg {
               DeviceManagerCommand::StartScanning => self.handle_start_scanning().await,
               DeviceManagerCommand::StopScanning => self.handle_stop_scanning().await,
-            } 
+            }
           } else {
             info!("Channel to Device Manager frontend dropped, exiting event loop.");
             break;

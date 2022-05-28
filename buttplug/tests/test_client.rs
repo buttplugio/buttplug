@@ -162,7 +162,6 @@ fn test_successive_start_scanning() {
 
 #[cfg(feature = "server")]
 #[test]
-#[ignore="Need to figure out how we want to handle ScanningFinished going forward."]
 fn test_client_scanning_finished() {
   async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;

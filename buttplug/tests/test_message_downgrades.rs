@@ -109,11 +109,11 @@ fn test_version0_device_added_device_list() {
     // Check that we got an event back about scanning finishing.
     let mut msg = recv.next().await.expect("Test, assuming infallible.");
     // We should receive ScanningFinished and DeviceAdded, but the order may change.
-    let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
+    let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
     assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
-    //msg = recv.next().await.expect("Test, assuming infallible.");
+    msg = recv.next().await.expect("Test, assuming infallible.");
     // We should get back an aneros with only SingleMotorVibrateCmd
-    //assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
+    assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
     let rdl = serializer
       .deserialize(ButtplugSerializedMessage::Text(
         r#"[{"RequestDeviceList": { "Id": 1}}]"#.to_owned(),
@@ -162,11 +162,11 @@ fn test_version0_singlemotorvibratecmd() {
     // Check that we got an event back about scanning finishing.
     let mut msg = recv.next().await.expect("Test, assuming infallible.");
     // We should receive ScanningFinished and DeviceAdded, but the order may change.
-    let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
+    let possible_messages: Vec<ButtplugSerializedMessage> = vec![r#"[{"ScanningFinished":{"Id":0}}]"#.to_owned().into(), r#"[{"DeviceAdded":{"Id":0,"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}}]"#.to_owned().into()];
     assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
-    //msg = recv.next().await.expect("Test, assuming infallible.");
+    msg = recv.next().await.expect("Test, assuming infallible.");
     // We should get back an aneros with only SingleMotorVibrateCmd
-    //assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
+    assert!(possible_messages.contains(&serializer.serialize(vec!(msg))));
     let output2 = server
       .parse_message(
         serializer
