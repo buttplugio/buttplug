@@ -9,9 +9,9 @@ use super::btleplug_adapter_task::{BtleplugAdapterCommand, BtleplugAdapterTask};
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
   util::async_manager,
 };
@@ -23,11 +23,13 @@ use std::sync::{
 use tokio::sync::mpsc::{channel, Sender};
 
 #[derive(Default, Clone)]
-pub struct BtlePlugCommunicationManagerBuilder {
-}
+pub struct BtlePlugCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(BtlePlugCommunicationManager::new(sender))
   }
 }

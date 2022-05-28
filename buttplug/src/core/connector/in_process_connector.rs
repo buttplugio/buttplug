@@ -9,8 +9,8 @@
 
 use crate::{
   core::{
-  connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-  messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
+    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
@@ -31,7 +31,7 @@ use tracing_futures::Instrument;
 
 #[derive(Default)]
 pub struct ButtplugInProcessClientConnectorBuilder {
-  server: Option<ButtplugServer>
+  server: Option<ButtplugServer>,
 }
 
 impl ButtplugInProcessClientConnectorBuilder {

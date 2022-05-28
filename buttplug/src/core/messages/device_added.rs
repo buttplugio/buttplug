@@ -5,8 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
-
 use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1};
 use super::*;
 

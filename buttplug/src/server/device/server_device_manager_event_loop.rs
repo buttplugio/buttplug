@@ -11,7 +11,8 @@ use crate::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
     server_device::build_server_device,
-    ServerDevice, ServerDeviceEvent,
+    ServerDevice,
+    ServerDeviceEvent,
   },
   util::async_manager,
 };
@@ -80,11 +81,7 @@ impl ServerDeviceManagerEventLoop {
   }
 
   fn scanning_status(&self) -> bool {
-    if self
-      .comm_managers
-      .iter()
-      .any(|x| x.scanning_status())
-    {
+    if self.comm_managers.iter().any(|x| x.scanning_status()) {
       debug!("At least one manager still scanning, continuing event loop.");
       return true;
     }
@@ -140,7 +137,7 @@ impl ServerDeviceManagerEventLoop {
             .is_err()
           {
             info!("Server disappeared, exiting loop.");
-          }  
+          }
         }
       }
       HardwareCommunicationManagerEvent::DeviceFound {

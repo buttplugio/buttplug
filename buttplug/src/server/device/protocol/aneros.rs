@@ -9,7 +9,7 @@ use crate::{
   core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, generic_protocol_setup}
+    protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
 
@@ -48,16 +48,26 @@ mod test {
     server::device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::ProtocolHandler,
-    }
+    },
   };
 
   #[test]
   pub fn test_aneros_protocol() {
     let handler = Aneros {};
-    assert_eq!(handler.handle_vibrate_cmd(&vec![Some(64)]), Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false))]));
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(13), Some(64)]), 
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)), HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false))])
+      handler.handle_vibrate_cmd(&vec![Some(64)]),
+      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0xF1, 64],
+        false
+      ))])
+    );
+    assert_eq!(
+      handler.handle_vibrate_cmd(&vec![Some(13), Some(64)]),
+      Ok(vec![
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false))
+      ])
     );
   }
 }

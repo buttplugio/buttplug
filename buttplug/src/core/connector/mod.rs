@@ -74,7 +74,10 @@ use crate::{
 use displaydoc::Display;
 use futures::future::{self, BoxFuture};
 #[cfg(all(feature = "server", feature = "client"))]
-pub use in_process_connector::{ButtplugInProcessClientConnector, ButtplugInProcessClientConnectorBuilder};
+pub use in_process_connector::{
+  ButtplugInProcessClientConnector,
+  ButtplugInProcessClientConnectorBuilder,
+};
 pub use remote_connector::{
   ButtplugRemoteClientConnector,
   ButtplugRemoteConnector,

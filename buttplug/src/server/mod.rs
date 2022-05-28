@@ -53,19 +53,29 @@ pub use remote_server::*;
 
 use self::device::{
   configuration::{
-    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+    ProtocolAttributesIdentifier,
+    ProtocolCommunicationSpecifier,
+    ProtocolDeviceAttributes,
   },
   hardware::communication::HardwareCommunicationManagerBuilder,
   protocol::ProtocolIdentifierFactory,
-  ServerDeviceIdentifier, ServerDeviceManager, ServerDeviceManagerBuilder,
+  ServerDeviceIdentifier,
+  ServerDeviceManager,
+  ServerDeviceManagerBuilder,
 };
 use crate::{
   core::{
     errors::*,
     messages::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
-      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      StopAllDevices,
+      StopScanning,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{
@@ -281,12 +291,16 @@ impl ButtplugServerBuilder {
 
     for (name, specifiers) in protocol_map.protocol_specifiers() {
       for spec in specifiers {
-        self.device_manager_builder.communication_specifier(name, spec.clone());
+        self
+          .device_manager_builder
+          .communication_specifier(name, spec.clone());
       }
     }
 
     for (ident, attributes) in protocol_map.protocol_attributes() {
-      self.device_manager_builder.protocol_attributes(ident.clone(), attributes.clone());
+      self
+        .device_manager_builder
+        .protocol_attributes(ident.clone(), attributes.clone());
     }
 
     let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);

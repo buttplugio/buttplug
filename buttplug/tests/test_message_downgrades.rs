@@ -8,14 +8,16 @@
 extern crate buttplug;
 mod util;
 
-use util::test_server_with_device;
 use buttplug::{
   core::messages::{
     self,
     serializer::{
-      ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugServerJSONSerializer,
+      ButtplugMessageSerializer,
+      ButtplugSerializedMessage,
+      ButtplugServerJSONSerializer,
     },
-    Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+    Endpoint,
+    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
   },
   server::{
     device::{
@@ -27,6 +29,7 @@ use buttplug::{
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
+use util::test_server_with_device;
 
 #[test]
 fn test_version0_connection() {

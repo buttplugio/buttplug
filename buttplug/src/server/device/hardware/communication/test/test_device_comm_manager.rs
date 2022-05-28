@@ -5,28 +5,33 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::test_device::{TestHardwareConnector, TestDeviceInternal};
+use super::test_device::{TestDeviceInternal, TestHardwareConnector};
 use crate::{
   core::{errors::ButtplugError, ButtplugResultFuture},
   server::device::{
-    configuration::{BluetoothLESpecifier, DeviceConfigurationManager, ProtocolCommunicationSpecifier},
+    configuration::{
+      BluetoothLESpecifier,
+      DeviceConfigurationManager,
+      ProtocolCommunicationSpecifier,
+    },
     ServerDevice,
   },
-  server::{
-    device::{
-      server_device::build_server_device,
-      hardware::communication::{
-        HardwareCommunicationManagerEvent,
-        HardwareCommunicationManager,
-        HardwareCommunicationManagerBuilder,
-      }      
-    }
+  server::device::{
+    hardware::communication::{
+      HardwareCommunicationManager,
+      HardwareCommunicationManagerBuilder,
+      HardwareCommunicationManagerEvent,
+    },
+    server_device::build_server_device,
   },
   util::device_configuration::create_test_dcm,
 };
 use futures::future;
 use std::{
-  sync::{Arc, atomic::{AtomicBool, Ordering}},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
   time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::{mpsc::Sender, Mutex};
@@ -47,7 +52,8 @@ fn new_uninitialized_ble_test_device(
       .subsec_nanos()
       .to_string()
   });
-  let specifier = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
+  let specifier =
+    ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(name, &[]));
   let hardware = Arc::new(TestDeviceInternal::new(name, &address));
   let hardware_clone = hardware.clone();
   let hardware_creator = TestHardwareConnector::new(specifier, hardware);
@@ -62,11 +68,10 @@ async fn new_bluetoothle_test_device_with_cfg(
   let (hardware, hardware_creator) = new_uninitialized_ble_test_device(name, None);
   let hardware_clone = hardware.clone();
   let _err_str = &format!("No protocol found for device {}", name);
-  let device: ServerDevice =
-    build_server_device(config_mgr.clone(), Box::new(hardware_creator))
-      .await
-      .expect("We'll always return Ok here, otherwise we should panic.")
-      .expect("Empty option shouldn't be possible");
+  let device: ServerDevice = build_server_device(config_mgr.clone(), Box::new(hardware_creator))
+    .await
+    .expect("We'll always return Ok here, otherwise we should panic.")
+    .expect("Empty option shouldn't be possible");
   Ok((device, hardware_clone))
 }
 
@@ -116,7 +121,10 @@ impl TestDeviceCommunicationManagerBuilder {
 }
 
 impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
       sender,
       self.devices.clone(),
@@ -127,15 +135,18 @@ impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuild
 pub struct TestDeviceCommunicationManager {
   device_sender: Sender<HardwareCommunicationManagerEvent>,
   devices: WaitingDeviceList,
-  is_scanning: Arc<AtomicBool>
+  is_scanning: Arc<AtomicBool>,
 }
 
 impl TestDeviceCommunicationManager {
-  pub fn new(device_sender: Sender<HardwareCommunicationManagerEvent>, devices: WaitingDeviceList) -> Self {
+  pub fn new(
+    device_sender: Sender<HardwareCommunicationManagerEvent>,
+    devices: WaitingDeviceList,
+  ) -> Self {
     Self {
       device_sender,
       devices,
-      is_scanning: Arc::new(AtomicBool::new(false))
+      is_scanning: Arc::new(AtomicBool::new(false)),
     }
   }
 }
@@ -155,16 +166,12 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
       if devices.is_empty() {
         warn!("No devices for test device comm manager to emit, did you mean to do this?");
       }
-      while let Some(d) = devices.pop() {      
-        let device_name = d.device().name();  
+      while let Some(d) = devices.pop() {
+        let device_name = d.device().name();
         if device_sender
           .send(HardwareCommunicationManagerEvent::DeviceFound {
-            name: d
-              .device()
-              .name(),
-            address: d
-              .device()
-              .address(),
+            name: d.device().name(),
+            address: d.device().address(),
             creator: Box::new(d),
           })
           .await
@@ -174,7 +181,6 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
         } else {
           info!("Test DCM emitting device: {}", device_name);
         }
-        
       }
       is_scanning.store(false, Ordering::SeqCst);
       if device_sender
@@ -207,7 +213,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
 mod test {
   use crate::{
     core::messages::{self, ButtplugMessageSpecVersion, ButtplugServerMessage},
-    server::device::hardware::communication::{test::TestDeviceCommunicationManagerBuilder},
+    server::device::hardware::communication::test::TestDeviceCommunicationManagerBuilder,
     server::ButtplugServerBuilder,
     util::async_manager,
   };

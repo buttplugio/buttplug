@@ -16,9 +16,9 @@ use super::{
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
   util::async_manager,
 };
@@ -139,7 +139,10 @@ fn serial_read_thread(
 pub struct LovenseSerialDongleCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseSerialDongleCommunicationManager::new(sender))
   }
 }

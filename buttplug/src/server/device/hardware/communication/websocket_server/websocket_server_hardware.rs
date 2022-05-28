@@ -14,16 +14,16 @@ use crate::{
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},
     hardware::{
-    HardwareEvent,
-    HardwareConnector,
-    HardwareSpecializer,
-    GenericHardwareSpecializer,
-    Hardware,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      GenericHardwareSpecializer,
+      Hardware,
+      HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
+      HardwareSpecializer,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -155,11 +155,10 @@ async fn run_connection_loop<S>(
   debug!("Exiting Websocket Server Device control loop.");
 }
 
-
 impl Debug for WebsocketServerHardwareConnector {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("WebsocketServerHardwareConnector")
-    .field("info", &self.info)
+      .field("info", &self.info)
       .finish()
   }
 }
@@ -210,20 +209,12 @@ impl HardwareConnector for WebsocketServerHardwareConnector {
     ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
   }
 
-  async fn connect(
-    &mut self
-  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     let hardware_internal = WebsocketServerHardware::new(
-      self
-        .device_event_sender
-        .clone(),
+      self.device_event_sender.clone(),
       self.info.clone(),
-      self
-        .outgoing_sender
-        .clone(),
-      self
-        .incoming_broadcaster
-        .clone(),
+      self.outgoing_sender.clone(),
+      self.incoming_broadcaster.clone(),
     );
     let hardware = Hardware::new(
       &self.info.identifier,
@@ -281,10 +272,15 @@ impl HardwareInternal for WebsocketServerHardware {
     &self,
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Websocket Hardware does not support read".to_owned()))))
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Websocket Hardware does not support read".to_owned(),
+    ))))
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.outgoing_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
@@ -299,7 +295,10 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn subscribe(
+    &self,
+    _msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
       return Box::pin(future::ready(Ok(())));
     }
@@ -342,7 +341,10 @@ impl HardwareInternal for WebsocketServerHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn unsubscribe(
+    &self,
+    _msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();

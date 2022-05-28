@@ -17,8 +17,8 @@ pub mod stream;
 
 #[cfg(all(feature = "server", feature = "client"))]
 use crate::{
-  core::connector::ButtplugInProcessClientConnectorBuilder,
   client::ButtplugClient,
+  core::connector::ButtplugInProcessClientConnectorBuilder,
   server::ButtplugServerBuilder,
 };
 
@@ -63,48 +63,44 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
   #[cfg(feature = "btleplug-manager")]
   {
     use crate::server::device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder;
-    server_builder
-      .comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    server_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "websocket-server-manager")]
   {
     use crate::server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder;
-    server_builder
-      .comm_manager(
-        WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
-      );
+    server_builder.comm_manager(
+      WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
+    );
   }
   #[cfg(feature = "serial-manager")]
   {
     use crate::server::device::hardware::communication::serialport::SerialPortCommunicationManagerBuilder;
-    server_builder
-      .comm_manager(SerialPortCommunicationManagerBuilder::default());
+    server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-connect-service-manager")]
   {
     use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
-    server_builder
-      .comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
+    server_builder.comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
   #[cfg(feature = "lovense-dongle-manager")]
   {
     use crate::server::device::hardware::communication::lovense_dongle::{
-      LovenseHIDDongleCommunicationManagerBuilder, LovenseSerialDongleCommunicationManagerBuilder,
+      LovenseHIDDongleCommunicationManagerBuilder,
+      LovenseSerialDongleCommunicationManagerBuilder,
     };
-    server_builder
-      .comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
-    server_builder
-      .comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default());
+    server_builder.comm_manager(LovenseHIDDongleCommunicationManagerBuilder::default());
+    server_builder.comm_manager(LovenseSerialDongleCommunicationManagerBuilder::default());
   }
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   {
     use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
-    server_builder
-      .comm_manager(XInputDeviceCommunicationManagerBuilder::default());
+    server_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
 
   let server = server_builder.finish().unwrap();
-  let connector = ButtplugInProcessClientConnectorBuilder::default().server(server).finish();
+  let connector = ButtplugInProcessClientConnectorBuilder::default()
+    .server(server)
+    .finish();
   let client = ButtplugClient::new(client_name);
   client.connect(connector).await.unwrap();
   client

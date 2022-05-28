@@ -16,9 +16,9 @@ use super::{
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
   util::async_manager,
 };
@@ -154,7 +154,10 @@ fn hid_read_thread(
 pub struct LovenseHIDDongleCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseHIDDongleCommunicationManager::new(sender))
   }
 }

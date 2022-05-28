@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -48,23 +45,31 @@ mod test {
   use crate::{
     core::messages::Endpoint,
     server::device::{
-      protocol::ProtocolHandler,
       hardware::{HardwareCommand, HardwareWriteCmd},
-    }
+      protocol::ProtocolHandler,
+    },
   };
 
   #[test]
   pub fn test_cachito_protocol() {
     let handler = super::Cachito::default();
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(3)]), 
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 3, 0], false))])
+      handler.handle_vibrate_cmd(&vec![Some(3)]),
+      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![2, 1, 3, 0],
+        false
+      ))])
     );
     assert_eq!(
       handler.handle_vibrate_cmd(&vec![Some(1), Some(50)]),
       Ok(vec![
         HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 1, 0], false)),
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![3, 2, 50, 0], false)),
+        HardwareCommand::Write(HardwareWriteCmd::new(
+          Endpoint::Tx,
+          vec![3, 2, 50, 0],
+          false
+        )),
       ])
     );
   }

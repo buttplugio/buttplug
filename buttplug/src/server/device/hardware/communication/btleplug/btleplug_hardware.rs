@@ -10,21 +10,21 @@ use crate::{
     errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
   },
+  server::device::hardware::communication::HardwareSpecificError,
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
     hardware::{
+      Hardware,
       HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
       HardwareSpecializer,
-    HardwareEvent,
-    Hardware,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::HardwareSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
@@ -55,17 +55,12 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
-  pub fn new(
-    name: &str,
-    services: &Vec<Uuid>,
-    device: T,
-    adapter: Adapter,
-  ) -> Self {
+  pub fn new(name: &str, services: &Vec<Uuid>, device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
       services: services.clone(),
       device,
-      adapter
+      adapter,
     }
   }
 }
@@ -73,9 +68,9 @@ impl<T: Peripheral> BtleplugHardwareConnector<T> {
 impl<T: Peripheral> Debug for BtleplugHardwareConnector<T> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     f.debug_struct("BtleplugHardwareCreator")
-    .field("name", &self.name)
-    .field("address", &self.device.id())
-    .finish()
+      .field("name", &self.name)
+      .field("address", &self.device.id())
+      .finish()
   }
 }
 
@@ -84,7 +79,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
-      &self.services
+      &self.services,
     ))
   }
 
@@ -112,45 +107,51 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
         );
       }
     }
-    Ok(Box::new(BtleplugHardwareSpecializer::new(&self.name, self.device.clone(), self.adapter.clone())))
+    Ok(Box::new(BtleplugHardwareSpecializer::new(
+      &self.name,
+      self.device.clone(),
+      self.adapter.clone(),
+    )))
   }
 }
 
 pub struct BtleplugHardwareSpecializer<T: Peripheral + 'static> {
   name: String,
   device: T,
-  adapter: Adapter
+  adapter: Adapter,
 }
 
 impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
-  pub(super) fn new(
-    name: &str,
-    device: T,
-    adapter: Adapter,
-  ) -> Self {
+  pub(super) fn new(name: &str, device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
       device,
-      adapter
+      adapter,
     }
   }
 }
 
 #[async_trait]
 impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
-async fn specialize(&mut self, specifiers: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError> {
+  async fn specialize(
+    &mut self,
+    specifiers: &Vec<ProtocolCommunicationSpecifier>,
+  ) -> Result<Hardware, ButtplugDeviceError> {
     // Map UUIDs to endpoints
     let mut uuid_map = HashMap::<Uuid, Endpoint>::new();
     let mut endpoints = HashMap::<Endpoint, Characteristic>::new();
     let address = self.device.id();
 
-    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers.iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
+    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers
+      .iter()
+      .find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_)))
+    {
       for (proto_uuid, proto_service) in btle.services() {
         for service in self.device.services() {
           if service.uuid != *proto_uuid {
             continue;
           }
-  
+
           debug!("Found required service {} {:?}", service.uuid, service);
           for (chr_name, chr_uuid) in proto_service.iter() {
             if let Some(chr) = service.characteristics.iter().find(|c| c.uuid == *chr_uuid) {
@@ -170,9 +171,15 @@ async fn specialize(&mut self, specifiers: &Vec<ProtocolCommunicationSpecifier>)
         }
       }
     } else {
-      error!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, address);
+      error!(
+        "Can't find btle protocol specifier mapping for device {} {:?}",
+        self.name, address
+      );
       return Err(
-        ButtplugDeviceError::DeviceConnectionError(format!("Can't find btle protocol specifier mapping for device {} {:?}", self.name, address))
+        ButtplugDeviceError::DeviceConnectionError(format!(
+          "Can't find btle protocol specifier mapping for device {} {:?}",
+          self.name, address
+        ))
         .into(),
       );
     }
@@ -181,7 +188,7 @@ async fn specialize(&mut self, specifiers: &Vec<ProtocolCommunicationSpecifier>)
       .notifications()
       .await
       .expect("Should always be able to get notifications");
-  
+
     let device_internal_impl = BtlePlugHardware::new(
       self.device.clone(),
       &self.name,
@@ -310,7 +317,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -331,11 +341,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         Ok(()) => Ok(()),
         Err(err) => {
           error!("BTLEPlug device write error: {:?}", err);
-          Err(
-            ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
-              format!("{:?}", err),
-            ))
-          )
+          Err(ButtplugDeviceError::DeviceSpecificError(
+            HardwareSpecificError::BtleplugError(format!("{:?}", err)),
+          ))
         }
       }
     })
@@ -365,17 +373,18 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         }
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);
-          Err(
-            ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
-              format!("{:?}", err),
-            ))
-          )
+          Err(ButtplugDeviceError::DeviceSpecificError(
+            HardwareSpecificError::BtleplugError(format!("{:?}", err)),
+          ))
         }
       }
     })
   }
 
-  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn subscribe(
+    &self,
+    msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -387,14 +396,18 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     Box::pin(async move {
       device.subscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
-          format!("{:?}", e),
-        ))
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
+          "{:?}",
+          e
+        )))
       })
     })
   }
 
-  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn unsubscribe(
+    &self,
+    msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -406,9 +419,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let device = self.device.clone();
     Box::pin(async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(
-          format!("{:?}", e),
-        ))
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::BtleplugError(format!(
+          "{:?}",
+          e
+        )))
       })
     })
   }

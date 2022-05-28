@@ -9,13 +9,18 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessageType, LinearCmd, RotateCmd,
-      RotationSubcommand, VibrateCmd, VibrateSubcommand,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessageType,
+      LinearCmd,
+      RotateCmd,
+      RotationSubcommand,
+      VibrateCmd,
+      VibrateSubcommand,
     },
   },
   server::device::configuration::ProtocolDeviceAttributes,
 };
-use std::sync::atomic::{AtomicU32, AtomicBool, Ordering::SeqCst};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst};
 
 // In order to make our lives easier, we make some assumptions about what's internally mutable in
 // the GenericCommandManager (GCM). Once the GCM is configured for a device, it won't change sizes,
@@ -46,7 +51,7 @@ impl GenericCommandManager {
     let mut rotations = vec![];
     let mut rotation_step_counts = vec![];
     let mut rotation_step_ranges = vec![];
-    let mut linears= vec![];
+    let mut linears = vec![];
     let mut linear_step_counts = vec![];
 
     let mut stop_commands = vec![];
@@ -77,7 +82,9 @@ impl GenericCommandManager {
     if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::RotateCmd) {
       if let Some(count) = attr.feature_count() {
         // We have to use resize_with here, since Atomic* aren't clonable.
-        rotations.resize_with(*count as usize, || (AtomicU32::new(0), AtomicBool::new(false)));
+        rotations.resize_with(*count as usize, || {
+          (AtomicU32::new(0), AtomicBool::new(false))
+        });
       }
       if let Some(step_counts) = &attr.step_count() {
         rotation_step_counts = step_counts.clone();
@@ -208,7 +215,11 @@ impl GenericCommandManager {
   }
 
   pub fn vibration(&self) -> Vec<Option<u32>> {
-    self.vibrations.iter().map(|x| Some(x.load(SeqCst))).collect()
+    self
+      .vibrations
+      .iter()
+      .map(|x| Some(x.load(SeqCst)))
+      .collect()
   }
 
   pub fn update_rotation(
@@ -283,10 +294,7 @@ impl GenericCommandManager {
     Ok(result)
   }
 
-  pub fn _update_linear(
-    &self,
-    _msg: &LinearCmd,
-  ) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
+  pub fn _update_linear(&self, _msg: &LinearCmd) -> Result<Option<Vec<(u32, u32)>>, ButtplugError> {
     // First, make sure this is a valid command, that doesn't contain an
     // index we can't reach.
 
@@ -316,8 +324,13 @@ mod test {
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::{
     core::messages::{
-      ButtplugDeviceMessageType, DeviceMessageAttributesBuilder, DeviceMessageAttributesMap,
-      RotateCmd, RotationSubcommand, VibrateCmd, VibrateSubcommand,
+      ButtplugDeviceMessageType,
+      DeviceMessageAttributesBuilder,
+      DeviceMessageAttributesMap,
+      RotateCmd,
+      RotationSubcommand,
+      VibrateCmd,
+      VibrateSubcommand,
     },
     server::device::configuration::ProtocolAttributesType,
   };

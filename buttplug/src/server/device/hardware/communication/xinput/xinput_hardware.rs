@@ -5,31 +5,29 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::xinput_device_comm_manager::{
-  XInputControllerIndex,
-};
+use super::xinput_device_comm_manager::XInputControllerIndex;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
   },
+  server::device::hardware::communication::HardwareSpecificError,
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, XInputSpecifier},
     hardware::{
-    HardwareEvent,
-    HardwareConnector,
-    GenericHardwareSpecializer,
-    HardwareSpecializer,
-    Hardware,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      GenericHardwareSpecializer,
+      Hardware,
+      HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
+      HardwareSpecializer,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::HardwareSpecificError,
-  util::async_manager
+  util::async_manager,
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -50,7 +48,7 @@ pub(super) fn create_address(index: XInputControllerIndex) -> String {
 async fn check_gamepad_connectivity(
   index: XInputControllerIndex,
   sender: broadcast::Sender<HardwareEvent>,
-  cancellation_token: CancellationToken
+  cancellation_token: CancellationToken,
 ) {
   let handle = rusty_xinput::XInputHandle::load_default()
     .expect("Always loads in windows, this shouldn't run elsewhere.");
@@ -65,7 +63,7 @@ async fn check_gamepad_connectivity(
     tokio::select! {
       _ = cancellation_token.cancelled() => return,
       _ = tokio::time::sleep(Duration::from_millis(500)) => continue
-    }    
+    }
   }
 }
 
@@ -93,9 +91,7 @@ impl HardwareConnector for XInputHardwareConnector {
     ProtocolCommunicationSpecifier::XInput(XInputSpecifier::default())
   }
 
-  async fn connect(
-    &mut self,
-  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     debug!("Emitting a new xbox device impl.");
     let hardware_internal = XInputHardware::new(self.index);
     let hardware = Hardware::new(
@@ -124,7 +120,7 @@ impl XInputHardware {
     let sender = device_event_sender.clone();
     async_manager::spawn(async move {
       check_gamepad_connectivity(index, sender, child).await;
-    });    
+    });
     Self {
       handle: rusty_xinput::XInputHandle::load_default().expect("The DLL should load as long as we're on windows, and we don't get here if we're not on windows."),
       index,
@@ -155,11 +151,18 @@ impl HardwareInternal for XInputHardware {
         .map_err(|e| {
           ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
         })?;
-      Ok(RawReading::new(index as u32, Endpoint::Rx, vec![battery.battery_level.0]))
+      Ok(RawReading::new(
+        index as u32,
+        Endpoint::Rx,
+        vec![battery.battery_level.0],
+      ))
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
     let data = msg.data.clone();
@@ -174,18 +177,27 @@ impl HardwareInternal for XInputHardware {
       handle
         .set_state(index as u32, left_motor_speed, right_motor_speed)
         .map_err(|e: XInputUsageError| {
-          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
-            .into()
+          ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e))).into()
         })
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("XInput hardware does not support subscribe".to_owned()))))
+  fn subscribe(
+    &self,
+    _msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "XInput hardware does not support subscribe".to_owned(),
+    ))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("XInput hardware does not support unsubscribe".to_owned()))))
+  fn unsubscribe(
+    &self,
+    _msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "XInput hardware does not support unsubscribe".to_owned(),
+    ))))
   }
 }
 

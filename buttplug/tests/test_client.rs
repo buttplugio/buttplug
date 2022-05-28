@@ -6,7 +6,7 @@
 // for full license information.
 
 mod util;
-use util::{test_client, test_client_with_device, test_client_with_delayed_device_manager};
+use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device};
 extern crate buttplug;
 extern crate tracing;
 
@@ -25,7 +25,7 @@ use buttplug::{
   server::{
     device::{
       hardware::communication::test::check_test_recv_value,
-      hardware::{HardwareCommand, HardwareWriteCmd,}
+      hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServerBuilder,
   },
@@ -123,7 +123,7 @@ fn test_start_scanning() {
 
 #[cfg(feature = "server")]
 #[test]
-#[ignore="We may want to just call this Ok now?"]
+#[ignore = "We may want to just call this Ok now?"]
 fn test_stop_scanning_when_not_scanning() {
   async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;
@@ -182,7 +182,9 @@ fn test_client_ping() {
       .max_ping_time(200)
       .finish()
       .expect("Test, assuming infallible.");
-    let connector = ButtplugInProcessClientConnectorBuilder::default().server(server).finish();
+    let connector = ButtplugInProcessClientConnectorBuilder::default()
+      .server(server)
+      .finish();
     let client = ButtplugClient::new("Test Client");
     client
       .connect(connector)

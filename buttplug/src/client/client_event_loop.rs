@@ -13,18 +13,16 @@ use super::{
   ButtplugClientEvent,
   ButtplugClientMessageFuturePair,
 };
-use crate::{
-  core::{
-    connector::{ButtplugConnector, ButtplugConnectorStateShared},
-    errors::{ButtplugDeviceError, ButtplugError},
-    messages::{
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugDeviceMessage,
-      ButtplugMessageValidator,
-      DeviceList,
-      DeviceMessageInfo,
-    },
+use crate::core::{
+  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  errors::{ButtplugDeviceError, ButtplugError},
+  messages::{
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugDeviceMessage,
+    ButtplugMessageValidator,
+    DeviceList,
+    DeviceMessageInfo,
   },
 };
 use dashmap::DashMap;

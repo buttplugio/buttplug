@@ -14,17 +14,20 @@ use buttplug::{
       self,
       ButtplugMessageSpecVersion,
       ButtplugServerMessage,
+      Endpoint,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-      Endpoint
     },
   },
   server::{
     device::{
-      hardware::communication::test::{check_test_recv_value, TestDeviceCommunicationManagerBuilder},
-      hardware::{HardwareCommand, HardwareWriteCmd}
+      hardware::communication::test::{
+        check_test_recv_value,
+        TestDeviceCommunicationManagerBuilder,
+      },
+      hardware::{HardwareCommand, HardwareWriteCmd},
     },
-    ButtplugServer, 
-    ButtplugServerBuilder
+    ButtplugServer,
+    ButtplugServerBuilder,
   },
   util::async_manager,
 };
@@ -144,15 +147,13 @@ fn test_device_stop_on_ping_timeout() {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server_builder
-      .max_ping_time(100)
-      .comm_manager(builder);
+    server_builder.max_ping_time(100).comm_manager(builder);
     let server = server_builder.finish().unwrap();
     let device = helper.add_ble_device("Massage Demo").await;
 
     let recv = server.event_stream();
     pin_mut!(recv);
-    
+
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.into()).await;
@@ -245,9 +246,7 @@ fn test_device_index_generation() {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server_builder
-
-      .comm_manager(builder);
+    server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
     let _ = helper.add_ble_device("Massage Demo").await;
     let _ = helper.add_ble_device("Massage Demo").await;

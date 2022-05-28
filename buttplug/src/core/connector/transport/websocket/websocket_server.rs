@@ -7,17 +7,17 @@
 
 use crate::{
   core::{
-  connector::{
-    transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
-      ButtplugTransportIncomingMessage,
+    connector::{
+      transport::{
+        ButtplugConnectorTransport,
+        ButtplugConnectorTransportSpecificError,
+        ButtplugTransportIncomingMessage,
+      },
+      ButtplugConnectorError,
+      ButtplugConnectorResultFuture,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    messages::serializer::ButtplugSerializedMessage,
   },
-  messages::serializer::ButtplugSerializedMessage,
-},
   util::async_manager,
 };
 use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};

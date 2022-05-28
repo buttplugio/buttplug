@@ -12,9 +12,9 @@
 #![doc = include_str!("../README.md")]
 
 //! # An Overview of Buttplug's Module System
-//! 
+//!
 //! Buttplug is broken up into the following modules:
-//! 
+//!
 //! - [Core](crate::core)
 //!   - Generic portions of the library code that are used by the other modules. This includes
 //!     message classes, serializers, connectors, and errors.
@@ -41,9 +41,9 @@ extern crate futures;
 #[macro_use]
 extern crate tracing;
 
-pub mod core;
 #[cfg(feature = "client")]
 pub mod client;
+pub mod core;
 #[cfg(feature = "server")]
 pub mod server;
 pub mod util;

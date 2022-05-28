@@ -7,8 +7,7 @@
 
 //! Connector for using pipes as a client.
 
-use crate::{
-  core::{
+use crate::core::{
   connector::{
     transport::{
       ButtplugConnectorTransport,
@@ -18,8 +17,7 @@ use crate::{
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
   },
-  messages::serializer::ButtplugSerializedMessage
-},
+  messages::serializer::ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
 use std::sync::Arc;

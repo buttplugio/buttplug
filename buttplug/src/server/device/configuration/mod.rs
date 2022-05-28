@@ -140,24 +140,30 @@
 pub mod specifier;
 pub use specifier::*;
 
-use super::protocol::{
-  get_default_protocol_map, ProtocolIdentifierFactory,
-  ProtocolSpecializer,
-};
+use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, ProtocolSpecializer};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     messages::{
-      ButtplugDeviceMessageType, DeviceMessageAttributes, DeviceMessageAttributesBuilder,
-      DeviceMessageAttributesMap, Endpoint,
+      ButtplugDeviceMessageType,
+      DeviceMessageAttributes,
+      DeviceMessageAttributesBuilder,
+      DeviceMessageAttributesMap,
+      Endpoint,
     },
   },
-  server::device::{ServerDeviceIdentifier},
+  server::device::ServerDeviceIdentifier,
 };
 use dashmap::DashMap;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, sync::{Arc, atomic::{AtomicU32, Ordering}}};
+use std::{
+  collections::HashMap,
+  sync::{
+    atomic::{AtomicU32, Ordering},
+    Arc,
+  },
+};
 
 /// Denotes what set of protocols attributes should be used: Default (generic) or device class
 /// specific.
@@ -193,11 +199,15 @@ pub struct ProtocolAttributesIdentifier {
 }
 
 impl ProtocolAttributesIdentifier {
-  pub fn new(protocol: &str, attributes_identifier: &ProtocolAttributesType, address: &Option<String>) -> Self {
+  pub fn new(
+    protocol: &str,
+    attributes_identifier: &ProtocolAttributesType,
+    address: &Option<String>,
+  ) -> Self {
     Self {
       protocol: protocol.to_owned(),
       attributes_identifier: attributes_identifier.clone(),
-      address: address.clone()
+      address: address.clone(),
     }
   }
 }
@@ -207,7 +217,7 @@ impl From<&ServerDeviceIdentifier> for ProtocolAttributesIdentifier {
     Self {
       protocol: other.protocol().clone(),
       attributes_identifier: other.attributes_identifier().clone(),
-      address: Some(other.address().clone())
+      address: Some(other.address().clone()),
     }
   }
 }
@@ -305,7 +315,13 @@ impl ProtocolDeviceAttributes {
   // TODO Can we do this in new() instead and return a result there?
   fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     for (message_type, message_attrs) in self.message_attributes_map() {
-      message_attrs.check(&message_type).map_err(|err| ButtplugDeviceError::DeviceConfigurationError(format!("Configuration Error in {:?}: {}", self.identifier(), err.to_string())))?;
+      message_attrs.check(&message_type).map_err(|err| {
+        ButtplugDeviceError::DeviceConfigurationError(format!(
+          "Configuration Error in {:?}: {}",
+          self.identifier(),
+          err.to_string()
+        ))
+      })?;
     }
     Ok(())
   }
@@ -575,10 +591,7 @@ impl DeviceConfigurationManagerBuilder {
       if reserved_indexes.contains_key(identifier) {
         // TODO Fill in error
       }
-      if reserved_indexes
-        .iter()
-        .any(|pair| *pair == *index)
-      {
+      if reserved_indexes.iter().any(|pair| *pair == *index) {
         // TODO Fill in error
       }
       reserved_indexes.insert(identifier.clone(), index.clone());
@@ -666,11 +679,7 @@ impl DeviceConfigurationManager {
       *id
     } else {
       let mut current_index = self.current_index.load(Ordering::SeqCst);
-      while self
-        .reserved_indexes
-        .iter()
-        .any(|x| *x == current_index)
-      {
+      while self.reserved_indexes.iter().any(|x| *x == current_index) {
         current_index += 1;
       }
       let generated_device_index = current_index;
@@ -730,14 +739,21 @@ impl DeviceConfigurationManager {
     identifier: &ServerDeviceIdentifier,
     raw_endpoints: &Vec<Endpoint>,
   ) -> Option<ProtocolDeviceAttributes> {
-
     let mut flat_attrs = if let Some(attrs) = self.protocol_attributes.get(&identifier.into()) {
       attrs.flatten()
     } else {
-      if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier{ address: None, attributes_identifier: identifier.attributes_identifier().clone(), protocol: identifier.protocol().clone()}) {
+      if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
+        address: None,
+        attributes_identifier: identifier.attributes_identifier().clone(),
+        protocol: identifier.protocol().clone(),
+      }) {
         attrs.flatten()
       } else {
-        if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier{ address: None, attributes_identifier: ProtocolAttributesType::Default, protocol: identifier.protocol().clone()}) {
+        if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
+          address: None,
+          attributes_identifier: ProtocolAttributesType::Default,
+          protocol: identifier.protocol().clone(),
+        }) {
           attrs.flatten()
         } else {
           return None;
@@ -762,7 +778,7 @@ mod test {
   use super::*;
   use crate::core::messages::{ButtplugDeviceMessageType, Endpoint};
   use std::collections::{HashMap, HashSet};
-  
+
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
     let mut builder = DeviceConfigurationManagerBuilder::default();
     if allow_raw_messages {

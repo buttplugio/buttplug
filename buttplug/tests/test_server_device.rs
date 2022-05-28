@@ -6,7 +6,6 @@
 // for full license information.
 
 mod util;
-use util::test_server_with_device;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -14,15 +13,19 @@ use buttplug::{
       self,
       ButtplugDeviceMessageType,
       ButtplugServerMessage,
+      Endpoint,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-      Endpoint
     },
   },
-  server::{ButtplugServerBuilder, device::hardware::communication::test::TestDeviceCommunicationManagerBuilder},
+  server::{
+    device::hardware::communication::test::TestDeviceCommunicationManagerBuilder,
+    ButtplugServerBuilder,
+  },
   util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
 use std::matches;
+use util::test_server_with_device;
 
 // Test devices that have protocols that support movements not all devices do.
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
@@ -72,13 +75,9 @@ fn test_server_raw_message() {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server_builder
-      .allow_raw_messages()
-      .comm_manager(builder);
+    server_builder.allow_raw_messages().comm_manager(builder);
     let server = server_builder.finish().unwrap();
-    helper
-      .add_ble_device("Massage Demo")
-      .await;
+    helper.add_ble_device("Massage Demo").await;
     let recv = server.event_stream();
     pin_mut!(recv);
     assert!(server
@@ -237,15 +236,14 @@ fn test_reject_on_no_raw_message() {
 }
 
 #[cfg(target_os = "windows")]
-#[ignore="Has weird timeout issues"]
+#[ignore = "Has weird timeout issues"]
 #[test]
 fn test_repeated_address_additions() {
   async_manager::block_on(async {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
-    server_builder
-      .comm_manager(builder);
+    server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
     let recv = server.event_stream();
     pin_mut!(recv);

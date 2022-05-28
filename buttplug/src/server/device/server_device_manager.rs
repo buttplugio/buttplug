@@ -26,33 +26,34 @@ use crate::{
   },
   server::{
     device::{
-      configuration::{DeviceConfigurationManagerBuilder, ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes},
-      protocol::ProtocolIdentifierFactory,
-      hardware::{
-        communication::{
-          HardwareCommunicationManager,
-          HardwareCommunicationManagerBuilder,
-        },
+      configuration::{
+        DeviceConfigurationManagerBuilder,
+        ProtocolAttributesIdentifier,
+        ProtocolCommunicationSpecifier,
+        ProtocolDeviceAttributes,
       },
+      hardware::communication::{
+        HardwareCommunicationManager,
+        HardwareCommunicationManagerBuilder,
+      },
+      protocol::ProtocolIdentifierFactory,
       ServerDevice,
       ServerDeviceIdentifier,
     },
-    ButtplugServerResultFuture, ButtplugServerError
+    ButtplugServerError,
+    ButtplugServerResultFuture,
   },
   util::async_manager,
 };
 use dashmap::DashMap;
 use futures::future;
-use tokio_util::sync::CancellationToken;
-use std::{
-  convert::TryFrom,
-  sync::Arc,
-};
+use std::{convert::TryFrom, sync::Arc};
 use tokio::sync::{broadcast, mpsc};
+use tokio_util::sync::CancellationToken;
 
 pub(super) enum DeviceManagerCommand {
   StartScanning,
-  StopScanning
+  StopScanning,
 }
 
 #[derive(Debug)]
@@ -71,7 +72,7 @@ impl ServerDeviceManagerBuilder {
   pub fn comm_manager<T>(&mut self, builder: T) -> &mut Self
   where
     T: HardwareCommunicationManagerBuilder + 'static,
-  {    
+  {
     self.comm_managers.push(Box::new(builder));
     self
   }
@@ -87,7 +88,9 @@ impl ServerDeviceManagerBuilder {
   }
 
   pub fn reserved_index(&mut self, identifier: &ServerDeviceIdentifier, index: u32) -> &mut Self {
-    self.configuration_manager_builder.reserved_index(identifier, index);
+    self
+      .configuration_manager_builder
+      .reserved_index(identifier, index);
     self
   }
 
@@ -115,7 +118,9 @@ impl ServerDeviceManagerBuilder {
     identifier: ProtocolAttributesIdentifier,
     attributes: ProtocolDeviceAttributes,
   ) -> &mut Self {
-    self.configuration_manager_builder.protocol_attributes(identifier, attributes);
+    self
+      .configuration_manager_builder
+      .protocol_attributes(identifier, attributes);
     self
   }
 
@@ -123,14 +128,20 @@ impl ServerDeviceManagerBuilder {
     self.configuration_manager_builder.skip_default_protocols();
     self
   }
-  
-  pub fn allow_raw_messages(&mut self) -> &mut Self {    
+
+  pub fn allow_raw_messages(&mut self) -> &mut Self {
     self.configuration_manager_builder.allow_raw_messages();
     self
   }
 
-  pub fn finish(&mut self, output_sender: broadcast::Sender<ButtplugServerMessage>) -> Result<ServerDeviceManager, ButtplugServerError> {
-    let config_mgr = self.configuration_manager_builder.finish().map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
+  pub fn finish(
+    &mut self,
+    output_sender: broadcast::Sender<ButtplugServerMessage>,
+  ) -> Result<ServerDeviceManager, ButtplugServerError> {
+    let config_mgr = self
+      .configuration_manager_builder
+      .finish()
+      .map_err(|err| ButtplugServerError::DeviceConfigurationManagerError(err))?;
 
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
@@ -138,20 +149,31 @@ impl ServerDeviceManagerBuilder {
     for builder in &self.comm_managers {
       let comm_mgr = builder.finish(device_event_sender.clone());
 
-      if comm_managers.iter().any(|mgr: &Box<dyn HardwareCommunicationManager>| &mgr.name() == &comm_mgr.name()) {
-        return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(comm_mgr.name().to_owned()));
+      if comm_managers
+        .iter()
+        .any(|mgr: &Box<dyn HardwareCommunicationManager>| &mgr.name() == &comm_mgr.name())
+      {
+        return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
+          comm_mgr.name().to_owned(),
+        ));
       }
 
       comm_managers.push(comm_mgr);
     }
-    
+
     let mut colliding_dcms = vec![];
     for mgr in comm_managers.iter() {
       info!("{}: {}", mgr.name(), mgr.can_scan());
       // Hack: Lovense and Bluetooth dongles will fight with each other over devices, possibly
       // interrupting each other connecting and causing very weird issues for users. Print a
       // warning message to logs if more than one is active and available to scan.
-      if ["BtlePlugCommunicationManager", "LovenseSerialDongleCommunicationManager", "LovenseHIDDongleCommunicationManager"].iter().any(|x| x == &mgr.name())
+      if [
+        "BtlePlugCommunicationManager",
+        "LovenseSerialDongleCommunicationManager",
+        "LovenseHIDDongleCommunicationManager",
+      ]
+      .iter()
+      .any(|x| x == &mgr.name())
         && mgr.can_scan()
       {
         colliding_dcms.push(mgr.name().clone());
@@ -179,7 +201,7 @@ impl ServerDeviceManagerBuilder {
     Ok(ServerDeviceManager {
       devices,
       device_command_sender,
-      loop_cancellation_token
+      loop_cancellation_token,
     })
   }
 }
@@ -187,14 +209,18 @@ impl ServerDeviceManagerBuilder {
 pub struct ServerDeviceManager {
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
-  loop_cancellation_token: CancellationToken
+  loop_cancellation_token: CancellationToken,
 }
 
 impl ServerDeviceManager {
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
     Box::pin(async move {
-      if command_sender.send(DeviceManagerCommand::StartScanning).await.is_err() {
+      if command_sender
+        .send(DeviceManagerCommand::StartScanning)
+        .await
+        .is_err()
+      {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
@@ -204,12 +230,15 @@ impl ServerDeviceManager {
   fn stop_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
     Box::pin(async move {
-      if command_sender.send(DeviceManagerCommand::StopScanning).await.is_err() {
+      if command_sender
+        .send(DeviceManagerCommand::StopScanning)
+        .await
+        .is_err()
+      {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
     })
-
   }
 
   pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {

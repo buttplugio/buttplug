@@ -8,8 +8,10 @@
 //! Generic remote transport handling methods and traits
 
 use super::{
-  ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture,
-  transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage}
+  transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
+  ButtplugConnector,
+  ButtplugConnectorError,
+  ButtplugConnectorResultFuture,
 };
 use crate::{
   core::messages::{

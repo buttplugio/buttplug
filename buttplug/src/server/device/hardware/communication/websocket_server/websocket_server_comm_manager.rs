@@ -9,9 +9,9 @@ use super::websocket_server_hardware::WebsocketServerHardwareConnector;
 use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
   util::async_manager,
 };
@@ -56,11 +56,14 @@ impl WebsocketServerDeviceCommunicationManagerBuilder {
 }
 
 impl HardwareCommunicationManagerBuilder for WebsocketServerDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(
-        sender,
-        self.server_port,
-        self.listen_on_all_interfaces,
+      sender,
+      self.server_port,
+      self.listen_on_all_interfaces,
     ))
   }
 }

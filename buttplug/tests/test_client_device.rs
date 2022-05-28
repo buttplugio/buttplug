@@ -6,14 +6,8 @@
 // for full license information.
 
 mod util;
-use util::test_client_with_device;
 use buttplug::{
-  client::{
-    ButtplugClientDeviceEvent,
-    ButtplugClientError,
-    ButtplugClientEvent,
-    VibrateCommand,
-  },
+  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage},
@@ -23,13 +17,14 @@ use buttplug::{
 use futures::StreamExt;
 use futures_timer::Delay;
 use std::{collections::HashMap, sync::Arc, time::Duration};
+use util::test_client_with_device;
 
 #[cfg(feature = "server")]
 #[test]
 fn test_client_device_connected_status() {
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
-    
+
     let mut event_stream = client.event_stream();
     client
       .start_scanning()
@@ -68,7 +63,7 @@ fn test_client_device_connected_status() {
 fn test_client_device_client_disconnected_status() {
   async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;
-    
+
     let mut event_stream = client.event_stream();
     client
       .start_scanning()
@@ -108,7 +103,7 @@ fn test_client_device_client_disconnected_status() {
 fn test_client_device_connected_no_event_listener() {
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
-    
+
     client
       .start_scanning()
       .await
@@ -133,7 +128,7 @@ fn test_client_device_connected_no_event_listener() {
 fn test_client_device_invalid_command() {
   async_manager::block_on(async {
     let (client, _) = test_client_with_device().await;
-    
+
     let mut event_stream = client.event_stream();
     client
       .start_scanning()

@@ -8,17 +8,17 @@
 use super::xinput_hardware::XInputHardwareConnector;
 use crate::{
   core::errors::ButtplugDeviceError,
-  server::device::{
-    hardware::communication::{
-      HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
-      HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
-      TimedRetryCommunicationManagerImpl,
-    },
+  server::device::hardware::communication::{
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    TimedRetryCommunicationManager,
+    TimedRetryCommunicationManagerImpl,
   },
 };
+use async_trait::async_trait;
 use std::string::ToString;
 use tokio::sync::mpsc;
-use async_trait::async_trait;
 
 // 1-index this because we use it elsewhere for showing which controller is which.
 #[derive(Debug, Display, Clone, Copy)]
@@ -50,9 +50,7 @@ pub struct XInputDeviceCommunicationManager {
 
 impl XInputDeviceCommunicationManager {
   fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
-    Self {
-      sender,
-    }
+    Self { sender }
   }
 }
 
@@ -78,7 +76,8 @@ impl TimedRetryCommunicationManagerImpl for XInputDeviceCommunicationManager {
           info!("XInput manager found device {}", index);
           let device_creator = Box::new(XInputHardwareConnector::new(*i));
 
-          if self.sender
+          if self
+            .sender
             .send(HardwareCommunicationManagerEvent::DeviceFound {
               name: i.to_string(),
               address: i.to_string(),

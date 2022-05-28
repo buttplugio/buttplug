@@ -19,6 +19,7 @@ mod device_added;
 mod device_list;
 mod device_message_info;
 mod device_removed;
+mod endpoint;
 mod error;
 mod fleshlight_launch_fw12_cmd;
 mod kiiroo_cmd;
@@ -52,7 +53,6 @@ mod stop_scanning;
 mod test;
 mod vibrate_cmd;
 mod vorze_a10_cyclone_cmd;
-mod endpoint;
 
 pub use self::log::Log;
 pub use battery_level_cmd::BatteryLevelCmd;
@@ -284,9 +284,7 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
       ButtplugDeviceMessageType::RSSILevelCmd => {
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
-      ButtplugDeviceMessageType::LevelCmd => {
-        Ok(ButtplugCurrentSpecDeviceMessageType::LevelCmd)
-      }
+      ButtplugDeviceMessageType::LevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::LevelCmd),
       _ => Err(ButtplugMessageError::MessageConversionError(
         "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),

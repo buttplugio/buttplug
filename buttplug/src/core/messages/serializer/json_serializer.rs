@@ -6,26 +6,24 @@
 // for full license information.
 
 use super::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError};
-use crate::{
-  core::{
-    errors::{ButtplugError, ButtplugHandshakeError},
-    messages::{
-      self,
-      ButtplugClientMessage,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugMessage,
-      ButtplugMessageSpecVersion,
-      ButtplugServerMessage,
-      ButtplugSpecV0ClientMessage,
-      ButtplugSpecV0ServerMessage,
-      ButtplugSpecV1ClientMessage,
-      ButtplugSpecV1ServerMessage,
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
-      ButtplugSpecV3ClientMessage,
-      ButtplugSpecV3ServerMessage,
-    },
+use crate::core::{
+  errors::{ButtplugError, ButtplugHandshakeError},
+  messages::{
+    self,
+    ButtplugClientMessage,
+    ButtplugCurrentSpecClientMessage,
+    ButtplugCurrentSpecServerMessage,
+    ButtplugMessage,
+    ButtplugMessageSpecVersion,
+    ButtplugServerMessage,
+    ButtplugSpecV0ClientMessage,
+    ButtplugSpecV0ServerMessage,
+    ButtplugSpecV1ClientMessage,
+    ButtplugSpecV1ServerMessage,
+    ButtplugSpecV2ClientMessage,
+    ButtplugSpecV2ServerMessage,
+    ButtplugSpecV3ClientMessage,
+    ButtplugSpecV3ServerMessage,
   },
 };
 use jsonschema::JSONSchema;
@@ -200,7 +198,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
             .cloned()
             .map(|m| m.into())
             .collect()
-        }        
+        }
       });
     }
     // instead of using if/else here, return in the if, which drops the borrow.

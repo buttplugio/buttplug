@@ -5,8 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
-
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize, Serializer};
@@ -16,7 +14,7 @@ use std::collections::{BTreeMap, HashMap};
 /// etc...) to configuration information about those commands. This includes information about
 /// number of features (vibration motor count, rotator count, etc...), power levels and ranges,
 /// etc...
-/// 
+///
 /// If a message type is in this map, it is assumed to be supported by a device and its protocol.
 pub type DeviceMessageAttributesMap = HashMap<ButtplugDeviceMessageType, DeviceMessageAttributes>;
 

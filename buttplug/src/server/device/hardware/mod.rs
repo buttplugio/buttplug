@@ -5,25 +5,16 @@ use std::fmt::Debug;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{
-      Endpoint,
-      RawReadCmd,
-      RawReading,
-      RawSubscribeCmd,
-      RawUnsubscribeCmd,
-      RawWriteCmd,
-    },
+    messages::{Endpoint, RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd},
   },
-  server::device::{
-    configuration::{ProtocolCommunicationSpecifier},
-  },
+  server::device::configuration::ProtocolCommunicationSpecifier,
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
-/// 
+///
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
@@ -59,7 +50,7 @@ impl From<RawReadCmd> for HardwareReadCmd {
 }
 
 /// Parameters for writing data to a [Hardware](crate::device::Hardware) endpoint
-/// 
+///
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
@@ -95,11 +86,11 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 }
 
 /// Parameters for subscribing to a [Hardware](crate::device::Hardware) endpoint
-/// 
+///
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-/// 
+///
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
@@ -126,7 +117,7 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 
 /// Parameters for unsubscribing from a [Hardware](crate::device::Hardware) endpoint that has
 /// previously been subscribed.
-/// 
+///
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
@@ -158,7 +149,7 @@ pub enum HardwareCommand {
   // TODO Figure out how to handle arbitrary reads/returns
   //
   // These don't happen a lot and are usually part of init right now.
-  
+
   // Read(HardwareReadCmd),
   Subscribe(HardwareSubscribeCmd),
   Unsubscribe(HardwareUnsubscribeCmd),
@@ -263,7 +254,7 @@ impl Hardware {
   }
 
   /// Returns a receiver for any events the device may emit.
-  /// 
+  ///
   /// This uses a broadcast channel and can be called multiple times to create multiple streams if
   /// needed.
   pub fn event_stream(&self) -> broadcast::Receiver<HardwareEvent> {
@@ -277,7 +268,7 @@ impl Hardware {
 
   pub fn parse_message(
     &self,
-    command: &HardwareCommand
+    command: &HardwareCommand,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     match command {
       HardwareCommand::Write(cmd) => self.write_value(cmd),
@@ -295,23 +286,32 @@ impl Hardware {
   }
 
   /// Write a value to the device
-  pub fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  pub fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.write_value(msg)
   }
 
   /// Subscribe to a device endpoint, if it exists
-  pub fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  pub fn subscribe(
+    &self,
+    msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.subscribe(msg)
   }
 
   /// Unsubscribe from a device endpoint, if it exists
-  pub fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  pub fn unsubscribe(
+    &self,
+    msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     self.internal_impl.unsubscribe(msg)
   }
 }
 
 /// Internal representation of device implementations
-/// 
+///
 /// This trait is implemented by
 /// [DeviceCommunicationManager](crate::server::device::communication_manager::DeviceCommunicationManager) modules
 /// to represent and communicate with devices. It provides an abstract way to represent devices
@@ -322,14 +322,25 @@ pub trait HardwareInternal: Sync + Send {
   /// Returns a receiver for any events the device may emit.
   fn event_stream(&self) -> broadcast::Receiver<HardwareEvent>;
   /// Read a value from the device
-  fn read_value(&self, msg: &HardwareReadCmd)
-    -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>>;
+  fn read_value(
+    &self,
+    msg: &HardwareReadCmd,
+  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>>;
   /// Write a value to the device
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Subscribe to a device endpoint, if it exists
-  fn subscribe(&self, msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
+  fn subscribe(
+    &self,
+    msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
   /// Unsubscribe from a device endpoint, if it exists
-  fn unsubscribe(&self, msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
+  fn unsubscribe(
+    &self,
+    msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>>;
 }
 
 #[async_trait]
@@ -343,30 +354,36 @@ pub trait HardwareConnector: Sync + Send + Debug {
 #[async_trait]
 pub trait HardwareSpecializer: Sync + Send {
   /// Try to initialize a device.
-  /// 
+  ///
   /// Given a
   /// [ProtocolDeviceConfiguration](crate::server::device::configuration::ProtocolDeviceConfiguration)
   /// which will contain information about what a protocol needs to communicate with a device, try
   /// to identify all required endpoints on the hardware.
-  async fn specialize(&mut self, protocol: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError>;
+  async fn specialize(
+    &mut self,
+    protocol: &Vec<ProtocolCommunicationSpecifier>,
+  ) -> Result<Hardware, ButtplugDeviceError>;
 }
 
 /// Used in cases where there's nothing to specialize for the protocol.
 pub struct GenericHardwareSpecializer {
-  hardware: Option<Hardware>
+  hardware: Option<Hardware>,
 }
 
 impl GenericHardwareSpecializer {
   pub fn new(hardware: Hardware) -> Self {
     Self {
-      hardware: Some(hardware)
+      hardware: Some(hardware),
     }
   }
 }
 
 #[async_trait]
 impl HardwareSpecializer for GenericHardwareSpecializer {
-  async fn specialize(&mut self, _: &Vec<ProtocolCommunicationSpecifier>) -> Result<Hardware, ButtplugDeviceError> {
+  async fn specialize(
+    &mut self,
+    _: &Vec<ProtocolCommunicationSpecifier>,
+  ) -> Result<Hardware, ButtplugDeviceError> {
     Ok(self.hardware.take().expect("This should only be run once"))
   }
 }

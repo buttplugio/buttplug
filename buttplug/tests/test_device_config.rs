@@ -8,10 +8,7 @@
 mod util;
 extern crate buttplug;
 
-use buttplug::{
-  server::ButtplugServerBuilder,
-  util::async_manager
-};
+use buttplug::{server::ButtplugServerBuilder, util::async_manager};
 
 const BASE_CONFIG_JSON: &str = r#"
 {
@@ -63,10 +60,12 @@ const BASE_CONFIG_JSON: &str = r#"
 #[test]
 fn test_basic_device_config() {
   async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).finish().is_ok());
+    assert!(ButtplugServerBuilder::default()
+      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+      .finish()
+      .is_ok());
   });
 }
-
 
 #[cfg(feature = "server")]
 #[test]
@@ -91,7 +90,11 @@ fn test_valid_step_range() {
   }
   "#;
   async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
+    assert!(ButtplugServerBuilder::default()
+      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+      .user_device_configuration_json(Some(user_config_json.to_owned()))
+      .finish()
+      .is_ok());
   });
 }
 
@@ -118,7 +121,11 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
   }
   "#;
   async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_err());
+    assert!(ButtplugServerBuilder::default()
+      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+      .user_device_configuration_json(Some(user_config_json.to_owned()))
+      .finish()
+      .is_err());
   });
 }
 
@@ -146,7 +153,15 @@ fn test_invalid_step_range_device_config_wrong_order() {
   }
   "#;
   async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
-    assert!(ButtplugServerBuilder::default().device_configuration_json(Some(BASE_CONFIG_JSON.to_owned())).user_device_configuration_json(Some(user_config_json.to_owned())).finish().is_ok());
+    assert!(ButtplugServerBuilder::default()
+      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+      .user_device_configuration_json(Some(user_config_json.to_owned()))
+      .finish()
+      .is_ok());
+    assert!(ButtplugServerBuilder::default()
+      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+      .user_device_configuration_json(Some(user_config_json.to_owned()))
+      .finish()
+      .is_ok());
   });
 }

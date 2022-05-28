@@ -8,9 +8,9 @@
 use buttplug::{
   core::ButtplugResultFuture,
   server::device::hardware::communication::{
-    HardwareCommunicationManagerEvent,
     HardwareCommunicationManager,
     HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
 };
 use std::sync::{
@@ -23,7 +23,10 @@ use tokio::sync::mpsc::Sender;
 pub struct DelayDeviceCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager> {
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(DelayDeviceCommunicationManager::new(sender))
   }
 }

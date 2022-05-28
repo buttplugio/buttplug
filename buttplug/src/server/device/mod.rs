@@ -8,17 +8,17 @@
 //! Device configuration, connection, and communication
 //!
 //! Welcome to the guts of Buttplug.
-//! 
+//!
 //! Structs in the device module are used by the [Buttplug Server](crate::server) (specifically the
 //! [Device Manager](crate::server::device_manager::DeviceManager)) to identify devices that
 //! Buttplug can connect to, and match them to supported protocols in order to establish
 //! communication, translate ButtplugMessages to raw hardware commands, and send those commands to
 //! the hardware.
-//! 
+//!
 //! # What even is a device in Buttplug?
-//! 
+//!
 //! Devices in buttplug consist of two components:
-//! 
+//!
 //! - Implementations (represented by [Hardware]), which handle the actual communication with
 //!   hardware. Implementations are created by a [DeviceCommunicationManager], which handles the
 //!   discovery method for that type of hardware (Bluetooth scanning, USB bus scanning, listening on
@@ -27,35 +27,35 @@
 //!   of a device (can it vibrate/rotate/etc, at what speeds, so on and so forth), and translate
 //!   from [Buttplug Device Messages](crate::core::messages::ButtplugDeviceMessage) into strings or
 //!   binary arrays to send to devices via their implementation.
-//! 
+//!
 //! # Device Lifetimes in Buttplug
-//! 
+//!
 //! Creation and handling of devices happens in stages in Buttplug: configuring what the library can
 //! support, creating a device once a usable one is found, commanding connected devices, and
 //! disconnection/reconnection. This is process makes up most of the reason the library exists, so
 //! we'll cover it at a high level here.
-//! 
+//!
 //! ## Configuration and Bringup
-//! 
+//!
 //! Configuration of the device creation system happens when we bring up a
 //! [ButtplugServer](crate::server::ButtplugServer) and configure the [DeviceManager] that is owns.
 //! Information that needs to be added for device creation includes:
-//! 
+//!
 //! - Protocols that the library implements, or that developers add themselves.
 //! - Device configurations related to those protocols, so we can identify and connect to devices
 //!   that are compatible with them.
 //! - Lists of device addresses that we will either never connect to or only connect to.
-//! 
+//!
 //! This information is entered via the public [DeviceManager] API, and stored between the
-//! [DeviceManager] and the [DeviceConfigurationManager] (which is owned by the [DeviceManager]). 
-//! 
+//! [DeviceManager] and the [DeviceConfigurationManager] (which is owned by the [DeviceManager]).
+//!
 //! After all of the information is added, the [DeviceManager] is considered ready to discover
 //! devices.
-//! 
+//!
 //! ## Device Discovery and Creation
-//! 
+//!
 //! To create a device, we go through the following steps:
-//! 
+//!
 //! - When the server receives a StartScanning message, all comm managers start looking for devices.
 //!   Strategies for scanning can vary between [DeviceCommunicationManager]s, either using long term
 //!   scans (bluetooth) or repeated timed scans (USB, HID, XInput, etc... which check their
@@ -86,21 +86,21 @@
 //! - Finally, with everything connected and configured, we have all the information we need to see
 //!   if there are any user configurations to apply to the device. This is where users can set
 //!   limits different aspects of specific devices, like vibration speed, stroke length, etc...
-//! 
+//!
 //! Once we've made it through this, the device is handed to the [DeviceManager], and the
 //! [ButtplugServer] notifies the [ButtplugClient] (if one is connected) of the new device via the
 //! DeviceAdded message.
-//! 
+//!
 //! ## Commanding
-//! 
-//! 
+//!
+//!
 
-mod server_device_manager;
-mod server_device_manager_event_loop;
-pub mod server_device;
 pub mod configuration;
 pub mod hardware;
 pub mod protocol;
+pub mod server_device;
+mod server_device_manager;
+mod server_device_manager_event_loop;
 
+pub use server_device::{ServerDevice, ServerDeviceEvent, ServerDeviceIdentifier};
 pub use server_device_manager::{ServerDeviceManager, ServerDeviceManagerBuilder};
-pub use server_device::{ServerDeviceIdentifier, ServerDevice, ServerDeviceEvent};

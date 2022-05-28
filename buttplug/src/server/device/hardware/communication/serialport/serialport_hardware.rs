@@ -7,27 +7,28 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError},
+    errors::ButtplugDeviceError,
     messages::{Endpoint, RawReading},
   },
+  server::device::hardware::communication::HardwareSpecificError,
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, SerialSpecifier},
     hardware::{
-    HardwareEvent,
-    HardwareConnector,
-    HardwareSpecializer,
-    Hardware,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      Hardware,
+      HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
+      HardwareSpecializer,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
-  server::device::hardware::communication::HardwareSpecificError,
   util::async_manager,
 };
 use async_trait::async_trait;
+use futures::future;
 use futures::{future::BoxFuture, FutureExt};
 use serialport::{SerialPort, SerialPortInfo};
 use std::{
@@ -42,7 +43,6 @@ use std::{
 };
 use tokio::sync::{broadcast, mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
-use futures::future;
 
 pub struct SerialPortHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
@@ -52,7 +52,9 @@ pub struct SerialPortHardwareConnector {
 impl SerialPortHardwareConnector {
   pub fn new(port_info: &SerialPortInfo) -> Self {
     Self {
-      specifier: ProtocolCommunicationSpecifier::Serial(SerialSpecifier::new_from_name(&port_info.port_name)),
+      specifier: ProtocolCommunicationSpecifier::Serial(SerialSpecifier::new_from_name(
+        &port_info.port_name,
+      )),
       port_info: port_info.clone(),
     }
   }
@@ -73,7 +75,9 @@ impl HardwareConnector for SerialPortHardwareConnector {
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
-    Ok(Box::new(SerialPortHardwareSpecialzier::new(&self.port_info)))
+    Ok(Box::new(SerialPortHardwareSpecialzier::new(
+      &self.port_info,
+    )))
   }
 }
 
@@ -190,9 +194,8 @@ impl SerialPortHardware {
           break;
         }
       }
-    };
+    }
     let port_def = port_def.expect("We'll always have a port definition by this point");
-
 
     // This seems like it should be a oneshot, but there's no way to await a
     // value on those?
@@ -225,9 +228,7 @@ impl SerialPortHardware {
       .await
       .expect("This will always be a Some value, we're just blocking for bringup")
       .map_err(|e| {
-        ButtplugDeviceError::DeviceSpecificError(
-          HardwareSpecificError::SerialError(e.to_string()),
-        )
+        ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::SerialError(e.to_string()))
       })?;
     debug!("Serial port received from thread.");
     let (writer_sender, writer_receiver) = mpsc::channel(256);
@@ -304,7 +305,10 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.port_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
@@ -317,7 +321,10 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn subscribe(
+    &self,
+    _msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     // TODO Should check endpoint validity
     let data_receiver = self.port_receiver.clone();
     let event_sender = self.device_event_sender.clone();
@@ -351,8 +358,13 @@ impl HardwareInternal for SerialPortHardware {
     })
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Serial port does not support unsubscribe".to_owned()))))
+  fn unsubscribe(
+    &self,
+    _msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Serial port does not support unsubscribe".to_owned(),
+    ))))
   }
 }
 

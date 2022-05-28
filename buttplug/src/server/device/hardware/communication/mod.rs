@@ -13,22 +13,24 @@ pub mod lovense_connect_service;
 pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
-#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
-pub mod xinput;
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;
-
+#[cfg(all(feature = "xinput-manager", target_os = "windows"))]
+pub mod xinput;
 
 pub mod test;
 
-use crate::{core::{errors::ButtplugDeviceError, ButtplugResultFuture}, server::device::hardware::HardwareConnector};
+use crate::{
+  core::{errors::ButtplugDeviceError, ButtplugResultFuture},
+  server::device::hardware::HardwareConnector,
+};
+use async_trait::async_trait;
+use futures::future;
 use serde::{Deserialize, Serialize};
-use std::{time::Duration, sync::Arc};
+use std::{sync::Arc, time::Duration};
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 use tokio_util::sync::CancellationToken;
-use futures::future;
-use async_trait::async_trait;
 
 #[derive(Debug)]
 pub enum HardwareCommunicationManagerEvent {
@@ -43,7 +45,10 @@ pub enum HardwareCommunicationManagerEvent {
 }
 
 pub trait HardwareCommunicationManagerBuilder: Send {
-  fn finish(&self, sender: Sender<HardwareCommunicationManagerEvent>) -> Box<dyn HardwareCommunicationManager>;
+  fn finish(
+    &self,
+    sender: Sender<HardwareCommunicationManagerEvent>,
+  ) -> Box<dyn HardwareCommunicationManager>;
 }
 
 pub trait HardwareCommunicationManager: Send + Sync {
@@ -81,19 +86,21 @@ pub trait TimedRetryCommunicationManagerImpl: Sync + Send {
 
 pub struct TimedRetryCommunicationManager<T: TimedRetryCommunicationManagerImpl + 'static> {
   comm_manager: Arc<T>,
-  cancellation_token: Option<CancellationToken>
+  cancellation_token: Option<CancellationToken>,
 }
 
 impl<T: TimedRetryCommunicationManagerImpl> TimedRetryCommunicationManager<T> {
   pub fn new(comm_manager: T) -> Self {
     Self {
       comm_manager: Arc::new(comm_manager),
-      cancellation_token: None
+      cancellation_token: None,
     }
   }
 }
 
-impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager for TimedRetryCommunicationManager<T> {
+impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
+  for TimedRetryCommunicationManager<T>
+{
   fn name(&self) -> &'static str {
     self.comm_manager.name()
   }
@@ -127,7 +134,7 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager for Tim
     self.cancellation_token.take().unwrap().cancel();
     return Box::pin(future::ready(Ok(())));
   }
-  
+
   fn scanning_status(&self) -> bool {
     self.cancellation_token.is_some()
   }

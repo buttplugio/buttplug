@@ -7,8 +7,7 @@
 
 //! Connector for using pipes as a server/host.
 
-use crate::{
-  core::{
+use crate::core::{
   connector::{
     transport::{
       ButtplugConnectorTransport,
@@ -19,10 +18,13 @@ use crate::{
     ButtplugConnectorResultFuture,
   },
   messages::serializer::ButtplugSerializedMessage,
-}
 };
 use futures::future::BoxFuture;
 use std::sync::Arc;
+#[cfg(target_os = "windows")]
+use tokio::net::windows::named_pipe;
+#[cfg(not(target_os = "windows"))]
+use tokio::net::{UnixListener, UnixStream};
 use tokio::{
   io::{AsyncWriteExt, Interest},
   sync::{
@@ -30,10 +32,6 @@ use tokio::{
     Notify,
   },
 };
-#[cfg(target_os = "windows")]
-use tokio::net::windows::named_pipe;
-#[cfg(not(target_os = "windows"))]
-use tokio::net::{UnixListener, UnixStream};
 
 #[cfg(target_os = "windows")]
 type PipeServerType = named_pipe::NamedPipeServer;
@@ -238,8 +236,8 @@ mod test {
   use super::ButtplugPipeServerTransportBuilder;
   use crate::{
     core::{
-    connector::{transport::ButtplugConnectorTransport, ButtplugRemoteServerConnector},
-    messages::serializer::ButtplugServerJSONSerializer,
+      connector::{transport::ButtplugConnectorTransport, ButtplugRemoteServerConnector},
+      messages::serializer::ButtplugServerJSONSerializer,
     },
     server::ButtplugRemoteServer,
     util::async_manager,

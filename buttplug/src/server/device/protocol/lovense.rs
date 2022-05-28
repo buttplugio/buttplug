@@ -7,23 +7,17 @@
 
 use crate::{
   core::{
-    errors::{ButtplugDeviceError},
-    messages::{
-      self,
-      Endpoint,
-      ButtplugDeviceMessage,
-      ButtplugServerMessage,
-    },
+    errors::ButtplugDeviceError,
+    messages::{self, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
-  server::{
-    device::{
-      ServerDeviceIdentifier,
-      protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-      configuration::ProtocolAttributesType,
-      hardware::{Hardware, HardwareWriteCmd, HardwareEvent, HardwareSubscribeCmd, HardwareCommand},
-    },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
 use futures_timer::Delay;
 use std::{
@@ -33,7 +27,6 @@ use std::{
   },
   time::Duration,
 };
-use async_trait::async_trait;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -44,13 +37,11 @@ const LOVENSE_COMMAND_TIMEOUT_MS: u64 = 500;
 const LOVENSE_COMMAND_RETRY: u64 = 5;
 
 pub mod setup {
-  use crate::server::device::protocol::{
-    ProtocolIdentifier, ProtocolIdentifierFactory,
-  };
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
   #[derive(Default)]
   pub struct LovenseIdentifierFactory {}
 
-  impl ProtocolIdentifierFactory for  LovenseIdentifierFactory {
+  impl ProtocolIdentifierFactory for LovenseIdentifierFactory {
     fn identifier(&self) -> &str {
       "lovense"
     }
@@ -62,8 +53,7 @@ pub mod setup {
 }
 
 #[derive(Default)]
-pub struct LovenseIdentifier {
-}
+pub struct LovenseIdentifier {}
 
 #[async_trait]
 impl ProtocolIdentifier for LovenseIdentifier {
@@ -132,63 +122,64 @@ pub struct Lovense {
 impl ProtocolHandler for Lovense {
   fn handle_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    cmds: &Vec<Option<u32>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-      // Lovense is the same situation as the Lovehoney Desire, where commands
-      // are different if we're addressing all motors or seperate motors.
-      // Difference here being that there's Lovense variants with different
-      // numbers of motors.
-      //
-      // Neat way of checking if everything is the same via
-      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-      //
-      // Just make sure we're not matching on None, 'cause if that's the case
-      // we ain't got shit to do.
-      if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-        let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity"))
-          .as_bytes()
-          .to_vec();
-        return Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into()));
+    // Lovense is the same situation as the Lovehoney Desire, where commands
+    // are different if we're addressing all motors or seperate motors.
+    // Difference here being that there's Lovense variants with different
+    // numbers of motors.
+    //
+    // Neat way of checking if everything is the same via
+    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+    //
+    // Just make sure we're not matching on None, 'cause if that's the case
+    // we ain't got shit to do.
+    if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
+      let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity"))
+        .as_bytes()
+        .to_vec();
+      return Ok(vec![HardwareWriteCmd::new(
+        Endpoint::Tx,
+        lovense_cmd,
+        false,
+      )
+      .into()]);
+    }
+    let mut hardware_cmds = vec![];
+    for (i, cmd) in cmds.iter().enumerate() {
+      if let Some(speed) = cmd {
+        let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
       }
-      let mut hardware_cmds = vec!();
-      for (i, cmd) in cmds.iter().enumerate() {
-        if let Some(speed) = cmd {
-          let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-        }
-      }
-      Ok(hardware_cmds)
+    }
+    Ok(hardware_cmds)
   }
 
   fn handle_rotate_cmd(
     &self,
-    cmds: &Vec<Option<(u32, bool)>>
+    cmds: &Vec<Option<(u32, bool)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let direction = self.rotation_direction.clone();
-    let mut hardware_cmds = vec!();
-      if let Some(Some((speed, clockwise))) = cmds.get(0) {
-        let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
-        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-        let dir = direction.load(Ordering::SeqCst);
-        // TODO Should we store speed and direction as an option for rotation caching? This is weird.
-        if dir != *clockwise {
-          direction.store(*clockwise, Ordering::SeqCst);
-          hardware_cmds.push(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            b"RotateChange;".to_vec(),
-            false,
-          ).into());
-        }
+    let mut hardware_cmds = vec![];
+    if let Some(Some((speed, clockwise))) = cmds.get(0) {
+      let lovense_cmd = format!("Rotate:{};", speed).as_bytes().to_vec();
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      let dir = direction.load(Ordering::SeqCst);
+      // TODO Should we store speed and direction as an option for rotation caching? This is weird.
+      if dir != *clockwise {
+        direction.store(*clockwise, Ordering::SeqCst);
+        hardware_cmds
+          .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange;".to_vec(), false).into());
       }
-      Ok(hardware_cmds)
     }
+    Ok(hardware_cmds)
+  }
 
-    // TODO Figure out how we're going to reimplement this?!
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
     message: messages::BatteryLevelCmd,
-  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>>  {
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     Box::pin(async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(

@@ -70,19 +70,25 @@ pub mod zalo;
 */
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{self, ButtplugServerMessage, ButtplugDeviceMessage, Endpoint, RawReading, ButtplugDeviceCommandMessageUnion}},
-  server::{
-    device::{
-      configuration::{
-        ProtocolAttributesType, ProtocolCommunicationSpecifier,
-      },
-      hardware::{Hardware, HardwareCommand, HardwareReadCmd},
-      ServerDeviceIdentifier,
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{
+      self,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugServerMessage,
+      Endpoint,
+      RawReading,
     },
   },
+  server::device::{
+    configuration::{ProtocolAttributesType, ProtocolCommunicationSpecifier},
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd},
+    ServerDeviceIdentifier,
+  },
 };
-use futures::future::{self, BoxFuture};
 use async_trait::async_trait;
+use futures::future::{self, BoxFuture};
 use std::{collections::HashMap, sync::Arc};
 
 pub trait ProtocolIdentifierFactory: Send + Sync {
@@ -103,17 +109,29 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   }
 
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
-  add_to_protocol_map(&mut map, buttplug_passthru::setup::ButtplugPassthruIdentifierFactory::default());
-  add_to_protocol_map(&mut map, cachito::setup::CachitoIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lovense::setup::LovenseIdentifierFactory::default());
-  add_to_protocol_map(&mut map, hismith::setup::HismithIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    buttplug_passthru::setup::ButtplugPassthruIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    cachito::setup::CachitoIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lovense::setup::LovenseIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    hismith::setup::HismithIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
   /*
   add_to_protocol_map(&mut map, ankni::AnkniFactory::default());
   add_to_protocol_map(&mut map, fredorch::FredorchFactory::default());
-  
+
   add_to_protocol_map(&mut map, hgod::HgodFactory::default());
-  
+
   add_to_protocol_map(&mut map, jejoue::JeJoueFactory::default());
   add_to_protocol_map(&mut map, kiiroo_v2::KiirooV2Factory::default());
   add_to_protocol_map(&mut map, kiiroo_v2_vibrator::KiirooV2VibratorFactory::default());
@@ -362,7 +380,9 @@ pub trait ProtocolHandler: Sync + Send {
         Ok(battery_reading.into())
       })
     } else {
-      Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(format!("Command not implemented for this protocol: BatteryCmd")))))
+      Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+        format!("Command not implemented for this protocol: BatteryCmd"),
+      ))))
     }
   }
 
@@ -399,7 +419,7 @@ macro_rules! generic_protocol_setup {
         }
       }
     }
-  }
+  };
 }
 
 pub use generic_protocol_setup;

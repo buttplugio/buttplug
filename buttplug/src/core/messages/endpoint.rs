@@ -11,7 +11,7 @@ use std::{
   string::ToString,
 };
 
-use core::hash::{Hash};
+use core::hash::Hash;
 
 // We need this array to be exposed in our WASM FFI, but the only way to do that
 // is to expose it at the declaration level. Therefore, we use the WASM feature
@@ -19,7 +19,7 @@ use core::hash::{Hash};
 // de/serialization is taken care of at the FFI level.
 
 /// Endpoint names for device communication.
-/// 
+///
 /// Endpoints denote different contextual communication targets on a device. For instance, for a
 /// device that uses UART style communication (serial, a lot of Bluetooth LE devices, etc...) most
 /// devices will just have a Tx and Rx endpoint. However, on other devices that can have varying

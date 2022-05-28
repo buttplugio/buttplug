@@ -17,8 +17,8 @@ use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
   TestDeviceEndpointChannel,
-  TestHardwareConnector,
   TestDeviceInternal,
+  TestHardwareConnector,
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{

@@ -9,8 +9,10 @@ use super::SerialPortHardwareConnector;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::hardware::communication::{
-    HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
   },
 };
@@ -78,7 +80,8 @@ impl TimedRetryCommunicationManagerImpl for SerialPortCommunicationManager {
         debug!("No serial ports found");
       }
     }
-    if self.sender
+    if self
+      .sender
       .send(HardwareCommunicationManagerEvent::ScanningFinished)
       .await
       .is_err()

@@ -9,8 +9,10 @@ use super::lovense_connect_service_hardware::LovenseServiceHardwareConnector;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::hardware::communication::{
-    HardwareCommunicationManager, HardwareCommunicationManagerBuilder,
-    HardwareCommunicationManagerEvent, TimedRetryCommunicationManager,
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
+    TimedRetryCommunicationManager,
     TimedRetryCommunicationManagerImpl,
   },
 };
@@ -212,22 +214,20 @@ impl TimedRetryCommunicationManagerImpl for LovenseConnectServiceCommunicationMa
             .expect("Should always get json back from service, if we got a response.");
           let info: LovenseServiceInfo = serde_json::from_str(&text)
             .expect("Should always get json back from service, if we got a response.");
-          info
-            .iter()
-            .for_each(|x| {
-              // Lovense Connect uses [ip].lovense.club, which is a loopback DNS resolver that
-              // should just point to [ip]. This is used for handling secure certificate
-              // resolution when trying to use lovense connect over secure contexts. However,
-              // this sometimes fails on DNS resolution. Since we aren't using secure contexts
-              // at the moment, we can just cut out the IP from the domain and use that
-              // directly, which has fixed issues for some users.
-              let host_parts: Vec<&str> = x.0.split('.').collect();
-              let new_http_host = host_parts[0].replace('-', ".");
-              // We set the protocol type here so it'll just filter down, in case we want to move to secure.
-              let host = format!("http://{}:{}", new_http_host, x.1.http_port);
-              debug!("Lovense Connect converting IP to {}", host);
-              self.known_hosts.insert(host);
-            });
+          info.iter().for_each(|x| {
+            // Lovense Connect uses [ip].lovense.club, which is a loopback DNS resolver that
+            // should just point to [ip]. This is used for handling secure certificate
+            // resolution when trying to use lovense connect over secure contexts. However,
+            // this sometimes fails on DNS resolution. Since we aren't using secure contexts
+            // at the moment, we can just cut out the IP from the domain and use that
+            // directly, which has fixed issues for some users.
+            let host_parts: Vec<&str> = x.0.split('.').collect();
+            let new_http_host = host_parts[0].replace('-', ".");
+            // We set the protocol type here so it'll just filter down, in case we want to move to secure.
+            let host = format!("http://{}:{}", new_http_host, x.1.http_port);
+            debug!("Lovense Connect converting IP to {}", host);
+            self.known_hosts.insert(host);
+          });
           // If we've found new hosts, go ahead and search them.
           if !self.known_hosts.is_empty() {
             self.lovense_local_service_check().await

@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::core::messages::Endpoint;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
@@ -19,7 +18,7 @@ use uuid::Uuid;
 // confusing (see the messages impl).
 
 /// Specifier for Bluetooth LE Devices
-/// 
+///
 /// Used by protocols for identifying bluetooth devices via their advertisements, as well as
 /// defining the services and characteristics they are expected to have.
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters)]
@@ -76,11 +75,15 @@ impl PartialEq for BluetoothLESpecifier {
 }
 
 impl BluetoothLESpecifier {
-  pub fn new(names: HashSet<String>, advertised_services: HashSet<Uuid>, services: HashMap<Uuid, HashMap<Endpoint, Uuid>>) -> Self {
+  pub fn new(
+    names: HashSet<String>,
+    advertised_services: HashSet<Uuid>,
+    services: HashMap<Uuid, HashMap<Endpoint, Uuid>>,
+  ) -> Self {
     Self {
       names,
       advertised_services,
-      services
+      services,
     }
   }
 
@@ -102,14 +105,18 @@ impl BluetoothLESpecifier {
     // Add any new names.
     self.names = self.names.union(&other.names).cloned().collect();
     // Add new services, overwrite matching services.
-    self.advertised_services = self.advertised_services.union(&other.advertised_services).cloned().collect();
+    self.advertised_services = self
+      .advertised_services
+      .union(&other.advertised_services)
+      .cloned()
+      .collect();
     self.services.extend(other.services);
   }
 }
 
 /// Specifier for [Lovense Connect
 /// Service](crate::server::device::communication_manager::lovense_connect_service) devices
-/// 
+///
 /// Network based services, has no attributes because the [Lovense Connect
 /// Service](crate::server::device::communication_manager::lovense_connect_service) device communication manager
 /// handles all device discovery and identification itself.
@@ -133,7 +140,7 @@ impl PartialEq for LovenseConnectServiceSpecifier {
 }
 
 /// Specifier for [XInput](crate::server::device::communication_manager::xinput) devices
-/// 
+///
 /// Network based services, has no attributes because the
 /// [XInput](crate::server::device::communication_manager::xinput) device communication manager handles all device
 /// discovery and identification itself.
@@ -157,7 +164,7 @@ impl PartialEq for XInputSpecifier {
 }
 
 /// Specifier for HID (USB, Bluetooth) devices
-/// 
+///
 /// Handles devices managed by the operating system's HID manager.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Copy, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
@@ -169,7 +176,7 @@ pub struct HIDSpecifier {
 }
 
 /// Specifier for Serial devices
-/// 
+///
 /// Handles serial port device identification (via port names) and configuration.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
@@ -246,7 +253,7 @@ impl WebsocketSpecifier {
 }
 
 /// Enum that covers all types of communication specifiers.
-/// 
+///
 /// Allows generalization of specifiers to handle checking for equality. Used for testing newly discovered
 /// devices against the list of known devices for a protocol.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -278,4 +285,5 @@ impl PartialEq for ProtocolCommunicationSpecifier {
   }
 }
 
-impl Eq for ProtocolCommunicationSpecifier {}
+impl Eq for ProtocolCommunicationSpecifier {
+}

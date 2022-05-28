@@ -12,18 +12,18 @@ use crate::{
     ButtplugResultFuture,
   },
   server::device::{
-    configuration::{ProtocolCommunicationSpecifier},
+    configuration::ProtocolCommunicationSpecifier,
     hardware::{
+      Hardware,
+      HardwareCommand,
       HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
       HardwareSpecializer,
-    HardwareEvent,
-    Hardware,
-    HardwareCommand,
-    HardwareInternal,
-    HardwareReadCmd,
-    HardwareSubscribeCmd,
-    HardwareUnsubscribeCmd,
-    HardwareWriteCmd,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
 };
@@ -70,7 +70,9 @@ impl HardwareConnector for TestHardwareConnector {
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
-    Ok(Box::new(TestHardwareSpecializer::new(self.hardware.clone())))
+    Ok(Box::new(TestHardwareSpecializer::new(
+      self.hardware.clone(),
+    )))
   }
 }
 
@@ -80,9 +82,7 @@ pub struct TestHardwareSpecializer {
 
 impl TestHardwareSpecializer {
   fn new(hardware: Arc<TestDeviceInternal>) -> Self {
-    Self {
-      hardware
-    }
+    Self { hardware }
   }
 }
 
@@ -93,7 +93,10 @@ impl HardwareSpecializer for TestHardwareSpecializer {
     specifiers: &Vec<ProtocolCommunicationSpecifier>,
   ) -> Result<Hardware, ButtplugDeviceError> {
     let device = self.hardware.clone();
-    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers.iter().find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_))) {
+    if let Some(ProtocolCommunicationSpecifier::BluetoothLE(btle)) = specifiers
+      .iter()
+      .find(|x| matches!(x, ProtocolCommunicationSpecifier::BluetoothLE(_)))
+    {
       for endpoint_map in btle.services().values() {
         for endpoint in endpoint_map.keys() {
           device.add_endpoint(endpoint).await;
@@ -244,7 +247,10 @@ impl HardwareInternal for TestDevice {
     Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let channels = self.endpoint_channels.clone();
     let data_command = msg.clone().into();
     let endpoint = msg.endpoint;
@@ -253,7 +259,11 @@ impl HardwareInternal for TestDevice {
       match channels.get(&endpoint) {
         Some(device_channel) => {
           // We hold both ends, can unwrap.
-          device_channel.sender.send(data_command).await.expect("Test");
+          device_channel
+            .sender
+            .send(data_command)
+            .await
+            .expect("Test");
           Ok(())
         }
         None => Err(ButtplugDeviceError::InvalidEndpoint(endpoint)),
@@ -261,11 +271,21 @@ impl HardwareInternal for TestDevice {
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Test device does not support subscribe".to_owned()))))
+  fn subscribe(
+    &self,
+    _msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Test device does not support subscribe".to_owned(),
+    ))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Test device does not support unsubscribe".to_owned()))))
+  fn unsubscribe(
+    &self,
+    _msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Test device does not support unsubscribe".to_owned(),
+    ))))
   }
 }

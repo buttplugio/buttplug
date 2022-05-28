@@ -6,8 +6,11 @@
 // for full license information.
 
 use super::lovense_dongle_messages::{
-  LovenseDongleIncomingMessage, LovenseDongleMessageFunc, LovenseDongleMessageType,
-  LovenseDongleOutgoingMessage, OutgoingLovenseData,
+  LovenseDongleIncomingMessage,
+  LovenseDongleMessageFunc,
+  LovenseDongleMessageType,
+  LovenseDongleOutgoingMessage,
+  OutgoingLovenseData,
 };
 use crate::{
   core::{
@@ -15,13 +18,18 @@ use crate::{
     messages::{Endpoint, RawReading},
   },
   server::device::{
-    configuration::{
-      BluetoothLESpecifier, ProtocolCommunicationSpecifier
-    },
+    configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
     hardware::{
-      Hardware, HardwareConnector, HardwareEvent, HardwareInternal, HardwareReadCmd,
-      HardwareSpecializer, HardwareSubscribeCmd, HardwareUnsubscribeCmd, HardwareWriteCmd,
-      GenericHardwareSpecializer
+      GenericHardwareSpecializer,
+      Hardware,
+      HardwareConnector,
+      HardwareEvent,
+      HardwareInternal,
+      HardwareReadCmd,
+      HardwareSpecializer,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -81,9 +89,7 @@ impl HardwareConnector for LovenseDongleHardwareConnector {
     self.specifier.clone()
   }
 
-  async fn connect(
-    &mut self,
-  ) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
+  async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
     let hardware_internal = LovenseDongleHardware::new(
       &self.id,
       self.device_outgoing.clone(),
@@ -178,10 +184,15 @@ impl HardwareInternal for LovenseDongleHardware {
     &self,
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Lovense Dongle does not support read".to_owned()))))
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Lovense Dongle does not support read".to_owned(),
+    ))))
   }
 
-  fn write_value(&self, msg: &HardwareWriteCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+  fn write_value(
+    &self,
+    msg: &HardwareWriteCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
     let data = msg.data.clone();
@@ -202,18 +213,26 @@ impl HardwareInternal for LovenseDongleHardware {
         .await
         .map_err(|_| {
           error!("Port closed during writing.");
-          ButtplugDeviceError::DeviceNotConnected(
-            "Port closed during writing".to_owned(),
-          )
+          ButtplugDeviceError::DeviceNotConnected("Port closed during writing".to_owned())
         })
     })
   }
 
-  fn subscribe(&self, _msg: &HardwareSubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Lovense Dongle does not support subscribe".to_owned()))))
+  fn subscribe(
+    &self,
+    _msg: &HardwareSubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Lovense Dongle does not support subscribe".to_owned(),
+    ))))
   }
 
-  fn unsubscribe(&self, _msg: &HardwareUnsubscribeCmd) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand("Lovense Dongle does not support unsubscribe".to_owned()))))
+  fn unsubscribe(
+    &self,
+    _msg: &HardwareUnsubscribeCmd,
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Lovense Dongle does not support unsubscribe".to_owned(),
+    ))))
   }
 }

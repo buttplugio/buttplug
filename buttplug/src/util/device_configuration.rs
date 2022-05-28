@@ -7,23 +7,29 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages::DeviceMessageAttributesMap,
-  },
+  core::{errors::ButtplugDeviceError, messages::DeviceMessageAttributesMap},
   server::device::{
     configuration::{
-      BluetoothLESpecifier, DeviceConfigurationManager, DeviceConfigurationManagerBuilder, HIDSpecifier, LovenseConnectServiceSpecifier,
-      ProtocolAttributesType, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
-      SerialSpecifier, USBSpecifier,
-      WebsocketSpecifier, XInputSpecifier, ProtocolAttributesIdentifier,
+      BluetoothLESpecifier,
+      DeviceConfigurationManager,
+      DeviceConfigurationManagerBuilder,
+      HIDSpecifier,
+      LovenseConnectServiceSpecifier,
+      ProtocolAttributesIdentifier,
+      ProtocolAttributesType,
+      ProtocolCommunicationSpecifier,
+      ProtocolDeviceAttributes,
+      SerialSpecifier,
+      USBSpecifier,
+      WebsocketSpecifier,
+      XInputSpecifier,
     },
     ServerDeviceIdentifier,
-  }
+  },
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -32,7 +38,7 @@ static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
 /// protocol, as well as names, message attributes, etc... for different devices.
-/// 
+///
 /// Example: A Kiiroo ProtocolDeviceConfiguration would contain the Bluetooth LE information for all
 /// devices supported under the Kiiroo protocol. It would also contain information about the names
 /// and capabilities of different Kiiroo devices (Cliona, Onyx, Keon, etc...).
@@ -57,7 +63,6 @@ impl ProtocolDeviceConfiguration {
       configurations,
     }
   }
-
 }
 
 #[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq)]
@@ -167,7 +172,9 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
       specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
     if let Some(lcs) = &protocol_def.lovense_connect_service {
-      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(lcs.clone()));
+      specifiers.push(ProtocolCommunicationSpecifier::LovenseConnectService(
+        lcs.clone(),
+      ));
     }
 
     let mut configurations = HashMap::new();
@@ -181,10 +188,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
         defaults.messages.clone().unwrap_or_default(),
         None,
       );
-      configurations.insert(
-        ProtocolAttributesType::Default,
-        config_attrs,
-      );
+      configurations.insert(ProtocolAttributesType::Default, config_attrs);
     }
 
     for config in protocol_def.configurations {
@@ -197,10 +201,7 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
             config.messages.clone().unwrap_or_default(),
             None,
           );
-          configurations.insert(
-            ProtocolAttributesType::Identifier(identifier),
-            config_attrs,
-          );
+          configurations.insert(ProtocolAttributesType::Identifier(identifier), config_attrs);
         }
       }
     }
@@ -228,30 +229,25 @@ fn add_user_configs_to_protocol(
 
     // Make a vector out of the protocol definition specifiers
     if let Some(usb_vec) = &protocol_def.usb {
-      usb_vec.iter().for_each(|spec| {
-        base_protocol_def
-          .push(ProtocolCommunicationSpecifier::USB(*spec))
-      });
+      usb_vec
+        .iter()
+        .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::USB(*spec)));
     }
     if let Some(serial_vec) = &protocol_def.serial {
       serial_vec.iter().for_each(|spec| {
-        base_protocol_def
-          .push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
+        base_protocol_def.push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
       });
     }
     if let Some(hid_vec) = &protocol_def.hid {
-      hid_vec.iter().for_each(|spec| {
-        base_protocol_def
-          .push(ProtocolCommunicationSpecifier::HID(*spec))
-      });
+      hid_vec
+        .iter()
+        .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::HID(*spec)));
     }
     if let Some(btle) = &protocol_def.btle {
-      base_protocol_def
-        .push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
+      base_protocol_def.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
     }
     if let Some(websocket) = &protocol_def.websocket {
-      base_protocol_def
-        .push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
+      base_protocol_def.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
   }
   for (specifier, user_config) in user_config_def.user_configs() {
@@ -330,9 +326,15 @@ pub fn load_protocol_config_from_json(
           Ok(protocol_config)
         }
       }
-      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err))),
+      Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "{}",
+        err
+      ))),
     },
-    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!("{}", err))),
+    Err(err) => Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+      "{}",
+      err
+    ))),
   }
 }
 
@@ -360,18 +362,16 @@ pub fn load_protocol_configs_from_json(
   // name to ProtocolDeviceConfiguration structs.
   for (protocol_name, protocol_def) in main_config.protocols.unwrap_or_default() {
     let protocol_device_config: ProtocolDeviceConfiguration = protocol_def.into();
-    protocol_specifiers.insert(protocol_name.clone(), protocol_device_config.specifiers().clone());
+    protocol_specifiers.insert(
+      protocol_name.clone(),
+      protocol_device_config.specifiers().clone(),
+    );
     for (config_ident, config) in protocol_device_config.configurations() {
-      let ident = ProtocolAttributesIdentifier::new(
-        &protocol_name,
-        &config_ident,
-        &None
-      );
+      let ident = ProtocolAttributesIdentifier::new(&protocol_name, &config_ident, &None);
       protocol_attributes.insert(ident, config.clone());
     }
   }
 
-  
   let mut external_config = ExternalDeviceConfiguration {
     protocol_specifiers,
     protocol_attributes,
@@ -393,18 +393,18 @@ pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
   let devices = load_protocol_configs_from_json(None, None, false)
     .expect("If this fails, the whole library goes with it.");
   let mut builder = DeviceConfigurationManagerBuilder::default();
-   if allow_raw_messages {
+  if allow_raw_messages {
     builder.allow_raw_messages();
   }
   for (name, specifiers) in devices.protocol_specifiers {
     for spec in specifiers {
-      builder
-        .communication_specifier(&name, spec);
+      builder.communication_specifier(&name, spec);
     }
   }
   for (ident, def) in devices.protocol_attributes {
-    builder
-      .protocol_attributes(ident, def);
+    builder.protocol_attributes(ident, def);
   }
-  builder.finish().expect("If this fails, the whole library goes with it.")
+  builder
+    .finish()
+    .expect("If this fails, the whole library goes with it.")
 }

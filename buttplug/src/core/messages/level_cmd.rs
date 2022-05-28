@@ -5,8 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
-
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -64,7 +62,13 @@ impl ButtplugMessageValidator for LevelCmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
     for level in &self.levels {
-      self.is_in_command_range(level.level, format!("Level {} for LevelCmd index {} is invalid. Level should be a value between 0.0 and 1.0", level.level, level.index))?;
+      self.is_in_command_range(
+        level.level,
+        format!(
+          "Level {} for LevelCmd index {} is invalid. Level should be a value between 0.0 and 1.0",
+          level.level, level.index
+        ),
+      )?;
     }
     Ok(())
   }
