@@ -1,0 +1,38 @@
+devices:
+  - identifier: 
+      name: "NFY008"
+      address: null
+      identifier: "Default"
+    expected_name: "Mizz Zee Device"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages: 
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x69, 0x96, 0x03, 0x01, 0x01, 0x22]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !StopDeviceCmd
+            Id: 1
+            DeviceIndex: 0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+          endpoint: tx
+          data: [0x69, 0x96, 0x03, 0x01, 0x00, 0x00]
+          write_with_response: false

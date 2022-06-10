@@ -3767,6 +3767,32 @@
         }
       }
     },
+    "mizzzee-v2": {
+      "btle": {
+        "names": [
+          "XHT"
+        ],
+        "services": {
+          "0000eea0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ee01-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Mizz Zee Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                68
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
     "htk_bm": {
       "btle": {
         "names": [
