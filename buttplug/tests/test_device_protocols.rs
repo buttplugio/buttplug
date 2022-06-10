@@ -35,6 +35,8 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_satisfyer_dual_vibrator.yaml" ; "Satisfyer Protocol - Dual Vibrator")]
 #[test_case("test_mysteryvibe.yaml" ; "Mysteryvibe Protocol")]
 #[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
@@ -62,6 +64,8 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_satisfyer_dual_vibrator.yaml" ; "Satisfyer Protocol - Dual Vibrator")]
 #[test_case("test_mysteryvibe.yaml" ; "Mysteryvibe Protocol")]
 #[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
 fn test_device_protocols_json_v3(test_file: &str) {
@@ -84,6 +88,8 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_satisfyer_dual_vibrator.yaml" ; "Satisfyer Protocol - Dual Vibrator")]
 #[test_case("test_mysteryvibe.yaml" ; "Mysteryvibe Protocol")]
 #[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
 fn test_device_protocols_embedded_v2(test_file: &str) {
@@ -105,6 +111,8 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_satisfyer_dual_vibrator.yaml" ; "Satisfyer Protocol - Dual Vibrator")]
 #[test_case("test_mysteryvibe.yaml" ; "Mysteryvibe Protocol")]
 #[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
+#[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
+#[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
 fn test_device_protocols_json_v2(test_file: &str) {

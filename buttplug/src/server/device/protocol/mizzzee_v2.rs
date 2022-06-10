@@ -13,12 +13,12 @@ use crate::{
   },
 };
 
-generic_protocol_setup!(MizzZee, "mizzzee");
+generic_protocol_setup!(MizzZeeV2, "mizzzee-v2");
 
 #[derive(Default)]
-pub struct MizzZee {}
+pub struct MizzZeeV2 {}
 
-impl ProtocolHandler for MizzZee {
+impl ProtocolHandler for MizzZeeV2 {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
@@ -29,9 +29,10 @@ impl ProtocolHandler for MizzZee {
       vec![
         0x69,
         0x96,
-        0x03,
-        0x01,
-        if scalar == 0 { 0x00 } else { 0x01 },
+        0x04,
+        0x02,
+        scalar as u8,
+        0x2c,
         scalar as u8,
       ],
       false,
@@ -39,3 +40,4 @@ impl ProtocolHandler for MizzZee {
     .into()])
   }
 }
+
