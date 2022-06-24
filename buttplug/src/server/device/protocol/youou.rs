@@ -72,7 +72,7 @@ impl ButtplugProtocol for Youou {}
 
 crate::default_protocol_properties_definition!(Youou);
 
-impl ButtplugProtocolCommandHandler for Youou {
+impl ProtocolHandler for Youou {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<Hardware>,

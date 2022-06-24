@@ -5,71 +5,44 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(LiboVibes, "libo-vibes");
+generic_protocol_setup!(LiboVibes, "libo-vibes");
 
-impl ButtplugProtocolCommandHandler for LiboVibes {
+#[derive(Default)]
+pub struct LiboVibes {}
+
+impl ProtocolHandler for LiboVibes {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        for (index, cmd) in cmds.iter().enumerate() {
-          if let Some(speed) = cmd {
-            if index == 0 {
-              fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                Endpoint::Tx,
-                vec![*speed as u8],
-                false,
-              )));
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut msg_vec = vec![];
+    for (index, cmd) in cmds.iter().enumerate() {
+      if let Some(speed) = cmd {
+        if index == 0 {
+          msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![*speed as u8], false).into());
 
-              // If this is a single vibe device, we need to send stop to TxMode too
-              if *speed as u8 == 0 && cmds.len() == 1 {
-                fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                  Endpoint::TxMode,
-                  vec![0u8],
-                  false,
-                )));
-              }
-            } else if index == 1 {
-              fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                Endpoint::TxMode,
-                vec![*speed as u8],
-                false,
-              )));
-            }
+          // If this is a single vibe device, we need to send stop to TxMode too
+          if *speed as u8 == 0 && cmds.len() == 1 {
+            msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![0u8], false).into());
           }
+        } else if index == 1 {
+          msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![*speed as u8], false).into());
         }
       }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -204,3 +177,4 @@ mod test {
     });
   }
 }
+ */

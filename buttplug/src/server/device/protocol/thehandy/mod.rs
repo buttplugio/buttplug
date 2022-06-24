@@ -149,7 +149,7 @@ impl ButtplugProtocolFactory for TheHandyFactory {
   }
 }
 
-impl ButtplugProtocolCommandHandler for TheHandy {
+impl ProtocolHandler for TheHandy {
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
     device: Arc<Hardware>,

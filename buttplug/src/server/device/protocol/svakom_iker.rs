@@ -5,79 +5,70 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(SvakomIker, "svakom-iker");
+generic_protocol_setup!(SvakomIker, "svakom-iker");
 
-impl ButtplugProtocolCommandHandler for SvakomIker {
+#[derive(Default)]
+pub struct SvakomIker {}
+
+impl ProtocolHandler for SvakomIker {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut vibe_off = false;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          if speed == 0 {
-            vibe_off = true;
-          }
-          device
-            .write_value(HardwareWriteCmd::new(
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut vibe_off = false;
+    let mut msg_vec = vec![];
+    if let Some(speed) = cmds[0] {
+      if speed == 0 {
+        vibe_off = true;
+      }
+      msg_vec.push(
+        HardwareWriteCmd::new(
+          Endpoint::Tx,
+          [0x55, 0x03, 0x03, 0x00, 0x01, speed as u8].to_vec(),
+          true,
+        )
+        .into(),
+      );
+    }
+    if cmds.len() > 1 {
+      if let Some(speed) = cmds[1] {
+        if speed != 0 || !vibe_off {
+          msg_vec.push(
+            HardwareWriteCmd::new(
               Endpoint::Tx,
-              [0x55, 0x03, 0x03, 0x00, 0x01, speed as u8].to_vec(),
+              [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
               true,
-            ))
-            .await?;
+            )
+            .into(),
+          );
         }
-        if cmds.len() > 1 {
-          if let Some(speed) = cmds[1] {
-            if speed != 0 || !vibe_off {
-              device
-                .write_value(HardwareWriteCmd::new(
-                  Endpoint::Tx,
-                  [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
-                  true,
-                ))
-                .await?;
-            }
-          } else if vibe_off {
-            // Turning off the vibe will turn off the pulser
-            // Fetch the current pulser value to resend
-            let all_results = manager.lock().await.vibration();
-            if let Some(speed) = all_results[1] {
-              if speed != 0 {
-                device
-                  .write_value(HardwareWriteCmd::new(
-                    Endpoint::Tx,
-                    [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
-                    true,
-                  ))
-                  .await?;
-              }
-            }
+      } else if vibe_off {
+        if let Some(speed) = cmds[1] {
+          if speed != 0 {
+            msg_vec.push(
+              HardwareWriteCmd::new(
+                Endpoint::Tx,
+                [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
+                true,
+              )
+              .into()
+            )
           }
         }
       }
-
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 }
+/*
 
 #[cfg(all(test, feature = "server"))]
 mod test {
@@ -242,3 +233,4 @@ mod test {
     });
   }
 }
+ */

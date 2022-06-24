@@ -86,7 +86,7 @@ impl ButtplugProtocolFactory for KiirooV2Factory {
 
 impl ButtplugProtocol for KiirooV2 {}
 
-impl ButtplugProtocolCommandHandler for KiirooV2 {
+impl ProtocolHandler for KiirooV2 {
   fn handle_linear_cmd(
     &self,
     device: Arc<Hardware>,

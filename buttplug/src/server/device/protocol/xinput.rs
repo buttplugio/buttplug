@@ -63,7 +63,7 @@ impl ButtplugProtocolFactory for XInputFactory {
   }
 }
 
-impl ButtplugProtocolCommandHandler for XInput {
+impl ProtocolHandler for XInput {
   fn handle_vibrate_cmd(
     &self,
     device: Arc<Hardware>,

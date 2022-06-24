@@ -21,7 +21,7 @@ pub struct HtkBm {}
 impl ProtocolHandler for HtkBm {
   fn handle_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<u32>>
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec = vec![];
     if cmds.len() == 2 {

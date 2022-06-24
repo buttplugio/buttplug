@@ -80,12 +80,11 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
   info!("Hgod control loop exiting, most likely due to device disconnection.");
 }
 
-impl ButtplugProtocolCommandHandler for Hgod {
+impl ProtocolHandler for Hgod {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();

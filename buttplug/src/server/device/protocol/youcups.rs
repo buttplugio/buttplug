@@ -5,41 +5,35 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::Endpoint,
+  },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Youcups, "youcups");
+generic_protocol_setup!(Youcups, "youcups");
 
-impl ButtplugProtocolCommandHandler for Youcups {
+#[derive(Default)]
+pub struct Youcups {}
+
+impl ProtocolHandler for Youcups {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // TODO Convert to using generic command manager
-    let msg = HardwareWriteCmd::new(
+    cmds: &Vec<Option<u32>>
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| HardwareWriteCmd::new(
       Endpoint::Tx,
-      format!("$SYS,{}?", (msg.speeds()[0].speed() * 8.0) as u8)
+      format!("$SYS,{}?", speed as u8)
         .as_bytes()
         .to_vec(),
       false,
-    );
-    let fut = device.write_value(msg);
-    Box::pin(async {
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    ).into()))
   }
 }
 

@@ -123,12 +123,11 @@ impl ButtplugProtocol for Satisfyer {}
 
 crate::default_protocol_properties_definition!(Satisfyer);
 
-impl ButtplugProtocolCommandHandler for Satisfyer {
+impl ProtocolHandler for Satisfyer {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     let last_command = self.last_command.clone();

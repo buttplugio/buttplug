@@ -56,7 +56,7 @@ impl ButtplugProtocolFactory for VibratissimoFactory {
   }
 }
 
-impl ButtplugProtocolCommandHandler for Vibratissimo {
+impl ProtocolHandler for Vibratissimo {
   fn handle_stop_device_cmd(
     &self,
     device: Arc<Hardware>,
@@ -73,9 +73,8 @@ impl ButtplugProtocolCommandHandler for Vibratissimo {
 
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {

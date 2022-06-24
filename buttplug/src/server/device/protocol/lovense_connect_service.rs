@@ -5,139 +5,83 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, ButtplugDeviceMessage, Endpoint},
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
-    },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
 use std::sync::{
-  atomic::{AtomicBool, Ordering},
+  atomic::{AtomicBool, Ordering::SeqCst},
   Arc,
 };
-use tokio::sync::Mutex;
 
+generic_protocol_setup!(LovenseConnectService, "lovense-connect-service");
+
+#[derive(Default)]
 pub struct LovenseConnectService {
-  device_attributes: ProtocolDeviceAttributes,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   rotation_direction: Arc<AtomicBool>,
 }
 
-impl LovenseConnectService {
-  const PROTOCOL_IDENTIFIER: &'static str = "lovense-connect-service";
-
-  // Due to this lacking the ability to take extra fields, we can't pass in our
-  // event receiver from the subscription, which we'll need for things like
-  // battery readings. Therefore, we expect initialize() to return the protocol
-  // itself instead of calling this, which is simply a convenience method for
-  // the default implementation anyways.
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-      rotation_direction: Arc::new(AtomicBool::new(false)),
-    }
-  }
-}
-
-super::default_protocol_trait_declaration!(LovenseConnectService);
-crate::default_protocol_properties_definition!(LovenseConnectService);
-
-impl ButtplugProtocol for LovenseConnectService {}
-
-impl ButtplugProtocolCommandHandler for LovenseConnectService {
+impl ProtocolHandler for LovenseConnectService {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      // Store off result before the match, so we drop the lock ASAP.
-      let result = manager.lock().await.update_vibration(&msg, false)?;
-      // Lovense is the same situation as the Lovehoney Desire, where commands
-      // are different if we're addressing all motors or seperate motors.
-      // Difference here being that there's Lovense variants with different
-      // numbers of motors.
-      //
-      // Neat way of checking if everything is the same via
-      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-      //
-      // Just make sure we're not matching on None, 'cause if that's the case
-      // we ain't got shit to do.
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-          let lovense_cmd = format!(
-            "Vibrate?v={}&t={}",
-            cmds[0].expect("Already checked existence"),
-            device.address()
-          )
-          .as_bytes()
-          .to_vec();
-          let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
-          fut.await?;
-          return Ok(messages::Ok::default().into());
-        }
-        for (i, cmd) in cmds.iter().enumerate() {
-          if let Some(speed) = cmd {
-            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address())
-              .as_bytes()
-              .to_vec();
-            fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false)));
-          }
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // Lovense is the same situation as the Lovehoney Desire, where commands
+    // are different if we're addressing all motors or seperate motors.
+    // Difference here being that there's Lovense variants with different
+    // numbers of motors.
+    //
+    // Neat way of checking if everything is the same via
+    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+    //
+    // Just make sure we're not matching on None, 'cause if that's the case
+    // we ain't got shit to do.
+    let mut msg_vec = vec![];
+    if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
+      let lovense_cmd = format!(
+        "Vibrate?v={}&t={}",
+        cmds[0].expect("Already checked existence"),
+        device.address()
+      )
+      .as_bytes()
+      .to_vec();
+      msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    } else {
+      for (i, cmd) in cmds.iter().enumerate() {
+        if let Some(speed) = cmd {
+          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address())
+            .as_bytes()
+            .to_vec();
+          msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
         }
       }
-      for fut in fut_vec {
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::RotateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    let direction = self.rotation_direction.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_rotation(&msg)?;
-      if let Some((speed, clockwise)) = result[0] {
-        let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address())
-          .as_bytes()
-          .to_vec();
-        let fut = device.write_value(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false));
-        fut.await?;
-        let dir = direction.load(Ordering::SeqCst);
-        // TODO Should we store speed and direction as an option for rotation caching? This is weird.
-        if dir != clockwise {
-          direction.store(clockwise, Ordering::SeqCst);
-          let fut = device.write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            b"RotateChange?".to_vec(),
-            false,
-          ));
-          fut.await?;
-        }
-      }
-      Ok(messages::Ok::default().into())
-    })
+    message: &Vec<Option<(u32, bool)>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut msg_vec = vec![];
+    let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address())
+      .as_bytes()
+      .to_vec();
+    msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    let dir = self.rotation_direction.load(Ordering::SeqCst);
+    // TODO Should we store speed and direction as an option for rotation caching? This is weird.
+    if dir != clockwise {
+      self.rotation_direction.store(clockwise, Ordering::SeqCst);
+      msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
+    }
+    Ok(msg_vec)
   }
 
   fn handle_battery_level_cmd(

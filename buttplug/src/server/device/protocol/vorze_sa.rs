@@ -5,51 +5,25 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,    
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, Endpoint},
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::atomic::{AtomicU8, Ordering::SeqCst};
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use std::sync::{Arc, atomic::{AtomicU8, Ordering::SeqCst}};
 
+generic_protocol_setup!(VorzeSA, "vorze-sa");
 
+#[derive(Default)]
 pub struct VorzeSA {
-  device_attributes: ProtocolDeviceAttributes,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  previous_position: Arc<AtomicU8>,
+  previous_position: Arc<AtomicU8>
 }
-
-impl VorzeSA {
-  const PROTOCOL_IDENTIFIER: &'static str = "vorze-sa";
-
-  fn new(device_attributes: crate::server::device::configuration::ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-super::default_protocol_trait_declaration!(VorzeSA);
 
 #[repr(u8)]
 #[derive(PartialEq)]
@@ -92,76 +66,55 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
   speed as u8
 }
 
-crate::default_protocol_properties_definition!(VorzeSA);
-
-impl ButtplugProtocol for VorzeSA {}
-
-impl ButtplugProtocolCommandHandler for VorzeSA {
+impl ProtocolHandler for VorzeSA {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let dev_id = if self.name().to_ascii_lowercase().contains("rocket") {
       VorzeDevices::Rocket
     } else {
       VorzeDevices::Bach
     };
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&msg, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          fut_vec.push(device.write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
-            true,
-          )));
-        }
-      }
-      for fut in fut_vec {
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |index, speed| {
+      HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
+        true,
+      )
+      .into()
+    }))
   }
 
   fn handle_rotate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::RotateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    // This will never change, so we can process it before the future.
+    cmds: &Vec<Option<(u32, bool)>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let dev_id = if self.name().contains("UFO") {
       VorzeDevices::Ufo
     } else {
       VorzeDevices::Cyclone
     };
-    Box::pin(async move {
-      let result = manager.lock().await.update_rotation(&msg)?;
-      let mut fut_vec = vec![];
-      if let Some((speed, clockwise)) = result[0] {
-        let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-        fut_vec.push(device.write_value(HardwareWriteCmd::new(
+    if let Some((speed, clockwise)) = cmds[0] {
+      let data: u8 = (clockwise as u8) << 7 | (speed as u8);
+      Ok(vec!(
+        HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![dev_id as u8, VorzeActions::Rotate as u8, data],
           true,
-        )));
-      }
-      for fut in fut_vec {
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+        )
+        .into(),
+      ))
+    } else {
+      Ok(vec![])
+    }
   }
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<Hardware>,
     msg: messages::LinearCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 
     let previous_position = self.previous_position.load(SeqCst);
@@ -172,37 +125,22 @@ impl ButtplugProtocolCommandHandler for VorzeSA {
 
     self.previous_position.store(position as u8, SeqCst);
 
-    let fut = device.write_value(HardwareWriteCmd::new(
+    Ok(vec!(HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
       true,
-    ));
-
-    Box::pin(async move {
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    ).into()))
   }
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    device: Arc<Hardware>,
     msg: messages::VorzeA10CycloneCmd,
-  ) -> ButtplugServerResultFuture {
-    self.handle_rotate_cmd(
-      device,
-      messages::RotateCmd::new(
-        msg.device_index(),
-        vec![messages::RotationSubcommand::new(
-          0,
-          msg.speed() as f64 / 99f64,
-          msg.clockwise(),
-        )],
-      ),
-    )
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.handle_rotate_cmd(vec!(Some((msg.speed() as f64 / 99f64, msg.clockwise()))))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -217,7 +155,7 @@ mod test {
       VibrateSubcommand,
     },
     server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd}, 
+      hardware::{HardwareCommand, HardwareWriteCmd},
     hardware::communication::test::{
       check_test_recv_empty,
       check_test_recv_value,
@@ -413,3 +351,4 @@ mod test {
     });
   }
 }
+*/

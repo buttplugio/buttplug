@@ -5,48 +5,37 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Svakom, "svakom");
+generic_protocol_setup!(Svakom, "svakom");
 
-impl ButtplugProtocolCommandHandler for Svakom {
+#[derive(Default)]
+pub struct Svakom {}
+
+impl ProtocolHandler for Svakom {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| {
           let multiplier: u8 = if speed == 0 { 0x00 } else { 0x01 };
-          let msg = HardwareWriteCmd::new(
+          HardwareWriteCmd::new(
             Endpoint::Tx,
             [0x55, 0x04, 0x03, 0x00, multiplier, speed as u8].to_vec(),
             false,
-          );
-          device.write_value(msg).await?;
-        }
-      }
-
-      Ok(messages::Ok::default().into())
-    })
+          ).into()
+    }))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -104,3 +93,4 @@ mod test {
     });
   }
 }
+ */

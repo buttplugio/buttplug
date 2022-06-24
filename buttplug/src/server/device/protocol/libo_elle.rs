@@ -5,70 +5,48 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(LiboElle, "libo-elle");
+generic_protocol_setup!(LiboElle, "libo-elle");
 
-impl ButtplugProtocolCommandHandler for LiboElle {
+#[derive(Default)]
+pub struct LiboElle {}
+
+impl ProtocolHandler for LiboElle {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        for (index, cmd) in cmds.iter().enumerate() {
-          if let Some(speed) = cmd {
-            if index == 1 {
-              let mut data = 0u8;
-              if *speed as u8 > 0 && *speed as u8 <= 7 {
-                data |= (*speed as u8 - 1) << 4;
-                data |= 1; // Set the mode too
-              } else if *speed as u8 > 7 {
-                data |= (*speed as u8 - 8) << 4;
-                data |= 4; // Set the mode too
-              }
-              fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                Endpoint::Tx,
-                vec![data],
-                false,
-              )));
-            } else if index == 0 {
-              fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                Endpoint::TxMode,
-                vec![*speed as u8],
-                false,
-              )));
-            }
-          }
+    cmds: &Vec<Option<u32>>
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |index, speed| {
+      if index == 1 {
+        let mut data = 0u8;
+        if speed as u8 > 0 && speed as u8 <= 7 {
+          data |= (speed as u8 - 1) << 4;
+          data |= 1; // Set the mode too
+        } else if speed as u8 > 7 {
+          data |= (speed as u8 - 8) << 4;
+          data |= 4; // Set the mode too
         }
+        HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into()
+      } else {
+        HardwareWriteCmd::new(
+          Endpoint::TxMode,
+          vec![speed as u8],
+          false,
+        ).into()
       }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    }))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -139,3 +117,4 @@ mod test {
     });
   }
 }
+ */

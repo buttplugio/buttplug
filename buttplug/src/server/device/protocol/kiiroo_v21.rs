@@ -7,122 +7,68 @@
 
 use super::{
   fleshlight_launch_helper::calculate_speed,
-  ButtplugProtocol,
-  ButtplugProtocolFactory,
-  ButtplugProtocolCommandHandler,
+  handle_nonaggregate_vibrate_cmd
 };
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,
-    FleshlightLaunchFW12Cmd,
+  core::{errors::ButtplugDeviceError, messages::{self, Endpoint, ButtplugDeviceMessage}},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
 };
-use std::sync::{
-  atomic::{AtomicU8, Ordering::SeqCst},
-  Arc,
-};
-use tokio::sync::Mutex;
+use std::sync::{Arc, atomic::{AtomicU8, Ordering::SeqCst}};
 
+generic_protocol_setup!(KiirooV21, "kiiroo-v21");
+
+#[derive(Default)]
 pub struct KiirooV21 {
-  device_attributes: ProtocolDeviceAttributes,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  previous_position: Arc<AtomicU8>,
+  previous_position: Arc<AtomicU8>
 }
 
-impl KiirooV21 {
-  const PROTOCOL_IDENTIFIER: &'static str = "kiiroo-v21";
-
-  fn new(device_attributes: crate::server::device::configuration::ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-crate::default_protocol_trait_declaration!(KiirooV21);
-crate::default_protocol_properties_definition!(KiirooV21);
-
-impl ButtplugProtocol for KiirooV21 {}
-
-impl ButtplugProtocolCommandHandler for KiirooV21 {
+impl ProtocolHandler for KiirooV21 {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        device
-          .write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x01, cmds.get(0).unwrap_or(&None).unwrap_or(0) as u8],
-            false,
-          ))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x01, speed as u8],
+      false,
+    ).into()))
   }
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(SeqCst);
     let distance = (previous_position as f64 - (v.position * 99f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12Cmd::new(
+    let fl_cmd = messages::FleshlightLaunchFW12Cmd::new(
       message.device_index(),
       (v.position * 99f64) as u8,
       (calculate_speed(distance, v.duration) * 99f64) as u8,
     );
-    self.handle_fleshlight_launch_fw12_cmd(device, fl_cmd)
+    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
   }
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let previous_position = self.previous_position.clone();
     let position = message.position();
-    let msg = HardwareWriteCmd::new(
+    previous_position.store(position, SeqCst);
+    Ok(vec!(HardwareWriteCmd::new(
       Endpoint::Tx,
       [0x03, 0x00, message.speed(), message.position()].to_vec(),
-      false,
-    );
-    let fut = device.write_value(msg);
-    Box::pin(async move {
-      previous_position.store(position, SeqCst);
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+      false).into()))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -233,3 +179,4 @@ mod test {
     });
   }
 }
+ */

@@ -171,7 +171,7 @@ impl Fredorch {
   }
 }
 
-impl ButtplugProtocolCommandHandler for Fredorch {
+impl ProtocolHandler for Fredorch {
   fn handle_linear_cmd(
     &self,
     device: Arc<Hardware>,

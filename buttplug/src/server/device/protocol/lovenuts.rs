@@ -5,53 +5,41 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(LoveNuts, "lovenuts");
+generic_protocol_setup!(LoveNuts, "lovenuts");
 
-impl ButtplugProtocolCommandHandler for LoveNuts {
+#[derive(Default)]
+pub struct LoveNuts {}
+
+impl ProtocolHandler for LoveNuts {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
-          for _ in 0..10 {
-            let mut b: u8 = speed as u8;
-            b |= (speed as u8) << 4;
-            data.push(b);
-          }
-          data.push(0x00);
-          data.push(0xff);
-
-          device
-            .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, false))
-            .await?;
-        }
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if let Some(speed) = cmds[0] {
+      let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
+      for _ in 0..10 {
+        let mut b: u8 = speed as u8;
+        b |= (speed as u8) << 4;
+        data.push(b);
       }
+      data.push(0x00);
+      data.push(0xff);
 
-      Ok(messages::Ok::default().into())
-    })
+      Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    } else {
+      Ok(vec![])
+    }
   }
 }
-
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -106,3 +94,4 @@ mod test {
     });
   }
 }
+ */

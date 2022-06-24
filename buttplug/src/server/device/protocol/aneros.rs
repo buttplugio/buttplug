@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
@@ -23,20 +24,14 @@ impl ProtocolHandler for Aneros {
     &self,
     cmds: &Vec<Option<u32>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut cmd_vec = vec![];
-    for (index, cmd) in cmds.iter().enumerate() {
-      if let Some(speed) = cmd {
-        cmd_vec.push(
-          HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0xF1 + (index as u8), *speed as u8],
-            false,
-          )
-          .into(),
-        );
-      }
-    }
-    Ok(cmd_vec)
+    Ok(
+      handle_nonaggregate_vibrate_cmd(cmds, |index, speed|
+        HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0xF1 + (index as u8), speed as u8],
+        false,
+        ).into())
+    )
   }
 }
 

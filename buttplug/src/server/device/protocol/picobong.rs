@@ -5,37 +5,29 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Picobong, "picobong");
+generic_protocol_setup!(Picobong, "picobong");
 
-impl ButtplugProtocolCommandHandler for Picobong {
+#[derive(Default)]
+pub struct Picobong {}
+
+impl ProtocolHandler for Picobong {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // TODO Convert to using generic command manager
-    let speed = (msg.speeds()[0].speed() * 10.0) as u8;
-    let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, [0x01, mode, speed].to_vec(), false);
-    let fut = device.write_value(msg);
-    Box::pin(async {
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| {
+      let mode: u8 = if speed == 0 { 0xff } else { 0x01 };
+      HardwareWriteCmd::new(Endpoint::Tx, [0x01, mode, speed as u8].to_vec(), false).into()
+    }))
   }
 }
 

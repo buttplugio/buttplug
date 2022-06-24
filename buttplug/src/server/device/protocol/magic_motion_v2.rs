@@ -5,83 +5,70 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(MagicMotionV2, "magic-motion-2");
+generic_protocol_setup!(MagicMotionV2, "magic-motion-2");
 
-impl ButtplugProtocolCommandHandler for MagicMotionV2 {
+#[derive(Default)]
+pub struct MagicMotionV2 {}
+
+impl ProtocolHandler for MagicMotionV2 {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      if let Some(cmds) = result {
-        let data = if cmds.len() == 1 {
-          vec![
-            0x10,
-            0xff,
-            0x04,
-            0x0a,
-            0x32,
-            0x0a,
-            0x00,
-            0x04,
-            0x08,
-            cmds[0].unwrap_or(0) as u8,
-            0x64,
-            0x00,
-            0x04,
-            0x08,
-            0,
-            0x64,
-            0x01,
-          ]
-        } else {
-          vec![
-            0x10,
-            0xff,
-            0x04,
-            0x0a,
-            0x32,
-            0x0a,
-            0x00,
-            0x04,
-            0x08,
-            cmds[0].unwrap_or(0) as u8,
-            0x64,
-            0x00,
-            0x04,
-            0x08,
-            cmds[1].unwrap_or(0) as u8,
-            0x64,
-            0x01,
-          ]
-        };
-        device
-          .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, false))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let data = if cmds.len() == 1 {
+      vec![
+        0x10,
+        0xff,
+        0x04,
+        0x0a,
+        0x32,
+        0x0a,
+        0x00,
+        0x04,
+        0x08,
+        cmds[0].unwrap_or(0) as u8,
+        0x64,
+        0x00,
+        0x04,
+        0x08,
+        0,
+        0x64,
+        0x01,
+      ]
+    } else {
+      vec![
+        0x10,
+        0xff,
+        0x04,
+        0x0a,
+        0x32,
+        0x0a,
+        0x00,
+        0x04,
+        0x08,
+        cmds[0].unwrap_or(0) as u8,
+        0x64,
+        0x00,
+        0x04,
+        0x08,
+        cmds[1].unwrap_or(0) as u8,
+        0x64,
+        0x01,
+      ]
+    };
+    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, data, false).into()))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -145,3 +132,4 @@ mod test {
     });
   }
 }
+ */

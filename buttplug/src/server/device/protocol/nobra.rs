@@ -5,53 +5,31 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Nobra, "nobra");
+generic_protocol_setup!(Nobra, "nobra");
 
-impl ButtplugProtocolCommandHandler for Nobra {
+#[derive(Default)]
+pub struct Nobra {}
+
+impl ProtocolHandler for Nobra {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
-        for (_, cmd) in cmds.iter().enumerate() {
-          if let Some(speed) = cmd {
-            let output_speed = if *speed == 0 { 0x70 } else { 0x60 + speed };
-            fut_vec.push(device.write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![output_speed as u8],
-              false,
-            )));
-          }
-        }
-      } else {
-        info!("No updates in packet for Nobra protocol");
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut msg_vec = vec!();
+    for (_, cmd) in cmds.iter().enumerate() {
+      if let Some(speed) = cmd {
+        let output_speed = if *speed == 0 { 0x70 } else { 0x60 + speed };
+        msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![output_speed as u8], false).into());
       }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 }

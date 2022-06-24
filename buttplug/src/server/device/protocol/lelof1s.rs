@@ -49,12 +49,11 @@ impl ButtplugProtocolFactory for LeloF1sFactory {
   }
 }
 
-impl ButtplugProtocolCommandHandler for LeloF1s {
+impl ProtocolHandler for LeloF1s {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     Box::pin(async move {

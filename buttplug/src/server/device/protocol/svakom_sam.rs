@@ -5,59 +5,41 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(SvakomSam, "svakom-sam");
+generic_protocol_setup!(SvakomSam, "svakom-sam");
 
-impl ButtplugProtocolCommandHandler for SvakomSam {
+#[derive(Default)]
+pub struct SvakomSam {}
+
+impl ProtocolHandler for SvakomSam {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          device
-            .write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              [18, 1, 3, 0, 5, speed as u8].to_vec(),
-              true,
-            ))
-            .await?;
-        }
-        if cmds.len() > 1 {
-          if let Some(speed) = cmds[1] {
-            device
-              .write_value(HardwareWriteCmd::new(
-                Endpoint::Tx,
-                [18, 6, 1, speed as u8].to_vec(),
-                true,
-              ))
-              .await?;
-          }
-        }
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut msg_vec = vec![];
+    if let Some(speed) = cmds[0] {
+      msg_vec.push(
+        HardwareWriteCmd::new(Endpoint::Tx, [18, 1, 3, 0, 5, speed as u8].to_vec(), true).into(),
+      );
+    }
+    if cmds.len() > 1 {
+      if let Some(speed) = cmds[1] {
+        msg_vec
+          .push(HardwareWriteCmd::new(Endpoint::Tx, [18, 6, 1, speed as u8].to_vec(), true).into());
       }
-
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -139,3 +121,4 @@ mod test {
     });
   }
 }
+ */

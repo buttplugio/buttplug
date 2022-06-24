@@ -5,60 +5,51 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::Endpoint,
+  },
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Zalo, "zalo");
+generic_protocol_setup!(Zalo, "zalo");
 
-impl ButtplugProtocolCommandHandler for Zalo {
+#[derive(Default)]
+pub struct Zalo {}
+
+impl ProtocolHandler for Zalo {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      if let Some(cmds) = result {
-        let speed0: u8 = cmds[0].unwrap_or(0) as u8;
-        let speed1: u8 = if cmds.len() == 1 {
-          0
-        } else {
-          cmds[1].unwrap_or(0) as u8
-        };
-        device
-          .write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![
-              if speed0 == 0 && speed1 == 0 {
-                0x02
-              } else {
-                0x01
-              },
-              if speed0 == 0 { 0x01 } else { speed0 },
-              if speed1 == 0 { 0x01 } else { speed1 },
-            ],
-            true,
-          ))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    let speed0: u8 = cmds[0].unwrap_or(0) as u8;
+    let speed1: u8 = if cmds.len() == 1 {
+      0
+    } else {
+      cmds[1].unwrap_or(0) as u8
+    };
+    Ok(vec!(HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![
+          if speed0 == 0 && speed1 == 0 {
+            0x02
+          } else {
+            0x01
+          },
+          if speed0 == 0 { 0x01 } else { speed0 },
+          if speed1 == 0 { 0x01 } else { speed1 },
+        ],
+        true,
+      ).into()))
+    }
   }
-}
 
+  /*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -202,3 +193,4 @@ mod test {
     });
   }
 }
+ */

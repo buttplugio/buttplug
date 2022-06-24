@@ -5,49 +5,38 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(Maxpro, "maxpro");
+generic_protocol_setup!(Maxpro, "maxpro");
 
-impl ButtplugProtocolCommandHandler for Maxpro {
+#[derive(Default)]
+pub struct Maxpro {}
+
+impl ProtocolHandler for Maxpro {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // TODO Convert to using generic command manager
+    if let Some(speed) = cmds[0] {
+      let mut data = vec![0x55u8, 0x04, 0x07, 0xff, 0xff, 0x3f, speed as u8, 0x5f, speed as u8, 0x00];
+      let mut crc: u8 = 0;
 
-    // Speed range for Maxpro toys are 10-100 for some reason.
-    let max_value: f64 = 100.0;
-    let speed: u8 = (msg.speeds()[0].speed() * max_value) as u8;
-    let mut data = vec![0x55, 0x04, 0x07, 0xff, 0xff, 0x3f, speed, 0x5f, speed, 0x00];
-    let mut crc: u8 = 0;
+      for b in data.clone() {
+        crc = crc.wrapping_add(b);
+      }
 
-    for b in data.clone() {
-      crc = crc.wrapping_add(b);
+      data[9] = crc;
+      Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
+    } else {
+      Ok(vec![])
     }
-
-    data[9] = crc;
-
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, data, false);
-    // device.write_value(msg.into()).await?;
-    let fut = device.write_value(msg);
-    Box::pin(async move {
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
   }
 }
 

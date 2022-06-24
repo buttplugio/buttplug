@@ -5,82 +5,68 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(LovehoneyDesire, "lovehoney-desire");
+generic_protocol_setup!(LovehoneyDesire, "lovehoney-desire");
 
-impl ButtplugProtocolCommandHandler for LovehoneyDesire {
+#[derive(Default)]
+pub struct LovehoneyDesire {}
+
+impl ProtocolHandler for LovehoneyDesire {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        // The Lovehoney Desire has 2 types of commands
-        //
-        // - Set both motors with one command
-        // - Set each motor separately
-        //
-        // We'll need to check what we got back and write our
-        // commands accordingly.
-        //
-        // Neat way of checking if everything is the same via
-        // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-        //
-        // Just make sure we're not matching on None, 'cause if
-        // that's the case we ain't got shit to do.
-        let mut fut_vec = vec![];
-        if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
-          let fut = device.write_value(HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![
-              0xF3,
-              0,
-              cmds[0].expect("Already checked value existence") as u8,
-            ],
-            false,
-          ));
-          fut.await?;
-        } else {
-          // We have differening values. Set each motor separately.
-          let mut i = 1;
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    // The Lovehoney Desire has 2 types of commands
+    //
+    // - Set both motors with one command
+    // - Set each motor separately
+    //
+    // We'll need to check what we got back and write our
+    // commands accordingly.
+    //
+    // Neat way of checking if everything is the same via
+    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+    //
+    // Just make sure we're not matching on None, 'cause if
+    // that's the case we ain't got shit to do.
+    let mut msg_vec = vec![];
+    if cmds[0].is_some() && cmds.windows(2).all(|w| w[0] == w[1]) {
+      msg_vec.push(
+        HardwareWriteCmd::new(
+          Endpoint::Tx,
+          vec![
+            0xF3,
+            0,
+            cmds[0].expect("Already checked value existence") as u8,
+          ],
+          false,
+        )
+        .into(),
+      );
+    } else {
+      // We have differening values. Set each motor separately.
+      let mut i = 1;
 
-          for cmd in cmds {
-            if let Some(speed) = cmd {
-              fut_vec.push(device.write_value(HardwareWriteCmd::new(
-                Endpoint::Tx,
-                vec![0xF3, i, speed as u8],
-                false,
-              )));
-            }
-            i += 1;
-          }
-          for fut in fut_vec {
-            fut.await?;
-          }
+      for cmd in cmds {
+        if let Some(speed) = cmd {
+          msg_vec
+            .push(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF3, i, *speed as u8], false).into());
         }
+        i += 1;
       }
-      Ok(messages::Ok::default().into())
-    })
+    }
+    Ok(msg_vec)
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -193,3 +179,4 @@ mod test {
     });
   }
 }
+ */

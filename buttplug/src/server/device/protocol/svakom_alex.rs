@@ -5,47 +5,35 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(SvakomAlex, "svakom-alex");
+generic_protocol_setup!(SvakomAlex, "svakom-alex");
 
-impl ButtplugProtocolCommandHandler for SvakomAlex {
+#[derive(Default)]
+pub struct SvakomAlex {}
+
+impl ProtocolHandler for SvakomAlex {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          let msg = HardwareWriteCmd::new(
-            Endpoint::Tx,
-            [18, 1, 3, 0, if speed == 0 { 0xFF } else { speed as u8 }, 0].to_vec(),
-            false,
-          );
-          device.write_value(msg).await?;
-        }
-      }
-
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| {
+      HardwareWriteCmd::new(
+        Endpoint::Tx,
+        [18, 1, 3, 0, if speed == 0 { 0xFF } else { speed as u8 }, 0].to_vec(),
+        false,
+      ).into()
+    }))
   }
 }
-
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -99,3 +87,4 @@ mod test {
     });
   }
 }
+*/

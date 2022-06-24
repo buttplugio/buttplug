@@ -5,20 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler, GenericCommandManager};
 use crate::{
-  core::messages::{ButtplugDeviceCommandMessageUnion, },
   server::device::{
-    hardware::Hardware,
-    protocol::ButtplugProtocolProperties,
-    configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
+    protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(RawProtocol, "raw");
+generic_protocol_setup!(RawProtocol, "raw");
 
-impl ButtplugProtocolCommandHandler for RawProtocol {
+#[derive(Default)]
+pub struct RawProtocol {}
+
+impl ProtocolHandler for RawProtocol {
 }
 
 // TODO Write tests

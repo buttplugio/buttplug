@@ -62,12 +62,11 @@ impl ButtplugProtocolFactory for AnkniFactory {
   }
 }
 
-impl ButtplugProtocolCommandHandler for Ankni {
+impl ProtocolHandler for Ankni {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let manager = self.manager.clone();
     Box::pin(async move {
       let result = manager.lock().await.update_vibration(&message, false)?;

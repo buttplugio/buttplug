@@ -5,54 +5,44 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(MizzZee, "mizzzee");
+generic_protocol_setup!(MizzZee, "mizzzee");
 
-impl ButtplugProtocolCommandHandler for MizzZee {
+#[derive(Default)]
+pub struct MizzZee {}
+
+impl ProtocolHandler for MizzZee {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          device
-            .write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![
-                0x69,
-                0x96,
-                0x03,
-                0x01,
-                if speed == 0 { 0x00 } else { 0x01 },
-                speed as u8,
-              ],
-              false,
-            ))
-            .await?;
-        }
-      }
-
-      Ok(messages::Ok::default().into())
-    })
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if let Some(speed) = cmds[0] {
+      Ok(vec![HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![
+          0x69,
+          0x96,
+          0x03,
+          0x01,
+          if speed == 0 { 0x00 } else { 0x01 },
+          speed as u8,
+        ],
+        false,
+      )
+      .into()])
+    } else {
+      Ok(vec![])
+    }
   }
 }
+/*
 
 #[cfg(all(test, feature = "server"))]
 mod test {
@@ -102,3 +92,4 @@ mod test {
     });
   }
 }
+ */

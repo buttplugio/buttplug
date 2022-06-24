@@ -109,12 +109,11 @@ crate::default_protocol_properties_definition!(MysteryVibe);
 
 impl ButtplugProtocol for MysteryVibe {}
 
-impl ButtplugProtocolCommandHandler for MysteryVibe {
+impl ProtocolHandler for MysteryVibe {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();

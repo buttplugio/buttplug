@@ -5,49 +5,39 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{generic_protocol_setup, ProtocolHandler},
+  },
 };
-use std::sync::Arc;
 
-super::default_protocol_declaration!(LiboShark, "libo-shark");
+generic_protocol_setup!(LiboShark, "libo-shark");
 
-impl ButtplugProtocolCommandHandler for LiboShark {
+#[derive(Default)]
+pub struct LiboShark {}
+
+impl ProtocolHandler for LiboShark {
   fn handle_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    message: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
+    cmds: &Vec<Option<u32>>,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      if let Some(cmds) = result {
-        let mut data = 0u8;
-        if let Some(speed) = cmds[0] {
-          data |= (speed as u8) << 4;
-        }
-        if let Some(speed) = cmds[1] {
-          data |= speed as u8;
-        }
-        device
-          .write_value(HardwareWriteCmd::new(Endpoint::Tx, vec![data], false))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    let mut data = 0u8;
+    if let Some(speed) = cmds[0] {
+      data |= (speed as u8) << 4;
+    }
+    if let Some(speed) = cmds[1] {
+      data |= speed as u8;
+    }
+    Ok(vec![
+      HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into()
+    ])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -123,3 +113,4 @@ mod test {
     });
   }
 }
+ */

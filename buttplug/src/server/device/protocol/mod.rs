@@ -8,34 +8,24 @@
 //! Implementations of communication protocols for hardware supported by Buttplug
 
 pub mod generic_command_manager;
+
+// Utility mods
+pub mod fleshlight_launch_helper;
+
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
 pub mod buttplug_passthru;
 pub mod cachito;
 pub mod hismith;
 pub mod htk_bm;
-pub mod lovense;
-
-/*
-pub mod ankni;
-pub mod fleshlight_launch_helper;
-pub mod fredorch;
-pub mod hgod;
-
 pub mod jejoue;
-pub mod kiiroo_v2;
-pub mod kiiroo_v21;
-pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
-pub mod lelof1s;
-pub mod lelof1sv2;
+pub mod kiiroo_v21;
+pub mod lovense;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
-pub mod lovedistance;
 pub mod lovehoney_desire;
-
-pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod magic_motion_v1;
 pub mod magic_motion_v2;
@@ -45,28 +35,39 @@ pub mod mannuo;
 pub mod maxpro;
 pub mod mizzzee;
 pub mod motorbunny;
-pub mod mysteryvibe;
 pub mod nobra;
-pub mod patoo;
 pub mod picobong;
-pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
-pub mod satisfyer;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_iker;
 pub mod svakom_sam;
 pub mod tcode_v03;
+pub mod wevibe8bit;
+pub mod youcups;
+pub mod zalo;
+
+/*
+pub mod ankni;
+pub mod fredorch;
+pub mod hgod;
+pub mod kiiroo_v2;
+pub mod kiiroo_v21_initialized;
+pub mod lelof1s;
+pub mod lelof1sv2;
+pub mod lovedistance;
+pub mod lovense_connect_service;
+pub mod mysteryvibe;
+pub mod patoo;
+pub mod prettylove;
+pub mod satisfyer;
 pub mod thehandy;
 pub mod vibratissimo;
 pub mod vorze_sa;
 pub mod wevibe;
-pub mod wevibe8bit;
 pub mod xinput;
-pub mod youcups;
 pub mod youou;
-pub mod zalo;
 */
 
 use crate::{
@@ -339,18 +340,20 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented(print_type_of(&message))
   }
 
+  // Returns the hardware command needed to send multiple speeds to multiple vibration features.
+  // Rare, but happens for some devices that pack multiple vibration features into a single command.
   fn handle_vibrate_cmd(
     &self,
-    message: &Vec<Option<u32>>,
+    _commands: &Vec<Option<u32>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    self.command_unimplemented("Aggregated VibrateCmd")
   }
 
   fn handle_rotate_cmd(
     &self,
-    message: &Vec<Option<(u32, bool)>>,
+    _commands: &Vec<Option<(u32, bool)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    self.command_unimplemented("RotateCmd")
   }
 
   fn handle_linear_cmd(
@@ -421,5 +424,19 @@ macro_rules! generic_protocol_setup {
     }
   };
 }
+
+pub fn handle_nonaggregate_vibrate_cmd<F>(
+  commands: &Vec<Option<u32>>,
+  vibrate_closure: F
+) -> Vec<HardwareCommand> 
+  where F: Fn(u32, u32) -> HardwareCommand {
+  commands
+    .iter()
+    .enumerate()
+    .filter(|(_, x)| x.is_some())
+    .map(|(i, x)| vibrate_closure(i as u32, *x.as_ref().unwrap()))
+    .collect()
+}
+
 
 pub use generic_protocol_setup;
