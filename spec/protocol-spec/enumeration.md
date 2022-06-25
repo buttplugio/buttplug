@@ -291,30 +291,53 @@ sequenceDiagram
 ---
 ## Message Attributes for DeviceList and DeviceAdded
 
-**Description:** A collection of message attributes. This object is
-always the child of a Device Message type name within a
-[DeviceList](enumeration.md#devicelist) or
-[DeviceAdded](enumeration.md#deviceadded) message. Not all attributes
-are relevant for all Device Messages on all Devices; in these cases
-the attributes will not be included.
+**Description:** A collection of message attributes. This object is always the child of a Device
+Message type name within a [DeviceList](enumeration.md#devicelist) or
+[DeviceAdded](enumeration.md#deviceadded) message. Not all attributes are relevant for all Device
+Messages on all Devices; in these cases the attributes will not be included.
 
 **Attributes:**
 
-* _FeatureCount_ (unsigned int): Number of features the Device Message
-  may address. This attribute is used to define the capabilities of
-  generic device control messages. The meaning of "feature" is
-  specific to the context of the message the attribute is attached to.
-  For instance, the FeatureCount attribute of a VibrateCmd message
-  will refer to the number of vibration motors that can be controlled
-  on a device advertising the VibrateCmd message.
-* _StepCount_ (array of unsigned int, minimum value: 1): For each
-  feature, lists the number of discrete steps the feature can use.
-  Returning to the VibrateCmd example from the above _FeatureCount_
-  specification, if a device had 2 motors, and each motor has 20 steps
-  of vibration speeds from 0%-100% (this is exactly what the Lovense
-  Edge is), the _StepCount_ attribute would be [20, 20]. Having the
-  array allows use to specify different amounts of steps for multiple
-  vibrators on the device.
+* _FeatureCount_
+  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
+  * Type: unsigned int
+  * Description: Number of features the Device Message may address. This attribute is used to define
+    the capabilities of generic device control messages. The meaning of "feature" is specific to the
+    context of the message the attribute is attached to. For instance, the FeatureCount attribute of
+    a VibrateCmd message will refer to the number of vibration motors that can be controlled on a
+    device advertising the VibrateCmd message.
+* _StepCount_ 
+  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
+  * Type: array of unsigned int
+  * Minimum value: 1
+  * Description: For each feature, lists the number of discrete steps the feature can use. Returning
+    to the VibrateCmd example from the above _FeatureCount_ specification, if a device had 2 motors,
+    and each motor has 20 steps of vibration speeds from 0%-100% (this is exactly what the Lovense
+    Edge is), the _StepCount_ attribute would be [20, 20]. Having the array allows use to specify
+    different amounts of steps for multiple vibrators on the device.
+* _StepRange_
+  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
+  * Type: array of 2 unsigned ints
+  * Maximum Value: Value of _StepCount_ for feature
+  * Description: Value that can be set by users to denote minimum and maximum value ranges for a
+    device scalar, rotation speed, linear position, etc... This value will only occur in User Configurations, and will not be used in base device definitions.
+* _ActuatorType_
+  * Valid for Messages: ScalarCmd 
+  * Type: array of strings
+  * Description: Type of actuator this feature represents.
+* _SensorType_
+  * Valid for Messages: ScalarSensorReadCmd
+  * Type: array of strings
+  * Description: Sensor types that can be read by Sensor.
+* _FeatureDescriptors_
+  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd, SensorReadCmd
+  * Type: array of strings
+  * Description: Text descriptor for each actuator represented by the
+    message.
+* _Endpoints_
+  * Valid for Messages: RawReadCmd, RawWriteCmd, RawSubscribeCmd
+  * Type: array of strings
+  * Description: Endpoints that can be used by Raw commands
 
 ---
 ## DeviceRemoved

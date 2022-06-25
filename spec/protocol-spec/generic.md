@@ -90,27 +90,28 @@ sequenceDiagram
 ]
 ```
 ---
-## VibrateCmd
+## ScalarCmd
 
-**Description:** Causes a device that supports vibration to run
-specific vibration motors at a certain speeds. Devices with multiple
-vibrator features may take multiple values. The
-[FeatureCount](enumeration.md#messageattributes) attribute for the
-message in the
-[DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded)
-message will contain that information.
+**Description:** Sets the static level for a feature. For instance, the vibration speed of a
+vibrator, the oscillating speed of a fucking machine, etc... The
+[Message Attributes](enumeration.md#messageattributes) for the ScalarCmd message in the
+[DeviceList](enumeration.md#devicelist)/[DeviceAdded](enumeration.md#deviceadded) message contain information on the actuator type and description, number of actuators, level ranges, and more.
 
-**Introduced In Spec Version:** 1
+Due to the amount of different controls that are scalars within haptics (vibration speed, oscillation speed, inflate/constrict pressures, etc), this message provides flexibility to add new acutuation types without having to introduce new messages into the protocol. The values accepted as actuator types can be extended as needed.
 
-**Last Updated In Spec Version:** 1
+In practice, ScalarCmd is meants to be exposed to developers via crafted APIs, i.e. having vibrate()/rotate()/oscillate() etc functions available on a data structure that represents a device, with the actuator types denoting which of those methods may be allowed. The ScalarCmd itself can be exposed via API also, but this may lead to a lack of attention to context that could cause issues (i.e. someone driving a vibrator and a fucking machine with the same power signals). Mitigation for that type of issue may be UX related versus system/protocol related, by letting users set speed limits and ranges for devices.
+
+**Introduced In Spec Version:** 3
+
+**Last Updated In Spec Version:** 3
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
 * _DeviceIndex_ (unsigned int): Index of device
-* _Speeds_ (array): Vibration speeds
-  * _Index_ (unsigned int): Index of vibration motor
-  * _Speed_ (double): Vibration speed with a range of [0.0-1.0]
+* _Scalars_ (array): Scalar values to set actuators
+  * _Index_ (unsigned int): Index of actuator
+  * _Scalar_ (double): Actuator level with a range of [0.0-1.0]
 
 **Expected Response:**
 
@@ -121,7 +122,7 @@ message will contain that information.
 
 <mermaid>
 sequenceDiagram
-    Client->>+Server: VibrateCmd Id=1
+    Client->>+Server: ScalarCmd Id=1
     Server->>-Client: Ok Id=1
 </mermaid>
 
@@ -130,17 +131,17 @@ sequenceDiagram
 ```json
 [
   {
-    "VibrateCmd": {
+    "ScalarCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "Speeds": [
+      "Scalars": [
         {
           "Index": 0,
-          "Speed": 0.5
+          "Scalar": 0.5
         },
         {
           "Index": 1,
-          "Speed": 1.0
+          "Scalar": 1.0
         }
       ]
     }
@@ -148,6 +149,7 @@ sequenceDiagram
 ]
 ```
 ---
+
 ## LinearCmd
 
 **Description:** Causes a device that supports linear movement to move

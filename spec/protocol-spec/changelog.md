@@ -1,5 +1,19 @@
 # Spec Changelog
 
+## Version 3 (2022-??-??)
+
+- Messages Added:
+  - ScalarCmd
+  - ScalarReadCmd
+  - ScalarReading
+- Messages Changed:
+  - DeviceList/DeviceAdded
+    - Added Message Attributes _FeatureDescriptor_, _ActuatorType_, _StepRange_, _SensorType_
+- Messages Deprecated:
+  - VibrateCmd
+    - Superceded by ScalarCmd. Will still be available via API calls in client APIs, just no longer
+      needs to be a specific message in the protocol.
+
 ## Version 2 (2020-09-28)
 
 - Messages Added:
