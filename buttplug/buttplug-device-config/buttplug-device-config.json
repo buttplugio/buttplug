@@ -100,12 +100,11 @@
       "defaults": {
         "name": "Lovense Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              20
-            ]
-          },
+          "VibrateCmd": [
+            {
+              "StepCount": 20
+            }
+          ],
           "BatteryLevelCmd": {}
         }
       },
@@ -122,13 +121,14 @@
           ],
           "name": "Lovense Edge",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -139,12 +139,11 @@
           ],
           "name": "Lovense Nora",
           "messages": {
-            "RotateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                20
-              ]
-            },
+            "RotateCmd": [
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -214,13 +213,14 @@
           ],
           "name": "Lovense Dolce",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -236,13 +236,14 @@
           ],
           "name": "Lovense Hyphy",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -261,12 +262,11 @@
       "defaults": {
         "name": "Lovense Connect Service Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              20
-            ]
-          },
+          "VibrateCmd": [
+            {
+              "StepCount": 20
+            }
+          ],
           "BatteryLevelCmd": {}
         }
       },
@@ -283,13 +283,14 @@
           ],
           "name": "Lovense Edge",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -299,12 +300,11 @@
           ],
           "name": "Lovense Nora",
           "messages": {
-            "RotateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                20
-              ]
-            },
+            "RotateCmd": [
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -374,13 +374,14 @@
           ],
           "name": "Lovense Dolce",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -396,13 +397,14 @@
           ],
           "name": "Lovense Hyphy",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                20,
-                20
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 20
+              },
+              {
+                "StepCount": 20
+              }
+            ],
             "BatteryLevelCmd": {}
           }
         },
@@ -421,14 +423,14 @@
       "defaults": {
         "name": "XBox (XInput) Compatible Gamepad",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              65535,
-              65535
-            ]
-          },
-          "BatteryLevelCmd": {}
+          "VibrateCmd": [
+            {
+              "StepCount": 65535
+            },
+            {
+              "StepCount": 65535
+            }
+          ]
         }
       }
     },
@@ -454,12 +456,11 @@
       "defaults": {
         "name": "Kiiroo v2 Device",
         "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              99
-            ]
-          },
+          "LinearCmd": [
+            {
+              "StepCount": 99
+            }
+          ],
           "FleshlightLaunchFW12Cmd": {}
         }
       },
@@ -494,12 +495,11 @@
       "defaults": {
         "name": "Libo Elle Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            }
+          ]
         }
       },
       "configurations": [
@@ -532,13 +532,14 @@
       "defaults": {
         "name": "Libo Shark",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              3,
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            },
+            {
+              "StepCount": 3
+            }
+          ]
         }
       }
     },
@@ -588,12 +589,11 @@
       "defaults": {
         "name": "Libo Vibes Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -657,13 +657,14 @@
           ],
           "name": "Libo LaLa",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                3
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 3
+              }
+            ]
           }
         },
         {
@@ -672,13 +673,14 @@
           ],
           "name": "Libo Carlos",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                3
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 3
+              }
+            ]
           }
         },
         {
@@ -687,13 +689,14 @@
           ],
           "name": "Libo Selina",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                3
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 3
+              }
+            ]
           }
         }
       ]
@@ -724,12 +727,11 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -817,12 +819,11 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -850,13 +851,14 @@
           ],
           "name": "MagicMotion Eidolon",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         }
       ]
@@ -880,12 +882,11 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              77
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 77
+            }
+          ]
         }
       }
     },
@@ -914,12 +915,11 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -959,13 +959,14 @@
           ],
           "name": "MagicMotion Umi",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -993,17 +994,26 @@
       "defaults": {
         "name": "Mysteryvibe Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 6,
-            "StepCount": [
-              56,
-              56,
-              56,
-              56,
-              56,
-              56
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 56
+            },
+            {
+              "StepCount": 56
+            },
+            {
+              "StepCount": 56
+            },
+            {
+              "StepCount": 56
+            },
+            {
+              "StepCount": 56
+            },
+            {
+              "StepCount": 56
+            }
+          ]
         }
       },
       "configurations": [
@@ -1025,13 +1035,14 @@
           ],
           "name": "MysteryVibe Poco",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                56,
-                56
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 56
+              },
+              {
+                "StepCount": 56
+              }
+            ]
           }
         }
       ]
@@ -1059,12 +1070,11 @@
       "defaults": {
         "name": "Picobong Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              10
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 10
+            }
+          ]
         }
       },
       "configurations": [
@@ -1124,12 +1134,11 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              255
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 255
+            }
+          ]
         }
       },
       "configurations": [
@@ -1143,13 +1152,14 @@
           "messages": {
             "BatteryLevelCmd": {},
             "RSSILevelCmd": {},
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                255,
-                255
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 255
+              },
+              {
+                "StepCount": 255
+              }
+            ]
           }
         },
         {
@@ -1160,14 +1170,17 @@
           "messages": {
             "BatteryLevelCmd": {},
             "RSSILevelCmd": {},
-            "VibrateCmd": {
-              "FeatureCount": 3,
-              "StepCount": [
-                255,
-                255,
-                2
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 255
+              },
+              {
+                "StepCount": 255
+              },
+              {
+                "StepCount": 2
+              }
+            ]
           }
         }
       ]
@@ -1203,12 +1216,11 @@
       "defaults": {
         "name": "WeVibe Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              15
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 15
+            }
+          ]
         }
       },
       "configurations": [
@@ -1271,13 +1283,14 @@
           ],
           "name": "WeVibe 4 Plus",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                15,
-                15
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              }
+            ]
           }
         },
         {
@@ -1286,13 +1299,14 @@
           ],
           "name": "WeVibe Gala",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                15,
-                15
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              }
+            ]
           }
         },
         {
@@ -1301,13 +1315,14 @@
           ],
           "name": "WeVibe Nova",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                15,
-                15
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              }
+            ]
           }
         },
         {
@@ -1316,13 +1331,14 @@
           ],
           "name": "WeVibe Sync",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                15,
-                15
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              }
+            ]
           }
         }
       ]
@@ -1351,12 +1367,11 @@
       "defaults": {
         "name": "WeVibe 8-bit Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              12
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 12
+            }
+          ]
         }
       },
       "configurations": [
@@ -1366,13 +1381,14 @@
           ],
           "name": "WeVibe Chorus",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                27,
-                27
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 27
+              },
+              {
+                "StepCount": 27
+              }
+            ]
           }
         },
         {
@@ -1381,12 +1397,11 @@
           ],
           "name": "WeVibe Melt",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                22
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 22
+              }
+            ]
           }
         },
         {
@@ -1401,13 +1416,14 @@
           ],
           "name": "WeVibe Vector",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                12,
-                12
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 12
+              },
+              {
+                "StepCount": 12
+              }
+            ]
           }
         },
         {
@@ -1416,12 +1432,11 @@
           ],
           "name": "WeVibe Wand",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                22
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 22
+              }
+            ]
           }
         },
         {
@@ -1431,12 +1446,11 @@
           ],
           "name": "WeVibe Bond",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                27
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 27
+              }
+            ]
           }
         },
         {
@@ -1447,13 +1461,14 @@
           ],
           "name": "WeVibe Nova 2",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                27,
-                27
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 27
+              },
+              {
+                "StepCount": 27
+              }
+            ]
           }
         }
       ]
@@ -1492,12 +1507,11 @@
       "defaults": {
         "name": "Youcups Warrior II",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              8
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 8
+            }
+          ]
         }
       }
     },
@@ -1515,19 +1529,32 @@
       "defaults": {
         "name": "Cueme Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 8,
-            "StepCount": [
-              15,
-              15,
-              15,
-              15,
-              15,
-              15,
-              15,
-              15
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            },
+            {
+              "StepCount": 15
+            }
+          ]
         }
       },
       "configurations": [
@@ -1549,15 +1576,20 @@
           ],
           "name": "Cueme Womans",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 4,
-              "StepCount": [
-                15,
-                15,
-                15,
-                15
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              },
+              {
+                "StepCount": 15
+              }
+            ]
           }
         }
       ]
@@ -1582,14 +1614,17 @@
       "defaults": {
         "name": "Kiiroo V2 Vibrator Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 3,
-            "StepCount": [
-              100,
-              100,
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            },
+            {
+              "StepCount": 100
+            },
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -1599,12 +1634,11 @@
           ],
           "name": "Kiiroo Pearl 2",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1613,17 +1647,16 @@
           ],
           "name": "OhMiBod Fuse",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ],
-              "FeatureOrder": [
-                1,
-                0
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100,
+                "FeatureOrder": 1
+              },
+              {
+                "StepCount": 100,
+                "FeatureOrder": 0
+              }
+            ]
           }
         },
         {
@@ -1632,17 +1665,16 @@
           ],
           "name": "PornHub Virtual Rabit",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ],
-              "FeatureOrder": [
-                1,
-                0
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100,
+                "FeatureOrder": 1
+              },
+              {
+                "StepCount": 100,
+                "FeatureOrder": 0
+              }
+            ]
           }
         },
         {
@@ -1651,13 +1683,14 @@
           ],
           "name": "PornHub Virtual Blowbot",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1666,14 +1699,17 @@
           ],
           "name": "Kiiroo Titan",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 3,
-              "StepCount": [
-                100,
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         }
       ]
@@ -1712,12 +1748,11 @@
           ],
           "name": "Kiiroo Pearl 2.1",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1726,12 +1761,11 @@
           ],
           "name": "Kiiroo Cliona",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1740,12 +1774,11 @@
           ],
           "name": "OhMiBod Esca 2",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1754,18 +1787,16 @@
           ],
           "name": "Kiiroo Titan 1.1",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            },
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ],
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "FleshlightLaunchFW12Cmd": {}
           }
         },
@@ -1775,12 +1806,11 @@
           ],
           "name": "OhMiBod Lumen",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1789,12 +1819,11 @@
           ],
           "name": "hMiBod NEX|3",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -1803,12 +1832,11 @@
           ],
           "name": "Hot Octopuss Pulse Solo Interactive",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                6
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 6
+              }
+            ]
           }
         }
       ]
@@ -1841,12 +1869,11 @@
           ],
           "name": "Kiiroo Onyx 2.1",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "FleshlightLaunchFW12Cmd": {}
           }
         },
@@ -1856,12 +1883,11 @@
           ],
           "name": "Kiiroo Onyx+",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "FleshlightLaunchFW12Cmd": {}
           }
         },
@@ -1871,12 +1897,11 @@
           ],
           "name": "Kiiroo Keon",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "FleshlightLaunchFW12Cmd": {}
           }
         },
@@ -1887,12 +1912,11 @@
           ],
           "name": "Kiiroo Onyx+ Realm Edition",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "FleshlightLaunchFW12Cmd": {}
           }
         }
@@ -1908,12 +1932,11 @@
       "defaults": {
         "name": "Vorze Cyclone X10 Device",
         "messages": {
-          "RotateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              10
-            ]
-          }
+          "RotateCmd": [
+            {
+              "StepCount": 10
+            }
+          ]
         }
       }
     },
@@ -1927,12 +1950,11 @@
       "defaults": {
         "name": "Rez TranceVibrator",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              255
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 255
+            }
+          ]
         }
       }
     },
@@ -1961,12 +1983,11 @@
           ],
           "name": "Kiiroo Pearl",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                4
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 4
+              }
+            ]
           }
         },
         {
@@ -1975,12 +1996,11 @@
           ],
           "name": "Kiiroo Onyx",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                4
-              ]
-            }
+            "LinearCmd": [
+              {
+                "StepCount": 4
+              }
+            ]
           }
         }
       ]
@@ -2011,12 +2031,11 @@
           ],
           "name": "Vorze Bach",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -2025,12 +2044,11 @@
           ],
           "name": "Adult Festa Rocket",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -2039,12 +2057,11 @@
           ],
           "name": "Vorze A10 Cyclone SA",
           "messages": {
-            "RotateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "RotateCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "VorzeA10CycloneCmd": {}
           }
         },
@@ -2054,12 +2071,11 @@
           ],
           "name": "Vorze UFO SA",
           "messages": {
-            "RotateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            },
+            "RotateCmd": [
+              {
+                "StepCount": 99
+              }
+            ],
             "VorzeA10CycloneCmd": {}
           }
         },
@@ -2069,12 +2085,11 @@
           ],
           "name": "Vorze Piston",
           "messages": {
-            "LinearCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                99
-              ]
-            }
+            "LinearCmd": [
+              {
+                "StepCount": 99
+              }
+            ]
           }
         }
       ]
@@ -2093,12 +2108,11 @@
       "defaults": {
         "name": "Youou Wand Vibrator",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              255
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 255
+            }
+          ]
         }
       }
     },
@@ -2112,12 +2126,11 @@
       "defaults": {
         "name": "RealTouch",
         "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              99
-            ]
-          }
+          "LinearCmd": [
+            {
+              "StepCount": 99
+            }
+          ]
         }
       }
     },
@@ -2136,12 +2149,11 @@
       "defaults": {
         "name": "Pretty Love Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            }
+          ]
         }
       }
     },
@@ -2165,12 +2177,11 @@
       "defaults": {
         "name": "Svakom Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              19
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 19
+            }
+          ]
         }
       },
       "configurations": [
@@ -2214,13 +2225,14 @@
       "defaults": {
         "name": "Svakom Sam Neo",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              10,
-              1
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 10
+            },
+            {
+              "StepCount": 1
+            }
+          ]
         }
       }
     },
@@ -2238,12 +2250,11 @@
       "defaults": {
         "name": "Svakom Alex Neo",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            }
+          ]
         }
       }
     },
@@ -2261,13 +2272,14 @@
       "defaults": {
         "name": "Svakom Iker",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              10,
-              5
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 10
+            },
+            {
+              "StepCount": 5
+            }
+          ]
         }
       }
     },
@@ -2285,12 +2297,11 @@
       "defaults": {
         "name": "Realov Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              50
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 50
+            }
+          ]
         }
       }
     },
@@ -2309,18 +2320,16 @@
       "defaults": {
         "name": "Motorbunny Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              255
-            ]
-          },
-          "RotateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              255
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 255
+            }
+          ],
+          "RotateCmd": [
+            {
+              "StepCount": 255
+            }
+          ]
         }
       },
       "configurations": [
@@ -2354,12 +2363,11 @@
       "defaults": {
         "name": "Zalo Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              8
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 8
+            }
+          ]
         }
       },
       "configurations": [
@@ -2369,17 +2377,16 @@
           ],
           "name": "Zalo Queen",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                8,
-                8
-              ],
-              "FeatureOrder": [
-                1,
-                0
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 8,
+                "FeatureOrder": 1
+              },
+              {
+                "StepCount": 8,
+                "FeatureOrder": 0
+              }
+            ]
           }
         },
         {
@@ -2388,13 +2395,14 @@
           ],
           "name": "Zalo King",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                8,
-                8
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 8
+              },
+              {
+                "StepCount": 8
+              }
+            ]
           }
         },
         {
@@ -2429,12 +2437,11 @@
           ],
           "name": "SayberX",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                4
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 4
+              }
+            ]
           }
         },
         {
@@ -2460,12 +2467,11 @@
       "defaults": {
         "name": "Muse Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              9
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 9
+            }
+          ]
         }
       },
       "configurations": [
@@ -2498,13 +2504,14 @@
       "defaults": {
         "name": "Lelo F1s",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              100,
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            },
+            {
+              "StepCount": 100
+            }
+          ]
         }
       }
     },
@@ -2525,13 +2532,14 @@
       "defaults": {
         "name": "Lelo F1s V2",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              100,
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            },
+            {
+              "StepCount": 100
+            }
+          ]
         }
       }
     },
@@ -2549,13 +2557,14 @@
       "defaults": {
         "name": "Aneros Vivi",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              127,
-              127
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 127
+            },
+            {
+              "StepCount": 127
+            }
+          ]
         }
       }
     },
@@ -2575,13 +2584,14 @@
       "defaults": {
         "name": "Lovehoney Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              127,
-              127
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 127
+            },
+            {
+              "StepCount": 127
+            }
+          ]
         }
       },
       "configurations": [
@@ -2597,12 +2607,11 @@
           ],
           "name": "Lovehoney Desire Knicker Vibrator",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                127
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 127
+              }
+            ]
           }
         },
         {
@@ -2611,12 +2620,11 @@
           ],
           "name": "Lovehoney Desire Love Egg",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                127
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 127
+              }
+            ]
           }
         }
       ]
@@ -2654,12 +2662,11 @@
       "defaults": {
         "name": "MaxPro 2",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       }
     },
@@ -2676,12 +2683,11 @@
       "defaults": {
         "name": "Nobra's Silicone Dreams Toy",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              15
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 15
+            }
+          ]
         }
       }
     },
@@ -2700,12 +2706,11 @@
       "defaults": {
         "name": "The Handy",
         "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          },
+          "LinearCmd": [
+            {
+              "StepCount": 100
+            }
+          ],
           "FleshlightLaunchFW12Cmd": {}
         }
       }
@@ -2725,13 +2730,14 @@
       "defaults": {
         "name": "Cachito Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              5,
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 5
+            },
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -2763,13 +2769,14 @@
       "defaults": {
         "name": "Je Joue Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              5,
-              5
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 5
+            },
+            {
+              "StepCount": 5
+            }
+          ]
         }
       }
     },
@@ -2787,12 +2794,11 @@
       "defaults": {
         "name": "Love Nut",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              15
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 15
+            }
+          ]
         }
       }
     },
@@ -2814,12 +2820,11 @@
       "defaults": {
         "name": "Patoo Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -2847,13 +2852,14 @@
           ],
           "name": "Patoo Devil",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         }
       ]
@@ -2871,12 +2877,11 @@
       "defaults": {
         "name": "TCode v0.3 (Single Linear Axis)",
         "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          },
+          "LinearCmd": [
+            {
+              "StepCount": 100
+            }
+          ],
           "FleshlightLaunchFW12Cmd": {}
         }
       }
@@ -2896,12 +2901,11 @@
       "defaults": {
         "name": "Fredorch Device",
         "messages": {
-          "LinearCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              150
-            ]
-          },
+          "LinearCmd": [
+            {
+              "StepCount": 150
+            }
+          ],
           "FleshlightLaunchFW12Cmd": {}
         }
       }
@@ -2920,12 +2924,11 @@
       "defaults": {
         "name": "Mizz Zee Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              68
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 68
+            }
+          ]
         }
       }
     },
@@ -2946,13 +2949,14 @@
       "defaults": {
         "name": "HTK Breast Massager",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 2,
-            "StepCount": [
-              1,
-              1
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 1
+            },
+            {
+              "StepCount": 1
+            }
+          ]
         }
       }
     },
@@ -2971,12 +2975,11 @@
       "defaults": {
         "name": "Ankni Candy",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            }
+          ]
         }
       }
     },
@@ -2995,12 +2998,11 @@
       "defaults": {
         "name": "Hgod Butterfly Love",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              10
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 10
+            }
+          ]
         }
       }
     },
@@ -3023,12 +3025,11 @@
       "defaults": {
         "name": "Love Distance Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              121
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 121
+            }
+          ]
         }
       },
       "configurations": [
@@ -3085,12 +3086,11 @@
       "defaults": {
         "name": "Satisfyer Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              100
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 100
+            }
+          ]
         }
       },
       "configurations": [
@@ -3100,12 +3100,11 @@
           ],
           "name": "Satisfyer Hot Spot",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3114,13 +3113,14 @@
           ],
           "name": "Satisfyer Heated Affair",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3135,12 +3135,11 @@
           ],
           "name": "Satisfyer Heated Thrill",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3149,13 +3148,14 @@
           ],
           "name": "Satisfyer Hot Bunny",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3164,12 +3164,11 @@
           ],
           "name": "Satisfyer Heat Climax",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3178,13 +3177,14 @@
           ],
           "name": "Satisfyer Heat Climax+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3193,12 +3193,11 @@
           ],
           "name": "Satisfyer Hot Passion",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3207,13 +3206,14 @@
           ],
           "name": "Satisfyer Haute Couture+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3222,13 +3222,14 @@
           ],
           "name": "Satisfyer High Fashion+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3237,13 +3238,14 @@
           ],
           "name": "Satisfyer Prêt-à-porter+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3253,13 +3255,14 @@
           ],
           "name": "Satisfyer Love Triangle",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3269,13 +3272,14 @@
           ],
           "name": "Satisfyer Curvy 1+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3285,13 +3289,14 @@
           ],
           "name": "Satisfyer Curvy 2+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3308,13 +3313,14 @@
           ],
           "name": "Satisfyer Double Joy",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3325,13 +3331,14 @@
           ],
           "name": "Satisfyer Double Fun",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3342,13 +3349,14 @@
           ],
           "name": "Satisfyer Double Love",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3357,13 +3365,14 @@
           ],
           "name": "Satisfyer Curvy 3+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3374,13 +3383,14 @@
           ],
           "name": "Satisfyer Hot Lover",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3391,13 +3401,14 @@
           ],
           "name": "Satisfyer Mono Flex",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3409,14 +3420,17 @@
           ],
           "name": "Satisfyer Double Flex",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 3,
-              "StepCount": [
-                100,
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3427,13 +3441,14 @@
           ],
           "name": "Satisfyer Heat Wave",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3485,13 +3500,14 @@
           ],
           "name": "Satisfyer Dual Love",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3501,13 +3517,14 @@
           ],
           "name": "Satisfyer Dual Pleasure",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3516,12 +3533,11 @@
           ],
           "name": "Satisfyer Hero+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3530,12 +3546,11 @@
           ],
           "name": "Satisfyer Knight+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3545,12 +3560,11 @@
           ],
           "name": "Satisfyer Newcomer+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3560,13 +3574,14 @@
           ],
           "name": "Satisfyer Plug-ilicious 1",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3577,13 +3592,14 @@
           ],
           "name": "Satisfyer Plug-ilicious 2",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3592,12 +3608,11 @@
           ],
           "name": "Satisfyer E-Love Foreplay",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3606,12 +3621,11 @@
           ],
           "name": "Satisfyer E-Love G-Hunter",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3620,13 +3634,14 @@
           ],
           "name": "Satisfyer E-Love G-Hunter+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3635,12 +3650,11 @@
           ],
           "name": "Satisfyer E-Love G-Spotter",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3649,13 +3663,14 @@
           ],
           "name": "Satisfyer E-Love G-Spotter+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3664,12 +3679,11 @@
           ],
           "name": "Satisfyer E-Love Story",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3729,13 +3743,14 @@
           ],
           "name": "Satisfyer Men Vibration+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3751,13 +3766,14 @@
           ],
           "name": "Satisfyer Rotator Plug 1+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3767,13 +3783,14 @@
           ],
           "name": "Satisfyer Rotator Plug 2+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3820,13 +3837,14 @@
           ],
           "name": "Satisfyer Double Desire",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3838,13 +3856,14 @@
           ],
           "name": "Satisfyer Double Lust",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3867,13 +3886,14 @@
           ],
           "name": "Satisfyer Top Secret",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3884,13 +3904,14 @@
           ],
           "name": "Satisfyer Top Secret+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3908,13 +3929,14 @@
           ],
           "name": "Satisfyer Sunray",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3924,13 +3946,14 @@
           ],
           "name": "Satisfyer Curvy Trinity 5+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3953,13 +3976,14 @@
           ],
           "name": "Satisfyer Hug me",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3968,13 +3992,14 @@
           ],
           "name": "Satisfyer Air Pump Bunny 5+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3983,12 +4008,11 @@
           ],
           "name": "Satisfyer Air Pump Vibrator 5+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -3998,13 +4022,14 @@
           ],
           "name": "Satisfyer Threesome 4",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -4026,12 +4051,11 @@
           ],
           "name": "Satisfyer Air Pump Booty 5+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -4040,13 +4064,14 @@
           ],
           "name": "Satisfyer Pro+ Wave 4",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -4056,13 +4081,14 @@
           ],
           "name": "Satisfyer Mini Wand-er+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -4079,13 +4105,14 @@
           ],
           "name": "Satisfyer Twirling Pro+",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         },
         {
@@ -4109,13 +4136,14 @@
           ],
           "name": "Satisfyer Rrrolling Sensation",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 2,
-              "StepCount": [
-                100,
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              },
+              {
+                "StepCount": 100
+              }
+            ]
           }
         }
       ]
@@ -4138,12 +4166,11 @@
       "defaults": {
         "name": "ManNuo Device",
         "messages": {
-          "VibrateCmd": {
-            "FeatureCount": 1,
-            "StepCount": [
-              3
-            ]
-          }
+          "VibrateCmd": [
+            {
+              "StepCount": 3
+            }
+          ]
         }
       }
     }

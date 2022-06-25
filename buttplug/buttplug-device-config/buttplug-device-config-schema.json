@@ -143,34 +143,22 @@
     },
     "StepCount": {
       "description": "Specifies granularity of each feature on the device.",
-      "type": "array",
-      "items": {
-        "minimum": 1,
-        "type": "integer"
-      },
-      "minItems": 1
+      "minimum": 1,
+      "type": "integer"
     },
     "StepRange": {
       "description": "Specifies the range of steps to use for a device. Devices will use 0 as a stop, so range is for 0 < x <= StepCount.",
       "type": "array",
-      "minItems": 1,
       "items": {
-        "type": "array",
-        "items": {
-          "type": "integer"
-        },
-        "minItems": 2,
-        "maxItems": 2
-      }
+        "type": "integer"
+      },
+      "minItems": 2,
+      "maxItems": 2
     },
     "FeatureOrder": {
       "description": "Specifies the order features are exposed in by the ButtplugMessages.",
-      "type": "array",
-      "items": {
-        "minimum": 0,
-        "type": "integer"
-      },
-      "minItems": 2
+      "minimum": 0,
+      "type": "integer"
     },
     "NullMessageAttributes": {
       "description": "Attributes for device message that have no attributes.",
@@ -181,77 +169,36 @@
     },
     "GenericMessageAttributes": {
       "description": "Attributes for device messages.",
-      "type": "object",
-      "properties": {
-        "FeatureCount": {
-          "$ref": "#/components/FeatureCount"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "StepCount": {
+            "$ref": "#/components/StepCount"
+          },
+          "FeatureOrder": {
+            "$ref": "#/components/FeatureOrder"
+          }
         },
-        "StepCount": {
-          "$ref": "#/components/StepCount"
-        },
-        "FeatureOrder": {
-          "$ref": "#/components/FeatureOrder"
-        }
+        "additionalProperties": false,
+        "minProperties": 0
       },
-      "additionalProperties": false,
-      "minProperties": 0
+      "minItems": 1
     },
     "GenericUserMessageAttributes": {
       "description": "Attributes for device messages that can be configured by the user.",
-      "type": "object",
-      "properties": {
-        "StepRange": {
-          "$ref": "#/components/StepRange"
-        }
-      },
-      "additionalProperties": false,
-      "minProperties": 0
-    },
-    "RawMessageAttributes": {
-      "description": "Attributes for raw device messages.",
-      "type": "object",
-      "properties": {
-        "Endpoints": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minItems": 1
-          }
-        }
-      },
-      "additionalProperties": false,
-      "minProperties": 0
-    },
-    "PatternMessageAttributes": {
-      "description": "Attributes for PatternPlaybackCmd.",
-      "type": "object",
-      "properties": {
-        "FeatureCount": {
-          "$ref": "#/components/FeatureCount"
-        },
-        "StepCount": {
-          "$ref": "#/components/StepCount"
-        },
-        "ActuatorType": {
-          "description": "Types of actuators for pattern playback (Vibrate, Rotate, Linear)",
-          "type": "array",
-          "items": {
-            "type": "string"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "StepRange": {
+            "$ref": "#/components/StepRange"
           }
         },
-        "Patterns": {
-          "description": "Names of patterns to play back, per actuator.",
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
+        "additionalProperties": false,
+        "minProperties": 0
       },
-      "additionalProperties": false,
-      "minProperties": 0
+      "minItems": 1
     },
     "DeviceMessagesEx": {
       "description": "A list of the messages a device will accept on this server implementation.",
@@ -289,21 +236,6 @@
         },
         "RSSILevelCmd": {
           "$ref": "#/components/NullMessageAttributes"
-        },
-        "RawReadCmd": {
-          "$ref": "#/components/RawMessageAttributes"
-        },
-        "RawWriteCmd": {
-          "$ref": "#/components/RawMessageAttributes"
-        },
-        "RawSubscribeCmd": {
-          "$ref": "#/components/RawMessageAttributes"
-        },
-        "RawUnsubscribeCmd": {
-          "$ref": "#/components/RawMessageAttributes"
-        },
-        "PatternPlaybackCmd": {
-          "$ref": "#/components/PatternMessageAttributes"
         }
       },
       "additionalProperties": false

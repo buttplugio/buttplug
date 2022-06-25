@@ -67,8 +67,6 @@
 # is new protocols, since those have to be implemented in source code.
 #
 # That's pretty much it for how this file works.
-
-
 # Now for the actual protocol definitions. This is gonna get wild, so
 # I'll keep a list of rules that you can refer to up here.
 #
@@ -117,11 +115,8 @@
 #
 # - Serial info here is for default device configuration. Port names
 #   will have to be added by the user in the user device config file.
-
 version: 65
-
 protocols:
-  
   lovense:
     # Lovense is special. Special in oh so many ways.
     #
@@ -208,9 +203,7 @@ protocols:
       name: Lovense Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 20
+          - StepCount: 20
         BatteryLevelCmd: {}
     configurations:
       # For lovense, our identifiers are the letters returned from the
@@ -223,10 +216,8 @@ protocols:
         name: Lovense Edge
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - A
@@ -234,9 +225,7 @@ protocols:
         name: Lovense Nora
         messages:
           RotateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - L
@@ -273,10 +262,8 @@ protocols:
         name: Lovense Dolce
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - ED
@@ -286,10 +273,8 @@ protocols:
         name: Lovense Hyphy
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - T
@@ -301,9 +286,7 @@ protocols:
       name: Lovense Connect Service Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 20
+          - StepCount: 20
         BatteryLevelCmd: {}
     configurations:
       # For lovense service, our identifiers are the device names as the service
@@ -318,19 +301,15 @@ protocols:
         name: Lovense Edge
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - Nora
         name: Lovense Nora
         messages:
           RotateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - Ambi
@@ -367,10 +346,8 @@ protocols:
         name: Lovense Dolce
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - ED
@@ -380,10 +357,8 @@ protocols:
         name: Lovense Hyphy
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 20
-              - 20
+            - StepCount: 20
+            - StepCount: 20
           BatteryLevelCmd: {}
       - identifier:
           - T
@@ -404,10 +379,8 @@ protocols:
       name: XBox (XInput) Compatible Gamepad
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 65535
-            - 65535
+          - StepCount: 65535
+          - StepCount: 65535
   kiiroo-v2:
     btle:
       names:
@@ -430,9 +403,7 @@ protocols:
       name: Kiiroo v2 Device
       messages:
         LinearCmd:
-          FeatureCount: 1
-          StepCount:
-            - 99
+          - StepCount: 99
         FleshlightLaunchFW12Cmd: {}
     configurations:
       - identifier:
@@ -455,9 +426,7 @@ protocols:
         name: Libo Elle Device      
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 3  # Vibe
+            - StepCount: 3  # Vibe
       configurations:
         - identifier:
             - PiPiJing
@@ -478,10 +447,8 @@ protocols:
         name: Libo Shark          
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 3
-              - 3
+            - StepCount: 3
+            - StepCount: 3
   libo-karen:
       btle:
         names:
@@ -521,9 +488,7 @@ protocols:
         name: Libo Vibes Device
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
       configurations:
         - identifier:
             - XiaoLu
@@ -558,28 +523,22 @@ protocols:
           name: Libo LaLa
           messages:
             VibrateCmd:
-              FeatureCount: 2
-              StepCount:
-                - 100
-                - 3
+            - StepCount: 100
+            - StepCount: 3
         - identifier:
             - Gugudai
           name: Libo Carlos
           messages:
             VibrateCmd:
-              FeatureCount: 2
-              StepCount:
-                - 100
-                - 3
+            - StepCount: 100
+            - StepCount: 3
         - identifier:
             - Haima
           name: Libo Selina
           messages:
             VibrateCmd:
-              FeatureCount: 2
-              StepCount:
-                - 100
-                - 3
+            - StepCount: 100
+            - StepCount: 3
   magic-motion-1:
     btle:
       names:
@@ -603,9 +562,7 @@ protocols:
         BatteryLevelCmd: { }
         RSSILevelCmd: { }
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
     configurations:
       - identifier:
           - Smart Bean
@@ -656,9 +613,7 @@ protocols:
         BatteryLevelCmd: {}
         RSSILevelCmd: {}
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
     configurations:
       - identifier:
           - Lipstick
@@ -674,10 +629,8 @@ protocols:
         name: MagicMotion Eidolon
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
   magic-motion-3:
     btle:
       names:
@@ -694,9 +647,7 @@ protocols:
         BatteryLevelCmd: {}
         RSSILevelCmd: {}
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 77
+          - StepCount: 77
   magic-motion-4:
     btle:
       names:
@@ -719,9 +670,7 @@ protocols:
         BatteryLevelCmd: {}
         RSSILevelCmd: {}
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
     configurations:
       - identifier:
           - funone
@@ -743,10 +692,8 @@ protocols:
         name: MagicMotion Umi
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - funkegel
         name: MagicMotion Crystal
@@ -764,14 +711,12 @@ protocols:
       name: Mysteryvibe Device
       messages:
         VibrateCmd:
-          FeatureCount: 6
-          StepCount:
-            - 56
-            - 56
-            - 56
-            - 56
-            - 56
-            - 56
+          - StepCount: 56
+          - StepCount: 56
+          - StepCount: 56
+          - StepCount: 56
+          - StepCount: 56
+          - StepCount: 56
     configurations:
       - identifier:
           - MV Crescendo
@@ -784,10 +729,8 @@ protocols:
         name: MysteryVibe Poco
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 56
-              - 56
+            - StepCount: 56
+            - StepCount: 56
   picobong:
     btle:
       names:
@@ -808,9 +751,7 @@ protocols:
       name: Picobong Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 10
+          - StepCount: 10
     configurations:
       - identifier:
           - Blow hole
@@ -851,9 +792,7 @@ protocols:
         BatteryLevelCmd: {}
         RSSILevelCmd: {}
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 255
+          - StepCount: 255
     configurations:
       - identifier:
           - Licker
@@ -864,10 +803,8 @@ protocols:
           BatteryLevelCmd: {}
           RSSILevelCmd: {}
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 255
-              - 255
+            - StepCount: 255
+            - StepCount: 255
       - identifier:
           - Rabbit
         name: Vibratissimo Rabbit
@@ -875,11 +812,9 @@ protocols:
           BatteryLevelCmd: {}
           RSSILevelCmd: {}
           VibrateCmd:
-            FeatureCount: 3
-            StepCount:
-              - 255
-              - 255
-              - 02
+            - StepCount: 255
+            - StepCount: 255
+            - StepCount: 02
   wevibe:
     btle:
       names:
@@ -908,9 +843,7 @@ protocols:
       name: WeVibe Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 15
+          - StepCount: 15
     configurations:
       # Single Vibes
       - identifier:
@@ -948,37 +881,29 @@ protocols:
         name: WeVibe 4 Plus
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 15
-              - 15
+            - StepCount: 15
+            - StepCount: 15
       - identifier:
           - Gala
         name: WeVibe Gala
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 15
-              - 15
+            - StepCount: 15
+            - StepCount: 15
       - identifier:
           - Nova
         name: WeVibe Nova
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 15
-              - 15
+            - StepCount: 15
+            - StepCount: 15
       - identifier:
           - Sync
         name: WeVibe Sync
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 15
-              - 15
+            - StepCount: 15
+            - StepCount: 15
   wevibe-8bit:
     btle:
       names:
@@ -1000,27 +925,21 @@ protocols:
       name: WeVibe 8-bit Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 12
+          - StepCount: 12
     configurations:
       - identifier:
           - Chorus
         name: WeVibe Chorus
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 27
-              - 27
+            - StepCount: 27
+            - StepCount: 27
       - identifier:
           - Melt
         name: WeVibe Melt
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 22
+            - StepCount: 22
       - identifier:
           - Moxie
         name: WeVibe Moxie
@@ -1029,27 +948,21 @@ protocols:
         name: WeVibe Vector
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 12
-              - 12
+            - StepCount: 12
+            - StepCount: 12
       - identifier:
           - Wand
         name: WeVibe Wand
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 22
+            - StepCount: 22
       - identifier:
           - Bond
           - Nelson
         name: WeVibe Bond
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 27
+            - StepCount: 27
       - identifier:
           - Nova2
           - Nova_2
@@ -1057,10 +970,8 @@ protocols:
         name: WeVibe Nova 2
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 27
-              - 27
+            - StepCount: 27
+            - StepCount: 27
   wevibe-legacy:
     btle:
       names:
@@ -1086,9 +997,7 @@ protocols:
       name: Youcups Warrior II
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 8
+          - StepCount: 8
   cueme:
     btle:
       names:
@@ -1102,16 +1011,14 @@ protocols:
       name: Cueme Device
       messages:
         VibrateCmd:
-          FeatureCount: 8
-          StepCount:
-            - 15
-            - 15
-            - 15
-            - 15
-            - 15
-            - 15
-            - 15
-            - 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
+          - StepCount: 15
     configurations:
       - identifier:
           - "1"
@@ -1124,12 +1031,10 @@ protocols:
         name: Cueme Womans
         messages:
           VibrateCmd:
-            FeatureCount: 4
-            StepCount:
-              - 15
-              - 15
-              - 15
-              - 15
+            - StepCount: 15
+            - StepCount: 15
+            - StepCount: 15
+            - StepCount: 15
   kiiroo-v2-vibrator:
     btle:
       names:
@@ -1147,63 +1052,49 @@ protocols:
       name: Kiiroo V2 Vibrator Device
       messages:
         VibrateCmd:
-          FeatureCount: 3
-          StepCount:
-           - 100
-           - 100
-           - 100
+          - StepCount: 100
+          - StepCount: 100
+          - StepCount: 100
     configurations:
       - identifier:
           - Pearl2
         name: Kiiroo Pearl 2
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 100
+            - StepCount: 100
       - identifier:
           - Fuse
         name: OhMiBod Fuse
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
-            FeatureOrder:
-              - 1
-              - 0
+            - StepCount: 100
+              FeatureOrder: 1
+            - StepCount: 100
+              FeatureOrder: 0
       - identifier:
           - Virtual Rabbit
         name: PornHub Virtual Rabit
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
-            FeatureOrder:
-              - 1
-              - 0
+            - StepCount: 100
+              FeatureOrder: 1
+            - StepCount: 100
+              FeatureOrder: 0
       - identifier:
           - Virtual Blowbot
         name: PornHub Virtual Blowbot
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - Titan
         name: Kiiroo Titan
         messages:
           VibrateCmd:
-            FeatureCount: 3
-            StepCount:
-              - 100
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
+            - StepCount: 100
   kiiroo-v21:
     btle:
       names:
@@ -1232,62 +1123,46 @@ protocols:
         name: Kiiroo Pearl 2.1
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 100
+            - StepCount: 100
       - identifier:
           - Cliona
         name: Kiiroo Cliona
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 100
+            - StepCount: 100
       - identifier:
           - OhMiBod 4.0
         name: OhMiBod Esca 2
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 100
+            - StepCount: 100
       - identifier:
           - Titan1.1
         name: Kiiroo Titan 1.1
         messages:
           VibrateCmd:
-            FeatureCount: 1 # Actually 3, but havn't worked out how to map them yet
-            StepCount:
-             - 100
+            - StepCount: 100
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           FleshlightLaunchFW12Cmd: {}
       - identifier:
           - OhMiBod LUMEN
         name: OhMiBod Lumen
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
       - identifier:
           - OhMiBod NEX3
         name: hMiBod NEX|3
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
       - identifier:
           - Pulse Interactive
         name: Hot Octopuss Pulse Solo Interactive
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 6
+            - StepCount: 6
   kiiroo-v21-initialized:
     btle:
       names:
@@ -1311,27 +1186,21 @@ protocols:
         name: Kiiroo Onyx 2.1
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           FleshlightLaunchFW12Cmd: { }
       - identifier:
           - Onyx+
         name: Kiiroo Onyx+
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           FleshlightLaunchFW12Cmd: { }
       - identifier:
           - KEON
         name: Kiiroo Keon
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           FleshlightLaunchFW12Cmd: { }
       - identifier:
           - Rey
@@ -1339,9 +1208,7 @@ protocols:
         name: Kiiroo Onyx+ Realm Edition
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           FleshlightLaunchFW12Cmd: { }
   vorze-cyclone-x:
     hid:
@@ -1351,9 +1218,7 @@ protocols:
       name: Vorze Cyclone X10 Device
       messages:
         RotateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 10
+          - StepCount: 10
   rez-trancevibrator:
     usb:
       - vendor-id: 0xb49
@@ -1362,9 +1227,7 @@ protocols:
       name: Rez TranceVibrator
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 255
+          - StepCount: 255
   kiiroo-v1:
     btle:
       names:
@@ -1389,17 +1252,13 @@ protocols:
         name: Kiiroo Pearl
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 4
+            - StepCount: 4
       - identifier:
           - ONYX
         name: Kiiroo Onyx
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 4
+            - StepCount: 4
   vorze-sa:
     btle:
       names:
@@ -1420,43 +1279,33 @@ protocols:
         name: Vorze Bach
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
       - identifier:
           - ROCKET
         name: Adult Festa Rocket
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
       - identifier:
           - CycSA
         name: Vorze A10 Cyclone SA
         messages:
           RotateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           VorzeA10CycloneCmd: {}
       - identifier:
           - UFOSA
         name: Vorze UFO SA
         messages:
           RotateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
           VorzeA10CycloneCmd: {}
       - identifier:
           - VorzePiston
         name: Vorze Piston
         messages:
           LinearCmd:
-            FeatureCount: 1
-            StepCount:
-              - 99
+            - StepCount: 99
   youou:
     btle:
       names:
@@ -1468,9 +1317,7 @@ protocols:
       name: Youou Wand Vibrator
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 255
+          - StepCount: 255
   realtouch:
     hid:
       - vendor-id: 0x1f54
@@ -1479,9 +1326,7 @@ protocols:
       name: RealTouch
       messages:
         LinearCmd:
-          FeatureCount: 1
-          StepCount:
-           - 99
+          - StepCount: 99
   prettylove:
     btle:
       names:
@@ -1494,9 +1339,7 @@ protocols:
       name: Pretty Love Device      
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 3
+          - StepCount: 3
   svakom:
     btle:
       names:
@@ -1514,9 +1357,7 @@ protocols:
       name: Svakom Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 19
+          - StepCount: 19
     configurations:
       - identifier:
           - Aogu SCB
@@ -1541,10 +1382,8 @@ protocols:
       name: Svakom Sam Neo
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 10
-            - 1
+          - StepCount: 10
+          - StepCount: 1
   svakom-alex:
     btle:
       names:
@@ -1556,9 +1395,7 @@ protocols:
       name: Svakom Alex Neo
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 3
+          - StepCount: 3
   svakom-iker:
     btle:
       names:
@@ -1570,10 +1407,8 @@ protocols:
       name: Svakom Iker
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 10
-            - 5
+          - StepCount: 10
+          - StepCount: 5
   realov:
     btle:
       names:
@@ -1585,9 +1420,7 @@ protocols:
       name: Realov Device      
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 50
+          - StepCount: 50
   motorbunny:
     btle:
       names:
@@ -1605,13 +1438,9 @@ protocols:
       name: Motorbunny Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 255
+          - StepCount: 255
         RotateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 255
+          - StepCount: 255
     configurations:
       - identifier:
           - MB Controller
@@ -1632,31 +1461,24 @@ protocols:
       name: Zalo Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 8
+          - StepCount: 8
     configurations:
       - identifier:
           - ZALO-Queen
         name: Zalo Queen
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 8 # Oscillator
-              - 8 # Vibe
-            FeatureOrder:
-              - 1
-              - 0
+            - StepCount: 8 # Oscillator
+              FeatureOrder: 1
+            - StepCount: 8 # Vibe
+              FeatureOrder: 0
       - identifier:
           - ZALO-King
         name: Zalo King
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 8 # Vibe
-              - 8 # Oscillator
+            - StepCount: 8 # Vibe
+            - StepCount: 8 # Oscillator
       - identifier:
           - ZALO-Jeanne
         name: Zalo Jeanne
@@ -1678,9 +1500,7 @@ protocols:
         name: SayberX
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 4
+          - StepCount: 4
       - identifier:
           - X-Ring
         name: Sayber X-Ring
@@ -1696,9 +1516,7 @@ protocols:
       name: Muse Device      
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-           - 9
+          - StepCount: 9
     configurations:
       - identifier:
           - WB-ZDB-WST
@@ -1723,10 +1541,8 @@ protocols:
       name: Lelo F1s 
       messages:        
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-           - 100
-           - 100
+          - StepCount: 100
+          - StepCount: 100
   lelo-f1sv2:
     btle:
       names:
@@ -1748,10 +1564,8 @@ protocols:
       name: Lelo F1s V2
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 100
-            - 100
+          - StepCount: 100
+          - StepCount: 100
   aneros:
     btle:
       names:
@@ -1763,10 +1577,8 @@ protocols:
       name: Aneros Vivi         
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-           - 127
-           - 127
+          - StepCount: 127
+          - StepCount: 127
   lovehoney-desire:
     btle:
       names:
@@ -1780,10 +1592,8 @@ protocols:
       name: Lovehoney Device         
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-           - 127
-           - 127
+          - StepCount: 127
+          - StepCount: 127
     configurations:
       - identifier:
           - PROSTATE VIBE
@@ -1793,17 +1603,13 @@ protocols:
         name: Lovehoney Desire Knicker Vibrator
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 127
+          - StepCount: 127
       - identifier:
           - LOVE EGG
         name: Lovehoney Desire Love Egg
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-             - 127
+          - StepCount: 127
   twerkingbutt:
     btle:
       names:
@@ -1830,9 +1636,7 @@ protocols:
       name: MaxPro 2         
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
   nobra:
     serial:
       - port: default
@@ -1844,9 +1648,7 @@ protocols:
       name: Nobra's Silicone Dreams Toy
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 15
+          - StepCount: 15
   thehandy:
     btle:
       names:
@@ -1863,9 +1665,7 @@ protocols:
       name: The Handy         
       messages:
         LinearCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
         FleshlightLaunchFW12Cmd: {}
   cachito:
     btle:
@@ -1879,10 +1679,8 @@ protocols:
       name: Cachito Device
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 5
-            - 100
+          - StepCount: 5
+          - StepCount: 100
     configurations:
       - identifier:
           - CCTSK
@@ -1901,10 +1699,8 @@ protocols:
       name: Je Joue Device
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 5
-            - 5
+          - StepCount: 5
+          - StepCount: 5
   lovenuts:
     btle:
       names:
@@ -1916,9 +1712,7 @@ protocols:
       name: Love Nut
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 15
+          - StepCount: 15
   patoo:
     btle:
       names:
@@ -1934,9 +1728,7 @@ protocols:
       name: Patoo Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
     configurations:
       - identifier:
           - PTVEA
@@ -1952,10 +1744,8 @@ protocols:
         name: Patoo Devil
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
   tcode-v03:
     serial:
       - port: default
@@ -1967,9 +1757,7 @@ protocols:
       name: TCode v0.3 (Single Linear Axis)
       messages:
         LinearCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
         FleshlightLaunchFW12Cmd: {}
   fredorch:
     btle:
@@ -1983,9 +1771,7 @@ protocols:
       name: Fredorch Device
       messages:
         LinearCmd:
-          FeatureCount: 1
-          StepCount:
-            - 150
+          - StepCount: 150
         FleshlightLaunchFW12Cmd: {}
   mizzzee:
     btle:
@@ -1998,9 +1784,7 @@ protocols:
       name: Mizz Zee Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 68
+          - StepCount: 68
   htk_bm:
     btle:
       names:
@@ -2014,10 +1798,8 @@ protocols:
       name: HTK Breast Massager
       messages:
         VibrateCmd:
-          FeatureCount: 2
-          StepCount:
-            - 1
-            - 1
+          - StepCount: 1
+          - StepCount: 1
   ankni:
     btle:
       names:
@@ -2030,9 +1812,7 @@ protocols:
       name: Ankni Candy
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 3
+          - StepCount: 3
   hgod:
     btle:
       names:
@@ -2045,9 +1825,7 @@ protocols:
       name: Hgod Butterfly Love
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 10
+          - StepCount: 10
   lovedistance:
     btle:
       names:
@@ -2064,9 +1842,7 @@ protocols:
       name: Love Distance Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 121
+          - StepCount: 121
     configurations:
       - identifier:
           - REACH G
@@ -2099,28 +1875,22 @@ protocols:
       name: Satisfyer Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 100
+          - StepCount: 100
     configurations:
       - identifier:
           - "10005"
         name: Satisfyer Hot Spot
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10006"
         name: Satisfyer Heated Affair
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10007"
@@ -2130,105 +1900,83 @@ protocols:
         name: Satisfyer Heated Thrill
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10009"
         name: Satisfyer Hot Bunny
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10010"
         name: Satisfyer Heat Climax
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10011"
         name: Satisfyer Heat Climax+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10012"
         name: Satisfyer Hot Passion
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10013"
         name: Satisfyer Haute Couture+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10014"
         name: Satisfyer High Fashion+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10015"
         name: Satisfyer Prêt-à-porter+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10024"
           - "10025"
         name: Satisfyer Love Triangle
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10027"
           - "10028"
         name: Satisfyer Curvy 1+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10030"
           - "10031"
         name: Satisfyer Curvy 2+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10032"
         name: Satisfyer Double Wand-er
@@ -2239,10 +1987,8 @@ protocols:
         name: Satisfyer Double Joy
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10049"
           - "10050"
@@ -2250,10 +1996,8 @@ protocols:
         name: Satisfyer Double Fun
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10052"
           - "10053"
@@ -2261,19 +2005,15 @@ protocols:
         name: Satisfyer Double Love
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10055"
         name: Satisfyer Curvy 3+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10059"
           - "10060"
@@ -2281,10 +2021,8 @@ protocols:
         name: Satisfyer Hot Lover
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10062"
@@ -2293,10 +2031,8 @@ protocols:
         name: Satisfyer Mono Flex
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10065"
           - "10066"
@@ -2305,11 +2041,9 @@ protocols:
         name: Satisfyer Double Flex
         messages:
           VibrateCmd:
-            FeatureCount: 3
-            StepCount:
-              - 100
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10069"
           - "10070"
@@ -2317,10 +2051,8 @@ protocols:
         name: Satisfyer Heat Wave
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Heater?
       - identifier:
           - "10072"
@@ -2349,55 +2081,43 @@ protocols:
         name: Satisfyer Dual Love
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10081"
           - "10082"
         name: Satisfyer Dual Pleasure
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10090"
         name: Satisfyer Hero+
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100 # Airpulse?
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10091"
         name: Satisfyer Knight+
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100 # Airpulse?
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10092"
           - "10093"
         name: Satisfyer Newcomer+
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100 # Airpulse?
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10100"
           - "10101"
         name: Satisfyer Plug-ilicious 1
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10102"
           - "10103"
@@ -2405,18 +2125,14 @@ protocols:
         name: Satisfyer Plug-ilicious 2
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10105"
         name: Satisfyer E-Love Foreplay
         messages:
           VibrateCmd:
-            FeatureCount: 1 # 4?
-            StepCount:
-              - 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2425,9 +2141,7 @@ protocols:
         name: Satisfyer E-Love G-Hunter
         messages:
           VibrateCmd:
-            FeatureCount: 1 # 4?
-            StepCount:
-              - 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2436,10 +2150,8 @@ protocols:
         name: Satisfyer E-Love G-Hunter+
         messages:
           VibrateCmd:
-            FeatureCount: 2 # 5?
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2448,9 +2160,7 @@ protocols:
         name: Satisfyer E-Love G-Spotter
         messages:
           VibrateCmd:
-            FeatureCount: 1 # 4?
-            StepCount:
-              - 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2459,10 +2169,8 @@ protocols:
         name: Satisfyer E-Love G-Spotter+
         messages:
           VibrateCmd:
-            FeatureCount: 2 # 5?
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2471,9 +2179,7 @@ protocols:
         name: Satisfyer E-Love Story
         messages:
           VibrateCmd:
-            FeatureCount: 1 # 4?
-            StepCount:
-              - 100
+            - StepCount: 100
               # - 100 e-amplitude
               # - 100 e-pulsewidth
               # - 100 e-frequency
@@ -2515,10 +2221,8 @@ protocols:
         name: Satisfyer Men Vibration+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10141"
         name: Satisfyer Power Plug
@@ -2528,20 +2232,16 @@ protocols:
         name: Satisfyer Rotator Plug 1+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100 # Single direction rotator
-              - 100
+            - StepCount: 100 # Single direction rotator
+            - StepCount: 100
       - identifier:
           - "10144"
           - "10145"
         name: Satisfyer Rotator Plug 2+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100 # Single direction rotator
-              - 100
+            - StepCount: 100 # Single direction rotator
+            - StepCount: 100
       - identifier:
           - "10146"
           - "10147"
@@ -2570,10 +2270,8 @@ protocols:
         name: Satisfyer Double Desire
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10163"
           - "10164"
@@ -2582,10 +2280,8 @@ protocols:
         name: Satisfyer Double Lust
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10167"
         name: Satisfyer Epic Duo
@@ -2599,10 +2295,8 @@ protocols:
         name: Satisfyer Top Secret
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10172"
           - "10173"
@@ -2610,10 +2304,8 @@ protocols:
         name: Satisfyer Top Secret+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10175"
           - "10176"
@@ -2625,20 +2317,16 @@ protocols:
         name: Satisfyer Sunray
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10180"
           - "10181"
         name: Satisfyer Curvy Trinity 5+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10183"
           - "10184"
@@ -2652,28 +2340,22 @@ protocols:
         name: Satisfyer Hug me
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10188"
         name: Satisfyer Air Pump Bunny 5+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
           # Pump?
       - identifier:
           - "10189"
         name: Satisfyer Air Pump Vibrator 5+
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Pump?
       - identifier:
           - "10190"
@@ -2681,10 +2363,8 @@ protocols:
         name: Satisfyer Threesome 4
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10192"
         name: Satisfyer G-Spot Flex 4+
@@ -2697,29 +2377,23 @@ protocols:
         name: Satisfyer Air Pump Booty 5+
         messages:
           VibrateCmd:
-            FeatureCount: 1
-            StepCount:
-              - 100
+            - StepCount: 100
           # Pump?
       - identifier:
           - "10196"
         name: Satisfyer Pro+ Wave 4
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100 # Wave?
-              - 100 # Airpulse?
+            - StepCount: 100 # Wave?
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10197"
           - "10198"
         name: Satisfyer Mini Wand-er+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100
+            - StepCount: 100
+            - StepCount: 100
       - identifier:
           - "10199"
           - "10200"
@@ -2730,10 +2404,8 @@ protocols:
         name: Satisfyer Twirling Pro+
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Airpulse?
+            - StepCount: 100
+            - StepCount: 100 # Airpulse?
       - identifier:
           - "10205"
         name: Satisfyer Perfect Pair 4
@@ -2748,10 +2420,8 @@ protocols:
         name: Satisfyer Rrrolling Sensation
         messages:
           VibrateCmd:
-            FeatureCount: 2
-            StepCount:
-              - 100
-              - 100 # Rolling?
+            - StepCount: 100
+            - StepCount: 100 # Rolling?
   mannuo:
     btle:
       names:
@@ -2767,9 +2437,7 @@ protocols:
       name: ManNuo Device
       messages:
         VibrateCmd:
-          FeatureCount: 1
-          StepCount:
-            - 3
+          - StepCount: 3
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
