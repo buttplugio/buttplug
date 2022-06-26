@@ -325,8 +325,8 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => {
         check_msg(ButtplugDeviceMessageType::RSSILevelCmd)
       }
-      ButtplugDeviceCommandMessageUnion::LevelCmd(_) => {
-        check_msg(ButtplugDeviceMessageType::LevelCmd)
+      ButtplugDeviceCommandMessageUnion::ScalarCmd(_) => {
+        check_msg(ButtplugDeviceMessageType::ScalarCmd)
       }
       // We translate SingleMotorVibrateCmd into Vibrate, so this one is special.
       ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(_) => {
@@ -402,7 +402,7 @@ impl ServerDevice {
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
-      ButtplugDeviceCommandMessageUnion::LevelCmd(msg) => {
+      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_level_cmd(msg))
       }
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => {

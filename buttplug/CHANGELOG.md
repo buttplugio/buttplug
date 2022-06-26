@@ -26,7 +26,7 @@
 - Simplified the device creation system.
 - Added TimedRetryHardwareCommunicationManager wrapper, for generic handling of hot plugging in comm
   managers that don't constantly scan (XInput, USB, etc...)
-- Added LevelCmd
+- Added ScalarCmd
 
 # 5.1.10 (2022-05-07)
 

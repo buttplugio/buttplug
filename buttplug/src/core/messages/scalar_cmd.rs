@@ -12,61 +12,61 @@ use serde::{Deserialize, Serialize};
 /// Generic command for setting a level (single magnitude value) of a device feature.
 #[derive(Debug, Default, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct LevelSubcommand {
+pub struct ScalarSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Level"))]
-  level: f64,
+  scalar: f64,
 }
 
-impl LevelSubcommand {
-  pub fn new(index: u32, level: f64) -> Self {
-    Self { index, level }
+impl ScalarSubcommand {
+  pub fn new(index: u32, scalar: f64) -> Self {
+    Self { index, scalar }
   }
 
   pub fn index(&self) -> u32 {
     self.index
   }
 
-  pub fn level(&self) -> f64 {
-    self.level
+  pub fn scalar(&self) -> f64 {
+    self.scalar
   }
 }
 
 #[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct LevelCmd {
+pub struct ScalarCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Levels"))]
-  levels: Vec<LevelSubcommand>,
+  scalars: Vec<ScalarSubcommand>,
 }
 
-impl LevelCmd {
-  pub fn new(device_index: u32, levels: Vec<LevelSubcommand>) -> Self {
+impl ScalarCmd {
+  pub fn new(device_index: u32, scalars: Vec<ScalarSubcommand>) -> Self {
     Self {
       id: 1,
       device_index,
-      levels,
+      scalars,
     }
   }
 
-  pub fn levels(&self) -> &Vec<LevelSubcommand> {
-    &self.levels
+  pub fn scalars(&self) -> &Vec<ScalarSubcommand> {
+    &self.scalars
   }
 }
 
-impl ButtplugMessageValidator for LevelCmd {
+impl ButtplugMessageValidator for ScalarCmd {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)?;
-    for level in &self.levels {
+    for level in &self.scalars {
       self.is_in_command_range(
-        level.level,
+        level.scalar,
         format!(
-          "Level {} for LevelCmd index {} is invalid. Level should be a value between 0.0 and 1.0",
-          level.level, level.index
+          "Level {} for ScalarCmd index {} is invalid. Level should be a value between 0.0 and 1.0",
+          level.scalar, level.index
         ),
       )?;
     }

@@ -114,7 +114,7 @@ impl DeviceMessageAttributes {
       ButtplugDeviceMessageType::BatteryLevelCmd => self.battery_level_cmd.is_some(),
       ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => self.fleshlight_launch_fw12_cmd.is_some(),
       ButtplugDeviceMessageType::KiirooCmd => false,
-      ButtplugDeviceMessageType::LevelCmd => self.vibrate_cmd.is_some(),
+      ButtplugDeviceMessageType::ScalarCmd => self.vibrate_cmd.is_some(),
       ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
       ButtplugDeviceMessageType::LovenseCmd => false,
       ButtplugDeviceMessageType::RSSILevelCmd => self.rssi_level_cmd.is_some(),

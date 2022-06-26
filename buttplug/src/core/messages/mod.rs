@@ -23,7 +23,7 @@ mod endpoint;
 mod error;
 mod fleshlight_launch_fw12_cmd;
 mod kiiroo_cmd;
-mod level_cmd;
+mod scalar_cmd;
 mod linear_cmd;
 mod log;
 mod log_level;
@@ -65,7 +65,7 @@ pub use endpoint::Endpoint;
 pub use error::{Error, ErrorCode, ErrorV0};
 pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
 pub use kiiroo_cmd::KiirooCmd;
-pub use level_cmd::LevelCmd;
+pub use scalar_cmd::ScalarCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
@@ -198,7 +198,7 @@ pub enum ButtplugDeviceMessageType {
   RawUnsubscribeCmd,
   BatteryLevelCmd,
   RSSILevelCmd,
-  LevelCmd,
+  ScalarCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -241,7 +241,7 @@ pub enum ButtplugCurrentSpecDeviceMessageType {
   RawUnsubscribeCmd,
   BatteryLevelCmd,
   RSSILevelCmd,
-  LevelCmd,
+  ScalarCmd,
 }
 
 // Ordering for ButtplugCurrentDeviceMessageType should be lexicographic, for
@@ -284,7 +284,7 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
       ButtplugDeviceMessageType::RSSILevelCmd => {
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
-      ButtplugDeviceMessageType::LevelCmd => Ok(ButtplugCurrentSpecDeviceMessageType::LevelCmd),
+      ButtplugDeviceMessageType::ScalarCmd => Ok(ButtplugCurrentSpecDeviceMessageType::ScalarCmd),
       _ => Err(ButtplugMessageError::MessageConversionError(
         "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),
@@ -313,7 +313,7 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
         ButtplugDeviceMessageType::BatteryLevelCmd
       }
       ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
-      ButtplugCurrentSpecDeviceMessageType::LevelCmd => ButtplugDeviceMessageType::LevelCmd,
+      ButtplugCurrentSpecDeviceMessageType::ScalarCmd => ButtplugDeviceMessageType::ScalarCmd,
     }
   }
 }
@@ -349,7 +349,7 @@ pub enum ButtplugClientMessage {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
-  LevelCmd(LevelCmd),
+  ScalarCmd(ScalarCmd),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
@@ -450,7 +450,7 @@ pub enum ButtplugSpecV3ClientMessage {
   StopDeviceCmd(StopDeviceCmd),
   RawSubscribeCmd(RawSubscribeCmd),
   RawUnsubscribeCmd(RawUnsubscribeCmd),
-  LevelCmd(LevelCmd),
+  ScalarCmd(ScalarCmd),
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
@@ -801,5 +801,5 @@ pub enum ButtplugDeviceCommandMessageUnion {
   RawUnsubscribeCmd(RawUnsubscribeCmd),
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
-  LevelCmd(LevelCmd),
+  ScalarCmd(ScalarCmd),
 }

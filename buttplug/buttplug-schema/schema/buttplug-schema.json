@@ -57,18 +57,8 @@
       "type": "object",
       "properties": {
         "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" }
-      },
-      "additionalProperties": false,
-      "minProperties": 0
-    },
-    "LevelMessageAttributes": {
-      "description": "Attributes for device messages.",
-      "type": "object",
-      "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
         "StepCount": { "$ref": "#/components/StepCount" },
-        "LevelRange": { "$ref": "#/components/LevelRange" },
+        "StepRange": { "$ref": "#/components/StepRange" },
         "ActuatorType": { 
           "description": "Denotes type of actuator (Vibrator, Linear, Oscillator, etc...)",
           "type": "array",
@@ -128,6 +118,7 @@
       "type": "object",
       "properties": {
         "StopDeviceCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "ScalarCmd": { "$ref": "#/components/GenericMessageAttributes" },
         "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
         "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
         "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
@@ -180,8 +171,8 @@
       },
       "minItems": 1
     },
-    "LevelRange": {
-      "description": "Specifies the minimum/maximum level for an actuator LevelCmd or LevelReading message.",
+    "StepRange": {
+      "description": "Specifies the minimum/maximum level for an actuator ScalarCmd or LevelReading message.",
       "type": "array",
       "items": {
         "type": "number"
@@ -781,14 +772,14 @@
         "Speeds"
       ]
     },
-    "LevelCmd": {
+    "ScalarCmd": {
       "type": "object",
-      "description": "Sends a generic level command to a device.",
+      "description": "Sends a generic scalar command to a device.",
       "properties": {
         "Id": { "$ref": "#/components/Id" },
         "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
-        "Levels": {
-          "description": "Device actution level (floating point, range can vary) keyed on acutator index, stepping will be device specific.",
+        "Scalars": {
+          "description": "Device actution scalar (floating point, range can vary) keyed on acutator index, stepping will be device specific.",
           "type": "array",
           "items": {
             "type": "object",
@@ -798,15 +789,15 @@
                 "type": "integer",
                 "minimum": 0
               },
-              "Level": {
-                "description": "Actuator level (floating point, range can vary), stepping will be device specific.",
+              "Scalar": {
+                "description": "Actuator scalar (floating point, range can vary), stepping will be device specific.",
                 "type": "number"
               }
             },
             "additionalProperties": false,
             "required": [
               "Index",
-              "Level"
+              "Scalar"
             ]
           },
           "minItems": 1
@@ -816,7 +807,7 @@
       "required": [
         "Id",
         "DeviceIndex",
-        "Levels"
+        "Scalars"
       ]
     },
     "RotateCmd": {
@@ -924,7 +915,7 @@
       "Error": { "$ref": "#/messages/Error" },
       "FleshlightLaunchFW12Cmd": { "$ref": "#/messages/FleshlightLaunchFW12Cmd" },
       "KiirooCmd": { "$ref": "#/messages/KiirooCmd" },
-      "LevelCmd": { "$ref": "#/messages/LevelCmd" },
+      "ScalarCmd": { "$ref": "#/messages/ScalarCmd" },
       "LinearCmd": { "$ref": "#/messages/LinearCmd" },
       "Log": { "$ref": "#/messages/Log" },
       "LovenseCmd": { "$ref": "#/messages/LovenseCmd" },

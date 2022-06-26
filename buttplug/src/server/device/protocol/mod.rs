@@ -314,7 +314,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_level_cmd(
     &self,
-    message: messages::LevelCmd,
+    message: messages::ScalarCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented(print_type_of(&message))
   }
