@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1};
+use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -38,6 +38,34 @@ impl ButtplugMessageValidator for DeviceList {
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub struct DeviceListV2 {
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  id: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  devices: Vec<DeviceMessageInfoV2>,
+}
+
+impl From<DeviceList> for DeviceListV2 {
+  fn from(msg: DeviceList) -> Self {
+    let mut devices = vec![];
+    for d in msg.devices {
+      devices.push(DeviceMessageInfoV2::from(d));
+    }
+    Self {
+      id: msg.id,
+      devices,
+    }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceListV2 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_not_system_id(self.id)
+  }
+}
+
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
@@ -49,7 +77,8 @@ impl From<DeviceList> for DeviceListV1 {
   fn from(msg: DeviceList) -> Self {
     let mut devices = vec![];
     for d in msg.devices {
-      devices.push(DeviceMessageInfoV1::from(d));
+      let dmiv2 = DeviceMessageInfoV2::from(d);
+      devices.push(DeviceMessageInfoV1::from(dmiv2));
     }
     Self {
       id: msg.id,
@@ -77,7 +106,8 @@ impl From<DeviceList> for DeviceListV0 {
   fn from(msg: DeviceList) -> Self {
     let mut devices = vec![];
     for d in msg.devices {
-      let dmiv1 = DeviceMessageInfoV1::from(d);
+      let dmiv2 = DeviceMessageInfoV2::from(d);
+      let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
       devices.push(DeviceMessageInfoV0::from(dmiv1));
     }
     Self {

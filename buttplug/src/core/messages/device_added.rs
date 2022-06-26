@@ -5,14 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1};
+use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 use super::*;
 
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Notification that a device has been found and connected to the server.
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq)]
+#[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAdded {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -22,14 +22,14 @@ pub struct DeviceAdded {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  device_messages: DeviceMessageAttributesMap,
+  device_messages: DeviceMessageAttributes,
 }
 
 impl DeviceAdded {
   pub fn new(
     device_index: u32,
     device_name: &str,
-    device_messages: &DeviceMessageAttributesMap,
+    device_messages: &DeviceMessageAttributes,
   ) -> Self {
     Self {
       id: 0,
@@ -47,7 +47,7 @@ impl DeviceAdded {
     &self.device_name
   }
 
-  pub fn device_messages(&self) -> &DeviceMessageAttributesMap {
+  pub fn device_messages(&self) -> &DeviceMessageAttributes {
     &self.device_messages
   }
 }
@@ -58,7 +58,42 @@ impl ButtplugMessageValidator for DeviceAdded {
   }
 }
 
-#[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq)]
+
+#[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub struct DeviceAddedV2 {
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
+  id: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  device_index: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
+  device_name: String,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
+  device_messages: DeviceMessageAttributesV2,
+}
+
+impl From<DeviceAdded> for DeviceAddedV2 {
+  fn from(msg: DeviceAdded) -> Self {
+    let id = msg.id();
+    let dmi = DeviceMessageInfo::from(msg);
+    let dmiv1 = DeviceMessageInfoV2::from(dmi);
+
+    Self {
+      id,
+      device_index: dmiv1.device_index,
+      device_name: dmiv1.device_name,
+      device_messages: dmiv1.device_messages,
+    }
+  }
+}
+
+impl ButtplugMessageValidator for DeviceAddedV2 {
+  fn is_valid(&self) -> Result<(), ButtplugMessageError> {
+    self.is_system_id(self.id)
+  }
+}
+
+#[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -68,14 +103,15 @@ pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  device_messages: DeviceMessageAttributesMap,
+  device_messages: DeviceMessageAttributesV1,
 }
 
 impl From<DeviceAdded> for DeviceAddedV1 {
   fn from(msg: DeviceAdded) -> Self {
     let id = msg.id();
     let dmi = DeviceMessageInfo::from(msg);
-    let dmiv1 = DeviceMessageInfoV1::from(dmi);
+    let dmiv2 = DeviceMessageInfoV2::from(dmi);
+    let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
 
     Self {
       id,
@@ -109,7 +145,8 @@ impl From<DeviceAdded> for DeviceAddedV0 {
   fn from(msg: DeviceAdded) -> Self {
     let id = msg.id();
     let dmi = DeviceMessageInfo::from(msg);
-    let dmiv1 = DeviceMessageInfoV1::from(dmi);
+    let dmiv2 = DeviceMessageInfoV2::from(dmi);
+    let dmiv1 = DeviceMessageInfoV1::from(dmiv2);
     let dmiv0 = DeviceMessageInfoV0::from(dmiv1);
 
     Self {

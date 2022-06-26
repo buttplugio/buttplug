@@ -57,9 +57,9 @@ mod vorze_a10_cyclone_cmd;
 pub use self::log::Log;
 pub use battery_level_cmd::BatteryLevelCmd;
 pub use battery_level_reading::BatteryLevelReading;
-pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1};
-pub use device_list::{DeviceList, DeviceListV0, DeviceListV1};
-pub use device_message_info::{DeviceMessageAttributesMap, DeviceMessageInfo};
+pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
+pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
+pub use device_message_info::DeviceMessageInfo;
 pub use device_removed::DeviceRemoved;
 pub use endpoint::Endpoint;
 pub use error::{Error, ErrorCode, ErrorV0};
@@ -69,7 +69,7 @@ pub use level_cmd::LevelCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
-pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesBuilder};
+pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesV2, DeviceMessageAttributesV1};
 pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;
@@ -529,8 +529,6 @@ pub enum ButtplugSpecV2ClientMessage {
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugServerMessageType,
-  FromSpecificButtplugMessage,
-  TryFromButtplugServerMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ServerMessage {
@@ -540,8 +538,8 @@ pub enum ButtplugSpecV2ServerMessage {
   // Handshake messages
   ServerInfo(ServerInfo),
   // Device enumeration messages
-  DeviceList(DeviceList),
-  DeviceAdded(DeviceAdded),
+  DeviceList(DeviceListV2),
+  DeviceAdded(DeviceAddedV2),
   DeviceRemoved(DeviceRemoved),
   ScanningFinished(ScanningFinished),
   // Generic commands
@@ -549,6 +547,39 @@ pub enum ButtplugSpecV2ServerMessage {
   // Sensor commands
   BatteryLevelReading(BatteryLevelReading),
   RSSILevelReading(RSSILevelReading),
+}
+
+// This was implementated as a derive, but for some reason the .into() calls
+// wouldn't work correctly when used as a device. If the actual implementation
+// is here, things work fine. Luckily it won't ever be changed much.
+impl TryFrom<ButtplugServerMessage> for ButtplugSpecV2ServerMessage {
+  type Error = ButtplugMessageError;
+  fn try_from(msg: ButtplugServerMessage) -> Result<Self, ButtplugMessageError> {
+    match msg {
+      ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV2ServerMessage::Ok(msg)),
+      ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV2ServerMessage::Error(msg.into())),
+      ButtplugServerMessage::ServerInfo(msg) => {
+        Ok(ButtplugSpecV2ServerMessage::ServerInfo(msg.into()))
+      }
+      ButtplugServerMessage::DeviceList(msg) => {
+        Ok(ButtplugSpecV2ServerMessage::DeviceList(msg.into()))
+      }
+      ButtplugServerMessage::DeviceAdded(msg) => {
+        Ok(ButtplugSpecV2ServerMessage::DeviceAdded(msg.into()))
+      }
+      ButtplugServerMessage::DeviceRemoved(msg) => {
+        Ok(ButtplugSpecV2ServerMessage::DeviceRemoved(msg))
+      }
+      ButtplugServerMessage::ScanningFinished(msg) => {
+        Ok(ButtplugSpecV2ServerMessage::ScanningFinished(msg))
+      }
+      _ => Err(ButtplugMessageError::VersionError(
+        "ButtplugServerMessage".to_owned(),
+        format!("{:?}", msg),
+        "ButtplugSpecV2ServerMessage".to_owned(),
+      )),
+    }
+  }
 }
 
 /// Represents all client-to-server messages in v1 of the Buttplug Spec
