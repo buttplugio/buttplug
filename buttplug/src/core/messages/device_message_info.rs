@@ -140,7 +140,7 @@ impl From<DeviceMessageInfoV1> for DeviceMessageInfoV0 {
 
     device_messages.push(ButtplugDeviceMessageType::StopDeviceCmd);
     if device_message_info.device_messages.single_motor_vibrate_cmd().is_some() {
-      device_messages.push(ButtplugDeviceMessageType::VibrateCmd);
+      device_messages.push(ButtplugDeviceMessageType::SingleMotorVibrateCmd);
     }
     if device_message_info.device_messages.fleshlight_launch_fw12_cmd().is_some() {
       device_messages.push(ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd);

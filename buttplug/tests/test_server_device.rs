@@ -10,10 +10,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self,
-      ButtplugDeviceMessageType,
-      ButtplugServerMessage,
-      Endpoint,
+      self, ButtplugDeviceMessageType, ButtplugServerMessage, Endpoint,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
@@ -51,18 +48,8 @@ fn test_capabilities_exposure() {
       .expect("Test, assuming infallible.");
     while let Some(msg) = recv.next().await {
       if let ButtplugServerMessage::DeviceAdded(device) = msg {
-        assert!(!device
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::VibrateCmd));
-        assert!(!device
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::SingleMotorVibrateCmd));
-        assert!(device
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::LinearCmd));
-        assert!(device
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::StopDeviceCmd));
+        assert!(device.device_messages().vibrate_cmd().is_none());
+        assert!(device.device_messages().linear_cmd().is_some());
         return;
       }
     }
@@ -95,18 +82,10 @@ fn test_server_raw_message() {
       if let ButtplugServerMessage::ScanningFinished(_) = msg {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert!(da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
-        assert!(da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
-        assert!(da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
-        assert!(da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
+        assert!(da.device_messages().raw_read_cmd().is_some());
+        assert!(da.device_messages().raw_write_cmd().is_some());
+        assert!(da.device_messages().raw_subscribe_cmd().is_some());
+        assert!(da.device_messages().raw_unsubscribe_cmd().is_some());
         assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
         return;
       } else {
@@ -141,19 +120,11 @@ fn test_server_no_raw_message() {
         continue;
       } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
         assert_eq!(da.device_name(), "Aneros Vivi");
-        assert!(!da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawReadCmd));
-        assert!(!da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawWriteCmd));
-        assert!(!da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawSubscribeCmd));
-        assert!(!da
-          .device_messages()
-          .contains_key(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
-        return;
+        assert!(da.device_messages().raw_read_cmd().is_none());
+        assert!(da.device_messages().raw_write_cmd().is_none());
+        assert!(da.device_messages().raw_subscribe_cmd().is_none());
+        assert!(da.device_messages().raw_unsubscribe_cmd().is_none());
+        break;
       } else {
         panic!(
           "Returned message was not a DeviceAdded message or timed out: {:?}",

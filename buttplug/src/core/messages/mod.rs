@@ -69,7 +69,7 @@ pub use level_cmd::LevelCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
-pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesV2, DeviceMessageAttributesV1};
+pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesV2, DeviceMessageAttributesV1, GenericDeviceMessageAttributes, ActuatorType, SensorType};
 pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;

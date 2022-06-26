@@ -10,7 +10,7 @@ use buttplug::{
   client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    messages::{self, ButtplugClientMessage},
+    messages::{self, ButtplugClientMessage, DeviceMessageAttributes},
   },
   util::async_manager,
 };
@@ -188,7 +188,7 @@ fn test_client_repeated_deviceadded_message() {
       helper_clone
         .send_client_incoming(messages::Ok::new(3).into())
         .await;
-      let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
+      let device_added = messages::DeviceAdded::new(1, "Test Device", &DeviceMessageAttributes::default());
       helper_clone
         .send_client_incoming(device_added.clone().into())
         .await;
@@ -232,7 +232,7 @@ fn test_client_repeated_deviceremoved_message() {
       helper_clone
         .send_client_incoming(messages::Ok::new(3).into())
         .await;
-      let device_added = messages::DeviceAdded::new(1, "Test Device", &HashMap::new());
+      let device_added = messages::DeviceAdded::new(1, "Test Device", &DeviceMessageAttributes::default());
       let device_removed = messages::DeviceRemoved::new(1);
       helper_clone.send_client_incoming(device_added.into()).await;
       helper_clone

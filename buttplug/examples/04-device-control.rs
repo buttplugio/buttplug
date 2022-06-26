@@ -10,13 +10,12 @@
 
 use buttplug::{
   client::{
-    ButtplugClient,
     ButtplugClientDevice,
     ButtplugClientDeviceMessageType,
     ButtplugClientEvent,
     VibrateCommand,
   },
-  util::in_process_client
+  util::in_process_client,
 };
 use futures::StreamExt;
 use futures_timer::Delay;
@@ -85,8 +84,9 @@ async fn device_control_example() {
       //
       // For this example, we'll use the simple single value.
       if dev
-        .allowed_messages
-        .contains_key(&ButtplugClientDeviceMessageType::VibrateCmd)
+        .message_attributes
+        .vibrate_cmd()
+        .is_some()
       {
         if let Err(e) = dev.vibrate(VibrateCommand::Speed(1.0)).await {
           println!("Error sending vibrate command to device! {}", e);

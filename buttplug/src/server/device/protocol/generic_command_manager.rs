@@ -10,7 +10,6 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
       ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessageType,
       LinearCmd,
       RotateCmd,
       RotationSubcommand,
@@ -20,7 +19,10 @@ use crate::{
   },
   server::device::configuration::ProtocolDeviceAttributes,
 };
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst};
+use std::{
+  ops::RangeInclusive,
+  sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst}
+};
 
 // In order to make our lives easier, we make some assumptions about what's internally mutable in
 // the GenericCommandManager (GCM). Once the GCM is configured for a device, it won't change sizes,
@@ -35,9 +37,9 @@ pub struct GenericCommandManager {
   sent_rotation: AtomicBool,
   _sent_linear: bool,
   vibrations: Vec<AtomicU32>,
-  vibration_step_ranges: Vec<(u32, u32)>,
+  vibration_step_ranges: Vec<RangeInclusive<u32>>,
   rotations: Vec<(AtomicU32, AtomicBool)>,
-  rotation_step_ranges: Vec<(u32, u32)>,
+  rotation_step_ranges: Vec<RangeInclusive<u32>>,
   _linears: Vec<(u32, u32)>,
   _linear_step_counts: Vec<u32>,
   stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
@@ -46,10 +48,8 @@ pub struct GenericCommandManager {
 impl GenericCommandManager {
   pub fn new(attributes: &ProtocolDeviceAttributes) -> Self {
     let mut vibrations = vec![];
-    let mut vibration_step_counts = vec![];
     let mut vibration_step_ranges = vec![];
     let mut rotations = vec![];
-    let mut rotation_step_counts = vec![];
     let mut rotation_step_ranges = vec![];
     let mut linears = vec![];
     let mut linear_step_counts = vec![];
@@ -57,20 +57,10 @@ impl GenericCommandManager {
     let mut stop_commands = vec![];
 
     // TODO We should probably panic here if we don't have feature and step counts?
-    if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::VibrateCmd) {
-      if let Some(count) = attr.feature_count() {
-        // We have to use resize_with here, since Atomic* aren't clonable.
-        vibrations.resize_with(*count as usize, || AtomicU32::new(0));
-      }
-      if let Some(step_counts) = &attr.step_count() {
-        vibration_step_counts = step_counts.clone();
-      }
-      if let Some(step_range) = &attr.step_range() {
-        vibration_step_ranges = step_range.clone();
-      } else {
-        for step_count in &vibration_step_counts {
-          vibration_step_ranges.push((0, *step_count));
-        }
+    if let Some(attrs) = attributes.message_attributes.vibrate_cmd() {
+      vibrations.resize_with(attrs.len(), || AtomicU32::new(0));
+      for attr in attrs {
+        vibration_step_ranges.push(attr.step_range());
       }
 
       let mut subcommands = vec![];
@@ -79,22 +69,10 @@ impl GenericCommandManager {
       }
       stop_commands.push(VibrateCmd::new(0, subcommands).into());
     }
-    if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::RotateCmd) {
-      if let Some(count) = attr.feature_count() {
-        // We have to use resize_with here, since Atomic* aren't clonable.
-        rotations.resize_with(*count as usize, || {
-          (AtomicU32::new(0), AtomicBool::new(false))
-        });
-      }
-      if let Some(step_counts) = &attr.step_count() {
-        rotation_step_counts = step_counts.clone();
-      }
-      if let Some(step_range) = &attr.step_range() {
-        rotation_step_ranges = step_range.clone();
-      } else {
-        for step_count in &rotation_step_counts {
-          rotation_step_ranges.push((0, *step_count));
-        }
+    if let Some(attrs) = attributes.message_attributes.rotate_cmd() {
+      rotations.resize_with(attrs.len(), || (AtomicU32::new(0), AtomicBool::new(false)));
+      for attr in attrs {
+        rotation_step_ranges.push(attr.step_range());
       }
 
       // TODO Can we assume clockwise is false here? We might send extra
@@ -107,12 +85,10 @@ impl GenericCommandManager {
       }
       stop_commands.push(RotateCmd::new(0, subcommands).into());
     }
-    if let Some(attr) = attributes.message_attributes(&ButtplugDeviceMessageType::LinearCmd) {
-      if let Some(count) = attr.feature_count() {
-        linears = vec![(0, 0); *count as usize];
-      }
-      if let Some(step_counts) = &attr.step_count() {
-        linear_step_counts = step_counts.clone();
+    if let Some(attrs) = attributes.message_attributes.linear_cmd() {
+      linears = vec![(0, 0); attrs.len()];
+      for attr in attrs {
+        linear_step_counts.push(attr.step_count());
       }
     }
 
@@ -175,7 +151,7 @@ impl GenericCommandManager {
         );
       }
 
-      let range = self.vibration_step_ranges[index].1 - self.vibration_step_ranges[index].0;
+      let range = self.vibration_step_ranges[index].end() - self.vibration_step_ranges[index].start();
       let speed_modifier = speed_command.speed() * range as f64;
       let speed = if speed_modifier < 0.0001 {
         0
@@ -183,7 +159,7 @@ impl GenericCommandManager {
         // When calculating speeds, round up. This follows how we calculated
         // things in buttplug-js and buttplug-csharp, so it's more for history
         // than anything, but it's what users will expect.
-        (speed_modifier + self.vibration_step_ranges[index].0 as f64).ceil() as u32
+        (speed_modifier + *self.vibration_step_ranges[index].start() as f64).ceil() as u32
       };
       info!(
         "{:?} {} {} {}",
@@ -262,7 +238,7 @@ impl GenericCommandManager {
       // When calculating speeds, round up. This follows how we calculated
       // things in buttplug-js and buttplug-csharp, so it's more for history
       // than anything, but it's what users will expect.
-      let range = self.rotation_step_ranges[index].1 - self.rotation_step_ranges[index].0;
+      let range = self.rotation_step_ranges[index].end() - self.rotation_step_ranges[index].start();
       let speed_modifier = rotate_command.speed() * range as f64;
       let speed = if speed_modifier < 0.0001 {
         0
@@ -270,7 +246,7 @@ impl GenericCommandManager {
         // When calculating speeds, round up. This follows how we calculated
         // things in buttplug-js and buttplug-csharp, so it's more for history
         // than anything, but it's what users will expect.
-        (speed_modifier + self.rotation_step_ranges[index].0 as f64).ceil() as u32
+        (speed_modifier + *self.rotation_step_ranges[index].start() as f64).ceil() as u32
       };
       let clockwise = rotate_command.clockwise();
       // If we've already sent commands, we don't want to send them again,
@@ -324,9 +300,9 @@ mod test {
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::{
     core::messages::{
-      ButtplugDeviceMessageType,
+      ActuatorType,
       DeviceMessageAttributesBuilder,
-      DeviceMessageAttributesMap,
+      GenericDeviceMessageAttributes,
       RotateCmd,
       RotationSubcommand,
       VibrateCmd,
@@ -334,22 +310,19 @@ mod test {
     },
     server::device::configuration::ProtocolAttributesType,
   };
+  use std::ops::RangeInclusive;
 
   #[test]
   pub fn test_command_generator_vibration() {
-    let mut attributes_map = DeviceMessageAttributesMap::new();
-
+    let vibrate_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
-      .feature_count(2)
-      .step_count(vec![20, 20])
-      .build(&ButtplugDeviceMessageType::VibrateCmd)
-      .unwrap();
-    attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
+      .vibrate_cmd(&vec![vibrate_attrs.clone(), vibrate_attrs.clone()])
+      .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
       None,
       None,
-      attributes_map,
+      vibrate_attributes,
       None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
@@ -393,20 +366,19 @@ mod test {
 
   #[test]
   pub fn test_command_generator_vibration_step_range() {
-    let mut attributes_map = DeviceMessageAttributesMap::new();
+    let mut vibrate_attrs_1 = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    vibrate_attrs_1.set_step_range(&RangeInclusive::new(10, 15));
+    let mut vibrate_attrs_2 = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    vibrate_attrs_2.set_step_range(&RangeInclusive::new(10, 20));
 
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
-      .feature_count(2)
-      .step_count(vec![20, 20])
-      .step_range(vec![(10, 15), (10, 20)])
-      .build(&ButtplugDeviceMessageType::VibrateCmd)
-      .unwrap();
-    attributes_map.insert(ButtplugDeviceMessageType::VibrateCmd, vibrate_attributes);
+      .vibrate_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
+      .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
       None,
       None,
-      attributes_map,
+      vibrate_attributes,
       None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
@@ -450,19 +422,16 @@ mod test {
 
   #[test]
   pub fn test_command_generator_rotation() {
-    let mut attributes_map = DeviceMessageAttributesMap::new();
+    let rotate_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Rotate);
 
     let rotate_attributes = DeviceMessageAttributesBuilder::default()
-      .feature_count(2)
-      .step_count(vec![20, 20])
-      .build(&ButtplugDeviceMessageType::RotateCmd)
-      .unwrap();
-    attributes_map.insert(ButtplugDeviceMessageType::RotateCmd, rotate_attributes);
+      .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])
+      .finish();    
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
       None,
       None,
-      attributes_map,
+      rotate_attributes,
       None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);

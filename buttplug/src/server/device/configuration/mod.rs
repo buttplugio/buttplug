@@ -147,8 +147,6 @@ use crate::{
     messages::{
       ButtplugDeviceMessageType,
       DeviceMessageAttributes,
-      DeviceMessageAttributesBuilder,
-      DeviceMessageAttributesMap,
       Endpoint,
     },
   },
@@ -258,7 +256,7 @@ pub struct ProtocolDeviceAttributes {
   /// User configured name of the device this instance represents, assuming one exists.
   display_name: Option<String>,
   /// Message attributes for this device instance.
-  pub(super) message_attributes: DeviceMessageAttributesMap,
+  pub(super) message_attributes: DeviceMessageAttributes,
 }
 
 impl ProtocolDeviceAttributes {
@@ -267,7 +265,7 @@ impl ProtocolDeviceAttributes {
     identifier: ProtocolAttributesType,
     name: Option<String>,
     display_name: Option<String>,
-    message_attributes: DeviceMessageAttributesMap,
+    message_attributes: DeviceMessageAttributes,
     parent: Option<Arc<ProtocolDeviceAttributes>>,
   ) -> Self {
     Self {
@@ -290,7 +288,7 @@ impl ProtocolDeviceAttributes {
       parent: None,
       name: Some(self.name().to_owned()),
       display_name: self.display_name(),
-      message_attributes: self.message_attributes_map(),
+      message_attributes: self.message_attributes(),
     }
   }
 
@@ -300,21 +298,6 @@ impl ProtocolDeviceAttributes {
       parent: Some(parent),
       ..self.clone()
     }
-  }
-
-  /// Check to make sure the message attributes of an instance are valid.
-  // TODO Can we do this in new() instead and return a result there?
-  fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    for (message_type, message_attrs) in self.message_attributes_map() {
-      message_attrs.check(&message_type).map_err(|err| {
-        ButtplugDeviceError::DeviceConfigurationError(format!(
-          "Configuration Error in {:?}: {}",
-          self.identifier(),
-          err
-        ))
-      })?;
-    }
-    Ok(())
   }
 
   /// Return the protocol identifier for this instance
@@ -344,40 +327,36 @@ impl ProtocolDeviceAttributes {
     }
   }
 
-  /// Check if a type of device message is supported by this instance.
-  pub fn allows_message(&self, message_type: &ButtplugDeviceMessageType) -> bool {
-    self.message_attributes.contains_key(message_type)
+  /// Check to make sure the message attributes of an instance are valid.
+  // TODO Can we do this in new() instead and return a result there?
+  fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
+    if let Some(attrs) = self.message_attributes.vibrate_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::VibrateCmd)?;
+      }
+    }
+    if let Some(attrs) = self.message_attributes.rotate_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::RotateCmd)?;
+      }
+    }
+    if let Some(attrs) = self.message_attributes.linear_cmd() {
+      for attr in attrs {
+        attr.is_valid(&ButtplugDeviceMessageType::LinearCmd)?;
+      }
+    }
+    Ok(())
   }
 
-  /// Retreive the message attributes for a specific type of message supported by this instance, or
-  /// None if the message is not supported.
-  pub fn message_attributes(
-    &self,
-    message_type: &ButtplugDeviceMessageType,
-  ) -> Option<DeviceMessageAttributes> {
-    if let Some(attributes) = self.message_attributes.get(message_type) {
-      Some(attributes.clone())
-    } else if let Some(parent) = &self.parent {
-      parent.message_attributes(message_type)
-    } else {
-      None
-    }
+  /// Check if a type of device message is supported by this instance.
+  pub fn allows_message(&self, message_type: &ButtplugDeviceMessageType) -> bool {
+    self.message_attributes.message_allowed(message_type)
   }
 
   /// Retreive a map of all message attributes for this instance.
-  pub fn message_attributes_map(&self) -> DeviceMessageAttributesMap {
+  pub fn message_attributes(&self) -> DeviceMessageAttributes {
     if let Some(parent) = &self.parent {
-      let mut map = parent.message_attributes_map();
-      for (message, value) in &self.message_attributes {
-        let attrs = map
-          .get(message)
-          .map(|base_attrs| base_attrs.merge(value))
-          .or_else(|| Some(value.clone()))
-          .expect("We filled in the device attributes either way.");
-        // Overwrite anything that might already be in the map with our new attribute set.
-        map.insert(*message, attrs);
-      }
-      map
+      parent.message_attributes().merge(&self.message_attributes)
     } else {
       self.message_attributes.clone()
     }
@@ -386,34 +365,7 @@ impl ProtocolDeviceAttributes {
   /// Add raw message support to the attributes of this instance. Requires a list of all endpoints a
   /// device supports.
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    let endpoint_attributes = DeviceMessageAttributesBuilder::default()
-      .endpoints(endpoints.to_owned())
-      .build(&ButtplugDeviceMessageType::RawReadCmd)
-      .expect("Nothing needs checking");
-
-    self.message_attributes.insert(
-      ButtplugDeviceMessageType::RawReadCmd,
-      endpoint_attributes.clone(),
-    );
-    self.message_attributes.insert(
-      ButtplugDeviceMessageType::RawWriteCmd,
-      endpoint_attributes.clone(),
-    );
-    self.message_attributes.insert(
-      ButtplugDeviceMessageType::RawSubscribeCmd,
-      endpoint_attributes.clone(),
-    );
-    self.message_attributes.insert(
-      ButtplugDeviceMessageType::RawUnsubscribeCmd,
-      endpoint_attributes,
-    );
-  }
-
-  pub fn add_stop_device_cmd(&mut self) {
-    self
-      .message_attributes
-      .entry(ButtplugDeviceMessageType::StopDeviceCmd)
-      .or_insert_with(DeviceMessageAttributes::default);
+    self.message_attributes.add_raw_messages(endpoints);
   }
 }
 
@@ -747,9 +699,6 @@ impl DeviceConfigurationManager {
     } else {
       return None;
     };
-
-    // Add Stop Device Command.
-    flat_attrs.add_stop_device_cmd();
 
     if self.allow_raw_messages {
       flat_attrs.add_raw_messages(raw_endpoints);

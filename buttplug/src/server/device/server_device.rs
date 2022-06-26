@@ -20,7 +20,7 @@ use crate::{
       ButtplugDeviceMessageType,
       ButtplugMessage,
       ButtplugServerDeviceMessage,
-      DeviceMessageAttributesMap,
+      DeviceMessageAttributes,
       Endpoint,
       RawReading,
       RawSubscribeCmd,
@@ -256,8 +256,8 @@ impl ServerDevice {
   }
 
   /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> DeviceMessageAttributesMap {
-    self.attributes.message_attributes_map()
+  pub fn message_attributes(&self) -> DeviceMessageAttributes {
+    self.attributes.message_attributes()
   }
 
   /// Retreive the event stream for the device.
@@ -471,17 +471,10 @@ impl ServerDevice {
     let vibrator_count;
     if let Some(attr) = self
       .attributes
-      .message_attributes(&ButtplugDeviceMessageType::VibrateCmd)
+      .message_attributes()
+      .vibrate_cmd()
     {
-      if let Some(count) = attr.feature_count() {
-        vibrator_count = *count as usize;
-      } else {
-        return ButtplugDeviceError::ProtocolRequirementError(format!(
-          "{} needs to support VibrateCmd with a feature count to use SingleMotorVibrateCmd.",
-          self.name()
-        ))
-        .into();
-      }
+      vibrator_count = attr.len();
     } else {
       return ButtplugDeviceError::ProtocolRequirementError(format!(
         "{} needs to support VibrateCmd to use SingleMotorVibrateCmd.",

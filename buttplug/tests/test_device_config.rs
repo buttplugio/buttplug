@@ -42,12 +42,11 @@ const BASE_CONFIG_JSON: &str = r#"
           ],
           "name": "OhMiBod Lumen",
           "messages": {
-            "VibrateCmd": {
-              "FeatureCount": 1,
-              "StepCount": [
-                100
-              ]
-            }
+            "VibrateCmd": [
+              {
+                "StepCount": 100
+              }
+            ]
           }
         }
       ]
