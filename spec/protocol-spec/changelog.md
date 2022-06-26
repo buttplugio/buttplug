@@ -31,8 +31,6 @@
     - Adding StepCount to Message Attributes, to let users know how
       many steps a feature can use (i.e. how many vibration levels a
       piece of hardware might have)
-    - Adding PatternNames mapping to Message Attributes for anything that
-      supports PatternCmd.
   - ServerInfo
     - Remove Version fields
 - Messages Deprecated:
@@ -77,7 +75,7 @@
   - RotateCmd
 - Messages Changed:
   - DeviceList/DeviceAdded
-    - Added Message Attributes blocks to device info.
+    - Added Message Attributes blocks to device info, with FeatureCount attribute
   - RequestServerInfo
     - Added Spec Version Field
 - Messages Deprecated:
