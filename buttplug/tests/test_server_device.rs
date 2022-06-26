@@ -10,7 +10,7 @@ use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self, ButtplugDeviceMessageType, ButtplugServerMessage, Endpoint,
+      self, ButtplugServerMessage, Endpoint,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },

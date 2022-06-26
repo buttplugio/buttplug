@@ -16,7 +16,7 @@ use buttplug::{
 };
 use futures::StreamExt;
 use futures_timer::Delay;
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 use util::test_client_with_device;
 
 #[cfg(feature = "server")]
