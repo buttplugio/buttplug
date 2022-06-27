@@ -112,6 +112,8 @@ In practice, ScalarCmd is meants to be exposed to developers via crafted APIs, i
 * _Scalars_ (array): Scalar values to set actuators
   * _Index_ (unsigned int): Index of actuator
   * _Scalar_ (double): Actuator level with a range of [0.0-1.0]
+  * _ActuatorType_ (string): Type of actuator that the user expects to control with this command.
+    This is to make sure that context is correct between the client and server.
 
 **Expected Response:**
 
@@ -137,11 +139,13 @@ sequenceDiagram
       "Scalars": [
         {
           "Index": 0,
-          "Scalar": 0.5
+          "Scalar": 0.5,
+          "ActuatorType": "Vibrate"
         },
         {
           "Index": 1,
-          "Scalar": 1.0
+          "Scalar": 1.0,
+          "ActuatorType": "Inflate"
         }
       ]
     }

@@ -792,12 +792,17 @@
               "Scalar": {
                 "description": "Actuator scalar (floating point, range can vary), stepping will be device specific.",
                 "type": "number"
-              }
+              },
+              "ActuatorType": {
+                "description": "Actuator type that is expected to be controlled with this subcommand.",
+                "type": "string"
+              }              
             },
             "additionalProperties": false,
             "required": [
               "Index",
-              "Scalar"
+              "Scalar",
+              "ActuatorType"
             ]
           },
           "minItems": 1
