@@ -48,7 +48,7 @@ fn test_capabilities_exposure() {
       .expect("Test, assuming infallible.");
     while let Some(msg) = recv.next().await {
       if let ButtplugServerMessage::DeviceAdded(device) = msg {
-        assert!(device.device_messages().vibrate_cmd().is_none());
+        assert!(device.device_messages().scalar_cmd().is_none());
         assert!(device.device_messages().linear_cmd().is_some());
         return;
       }

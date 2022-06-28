@@ -13,16 +13,17 @@ use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActuatorType {
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
-  Linear,
   Oscillation,
   Constrict,
   Inflate,
-  Unknown,
+  // For instances where we specify a position to move to ASAP. Usually servos, probably for the
+  // OSR-2/SR-6.
+  Position
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -41,9 +42,9 @@ pub enum SensorType {
 pub struct DeviceMessageAttributes {
   // Generic commands
   #[getset(get = "pub")]
-  #[serde(rename = "VibrateCmd")]
+  #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  vibrate_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
+  scalar_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
   #[getset(get = "pub")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,30 +112,30 @@ pub struct DeviceMessageAttributes {
 impl DeviceMessageAttributes {
   pub fn message_allowed(&self, message_type: &ButtplugDeviceMessageType) -> bool {
     match message_type {
+      ButtplugDeviceMessageType::ScalarCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
+      ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
       ButtplugDeviceMessageType::BatteryLevelCmd => self.battery_level_cmd.is_some(),
       ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => self.fleshlight_launch_fw12_cmd.is_some(),
-      ButtplugDeviceMessageType::KiirooCmd => false,
-      ButtplugDeviceMessageType::ScalarCmd => self.vibrate_cmd.is_some(),
-      ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
-      ButtplugDeviceMessageType::LovenseCmd => false,
       ButtplugDeviceMessageType::RSSILevelCmd => self.rssi_level_cmd.is_some(),
       ButtplugDeviceMessageType::RawReadCmd => self.raw_read_cmd.is_some(),
       ButtplugDeviceMessageType::RawSubscribeCmd => self.raw_subscribe_cmd.is_some(),
       ButtplugDeviceMessageType::RawUnsubscribeCmd => self.raw_unsubscribe_cmd.is_some(),
       ButtplugDeviceMessageType::RawWriteCmd => self.raw_write_cmd.is_some(),
-      ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
-      ButtplugDeviceMessageType::SingleMotorVibrateCmd => self.vibrate_cmd.is_some(),
+      ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some(),
       ButtplugDeviceMessageType::StopDeviceCmd => true,
-      ButtplugDeviceMessageType::VibrateCmd => self.vibrate_cmd.is_some(),
-      ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some()
+      ButtplugDeviceMessageType::SingleMotorVibrateCmd => false,
+      ButtplugDeviceMessageType::VibrateCmd => false,
+      ButtplugDeviceMessageType::KiirooCmd => false,
+      ButtplugDeviceMessageType::LovenseCmd => false,      
     }
   }
 
   pub fn merge(&self, child: &DeviceMessageAttributes) -> DeviceMessageAttributes {
     Self { 
-      vibrate_cmd: child.vibrate_cmd().clone().or_else(|| self.vibrate_cmd().clone()),
       rotate_cmd: child.rotate_cmd().clone().or_else(|| self.rotate_cmd().clone()),
       linear_cmd: child.linear_cmd().clone().or_else(|| self.linear_cmd().clone()),
+      scalar_cmd: child.scalar_cmd().clone().or_else(|| self.scalar_cmd().clone()),
       battery_level_cmd: child.battery_level_cmd().clone().or_else(|| self.battery_level_cmd().clone()),
       rssi_level_cmd: child.rssi_level_cmd().clone().or_else(|| self.rssi_level_cmd().clone()),
       stop_device_cmd: NullDeviceMessageAttributes::default(),
@@ -164,8 +165,8 @@ pub struct DeviceMessageAttributesBuilder {
 }
 
 impl DeviceMessageAttributesBuilder {
-  pub fn vibrate_cmd(&mut self, attrs: &Vec<GenericDeviceMessageAttributes>) -> &Self {
-    self.attrs.vibrate_cmd = Some(attrs.clone());
+  pub fn scalar_cmd(&mut self, attrs: &Vec<GenericDeviceMessageAttributes>) -> &Self {
+    self.attrs.scalar_cmd = Some(attrs.clone());
     self
   }
 
@@ -218,11 +219,7 @@ impl DeviceMessageAttributesBuilder {
 pub struct NullDeviceMessageAttributes {}
 
 fn unspecified_feature() -> String {
-  "Unspecified Feature".to_string()
-}
-
-fn unknown_actuator() -> ActuatorType {
-  ActuatorType::Unknown
+  "No description available for feature".to_string()
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
@@ -237,7 +234,6 @@ pub struct GenericDeviceMessageAttributes {
   step_count: u32,
   #[getset(get = "pub")]
   #[serde(rename = "ActuatorType")]
-  #[serde(default = "unknown_actuator")]
   actuator_type: ActuatorType,
   #[serde(rename = "StepRange")]
   #[serde(skip_serializing)]
@@ -385,7 +381,7 @@ pub struct DeviceMessageAttributesV2 {
 impl From<DeviceMessageAttributes> for DeviceMessageAttributesV2 {
   fn from(other: DeviceMessageAttributes) -> Self {
     Self { 
-      vibrate_cmd: other.vibrate_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
+      vibrate_cmd: other.scalar_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x.clone())),
       rotate_cmd: other.rotate_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
       linear_cmd: other.linear_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
       battery_level_cmd: other.battery_level_cmd().clone(), 
@@ -409,6 +405,20 @@ pub struct GenericDeviceMessageAttributesV2 {
   #[getset(get = "pub")]
   #[serde(rename = "StepCount")]
   step_count: Vec<u32>,
+}
+
+impl GenericDeviceMessageAttributesV2 {
+  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: Vec<GenericDeviceMessageAttributes>) -> Self {
+    let mut feature_count = 0u32;
+    let mut step_count = vec!();
+    for attr in attributes_vec {
+      if *attr.actuator_type() == ActuatorType::Vibrate {
+        feature_count += 1;
+        step_count.push(attr.step_count());
+      }
+    }
+    Self { feature_count, step_count }
+  }
 }
 
 impl From<Vec<GenericDeviceMessageAttributes>> for GenericDeviceMessageAttributesV2 {

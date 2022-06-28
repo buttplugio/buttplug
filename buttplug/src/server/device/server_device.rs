@@ -24,8 +24,9 @@ use crate::{
       Endpoint,
       RawReading,
       RawSubscribeCmd,
-      VibrateCmd,
-      VibrateSubcommand,
+      ScalarCmd,
+      ScalarSubcommand,
+      ActuatorType,
     },
     ButtplugResultFuture,
   },
@@ -385,15 +386,28 @@ impl ServerDevice {
       // Message that return lists of hardware commands which we'll handle sending to the devices
       // here, in order to reduce boilerplate in the implementations. Generic messages that we can
       // use the generic command manager for, but still need protocol level translation.
-      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
+      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => {
+        // TODO Add ability to turn off actuator matching
+        let attributes = self.attributes.message_attributes();
+        let attrs = attributes.scalar_cmd().as_ref().expect("Already checked existence");
+        for command in msg.scalars() {
+          if command.index() > attrs.len() as u32 {
+            return Box::pin(future::ready(Err(ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index()).into())));
+          }
+          if *attrs[command.index() as usize].actuator_type() != command.actuator_type() {
+            return Box::pin(future::ready(Err(ButtplugDeviceError::DeviceActuatorTypeMismatch(self.name(), command.actuator_type(), *attrs[command.index() as usize].actuator_type()).into())));
+          }
+        }
+
         let commands = match self
           .generic_command_manager
-          .update_vibration(&msg, self.handler.needs_full_command_set())
+          .update_scalar(&msg, self.handler.needs_full_command_set())
         {
           Ok(values) => values,
           Err(err) => return Box::pin(future::ready(Err(err))),
         };
-        self.handle_generic_command_result(self.handler.handle_vibrate_cmd(&commands))
+
+        self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
       }
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
         let commands = match self.generic_command_manager.update_rotation(&msg) {
@@ -402,8 +416,8 @@ impl ServerDevice {
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
-      ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => {
-        self.handle_generic_command_result(self.handler.handle_level_cmd(msg))
+      ButtplugDeviceCommandMessageUnion::VibrateCmd(msg) => {
+        self.parse_message(ScalarCmd::from(msg).into())
       }
       ButtplugDeviceCommandMessageUnion::LinearCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_linear_cmd(msg))
@@ -468,28 +482,36 @@ impl ServerDevice {
     &self,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugServerResultFuture {
-    let vibrator_count;
     if let Some(attr) = self
       .attributes
       .message_attributes()
-      .vibrate_cmd()
+      .scalar_cmd()
     {
-      vibrator_count = attr.len();
+      let speed = message.speed();
+      let cmds: Vec<ScalarSubcommand> = attr
+        .iter()
+        .enumerate()
+        .filter(|(_, x)| *x.actuator_type() == ActuatorType::Vibrate)
+        .map(|(index, _)| ScalarSubcommand::new(index as u32, speed, ActuatorType::Vibrate))
+        .collect();
+      if cmds.is_empty() {
+        ButtplugDeviceError::ProtocolRequirementError(format!(
+          "{} has no vibrating features.",
+          self.name()
+        ))
+        .into()  
+      } else {
+        let mut vibrate_cmd = ScalarCmd::new(message.device_index(), cmds);
+        vibrate_cmd.set_id(message.id());
+        self.parse_message(vibrate_cmd.into())
+      }
     } else {
-      return ButtplugDeviceError::ProtocolRequirementError(format!(
-        "{} needs to support VibrateCmd to use SingleMotorVibrateCmd.",
+      ButtplugDeviceError::ProtocolRequirementError(format!(
+        "{} needs to support ScalarCmd to use SingleMotorVibrateCmd.",
         self.name()
       ))
-      .into();
+      .into()
     }
-    let speed = message.speed();
-    let mut cmds = vec![];
-    for i in 0..vibrator_count {
-      cmds.push(VibrateSubcommand::new(i as u32, speed));
-    }
-    let mut vibrate_cmd = VibrateCmd::new(message.device_index(), cmds);
-    vibrate_cmd.set_id(message.id());
-    self.parse_message(vibrate_cmd.into())
   }
 
   fn handle_raw_write_cmd(&self, message: messages::RawWriteCmd) -> ButtplugServerResultFuture {

@@ -40,7 +40,7 @@ pub use device::{
   ButtplugClientDeviceMessageType,
   LinearCommand,
   RotateCommand,
-  VibrateCommand,
+  ScalarCommand,
 };
 use futures::{
   future::{self, BoxFuture},

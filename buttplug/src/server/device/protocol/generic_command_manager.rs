@@ -9,12 +9,13 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
+      ActuatorType,
       ButtplugDeviceCommandMessageUnion,
       LinearCmd,
       RotateCmd,
       RotationSubcommand,
-      VibrateCmd,
-      VibrateSubcommand,
+      ScalarCmd,
+      ScalarSubcommand, GenericDeviceMessageAttributes,
     },
   },
   server::device::configuration::ProtocolDeviceAttributes,
@@ -23,6 +24,21 @@ use std::{
   ops::RangeInclusive,
   sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst}
 };
+use getset::{Getters};
+
+#[derive(Getters)]
+#[getset(get="pub")]
+struct ScalarGenericCommand {  
+  actuator: ActuatorType,
+  step_range: RangeInclusive<u32>,
+  value: AtomicU32
+}
+
+impl ScalarGenericCommand {
+  pub fn new(attributes: &GenericDeviceMessageAttributes) -> Self {
+    Self { actuator: attributes.actuator_type().clone(), step_range: attributes.step_range(), value: AtomicU32::new(0) }
+  }
+}
 
 // In order to make our lives easier, we make some assumptions about what's internally mutable in
 // the GenericCommandManager (GCM). Once the GCM is configured for a device, it won't change sizes,
@@ -33,11 +49,10 @@ use std::{
 // horrible day some sex toy decides to use floats in its protocol), so we can just use atomics and
 // call it done.
 pub struct GenericCommandManager {
-  sent_vibration: AtomicBool,
+  sent_scalar: AtomicBool,
   sent_rotation: AtomicBool,
   _sent_linear: bool,
-  vibrations: Vec<AtomicU32>,
-  vibration_step_ranges: Vec<RangeInclusive<u32>>,
+  scalars: Vec<ScalarGenericCommand>,
   rotations: Vec<(AtomicU32, AtomicBool)>,
   rotation_step_ranges: Vec<RangeInclusive<u32>>,
   _linears: Vec<(u32, u32)>,
@@ -47,8 +62,7 @@ pub struct GenericCommandManager {
 
 impl GenericCommandManager {
   pub fn new(attributes: &ProtocolDeviceAttributes) -> Self {
-    let mut vibrations = vec![];
-    let mut vibration_step_ranges = vec![];
+    let mut scalars = vec![];
     let mut rotations = vec![];
     let mut rotation_step_ranges = vec![];
     let mut linears = vec![];
@@ -56,18 +70,14 @@ impl GenericCommandManager {
 
     let mut stop_commands = vec![];
 
-    // TODO We should probably panic here if we don't have feature and step counts?
-    if let Some(attrs) = attributes.message_attributes.vibrate_cmd() {
-      vibrations.resize_with(attrs.len(), || AtomicU32::new(0));
-      for attr in attrs {
-        vibration_step_ranges.push(attr.step_range());
+    if let Some(attrs) = attributes.message_attributes.scalar_cmd() {
+      let mut subcommands = vec![];
+      for (index, attr) in attrs.iter().enumerate() {
+        scalars.push(ScalarGenericCommand::new(attr));
+        subcommands.push(ScalarSubcommand::new(index as u32, 0.0, *attr.actuator_type()));
       }
 
-      let mut subcommands = vec![];
-      for i in 0..vibrations.len() {
-        subcommands.push(VibrateSubcommand::new(i as u32, 0.0));
-      }
-      stop_commands.push(VibrateCmd::new(0, subcommands).into());
+      stop_commands.push(ScalarCmd::new(0, subcommands).into());
     }
     if let Some(attrs) = attributes.message_attributes.rotate_cmd() {
       rotations.resize_with(attrs.len(), || (AtomicU32::new(0), AtomicBool::new(false)));
@@ -93,30 +103,29 @@ impl GenericCommandManager {
     }
 
     Self {
-      sent_vibration: AtomicBool::new(false),
+      sent_scalar: AtomicBool::new(false),
       sent_rotation: AtomicBool::new(false),
       _sent_linear: false,
-      vibrations,
+      scalars,
       rotations,
       _linears: linears,
-      vibration_step_ranges,
       rotation_step_ranges,
       _linear_step_counts: linear_step_counts,
       stop_commands,
     }
   }
 
-  pub fn update_vibration(
+  pub fn update_scalar(
     &self,
-    msg: &VibrateCmd,
+    msg: &ScalarCmd,
     match_all: bool,
-  ) -> Result<Vec<Option<u32>>, ButtplugError> {
+  ) -> Result<Vec<Option<(ActuatorType, u32)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // subcommand.
-    if msg.speeds().is_empty() {
+    if msg.scalars().is_empty() {
       return Err(
         ButtplugDeviceError::ProtocolRequirementError(
-          "VibrateCmd has 0 commands, will not do anything.".to_owned(),
+          "ScalarCmd has 0 commands, will not do anything.".to_owned(),
         )
         .into(),
       );
@@ -128,55 +137,56 @@ impl GenericCommandManager {
     // If we've already sent commands before, we should check against our
     // old values. Otherwise, we should always send whatever command we're
     // going to send.
-    let mut result: Vec<Option<u32>> = vec![None; self.vibrations.len()];
+    let mut result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.scalars.len()];
     // If we're in a match all situation, set up the array with all prior
     // values before switching them out.
     if match_all {
-      for (index, speed) in self.vibrations.iter().enumerate() {
-        result[index] = Some(speed.load(SeqCst));
+      for (index, cmd) in self.scalars.iter().enumerate() {
+        result[index] = Some((cmd.actuator().clone(), cmd.value.load(SeqCst)));
       }
     }
-    for speed_command in msg.speeds() {
-      let index = speed_command.index() as usize;
+    for scalar_command in msg.scalars() {
+      let index = scalar_command.index() as usize;
       // Since we're going to iterate here anyways, we do our index check
       // here instead of in a filter above.
-      if index >= self.vibrations.len() {
+      if index >= self.scalars.len() {
         return Err(
           ButtplugDeviceError::ProtocolRequirementError(format!(
-            "VibrateCmd has {} commands, device has {} vibrators.",
-            msg.speeds().len(),
-            self.vibrations.len()
+            "ScalarCmd has {} commands, device has {} features.",
+            msg.scalars().len(),
+            self.scalars.len()
           ))
           .into(),
         );
       }
 
-      let range = self.vibration_step_ranges[index].end() - self.vibration_step_ranges[index].start();
-      let speed_modifier = speed_command.speed() * range as f64;
-      let speed = if speed_modifier < 0.0001 {
+      let range_start = self.scalars[index].step_range().start();
+      let range = self.scalars[index].step_range().end() - range_start;
+      let scalar_modifier = scalar_command.scalar() * range as f64;
+      let scalar = if scalar_modifier < 0.0001 {
         0
       } else {
         // When calculating speeds, round up. This follows how we calculated
         // things in buttplug-js and buttplug-csharp, so it's more for history
         // than anything, but it's what users will expect.
-        (speed_modifier + *self.vibration_step_ranges[index].start() as f64).ceil() as u32
+        (scalar_modifier + *range_start as f64).ceil() as u32
       };
       info!(
         "{:?} {} {} {}",
-        self.vibration_step_ranges[index], range, speed_modifier, speed
+        self.scalars[index].step_range(), range, scalar_modifier, scalar
       );
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
       // these values get None in our return vector.
-      let current_speed = self.vibrations[index].load(SeqCst);
-      let sent_vibration = self.sent_vibration.load(SeqCst);
-      if !sent_vibration || speed != current_speed || match_all {
-        self.vibrations[index].store(speed, SeqCst);
-        result[index] = Some(speed);
+      let current_scalar = self.scalars[index].value().load(SeqCst);
+      let sent_scalar = self.sent_scalar.load(SeqCst);
+      if !sent_scalar || scalar != current_scalar || match_all {
+        self.scalars[index].value().store(scalar, SeqCst);
+        result[index] = Some((*self.scalars[index].actuator(), scalar));
       }
 
-      if !sent_vibration {
-        self.sent_vibration.store(true, SeqCst);
+      if !sent_scalar {
+        self.sent_scalar.store(true, SeqCst);
       }
     }
 
@@ -190,11 +200,12 @@ impl GenericCommandManager {
     Ok(result)
   }
 
-  pub fn vibration(&self) -> Vec<Option<u32>> {
+  // Test method
+  pub(super) fn scalars(&self) -> Vec<Option<(ActuatorType, u32)>> {
     self
-      .vibrations
+      .scalars
       .iter()
-      .map(|x| Some(x.load(SeqCst)))
+      .map(|x| Some((*x.actuator(), x.value().load(SeqCst))))
       .collect()
   }
 
@@ -305,8 +316,8 @@ mod test {
       GenericDeviceMessageAttributes,
       RotateCmd,
       RotationSubcommand,
-      VibrateCmd,
-      VibrateSubcommand,
+      ScalarCmd,
+      ScalarSubcommand,
     },
     server::device::configuration::ProtocolAttributesType,
   };
@@ -314,54 +325,54 @@ mod test {
 
   #[test]
   pub fn test_command_generator_vibration() {
-    let vibrate_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
-    let vibrate_attributes = DeviceMessageAttributesBuilder::default()
-      .vibrate_cmd(&vec![vibrate_attrs.clone(), vibrate_attrs.clone()])
+    let scalar_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    let scalar_attributes = DeviceMessageAttributesBuilder::default()
+      .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs.clone()])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
       None,
       None,
-      vibrate_attributes,
+      scalar_attributes,
       None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
-    let vibrate_msg = VibrateCmd::new(
+    let vibrate_msg = ScalarCmd::new(
       0,
       vec![
-        VibrateSubcommand::new(0, 0.5),
-        VibrateSubcommand::new(1, 0.5),
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.5, ActuatorType::Vibrate),
       ],
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg, false)
+        .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      vec![Some(10), Some(10)]
+      vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 10))]
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg, false)
+        .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
       vec![]
     );
-    let vibrate_msg_2 = VibrateCmd::new(
+    let vibrate_msg_2 = ScalarCmd::new(
       0,
       vec![
-        VibrateSubcommand::new(0, 0.5),
-        VibrateSubcommand::new(1, 0.75),
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.75, ActuatorType::Vibrate),
       ],
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg_2, false)
+        .update_scalar(&vibrate_msg_2, false)
         .expect("Test, assuming infallible"),
-      vec![None, Some(15)]
+      vec![None, Some((ActuatorType::Vibrate, 15))]
     );
-    let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
-    assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
+    let vibrate_msg_invalid = ScalarCmd::new(0, vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)]);
+    assert!(mgr.update_scalar(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.vibration(), vec![Some(10), Some(15)]);
+    assert_eq!(mgr.scalars(), vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 15))]);
   }
 
   #[test]
@@ -372,7 +383,7 @@ mod test {
     vibrate_attrs_2.set_step_range(&RangeInclusive::new(10, 20));
 
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
-      .vibrate_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
+      .scalar_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
@@ -382,42 +393,42 @@ mod test {
       None,
     );
     let mgr = GenericCommandManager::new(&device_attributes);
-    let vibrate_msg = VibrateCmd::new(
+    let vibrate_msg = ScalarCmd::new(
       0,
       vec![
-        VibrateSubcommand::new(0, 0.5),
-        VibrateSubcommand::new(1, 0.5),
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.5, ActuatorType::Vibrate),
       ],
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg, false)
+        .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      vec![Some(13), Some(15)]
+      vec![Some((ActuatorType::Vibrate, 13)), Some((ActuatorType::Vibrate, 15))]
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg, false)
+        .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
       vec![]
     );
-    let vibrate_msg_2 = VibrateCmd::new(
+    let vibrate_msg_2 = ScalarCmd::new(
       0,
       vec![
-        VibrateSubcommand::new(0, 0.5),
-        VibrateSubcommand::new(1, 0.75),
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.75, ActuatorType::Vibrate),
       ],
     );
     assert_eq!(
       mgr
-        .update_vibration(&vibrate_msg_2, false)
+        .update_scalar(&vibrate_msg_2, false)
         .expect("Test, assuming infallible"),
-      vec![None, Some(18)]
+      vec![None, Some((ActuatorType::Vibrate, 18))]
     );
-    let vibrate_msg_invalid = VibrateCmd::new(0, vec![VibrateSubcommand::new(2, 0.5)]);
-    assert!(mgr.update_vibration(&vibrate_msg_invalid, false).is_err());
+    let vibrate_msg_invalid = ScalarCmd::new(0, vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)]);
+    assert!(mgr.update_scalar(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.vibration(), vec![Some(13), Some(18)]);
+    assert_eq!(mgr.scalars(), vec![Some((ActuatorType::Vibrate, 13)), Some((ActuatorType::Vibrate, 18))]);
   }
 
   #[test]

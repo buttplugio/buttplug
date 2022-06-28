@@ -75,6 +75,7 @@ use crate::{
     errors::ButtplugDeviceError,
     messages::{
       self,
+      ActuatorType,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugServerMessage,
@@ -312,11 +313,74 @@ pub trait ProtocolHandler: Sync + Send {
     )))
   }
 
-  fn handle_level_cmd(
+  // The default scalar handler assumes that most devices require discrete commands per feature. If
+  // a protocol has commands that combine multiple features, either with matched or unmatched
+  // actuators, they should just implement their own version of this method.
+  fn handle_scalar_cmd(
     &self,
-    message: messages::ScalarCmd,
+    commands: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    let mut command_vec = vec!();
+    for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {
+      let (actuator, scalar) = command.as_ref().expect("Already verified existence");
+      command_vec.append(&mut (match *actuator {
+        ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar)?,
+        ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
+        ActuatorType::Oscillation => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
+        ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
+        ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
+        ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
+      }));
+    }
+    Ok(command_vec)
+  }
+
+  fn handle_scalar_vibrate_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Vibrate Actuator)")
+  }
+
+  fn handle_scalar_rotate_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Rotate Actuator)")
+  }
+
+  fn handle_scalar_oscillate_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Osccilate Actuator)")
+  }
+
+  fn handle_scalar_inflate_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Inflate Actuator)")
+  }
+
+  fn handle_scalar_constrict_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Constrict Actuator)")
+  }
+
+  fn handle_scalar_position_cmd(
+    &self,
+    _index: u32,
+    _scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.command_unimplemented("ScalarCmd (Constrict Actuator)")
   }
 
   fn handle_vorze_a10_cyclone_cmd(

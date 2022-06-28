@@ -330,9 +330,9 @@ impl ProtocolDeviceAttributes {
   /// Check to make sure the message attributes of an instance are valid.
   // TODO Can we do this in new() instead and return a result there?
   fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
-    if let Some(attrs) = self.message_attributes.vibrate_cmd() {
+    if let Some(attrs) = self.message_attributes.scalar_cmd() {
       for attr in attrs {
-        attr.is_valid(&ButtplugDeviceMessageType::VibrateCmd)?;
+        attr.is_valid(&ButtplugDeviceMessageType::ScalarCmd)?;
       }
     }
     if let Some(attrs) = self.message_attributes.rotate_cmd() {

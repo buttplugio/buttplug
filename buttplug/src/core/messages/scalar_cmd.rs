@@ -10,18 +10,20 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Generic command for setting a level (single magnitude value) of a device feature.
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ScalarSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Level"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Scalar"))]
   scalar: f64,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "ActuatorType"))]
+  actuator_type: ActuatorType,
 }
 
 impl ScalarSubcommand {
-  pub fn new(index: u32, scalar: f64) -> Self {
-    Self { index, scalar }
+  pub fn new(index: u32, scalar: f64, actuator_type: ActuatorType) -> Self {
+    Self { index, scalar, actuator_type }
   }
 
   pub fn index(&self) -> u32 {
@@ -30,6 +32,10 @@ impl ScalarSubcommand {
 
   pub fn scalar(&self) -> f64 {
     self.scalar
+  }
+
+  pub fn actuator_type(&self) -> ActuatorType {
+    self.actuator_type
   }
 }
 
@@ -40,7 +46,7 @@ pub struct ScalarCmd {
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Levels"))]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Scalars"))]
   scalars: Vec<ScalarSubcommand>,
 }
 
@@ -71,5 +77,16 @@ impl ButtplugMessageValidator for ScalarCmd {
       )?;
     }
     Ok(())
+  }
+}
+
+impl From<VibrateCmd> for ScalarCmd {
+  fn from(vibrate_cmd: VibrateCmd) -> Self {
+    let subcommands: Vec<ScalarSubcommand> = vibrate_cmd
+      .speeds()
+      .iter()
+      .map(|x| ScalarSubcommand::new(x.index(), x.speed(), ActuatorType::Vibrate))
+      .collect();
+    Self { id: vibrate_cmd.id(), device_index: vibrate_cmd.device_index(), scalars: subcommands }
   }
 }

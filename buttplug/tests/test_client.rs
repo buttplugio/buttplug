@@ -11,7 +11,7 @@ extern crate buttplug;
 extern crate tracing;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
+  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, ScalarCommand},
   core::{
     connector::{
       ButtplugConnector,
@@ -35,6 +35,7 @@ use futures::{future::BoxFuture, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;
+use tracing::info;
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}
@@ -202,6 +203,7 @@ fn test_client_ping() {
 #[cfg(feature = "server")]
 #[test]
 fn test_stop_all_devices_and_device_command_range() {
+  tracing_subscriber::fmt::init();
   async_manager::block_on(async {
     let (client, test_device) = test_client_with_device().await;
     let mut event_stream = client.event_stream();
@@ -209,7 +211,8 @@ fn test_stop_all_devices_and_device_command_range() {
 
     while let Some(event) = event_stream.next().await {
       if let ButtplugClientEvent::DeviceAdded(dev) = event {
-        assert!(dev.vibrate(VibrateCommand::Speed(0.5)).await.is_ok());
+        info!("{:?}", dev.vibrate(ScalarCommand::Scalar(0.5)).await);
+        assert!(dev.vibrate(ScalarCommand::Scalar(0.5)).await.is_ok());
         // Unlike protocol unit tests, here the endpoint doesn't exist until
         // after device creation, so create the test receiver later.
         let command_receiver = test_device
@@ -223,7 +226,7 @@ fn test_stop_all_devices_and_device_command_range() {
           &command_receiver,
           HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false)),
         );
-        assert!(dev.vibrate(VibrateCommand::Speed(1.0)).await.is_ok());
+        assert!(dev.vibrate(ScalarCommand::Scalar(1.0)).await.is_ok());
         check_test_recv_value(
           &command_receiver,
           HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 127], false)),
