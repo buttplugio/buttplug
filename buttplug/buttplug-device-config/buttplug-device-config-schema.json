@@ -178,8 +178,18 @@
           },
           "FeatureOrder": {
             "$ref": "#/components/FeatureOrder"
+          },
+          "FeatureDescriptor": {
+            "type": "string"
+          },
+          "ActuatorType": {
+            "type": "string"
           }
         },
+        "required": [
+          "StepCount",
+          "ActuatorType"
+        ],
         "additionalProperties": false,
         "minProperties": 0
       },
@@ -206,6 +216,9 @@
       "properties": {
         "StopDeviceCmd": {
           "$ref": "#/components/NullMessageAttributes"
+        },
+        "ScalarCmd": {
+          "$ref": "#/components/GenericMessageAttributes"
         },
         "VibrateCmd": {
           "$ref": "#/components/GenericMessageAttributes"
@@ -244,6 +257,9 @@
       "description": "A list of the messages that can be configured in user device settings.",
       "type": "object",
       "properties": {
+        "ScalarCmd": {
+          "$ref": "#/components/GenericUserMessageAttributes"
+        },
         "VibrateCmd": {
           "$ref": "#/components/GenericUserMessageAttributes"
         },

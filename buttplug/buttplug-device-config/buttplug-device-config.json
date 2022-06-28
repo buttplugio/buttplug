@@ -100,9 +100,10 @@
       "defaults": {
         "name": "Lovense Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 20
+              "StepCount": 20,
+              "ActuatorType": "Vibrate"
             }
           ],
           "BatteryLevelCmd": {}
@@ -113,7 +114,21 @@
           "identifier": [
             "B"
           ],
-          "name": "Lovense Max"
+          "name": "Lovense Max",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepCount": 20,
+                "FeatureDescriptor": "Vibrator",
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepCount": 4,
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              }
+            ]
+          }
         },
         {
           "identifier": [
@@ -121,12 +136,14 @@
           ],
           "name": "Lovense Edge",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -141,7 +158,8 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Rotate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -213,12 +231,14 @@
           ],
           "name": "Lovense Dolce",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -236,12 +256,14 @@
           ],
           "name": "Lovense Hyphy",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -262,9 +284,10 @@
       "defaults": {
         "name": "Lovense Connect Service Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 20
+              "StepCount": 20,
+              "ActuatorType": "Vibrate"
             }
           ],
           "BatteryLevelCmd": {}
@@ -283,12 +306,14 @@
           ],
           "name": "Lovense Edge",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -302,7 +327,8 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Rotate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -374,12 +400,14 @@
           ],
           "name": "Lovense Dolce",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -397,12 +425,14 @@
           ],
           "name": "Lovense Hyphy",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20
+                "StepCount": 20,
+                "ActuatorType": "Vibrate"
               }
             ],
             "BatteryLevelCmd": {}
@@ -423,12 +453,14 @@
       "defaults": {
         "name": "XBox (XInput) Compatible Gamepad",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 65535
+              "StepCount": 65535,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 65535
+              "StepCount": 65535,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -458,7 +490,8 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 99
+              "StepCount": 99,
+              "ActuatorType": "Position"
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
@@ -495,9 +528,10 @@
       "defaults": {
         "name": "Libo Elle Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -532,12 +566,14 @@
       "defaults": {
         "name": "Libo Shark",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -589,9 +625,10 @@
       "defaults": {
         "name": "Libo Vibes Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -657,12 +694,14 @@
           ],
           "name": "Libo LaLa",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3
+                "StepCount": 3,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -673,12 +712,14 @@
           ],
           "name": "Libo Carlos",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3
+                "StepCount": 3,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -689,12 +730,14 @@
           ],
           "name": "Libo Selina",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3
+                "StepCount": 3,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -727,9 +770,10 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -819,9 +863,10 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -851,12 +896,14 @@
           ],
           "name": "MagicMotion Eidolon",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -882,9 +929,10 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 77
+              "StepCount": 77,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -915,9 +963,10 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -959,12 +1008,14 @@
           ],
           "name": "MagicMotion Umi",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -994,24 +1045,30 @@
       "defaults": {
         "name": "Mysteryvibe Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56
+              "StepCount": 56,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1035,12 +1092,14 @@
           ],
           "name": "MysteryVibe Poco",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 56
+                "StepCount": 56,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 56
+                "StepCount": 56,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1070,9 +1129,10 @@
       "defaults": {
         "name": "Picobong Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 10
+              "StepCount": 10,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1134,9 +1194,10 @@
         "messages": {
           "BatteryLevelCmd": {},
           "RSSILevelCmd": {},
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 255
+              "StepCount": 255,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1152,12 +1213,14 @@
           "messages": {
             "BatteryLevelCmd": {},
             "RSSILevelCmd": {},
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 255
+                "StepCount": 255,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 255
+                "StepCount": 255,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1170,15 +1233,18 @@
           "messages": {
             "BatteryLevelCmd": {},
             "RSSILevelCmd": {},
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 255
+                "StepCount": 255,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 255
+                "StepCount": 255,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 2
+                "StepCount": 2,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1216,9 +1282,10 @@
       "defaults": {
         "name": "WeVibe Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1283,12 +1350,14 @@
           ],
           "name": "WeVibe 4 Plus",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1299,12 +1368,14 @@
           ],
           "name": "WeVibe Gala",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1315,12 +1386,14 @@
           ],
           "name": "WeVibe Nova",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1331,12 +1404,14 @@
           ],
           "name": "WeVibe Sync",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1367,9 +1442,10 @@
       "defaults": {
         "name": "WeVibe 8-bit Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 12
+              "StepCount": 12,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1381,12 +1457,14 @@
           ],
           "name": "WeVibe Chorus",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 27
+                "StepCount": 27,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 27
+                "StepCount": 27,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1397,9 +1475,10 @@
           ],
           "name": "WeVibe Melt",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 22
+                "StepCount": 22,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1416,12 +1495,14 @@
           ],
           "name": "WeVibe Vector",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 12
+                "StepCount": 12,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 12
+                "StepCount": 12,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1432,9 +1513,10 @@
           ],
           "name": "WeVibe Wand",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 22
+                "StepCount": 22,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1446,9 +1528,10 @@
           ],
           "name": "WeVibe Bond",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 27
+                "StepCount": 27,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1461,12 +1544,14 @@
           ],
           "name": "WeVibe Nova 2",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 27
+                "StepCount": 27,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 27
+                "StepCount": 27,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1507,9 +1592,10 @@
       "defaults": {
         "name": "Youcups Warrior II",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 8
+              "StepCount": 8,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1529,30 +1615,38 @@
       "defaults": {
         "name": "Cueme Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1576,18 +1670,22 @@
           ],
           "name": "Cueme Womans",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15
+                "StepCount": 15,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1614,15 +1712,18 @@
       "defaults": {
         "name": "Kiiroo V2 Vibrator Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1634,9 +1735,10 @@
           ],
           "name": "Kiiroo Pearl 2",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1647,13 +1749,15 @@
           ],
           "name": "OhMiBod Fuse",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
                 "StepCount": 100,
+                "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
                 "StepCount": 100,
+                "ActuatorType": "Vibrate",
                 "FeatureOrder": 0
               }
             ]
@@ -1665,13 +1769,15 @@
           ],
           "name": "PornHub Virtual Rabit",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
                 "StepCount": 100,
+                "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
                 "StepCount": 100,
+                "ActuatorType": "Vibrate",
                 "FeatureOrder": 0
               }
             ]
@@ -1683,12 +1789,14 @@
           ],
           "name": "PornHub Virtual Blowbot",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1699,15 +1807,18 @@
           ],
           "name": "Kiiroo Titan",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1748,9 +1859,10 @@
           ],
           "name": "Kiiroo Pearl 2.1",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1761,9 +1873,10 @@
           ],
           "name": "Kiiroo Cliona",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1774,9 +1887,10 @@
           ],
           "name": "OhMiBod Esca 2",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1787,14 +1901,16 @@
           ],
           "name": "Kiiroo Titan 1.1",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ],
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ],
             "FleshlightLaunchFW12Cmd": {}
@@ -1806,9 +1922,10 @@
           ],
           "name": "OhMiBod Lumen",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1819,9 +1936,10 @@
           ],
           "name": "hMiBod NEX|3",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1832,9 +1950,10 @@
           ],
           "name": "Hot Octopuss Pulse Solo Interactive",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 6
+                "StepCount": 6,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1871,7 +1990,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ],
             "FleshlightLaunchFW12Cmd": {}
@@ -1885,7 +2005,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ],
             "FleshlightLaunchFW12Cmd": {}
@@ -1899,7 +2020,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ],
             "FleshlightLaunchFW12Cmd": {}
@@ -1914,7 +2036,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ],
             "FleshlightLaunchFW12Cmd": {}
@@ -1934,7 +2057,8 @@
         "messages": {
           "RotateCmd": [
             {
-              "StepCount": 10
+              "StepCount": 10,
+              "ActuatorType": "Rotate"
             }
           ]
         }
@@ -1950,9 +2074,10 @@
       "defaults": {
         "name": "Rez TranceVibrator",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 255
+              "StepCount": 255,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -1983,9 +2108,10 @@
           ],
           "name": "Kiiroo Pearl",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 4
+                "StepCount": 4,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -1998,7 +2124,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 4
+                "StepCount": 4,
+                "ActuatorType": "Position"
               }
             ]
           }
@@ -2031,9 +2158,10 @@
           ],
           "name": "Vorze Bach",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2044,9 +2172,10 @@
           ],
           "name": "Adult Festa Rocket",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2059,7 +2188,8 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Rotate"
               }
             ],
             "VorzeA10CycloneCmd": {}
@@ -2073,7 +2203,8 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Rotate"
               }
             ],
             "VorzeA10CycloneCmd": {}
@@ -2087,7 +2218,8 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99
+                "StepCount": 99,
+                "ActuatorType": "Position"
               }
             ]
           }
@@ -2108,9 +2240,10 @@
       "defaults": {
         "name": "Youou Wand Vibrator",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 255
+              "StepCount": 255,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2128,7 +2261,8 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 99
+              "StepCount": 99,
+              "ActuatorType": "Position"
             }
           ]
         }
@@ -2149,9 +2283,10 @@
       "defaults": {
         "name": "Pretty Love Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2177,9 +2312,10 @@
       "defaults": {
         "name": "Svakom Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 19
+              "StepCount": 19,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2225,12 +2361,14 @@
       "defaults": {
         "name": "Svakom Sam Neo",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 10
+              "StepCount": 10,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 1
+              "StepCount": 1,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2250,9 +2388,10 @@
       "defaults": {
         "name": "Svakom Alex Neo",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2272,12 +2411,14 @@
       "defaults": {
         "name": "Svakom Iker",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 10
+              "StepCount": 10,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 5
+              "StepCount": 5,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2297,9 +2438,10 @@
       "defaults": {
         "name": "Realov Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 50
+              "StepCount": 50,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2320,14 +2462,16 @@
       "defaults": {
         "name": "Motorbunny Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 255
+              "StepCount": 255,
+              "ActuatorType": "Vibrate"
             }
           ],
           "RotateCmd": [
             {
-              "StepCount": 255
+              "StepCount": 255,
+              "ActuatorType": "Rotate"
             }
           ]
         }
@@ -2363,9 +2507,10 @@
       "defaults": {
         "name": "Zalo Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 8
+              "StepCount": 8,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2377,14 +2522,16 @@
           ],
           "name": "Zalo Queen",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
                 "StepCount": 8,
+                "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
                 "StepCount": 8,
-                "FeatureOrder": 0
+                "FeatureOrder": 0,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2395,12 +2542,14 @@
           ],
           "name": "Zalo King",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 8
+                "StepCount": 8,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 8
+                "StepCount": 8,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2437,9 +2586,10 @@
           ],
           "name": "SayberX",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 4
+                "StepCount": 4,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2467,9 +2617,10 @@
       "defaults": {
         "name": "Muse Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 9
+              "StepCount": 9,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2504,12 +2655,14 @@
       "defaults": {
         "name": "Lelo F1s",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2532,12 +2685,14 @@
       "defaults": {
         "name": "Lelo F1s V2",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2557,12 +2712,16 @@
       "defaults": {
         "name": "Aneros Vivi",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 127
+              "StepCount": 127,
+              "FeatureDescriptor": "Perineum Vibrator",
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 127
+              "StepCount": 127,
+              "FeatureDescriptor": "Internal Vibrator",
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2584,12 +2743,14 @@
       "defaults": {
         "name": "Lovehoney Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 127
+              "StepCount": 127,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 127
+              "StepCount": 127,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2607,9 +2768,10 @@
           ],
           "name": "Lovehoney Desire Knicker Vibrator",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 127
+                "StepCount": 127,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2620,9 +2782,10 @@
           ],
           "name": "Lovehoney Desire Love Egg",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 127
+                "StepCount": 127,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2662,9 +2825,10 @@
       "defaults": {
         "name": "MaxPro 2",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2683,9 +2847,10 @@
       "defaults": {
         "name": "Nobra's Silicone Dreams Toy",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2708,7 +2873,8 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Position"
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
@@ -2730,12 +2896,14 @@
       "defaults": {
         "name": "Cachito Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 5
+              "StepCount": 5,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2769,12 +2937,14 @@
       "defaults": {
         "name": "Je Joue Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 5
+              "StepCount": 5,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 5
+              "StepCount": 5,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2794,9 +2964,10 @@
       "defaults": {
         "name": "Love Nut",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 15
+              "StepCount": 15,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2820,9 +2991,10 @@
       "defaults": {
         "name": "Patoo Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2852,12 +3024,14 @@
           ],
           "name": "Patoo Devil",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -2879,7 +3053,8 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Position"
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
@@ -2903,7 +3078,8 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 150
+              "StepCount": 150,
+              "ActuatorType": "Position"
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
@@ -2924,9 +3100,10 @@
       "defaults": {
         "name": "Mizz Zee Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 68
+              "StepCount": 68,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2949,12 +3126,14 @@
       "defaults": {
         "name": "HTK Breast Massager",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 1
+              "StepCount": 1,
+              "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 1
+              "StepCount": 1,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2975,9 +3154,10 @@
       "defaults": {
         "name": "Ankni Candy",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -2998,9 +3178,10 @@
       "defaults": {
         "name": "Hgod Butterfly Love",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 10
+              "StepCount": 10,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -3025,9 +3206,10 @@
       "defaults": {
         "name": "Love Distance Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 121
+              "StepCount": 121,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -3086,9 +3268,10 @@
       "defaults": {
         "name": "Satisfyer Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 100
+              "StepCount": 100,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
@@ -3100,9 +3283,10 @@
           ],
           "name": "Satisfyer Hot Spot",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3113,12 +3297,14 @@
           ],
           "name": "Satisfyer Heated Affair",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3135,9 +3321,10 @@
           ],
           "name": "Satisfyer Heated Thrill",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3148,12 +3335,14 @@
           ],
           "name": "Satisfyer Hot Bunny",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3164,9 +3353,10 @@
           ],
           "name": "Satisfyer Heat Climax",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3177,12 +3367,14 @@
           ],
           "name": "Satisfyer Heat Climax+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3193,9 +3385,10 @@
           ],
           "name": "Satisfyer Hot Passion",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3206,12 +3399,14 @@
           ],
           "name": "Satisfyer Haute Couture+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3222,12 +3417,14 @@
           ],
           "name": "Satisfyer High Fashion+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3238,12 +3435,14 @@
           ],
           "name": "Satisfyer Prêt-à-porter+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3255,12 +3454,14 @@
           ],
           "name": "Satisfyer Love Triangle",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3272,12 +3473,14 @@
           ],
           "name": "Satisfyer Curvy 1+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3289,12 +3492,14 @@
           ],
           "name": "Satisfyer Curvy 2+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3313,12 +3518,14 @@
           ],
           "name": "Satisfyer Double Joy",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3331,12 +3538,14 @@
           ],
           "name": "Satisfyer Double Fun",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3349,12 +3558,14 @@
           ],
           "name": "Satisfyer Double Love",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3365,12 +3576,14 @@
           ],
           "name": "Satisfyer Curvy 3+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3383,12 +3596,14 @@
           ],
           "name": "Satisfyer Hot Lover",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3401,12 +3616,14 @@
           ],
           "name": "Satisfyer Mono Flex",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3420,15 +3637,18 @@
           ],
           "name": "Satisfyer Double Flex",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3441,12 +3661,14 @@
           ],
           "name": "Satisfyer Heat Wave",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3500,12 +3722,14 @@
           ],
           "name": "Satisfyer Dual Love",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3517,12 +3741,14 @@
           ],
           "name": "Satisfyer Dual Pleasure",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3533,9 +3759,10 @@
           ],
           "name": "Satisfyer Hero+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3546,9 +3773,10 @@
           ],
           "name": "Satisfyer Knight+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3560,9 +3788,10 @@
           ],
           "name": "Satisfyer Newcomer+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3574,12 +3803,14 @@
           ],
           "name": "Satisfyer Plug-ilicious 1",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3592,12 +3823,14 @@
           ],
           "name": "Satisfyer Plug-ilicious 2",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3608,9 +3841,10 @@
           ],
           "name": "Satisfyer E-Love Foreplay",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3621,9 +3855,10 @@
           ],
           "name": "Satisfyer E-Love G-Hunter",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3634,12 +3869,14 @@
           ],
           "name": "Satisfyer E-Love G-Hunter+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3650,9 +3887,10 @@
           ],
           "name": "Satisfyer E-Love G-Spotter",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3663,12 +3901,14 @@
           ],
           "name": "Satisfyer E-Love G-Spotter+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3679,9 +3919,10 @@
           ],
           "name": "Satisfyer E-Love Story",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3743,12 +3984,14 @@
           ],
           "name": "Satisfyer Men Vibration+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3766,12 +4009,14 @@
           ],
           "name": "Satisfyer Rotator Plug 1+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3783,12 +4028,14 @@
           ],
           "name": "Satisfyer Rotator Plug 2+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3837,12 +4084,14 @@
           ],
           "name": "Satisfyer Double Desire",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3856,12 +4105,14 @@
           ],
           "name": "Satisfyer Double Lust",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3886,12 +4137,14 @@
           ],
           "name": "Satisfyer Top Secret",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3904,12 +4157,14 @@
           ],
           "name": "Satisfyer Top Secret+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3929,12 +4184,14 @@
           ],
           "name": "Satisfyer Sunray",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3946,12 +4203,14 @@
           ],
           "name": "Satisfyer Curvy Trinity 5+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3976,12 +4235,14 @@
           ],
           "name": "Satisfyer Hug me",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -3992,12 +4253,14 @@
           ],
           "name": "Satisfyer Air Pump Bunny 5+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4008,9 +4271,10 @@
           ],
           "name": "Satisfyer Air Pump Vibrator 5+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4022,12 +4286,14 @@
           ],
           "name": "Satisfyer Threesome 4",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4051,9 +4317,10 @@
           ],
           "name": "Satisfyer Air Pump Booty 5+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4064,12 +4331,14 @@
           ],
           "name": "Satisfyer Pro+ Wave 4",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4081,12 +4350,14 @@
           ],
           "name": "Satisfyer Mini Wand-er+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4105,12 +4376,14 @@
           ],
           "name": "Satisfyer Twirling Pro+",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4136,12 +4409,14 @@
           ],
           "name": "Satisfyer Rrrolling Sensation",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100
+                "StepCount": 100,
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -4166,9 +4441,10 @@
       "defaults": {
         "name": "ManNuo Device",
         "messages": {
-          "VibrateCmd": [
+          "ScalarCmd": [
             {
-              "StepCount": 3
+              "StepCount": 3,
+              "ActuatorType": "Vibrate"
             }
           ]
         }
