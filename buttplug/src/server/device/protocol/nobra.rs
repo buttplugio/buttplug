@@ -19,17 +19,12 @@ generic_protocol_setup!(Nobra, "nobra");
 pub struct Nobra {}
 
 impl ProtocolHandler for Nobra {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut msg_vec = vec!();
-    for (_, cmd) in cmds.iter().enumerate() {
-      if let Some(speed) = cmd {
-        let output_speed = if *speed == 0 { 0x70 } else { 0x60 + speed };
-        msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![output_speed as u8], false).into());
-      }
-    }
-    Ok(msg_vec)
+    let output_speed = if scalar == 0 { 0x70 } else { 0x60 + scalar };
+    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, vec![output_speed as u8], false).into()))
   }
 }

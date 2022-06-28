@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
@@ -20,17 +19,16 @@ generic_protocol_setup!(Hismith, "hismith");
 pub struct Hismith {}
 
 impl ProtocolHandler for Hismith {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_oscillate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| {
-      HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![0xAA, 0x04, speed as u8, (speed + 4) as u8],
-        false,
-      )
-      .into()
-    }))
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xAA, 0x04, scalar as u8, (scalar + 4) as u8],
+      false,
+    )
+    .into()])
   }
 }

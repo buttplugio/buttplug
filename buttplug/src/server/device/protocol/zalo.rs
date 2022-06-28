@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::Endpoint,
+    messages::{Endpoint, ActuatorType},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -22,16 +22,16 @@ generic_protocol_setup!(Zalo, "zalo");
 pub struct Zalo {}
 
 impl ProtocolHandler for Zalo {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
-    let speed0: u8 = cmds[0].unwrap_or(0) as u8;
+    let speed0: u8 = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
     let speed1: u8 = if cmds.len() == 1 {
       0
     } else {
-      cmds[1].unwrap_or(0) as u8
+      cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8
     };
     Ok(vec!(HardwareWriteCmd::new(
         Endpoint::Tx,

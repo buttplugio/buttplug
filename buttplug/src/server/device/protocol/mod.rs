@@ -404,15 +404,6 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented(print_type_of(&message))
   }
 
-  // Returns the hardware command needed to send multiple speeds to multiple vibration features.
-  // Rare, but happens for some devices that pack multiple vibration features into a single command.
-  fn handle_vibrate_cmd(
-    &self,
-    _commands: &Vec<Option<u32>>,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented("Aggregated VibrateCmd")
-  }
-
   fn handle_rotate_cmd(
     &self,
     _commands: &Vec<Option<(u32, bool)>>,
@@ -488,19 +479,5 @@ macro_rules! generic_protocol_setup {
     }
   };
 }
-
-pub fn handle_nonaggregate_vibrate_cmd<F>(
-  commands: &Vec<Option<u32>>,
-  vibrate_closure: F
-) -> Vec<HardwareCommand> 
-  where F: Fn(u32, u32) -> HardwareCommand {
-  commands
-    .iter()
-    .enumerate()
-    .filter(|(_, x)| x.is_some())
-    .map(|(i, x)| vibrate_closure(i as u32, *x.as_ref().unwrap()))
-    .collect()
-}
-
 
 pub use generic_protocol_setup;

@@ -19,24 +19,17 @@ generic_protocol_setup!(LoveNuts, "lovenuts");
 pub struct LoveNuts {}
 
 impl ProtocolHandler for LoveNuts {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(speed) = cmds[0] {
-      let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
-      for _ in 0..10 {
-        let mut b: u8 = speed as u8;
-        b |= (speed as u8) << 4;
-        data.push(b);
-      }
-      data.push(0x00);
-      data.push(0xff);
+    let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
+    data.append(&mut [scalar as u8 | (scalar as u8) << 4; 10].to_vec());
+    data.push(0x00);
+    data.push(0xff);
 
-      Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
-    } else {
-      Ok(vec![])
-    }
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }
 /*

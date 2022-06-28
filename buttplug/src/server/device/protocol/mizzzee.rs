@@ -19,27 +19,24 @@ generic_protocol_setup!(MizzZee, "mizzzee");
 pub struct MizzZee {}
 
 impl ProtocolHandler for MizzZee {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    if let Some(speed) = cmds[0] {
-      Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          0x69,
-          0x96,
-          0x03,
-          0x01,
-          if speed == 0 { 0x00 } else { 0x01 },
-          speed as u8,
-        ],
-        false,
-      )
-      .into()])
-    } else {
-      Ok(vec![])
-    }
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x69,
+        0x96,
+        0x03,
+        0x01,
+        if scalar == 0 { 0x00 } else { 0x01 },
+        scalar as u8,
+      ],
+      false,
+    )
+    .into()])
   }
 }
 /*

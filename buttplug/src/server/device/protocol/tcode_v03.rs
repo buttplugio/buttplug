@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::{self, Endpoint}},
   server::device::{
@@ -38,16 +37,16 @@ impl ProtocolHandler for TCodeV03 {
     Ok(msg_vec)
   }
 
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |index, speed| {
+    Ok(vec![
       HardwareWriteCmd::new(
         Endpoint::Tx,
-        format!("V{}{:02}\n", index, speed).as_bytes().to_vec(),
+        format!("V{}{:02}\n", index, scalar).as_bytes().to_vec(),
         false,
-      ).into()
-    }))
+      ).into()])
   }
 }

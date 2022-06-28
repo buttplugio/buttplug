@@ -5,12 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -23,17 +19,17 @@ generic_protocol_setup!(Youcups, "youcups");
 pub struct Youcups {}
 
 impl ProtocolHandler for Youcups {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      format!("$SYS,{}?", speed as u8)
-        .as_bytes()
-        .to_vec(),
+      format!("$SYS,{}?", scalar as u8).as_bytes().to_vec(),
       false,
-    ).into()))
+    )
+    .into()])
   }
 }
 

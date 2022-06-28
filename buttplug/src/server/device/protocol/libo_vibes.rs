@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,13 +19,13 @@ generic_protocol_setup!(LiboVibes, "libo-vibes");
 pub struct LiboVibes {}
 
 impl ProtocolHandler for LiboVibes {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     for (index, cmd) in cmds.iter().enumerate() {
-      if let Some(speed) = cmd {
+      if let Some((_, speed)) = cmd {
         if index == 0 {
           msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![*speed as u8], false).into());
 

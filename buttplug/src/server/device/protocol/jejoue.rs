@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,20 +19,20 @@ generic_protocol_setup!(JeJoue, "jejoue");
 pub struct JeJoue {}
 
 impl ProtocolHandler for JeJoue {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    cmds: &Vec<Option<(ActuatorType, u32)>>
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     // Default to both vibes
     let mut pattern: u8 = 1;
 
     // Use vibe 1 as speed
-    let mut speed = cmds[0].unwrap_or(0) as u8;
+    let mut speed = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
 
     // Unless it's zero, then five vibe 2 a chance
     if speed == 0 {
-      speed = cmds[1].unwrap_or(0) as u8;
+      speed = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
 
       // If we've vibing on 2 only, then change the pattern
       if speed != 0 {
@@ -41,7 +41,7 @@ impl ProtocolHandler for JeJoue {
     }
 
     // If we've vibing on 1 only, then change the pattern
-    if pattern == 1 && speed != 0 && cmds[1].unwrap_or(0) == 0 {
+    if pattern == 1 && speed != 0 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 == 0 {
       pattern = 2;
     }
     Ok(vec!(HardwareWriteCmd::new(

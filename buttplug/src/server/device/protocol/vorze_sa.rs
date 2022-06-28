@@ -77,7 +77,7 @@ impl ProtocolHandler for VorzeSA {
       VorzeDevices::Bach
     };
 
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |index, speed| {
+    Ok(vec!( {
       HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],

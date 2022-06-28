@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{ActuatorType, Endpoint}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,9 +19,9 @@ generic_protocol_setup!(MagicMotionV2, "magic-motion-2");
 pub struct MagicMotionV2 {}
 
 impl ProtocolHandler for MagicMotionV2 {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let data = if cmds.len() == 1 {
       vec![
@@ -34,7 +34,7 @@ impl ProtocolHandler for MagicMotionV2 {
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or(0) as u8,
+        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
         0x64,
         0x00,
         0x04,
@@ -54,12 +54,12 @@ impl ProtocolHandler for MagicMotionV2 {
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or(0) as u8,
+        cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
         0x64,
         0x00,
         0x04,
         0x08,
-        cmds[1].unwrap_or(0) as u8,
+        cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8,
         0x64,
         0x01,
       ]

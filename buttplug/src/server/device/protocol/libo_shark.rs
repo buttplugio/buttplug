@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,16 +19,16 @@ generic_protocol_setup!(LiboShark, "libo-shark");
 pub struct LiboShark {}
 
 impl ProtocolHandler for LiboShark {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     let mut data = 0u8;
-    if let Some(speed) = cmds[0] {
+    if let Some((_, speed)) = cmds[0] {
       data |= (speed as u8) << 4;
     }
-    if let Some(speed) = cmds[1] {
+    if let Some((_, speed)) = cmds[1] {
       data |= speed as u8;
     }
     Ok(vec![

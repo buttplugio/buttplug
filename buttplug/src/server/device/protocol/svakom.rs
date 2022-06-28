@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
@@ -20,18 +19,18 @@ generic_protocol_setup!(Svakom, "svakom");
 pub struct Svakom {}
 
 impl ProtocolHandler for Svakom {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| {
-          let multiplier: u8 = if speed == 0 { 0x00 } else { 0x01 };
-          HardwareWriteCmd::new(
-            Endpoint::Tx,
-            [0x55, 0x04, 0x03, 0x00, multiplier, speed as u8].to_vec(),
-            false,
-          ).into()
-    }))
+    let multiplier: u8 = if scalar == 0 { 0x00 } else { 0x01 };
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      [0x55, 0x04, 0x03, 0x00, multiplier, scalar as u8].to_vec(),
+      false,
+    )
+    .into()])
   }
 }
 

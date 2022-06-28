@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    messages::{self, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint, ActuatorType},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -119,9 +119,10 @@ pub struct Lovense {
 }
 
 impl ProtocolHandler for Lovense {
-  fn handle_vibrate_cmd(
+  // TODO THIS WILL BREAK FOR THE MAX AIR BLADDER AT THE MOMENT
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Lovense is the same situation as the Lovehoney Desire, where commands
     // are different if we're addressing all motors or seperate motors.
@@ -134,7 +135,7 @@ impl ProtocolHandler for Lovense {
     // Just make sure we're not matching on None, 'cause if that's the case
     // we ain't got shit to do.
     if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-      let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity"))
+      let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity").1)
         .as_bytes()
         .to_vec();
       return Ok(vec![HardwareWriteCmd::new(
@@ -146,7 +147,7 @@ impl ProtocolHandler for Lovense {
     }
     let mut hardware_cmds = vec![];
     for (i, cmd) in cmds.iter().enumerate() {
-      if let Some(speed) = cmd {
+      if let Some((_, speed)) = cmd {
         let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
         hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
       }
@@ -230,5 +231,4 @@ impl ProtocolHandler for Lovense {
   }
 }
 
-// TODO Gonna need to add the ability to set subscribe data in tests before
-// writing Lovense tests. Oops.
+// TODO Gonna need to add the ability to set subscribe data in tests before writing Lovense tests.

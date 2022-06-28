@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,9 +19,9 @@ generic_protocol_setup!(LovehoneyDesire, "lovehoney-desire");
 pub struct LovehoneyDesire {}
 
 impl ProtocolHandler for LovehoneyDesire {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // The Lovehoney Desire has 2 types of commands
     //
@@ -44,7 +44,7 @@ impl ProtocolHandler for LovehoneyDesire {
           vec![
             0xF3,
             0,
-            cmds[0].expect("Already checked value existence") as u8,
+            cmds[0].expect("Already checked value existence").1 as u8,
           ],
           false,
         )
@@ -55,7 +55,7 @@ impl ProtocolHandler for LovehoneyDesire {
       let mut i = 1;
 
       for cmd in cmds {
-        if let Some(speed) = cmd {
+        if let Some((_, speed)) = cmd {
           msg_vec
             .push(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF3, i, *speed as u8], false).into());
         }

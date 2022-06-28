@@ -5,10 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  fleshlight_launch_helper::calculate_speed,
-  handle_nonaggregate_vibrate_cmd
-};
+use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::{self, Endpoint, ButtplugDeviceMessage}},
   server::device::{
@@ -26,15 +23,16 @@ pub struct KiirooV21 {
 }
 
 impl ProtocolHandler for KiirooV21 {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    _: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |_, speed| HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x01, speed as u8],
+      vec![0x01, scalar as u8],
       false,
-    ).into()))
+    ).into()])
   }
 
   fn handle_linear_cmd(

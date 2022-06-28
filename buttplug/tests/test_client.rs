@@ -203,7 +203,6 @@ fn test_client_ping() {
 #[cfg(feature = "server")]
 #[test]
 fn test_stop_all_devices_and_device_command_range() {
-  tracing_subscriber::fmt::init();
   async_manager::block_on(async {
     let (client, test_device) = test_client_with_device().await;
     let mut event_stream = client.event_stream();

@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
 use crate::{
   core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
@@ -20,25 +19,27 @@ generic_protocol_setup!(LiboElle, "libo-elle");
 pub struct LiboElle {}
 
 impl ProtocolHandler for LiboElle {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(handle_nonaggregate_vibrate_cmd(cmds, |index, speed| {
+    Ok(vec!( {
+      let speed = scalar as u8;
       if index == 1 {
         let mut data = 0u8;
-        if speed as u8 > 0 && speed as u8 <= 7 {
-          data |= (speed as u8 - 1) << 4;
+        if speed as u8 > 0 && speed <= 7 {
+          data |= (speed - 1) << 4;
           data |= 1; // Set the mode too
-        } else if speed as u8 > 7 {
-          data |= (speed as u8 - 8) << 4;
+        } else if speed > 7 {
+          data |= (speed - 8) << 4;
           data |= 4; // Set the mode too
         }
         HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into()
       } else {
         HardwareWriteCmd::new(
           Endpoint::TxMode,
-          vec![speed as u8],
+          vec![speed],
           false,
         ).into()
       }

@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,13 +19,13 @@ generic_protocol_setup!(SvakomIker, "svakom-iker");
 pub struct SvakomIker {}
 
 impl ProtocolHandler for SvakomIker {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut vibe_off = false;
     let mut msg_vec = vec![];
-    if let Some(speed) = cmds[0] {
+    if let Some((_, speed)) = cmds[0] {
       if speed == 0 {
         vibe_off = true;
       }
@@ -39,7 +39,7 @@ impl ProtocolHandler for SvakomIker {
       );
     }
     if cmds.len() > 1 {
-      if let Some(speed) = cmds[1] {
+      if let Some((_, speed)) = cmds[1] {
         if speed != 0 || !vibe_off {
           msg_vec.push(
             HardwareWriteCmd::new(
@@ -51,7 +51,7 @@ impl ProtocolHandler for SvakomIker {
           );
         }
       } else if vibe_off {
-        if let Some(speed) = cmds[1] {
+        if let Some((_, speed)) = cmds[1] {
           if speed != 0 {
             msg_vec.push(
               HardwareWriteCmd::new(

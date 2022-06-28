@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -19,15 +19,15 @@ generic_protocol_setup!(HtkBm, "htk_bm");
 pub struct HtkBm {}
 
 impl ProtocolHandler for HtkBm {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>
+    cmds: &Vec<Option<(ActuatorType, u32)>>
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec = vec![];
     if cmds.len() == 2 {
       let mut data: u8 = 15;
-      let left = cmds[0].unwrap_or(0);
-      let right = cmds[1].unwrap_or(0);
+      let left = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1;
+      let right = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1;
       if left != 0 && right != 0 {
         data = 11 // both (normal mode)
       } else if left != 0 {
@@ -45,7 +45,7 @@ impl ProtocolHandler for HtkBm {
 mod test {
   use super::HtkBm;
   use crate::{
-    core::messages::Endpoint,
+    core::messages::{ActuatorType, Endpoint},
     server::device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::ProtocolHandler,
@@ -56,7 +56,7 @@ mod test {
   pub fn test_htkbm_protocol() {
     let handler = HtkBm {};
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(0), Some(0)]),
+      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 0)), Some((ActuatorType::Vibrate, 0))]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![15],
@@ -64,7 +64,7 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(1), Some(0)]),
+      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 1)), Some((ActuatorType::Vibrate, 0))]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![12],
@@ -72,7 +72,7 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(0), Some(1)]),
+      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 0)), Some((ActuatorType::Vibrate, 1))]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![13],
@@ -80,7 +80,7 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_vibrate_cmd(&vec![Some(1), Some(1)]),
+      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 1)), Some((ActuatorType::Vibrate, 1))]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![11],

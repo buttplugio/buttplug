@@ -19,9 +19,10 @@ generic_protocol_setup!(MagicMotionV3, "magic-motion-3");
 pub struct MagicMotionV3 {}
 
 impl ProtocolHandler for MagicMotionV3 {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -35,7 +36,7 @@ impl ProtocolHandler for MagicMotionV3 {
         0x00,
         0x04,
         0x08,
-        cmds[0].unwrap_or(0) as u8,
+        scalar as u8,
         0x64,
         0x00,
       ],
