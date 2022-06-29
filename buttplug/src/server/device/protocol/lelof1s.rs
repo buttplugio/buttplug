@@ -5,74 +5,57 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareSubscribeCmd, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{ActuatorType, Endpoint}
+  },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareSubscribeCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    ServerDeviceIdentifier,
+  },
 };
+use async_trait::async_trait;
 use std::sync::Arc;
 
-super::default_protocol_definition!(LeloF1s, "lelof1s");
+generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
 
-#[derive(Default, Debug)]
-pub struct LeloF1sFactory {}
+#[derive(Default)]
+pub struct LeloF1sInitializer {}
 
-impl ButtplugProtocolFactory for LeloF1sFactory {
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolInitializer for LeloF1sInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
-    let subscribe_fut = hardware.subscribe(HardwareSubscribeCmd::new(Endpoint::Rx));
-    Box::pin(async move {
-      subscribe_fut.await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(LeloF1s::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "lelo-f1s"
+    hardware.subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx)).await?;
+    Ok(Box::new(LeloF1s::default()))
   }
 }
+
+#[derive(Default)]
+pub struct LeloF1s {}
 
 impl ProtocolHandler for LeloF1s {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      let mut cmd_vec = vec![0x1];
-      if let Some(cmds) = result {
-        info!("{:?}", cmds);
-        for cmd in cmds.iter() {
-          cmd_vec.push(cmd.expect("Test, assuming infallible") as u8);
-        }
-        device
-          .write_value(HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    let mut cmd_vec = vec![0x1];
+    for cmd in cmds.iter() {
+      cmd_vec.push(cmd.expect("LeloF1s should always send all values").1 as u8);
+    }
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -153,3 +136,4 @@ mod test {
     });
   }
 }
+*/

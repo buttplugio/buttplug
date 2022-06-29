@@ -5,70 +5,89 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::Endpoint,
+  },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
+  },
 };
+use async_trait::async_trait;
 use std::sync::Arc;
 
-super::default_protocol_definition!(PrettyLove, "prettylove");
+pub mod setup {
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct PrettyLoveIdentifierFactory {}
 
-#[derive(Default, Debug)]
-pub struct PrettyLoveFactory {}
+  impl ProtocolIdentifierFactory for PrettyLoveIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "prettylove"
+    }
 
-impl ButtplugProtocolFactory for PrettyLoveFactory {
-  fn try_create(
-    &self,
-    hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    Box::pin(async move {
-      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier("Aogu BLE".to_owned()), &hardware.endpoints())?;
-      Ok(Box::new(PrettyLove::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "prettylove"
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::PrettyLoveIdentifier::default())
+    }
   }
 }
+
+#[derive(Default)]
+pub struct PrettyLoveIdentifier {}
+
+#[async_trait]
+impl ProtocolIdentifier for PrettyLoveIdentifier {
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "prettylove",
+        &ProtocolAttributesType::Identifier("Aogu BLE".to_owned()),
+      ),
+      Box::new(PrettyLoveInitializer::default()),
+    ))
+  }
+}
+
+#[derive(Default)]
+pub struct PrettyLoveInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for PrettyLoveInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Box::new(PrettyLove::default()))
+  }
+}
+
+#[derive(Default)]
+pub struct PrettyLove {}
 
 impl ProtocolHandler for PrettyLove {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          device
-            .write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![0x00u8, speed as u8],
-              true,
-            ))
-            .await?;
-        }
-      }
-      Ok(messages::Ok::default().into())
-    })
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0x00u8, scalar as u8],
+      true,
+    )
+    .into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -122,3 +141,4 @@ mod test {
     });
   }
 }
+*/

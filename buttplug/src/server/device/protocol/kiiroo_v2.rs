@@ -5,127 +5,81 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  fleshlight_launch_helper::calculate_speed,
-  ButtplugProtocol,
-  ButtplugProtocolFactory,
-  ButtplugProtocolCommandHandler,
-};
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,    
-    FleshlightLaunchFW12Cmd,
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, Endpoint}
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup, fleshlight_launch_helper::calculate_speed},
+    ServerDeviceIdentifier,
+  },
 };
-use std::sync::{
-  atomic::{AtomicU8, Ordering::SeqCst},
-  Arc,
+use async_trait::async_trait;
+use std::{
+  sync::{
+    Arc, atomic::{AtomicU8, Ordering}
+  },
 };
-use tokio::sync::Mutex;
 
+generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
+
+#[derive(Default)]
+pub struct KiirooV2Initializer {}
+
+#[async_trait]
+impl ProtocolInitializer for KiirooV2Initializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
+    hardware.write_value(&msg).await?;
+    Ok(Box::new(KiirooV2::default()))
+  }
+}
+
+
+#[derive(Default)]
 pub struct KiirooV2 {
-  device_attributes: ProtocolDeviceAttributes,
-  _manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
 }
-
-crate::default_protocol_properties_definition!(KiirooV2);
-
-impl KiirooV2 {
-  const PROTOCOL_IDENTIFIER: &'static str = "kiiroo-v2";
-
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      _manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-#[derive(Default, Debug)]
-pub struct KiirooV2Factory {}
-
-impl ButtplugProtocolFactory for KiirooV2Factory {
-  fn try_create(
-    &self,
-    hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
-    let info_fut = hardware.write_value(msg);
-    Box::pin(async move {
-      info_fut.await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(KiirooV2::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    KiirooV2::PROTOCOL_IDENTIFIER
-  }
-}
-
-impl ButtplugProtocol for KiirooV2 {}
 
 impl ProtocolHandler for KiirooV2 {
   fn handle_linear_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(SeqCst);
+    let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (v.position * 99f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12Cmd::new(
-      message.device_index(),
+    let fl_cmd = messages::FleshlightLaunchFW12Cmd::new(
+      0,
       (v.position * 99f64) as u8,
       (calculate_speed(distance, v.duration) * 99f64) as u8,
     );
-    self.handle_fleshlight_launch_fw12_cmd(device, fl_cmd)
+    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
   }
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugServerResultFuture {
-    let previous_position = self.previous_position.clone();
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = message.position();
-    let msg = HardwareWriteCmd::new(
+    self.previous_position.store(position, Ordering::SeqCst);
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [message.position(), message.speed()].to_vec(),
       false,
-    );
-    let fut = device.write_value(msg);
-    Box::pin(async move {
-      previous_position.store(position, SeqCst);
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    ).into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -177,3 +131,4 @@ mod test {
     });
   }
 }
+*/

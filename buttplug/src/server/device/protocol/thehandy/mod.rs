@@ -194,24 +194,22 @@ impl ProtocolHandler for TheHandy {
     }
 
     let linear = handyplug::LinearCmd {
-      // You know when message IDs are important? When you have a protocol that
-      // handles multiple asynchronous commands. You know what doesn't handle
-      // multiple asynchronous commands? The handyplug protocol.
+      // You know when message IDs are important? When you have a protocol that handles multiple
+      // asynchronous commands. You know what doesn't handle multiple asynchronous commands? The
+      // handyplug protocol.
       //
-      // Do you know where you'd pack those? In the top level container, as
-      // they should then be separate from the message context, in order to
-      // allow multiple sorters. Do you know what doesn't need multiple
-      // sorters? The handyplug protocol.
+      // Do you know where you'd pack those? In the top level container, as they should then be
+      // separate from the message context, in order to allow multiple sorters. Do you know what
+      // doesn't need multiple sorters? The handyplug protocol.
       //
       // Please do not cargo cult protocols.
       id: 2,
-      // You know when multiple device indicies are important? WHEN YOU HAVE
-      // MULTIPLE DEVICE CONNECTI... oh fuck it. I am so tired. I am going to
-      // bed.
+      // You know when multiple device indicies are important? WHEN YOU HAVE MULTIPLE DEVICE
+      // CONNECTI... oh fuck it. I am so tired. I am going to bed.
       device_index: 0,
-      // AND I'M BACK AND WELL RESTED. You know when multiple axes are
-      // important? When you have to support arbitrary devices with multiple
-      // axes. You know what device doesn't have multiple axes?
+      // AND I'M BACK AND WELL RESTED. You know when multiple axes are important? When you have to
+      // support arbitrary devices with multiple axes. You know what device doesn't have multiple
+      // axes?
       //
       // Guess.
       //

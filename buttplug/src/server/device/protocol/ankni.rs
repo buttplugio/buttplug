@@ -5,80 +5,73 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::Endpoint,
+  },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    ServerDeviceIdentifier,
+  },
 };
-use std::sync::Arc;
+use async_trait::async_trait;
+use std::{
+  sync::{
+    Arc,
+  },
+};
 
-super::default_protocol_definition!(Ankni, "ankni");
+generic_protocol_initializer_setup!(Ankni, "ankni");
 
-#[derive(Default, Debug)]
-pub struct AnkniFactory {}
+#[derive(Default)]
+pub struct AnkniInitializer {}
 
-impl ButtplugProtocolFactory for AnkniFactory {
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolInitializer for AnkniInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    Box::pin(async move {
-      let msg = HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-          0x01, 0x01, 0x01, 0x01, 0x01,
-        ],
-        true,
-      );
-      hardware.write_value(msg).await?;
-      let msg = HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd,
-          0xfd, 0xfd, 0xfd, 0x00, 0x00,
-        ],
-        true,
-      );
-      hardware.write_value(msg).await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(Ankni::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self,) -> &'static str {
-    "ankni"
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let msg = HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        0x01, 0x01, 0x01, 0x01, 0x01,
+      ],
+      true,
+    );
+    hardware.write_value(&msg).await?;
+    let msg = HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd,
+        0xfd, 0xfd, 0xfd, 0x00, 0x00,
+      ],
+      true,
+    );
+    hardware.write_value(&msg).await?;
+    Ok(Box::new(Ankni::default()))
   }
 }
 
+#[derive(Default)]
+pub struct Ankni {}
+
 impl ProtocolHandler for Ankni {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          device
-            .write_value(HardwareWriteCmd::new(
+    Ok(vec!(HardwareWriteCmd::new(
               Endpoint::Tx,
               vec![
                 0x03,
                 0x12,
-                speed as u8,
+                scalar as u8,
                 0x00,
                 0x00,
                 0x00,
@@ -98,16 +91,11 @@ impl ProtocolHandler for Ankni {
                 0x00,
               ],
               true,
-            ))
-            .await?;
+            ).into()))
         }
       }
 
-      Ok(messages::Ok::default().into())
-    })
-  }
-}
-
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -185,3 +173,4 @@ mod test {
     });
   }
 }
+*/

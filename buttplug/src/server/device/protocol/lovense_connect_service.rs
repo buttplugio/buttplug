@@ -5,33 +5,61 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ButtplugDeviceMessage, Endpoint},
+    messages::{self, ActuatorType, ButtplugServerMessage, Endpoint, ButtplugDeviceMessage},
   },
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,
+    },
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
+use futures::future::BoxFuture;
 use std::sync::{
-  atomic::{AtomicBool, Ordering::SeqCst},
+  atomic::{AtomicBool, Ordering},
   Arc,
 };
 
-generic_protocol_setup!(LovenseConnectService, "lovense-connect-service");
+generic_protocol_initializer_setup!(LovenseConnectService, "lovense-connect-service");
+
+#[derive(Default)]
+pub struct LovenseConnectServiceInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for LovenseConnectServiceInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Box::new(LovenseConnectService::new(hardware.address())))
+  }
+}
 
 #[derive(Default)]
 pub struct LovenseConnectService {
+  address: String,
   rotation_direction: Arc<AtomicBool>,
 }
 
+impl LovenseConnectService {
+  pub fn new(address: &str) -> Self {
+    Self {
+      address: address.to_owned(),
+      ..Default::default()
+    }
+  }
+}
+
 impl ProtocolHandler for LovenseConnectService {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Lovense is the same situation as the Lovehoney Desire, where commands
     // are different if we're addressing all motors or seperate motors.
@@ -47,16 +75,16 @@ impl ProtocolHandler for LovenseConnectService {
     if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
       let lovense_cmd = format!(
         "Vibrate?v={}&t={}",
-        cmds[0].expect("Already checked existence"),
-        device.address()
+        cmds[0].expect("Already checked existence").1,
+        self.address
       )
       .as_bytes()
       .to_vec();
       msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
     } else {
       for (i, cmd) in cmds.iter().enumerate() {
-        if let Some(speed) = cmd {
-          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, device.address())
+        if let Some((_, speed)) = cmd {
+          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
             .as_bytes()
             .to_vec();
           msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
@@ -68,41 +96,38 @@ impl ProtocolHandler for LovenseConnectService {
 
   fn handle_rotate_cmd(
     &self,
-    message: &Vec<Option<(u32, bool)>>,
+    cmds: &Vec<Option<(u32, bool)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut msg_vec = vec![];
-    let lovense_cmd = format!("/Rotate?v={}&t={}", speed, device.address())
-      .as_bytes()
-      .to_vec();
-    msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-    let dir = self.rotation_direction.load(Ordering::SeqCst);
-    // TODO Should we store speed and direction as an option for rotation caching? This is weird.
-    if dir != clockwise {
-      self.rotation_direction.store(clockwise, Ordering::SeqCst);
-      msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
+    let mut hardware_cmds = vec![];
+    if let Some(Some((speed, clockwise))) = cmds.get(0) {
+      let lovense_cmd = format!("/Rotate?v={}&t={}", speed, self.address)
+        .as_bytes()
+        .to_vec();
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      let dir = self.rotation_direction.load(Ordering::SeqCst);
+      // TODO Should we store speed and direction as an option for rotation caching? This is weird.
+      if dir != *clockwise {
+        self.rotation_direction.store(*clockwise, Ordering::SeqCst);
+        hardware_cmds
+          .push(HardwareWriteCmd::new(Endpoint::Tx, b"RotateChange?".to_vec(), false).into());
+      }
     }
-    Ok(msg_vec)
+    Ok(hardware_cmds)
   }
 
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::BatteryLevelCmd,
-  ) -> ButtplugServerResultFuture {
+    msg: messages::BatteryLevelCmd,
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     Box::pin(async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
       let reading = device
-        .read_value(HardwareReadCmd::new(Endpoint::Rx, 0, 0))
+        .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
-      Ok(
-        messages::BatteryLevelReading::new(
-          message.device_index(),
-          reading.data()[0] as f64 / 100f64,
-        )
-        .into(),
-      )
+      Ok(messages::BatteryLevelReading::new(msg.device_index(), reading.data()[0] as f64 / 100f64).into())
     })
   }
 }

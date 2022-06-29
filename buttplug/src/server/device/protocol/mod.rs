@@ -14,18 +14,26 @@ pub mod fleshlight_launch_helper;
 
 // Since users can pick and choose protocols, we need all of these to be public.
 pub mod aneros;
+pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
+pub mod fredorch;
 pub mod hismith;
 pub mod htk_bm;
 pub mod jejoue;
+pub mod kiiroo_v2;
 pub mod kiiroo_v2_vibrator;
 pub mod kiiroo_v21;
-pub mod lovense;
+pub mod kiiroo_v21_initialized;
+pub mod lelof1s;
+pub mod lelof1sv2;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod lovedistance;
 pub mod lovehoney_desire;
+pub mod lovense;
+pub mod lovense_connect_service;
 pub mod lovenuts;
 pub mod magic_motion_v1;
 pub mod magic_motion_v2;
@@ -36,7 +44,9 @@ pub mod maxpro;
 pub mod mizzzee;
 pub mod motorbunny;
 pub mod nobra;
+pub mod patoo;
 pub mod picobong;
+pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
 pub mod svakom;
@@ -45,28 +55,18 @@ pub mod svakom_iker;
 pub mod svakom_sam;
 pub mod tcode_v03;
 pub mod wevibe8bit;
+pub mod xinput;
 pub mod youcups;
 pub mod zalo;
 
 /*
-pub mod ankni;
-pub mod fredorch;
 pub mod hgod;
-pub mod kiiroo_v2;
-pub mod kiiroo_v21_initialized;
-pub mod lelof1s;
-pub mod lelof1sv2;
-pub mod lovedistance;
-pub mod lovense_connect_service;
 pub mod mysteryvibe;
-pub mod patoo;
-pub mod prettylove;
 pub mod satisfyer;
 pub mod thehandy;
 pub mod vibratissimo;
 pub mod vorze_sa;
 pub mod wevibe;
-pub mod xinput;
 pub mod youou;
 */
 
@@ -480,4 +480,42 @@ macro_rules! generic_protocol_setup {
   };
 }
 
+
+#[macro_export]
+macro_rules! generic_protocol_initializer_setup {
+  ( $protocol_name:ident, $protocol_identifier:tt) => {
+    paste::paste! {
+      pub mod setup {
+        use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+        #[derive(Default)]
+        pub struct [< $protocol_name IdentifierFactory >] {}
+      
+        impl ProtocolIdentifierFactory for [< $protocol_name IdentifierFactory >] {
+          fn identifier(&self) -> &str {
+            $protocol_identifier
+          }
+      
+          fn create(&self) -> Box<dyn ProtocolIdentifier> {
+            Box::new(super::[< $protocol_name Identifier >]::default())
+          }
+        }
+      }
+      
+      #[derive(Default)]
+      pub struct [< $protocol_name Identifier >] {}
+      
+      #[async_trait]
+      impl ProtocolIdentifier for [< $protocol_name Identifier >] {
+        async fn identify(
+          &mut self,
+          hardware: Arc<Hardware>,
+        ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+          Ok((ServerDeviceIdentifier::new(hardware.address(), $protocol_identifier, &ProtocolAttributesType::Identifier(hardware.name().to_owned())), Box::new([< $protocol_name Initializer >]::default())))
+        }
+      }
+    }
+  };
+}
+
 pub use generic_protocol_setup;
+pub use generic_protocol_initializer_setup;

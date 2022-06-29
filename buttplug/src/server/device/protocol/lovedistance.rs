@@ -5,74 +5,58 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,
     },
-  }
+    ServerDeviceIdentifier,
+  },
 };
+use async_trait::async_trait;
 use std::sync::Arc;
 
-super::default_protocol_definition!(LoveDistance, "lovedistance");
+generic_protocol_initializer_setup!(LoveDistance, "lovedistance");
 
-#[derive(Default, Debug)]
-pub struct LoveDistanceFactory {}
+#[derive(Default)]
+pub struct LoveDistanceInitializer {}
 
-impl ButtplugProtocolFactory for LoveDistanceFactory {
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolInitializer for LoveDistanceInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    Box::pin(async move {
-      let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
-      hardware.write_value(msg).await?;
-      let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
-      hardware.write_value(msg).await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(LoveDistance::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "lovedistance"
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
+    hardware.write_value(&msg).await?;
+    let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
+    hardware.write_value(&msg).await?;
+    Ok(Box::new(LoveDistance::default()))
   }
 }
+
+#[derive(Default)]
+pub struct LoveDistance {}
 
 impl ProtocolHandler for LoveDistance {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          device
-            .write_value(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![0xf3, 0x00, speed as u8],
-              false,
-            ))
-            .await?;
-        }
-      }
-
-      Ok(messages::Ok::default().into())
-    })
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xf3, 0x00, scalar as u8],
+      false,
+    )
+    .into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -126,3 +110,4 @@ mod test {
     });
   }
 }
+*/

@@ -5,34 +5,24 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  fleshlight_launch_helper::calculate_speed,
-  ButtplugProtocol,
-  ButtplugProtocolFactory,
-  ButtplugProtocolCommandHandler,
-};
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,
-    FleshlightLaunchFW12Cmd,
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, Endpoint}
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup, fleshlight_launch_helper::calculate_speed},
+    ServerDeviceIdentifier,
+  },
 };
-use std::sync::{
-  atomic::{AtomicU8, Ordering::SeqCst},
-  Arc,
+use async_trait::async_trait;
+use std::{
+  sync::{
+    Arc, atomic::{AtomicU8, Ordering}
+  },
 };
-use tokio::sync::Mutex;
 
 const CRC_HI: [u8; 256] = [
   0, 193, 129, 64, 1, 192, 128, 65, 1, 192, 128, 65, 0, 193, 129, 64, 1, 192, 128, 65, 0, 193, 129,
@@ -74,26 +64,25 @@ pub fn crc16(data: &[u8]) -> [u8; 2] {
   [n, o]
 }
 
-#[derive(Default, Debug)]
-pub struct FredorchFactory {}
 
-impl ButtplugProtocolFactory for FredorchFactory {
-  fn try_create(
-    &self,
+generic_protocol_initializer_setup!(Fredorch, "fredorch");
+
+#[derive(Default)]
+pub struct FredorchInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for FredorchInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    Box::pin(async move {
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
       // Set the device to program mode
       let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
       let mut crc = crc16(&data);
       data.push(crc[0]);
       data.push(crc[1]);
       hardware
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Set the program mode to record
@@ -102,7 +91,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       hardware
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Program the device to move to position 0 at speed 5
@@ -114,7 +103,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       hardware
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Run the program
@@ -123,7 +112,7 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       hardware
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
       // Set the program to repeat
@@ -132,70 +121,40 @@ impl ButtplugProtocolFactory for FredorchFactory {
       data.push(crc[0]);
       data.push(crc[1]);
       hardware
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
         .await?;
 
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(Fredorch::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "fredorch"
+      Ok(Box::new(Fredorch::default()))
   }
 }
 
-crate::default_protocol_properties_definition!(Fredorch);
-
+#[derive(Default)]
 pub struct Fredorch {
-  device_attributes: ProtocolDeviceAttributes,
-  _manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
   previous_position: Arc<AtomicU8>,
-}
-
-impl ButtplugProtocol for Fredorch {}
-
-impl Fredorch {
-  const PROTOCOL_IDENTIFIER: &'static str = "fredorch";
-  
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      _manager: Arc::new(Mutex::new(manager)),
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
 }
 
 impl ProtocolHandler for Fredorch {
   fn handle_linear_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
-    let previous_position = self.previous_position.load(SeqCst);
+    let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (v.position * 99f64)).abs() / 99f64;
-    let fl_cmd = FleshlightLaunchFW12Cmd::new(
-      message.device_index(),
+    let fl_cmd = messages::FleshlightLaunchFW12Cmd::new(
+      0,
       (v.position * 99f64) as u8,
       (calculate_speed(distance, v.duration) * 99f64) as u8,
     );
-    self.handle_fleshlight_launch_fw12_cmd(device, fl_cmd)
+    self.handle_fleshlight_launch_fw12_cmd(fl_cmd)
   }
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugServerResultFuture {
-    let previous_position = self.previous_position.clone();
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = ((message.position() as f64 / 99.0) * 150.0) as u8;
     let speed = ((message.speed() as f64 / 99.0) * 15.0) as u8;
     let mut data: Vec<u8> = vec![
@@ -205,16 +164,12 @@ impl ProtocolHandler for Fredorch {
     let crc = crc16(&data);
     data.push(crc[0]);
     data.push(crc[1]);
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, data, false);
-    let fut = device.write_value(msg);
-    Box::pin(async move {
-      previous_position.store(position, SeqCst);
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    self.previous_position.store(position, Ordering::SeqCst);
+    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, data, false).into()))
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -416,3 +371,4 @@ mod test {
     });
   }
 }
+*/
