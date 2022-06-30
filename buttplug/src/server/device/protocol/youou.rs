@@ -5,89 +5,88 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-    server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::Endpoint,
+  },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
+  },
 };
-use std::sync::{
-  atomic::{AtomicU8, Ordering},
-  Arc,
-};
+use async_trait::async_trait;
+use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
 
+pub mod setup {
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct YououIdentifierFactory {}
 
-pub struct Youou {
-  device_attributes: ProtocolDeviceAttributes,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  packet_id: AtomicU8,
-}
+  impl ProtocolIdentifierFactory for YououIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "youou"
+    }
 
-impl Youou {
-  const PROTOCOL_IDENTIFIER: &'static str = "youou";
-
-  fn new(device_attributes: crate::server::device::configuration::ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      packet_id: AtomicU8::new(0),
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::YououIdentifier::default())
     }
   }
 }
 
-#[derive(Default, Debug)]
-pub struct YououFactory {}
+#[derive(Default)]
+pub struct YououIdentifier {}
 
-impl ButtplugProtocolFactory for YououFactory {
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolIdentifier for YououIdentifier {
+  async fn identify(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    // Youou devices have wildcarded names of VX001_*
-    // Force the identifier lookup to VX001_
-    Box::pin(async move {
-      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier("VX001_".to_owned()), &hardware.endpoints())?;
-      Ok(Box::new(Youou::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    Youou::PROTOCOL_IDENTIFIER
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "Youou",
+        &ProtocolAttributesType::Identifier("VX001_".to_owned()),
+      ),
+      Box::new(YououInitializer::default()),
+    ))
   }
 }
 
-impl ButtplugProtocol for Youou {}
+#[derive(Default)]
+pub struct YououInitializer {}
 
-crate::default_protocol_properties_definition!(Youou);
+#[async_trait]
+impl ProtocolInitializer for YououInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Box::new(Youou::default()))
+  }
+}
+
+
+#[derive(Default)]
+pub struct Youou {
+  packet_id: AtomicU8,
+}
 
 impl ProtocolHandler for Youou {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    device: Arc<Hardware>,
-    msg: messages::VibrateCmd,
-  ) -> ButtplugServerResultFuture {
-    // TODO Convert to using generic command manager
-
+    _index: u32,
+    scalar: u32
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Byte 2 seems to be a monotonically increasing packet id of some kind
     //
     // Speed seems to be 0-247 or so.
     //
     // Anything above that sets a pattern which isn't what we want here.
-    let max_value: f64 = 247.0;
-    let speed: u8 = (msg.speeds()[0].speed() * max_value) as u8;
-    let state: u8 = if speed > 0 { 1 } else { 0 };
+    let state: u8 = if scalar > 0 { 1 } else { 0 };
 
     // Scope the packet id set so we can unlock ASAP.
     let mut data = vec![
@@ -97,7 +96,7 @@ impl ProtocolHandler for Youou {
       0x02,
       0x03,
       0x01,
-      speed,
+      scalar as u8,
       state,
     ];
     self.packet_id.store(
@@ -114,15 +113,11 @@ impl ProtocolHandler for Youou {
     let mut data2 = vec![crc, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
     data.append(&mut data2);
 
-    let msg = HardwareWriteCmd::new(Endpoint::Tx, data, false);
-    let fut = device.write_value(msg);
-    Box::pin(async {
-      fut.await?;
-      Ok(messages::Ok::default().into())
-    })
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -192,3 +187,4 @@ mod test {
     });
   }
 }
+ */

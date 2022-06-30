@@ -5,32 +5,20 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{
-  fleshlight_launch_helper,
-  ButtplugProtocol,
-  ButtplugProtocolFactory,
-  ButtplugProtocolCommandHandler,
-};
+use super::fleshlight_launch_helper;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{
-      self,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      Endpoint,
-    },
+    messages::{self, ButtplugDeviceMessage, Endpoint},
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
-    }
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareReadCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    ServerDeviceIdentifier,
   },
 };
-use futures::future;
+use async_trait::async_trait;
 use prost::Message;
 use std::sync::{
   atomic::{AtomicU8, Ordering},
@@ -45,54 +33,17 @@ mod handyplug {
   include!(concat!(env!("OUT_DIR"), "/handyplug.rs"));
 }
 
-crate::default_protocol_properties_definition!(TheHandy);
+generic_protocol_initializer_setup!(TheHandy, "thehandy");
 
-pub struct TheHandy {
-  device_attributes: ProtocolDeviceAttributes,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  // The generic command manager would normally handle this storage, but the only reason we're
-  // retaining tracking information is to build our fucking timing calculation for the fleshlight
-  // command backport. I am so mad right now.
-  previous_position: Arc<AtomicU8>,
-}
+#[derive(Default)]
+pub struct TheHandyInitializer {}
 
-impl TheHandy {
-  const PROTOCOL_IDENTIFIER: &'static str = "thehandy";
-
-  pub fn new(device_attributes: ProtocolDeviceAttributes) -> Self
-  where
-    Self: Sized,
-  {
-    Self {
-      stop_commands: GenericCommandManager::new(&device_attributes).stop_commands(),
-      device_attributes,
-      previous_position: Arc::new(AtomicU8::new(0)),
-    }
-  }
-}
-
-impl ButtplugProtocol for TheHandy {}
-
-#[derive(Default, Debug)]
-pub struct TheHandyFactory {}
-
-impl ButtplugProtocolFactory for TheHandyFactory {
-  fn protocol_identifier(&self) -> &'static str {
-    "thehandy"
-  }
-
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolInitializer for TheHandyInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  >
-  where
-    Self: Sized,
-  {
-    Box::pin(async move {
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
       // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
       // firmware easier".
       //
@@ -134,8 +85,8 @@ impl ButtplugProtocolFactory for TheHandyFactory {
       session_req
         .encode(&mut sec_buf)
         .expect("Infallible encode.");
-      hardware.write_value(HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
-      let _ = hardware.read_value(HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
+      hardware.write_value(&HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
+      let _ = hardware.read_value(&HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
 
       // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
       // messages that it can use. However, having removed these and still tried to run the system,
@@ -143,18 +94,23 @@ impl ButtplugProtocolFactory for TheHandyFactory {
       // does not seem needless.
       //
       // We have no device name updates here, so just return a device.
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(TheHandy::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
+      Ok(Box::new(TheHandy::default()))
   }
+}
+
+#[derive(Default)]
+pub struct TheHandy {
+  // The generic command manager would normally handle this storage, but the only reason we're
+  // retaining tracking information is to build our fucking timing calculation for the fleshlight
+  // command backport. I am so mad right now.
+  previous_position: Arc<AtomicU8>,
 }
 
 impl ProtocolHandler for TheHandy {
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::FleshlightLaunchFW12Cmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Oh good. ScriptPlayer hasn't updated to LinearCmd yet so now I have to
     // work backward from fleshlight to my own Linear format that Handy uses.
     //
@@ -168,7 +124,6 @@ impl ProtocolHandler for TheHandy {
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
     self.handle_linear_cmd(
-      device,
       messages::LinearCmd::new(
         message.device_index(),
         vec![messages::VectorSubcommand::new(0, duration, goal_position)],
@@ -178,9 +133,8 @@ impl ProtocolHandler for TheHandy {
 
   fn handle_linear_cmd(
     &self,
-    device: Arc<Hardware>,
     message: messages::LinearCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // What is "How not to implement a command structure for your device that
     // does one thing", Alex?
 
@@ -188,9 +142,9 @@ impl ProtocolHandler for TheHandy {
     //
     // TODO Use the command manager to check this.
     if message.vectors().len() != 1 {
-      return Box::pin(future::ready(Err(
+      return Err(
         ButtplugDeviceError::DeviceFeatureCountMismatch(1, message.vectors().len() as u32).into(),
-      )));
+      );
     }
 
     let linear = handyplug::LinearCmd {
@@ -231,11 +185,6 @@ impl ProtocolHandler for TheHandy {
     linear_payload
       .encode(&mut linear_buf)
       .expect("Infallible encode.");
-    Box::pin(async move {
-      device
-        .write_value(HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true))
-        .await?;
-      Ok(messages::Ok::default().into())
-    })
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true).into()])
   }
 }

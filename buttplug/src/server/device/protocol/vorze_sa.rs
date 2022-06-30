@@ -5,34 +5,78 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::handle_nonaggregate_vibrate_cmd;
+
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     messages::{self, Endpoint},
   },
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    ServerDeviceIdentifier,
   },
 };
-use std::sync::{Arc, atomic::{AtomicU8, Ordering::SeqCst}};
+use async_trait::async_trait;
+use std::{
+  sync::{
+    Arc,
+    atomic::{AtomicU8, Ordering}
+  },
+};
 
-generic_protocol_setup!(VorzeSA, "vorze-sa");
+generic_protocol_initializer_setup!(VorzeSA, "vorze-sa");
 
 #[derive(Default)]
+pub struct VorzeSAInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for VorzeSAInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let hwname = hardware.name().to_ascii_lowercase();
+    let device_type = if hwname.contains("cyclone") {
+      VorzeDevice::Cyclone
+    } else if hwname.contains("ufo tw") {
+      VorzeDevice::UfoTw
+    } else if hwname.contains("ufo") {
+      VorzeDevice::Ufo
+    } else if hwname.contains("bach") {
+      VorzeDevice::Bach
+    } else if hwname.contains("rocket") {
+      VorzeDevice::Rocket
+    } else if hwname.contains("piston") {
+      VorzeDevice::Piston
+    } else {
+      return Err(ButtplugDeviceError::ProtocolNotImplemented(format!("No protocol implementation for Vorze Device {}", hardware.name())))
+    };
+    Ok(Box::new(VorzeSA::new(device_type)))
+  }
+}
+
 pub struct VorzeSA {
-  previous_position: Arc<AtomicU8>
+  previous_position: Arc<AtomicU8>,
+  device_type: VorzeDevice
+}
+
+impl VorzeSA {
+  pub fn new(device_type: VorzeDevice) -> Self {
+    Self { previous_position: Arc::new(AtomicU8::new(0)), device_type }
+  }
 }
 
 #[repr(u8)]
-#[derive(PartialEq)]
-enum VorzeDevices {
+#[derive(PartialEq, Clone, Copy)]
+pub enum VorzeDevice {
   Bach = 6,
   Piston = 3,
   Cyclone = 1,
   Rocket = 7,
   Ufo = 2,
+  UfoTw = 5,
 }
 
 #[repr(u8)]
@@ -67,20 +111,15 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 }
 
 impl ProtocolHandler for VorzeSA {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_vibrate_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    _index: u32,
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let dev_id = if self.name().to_ascii_lowercase().contains("rocket") {
-      VorzeDevices::Rocket
-    } else {
-      VorzeDevices::Bach
-    };
-
     Ok(vec!( {
       HardwareWriteCmd::new(
         Endpoint::Tx,
-        vec![dev_id as u8, VorzeActions::Vibrate as u8, speed as u8],
+        vec![self.device_type as u8, VorzeActions::Vibrate as u8, scalar as u8],
         true,
       )
       .into()
@@ -91,17 +130,12 @@ impl ProtocolHandler for VorzeSA {
     &self,
     cmds: &Vec<Option<(u32, bool)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let dev_id = if self.name().contains("UFO") {
-      VorzeDevices::Ufo
-    } else {
-      VorzeDevices::Cyclone
-    };
     if let Some((speed, clockwise)) = cmds[0] {
       let data: u8 = (clockwise as u8) << 7 | (speed as u8);
       Ok(vec!(
         HardwareWriteCmd::new(
           Endpoint::Tx,
-          vec![dev_id as u8, VorzeActions::Rotate as u8, data],
+          vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
           true,
         )
         .into(),
@@ -117,17 +151,17 @@ impl ProtocolHandler for VorzeSA {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 
-    let previous_position = self.previous_position.load(SeqCst);
+    let previous_position = self.previous_position.load(Ordering::SeqCst);
     let position = v.position * 200f64;
     let distance = (previous_position as f64 - position).abs();
 
     let speed = get_piston_speed(distance, v.duration as f64);
 
-    self.previous_position.store(position as u8, SeqCst);
+    self.previous_position.store(position as u8, Ordering::SeqCst);
 
     Ok(vec!(HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![VorzeDevices::Piston as u8, position as u8, speed as u8],
+      vec![self.device_type as u8, position as u8, speed as u8],
       true,
     ).into()))
   }
@@ -136,7 +170,7 @@ impl ProtocolHandler for VorzeSA {
     &self,
     msg: messages::VorzeA10CycloneCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotate_cmd(vec!(Some((msg.speed() as f64 / 99f64, msg.clockwise()))))
+    self.handle_rotate_cmd(&vec!(Some((msg.speed(), msg.clockwise()))))
   }
 }
 

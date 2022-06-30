@@ -5,96 +5,80 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  }
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{ActuatorType, Endpoint},
+  },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    ServerDeviceIdentifier,
+  },
 };
-use futures_timer::Delay;
-use std::sync::Arc;
-use std::time::Duration;
+use async_trait::async_trait;
+use std::{
+  sync::{
+    Arc,
+  },
+};
 
-super::default_protocol_definition!(WeVibe, "wevibe");
+generic_protocol_initializer_setup!(WeVibe, "wevibe");
 
-#[derive(Default, Debug)]
-pub struct WeVibeFactory {}
+#[derive(Default)]
+pub struct WeVibeInitializer {}
 
-impl ButtplugProtocolFactory for WeVibeFactory {
-  fn try_create(
-    &self,
+#[async_trait]
+impl ProtocolInitializer for WeVibeInitializer {
+  async fn initialize(
+    &mut self,
     hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling WeVibe init");
-    let vibration_on = hardware.write_value(HardwareWriteCmd::new(
+    hardware.write_value(&HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
       true,
-    ));
-    let vibration_off = hardware.write_value(HardwareWriteCmd::new(
+    )).await?;
+    hardware.write_value(&HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
       true,
-    ));
-    Box::pin(async move {
-      vibration_on.await?;
-      Delay::new(Duration::from_millis(100)).await;
-      vibration_off.await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(WeVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "wevibe"
+    )).await?;
+    Ok(Box::new(WeVibe::default()))
   }
 }
+
+#[derive(Default)]
+pub struct WeVibe {}
 
 impl ProtocolHandler for WeVibe {
-  fn handle_vibrate_cmd(
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      if let Some(cmds) = result {
-        let r_speed_int = cmds[0].unwrap_or(0) as u8;
-        let r_speed_ext = cmds.last().unwrap_or(&None).unwrap_or(0u32) as u8;
-        let data = if r_speed_int == 0 && r_speed_ext == 0 {
-          vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
-        } else {
-          vec![
-            0x0f,
-            0x03,
-            0x00,
-            r_speed_ext | (r_speed_int << 4),
-            0x00,
-            0x03,
-            0x00,
-            0x00,
-          ]
-        };
-        device
-          .write_value(HardwareWriteCmd::new(Endpoint::Tx, data, true))
-          .await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
+    let r_speed_ext = cmds.last().unwrap_or(&None).unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
+    let data = if r_speed_int == 0 && r_speed_ext == 0 {
+      vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+    } else {
+      vec![
+        0x0f,
+        0x03,
+        0x00,
+        r_speed_ext | (r_speed_int << 4),
+        0x00,
+        0x03,
+        0x00,
+        0x00,
+      ]
+    };
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -248,3 +232,4 @@ mod test {
     });
   }
 }
+*/

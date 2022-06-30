@@ -5,108 +5,104 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    ButtplugDeviceMessage,
-    Endpoint,
-    VibrateCmd,
-    VibrateSubcommand,
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{Endpoint, ActuatorType},
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder, ProtocolAttributesIdentifier},
-      hardware::{Hardware, HardwareReadCmd, HardwareWriteCmd},
-    },
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareReadCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
 use std::sync::Arc;
 
-super::default_protocol_definition!(Vibratissimo, "vibratissimo");
+pub mod setup {
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct VibratissimoIdentifierFactory {}
 
-#[derive(Default, Debug)]
-pub struct VibratissimoFactory {}
+  impl ProtocolIdentifierFactory for VibratissimoIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "vibratissimo"
+    }
 
-impl ButtplugProtocolFactory for VibratissimoFactory {
-  fn try_create(
-    &self,
-    hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    Box::pin(async move {
-      let result = hardware
-        .read_value(HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
-        .await?;
-      let ident =
-        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
-      let device_attributes = builder.create(hardware.address(), &ProtocolAttributesIdentifier::Identifier(ident), &hardware.endpoints())?;
-      Ok(Box::new(Vibratissimo::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    Vibratissimo::PROTOCOL_IDENTIFIER
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::VibratissimoIdentifier::default())
+    }
   }
 }
 
-impl ProtocolHandler for Vibratissimo {
-  fn handle_stop_device_cmd(
-    &self,
-    device: Arc<Hardware>,
-    message: messages::StopDeviceCmd,
-  ) -> ButtplugServerResultFuture {
-    self.handle_vibrate_cmd(
-      device,
-      VibrateCmd::new(
-        message.device_index(),
-        vec![VibrateSubcommand::new(0, 0f64)],
-      ),
-    )
-  }
+#[derive(Default)]
+pub struct VibratissimoIdentifier {}
 
-  fn handle_vibrate_cmd(
+#[async_trait]
+impl ProtocolIdentifier for VibratissimoIdentifier {
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let result = hardware
+        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+        .await?;
+    let ident =
+      String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "vibratissimo",
+        &ProtocolAttributesType::Identifier(ident),
+      ),
+      Box::new(VibratissimoInitializer::default()),
+    ))
+  }
+}
+
+
+#[derive(Default)]
+pub struct VibratissimoInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for VibratissimoInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Box::new(Vibratissimo::default()))
+  }
+}
+
+#[derive(Default)]
+pub struct Vibratissimo {}
+
+impl ProtocolHandler for Vibratissimo {
+
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Store off result before the match, so we drop the lock ASAP.
-    let manager = self.manager.clone();
-    Box::pin(async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      let mut fut_vec = vec![];
-      if let Some(cmds) = result {
         let mut data: Vec<u8> = Vec::new();
         for cmd in cmds {
-          data.push(cmd.unwrap_or(0) as u8);
+          data.push(cmd.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8);
         }
         if data.len() == 1 {
           data.push(0x00);
         }
 
         // Put the device in write mode
-        fut_vec.push(device.write_value(HardwareWriteCmd::new(
+        Ok(vec![HardwareWriteCmd::new(
           Endpoint::TxMode,
           vec![0x03, 0xff],
           false,
-        )));
-        fut_vec.push(device.write_value(HardwareWriteCmd::new(Endpoint::TxVibrate, data, false)));
-      }
-      // TODO Just use join_all here
-      for fut in fut_vec {
-        // TODO Do something about possible errors here
-        fut.await?;
-      }
-      Ok(messages::Ok::default().into())
-    })
+        ).into(), HardwareWriteCmd::new(Endpoint::TxVibrate, data, false).into()])
   }
 }
 
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{
@@ -406,3 +402,4 @@ mod test {
     });
   }
 }
+*/

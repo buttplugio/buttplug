@@ -54,20 +54,20 @@ pub mod svakom_alex;
 pub mod svakom_iker;
 pub mod svakom_sam;
 pub mod tcode_v03;
+pub mod thehandy;
+pub mod vibratissimo;
+pub mod vorze_sa;
+pub mod wevibe;
 pub mod wevibe8bit;
 pub mod xinput;
 pub mod youcups;
+pub mod youou;
 pub mod zalo;
 
 /*
 pub mod hgod;
 pub mod mysteryvibe;
 pub mod satisfyer;
-pub mod thehandy;
-pub mod vibratissimo;
-pub mod vorze_sa;
-pub mod wevibe;
-pub mod youou;
 */
 
 use crate::{
