@@ -118,7 +118,7 @@
 # - Serial info here is for default device configuration. Port names
 #   will have to be added by the user in the user device config file.
 
-version: 65
+version: 66
 
 protocols:
   
@@ -204,6 +204,9 @@ protocols:
         54300001-0023-4bd4-bbd5-a6920e4c5653: # Calor
           tx: 54300002-0023-4bd4-bbd5-a6920e4c5653
           rx: 54300003-0023-4bd4-bbd5-a6920e4c5653
+        45460001-0023-4bd4-bbd5-a6920e4c5653: # Exomoon
+          tx: 45460002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45460003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name:
         en-us: Lovense Device
@@ -312,6 +315,10 @@ protocols:
           - T
         name:
           en-us: Lovense Calor
+      - identifier:
+          - EF
+        name:
+          en-us: Lovense Exomoon
   lovense-connect-service:
     lovense-connect-service:
       exists: true
