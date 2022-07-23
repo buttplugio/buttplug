@@ -114,6 +114,10 @@ impl DeviceMessageAttributes {
   pub fn message_allowed(&self, message_type: &ButtplugDeviceMessageType) -> bool {
     match message_type {
       ButtplugDeviceMessageType::ScalarCmd => self.scalar_cmd.is_some(),
+      // VibrateCmd and SingleMotorVibrateCmd will derive from Scalars, so errors will be thrown in
+      // the scalar parser if the actuator isn't correct.
+      ButtplugDeviceMessageType::VibrateCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::SingleMotorVibrateCmd => self.scalar_cmd.is_some(),
       ButtplugDeviceMessageType::SensorReadCmd => self.scalar_cmd.is_some(),
       ButtplugDeviceMessageType::SensorSubscribeCmd => self.scalar_cmd.is_some(),
       ButtplugDeviceMessageType::SensorUnsubscribeCmd => self.scalar_cmd.is_some(),
@@ -128,8 +132,6 @@ impl DeviceMessageAttributes {
       ButtplugDeviceMessageType::RawWriteCmd => self.raw_write_cmd.is_some(),
       ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some(),
       ButtplugDeviceMessageType::StopDeviceCmd => true,
-      ButtplugDeviceMessageType::SingleMotorVibrateCmd => false,
-      ButtplugDeviceMessageType::VibrateCmd => false,
       ButtplugDeviceMessageType::KiirooCmd => false,
       ButtplugDeviceMessageType::LovenseCmd => false,      
     }
