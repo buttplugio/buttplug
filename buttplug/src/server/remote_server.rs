@@ -29,7 +29,7 @@ use tokio::sync::{broadcast, mpsc, Notify};
 #[derive(Clone, Debug)]
 pub enum ButtplugRemoteServerEvent {
   Connected(String),
-  DeviceAdded(u32, String),
+  DeviceAdded(u32, String, String, Option<String>),
   DeviceRemoved(u32),
   Disconnected,
 }
@@ -112,9 +112,11 @@ async fn run_server<ConnectorType>(
           if remote_event_sender.receiver_count() > 0 {
             match &msg {
               ButtplugServerMessage::DeviceAdded(da) => {
-                if remote_event_sender.send(ButtplugRemoteServerEvent::DeviceAdded(da.device_index(), da.device_name().clone())).is_err() {
-                  error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-                }
+                if let Some(device_info) = server.device_manager().device_info(da.device_index()) {
+                  if remote_event_sender.send(ButtplugRemoteServerEvent::DeviceAdded(da.device_index(), da.device_name().clone(), device_info.identifier.address().clone(), device_info.display_name.clone())).is_err() {
+                    error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
+                  }  
+                } 
               },
               ButtplugServerMessage::DeviceRemoved(dr) => {
                if remote_event_sender.send(ButtplugRemoteServerEvent::DeviceRemoved(dr.device_index())).is_err() {

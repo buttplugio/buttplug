@@ -51,6 +51,7 @@ use std::{convert::TryFrom, sync::Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 
+#[derive(Debug)]
 pub(super) enum DeviceManagerCommand {
   StartScanning,
   StopScanning,
@@ -307,14 +308,14 @@ impl ServerDeviceManager {
     }
   }
 
-  pub fn device_info(&self, index: u32) -> Result<ServerDeviceInfo, ButtplugDeviceError> {
+  pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     if let Some(device) = self.devices.get(&index) {
-      Ok(ServerDeviceInfo {
+      Some(ServerDeviceInfo {
         identifier: device.value().identifier().clone(),
         display_name: device.value().display_name(),
       })
     } else {
-      Err(ButtplugDeviceError::DeviceNotAvailable(index))
+      None
     }
   }
 }
