@@ -524,7 +524,7 @@ impl ButtplugServer {
     let ping_timer = self.ping_timer.clone();
     let out_msg = messages::ServerInfo::new(
       &self.server_name,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      msg.message_version(),
       self.max_ping_time,
     );
     let connected = self.connected.clone();
