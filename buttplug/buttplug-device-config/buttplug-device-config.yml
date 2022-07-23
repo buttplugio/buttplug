@@ -2708,6 +2708,20 @@ protocols:
         ScalarCmd:
           - StepCount: 3
             ActuatorType: Vibrate
+  kgoal-boost:
+    btle:
+      names:
+        - Boost
+      services:
+        8e7c6065-7656-17ad-1b41-b53d1a548e0d:
+          rx: 10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5
+      defaults:
+        name: KGoal Boost
+      messages:
+        SensorReadCmd:
+          - SensorType: Pressure
+            FeatureDescriptor: Pelvic Pressure (Unnormalized)
+            SensorRange: [0, 1000]
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

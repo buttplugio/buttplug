@@ -26,12 +26,13 @@ pub enum ActuatorType {
   Position
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SensorType {
+  Battery,
+  RSSI,
   Button,
   Pressure,
-  RSSI,
-  Battery,
+  // Temperature,
   // Accelerometer,
   // Gyro,
 }
@@ -113,6 +114,9 @@ impl DeviceMessageAttributes {
   pub fn message_allowed(&self, message_type: &ButtplugDeviceMessageType) -> bool {
     match message_type {
       ButtplugDeviceMessageType::ScalarCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorReadCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorSubscribeCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorUnsubscribeCmd => self.scalar_cmd.is_some(),
       ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
       ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
       ButtplugDeviceMessageType::BatteryLevelCmd => self.battery_level_cmd.is_some(),
@@ -308,6 +312,9 @@ pub struct SensorDeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "SensorType")]
   sensor_type: SensorType,
+  #[getset(get = "pub")]
+  #[serde(rename = "SensorRange")]
+  sensor_range: [u32; 2]
 }
 
 /*

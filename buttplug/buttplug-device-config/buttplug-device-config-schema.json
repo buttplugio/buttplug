@@ -195,6 +195,37 @@
       },
       "minItems": 1
     },
+    "SensorMessageAttributes": {
+      "description": "Attributes for sensor messages.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "SensorType": {
+            "type": "string"
+          },
+          "FeatureDescriptor": {
+            "type": "string"
+          },
+          "SensorRange": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": [
+          "SensorType",
+          "FeatureDescriptor",
+          "SensorRange"
+        ],
+        "additionalProperties": false,
+        "minProperties": 0
+      },
+      "minItems": 1
+    },    
     "GenericUserMessageAttributes": {
       "description": "Attributes for device messages that can be configured by the user.",
       "type": "array",

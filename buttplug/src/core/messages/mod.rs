@@ -23,7 +23,6 @@ mod endpoint;
 mod error;
 mod fleshlight_launch_fw12_cmd;
 mod kiiroo_cmd;
-mod scalar_cmd;
 mod linear_cmd;
 mod log;
 mod log_level;
@@ -42,7 +41,12 @@ mod request_server_info;
 mod rotate_cmd;
 mod rssi_level_cmd;
 mod rssi_level_reading;
+mod scalar_cmd;
 mod scanning_finished;
+mod sensor_read_cmd;
+mod sensor_reading;
+mod sensor_subscribe_cmd;
+mod sensor_unsubscribe_cmd;
 pub mod serializer;
 mod server_info;
 mod single_motor_vibrate_cmd;
@@ -84,6 +88,10 @@ pub use rssi_level_cmd::RSSILevelCmd;
 pub use rssi_level_reading::RSSILevelReading;
 pub use scanning_finished::ScanningFinished;
 pub use scalar_cmd::{ScalarCmd, ScalarSubcommand};
+pub use sensor_read_cmd::{SensorReadCmd, SensorSubcommand};
+pub use sensor_reading::{SensorReading};
+pub use sensor_subscribe_cmd::SensorSubscribeCmd;
+pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmd;
 pub use server_info::{ServerInfo, ServerInfoV0};
 pub use single_motor_vibrate_cmd::SingleMotorVibrateCmd;
 pub use start_scanning::StartScanning;
@@ -199,6 +207,9 @@ pub enum ButtplugDeviceMessageType {
   BatteryLevelCmd,
   RSSILevelCmd,
   ScalarCmd,
+  SensorReadCmd,
+  SensorSubscribeCmd,
+  SensorUnsubscribeCmd,
   // Deprecated generic commands
   SingleMotorVibrateCmd,
   // Deprecated device specific commands
@@ -242,6 +253,9 @@ pub enum ButtplugCurrentSpecDeviceMessageType {
   BatteryLevelCmd,
   RSSILevelCmd,
   ScalarCmd,
+  SensorReadCmd,
+  SensorSubscribeCmd,
+  SensorUnsubscribeCmd,
 }
 
 // Ordering for ButtplugCurrentDeviceMessageType should be lexicographic, for
@@ -285,6 +299,9 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
       ButtplugDeviceMessageType::ScalarCmd => Ok(ButtplugCurrentSpecDeviceMessageType::ScalarCmd),
+      ButtplugDeviceMessageType::SensorReadCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorReadCmd),
+      ButtplugDeviceMessageType::SensorSubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd),
+      ButtplugDeviceMessageType::SensorUnsubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd),
       _ => Err(ButtplugMessageError::MessageConversionError(
         "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),
@@ -314,6 +331,9 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
       }
       ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
       ButtplugCurrentSpecDeviceMessageType::ScalarCmd => ButtplugDeviceMessageType::ScalarCmd,
+      ButtplugCurrentSpecDeviceMessageType::SensorReadCmd => ButtplugDeviceMessageType::SensorReadCmd,
+      ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd => ButtplugDeviceMessageType::SensorSubscribeCmd,
+      ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd => ButtplugDeviceMessageType::SensorUnsubscribeCmd,
     }
   }
 }
@@ -353,6 +373,9 @@ pub enum ButtplugClientMessage {
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
+  SensorReadCmd(SensorReadCmd),
+  SensorSubscribeCmd(SensorSubscribeCmd),
+  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
   // Deprecated generic commands
   SingleMotorVibrateCmd(SingleMotorVibrateCmd),
   // Deprecated device specific commands
@@ -361,7 +384,6 @@ pub enum ButtplugClientMessage {
   KiirooCmd(KiirooCmd),
   VorzeA10CycloneCmd(VorzeA10CycloneCmd),
   // To Add:
-  // PatternCmd
 }
 
 /// Represents all possible messages a
@@ -454,6 +476,9 @@ pub enum ButtplugSpecV3ClientMessage {
   // Sensor commands
   BatteryLevelCmd(BatteryLevelCmd),
   RSSILevelCmd(RSSILevelCmd),
+  SensorReadCmd(SensorReadCmd),
+  SensorSubscribeCmd(SensorSubscribeCmd),
+  SensorUnsubscribeCmd(SensorUnsubscribeCmd)
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
