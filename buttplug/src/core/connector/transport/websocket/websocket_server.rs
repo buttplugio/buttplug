@@ -110,6 +110,7 @@ async fn run_connection_loop<S>(
         if let Some(serialized_msg) = serialized_msg {
           match serialized_msg {
             ButtplugSerializedMessage::Text(text_msg) => {
+              trace!("Sending text message: {}", text_msg);
               if websocket_server_sender
                 .send(async_tungstenite::tungstenite::Message::Text(text_msg))
                 .await

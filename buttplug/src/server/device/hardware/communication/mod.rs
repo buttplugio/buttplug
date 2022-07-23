@@ -23,6 +23,7 @@ pub mod test;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
+  util::async_manager
 };
 use async_trait::async_trait;
 use futures::future;
@@ -114,15 +115,18 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
     let child_token = token.child_token();
     self.cancellation_token = Some(token);
     Box::pin(async move {
-      loop {
-        if let Err(err) = comm_manager.scan().await {
-          return Err(err.into());
+      async_manager::spawn(async move {
+        loop {
+          if let Err(err) = comm_manager.scan().await {
+            error!("Timed Device Communication Manager Failure: {}", err);
+            break;
+          }
+          tokio::select! {
+            _ = tokio::time::sleep(Duration::from_secs(1)) => continue,
+            _ = child_token.cancelled() => break,
+          }
         }
-        tokio::select! {
-          _ = tokio::time::sleep(Duration::from_secs(1)) => continue,
-          _ = child_token.cancelled() => break,
-        }
-      }
+      });
       Ok(())
     })
   }

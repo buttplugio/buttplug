@@ -307,10 +307,12 @@ impl ServerDeviceManagerEventLoop {
   }
 
   pub async fn run(&mut self) {
+    debug!("Starting Device Manager Loop");
     loop {
       tokio::select! {
         device_comm_msg = self.device_comm_receiver.recv() => {
           if let Some(msg) = device_comm_msg {
+            trace!("Got device communication message {:?}", msg);
             self.handle_device_communication(msg).await;
           } else {
             break;
@@ -318,6 +320,7 @@ impl ServerDeviceManagerEventLoop {
         }
         device_event_msg = self.device_event_receiver.recv() => {
           if let Some(msg) = device_event_msg {
+            trace!("Got device event message {:?}", msg);
             self.handle_device_event(msg).await;
           } else {
             error!("We shouldn't be able to get here since we also own the sender.");
@@ -326,20 +329,22 @@ impl ServerDeviceManagerEventLoop {
         },
         device_command_msg = self.device_command_receiver.recv() => {
           if let Some(msg) = device_command_msg {
+            trace!("Got device command message {:?}", msg);
             match msg {
               DeviceManagerCommand::StartScanning => self.handle_start_scanning().await,
               DeviceManagerCommand::StopScanning => self.handle_stop_scanning().await,
             }
           } else {
-            info!("Channel to Device Manager frontend dropped, exiting event loop.");
+            debug!("Channel to Device Manager frontend dropped, exiting event loop.");
             break;
           }
         }
         _ = self.loop_cancellation_token.cancelled().fuse() => {
-          info!("Device event loop cancelled, exiting.");
-          return
+          debug!("Device event loop cancelled, exiting.");
+          break;
         }
       }
     }
+    debug!("Exiting Device Manager Loop");
   }
 }
