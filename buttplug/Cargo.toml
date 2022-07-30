@@ -78,7 +78,7 @@ reqwest = { version = "0.11.10", optional = true, features = ["native-tls"] }
 serde-aux = "3.0.1"
 getset = "0.1.2"
 os_info = "3.4.0"
-jsonschema = "0.16.0"
+jsonschema = {version = "0.16.0", default-features = false, features = ["resolve-file"]}
 vectorize = "0.2.0"
 derivative = "2.2.0"
 
