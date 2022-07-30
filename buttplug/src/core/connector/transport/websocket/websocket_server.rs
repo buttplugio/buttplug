@@ -152,7 +152,10 @@ async fn run_connection_loop<S>(
                 }
                 async_tungstenite::tungstenite::Message::Close(_) => {
                   let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
-                  websocket_server_sender.close().await;
+                  // If closing errors out, log it but there's not a lot we can do.
+                  if let Err(e) = websocket_server_sender.close().await {
+                    error!("{:?}", e);
+                  }
                   break;
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
