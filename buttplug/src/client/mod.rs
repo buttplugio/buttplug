@@ -17,13 +17,13 @@ use crate::{
     messages::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
-      ButtplugMessageSpecVersion,
       Ping,
       RequestDeviceList,
       RequestServerInfo,
       StartScanning,
       StopAllDevices,
       StopScanning,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{
@@ -250,7 +250,7 @@ impl ButtplugClient {
     info!("Running handshake with server.");
     let msg = self
       .send_message_ignore_connect_status(
-        RequestServerInfo::new(&self.client_name, ButtplugMessageSpecVersion::Version2).into(),
+        RequestServerInfo::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
       )
       .await?;
 
