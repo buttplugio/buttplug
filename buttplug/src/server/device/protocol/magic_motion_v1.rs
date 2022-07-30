@@ -22,7 +22,7 @@ impl ProtocolHandler for MagicMotionV1 {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

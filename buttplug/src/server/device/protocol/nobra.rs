@@ -22,9 +22,14 @@ impl ProtocolHandler for Nobra {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let output_speed = if scalar == 0 { 0x70 } else { 0x60 + scalar };
-    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, vec![output_speed as u8], false).into()))
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![output_speed as u8],
+      false,
+    )
+    .into()])
   }
 }

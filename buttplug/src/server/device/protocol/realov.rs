@@ -22,9 +22,14 @@ impl ProtocolHandler for Realov {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, [0xc5u8, 0x55, scalar as u8, 0xaa].to_vec(), false).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      [0xc5u8, 0x55, scalar as u8, 0xaa].to_vec(),
+      false,
+    )
+    .into()])
   }
 }
 

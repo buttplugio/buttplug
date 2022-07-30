@@ -13,8 +13,13 @@ use crate::{
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareReadCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
@@ -44,57 +49,57 @@ impl ProtocolInitializer for TheHandyInitializer {
     &mut self,
     hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-      // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
-      // firmware easier".
-      //
-      // This code is mostly my translation of the Handy Python POC. It leaves out a lot of stuff
-      // that doesn't seem needed (ping messages, the whole RequestServerInfo flow, etc...) If they
-      // ever change anything, I quit.
-      //
-      // If you are a sex toy manufacturer reading this code: Please, talk to me before implementing
-      // your protocol. Buttplug is not made to be a hardware/firmware protocol, and you will regret
-      // trying to make it such.
+    // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
+    // firmware easier".
+    //
+    // This code is mostly my translation of the Handy Python POC. It leaves out a lot of stuff
+    // that doesn't seem needed (ping messages, the whole RequestServerInfo flow, etc...) If they
+    // ever change anything, I quit.
+    //
+    // If you are a sex toy manufacturer reading this code: Please, talk to me before implementing
+    // your protocol. Buttplug is not made to be a hardware/firmware protocol, and you will regret
+    // trying to make it such.
 
-      // First we need to set up a session with The Handy. This will require sending the "security
-      // initializer" to basically say we're sending plaintext. Due to pb3 making everything
-      // optional, we have some Option<T> wrappers here.
-      let session_req = protocomm::SessionData {
-        sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
-        proto: Some(protocomm::session_data::Proto::Sec0(
-          protocomm::Sec0Payload {
-            msg: protocomm::Sec0MsgType::S0SessionCommand as i32,
-            payload: Some(protocomm::sec0_payload::Payload::Sc(
-              protocomm::S0SessionCmd {},
-            )),
-          },
-        )),
-      };
+    // First we need to set up a session with The Handy. This will require sending the "security
+    // initializer" to basically say we're sending plaintext. Due to pb3 making everything
+    // optional, we have some Option<T> wrappers here.
+    let session_req = protocomm::SessionData {
+      sec_ver: protocomm::SecSchemeVersion::SecScheme0 as i32,
+      proto: Some(protocomm::session_data::Proto::Sec0(
+        protocomm::Sec0Payload {
+          msg: protocomm::Sec0MsgType::S0SessionCommand as i32,
+          payload: Some(protocomm::sec0_payload::Payload::Sc(
+            protocomm::S0SessionCmd {},
+          )),
+        },
+      )),
+    };
 
-      // We need to shove this at what we're calling the "firmware" endpoint but is actually the
-      // "prov-session" characteristic. These names are stored in characteristic descriptors, which
-      // isn't super common on sex toys (with exceptions for things that have a lot of sensors, like
-      // the Lelo F1s).
-      //
-      // I don't have to do characteristic descriptor lookups for the other 140+ pieces of hardware
-      // this library supports so I'm damn well not doing it now. YOLO'ing hardcoded values from the
-      // device config.
-      //
-      // If they ever change this, I quit (or will just update the device config).
+    // We need to shove this at what we're calling the "firmware" endpoint but is actually the
+    // "prov-session" characteristic. These names are stored in characteristic descriptors, which
+    // isn't super common on sex toys (with exceptions for things that have a lot of sensors, like
+    // the Lelo F1s).
+    //
+    // I don't have to do characteristic descriptor lookups for the other 140+ pieces of hardware
+    // this library supports so I'm damn well not doing it now. YOLO'ing hardcoded values from the
+    // device config.
+    //
+    // If they ever change this, I quit (or will just update the device config).
 
-      let mut sec_buf = vec![];
-      session_req
-        .encode(&mut sec_buf)
-        .expect("Infallible encode.");
-      hardware.write_value(&HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
-      let _ = hardware.read_value(&HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
+    let mut sec_buf = vec![];
+    session_req
+      .encode(&mut sec_buf)
+      .expect("Infallible encode.");
+    hardware.write_value(&HardwareWriteCmd::new(Endpoint::Firmware, sec_buf, false));
+    let _ = hardware.read_value(&HardwareReadCmd::new(Endpoint::Firmware, 100, 500));
 
-      // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
-      // messages that it can use. However, having removed these and still tried to run the system,
-      // it seems fine. I've omitted those for the moment, and will readd the complexity once it
-      // does not seem needless.
-      //
-      // We have no device name updates here, so just return a device.
-      Ok(Box::new(TheHandy::default()))
+    // At this point, the "handyplug" protocol does actually have both RequestServerInfo and Ping
+    // messages that it can use. However, having removed these and still tried to run the system,
+    // it seems fine. I've omitted those for the moment, and will readd the complexity once it
+    // does not seem needless.
+    //
+    // We have no device name updates here, so just return a device.
+    Ok(Box::new(TheHandy::default()))
   }
 }
 
@@ -123,12 +128,10 @@ impl ProtocolHandler for TheHandy {
     let distance = (goal_position - previous_position).abs();
     let duration =
       fleshlight_launch_helper::calculate_duration(distance, message.speed() as f64 / 99f64) as u32;
-    self.handle_linear_cmd(
-      messages::LinearCmd::new(
-        message.device_index(),
-        vec![messages::VectorSubcommand::new(0, duration, goal_position)],
-      ),
-    )
+    self.handle_linear_cmd(messages::LinearCmd::new(
+      message.device_index(),
+      vec![messages::VectorSubcommand::new(0, duration, goal_position)],
+    ))
   }
 
   fn handle_linear_cmd(
@@ -185,6 +188,8 @@ impl ProtocolHandler for TheHandy {
     linear_payload
       .encode(&mut linear_buf)
       .expect("Infallible encode.");
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(Endpoint::Tx, linear_buf, true).into()
+    ])
   }
 }

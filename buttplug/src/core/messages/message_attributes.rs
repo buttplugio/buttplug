@@ -23,7 +23,7 @@ pub enum ActuatorType {
   Inflate,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
   // OSR-2/SR-6.
-  Position
+  Position,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -124,7 +124,9 @@ impl DeviceMessageAttributes {
       ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
       ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
       ButtplugDeviceMessageType::BatteryLevelCmd => self.battery_level_cmd.is_some(),
-      ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => self.fleshlight_launch_fw12_cmd.is_some(),
+      ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => {
+        self.fleshlight_launch_fw12_cmd.is_some()
+      }
       ButtplugDeviceMessageType::RSSILevelCmd => self.rssi_level_cmd.is_some(),
       ButtplugDeviceMessageType::RawReadCmd => self.raw_read_cmd.is_some(),
       ButtplugDeviceMessageType::RawSubscribeCmd => self.raw_subscribe_cmd.is_some(),
@@ -133,30 +135,63 @@ impl DeviceMessageAttributes {
       ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some(),
       ButtplugDeviceMessageType::StopDeviceCmd => true,
       ButtplugDeviceMessageType::KiirooCmd => false,
-      ButtplugDeviceMessageType::LovenseCmd => false,      
+      ButtplugDeviceMessageType::LovenseCmd => false,
     }
   }
 
   pub fn merge(&self, child: &DeviceMessageAttributes) -> DeviceMessageAttributes {
-    Self { 
-      rotate_cmd: child.rotate_cmd().clone().or_else(|| self.rotate_cmd().clone()),
-      linear_cmd: child.linear_cmd().clone().or_else(|| self.linear_cmd().clone()),
-      scalar_cmd: child.scalar_cmd().clone().or_else(|| self.scalar_cmd().clone()),
-      battery_level_cmd: child.battery_level_cmd().clone().or_else(|| self.battery_level_cmd().clone()),
-      rssi_level_cmd: child.rssi_level_cmd().clone().or_else(|| self.rssi_level_cmd().clone()),
+    Self {
+      rotate_cmd: child
+        .rotate_cmd()
+        .clone()
+        .or_else(|| self.rotate_cmd().clone()),
+      linear_cmd: child
+        .linear_cmd()
+        .clone()
+        .or_else(|| self.linear_cmd().clone()),
+      scalar_cmd: child
+        .scalar_cmd()
+        .clone()
+        .or_else(|| self.scalar_cmd().clone()),
+      battery_level_cmd: child
+        .battery_level_cmd()
+        .clone()
+        .or_else(|| self.battery_level_cmd().clone()),
+      rssi_level_cmd: child
+        .rssi_level_cmd()
+        .clone()
+        .or_else(|| self.rssi_level_cmd().clone()),
       stop_device_cmd: NullDeviceMessageAttributes::default(),
-      raw_read_cmd: child.raw_read_cmd().clone().or_else(|| self.raw_read_cmd().clone()),
-      raw_write_cmd: child.raw_write_cmd().clone().or_else(|| self.raw_write_cmd().clone()),
-      raw_subscribe_cmd: child.raw_subscribe_cmd().clone().or_else(|| self.raw_subscribe_cmd().clone()),
-      raw_unsubscribe_cmd: child.raw_unsubscribe_cmd().clone().or_else(|| self.raw_unsubscribe_cmd().clone()),
-      fleshlight_launch_fw12_cmd: child.fleshlight_launch_fw12_cmd().clone().or_else(|| self.fleshlight_launch_fw12_cmd().clone()),
-      vorze_a10_cyclone_cmd: child.vorze_a10_cyclone_cmd().clone().or_else(|| self.vorze_a10_cyclone_cmd().clone()),
+      raw_read_cmd: child
+        .raw_read_cmd()
+        .clone()
+        .or_else(|| self.raw_read_cmd().clone()),
+      raw_write_cmd: child
+        .raw_write_cmd()
+        .clone()
+        .or_else(|| self.raw_write_cmd().clone()),
+      raw_subscribe_cmd: child
+        .raw_subscribe_cmd()
+        .clone()
+        .or_else(|| self.raw_subscribe_cmd().clone()),
+      raw_unsubscribe_cmd: child
+        .raw_unsubscribe_cmd()
+        .clone()
+        .or_else(|| self.raw_unsubscribe_cmd().clone()),
+      fleshlight_launch_fw12_cmd: child
+        .fleshlight_launch_fw12_cmd()
+        .clone()
+        .or_else(|| self.fleshlight_launch_fw12_cmd().clone()),
+      vorze_a10_cyclone_cmd: child
+        .vorze_a10_cyclone_cmd()
+        .clone()
+        .or_else(|| self.vorze_a10_cyclone_cmd().clone()),
     }
   }
 
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
     let raw_attrs = RawDeviceMessageAttributes {
-      endpoints: endpoints.clone().to_vec()
+      endpoints: endpoints.clone().to_vec(),
     };
     self.raw_read_cmd = Some(raw_attrs.clone());
     self.raw_write_cmd = Some(raw_attrs.clone());
@@ -167,7 +202,7 @@ impl DeviceMessageAttributes {
 
 #[derive(Default)]
 pub struct DeviceMessageAttributesBuilder {
-  attrs: DeviceMessageAttributes
+  attrs: DeviceMessageAttributes,
 }
 
 impl DeviceMessageAttributesBuilder {
@@ -248,7 +283,12 @@ pub struct GenericDeviceMessageAttributes {
 
 impl GenericDeviceMessageAttributes {
   pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
-    Self { feature_descriptor: feature_descriptor.to_owned(), step_count, actuator_type, step_range: None }
+    Self {
+      feature_descriptor: feature_descriptor.to_owned(),
+      step_count,
+      actuator_type,
+      step_range: None,
+    }
   }
 
   pub fn step_count(&self) -> u32 {
@@ -271,7 +311,10 @@ impl GenericDeviceMessageAttributes {
     self.step_range = Some(range.clone());
   }
 
-  pub fn is_valid(&self, message_type: &ButtplugDeviceMessageType) -> Result<(), ButtplugDeviceError> {
+  pub fn is_valid(
+    &self,
+    message_type: &ButtplugDeviceMessageType,
+  ) -> Result<(), ButtplugDeviceError> {
     if let Some(step_range) = &self.step_range {
       // if step ranges are set up manually, they must be included for all acutators.
       if !step_range.contains(&self.step_count) {
@@ -302,7 +345,9 @@ pub struct RawDeviceMessageAttributes {
 
 impl RawDeviceMessageAttributes {
   pub fn new(endpoints: &Vec<Endpoint>) -> Self {
-    Self { endpoints: endpoints.clone() }
+    Self {
+      endpoints: endpoints.clone(),
+    }
   }
 }
 
@@ -316,7 +361,7 @@ pub struct SensorDeviceMessageAttributes {
   sensor_type: SensorType,
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange")]
-  sensor_range: [u32; 2]
+  sensor_range: [u32; 2],
 }
 
 /*
@@ -389,19 +434,28 @@ pub struct DeviceMessageAttributesV2 {
 
 impl From<DeviceMessageAttributes> for DeviceMessageAttributesV2 {
   fn from(other: DeviceMessageAttributes) -> Self {
-    Self { 
-      vibrate_cmd: other.scalar_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x.clone())),
-      rotate_cmd: other.rotate_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
-      linear_cmd: other.linear_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
-      battery_level_cmd: other.battery_level_cmd().clone(), 
-      rssi_level_cmd: other.rssi_level_cmd().clone(), 
-      stop_device_cmd: other.stop_device_cmd().clone(), 
-      raw_read_cmd: other.raw_read_cmd().clone(), 
-      raw_write_cmd: other.raw_write_cmd().clone(), 
-      raw_subscribe_cmd: other.raw_subscribe_cmd().clone(), 
+    Self {
+      vibrate_cmd: other
+        .scalar_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x.clone())),
+      rotate_cmd: other
+        .rotate_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
+      linear_cmd: other
+        .linear_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
+      battery_level_cmd: other.battery_level_cmd().clone(),
+      rssi_level_cmd: other.rssi_level_cmd().clone(),
+      stop_device_cmd: other.stop_device_cmd().clone(),
+      raw_read_cmd: other.raw_read_cmd().clone(),
+      raw_write_cmd: other.raw_write_cmd().clone(),
+      raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
       raw_unsubscribe_cmd: other.raw_unsubscribe_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
-      vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone()
+      vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
     }
   }
 }
@@ -419,22 +473,25 @@ pub struct GenericDeviceMessageAttributesV2 {
 impl GenericDeviceMessageAttributesV2 {
   pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: Vec<GenericDeviceMessageAttributes>) -> Self {
     let mut feature_count = 0u32;
-    let mut step_count = vec!();
+    let mut step_count = vec![];
     for attr in attributes_vec {
       if *attr.actuator_type() == ActuatorType::Vibrate {
         feature_count += 1;
         step_count.push(attr.step_count());
       }
     }
-    Self { feature_count, step_count }
+    Self {
+      feature_count,
+      step_count,
+    }
   }
 }
 
 impl From<Vec<GenericDeviceMessageAttributes>> for GenericDeviceMessageAttributesV2 {
   fn from(attributes_vec: Vec<GenericDeviceMessageAttributes>) -> Self {
-    Self { 
-      feature_count: attributes_vec.len() as u32, 
-      step_count: attributes_vec.iter().map(|x| x.step_count()).collect() 
+    Self {
+      feature_count: attributes_vec.len() as u32,
+      step_count: attributes_vec.iter().map(|x| x.step_count()).collect(),
     }
   }
 }
@@ -473,14 +530,27 @@ pub struct DeviceMessageAttributesV1 {
 
 impl From<DeviceMessageAttributesV2> for DeviceMessageAttributesV1 {
   fn from(other: DeviceMessageAttributesV2) -> Self {
-    Self { 
-      vibrate_cmd: other.vibrate_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
-      rotate_cmd: other.rotate_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
-      linear_cmd: other.linear_cmd().as_ref().map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
+    Self {
+      vibrate_cmd: other
+        .vibrate_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
+      rotate_cmd: other
+        .rotate_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
+      linear_cmd: other
+        .linear_cmd()
+        .as_ref()
+        .map(|x| GenericDeviceMessageAttributesV1::from(x.clone())),
       stop_device_cmd: other.stop_device_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
-      single_motor_vibrate_cmd: if other.vibrate_cmd().is_some() { Some(NullDeviceMessageAttributes::default()) } else { None },
+      single_motor_vibrate_cmd: if other.vibrate_cmd().is_some() {
+        Some(NullDeviceMessageAttributes::default())
+      } else {
+        None
+      },
     }
   }
 }
@@ -493,7 +563,7 @@ pub struct GenericDeviceMessageAttributesV1 {
 
 impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1 {
   fn from(attributes: GenericDeviceMessageAttributesV2) -> Self {
-    Self { 
+    Self {
       feature_count: *attributes.feature_count(),
     }
   }
@@ -505,7 +575,8 @@ mod test {
 
   #[test]
   pub fn test_step_count_calculation() {
-    let mut vibrate_attributes = GenericDeviceMessageAttributes::new("test", 10, ActuatorType::Vibrate);
+    let mut vibrate_attributes =
+      GenericDeviceMessageAttributes::new("test", 10, ActuatorType::Vibrate);
     assert_eq!(vibrate_attributes.step_count(), 10);
     vibrate_attributes.set_step_range(&RangeInclusive::new(3u32, 7));
     assert_eq!(vibrate_attributes.step_count(), 4);

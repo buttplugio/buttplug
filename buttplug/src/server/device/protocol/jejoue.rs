@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{ActuatorType, Endpoint},
+  },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -21,7 +24,7 @@ pub struct JeJoue {}
 impl ProtocolHandler for JeJoue {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     // Default to both vibes
@@ -44,11 +47,12 @@ impl ProtocolHandler for JeJoue {
     if pattern == 1 && speed != 0 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 == 0 {
       pattern = 2;
     }
-    Ok(vec!(HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![pattern, speed],
       false,
-    ).into()))
+    )
+    .into()])
   }
 }
 

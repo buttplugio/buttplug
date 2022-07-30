@@ -22,7 +22,7 @@ impl ProtocolHandler for LoveNuts {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = vec![0x45, 0x56, 0x4f, 0x4c];
     data.append(&mut [scalar as u8 | (scalar as u8) << 4; 10].to_vec());

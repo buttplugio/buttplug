@@ -24,15 +24,12 @@ impl ProtocolHandler for Cachito {
     index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(
-      vec!(
-        HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![2u8 + (index as u8), 1u8 + (index as u8), scalar as u8, 0u8],
-        false,
-      )
-      .into(),
-    ))
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![2u8 + (index as u8), 1u8 + (index as u8), scalar as u8, 0u8],
+      false,
+    )
+    .into()])
   }
 }
 
@@ -58,7 +55,10 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 1)), Some((ActuatorType::Vibrate, 50))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 1)),
+        Some((ActuatorType::Vibrate, 50))
+      ]),
       Ok(vec![
         HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![2, 1, 1, 0], false)),
         HardwareCommand::Write(HardwareWriteCmd::new(

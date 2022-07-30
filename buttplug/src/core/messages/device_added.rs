@@ -58,7 +58,6 @@ impl ButtplugMessageValidator for DeviceAdded {
   }
 }
 
-
 #[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV2 {

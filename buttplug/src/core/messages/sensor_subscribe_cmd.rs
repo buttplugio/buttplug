@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::Getters;
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -18,7 +18,7 @@ pub struct SensorSubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Sensors"))]
-  sensors: Vec<SensorSubcommand>
+  sensors: Vec<SensorSubcommand>,
 }
 
 impl SensorSubscribeCmd {
@@ -26,7 +26,7 @@ impl SensorSubscribeCmd {
     Self {
       id: 1,
       device_index,
-      sensors
+      sensors,
     }
   }
 }

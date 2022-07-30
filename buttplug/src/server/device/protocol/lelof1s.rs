@@ -8,12 +8,17 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ActuatorType, Endpoint}
+    messages::{ActuatorType, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareSubscribeCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
@@ -34,7 +39,9 @@ impl ProtocolInitializer for LeloF1sInitializer {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
-    hardware.subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx)).await?;
+    hardware
+      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .await?;
     Ok(Box::new(LeloF1s::default()))
   }
 }
@@ -51,7 +58,9 @@ impl ProtocolHandler for LeloF1s {
     for cmd in cmds.iter() {
       cmd_vec.push(cmd.expect("LeloF1s should always send all values").1 as u8);
     }
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()
+    ])
   }
 }
 

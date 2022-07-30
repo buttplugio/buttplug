@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{ActuatorType, Endpoint},
+  },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -59,7 +62,7 @@ impl ProtocolHandler for SvakomIker {
                 [0x55, 0x07, 0x00, 0x00, speed as u8, 0x00].to_vec(),
                 true,
               )
-              .into()
+              .into(),
             )
           }
         }

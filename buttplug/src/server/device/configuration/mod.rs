@@ -144,15 +144,12 @@ use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, Proto
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{
-      ButtplugDeviceMessageType,
-      DeviceMessageAttributes,
-      Endpoint,
-    },
+    messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, Endpoint},
   },
   server::device::ServerDeviceIdentifier,
 };
 use dashmap::DashMap;
+use derivative::Derivative;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -162,7 +159,6 @@ use std::{
     Arc,
   },
 };
-use derivative::Derivative;
 
 /// Denotes what set of protocols attributes should be used: Default (generic) or device class
 /// specific.

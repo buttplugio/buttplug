@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint, ActuatorType},
+    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -212,21 +212,17 @@ impl ProtocolHandler for Lovense {
             }
           }
           HardwareEvent::Disconnected(_) => {
-            return Err(
-              ButtplugDeviceError::ProtocolSpecificError(
-                "Lovense".to_owned(),
-                "Lovense Device disconnected while getting Battery info.".to_owned(),
-              ),
-            )
+            return Err(ButtplugDeviceError::ProtocolSpecificError(
+              "Lovense".to_owned(),
+              "Lovense Device disconnected while getting Battery info.".to_owned(),
+            ))
           }
         }
       }
-      Err(
-        ButtplugDeviceError::ProtocolSpecificError(
-          "Lovense".to_owned(),
-          "Lovense Device disconnected while getting Battery info.".to_owned(),
-        ),
-      )
+      Err(ButtplugDeviceError::ProtocolSpecificError(
+        "Lovense".to_owned(),
+        "Lovense Device disconnected while getting Battery info.".to_owned(),
+      ))
     })
   }
 }

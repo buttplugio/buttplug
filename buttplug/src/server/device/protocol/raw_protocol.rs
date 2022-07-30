@@ -5,11 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::{
-  server::device::{
-    protocol::{generic_protocol_setup, ProtocolHandler},
-  },
-};
+use crate::server::device::protocol::{generic_protocol_setup, ProtocolHandler};
 
 generic_protocol_setup!(RawProtocol, "raw");
 

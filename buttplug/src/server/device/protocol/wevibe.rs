@@ -13,16 +13,17 @@ use crate::{
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc,
-  },
-};
+use std::sync::Arc;
 
 generic_protocol_initializer_setup!(WeVibe, "wevibe");
 
@@ -36,16 +37,20 @@ impl ProtocolInitializer for WeVibeInitializer {
     hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling WeVibe init");
-    hardware.write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
-      true,
-    )).await?;
-    hardware.write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-      true,
-    )).await?;
+    hardware
+      .write_value(&HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00],
+        true,
+      ))
+      .await?;
+    hardware
+      .write_value(&HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        true,
+      ))
+      .await?;
     Ok(Box::new(WeVibe::default()))
   }
 }
@@ -59,7 +64,11 @@ impl ProtocolHandler for WeVibe {
     cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-    let r_speed_ext = cmds.last().unwrap_or(&None).unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
+    let r_speed_ext = cmds
+      .last()
+      .unwrap_or(&None)
+      .unwrap_or((ActuatorType::Vibrate, 0u32))
+      .1 as u8;
     let data = if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     } else {

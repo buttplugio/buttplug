@@ -15,6 +15,7 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
       self,
+      ActuatorType,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugDeviceMessageType,
@@ -26,7 +27,6 @@ use crate::{
       RawSubscribeCmd,
       ScalarCmd,
       ScalarSubcommand,
-      ActuatorType,
     },
     ButtplugResultFuture,
   },
@@ -389,13 +389,26 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::ScalarCmd(msg) => {
         // TODO Add ability to turn off actuator matching
         let attributes = self.attributes.message_attributes();
-        let attrs = attributes.scalar_cmd().as_ref().expect("Already checked existence");
+        let attrs = attributes
+          .scalar_cmd()
+          .as_ref()
+          .expect("Already checked existence");
         for command in msg.scalars() {
           if command.index() > attrs.len() as u32 {
-            return Box::pin(future::ready(Err(ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index()).into())));
+            return Box::pin(future::ready(Err(
+              ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index())
+                .into(),
+            )));
           }
           if *attrs[command.index() as usize].actuator_type() != command.actuator_type() {
-            return Box::pin(future::ready(Err(ButtplugDeviceError::DeviceActuatorTypeMismatch(self.name(), command.actuator_type(), *attrs[command.index() as usize].actuator_type()).into())));
+            return Box::pin(future::ready(Err(
+              ButtplugDeviceError::DeviceActuatorTypeMismatch(
+                self.name(),
+                command.actuator_type(),
+                *attrs[command.index() as usize].actuator_type(),
+              )
+              .into(),
+            )));
           }
         }
 
@@ -406,9 +419,11 @@ impl ServerDevice {
           Ok(values) => values,
           Err(err) => return Box::pin(future::ready(Err(err))),
         };
-        
+
         if commands.is_empty() {
-          debug!("No commands generated for incoming device packet, skipping and returning success.");
+          debug!(
+            "No commands generated for incoming device packet, skipping and returning success."
+          );
           return Box::pin(future::ready(Ok(messages::Ok::default().into())));
         }
 
@@ -487,11 +502,7 @@ impl ServerDevice {
     &self,
     message: messages::SingleMotorVibrateCmd,
   ) -> ButtplugServerResultFuture {
-    if let Some(attr) = self
-      .attributes
-      .message_attributes()
-      .scalar_cmd()
-    {
+    if let Some(attr) = self.attributes.message_attributes().scalar_cmd() {
       let speed = message.speed();
       let cmds: Vec<ScalarSubcommand> = attr
         .iter()
@@ -504,7 +515,7 @@ impl ServerDevice {
           "{} has no vibrating features.",
           self.name()
         ))
-        .into()  
+        .into()
       } else {
         let mut vibrate_cmd = ScalarCmd::new(message.device_index(), cmds);
         vibrate_cmd.set_id(message.id());

@@ -22,9 +22,9 @@ pub mod hismith;
 pub mod htk_bm;
 pub mod jejoue;
 pub mod kiiroo_v2;
-pub mod kiiroo_v2_vibrator;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
+pub mod kiiroo_v2_vibrator;
 pub mod lelof1s;
 pub mod lelof1sv2;
 pub mod libo_elle;
@@ -128,56 +128,151 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     hismith::setup::HismithIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
-  add_to_protocol_map(&mut map, thehandy::setup::TheHandyIdentifierFactory::default());
-
+  add_to_protocol_map(
+    &mut map,
+    thehandy::setup::TheHandyIdentifierFactory::default(),
+  );
 
   add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
-  add_to_protocol_map(&mut map, fredorch::setup::FredorchIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    fredorch::setup::FredorchIdentifierFactory::default(),
+  );
 
   //add_to_protocol_map(&mut map, hgod::HgodFactory::default());
 
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
-  add_to_protocol_map(&mut map, kiiroo_v2::setup::KiirooV2IdentifierFactory::default());
-  add_to_protocol_map(&mut map, kiiroo_v2_vibrator::setup::KiirooV2VibratorIdentifierFactory::default());
-  add_to_protocol_map(&mut map, kiiroo_v21::setup::KiirooV21IdentifierFactory::default());
-  add_to_protocol_map(&mut map, kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lelof1s::setup::LeloF1sIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lelof1sv2::setup::LeloF1sV2IdentifierFactory::default());
-  add_to_protocol_map(&mut map, libo_elle::setup::LiboElleIdentifierFactory::default());
-  add_to_protocol_map(&mut map, libo_shark::setup::LiboSharkIdentifierFactory::default());
-  add_to_protocol_map(&mut map, libo_vibes::setup::LiboVibesIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lovedistance::setup::LoveDistanceIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    kiiroo_v2::setup::KiirooV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    kiiroo_v2_vibrator::setup::KiirooV2VibratorIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    kiiroo_v21::setup::KiirooV21IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lelof1s::setup::LeloF1sIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lelof1sv2::setup::LeloF1sV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    libo_elle::setup::LiboElleIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    libo_shark::setup::LiboSharkIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lovehoney_desire::setup::LovehoneyDesireIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lovedistance::setup::LoveDistanceIdentifierFactory::default(),
+  );
 
-  add_to_protocol_map(&mut map, lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default());
-  add_to_protocol_map(&mut map, lovenuts::setup::LoveNutsIdentifierFactory::default());
-  add_to_protocol_map(&mut map, magic_motion_v1::setup::MagicMotionV1IdentifierFactory::default());
-  add_to_protocol_map(&mut map, magic_motion_v2::setup::MagicMotionV2IdentifierFactory::default());
-  add_to_protocol_map(&mut map, magic_motion_v3::setup::MagicMotionV3IdentifierFactory::default());
-  add_to_protocol_map(&mut map, magic_motion_v4::setup::MagicMotionV4IdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    lovense_connect_service::setup::LovenseConnectServiceIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lovenuts::setup::LoveNutsIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    magic_motion_v1::setup::MagicMotionV1IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    magic_motion_v2::setup::MagicMotionV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    magic_motion_v3::setup::MagicMotionV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    magic_motion_v4::setup::MagicMotionV4IdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
   add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
-  add_to_protocol_map(&mut map, mizzzee::setup::MizzZeeIdentifierFactory::default());
-  add_to_protocol_map(&mut map, motorbunny::setup::MotorbunnyIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    mizzzee::setup::MizzZeeIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    motorbunny::setup::MotorbunnyIdentifierFactory::default(),
+  );
   //add_to_protocol_map(&mut map, mysteryvibe::MysteryVibeFactory::default());
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
-  add_to_protocol_map(&mut map, picobong::setup::PicobongIdentifierFactory::default());
-  add_to_protocol_map(&mut map, prettylove::setup::PrettyLoveIdentifierFactory::default());
-  add_to_protocol_map(&mut map, raw_protocol::setup::RawProtocolIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    picobong::setup::PicobongIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    prettylove::setup::PrettyLoveIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    raw_protocol::setup::RawProtocolIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
   //add_to_protocol_map(&mut map, satisfyer::SatisfyerFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
-  add_to_protocol_map(&mut map, svakom_alex::setup::SvakomAlexIdentifierFactory::default());
-  add_to_protocol_map(&mut map, svakom_iker::setup::SvakomIkerIdentifierFactory::default());
-  add_to_protocol_map(&mut map, svakom_sam::setup::SvakomSamIdentifierFactory::default());
-  add_to_protocol_map(&mut map, tcode_v03::setup::TCodeV03IdentifierFactory::default());
-  add_to_protocol_map(&mut map, vibratissimo::setup::VibratissimoIdentifierFactory::default());
-  add_to_protocol_map(&mut map, vorze_sa::setup::VorzeSAIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_sam::setup::SvakomSamIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    tcode_v03::setup::TCodeV03IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    vibratissimo::setup::VibratissimoIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    vorze_sa::setup::VorzeSAIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
-  add_to_protocol_map(&mut map, wevibe8bit::setup::WeVibe8BitIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    wevibe8bit::setup::WeVibe8BitIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
-  add_to_protocol_map(&mut map, youcups::setup::YoucupsIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    youcups::setup::YoucupsIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
   add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
   map
@@ -320,17 +415,19 @@ pub trait ProtocolHandler: Sync + Send {
     &self,
     commands: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut command_vec = vec!();
+    let mut command_vec = vec![];
     for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {
       let (actuator, scalar) = command.as_ref().expect("Already verified existence");
-      command_vec.append(&mut (match *actuator {
-        ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar)?,
-        ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
-        ActuatorType::Oscillation => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
-        ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
-        ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
-        ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
-      }));
+      command_vec.append(
+        &mut (match *actuator {
+          ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar)?,
+          ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
+          ActuatorType::Oscillation => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
+          ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
+          ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
+          ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
+        }),
+      );
     }
     Ok(command_vec)
   }
@@ -338,7 +435,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Vibrate Actuator)")
   }
@@ -346,7 +443,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_rotate_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Rotate Actuator)")
   }
@@ -354,7 +451,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_oscillate_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Osccilate Actuator)")
   }
@@ -362,7 +459,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_inflate_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Inflate Actuator)")
   }
@@ -370,7 +467,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_constrict_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Constrict Actuator)")
   }
@@ -378,7 +475,7 @@ pub trait ProtocolHandler: Sync + Send {
   fn handle_scalar_position_cmd(
     &self,
     _index: u32,
-    _scalar: u32
+    _scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("ScalarCmd (Constrict Actuator)")
   }
@@ -480,7 +577,6 @@ macro_rules! generic_protocol_setup {
   };
 }
 
-
 #[macro_export]
 macro_rules! generic_protocol_initializer_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
@@ -489,21 +585,21 @@ macro_rules! generic_protocol_initializer_setup {
         use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
         #[derive(Default)]
         pub struct [< $protocol_name IdentifierFactory >] {}
-      
+
         impl ProtocolIdentifierFactory for [< $protocol_name IdentifierFactory >] {
           fn identifier(&self) -> &str {
             $protocol_identifier
           }
-      
+
           fn create(&self) -> Box<dyn ProtocolIdentifier> {
             Box::new(super::[< $protocol_name Identifier >]::default())
           }
         }
       }
-      
+
       #[derive(Default)]
       pub struct [< $protocol_name Identifier >] {}
-      
+
       #[async_trait]
       impl ProtocolIdentifier for [< $protocol_name Identifier >] {
         async fn identify(
@@ -517,5 +613,5 @@ macro_rules! generic_protocol_initializer_setup {
   };
 }
 
-pub use generic_protocol_setup;
 pub use generic_protocol_initializer_setup;
+pub use generic_protocol_setup;

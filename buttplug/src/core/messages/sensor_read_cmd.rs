@@ -6,12 +6,12 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{CopyGetters, Getters};
 
 #[derive(Debug, PartialEq, Eq, Clone, Getters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
@@ -26,7 +26,6 @@ impl SensorSubcommand {
   }
 }
 
-
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorReadCmd {
@@ -35,7 +34,7 @@ pub struct SensorReadCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Sensors"))]
-  sensors: Vec<SensorSubcommand>
+  sensors: Vec<SensorSubcommand>,
 }
 
 impl SensorReadCmd {
@@ -43,7 +42,7 @@ impl SensorReadCmd {
     Self {
       id: 1,
       device_index,
-      sensors
+      sensors,
     }
   }
 }

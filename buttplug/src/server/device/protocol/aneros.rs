@@ -24,13 +24,12 @@ impl ProtocolHandler for Aneros {
     index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(
-      vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![0xF1 + (index as u8), scalar as u8],
-        false,
-      ).into()]
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xF1 + (index as u8), scalar as u8],
+      false,
     )
+    .into()])
   }
 }
 
@@ -57,7 +56,10 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 13)), Some((ActuatorType::Vibrate, 64))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 13)),
+        Some((ActuatorType::Vibrate, 64))
+      ]),
       Ok(vec![
         HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)),
         HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false))

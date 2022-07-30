@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -14,16 +13,19 @@ use crate::{
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc,
-    atomic::{AtomicU8, Ordering}
-  },
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
 };
 
 generic_protocol_initializer_setup!(VorzeSA, "vorze-sa");
@@ -51,7 +53,10 @@ impl ProtocolInitializer for VorzeSAInitializer {
     } else if hwname.contains("piston") {
       VorzeDevice::Piston
     } else {
-      return Err(ButtplugDeviceError::ProtocolNotImplemented(format!("No protocol implementation for Vorze Device {}", hardware.name())))
+      return Err(ButtplugDeviceError::ProtocolNotImplemented(format!(
+        "No protocol implementation for Vorze Device {}",
+        hardware.name()
+      )));
     };
     Ok(Box::new(VorzeSA::new(device_type)))
   }
@@ -59,12 +64,15 @@ impl ProtocolInitializer for VorzeSAInitializer {
 
 pub struct VorzeSA {
   previous_position: Arc<AtomicU8>,
-  device_type: VorzeDevice
+  device_type: VorzeDevice,
 }
 
 impl VorzeSA {
   pub fn new(device_type: VorzeDevice) -> Self {
-    Self { previous_position: Arc::new(AtomicU8::new(0)), device_type }
+    Self {
+      previous_position: Arc::new(AtomicU8::new(0)),
+      device_type,
+    }
   }
 }
 
@@ -116,14 +124,18 @@ impl ProtocolHandler for VorzeSA {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec!( {
+    Ok(vec![{
       HardwareWriteCmd::new(
         Endpoint::Tx,
-        vec![self.device_type as u8, VorzeActions::Vibrate as u8, scalar as u8],
+        vec![
+          self.device_type as u8,
+          VorzeActions::Vibrate as u8,
+          scalar as u8,
+        ],
         true,
       )
       .into()
-    }))
+    }])
   }
 
   fn handle_rotate_cmd(
@@ -132,14 +144,12 @@ impl ProtocolHandler for VorzeSA {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if let Some((speed, clockwise)) = cmds[0] {
       let data: u8 = (clockwise as u8) << 7 | (speed as u8);
-      Ok(vec!(
-        HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
-          true,
-        )
-        .into(),
-      ))
+      Ok(vec![HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
+        true,
+      )
+      .into()])
     } else {
       Ok(vec![])
     }
@@ -157,20 +167,23 @@ impl ProtocolHandler for VorzeSA {
 
     let speed = get_piston_speed(distance, v.duration as f64);
 
-    self.previous_position.store(position as u8, Ordering::SeqCst);
+    self
+      .previous_position
+      .store(position as u8, Ordering::SeqCst);
 
-    Ok(vec!(HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![self.device_type as u8, position as u8, speed as u8],
       true,
-    ).into()))
+    )
+    .into()])
   }
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
     msg: messages::VorzeA10CycloneCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotate_cmd(&vec!(Some((msg.speed(), msg.clockwise()))))
+    self.handle_rotate_cmd(&vec![Some((msg.speed(), msg.clockwise()))])
   }
 }
 

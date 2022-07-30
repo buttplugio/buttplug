@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{self, Endpoint}},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, Endpoint},
+  },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -28,11 +31,7 @@ impl ProtocolHandler for TCodeV03 {
       let position = (v.position * 99f64) as u32;
 
       let command = format!("L{}{:02}I{}\n", v.index, position, v.duration);
-      msg_vec.push(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        command.as_bytes().to_vec(),
-        false,
-      ).into());
+      msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, command.as_bytes().to_vec(), false).into());
     }
     Ok(msg_vec)
   }
@@ -40,13 +39,13 @@ impl ProtocolHandler for TCodeV03 {
   fn handle_scalar_vibrate_cmd(
     &self,
     index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![
-      HardwareWriteCmd::new(
-        Endpoint::Tx,
-        format!("V{}{:02}\n", index, scalar).as_bytes().to_vec(),
-        false,
-      ).into()])
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      format!("V{}{:02}\n", index, scalar).as_bytes().to_vec(),
+      false,
+    )
+    .into()])
   }
 }

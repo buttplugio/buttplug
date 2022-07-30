@@ -10,15 +10,15 @@ use byteorder::LittleEndian;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ActuatorType, Endpoint, ButtplugServerMessage, ButtplugDeviceMessage},
+    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareReadCmd},
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
-use futures::future::BoxFuture;
 use byteorder::WriteBytesExt;
+use futures::future::BoxFuture;
 use std::sync::Arc;
 
 generic_protocol_setup!(XInput, "xinput");
@@ -38,17 +38,22 @@ impl ProtocolHandler for XInput {
     let mut cmd = vec![];
     if cmd
       .write_u16::<LittleEndian>(
-        cmds[1].expect("GCM uses match_all, we'll always get 2 values").1 as u16,
+        cmds[1]
+          .expect("GCM uses match_all, we'll always get 2 values")
+          .1 as u16,
       )
       .is_err()
       || cmd
         .write_u16::<LittleEndian>(
-          cmds[0].expect("GCM uses match_all, we'll always get 2 values").1 as u16,
+          cmds[0]
+            .expect("GCM uses match_all, we'll always get 2 values")
+            .1 as u16,
         )
         .is_err()
     {
       return Err(
-        ButtplugDeviceError::ProtocolSpecificError("XInput".to_owned(),
+        ButtplugDeviceError::ProtocolSpecificError(
+          "XInput".to_owned(),
           "Cannot convert XInput value for processing".to_owned(),
         )
         .into(),

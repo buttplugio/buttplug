@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, ActuatorType},
+    messages::{ActuatorType, Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -26,25 +26,29 @@ impl ProtocolHandler for WeVibe8Bit {
     &self,
     cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-      let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
-      let r_speed_ext = cmds.last().unwrap_or(&None).unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
-      let data = if r_speed_int == 0 && r_speed_ext == 0 {
-        vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
-      } else {
-        let status_byte: u8 =
-          (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
-        vec![
-          0x0f,
-          0x03,
-          0x00,
-          r_speed_ext + 3,
-          r_speed_int + 3,
-          status_byte,
-          0x00,
-          0x00,
-        ]
-      };
-      Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, data, true).into()))
+    let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
+    let r_speed_ext = cmds
+      .last()
+      .unwrap_or(&None)
+      .unwrap_or((ActuatorType::Vibrate, 0u32))
+      .1 as u8;
+    let data = if r_speed_int == 0 && r_speed_ext == 0 {
+      vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+    } else {
+      let status_byte: u8 =
+        (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
+      vec![
+        0x0f,
+        0x03,
+        0x00,
+        r_speed_ext + 3,
+        r_speed_int + 3,
+        status_byte,
+        0x00,
+        0x00,
+      ]
+    };
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, true).into()])
   }
 }
 

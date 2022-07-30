@@ -8,20 +8,25 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint}
+    messages::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup, fleshlight_launch_helper::calculate_speed},
+    protocol::{
+      fleshlight_launch_helper::calculate_speed,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc, atomic::{AtomicU8, Ordering}
-  },
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
 };
 
 generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
@@ -40,7 +45,6 @@ impl ProtocolInitializer for KiirooV2Initializer {
     Ok(Box::new(KiirooV2::default()))
   }
 }
-
 
 #[derive(Default)]
 pub struct KiirooV2 {
@@ -75,7 +79,8 @@ impl ProtocolHandler for KiirooV2 {
       Endpoint::Tx,
       [message.position(), message.speed()].to_vec(),
       false,
-    ).into()])
+    )
+    .into()])
   }
 }
 

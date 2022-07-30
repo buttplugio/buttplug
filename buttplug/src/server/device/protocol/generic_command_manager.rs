@@ -11,32 +11,37 @@ use crate::{
     messages::{
       ActuatorType,
       ButtplugDeviceCommandMessageUnion,
+      GenericDeviceMessageAttributes,
       LinearCmd,
       RotateCmd,
       RotationSubcommand,
       ScalarCmd,
-      ScalarSubcommand, GenericDeviceMessageAttributes,
+      ScalarSubcommand,
     },
   },
   server::device::configuration::ProtocolDeviceAttributes,
 };
+use getset::Getters;
 use std::{
   ops::RangeInclusive,
-  sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst}
+  sync::atomic::{AtomicBool, AtomicU32, Ordering::SeqCst},
 };
-use getset::{Getters};
 
 #[derive(Getters)]
-#[getset(get="pub")]
-struct ScalarGenericCommand {  
+#[getset(get = "pub")]
+struct ScalarGenericCommand {
   actuator: ActuatorType,
   step_range: RangeInclusive<u32>,
-  value: AtomicU32
+  value: AtomicU32,
 }
 
 impl ScalarGenericCommand {
   pub fn new(attributes: &GenericDeviceMessageAttributes) -> Self {
-    Self { actuator: attributes.actuator_type().clone(), step_range: attributes.step_range(), value: AtomicU32::new(0) }
+    Self {
+      actuator: attributes.actuator_type().clone(),
+      step_range: attributes.step_range(),
+      value: AtomicU32::new(0),
+    }
   }
 }
 
@@ -74,7 +79,11 @@ impl GenericCommandManager {
       let mut subcommands = vec![];
       for (index, attr) in attrs.iter().enumerate() {
         scalars.push(ScalarGenericCommand::new(attr));
-        subcommands.push(ScalarSubcommand::new(index as u32, 0.0, *attr.actuator_type()));
+        subcommands.push(ScalarSubcommand::new(
+          index as u32,
+          0.0,
+          *attr.actuator_type(),
+        ));
       }
 
       stop_commands.push(ScalarCmd::new(0, subcommands).into());
@@ -173,7 +182,10 @@ impl GenericCommandManager {
       };
       info!(
         "{:?} {} {} {}",
-        self.scalars[index].step_range(), range, scalar_modifier, scalar
+        self.scalars[index].step_range(),
+        range,
+        scalar_modifier,
+        scalar
       );
       // If we've already sent commands, we don't want to send them again,
       // because some of our communication busses are REALLY slow. Make sure
@@ -349,7 +361,10 @@ mod test {
       mgr
         .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 10))]
+      vec![
+        Some((ActuatorType::Vibrate, 10)),
+        Some((ActuatorType::Vibrate, 10))
+      ]
     );
     assert_eq!(
       mgr
@@ -370,17 +385,28 @@ mod test {
         .expect("Test, assuming infallible"),
       vec![None, Some((ActuatorType::Vibrate, 15))]
     );
-    let vibrate_msg_invalid = ScalarCmd::new(0, vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)]);
+    let vibrate_msg_invalid = ScalarCmd::new(
+      0,
+      vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)],
+    );
     assert!(mgr.update_scalar(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.scalars(), vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 15))]);
+    assert_eq!(
+      mgr.scalars(),
+      vec![
+        Some((ActuatorType::Vibrate, 10)),
+        Some((ActuatorType::Vibrate, 15))
+      ]
+    );
   }
 
   #[test]
   pub fn test_command_generator_vibration_step_range() {
-    let mut vibrate_attrs_1 = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    let mut vibrate_attrs_1 =
+      GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
     vibrate_attrs_1.set_step_range(&RangeInclusive::new(10, 15));
-    let mut vibrate_attrs_2 = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    let mut vibrate_attrs_2 =
+      GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
     vibrate_attrs_2.set_step_range(&RangeInclusive::new(10, 20));
 
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
@@ -405,7 +431,10 @@ mod test {
       mgr
         .update_scalar(&vibrate_msg, false)
         .expect("Test, assuming infallible"),
-      vec![Some((ActuatorType::Vibrate, 13)), Some((ActuatorType::Vibrate, 15))]
+      vec![
+        Some((ActuatorType::Vibrate, 13)),
+        Some((ActuatorType::Vibrate, 15))
+      ]
     );
     assert_eq!(
       mgr
@@ -426,10 +455,19 @@ mod test {
         .expect("Test, assuming infallible"),
       vec![None, Some((ActuatorType::Vibrate, 18))]
     );
-    let vibrate_msg_invalid = ScalarCmd::new(0, vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)]);
+    let vibrate_msg_invalid = ScalarCmd::new(
+      0,
+      vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)],
+    );
     assert!(mgr.update_scalar(&vibrate_msg_invalid, false).is_err());
 
-    assert_eq!(mgr.scalars(), vec![Some((ActuatorType::Vibrate, 13)), Some((ActuatorType::Vibrate, 18))]);
+    assert_eq!(
+      mgr.scalars(),
+      vec![
+        Some((ActuatorType::Vibrate, 13)),
+        Some((ActuatorType::Vibrate, 18))
+      ]
+    );
   }
 
   #[test]
@@ -438,7 +476,7 @@ mod test {
 
     let rotate_attributes = DeviceMessageAttributesBuilder::default()
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])
-      .finish();    
+      .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,
       None,

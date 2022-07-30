@@ -5,21 +5,32 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ActuatorType, Endpoint}
+    messages::{ActuatorType, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareSubscribeCmd, HardwareEvent, HardwareUnsubscribeCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    hardware::{
+      Hardware,
+      HardwareCommand,
+      HardwareEvent,
+      HardwareSubscribeCmd,
+      HardwareUnsubscribeCmd,
+      HardwareWriteCmd,
+    },
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
-use std::sync::Arc;
 use async_trait::async_trait;
+use std::sync::Arc;
 
 generic_protocol_initializer_setup!(LeloF1sV2, "lelo-f1sv2");
 
@@ -32,7 +43,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
     &mut self,
     hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-// The Lelo F1s V2 has a very specific pairing flow:
+    // The Lelo F1s V2 has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)
     // * Then the security endpoint (Whitelist) needs to be read (which we can do via subscribe)
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection isn't not authorised
@@ -42,48 +53,48 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
     // * The password must not be sent whilst subscribed to the endpoint
     // * Once the password has been sent, the endpoint can be read for status again
     // * If it returns 0x00,00,00,00,00,00,00,00 the connection is authorised
-      let mut event_receiver = hardware.event_stream();
-      hardware
-        .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
-        .await?;
-      let noauth: Vec<u8> = vec![0; 8];
-      let authed: Vec<u8> = vec![1, 0, 0, 0, 0, 0, 0, 0];
+    let mut event_receiver = hardware.event_stream();
+    hardware
+      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
+      .await?;
+    let noauth: Vec<u8> = vec![0; 8];
+    let authed: Vec<u8> = vec![1, 0, 0, 0, 0, 0, 0, 0];
 
-      loop {
-        let event = event_receiver.recv().await;
-        if let Ok(HardwareEvent::Notification(_, _, n)) = event {
-          if n.eq(&noauth) {
-            info!(
-              "Lelo F1s V2 isn't authorised: Tap the device's power button to complete connection."
-            )
-          } else if n.eq(&authed) {
-            debug!("Lelo F1s V2 is authorised!");
-            return Ok(Box::new(LeloF1sV2::default()));
-          } else {
-            debug!("Lelo F1s V2 gave us a password: {:?}", n);
-            // Can't send whilst subscribed
-            hardware
-              .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Whitelist))
-              .await?;
-            // Send with response
-            hardware
-              .write_value(&HardwareWriteCmd::new(Endpoint::Whitelist, n, true))
-              .await?;
-            // Get back to the loop
-            hardware
-              .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
-              .await?;
-          }
+    loop {
+      let event = event_receiver.recv().await;
+      if let Ok(HardwareEvent::Notification(_, _, n)) = event {
+        if n.eq(&noauth) {
+          info!(
+            "Lelo F1s V2 isn't authorised: Tap the device's power button to complete connection."
+          )
+        } else if n.eq(&authed) {
+          debug!("Lelo F1s V2 is authorised!");
+          return Ok(Box::new(LeloF1sV2::default()));
         } else {
-          return Err(
-            ButtplugDeviceError::ProtocolSpecificError(
-              "LeloF1sV2".to_owned(),
-              "Lelo F1s V2 didn't provided valid security handshake".to_owned(),
-            )
-            .into(),
-          );
+          debug!("Lelo F1s V2 gave us a password: {:?}", n);
+          // Can't send whilst subscribed
+          hardware
+            .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::Whitelist))
+            .await?;
+          // Send with response
+          hardware
+            .write_value(&HardwareWriteCmd::new(Endpoint::Whitelist, n, true))
+            .await?;
+          // Get back to the loop
+          hardware
+            .subscribe(&HardwareSubscribeCmd::new(Endpoint::Whitelist))
+            .await?;
         }
+      } else {
+        return Err(
+          ButtplugDeviceError::ProtocolSpecificError(
+            "LeloF1sV2".to_owned(),
+            "Lelo F1s V2 didn't provided valid security handshake".to_owned(),
+          )
+          .into(),
+        );
       }
+    }
   }
 }
 
@@ -99,7 +110,9 @@ impl ProtocolHandler for LeloF1sV2 {
     for cmd in cmds.iter() {
       cmd_vec.push(cmd.expect("LeloF1s should always send all values").1 as u8);
     }
-    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()])
+    Ok(vec![
+      HardwareWriteCmd::new(Endpoint::Tx, cmd_vec, false).into()
+    ])
   }
 }
 

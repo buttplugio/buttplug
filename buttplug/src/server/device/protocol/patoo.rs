@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -19,12 +18,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc,
-  },
-};
-
+use std::sync::Arc;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -58,8 +52,15 @@ impl ProtocolIdentifier for PatooIdentifier {
     while i < c.len() && !c[i].is_digit(10) {
       i += 1;
     }
-    let name: String = c[0..i].iter().collect();    
-    Ok((ServerDeviceIdentifier::new(hardware.address(), "Patoo", &ProtocolAttributesType::Identifier(name)), Box::new(PatooInitializer::default())))
+    let name: String = c[0..i].iter().collect();
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "Patoo",
+        &ProtocolAttributesType::Identifier(name),
+      ),
+      Box::new(PatooInitializer::default()),
+    ))
   }
 }
 
@@ -84,33 +85,33 @@ impl ProtocolHandler for Patoo {
     &self,
     cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let mut msg_vec = vec!();
-        // Default to vibes
-        let mut mode: u8 = 4u8;
+    let mut msg_vec = vec![];
+    // Default to vibes
+    let mut mode: u8 = 4u8;
 
-        // Use vibe 1 as speed
-        let mut speed = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-        if speed == 0 {
-          mode = 0;
+    // Use vibe 1 as speed
+    let mut speed = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
+    if speed == 0 {
+      mode = 0;
 
-          // If we have a second vibe and it's not also 0, use that
-          if cmds.len() > 1 {
-            speed = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
-            if speed != 0 {
-              mode |= 0x80;
-            }
-          }
-        } else if cmds.len() > 1 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8 != 0 {
-          // Enable second vibe if it's not at 0
+      // If we have a second vibe and it's not also 0, use that
+      if cmds.len() > 1 {
+        speed = cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
+        if speed != 0 {
           mode |= 0x80;
         }
-
-        msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![speed], true).into());
-        msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![mode], true).into());
-
-      Ok(msg_vec)
+      }
+    } else if cmds.len() > 1 && cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8 != 0 {
+      // Enable second vibe if it's not at 0
+      mode |= 0x80;
     }
+
+    msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![speed], true).into());
+    msg_vec.push(HardwareWriteCmd::new(Endpoint::TxMode, vec![mode], true).into());
+
+    Ok(msg_vec)
   }
+}
 /*
 #[cfg(all(test, feature = "server"))]
 mod test {

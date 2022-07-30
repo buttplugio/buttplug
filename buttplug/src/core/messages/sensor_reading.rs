@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
@@ -18,7 +18,7 @@ pub struct SensorReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  device_index: u32,  
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "FeatureIndex"))]
   #[getset[get_copy="pub"]]
   feature_index: u32,
@@ -31,13 +31,18 @@ pub struct SensorReading {
 }
 
 impl SensorReading {
-  pub fn new(device_index: u32, feature_index: u32, sensor_type: SensorType, data: Vec<f64>) -> Self {
+  pub fn new(
+    device_index: u32,
+    feature_index: u32,
+    sensor_type: SensorType,
+    data: Vec<f64>,
+  ) -> Self {
     Self {
       id: 1,
       device_index,
       feature_index,
       sensor_type,
-      data
+      data,
     }
   }
 }

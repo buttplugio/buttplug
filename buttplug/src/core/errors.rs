@@ -10,10 +10,11 @@
 use super::messages::{
   self,
   serializer::ButtplugSerializerError,
+  ActuatorType,
   ButtplugDeviceMessageType,
   ButtplugMessageSpecVersion,
   Endpoint,
-  ErrorCode, ActuatorType,
+  ErrorCode,
 };
 #[cfg(feature = "server")]
 use crate::server::device::hardware::communication::HardwareSpecificError;
@@ -170,7 +171,7 @@ pub enum ButtplugDeviceError {
   /// Device Configuration Error: {0}
   DeviceConfigurationError(String),
   /// Actuator Type Mismatch: Index {0} got command for {1}, but expects {2}
-  DeviceActuatorTypeMismatch(String, ActuatorType, ActuatorType)
+  DeviceActuatorTypeMismatch(String, ActuatorType, ActuatorType),
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

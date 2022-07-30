@@ -7,32 +7,39 @@
 
 use super::fleshlight_launch_helper::calculate_speed;
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{self, Endpoint, ButtplugDeviceMessage}},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{self, ButtplugDeviceMessage, Endpoint},
+  },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
-use std::sync::{Arc, atomic::{AtomicU8, Ordering::SeqCst}};
+use std::sync::{
+  atomic::{AtomicU8, Ordering::SeqCst},
+  Arc,
+};
 
 generic_protocol_setup!(KiirooV21, "kiiroo-v21");
 
 #[derive(Default)]
 pub struct KiirooV21 {
-  previous_position: Arc<AtomicU8>
+  previous_position: Arc<AtomicU8>,
 }
 
 impl ProtocolHandler for KiirooV21 {
   fn handle_scalar_vibrate_cmd(
     &self,
     _: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![0x01, scalar as u8],
       false,
-    ).into()])
+    )
+    .into()])
   }
 
   fn handle_linear_cmd(
@@ -59,10 +66,12 @@ impl ProtocolHandler for KiirooV21 {
     let previous_position = self.previous_position.clone();
     let position = message.position();
     previous_position.store(position, SeqCst);
-    Ok(vec!(HardwareWriteCmd::new(
+    Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [0x03, 0x00, message.speed(), message.position()].to_vec(),
-      false).into()))
+      false,
+    )
+    .into()])
   }
 }
 
@@ -71,7 +80,7 @@ impl ProtocolHandler for KiirooV21 {
 mod test {
   use crate::{
     core::messages::{
-      Endpoint,      
+      Endpoint,
       FleshlightLaunchFW12Cmd,
       LinearCmd,
       StopDeviceCmd,

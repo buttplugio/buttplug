@@ -22,15 +22,22 @@ impl ProtocolHandler for SvakomAlex {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec![
-      HardwareWriteCmd::new(
-        Endpoint::Tx,
-        [18, 1, 3, 0, if scalar == 0 { 0xFF } else { scalar as u8 }, 0].to_vec(),
-        false,
-      ).into()
-    ])
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      [
+        18,
+        1,
+        3,
+        0,
+        if scalar == 0 { 0xFF } else { scalar as u8 },
+        0,
+      ]
+      .to_vec(),
+      false,
+    )
+    .into()])
   }
 }
 /*

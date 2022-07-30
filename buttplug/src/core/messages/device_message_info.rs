@@ -17,10 +17,7 @@ pub struct DeviceMessageInfo {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(rename = "DeviceMessages")
-  )]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   pub device_messages: DeviceMessageAttributes,
 }
 
@@ -43,11 +40,10 @@ impl From<DeviceAdded> for DeviceMessageInfo {
     Self {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
-      device_messages: device_added.device_messages().clone()
+      device_messages: device_added.device_messages().clone(),
     }
   }
 }
-
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -56,10 +52,7 @@ pub struct DeviceMessageInfoV2 {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(rename = "DeviceMessages")
-  )]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   pub device_messages: DeviceMessageAttributesV2,
 }
 
@@ -88,10 +81,7 @@ pub struct DeviceMessageInfoV1 {
   pub device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   pub device_name: String,
-  #[cfg_attr(
-    feature = "serialize-json",
-    serde(rename = "DeviceMessages")
-  )]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
   pub device_messages: DeviceMessageAttributesV1,
 }
 
@@ -136,19 +126,31 @@ impl From<DeviceAdded> for DeviceMessageInfoV0 {
 impl From<DeviceMessageInfoV1> for DeviceMessageInfoV0 {
   fn from(device_message_info: DeviceMessageInfoV1) -> Self {
     // Convert to array of message types.
-    let mut device_messages: Vec<ButtplugDeviceMessageType> = vec!();
+    let mut device_messages: Vec<ButtplugDeviceMessageType> = vec![];
 
     device_messages.push(ButtplugDeviceMessageType::StopDeviceCmd);
-    if device_message_info.device_messages.single_motor_vibrate_cmd().is_some() {
+    if device_message_info
+      .device_messages
+      .single_motor_vibrate_cmd()
+      .is_some()
+    {
       device_messages.push(ButtplugDeviceMessageType::SingleMotorVibrateCmd);
     }
-    if device_message_info.device_messages.fleshlight_launch_fw12_cmd().is_some() {
+    if device_message_info
+      .device_messages
+      .fleshlight_launch_fw12_cmd()
+      .is_some()
+    {
       device_messages.push(ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd);
     }
-    if device_message_info.device_messages.vorze_a10_cyclone_cmd().is_some() {
+    if device_message_info
+      .device_messages
+      .vorze_a10_cyclone_cmd()
+      .is_some()
+    {
       device_messages.push(ButtplugDeviceMessageType::VorzeA10CycloneCmd);
     }
-    
+
     device_messages.sort();
 
     // SingleMotorVibrateCmd is added as part of the V1 conversion, so we

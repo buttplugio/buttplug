@@ -22,10 +22,15 @@ impl ProtocolHandler for Picobong {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mode: u8 = if scalar == 0 { 0xff } else { 0x01 };
-    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, [0x01, mode, scalar as u8].to_vec(), false).into()))
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      [0x01, mode, scalar as u8].to_vec(),
+      false,
+    )
+    .into()])
   }
 }
 

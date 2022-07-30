@@ -98,12 +98,10 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
       }
       if let Err(err) = self.device.discover_services().await {
         error!("BTLEPlug error discovering characteristics: {:?}", err);
-        return Err(
-          ButtplugDeviceError::DeviceConnectionError(format!(
-            "BTLEPlug error discovering characteristics: {:?}",
-            err
-          )),
-        );
+        return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+          "BTLEPlug error discovering characteristics: {:?}",
+          err
+        )));
       }
     }
     Ok(Box::new(BtleplugHardwareSpecializer::new(
@@ -174,12 +172,10 @@ impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
         "Can't find btle protocol specifier mapping for device {} {:?}",
         self.name, address
       );
-      return Err(
-        ButtplugDeviceError::DeviceConnectionError(format!(
-          "Can't find btle protocol specifier mapping for device {} {:?}",
-          self.name, address
-        )),
-      );
+      return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+        "Can't find btle protocol specifier mapping for device {} {:?}",
+        self.name, address
+      )));
     }
     let notification_stream = self
       .device
@@ -322,9 +318,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
-        )));
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint,
+        ))));
       }
     };
     let device = self.device.clone();
@@ -356,9 +352,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
-        )));
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint,
+        ))));
       }
     };
     let device = self.device.clone();
@@ -386,9 +382,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
-        )));
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint,
+        ))));
       }
     };
     let device = self.device.clone();
@@ -409,9 +405,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return Box::pin(future::ready(Err(
-          ButtplugDeviceError::InvalidEndpoint(msg.endpoint),
-        )));
+        return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
+          msg.endpoint,
+        ))));
       }
     };
     let device = self.device.clone();

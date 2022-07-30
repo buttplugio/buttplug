@@ -6,10 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -18,7 +15,10 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::sync::{Arc, atomic::{AtomicU8, Ordering}};
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
+};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -69,7 +69,6 @@ impl ProtocolInitializer for YououInitializer {
   }
 }
 
-
 #[derive(Default)]
 pub struct Youou {
   packet_id: AtomicU8,
@@ -79,7 +78,7 @@ impl ProtocolHandler for Youou {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Byte 2 seems to be a monotonically increasing packet id of some kind
     //

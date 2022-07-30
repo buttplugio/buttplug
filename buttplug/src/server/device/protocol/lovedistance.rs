@@ -11,7 +11,10 @@ use crate::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
     protocol::{
-      generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
     ServerDeviceIdentifier,
   },

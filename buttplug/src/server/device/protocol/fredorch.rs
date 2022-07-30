@@ -8,20 +8,25 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint}
+    messages::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup, fleshlight_launch_helper::calculate_speed},
+    protocol::{
+      fleshlight_launch_helper::calculate_speed,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc, atomic::{AtomicU8, Ordering}
-  },
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
 };
 
 const CRC_HI: [u8; 256] = [
@@ -64,7 +69,6 @@ pub fn crc16(data: &[u8]) -> [u8; 2] {
   [n, o]
 }
 
-
 generic_protocol_initializer_setup!(Fredorch, "fredorch");
 
 #[derive(Default)]
@@ -76,55 +80,55 @@ impl ProtocolInitializer for FredorchInitializer {
     &mut self,
     hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-      // Set the device to program mode
-      let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
-      let mut crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+    // Set the device to program mode
+    let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
+    let mut crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+      .await?;
 
-      // Set the program mode to record
-      data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+    // Set the program mode to record
+    data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00];
+    crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+      .await?;
 
-      // Program the device to move to position 0 at speed 5
-      data = vec![
-        0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x01,
-      ];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+    // Program the device to move to position 0 at speed 5
+    data = vec![
+      0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x01,
+    ];
+    crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+      .await?;
 
-      // Run the program
-      data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+    // Run the program
+    data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01];
+    crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+      .await?;
 
-      // Set the program to repeat
-      data = vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01];
-      crc = crc16(&data);
-      data.push(crc[0]);
-      data.push(crc[1]);
-      hardware
-        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-        .await?;
+    // Set the program to repeat
+    data = vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01];
+    crc = crc16(&data);
+    data.push(crc[0]);
+    data.push(crc[1]);
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
+      .await?;
 
-      Ok(Box::new(Fredorch::default()))
+    Ok(Box::new(Fredorch::default()))
   }
 }
 
@@ -165,7 +169,7 @@ impl ProtocolHandler for Fredorch {
     data.push(crc[0]);
     data.push(crc[1]);
     self.previous_position.store(position, Ordering::SeqCst);
-    Ok(vec!(HardwareWriteCmd::new(Endpoint::Tx, data, false).into()))
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }
 

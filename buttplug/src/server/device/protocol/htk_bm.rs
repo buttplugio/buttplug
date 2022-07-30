@@ -6,7 +6,10 @@
 // for full license information.
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
+  core::{
+    errors::ButtplugDeviceError,
+    messages::{ActuatorType, Endpoint},
+  },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
     protocol::{generic_protocol_setup, ProtocolHandler},
@@ -21,7 +24,7 @@ pub struct HtkBm {}
 impl ProtocolHandler for HtkBm {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>
+    cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec = vec![];
     if cmds.len() == 2 {
@@ -56,7 +59,10 @@ mod test {
   pub fn test_htkbm_protocol() {
     let handler = HtkBm {};
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 0)), Some((ActuatorType::Vibrate, 0))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 0)),
+        Some((ActuatorType::Vibrate, 0))
+      ]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![15],
@@ -64,7 +70,10 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 1)), Some((ActuatorType::Vibrate, 0))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 1)),
+        Some((ActuatorType::Vibrate, 0))
+      ]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![12],
@@ -72,7 +81,10 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 0)), Some((ActuatorType::Vibrate, 1))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 0)),
+        Some((ActuatorType::Vibrate, 1))
+      ]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![13],
@@ -80,7 +92,10 @@ mod test {
       ))])
     );
     assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 1)), Some((ActuatorType::Vibrate, 1))]),
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 1)),
+        Some((ActuatorType::Vibrate, 1))
+      ]),
       Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
         Endpoint::Tx,
         vec![11],

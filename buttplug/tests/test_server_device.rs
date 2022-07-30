@@ -9,10 +9,7 @@ mod util;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{
-      self, ButtplugServerMessage, Endpoint,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
-    },
+    messages::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
   },
   server::{
     device::hardware::communication::test::TestDeviceCommunicationManagerBuilder,

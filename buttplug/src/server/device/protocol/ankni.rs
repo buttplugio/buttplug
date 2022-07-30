@@ -6,23 +6,21 @@
 // for full license information.
 
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    messages::Endpoint,
-  },
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc,
-  },
-};
+use std::sync::Arc;
 
 generic_protocol_initializer_setup!(Ankni, "ankni");
 
@@ -64,36 +62,37 @@ impl ProtocolHandler for Ankni {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec!(HardwareWriteCmd::new(
-              Endpoint::Tx,
-              vec![
-                0x03,
-                0x12,
-                scalar as u8,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-              ],
-              true,
-            ).into()))
-        }
-      }
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x03,
+        0x12,
+        scalar as u8,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+      ],
+      true,
+    )
+    .into()])
+  }
+}
 
 /*
 #[cfg(all(test, feature = "server"))]

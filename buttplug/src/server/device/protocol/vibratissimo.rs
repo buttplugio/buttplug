@@ -5,15 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, ActuatorType},
+    messages::{ActuatorType, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareReadCmd},
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
   },
@@ -47,8 +46,8 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     hardware: Arc<Hardware>,
   ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
-        .await?;
+      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .await?;
     let ident =
       String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     Ok((
@@ -61,7 +60,6 @@ impl ProtocolIdentifier for VibratissimoIdentifier {
     ))
   }
 }
-
 
 #[derive(Default)]
 pub struct VibratissimoInitializer {}
@@ -80,25 +78,23 @@ impl ProtocolInitializer for VibratissimoInitializer {
 pub struct Vibratissimo {}
 
 impl ProtocolHandler for Vibratissimo {
-
   fn handle_scalar_cmd(
     &self,
     cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-        let mut data: Vec<u8> = Vec::new();
-        for cmd in cmds {
-          data.push(cmd.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8);
-        }
-        if data.len() == 1 {
-          data.push(0x00);
-        }
+    let mut data: Vec<u8> = Vec::new();
+    for cmd in cmds {
+      data.push(cmd.unwrap_or((ActuatorType::Vibrate, 0)).1 as u8);
+    }
+    if data.len() == 1 {
+      data.push(0x00);
+    }
 
-        // Put the device in write mode
-        Ok(vec![HardwareWriteCmd::new(
-          Endpoint::TxMode,
-          vec![0x03, 0xff],
-          false,
-        ).into(), HardwareWriteCmd::new(Endpoint::TxVibrate, data, false).into()])
+    // Put the device in write mode
+    Ok(vec![
+      HardwareWriteCmd::new(Endpoint::TxMode, vec![0x03, 0xff], false).into(),
+      HardwareWriteCmd::new(Endpoint::TxVibrate, data, false).into(),
+    ])
   }
 }
 

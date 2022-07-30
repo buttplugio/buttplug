@@ -8,13 +8,16 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ActuatorType, ButtplugServerMessage, Endpoint, ButtplugDeviceMessage},
+    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
     protocol::{
-      generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
     ServerDeviceIdentifier,
   },
@@ -127,7 +130,10 @@ impl ProtocolHandler for LovenseConnectService {
         .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
-      Ok(messages::BatteryLevelReading::new(msg.device_index(), reading.data()[0] as f64 / 100f64).into())
+      Ok(
+        messages::BatteryLevelReading::new(msg.device_index(), reading.data()[0] as f64 / 100f64)
+          .into(),
+      )
     })
   }
 }

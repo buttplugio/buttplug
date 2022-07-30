@@ -22,9 +22,9 @@ impl ProtocolHandler for LiboElle {
   fn handle_scalar_vibrate_cmd(
     &self,
     index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    Ok(vec!( {
+    Ok(vec![{
       let speed = scalar as u8;
       if index == 1 {
         let mut data = 0u8;
@@ -37,13 +37,9 @@ impl ProtocolHandler for LiboElle {
         }
         HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into()
       } else {
-        HardwareWriteCmd::new(
-          Endpoint::TxMode,
-          vec![speed],
-          false,
-        ).into()
+        HardwareWriteCmd::new(Endpoint::TxMode, vec![speed], false).into()
       }
-    }))
+    }])
   }
 }
 

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, ActuatorType},
+    messages::{ActuatorType, Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -33,23 +33,24 @@ impl ProtocolHandler for Zalo {
     } else {
       cmds[1].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8
     };
-    Ok(vec!(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![
-          if speed0 == 0 && speed1 == 0 {
-            0x02
-          } else {
-            0x01
-          },
-          if speed0 == 0 { 0x01 } else { speed0 },
-          if speed1 == 0 { 0x01 } else { speed1 },
-        ],
-        true,
-      ).into()))
-    }
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        if speed0 == 0 && speed1 == 0 {
+          0x02
+        } else {
+          0x01
+        },
+        if speed0 == 0 { 0x01 } else { speed0 },
+        if speed1 == 0 { 0x01 } else { speed1 },
+      ],
+      true,
+    )
+    .into()])
   }
+}
 
-  /*
+/*
 #[cfg(all(test, feature = "server"))]
 mod test {
   use crate::{

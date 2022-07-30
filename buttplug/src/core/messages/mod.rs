@@ -72,7 +72,15 @@ pub use kiiroo_cmd::KiirooCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
-pub use message_attributes::{DeviceMessageAttributes, DeviceMessageAttributesBuilder, DeviceMessageAttributesV2, DeviceMessageAttributesV1, GenericDeviceMessageAttributes, ActuatorType, SensorType};
+pub use message_attributes::{
+  ActuatorType,
+  DeviceMessageAttributes,
+  DeviceMessageAttributesBuilder,
+  DeviceMessageAttributesV1,
+  DeviceMessageAttributesV2,
+  GenericDeviceMessageAttributes,
+  SensorType,
+};
 pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;
@@ -86,10 +94,10 @@ pub use request_server_info::RequestServerInfo;
 pub use rotate_cmd::{RotateCmd, RotationSubcommand};
 pub use rssi_level_cmd::RSSILevelCmd;
 pub use rssi_level_reading::RSSILevelReading;
-pub use scanning_finished::ScanningFinished;
 pub use scalar_cmd::{ScalarCmd, ScalarSubcommand};
+pub use scanning_finished::ScanningFinished;
 pub use sensor_read_cmd::{SensorReadCmd, SensorSubcommand};
-pub use sensor_reading::{SensorReading};
+pub use sensor_reading::SensorReading;
 pub use sensor_subscribe_cmd::SensorSubscribeCmd;
 pub use sensor_unsubscribe_cmd::SensorUnsubscribeCmd;
 pub use server_info::{ServerInfo, ServerInfoV0};
@@ -299,9 +307,15 @@ impl TryFrom<ButtplugDeviceMessageType> for ButtplugCurrentSpecDeviceMessageType
         Ok(ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd)
       }
       ButtplugDeviceMessageType::ScalarCmd => Ok(ButtplugCurrentSpecDeviceMessageType::ScalarCmd),
-      ButtplugDeviceMessageType::SensorReadCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorReadCmd),
-      ButtplugDeviceMessageType::SensorSubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd),
-      ButtplugDeviceMessageType::SensorUnsubscribeCmd => Ok(ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd),
+      ButtplugDeviceMessageType::SensorReadCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::SensorReadCmd)
+      }
+      ButtplugDeviceMessageType::SensorSubscribeCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd)
+      }
+      ButtplugDeviceMessageType::SensorUnsubscribeCmd => {
+        Ok(ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd)
+      }
       _ => Err(ButtplugMessageError::MessageConversionError(
         "Device message deprecated, does not exist in current version of protocol.".to_owned(),
       )),
@@ -331,9 +345,15 @@ impl From<ButtplugCurrentSpecDeviceMessageType> for ButtplugDeviceMessageType {
       }
       ButtplugCurrentSpecDeviceMessageType::RSSILevelCmd => ButtplugDeviceMessageType::RSSILevelCmd,
       ButtplugCurrentSpecDeviceMessageType::ScalarCmd => ButtplugDeviceMessageType::ScalarCmd,
-      ButtplugCurrentSpecDeviceMessageType::SensorReadCmd => ButtplugDeviceMessageType::SensorReadCmd,
-      ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd => ButtplugDeviceMessageType::SensorSubscribeCmd,
-      ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd => ButtplugDeviceMessageType::SensorUnsubscribeCmd,
+      ButtplugCurrentSpecDeviceMessageType::SensorReadCmd => {
+        ButtplugDeviceMessageType::SensorReadCmd
+      }
+      ButtplugCurrentSpecDeviceMessageType::SensorSubscribeCmd => {
+        ButtplugDeviceMessageType::SensorSubscribeCmd
+      }
+      ButtplugCurrentSpecDeviceMessageType::SensorUnsubscribeCmd => {
+        ButtplugDeviceMessageType::SensorUnsubscribeCmd
+      }
     }
   }
 }
@@ -478,7 +498,7 @@ pub enum ButtplugSpecV3ClientMessage {
   RSSILevelCmd(RSSILevelCmd),
   SensorReadCmd(SensorReadCmd),
   SensorSubscribeCmd(SensorSubscribeCmd),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmd)
+  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
 }
 
 /// Represents all server-to-client messages in v3 of the Buttplug Spec
@@ -548,12 +568,7 @@ pub enum ButtplugSpecV2ClientMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug,
-  Clone,
-  PartialEq,
-  ButtplugMessage,
-  ButtplugMessageValidator,
-  ButtplugServerMessageType,
+  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ServerMessage {
@@ -784,7 +799,8 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV0ServerMessage {
 #[derive(
   Debug,
   Clone,
-  PartialEq, Eq,
+  PartialEq,
+  Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugClientMessageType,

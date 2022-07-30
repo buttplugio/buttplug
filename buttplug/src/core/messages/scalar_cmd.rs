@@ -23,7 +23,11 @@ pub struct ScalarSubcommand {
 
 impl ScalarSubcommand {
   pub fn new(index: u32, scalar: f64, actuator_type: ActuatorType) -> Self {
-    Self { index, scalar, actuator_type }
+    Self {
+      index,
+      scalar,
+      actuator_type,
+    }
   }
 
   pub fn index(&self) -> u32 {
@@ -87,6 +91,10 @@ impl From<VibrateCmd> for ScalarCmd {
       .iter()
       .map(|x| ScalarSubcommand::new(x.index(), x.speed(), ActuatorType::Vibrate))
       .collect();
-    Self { id: vibrate_cmd.id(), device_index: vibrate_cmd.device_index(), scalars: subcommands }
+    Self {
+      id: vibrate_cmd.id(),
+      device_index: vibrate_cmd.device_index(),
+      scalars: subcommands,
+    }
   }
 }

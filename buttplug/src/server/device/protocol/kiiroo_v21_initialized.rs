@@ -5,24 +5,28 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint}
+    messages::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer, generic_protocol_initializer_setup, fleshlight_launch_helper::calculate_speed},
+    protocol::{
+      fleshlight_launch_helper::calculate_speed,
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::{
-    Arc, atomic::{AtomicU8, Ordering}
-  },
+use std::sync::{
+  atomic::{AtomicU8, Ordering},
+  Arc,
 };
 
 generic_protocol_initializer_setup!(KiirooV21Initialized, "kiiroo-v21-initialized");
@@ -37,16 +41,20 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
     hardware: Arc<Hardware>,
   ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling Onyx+ init");
-    hardware.write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
-      true,
-    )).await?;
-    hardware.write_value(&HardwareWriteCmd::new(
-      Endpoint::Tx,
-      vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
-      true,
-    )).await?;
+    hardware
+      .write_value(&HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0x03u8, 0x00u8, 0x64u8, 0x19u8],
+        true,
+      ))
+      .await?;
+    hardware
+      .write_value(&HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![0x03u8, 0x00u8, 0x64u8, 0x00u8],
+        true,
+      ))
+      .await?;
     Ok(Box::new(KiirooV21Initialized::default()))
   }
 }
@@ -60,13 +68,14 @@ impl ProtocolHandler for KiirooV21Initialized {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
-    scalar: u32
+    scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
-            Endpoint::Tx,
-            vec![0x01, scalar as u8],
-            false,
-          ).into()])
+      Endpoint::Tx,
+      vec![0x01, scalar as u8],
+      false,
+    )
+    .into()])
   }
 
   fn handle_linear_cmd(
@@ -96,7 +105,8 @@ impl ProtocolHandler for KiirooV21Initialized {
       Endpoint::Tx,
       [0x03, 0x00, message.speed(), message.position()].to_vec(),
       false,
-    ).into()])
+    )
+    .into()])
   }
 }
 /*

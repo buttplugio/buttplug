@@ -23,7 +23,7 @@ pub mod test;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
-  util::async_manager
+  util::async_manager,
 };
 use async_trait::async_trait;
 use futures::future;
