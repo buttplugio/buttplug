@@ -13,14 +13,12 @@ exclude = ["examples/**"]
 
 [features]
 # Basic features
-# default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
-default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager"]
+default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
 client=[]
 server=[]
 serialize-json=[]
 # Connectors
-#websockets=["serialize-json", "async-tungstenite", "native-tls"]
-websockets=["serialize-json", "async-tungstenite"]
+websockets=["serialize-json", "async-tungstenite", "native-tls"]
 # Device Communication Managers
 xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
@@ -29,7 +27,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
-tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime"] #, "async-tungstenite/tokio-native-tls"]
+tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures", "futures-timer/wasm-bindgen"]
 dummy-runtime=[]
 # Compiler config
@@ -45,7 +43,6 @@ async-trait = "0.1.56"
 serde = { version = "1.0.140", features = ["derive"] }
 serde_json = "1.0.82"
 serde_repr = "0.1.8"
-# Hold at 0.8 until 1.0 is supported by btleplug
 uuid = { version = "1.1.2", features = ["serde"] }
 url = "2.2.2"
 btleplug = { version = "0.10.0", optional = true }
