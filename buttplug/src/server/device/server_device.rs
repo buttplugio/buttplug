@@ -406,6 +406,11 @@ impl ServerDevice {
           Ok(values) => values,
           Err(err) => return Box::pin(future::ready(Err(err))),
         };
+        
+        if commands.is_empty() {
+          debug!("No commands generated for incoming device packet, skipping and returning success.");
+          return Box::pin(future::ready(Ok(messages::Ok::default().into())));
+        }
 
         self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
       }
