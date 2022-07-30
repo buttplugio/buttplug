@@ -117,7 +117,12 @@
       "type": "object",
       "properties": {
         "StopDeviceCmd": { "$ref": "#/components/NullMessageAttributes" },
-        "ScalarCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "ScalarCmd": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/GenericMessageAttributes" },
+            "minItems": 1
+        },
         "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
         "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
         "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
@@ -163,19 +168,12 @@
     },
     "StepCount": {
       "description": "Specifies granularity of each feature on the device.",
-      "type": "array",
-      "items": {
-        "minimum": 1,
-        "type": "integer"
-      },
-      "minItems": 1
+      "minimum": 1,
+      "type": "integer"
     },
     "StepRange": {
       "description": "Specifies the minimum/maximum level for an actuator ScalarCmd or LevelReading message.",
-      "type": "array",
-      "items": {
-        "type": "number"
-      },
+      "type": "number",
       "minItems": 2
     }
   },
