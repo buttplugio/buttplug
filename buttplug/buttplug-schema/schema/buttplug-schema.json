@@ -56,16 +56,15 @@
       "description": "Attributes for device messages.",
       "type": "object",
       "properties": {
+        "FeatureDescriptor": {
+          "type": "string"
+        },
         "FeatureCount": { "$ref": "#/components/FeatureCount" },
         "StepCount": { "$ref": "#/components/StepCount" },
         "StepRange": { "$ref": "#/components/StepRange" },
         "ActuatorType": { 
           "description": "Denotes type of actuator (Vibrator, Linear, Oscillator, etc...)",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minItems": 1
-          } 
+          "type": "string"
         }
       },
       "additionalProperties": false,
