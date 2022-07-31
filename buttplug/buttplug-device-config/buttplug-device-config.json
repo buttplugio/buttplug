@@ -106,7 +106,16 @@
               "ActuatorType": "Vibrate"
             }
           ],
-          "BatteryLevelCmd": {}
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ]
         }
       },
       "configurations": [
@@ -145,8 +154,7 @@
                 "StepCount": 20,
                 "ActuatorType": "Vibrate"
               }
-            ],
-            "BatteryLevelCmd": {}
+            ]
           }
         },
         {
@@ -161,8 +169,7 @@
                 "StepCount": 20,
                 "ActuatorType": "Rotate"
               }
-            ],
-            "BatteryLevelCmd": {}
+            ]
           }
         },
         {
@@ -240,8 +247,7 @@
                 "StepCount": 20,
                 "ActuatorType": "Vibrate"
               }
-            ],
-            "BatteryLevelCmd": {}
+            ]
           }
         },
         {
@@ -265,8 +271,7 @@
                 "StepCount": 20,
                 "ActuatorType": "Vibrate"
               }
-            ],
-            "BatteryLevelCmd": {}
+            ]
           }
         },
         {
@@ -290,7 +295,16 @@
               "ActuatorType": "Vibrate"
             }
           ],
-          "BatteryLevelCmd": {}
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ]
         }
       },
       "configurations": [
@@ -316,7 +330,16 @@
                 "ActuatorType": "Vibrate"
               }
             ],
-            "BatteryLevelCmd": {}
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ]
           }
         },
         {
@@ -331,7 +354,16 @@
                 "ActuatorType": "Rotate"
               }
             ],
-            "BatteryLevelCmd": {}
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ]
           }
         },
         {
@@ -410,7 +442,16 @@
                 "ActuatorType": "Vibrate"
               }
             ],
-            "BatteryLevelCmd": {}
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ]
           }
         },
         {
@@ -435,7 +476,16 @@
                 "ActuatorType": "Vibrate"
               }
             ],
-            "BatteryLevelCmd": {}
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ]
           }
         },
         {
@@ -768,8 +818,16 @@
       "defaults": {
         "name": "Magic Motion V1 Device",
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "ScalarCmd": [
             {
               "StepCount": 100,
@@ -861,8 +919,16 @@
       "defaults": {
         "name": "Magic Motion V2 Device",
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "ScalarCmd": [
             {
               "StepCount": 100,
@@ -927,8 +993,16 @@
       "defaults": {
         "name": "LoveLife Krush",
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "ScalarCmd": [
             {
               "StepCount": 77,
@@ -961,8 +1035,16 @@
       "defaults": {
         "name": "Magic Motion V4 Device",
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "ScalarCmd": [
             {
               "StepCount": 100,
@@ -1192,8 +1274,16 @@
       "defaults": {
         "name": "Vibratissimo Device",
         "messages": {
-          "BatteryLevelCmd": {},
-          "RSSILevelCmd": {},
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "ScalarCmd": [
             {
               "StepCount": 255,
@@ -1211,8 +1301,16 @@
           ],
           "name": "Vibratissimo Licker",
           "messages": {
-            "BatteryLevelCmd": {},
-            "RSSILevelCmd": {},
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ],
             "ScalarCmd": [
               {
                 "StepCount": 255,
@@ -1231,8 +1329,16 @@
           ],
           "name": "Vibratissimo Rabbit",
           "messages": {
-            "BatteryLevelCmd": {},
-            "RSSILevelCmd": {},
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  0,
+                  100
+                ]
+              }
+            ],
             "ScalarCmd": [
               {
                 "StepCount": 255,
@@ -4445,6 +4551,33 @@
             {
               "StepCount": 3,
               "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "kgoal-boost": {
+      "btle": {
+        "names": [
+          "Boost"
+        ],
+        "services": {
+          "8e7c6065-7656-17ad-1b41-b53d1a548e0d": {
+            "rx": "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5"
+          }
+        }
+      },
+      "defaults": {
+        "name": "KGoal Boost",
+        "messages": {
+          "SensorSubscribeCmd": [
+            {
+              "SensorType": "Pressure",
+              "FeatureDescriptor": "Pelvic Pressure (Unnormalized)",
+              "SensorRange": [
+                0,
+                1000
+              ]
             }
           ]
         }

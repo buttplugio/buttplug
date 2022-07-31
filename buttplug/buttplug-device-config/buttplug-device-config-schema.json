@@ -260,6 +260,15 @@
         "RotateCmd": {
           "$ref": "#/components/GenericMessageAttributes"
         },
+        "SensorReadCmd": {
+          "$ref": "#/components/SensorMessageAttributes"
+        },
+        "SensorSubscribeCmd": {
+          "$ref": "#/components/SensorMessageAttributes"
+        },
+        "SensorUnsubscribeCmd": {
+          "$ref": "#/components/SensorMessageAttributes"
+        },
         "LovenseCmd": {
           "$ref": "#/components/NullMessageAttributes"
         },
@@ -273,12 +282,6 @@
           "$ref": "#/components/NullMessageAttributes"
         },
         "FleshlightLaunchFW12Cmd": {
-          "$ref": "#/components/NullMessageAttributes"
-        },
-        "BatteryLevelCmd": {
-          "$ref": "#/components/NullMessageAttributes"
-        },
-        "RSSILevelCmd": {
           "$ref": "#/components/NullMessageAttributes"
         }
       },

@@ -205,7 +205,10 @@ protocols:
         ScalarCmd:
           - StepCount: 20
             ActuatorType: Vibrate
-        BatteryLevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
     configurations:
       # For lovense, our identifiers are the letters returned from the
       # DeviceInfo query sent on initialization.
@@ -229,7 +232,6 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
       - identifier:
           - A
           - C
@@ -238,7 +240,6 @@ protocols:
           RotateCmd:
             - StepCount: 20
               ActuatorType: Rotate
-          BatteryLevelCmd: {}
       - identifier:
           - L
         name: Lovense Ambi
@@ -278,7 +279,6 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
       - identifier:
           - ED
         name: Lovense Gush
@@ -291,7 +291,6 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
       - identifier:
           - T
         name: Lovense Calor
@@ -304,7 +303,10 @@ protocols:
         ScalarCmd:
           - StepCount: 20
             ActuatorType: Vibrate
-        BatteryLevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
     configurations:
       # For lovense service, our identifiers are the device names as the service
       # reports them. Note that if we're getting device info from the remote
@@ -322,7 +324,10 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
       - identifier:
           - Nora
         name: Lovense Nora
@@ -330,7 +335,10 @@ protocols:
           RotateCmd:
             - StepCount: 20
               ActuatorType: Rotate
-          BatteryLevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
       - identifier:
           - Ambi
         name: Lovense Ambi
@@ -370,7 +378,10 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
       - identifier:
           - ED
         name: Lovense Gush
@@ -383,7 +394,10 @@ protocols:
               ActuatorType: Vibrate
             - StepCount: 20
               ActuatorType: Vibrate
-          BatteryLevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
       - identifier:
           - T
         name: Lovense Calor
@@ -596,8 +610,10 @@ protocols:
     defaults:
       name: Magic Motion V1 Device
       messages:
-        BatteryLevelCmd: { }
-        RSSILevelCmd: { }
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
         ScalarCmd:
           - StepCount: 100
             ActuatorType: Vibrate
@@ -648,8 +664,10 @@ protocols:
     defaults:
       name: Magic Motion V2 Device
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
         ScalarCmd:
           - StepCount: 100
             ActuatorType: Vibrate
@@ -685,8 +703,10 @@ protocols:
     defaults:
       name: LoveLife Krush
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
         ScalarCmd:
           - StepCount: 77
             ActuatorType: Vibrate
@@ -709,8 +729,10 @@ protocols:
     defaults:
       name: Magic Motion V4 Device
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
         ScalarCmd:
           - StepCount: 100
             ActuatorType: Vibrate
@@ -843,8 +865,10 @@ protocols:
     defaults:
       name: Vibratissimo Device
       messages:
-        BatteryLevelCmd: {}
-        RSSILevelCmd: {}
+        SensorReadCmd:
+          - FeatureDescriptor: Battery Level
+            SensorType: Battery
+            SensorRange: [0, 100]
         ScalarCmd:
           - StepCount: 255
             ActuatorType: Vibrate
@@ -855,8 +879,10 @@ protocols:
           - Womenizer
         name: Vibratissimo Licker
         messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
           ScalarCmd:
             - StepCount: 255
               ActuatorType: Vibrate
@@ -866,8 +892,10 @@ protocols:
           - Rabbit
         name: Vibratissimo Rabbit
         messages:
-          BatteryLevelCmd: {}
-          RSSILevelCmd: {}
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [0, 100]
           ScalarCmd:
             - StepCount: 255
               ActuatorType: Vibrate
@@ -2715,10 +2743,10 @@ protocols:
       services:
         8e7c6065-7656-17ad-1b41-b53d1a548e0d:
           rx: 10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5
-      defaults:
-        name: KGoal Boost
+    defaults:
+      name: KGoal Boost
       messages:
-        SensorReadCmd:
+        SensorSubscribeCmd:
           - SensorType: Pressure
             FeatureDescriptor: Pelvic Pressure (Unnormalized)
             SensorRange: [0, 1000]
