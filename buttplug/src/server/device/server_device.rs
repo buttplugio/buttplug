@@ -14,19 +14,10 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self,
-      ActuatorType,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      ButtplugServerDeviceMessage,
-      DeviceMessageAttributes,
-      Endpoint,
-      RawReading,
-      RawSubscribeCmd,
-      ScalarCmd,
-      ScalarSubcommand,
+      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage,
+      ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage,
+      DeviceMessageAttributes, Endpoint, RawReading, RawSubscribeCmd, ScalarCmd, ScalarSubcommand,
+      SensorDeviceMessageAttributes, SensorType,
     },
     ButtplugResultFuture,
   },
@@ -41,13 +32,13 @@ use crate::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use core::hash::{Hash, Hasher};
-use futures::{future, StreamExt};
+use futures::future;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
+use tokio_stream::StreamExt;
 
 use super::{
-  configuration::ProtocolDeviceAttributes,
-  protocol::generic_command_manager::GenericCommandManager,
+  configuration::ProtocolDeviceAttributes, protocol::generic_command_manager::GenericCommandManager,
 };
 
 #[derive(Debug)]
@@ -189,8 +180,7 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {
-}
+impl Eq for ServerDevice {}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -265,9 +255,9 @@ impl ServerDevice {
   ///
   /// This will include connections, disconnections, and notification events from subscribed
   /// endpoints.
-  pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> {
+  pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
     let identifier = self.identifier.clone();
-    convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(move |hardware_event| {
+    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(move |hardware_event| {
       let id = identifier.clone();
       match hardware_event {
         HardwareEvent::Disconnected(_) => ServerDeviceEvent::Disconnected(id),
@@ -279,7 +269,17 @@ impl ServerDevice {
           )
         }
       }
-    })
+    });
+
+    let identifier = self.identifier.clone();
+    let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
+      let id = identifier.clone();
+      ServerDeviceEvent::Notification(
+        id,
+        incoming_message
+      )
+    });
+    hardware_stream.merge(handler_mapped_stream)
   }
 
   pub fn supports_message(
@@ -341,6 +341,15 @@ impl ServerDevice {
       }
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(_) => {
         check_msg(ButtplugDeviceMessageType::VorzeA10CycloneCmd)
+      }
+      ButtplugDeviceCommandMessageUnion::SensorReadCmd(_) => {
+        check_msg(ButtplugDeviceMessageType::SensorReadCmd)
+      }
+      ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(_) => {
+        check_msg(ButtplugDeviceMessageType::SensorSubscribeCmd)
+      }
+      ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(_) => {
+        check_msg(ButtplugDeviceMessageType::SensorUnsubscribeCmd)
       }
     }
     .map_err(|err| err.into())
@@ -448,7 +457,13 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::VorzeA10CycloneCmd(msg) => {
         self.handle_generic_command_result(self.handler.handle_vorze_a10_cyclone_cmd(msg))
       }
-
+      ButtplugDeviceCommandMessageUnion::SensorReadCmd(msg) => self.handle_sensor_read_cmd(msg),
+      ButtplugDeviceCommandMessageUnion::SensorSubscribeCmd(msg) => {
+        self.handle_sensor_subscribe_cmd(msg)
+      }
+      ButtplugDeviceCommandMessageUnion::SensorUnsubscribeCmd(msg) => {
+        self.handle_sensor_unsubscribe_cmd(msg)
+      }
       // Everything else, which is mostly older messages, or special things that require reads.
       ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => Box::pin(future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
@@ -495,6 +510,90 @@ impl ServerDevice {
         fut.await?;
       }
       Ok(messages::Ok::default().into())
+    })
+  }
+
+  fn check_sensor_command(
+    &self,
+    attributes: &Vec<SensorDeviceMessageAttributes>,
+    sensor_index: &u32,
+    sensor_type: &SensorType,
+  ) -> Result<(), ButtplugDeviceError> {
+    if let Some(sensor_info) = attributes.get(*sensor_index as usize) {
+      if *sensor_info.sensor_type() == *sensor_type {
+        Ok(())
+      } else {
+        Err(ButtplugDeviceError::DeviceSensorTypeMismatch(
+          *sensor_index,
+          *sensor_type,
+          *sensor_info.sensor_type(),
+        ))
+      }
+    } else {
+      Err(ButtplugDeviceError::DeviceSensorIndexError(
+        attributes.len() as u32,
+        *sensor_index,
+      ))
+    }
+  }
+
+  fn handle_sensor_read_cmd(&self, message: messages::SensorReadCmd) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(
+      self
+        .message_attributes()
+        .sensor_read_cmd()
+        .as_ref()
+        .expect("Already checked validity"),
+      message.sensor_index(),
+      message.sensor_type(),
+    );
+    let device = self.hardware.clone();
+    let handler = self.handler.clone();
+    Box::pin(async move {
+      result?;
+      handler.handle_sensor_read_cmd(device, message).await.map_err(|e| e.into())
+    })
+  }
+
+  fn handle_sensor_subscribe_cmd(
+    &self,
+    message: messages::SensorSubscribeCmd,
+  ) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(
+      self
+        .message_attributes()
+        .sensor_subscribe_cmd()
+        .as_ref()
+        .expect("Already checked validity"),
+      message.sensor_index(),
+      message.sensor_type(),
+    );
+    let device = self.hardware.clone();
+    let handler = self.handler.clone();
+    Box::pin(async move {
+      result?;
+      handler.handle_sensor_subscribe_cmd(device, message).await.map_err(|e| e.into())
+    })
+  }
+
+  fn handle_sensor_unsubscribe_cmd(
+    &self,
+    message: messages::SensorUnsubscribeCmd,
+  ) -> ButtplugServerResultFuture {
+    let result = self.check_sensor_command(
+      self
+        .message_attributes()
+        .sensor_subscribe_cmd()
+        .as_ref()
+        .expect("Already checked validity"),
+      message.sensor_index(),
+      message.sensor_type(),
+    );
+    let device = self.hardware.clone();
+    let handler = self.handler.clone();
+    Box::pin(async move {
+      result?;
+      handler.handle_sensor_unsubscribe_cmd(device, message).await.map_err(|e| e.into())
     })
   }
 

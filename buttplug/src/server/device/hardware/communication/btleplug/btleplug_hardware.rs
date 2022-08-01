@@ -41,7 +41,9 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   pin::Pin,
+  sync::Arc
 };
+use dashmap::DashSet;
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
@@ -209,6 +211,7 @@ pub struct BtlePlugHardware<T: Peripheral + 'static> {
   device: T,
   event_stream: broadcast::Sender<HardwareEvent>,
   endpoints: HashMap<Endpoint, Characteristic>,
+  subscribed_endpoints: Arc<DashSet<Endpoint>>,
 }
 
 impl<T: Peripheral + 'static> BtlePlugHardware<T> {
@@ -294,6 +297,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
       device,
       endpoints,
       event_stream,
+      subscribed_endpoints: Arc::new(DashSet::new())
     }
   }
 }
@@ -379,7 +383,12 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     &self,
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    let characteristic = match self.endpoints.get(&msg.endpoint) {
+    let endpoint = msg.endpoint;
+    if self.subscribed_endpoints.contains(&endpoint) {
+      debug!("Endpoint {} already subscribed, ignoring and returning Ok.", endpoint);
+      return Box::pin(future::ready(Ok(())));
+    }
+    let characteristic = match self.endpoints.get(&endpoint) {
       Some(chr) => chr.clone(),
       None => {
         return Box::pin(future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
@@ -387,6 +396,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         ))));
       }
     };
+    let endpoints = self.subscribed_endpoints.clone();
     let device = self.device.clone();
     Box::pin(async move {
       device.subscribe(&characteristic).await.map_err(|e| {
@@ -394,7 +404,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
           "{:?}",
           e
         )))
-      })
+      })?;
+      endpoints.insert(endpoint);
+      Ok(())
     })
   }
 
@@ -402,6 +414,11 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     &self,
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    let endpoint = msg.endpoint;
+    if !self.subscribed_endpoints.contains(&endpoint) {
+      debug!("Endpoint {} already unsubscribed, ignoring and returning Ok.", endpoint);
+      return Box::pin(future::ready(Ok(())));
+    }
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
@@ -410,6 +427,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         ))));
       }
     };
+    let endpoints = self.subscribed_endpoints.clone();
     let device = self.device.clone();
     Box::pin(async move {
       device.unsubscribe(&characteristic).await.map_err(|e| {
@@ -417,7 +435,9 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
           "{:?}",
           e
         )))
-      })
+      })?;
+      endpoints.remove(&endpoint);
+      Ok(())
     })
   }
 }

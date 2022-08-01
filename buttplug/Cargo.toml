@@ -80,6 +80,7 @@ os_info = "3.4.0"
 jsonschema = { version = "0.16.0", default-features = false, features = ["resolve-file"] }
 vectorize = "0.2.0"
 derivative = "2.2.0"
+tokio-stream = "0.1.9"
 
 [target.'cfg(windows)'.dependencies]
 rusty-xinput = "1.2.0"

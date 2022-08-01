@@ -178,7 +178,7 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::BatteryLevelCmd,
+    message: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     Box::pin(async move {
@@ -205,7 +205,7 @@ impl ProtocolHandler for Lovense {
               let start_pos = if data_str.contains('s') { 1 } else { 0 };
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
-                  messages::BatteryLevelReading::new(message.device_index(), level as f64 / 100f64)
+                  messages::SensorReading::new(message.device_index(), 0, messages::SensorType::Battery, vec![level as i32])
                     .into(),
                 );
               }

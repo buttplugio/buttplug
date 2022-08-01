@@ -10,39 +10,28 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq, Eq, Clone, Getters)]
-#[getset(get = "pub")]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct SensorSubcommand {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
-  index: u32,
+pub struct SensorReadCmd {
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]  
+  id: u32,
+  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  device_index: u32,
+  #[getset(get="pub")]
+  #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
+  sensor_index: u32,
+  #[getset(get="pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
   sensor_type: SensorType,
 }
 
-impl SensorSubcommand {
-  pub fn new(index: u32, sensor_type: SensorType) -> Self {
-    Self { index, sensor_type }
-  }
-}
-
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
-#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub struct SensorReadCmd {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  id: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  device_index: u32,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Sensors"))]
-  sensors: Vec<SensorSubcommand>,
-}
-
 impl SensorReadCmd {
-  pub fn new(device_index: u32, sensors: Vec<SensorSubcommand>) -> Self {
+  pub fn new(device_index: u32, sensor_index: u32, sensor_type: SensorType) -> Self {
     Self {
       id: 1,
       device_index,
-      sensors,
+      sensor_index,
+      sensor_type
     }
   }
 }

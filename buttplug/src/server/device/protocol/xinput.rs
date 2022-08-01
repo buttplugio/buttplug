@@ -65,7 +65,7 @@ impl ProtocolHandler for XInput {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    _message: messages::BatteryLevelCmd,
+    msg: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     Box::pin(async move {
       let rawreading = device
@@ -73,19 +73,17 @@ impl ProtocolHandler for XInput {
         .await?;
       let id = rawreading.device_index();
       let battery = match rawreading.data()[0] {
-        0 => 0.0,
-        1 => 0.33,
-        2 => 0.66,
-        3 => 1.0,
+        0 => 0i32,
+        1 => 33,
+        2 => 66,
+        3 => 100,
         _ => {
           return Err(
             ButtplugDeviceError::DeviceCommunicationError(format!("something went wrong")).into(),
           )
         }
       };
-      Ok(ButtplugServerMessage::BatteryLevelReading(
-        messages::BatteryLevelReading::new(id, battery),
-      ))
+      Ok(messages::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery]).into())
     })
   }
 }

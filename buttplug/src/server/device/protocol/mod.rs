@@ -21,6 +21,7 @@ pub mod fredorch;
 pub mod hismith;
 pub mod htk_bm;
 pub mod jejoue;
+pub mod kgoal_boost;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
@@ -79,8 +80,10 @@ use crate::{
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugServerMessage,
+      ButtplugServerDeviceMessage,
       Endpoint,
       RawReading,
+      SensorType,
     },
   },
   server::device::{
@@ -90,8 +93,9 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use futures::future::{self, BoxFuture};
+use futures::{StreamExt, future::{self, BoxFuture}};
 use std::{collections::HashMap, sync::Arc};
+use std::pin::Pin;
 
 pub trait ProtocolIdentifierFactory: Send + Sync {
   fn identifier(&self) -> &str;
@@ -275,6 +279,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, youou::setup::YououIdentifierFactory::default());
   add_to_protocol_map(&mut map, zalo::setup::ZaloIdentifierFactory::default());
+  add_to_protocol_map(&mut map, kgoal_boost::setup::KGoalBoostIdentifierFactory::default());
   map
 }
 
@@ -515,37 +520,83 @@ pub trait ProtocolHandler: Sync + Send {
     self.command_unimplemented(print_type_of(&message))
   }
 
+  fn handle_sensor_subscribe_cmd(
+    &self,
+    _device: Arc<Hardware>,
+    _message: messages::SensorSubscribeCmd
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Command not implemented for this protocol: BatteryCmd".to_string(),
+    ))))
+  }
+
+  fn handle_sensor_unsubscribe_cmd(
+    &self,
+    _device: Arc<Hardware>,
+    _message: messages::SensorUnsubscribeCmd
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Command not implemented for this protocol: BatteryCmd".to_string(),
+    ))))
+  }
+
+  fn handle_sensor_read_cmd(
+    &self,
+    device: Arc<Hardware>,
+    message: messages::SensorReadCmd
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    match message.sensor_type() {
+      SensorType::Battery => {
+        self.handle_battery_level_cmd(device, message)
+      },
+      _ => {
+        Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+          "Command not implemented for this protocol: SensorReadCmd".to_string(),
+        ))))    
+      }
+    }
+  }
+
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::BatteryLevelCmd,
+    message: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     // If we have a standardized BLE Battery endpoint, handle that above the
     // protocol, as it'll always be the same.
     if device.endpoints().contains(&Endpoint::RxBLEBattery) {
-      info!("Trying to get battery reading.");
+      debug!("Trying to get battery reading.");
       let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
       let fut = device.read_value(&msg);
       Box::pin(async move {
         let raw_msg: RawReading = fut.await?;
-        let battery_level = raw_msg.data()[0] as f64 / 100f64;
+        let battery_level = raw_msg.data()[0] as i32;
         let battery_reading =
-          messages::BatteryLevelReading::new(message.device_index(), battery_level);
-        info!("Got battery reading: {}", battery_level);
+          messages::SensorReading::new(message.device_index(), *message.sensor_index(), *message.sensor_type(), vec![battery_level]);
+        debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading.into())
       })
     } else {
       Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-        "Command not implemented for this protocol: BatteryCmd".to_string(),
+        "Command not implemented for this protocol: SensorReadCmd".to_string(),
       ))))
     }
   }
 
   fn handle_rssi_level_cmd(
     &self,
-    message: messages::RSSILevelCmd,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.command_unimplemented(print_type_of(&message))
+    _device: Arc<Hardware>,
+    _message: messages::RSSILevelCmd,
+  ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
+    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+      "Command not implemented for this protocol: SensorReadCmd".to_string(),
+    ))))
+  }
+
+  fn event_stream(
+    &self
+  ) -> Pin<Box<dyn tokio_stream::Stream<Item = ButtplugServerDeviceMessage> + Send>> {
+     tokio_stream::empty().boxed()
   }
 }
 

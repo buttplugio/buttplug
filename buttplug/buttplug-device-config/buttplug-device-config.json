@@ -4562,15 +4562,36 @@
           "Boost"
         ],
         "services": {
+          "0000180f-0000-1000-8000-00805f9b34fb": {
+            "rxblebattery": "00002a19-0000-1000-8000-00805f9b34fb"
+          },
           "8e7c6065-7656-17ad-1b41-b53d1a548e0d": {
-            "rx": "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5"
+            "rxpressure": "10c2be2d-d2d5-b7a8-5f42-e2468c9ebbf5"
           }
         }
       },
       "defaults": {
         "name": "KGoal Boost",
         "messages": {
+          "SensorReadCmd": [
+            {
+              "SensorType": "Battery",
+              "FeatureDescriptor": "Battery Level",
+              "SensorRange": [
+                0,
+                100
+              ]
+            }
+          ],
           "SensorSubscribeCmd": [
+            {
+              "SensorType": "Pressure",
+              "FeatureDescriptor": "Pelvic Pressure (Normalized)",
+              "SensorRange": [
+                0,
+                1000
+              ]
+            },
             {
               "SensorType": "Pressure",
               "FeatureDescriptor": "Pelvic Pressure (Unnormalized)",

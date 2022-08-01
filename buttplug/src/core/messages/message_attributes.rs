@@ -26,7 +26,7 @@ pub enum ActuatorType {
   Position,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display)]
 pub enum SensorType {
   Battery,
   RSSI,
@@ -54,17 +54,16 @@ pub struct DeviceMessageAttributes {
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   linear_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
-  #[getset(get = "pub")]
-  #[serde(rename = "BatteryLevelCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  battery_level_cmd: Option<NullDeviceMessageAttributes>,
 
-  // RSSILevel is added post-serialization (only for bluetooth devices)
+  // Sensor Messages
   #[getset(get = "pub")]
-  #[serde(rename = "RSSILevelCmd")]
-  #[serde(skip_deserializing)]
+  #[serde(rename = "SensorReadCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  rssi_level_cmd: Option<NullDeviceMessageAttributes>,
+  sensor_read_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
+  #[getset(get = "pub")]
+  #[serde(rename = "SensorSubscribeCmd")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  sensor_subscribe_cmd: Option<Vec<SensorDeviceMessageAttributes>>,
 
   // StopDeviceCmd always exists
   #[getset(get = "pub")]
@@ -90,23 +89,15 @@ pub struct DeviceMessageAttributes {
   #[serde(skip_deserializing)]
   #[serde(skip_serializing_if = "Option::is_none")]
   raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
-  // Raw commands are only added post-serialization
-  #[getset(get = "pub")]
-  #[serde(rename = "RawUnsubscribeCmd")]
-  #[serde(skip_deserializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  raw_unsubscribe_cmd: Option<RawDeviceMessageAttributes>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
   #[serde(rename = "FleshlightLaunchFW12Cmd")]
   #[serde(skip_serializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
   fleshlight_launch_fw12_cmd: Option<NullDeviceMessageAttributes>,
   #[getset(get = "pub")]
   #[serde(rename = "VorzeA10CycloneCmd")]
   #[serde(skip_serializing)]
-  #[serde(skip_serializing_if = "Option::is_none")]
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
@@ -118,19 +109,35 @@ impl DeviceMessageAttributes {
       // the scalar parser if the actuator isn't correct.
       ButtplugDeviceMessageType::VibrateCmd => self.scalar_cmd.is_some(),
       ButtplugDeviceMessageType::SingleMotorVibrateCmd => self.scalar_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorReadCmd => self.scalar_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorSubscribeCmd => self.scalar_cmd.is_some(),
-      ButtplugDeviceMessageType::SensorUnsubscribeCmd => self.scalar_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorReadCmd => self.sensor_read_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorSubscribeCmd => self.sensor_subscribe_cmd.is_some(),
+      ButtplugDeviceMessageType::SensorUnsubscribeCmd => self.sensor_subscribe_cmd.is_some(),
       ButtplugDeviceMessageType::LinearCmd => self.linear_cmd.is_some(),
       ButtplugDeviceMessageType::RotateCmd => self.rotate_cmd.is_some(),
-      ButtplugDeviceMessageType::BatteryLevelCmd => self.battery_level_cmd.is_some(),
+      ButtplugDeviceMessageType::BatteryLevelCmd => {
+        if let Some(sensor_info) = &self.sensor_read_cmd {
+          sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::Battery)
+        } else {
+          false
+        }
+      }
       ButtplugDeviceMessageType::FleshlightLaunchFW12Cmd => {
         self.fleshlight_launch_fw12_cmd.is_some()
       }
-      ButtplugDeviceMessageType::RSSILevelCmd => self.rssi_level_cmd.is_some(),
+      ButtplugDeviceMessageType::RSSILevelCmd => {
+        if let Some(sensor_info) = &self.sensor_read_cmd {
+          sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::RSSI)
+        } else {
+          false
+        }
+      }
       ButtplugDeviceMessageType::RawReadCmd => self.raw_read_cmd.is_some(),
       ButtplugDeviceMessageType::RawSubscribeCmd => self.raw_subscribe_cmd.is_some(),
-      ButtplugDeviceMessageType::RawUnsubscribeCmd => self.raw_unsubscribe_cmd.is_some(),
+      ButtplugDeviceMessageType::RawUnsubscribeCmd => self.raw_subscribe_cmd.is_some(),
       ButtplugDeviceMessageType::RawWriteCmd => self.raw_write_cmd.is_some(),
       ButtplugDeviceMessageType::VorzeA10CycloneCmd => self.vorze_a10_cyclone_cmd.is_some(),
       ButtplugDeviceMessageType::StopDeviceCmd => true,
@@ -153,14 +160,14 @@ impl DeviceMessageAttributes {
         .scalar_cmd()
         .clone()
         .or_else(|| self.scalar_cmd().clone()),
-      battery_level_cmd: child
-        .battery_level_cmd()
+      sensor_read_cmd: child
+        .sensor_read_cmd()
         .clone()
-        .or_else(|| self.battery_level_cmd().clone()),
-      rssi_level_cmd: child
-        .rssi_level_cmd()
+        .or_else(|| self.sensor_read_cmd().clone()),
+      sensor_subscribe_cmd: child
+        .sensor_subscribe_cmd()
         .clone()
-        .or_else(|| self.rssi_level_cmd().clone()),
+        .or_else(|| self.sensor_subscribe_cmd().clone()),
       stop_device_cmd: NullDeviceMessageAttributes::default(),
       raw_read_cmd: child
         .raw_read_cmd()
@@ -174,10 +181,6 @@ impl DeviceMessageAttributes {
         .raw_subscribe_cmd()
         .clone()
         .or_else(|| self.raw_subscribe_cmd().clone()),
-      raw_unsubscribe_cmd: child
-        .raw_unsubscribe_cmd()
-        .clone()
-        .or_else(|| self.raw_unsubscribe_cmd().clone()),
       fleshlight_launch_fw12_cmd: child
         .fleshlight_launch_fw12_cmd()
         .clone()
@@ -196,7 +199,6 @@ impl DeviceMessageAttributes {
     self.raw_read_cmd = Some(raw_attrs.clone());
     self.raw_write_cmd = Some(raw_attrs.clone());
     self.raw_subscribe_cmd = Some(raw_attrs.clone());
-    self.raw_unsubscribe_cmd = Some(raw_attrs.clone());
   }
 }
 
@@ -221,13 +223,13 @@ impl DeviceMessageAttributesBuilder {
     self
   }
 
-  pub fn battery_level_cmd(&mut self) -> &Self {
-    self.attrs.battery_level_cmd = Some(NullDeviceMessageAttributes::default());
+  pub fn sensor_read_cmd(&mut self, attrs: &Vec<SensorDeviceMessageAttributes>) -> &Self {
+    self.attrs.sensor_read_cmd = Some(attrs.clone());
     self
   }
 
-  pub fn rssi_level_cmd(&mut self) -> &Self {
-    self.attrs.rssi_level_cmd = Some(NullDeviceMessageAttributes::default());
+  pub fn sensor_subscribe_cmd(&mut self, attrs: &Vec<SensorDeviceMessageAttributes>) -> &Self {
+    self.attrs.sensor_subscribe_cmd = Some(attrs.clone());
     self
   }
 
@@ -243,11 +245,6 @@ impl DeviceMessageAttributesBuilder {
 
   pub fn raw_subscribe_cmd(&mut self, endpoints: &Vec<Endpoint>) -> &Self {
     self.attrs.raw_subscribe_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
-    self
-  }
-
-  pub fn raw_unsubscribe_cmd(&mut self, endpoints: &Vec<Endpoint>) -> &Self {
-    self.attrs.raw_unsubscribe_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
     self
   }
 
@@ -416,10 +413,6 @@ pub struct DeviceMessageAttributesV2 {
   #[serde(rename = "RawSubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
-  #[getset(get = "pub")]
-  #[serde(rename = "RawUnsubscribeCmd")]
-  #[serde(skip_serializing_if = "Option::is_none")]
-  raw_unsubscribe_cmd: Option<RawDeviceMessageAttributes>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
@@ -447,13 +440,38 @@ impl From<DeviceMessageAttributes> for DeviceMessageAttributesV2 {
         .linear_cmd()
         .as_ref()
         .map(|x| GenericDeviceMessageAttributesV2::from(x.clone())),
-      battery_level_cmd: other.battery_level_cmd().clone(),
-      rssi_level_cmd: other.rssi_level_cmd().clone(),
+      battery_level_cmd: {
+        if let Some(sensor_info) = &other.sensor_read_cmd {
+          if sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::Battery)
+          {
+            Some(NullDeviceMessageAttributes::default())
+          } else {
+            None
+          }
+        } else {
+          None
+        }
+      },
+      rssi_level_cmd: {
+        if let Some(sensor_info) = &other.sensor_read_cmd {
+          if sensor_info
+            .iter()
+            .any(|x| *x.sensor_type() == SensorType::RSSI)
+          {
+            Some(NullDeviceMessageAttributes::default())
+          } else {
+            None
+          }
+        } else {
+          None
+        }
+      },
       stop_device_cmd: other.stop_device_cmd().clone(),
       raw_read_cmd: other.raw_read_cmd().clone(),
       raw_write_cmd: other.raw_write_cmd().clone(),
       raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
-      raw_unsubscribe_cmd: other.raw_unsubscribe_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
     }
