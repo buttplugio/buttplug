@@ -168,7 +168,7 @@ pub(super) async fn build_server_device(
 
 pub struct ServerDevice {
   hardware: Arc<Hardware>,
-  handler: Box<dyn ProtocolHandler>,
+  handler: Arc<dyn ProtocolHandler>,
   attributes: ProtocolDeviceAttributes,
   generic_command_manager: GenericCommandManager,
   /// Unique identifier for the device
@@ -202,7 +202,7 @@ impl ServerDevice {
   /// Given a protocol and a device impl, create a new ButtplugDevice instance
   fn new(
     identifier: ServerDeviceIdentifier,
-    handler: Box<dyn ProtocolHandler>,
+    handler: Arc<dyn ProtocolHandler>,
     hardware: Arc<Hardware>,
     attributes: &ProtocolDeviceAttributes,
   ) -> Self {

@@ -39,10 +39,10 @@ impl ProtocolInitializer for KiirooV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     hardware.write_value(&msg).await?;
-    Ok(Box::new(KiirooV2::default()))
+    Ok(Arc::new(KiirooV2::default()))
   }
 }
 

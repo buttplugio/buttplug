@@ -48,7 +48,7 @@ impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
     // firmware easier".
     //
@@ -99,7 +99,7 @@ impl ProtocolInitializer for TheHandyInitializer {
     // does not seem needless.
     //
     // We have no device name updates here, so just return a device.
-    Ok(Box::new(TheHandy::default()))
+    Ok(Arc::new(TheHandy::default()))
   }
 }
 

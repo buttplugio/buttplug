@@ -39,8 +39,8 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Box::new(LovenseConnectService::new(hardware.address())))
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(LovenseConnectService::new(hardware.address())))
   }
 }
 
@@ -121,7 +121,7 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: messages::BatteryLevelCmd,
+    msg: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     Box::pin(async move {
       // This is a dummy read. We just store the battery level in the device
@@ -131,7 +131,7 @@ impl ProtocolHandler for LovenseConnectService {
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(
-        messages::BatteryLevelReading::new(msg.device_index(), reading.data()[0] as f64 / 100f64)
+        messages::SensorReading::new(msg.device_index(), *msg.sensor_index(), *msg.sensor_type(), vec![reading.data()[0] as i32])
           .into(),
       )
     })

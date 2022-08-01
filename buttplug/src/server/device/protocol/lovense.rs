@@ -108,8 +108,8 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Box::new(Lovense::default()))
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(Lovense::default()))
   }
 }
 

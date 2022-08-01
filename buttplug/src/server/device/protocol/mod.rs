@@ -320,16 +320,16 @@ pub trait ProtocolInitializer: Sync + Send {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError>;
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
 pub struct GenericProtocolIdentifier {
-  handler: Option<Box<dyn ProtocolHandler>>,
+  handler: Option<Arc<dyn ProtocolHandler>>,
   protocol_identifier: String,
 }
 
 impl GenericProtocolIdentifier {
-  pub fn new(handler: Box<dyn ProtocolHandler>, protocol_identifier: &str) -> Self {
+  pub fn new(handler: Arc<dyn ProtocolHandler>, protocol_identifier: &str) -> Self {
     Self {
       handler: Some(handler),
       protocol_identifier: protocol_identifier.to_owned(),
@@ -358,11 +358,11 @@ impl ProtocolIdentifier for GenericProtocolIdentifier {
 }
 
 pub struct GenericProtocolInitializer {
-  handler: Option<Box<dyn ProtocolHandler>>,
+  handler: Option<Arc<dyn ProtocolHandler>>,
 }
 
 impl GenericProtocolInitializer {
-  pub fn new(handler: Box<dyn ProtocolHandler>) -> Self {
+  pub fn new(handler: Arc<dyn ProtocolHandler>) -> Self {
     Self {
       handler: Some(handler),
     }
@@ -374,7 +374,7 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }
 }
@@ -554,6 +554,7 @@ macro_rules! generic_protocol_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
     paste::paste! {
       pub mod setup {
+        use std::sync::Arc;
         use $crate::server::device::protocol::{
           GenericProtocolIdentifier, ProtocolIdentifier, ProtocolIdentifierFactory,
         };
@@ -567,7 +568,7 @@ macro_rules! generic_protocol_setup {
 
           fn create(&self) -> Box<dyn ProtocolIdentifier> {
             Box::new(GenericProtocolIdentifier::new(
-              Box::new(super::$protocol_name::default()),
+              Arc::new(super::$protocol_name::default()),
               self.identifier(),
             ))
           }

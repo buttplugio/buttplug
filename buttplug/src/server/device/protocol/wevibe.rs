@@ -35,7 +35,7 @@ impl ProtocolInitializer for WeVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling WeVibe init");
     hardware
       .write_value(&HardwareWriteCmd::new(
@@ -51,7 +51,7 @@ impl ProtocolInitializer for WeVibeInitializer {
         true,
       ))
       .await?;
-    Ok(Box::new(WeVibe::default()))
+    Ok(Arc::new(WeVibe::default()))
   }
 }
 

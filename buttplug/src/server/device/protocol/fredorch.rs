@@ -79,7 +79,7 @@ impl ProtocolInitializer for FredorchInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Set the device to program mode
     let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
     let mut crc = crc16(&data);
@@ -128,7 +128,7 @@ impl ProtocolInitializer for FredorchInitializer {
       .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
       .await?;
 
-    Ok(Box::new(Fredorch::default()))
+    Ok(Arc::new(Fredorch::default()))
   }
 }
 

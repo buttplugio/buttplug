@@ -32,7 +32,7 @@ impl ProtocolInitializer for AnkniInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![
@@ -51,7 +51,7 @@ impl ProtocolInitializer for AnkniInitializer {
       true,
     );
     hardware.write_value(&msg).await?;
-    Ok(Box::new(Ankni::default()))
+    Ok(Arc::new(Ankni::default()))
   }
 }
 

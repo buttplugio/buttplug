@@ -42,7 +42,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo F1s V2 has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)
     // * Then the security endpoint (Whitelist) needs to be read (which we can do via subscribe)
@@ -69,7 +69,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
           )
         } else if n.eq(&authed) {
           debug!("Lelo F1s V2 is authorised!");
-          return Ok(Box::new(LeloF1sV2::default()));
+          return Ok(Arc::new(LeloF1sV2::default()));
         } else {
           debug!("Lelo F1s V2 gave us a password: {:?}", n);
           // Can't send whilst subscribed

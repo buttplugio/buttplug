@@ -35,14 +35,14 @@ impl ProtocolInitializer for LeloF1sInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on
     // the button, this is more likely to turn the device off.
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
-    Ok(Box::new(LeloF1s::default()))
+    Ok(Arc::new(LeloF1s::default()))
   }
 }
 

@@ -61,8 +61,8 @@ impl ProtocolInitializer for PrettyLoveInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Box::new(PrettyLove::default()))
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(PrettyLove::default()))
   }
 }
 

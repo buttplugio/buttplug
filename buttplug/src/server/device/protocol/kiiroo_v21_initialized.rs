@@ -39,7 +39,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling Onyx+ init");
     hardware
       .write_value(&HardwareWriteCmd::new(
@@ -55,7 +55,7 @@ impl ProtocolInitializer for KiirooV21InitializedInitializer {
         true,
       ))
       .await?;
-    Ok(Box::new(KiirooV21Initialized::default()))
+    Ok(Arc::new(KiirooV21Initialized::default()))
   }
 }
 

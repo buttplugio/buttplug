@@ -32,12 +32,12 @@ impl ProtocolInitializer for LoveDistanceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
     hardware.write_value(&msg).await?;
     let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf4, 1], false);
     hardware.write_value(&msg).await?;
-    Ok(Box::new(LoveDistance::default()))
+    Ok(Arc::new(LoveDistance::default()))
   }
 }
 

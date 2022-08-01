@@ -77,7 +77,7 @@ impl ButtplugProtocolFactory for MysteryVibeFactory {
     Box::pin(async move {
       info_fut.await?;
       let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Box::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
+      Ok(Arc::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
     })
   }
 

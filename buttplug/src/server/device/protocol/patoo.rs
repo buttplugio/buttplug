@@ -72,8 +72,8 @@ impl ProtocolInitializer for PatooInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Box::new(Patoo::default()))
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(Patoo::default()))
   }
 }
 

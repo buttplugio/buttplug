@@ -69,8 +69,8 @@ impl ProtocolInitializer for VibratissimoInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Box::new(Vibratissimo::default()))
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(Vibratissimo::default()))
   }
 }
 

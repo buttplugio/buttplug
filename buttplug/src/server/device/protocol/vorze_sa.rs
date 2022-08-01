@@ -38,7 +38,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-  ) -> Result<Box<dyn ProtocolHandler>, ButtplugDeviceError> {
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let hwname = hardware.name().to_ascii_lowercase();
     let device_type = if hwname.contains("cyclone") {
       VorzeDevice::Cyclone
@@ -58,7 +58,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
         hardware.name()
       )));
     };
-    Ok(Box::new(VorzeSA::new(device_type)))
+    Ok(Arc::new(VorzeSA::new(device_type)))
   }
 }
 

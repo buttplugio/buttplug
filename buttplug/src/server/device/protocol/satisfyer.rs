@@ -110,7 +110,7 @@ impl ButtplugProtocolFactory for SatisfyerFactory {
       async_manager::spawn(async move {
         send_satisfyer_updates(hardware, last_command).await;
       });
-      Ok(Box::new(device) as Box<dyn ButtplugProtocol>)
+      Ok(Arc::new(device) as Box<dyn ButtplugProtocol>)
     })
   }
 
