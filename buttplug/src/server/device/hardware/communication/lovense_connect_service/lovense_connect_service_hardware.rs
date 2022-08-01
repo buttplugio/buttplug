@@ -29,7 +29,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   fmt::{self, Debug},
   sync::{
@@ -132,7 +132,7 @@ impl HardwareInternal for LovenseServiceHardware {
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 
   // Assume the only thing we'll read is battery.
@@ -141,13 +141,13 @@ impl HardwareInternal for LovenseServiceHardware {
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     let battery_level = self.battery_level.clone();
-    Box::pin(async move {
+    async move {
       Ok(RawReading::new(
         0,
         Endpoint::Rx,
         vec![battery_level.load(Ordering::SeqCst)],
       ))
-    })
+    }.boxed()
   }
 
   fn write_value(
@@ -160,7 +160,7 @@ impl HardwareInternal for LovenseServiceHardware {
       std::str::from_utf8(&msg.data)
         .expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
-    Box::pin(async move {
+    async move {
       match reqwest::get(command_url).await {
         Ok(_) => Ok(()),
         Err(err) => {
@@ -168,24 +168,24 @@ impl HardwareInternal for LovenseServiceHardware {
           Err(ButtplugDeviceError::UnhandledCommand(err.to_string()))
         }
       }
-    })
+    }.boxed()
   }
 
   fn subscribe(
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Connect does not support subscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Connect does not support unsubscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 }

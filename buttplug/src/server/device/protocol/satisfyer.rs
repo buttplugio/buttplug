@@ -87,7 +87,7 @@ impl ButtplugProtocolFactory for SatisfyerFactory {
     let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(msg);
 
-    Box::pin(async move {
+    async move {
       let result = hardware
         .read_value(HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
         .await?;
@@ -111,7 +111,7 @@ impl ButtplugProtocolFactory for SatisfyerFactory {
         send_satisfyer_updates(hardware, last_command).await;
       });
       Ok(Arc::new(device) as Box<dyn ButtplugProtocol>)
-    })
+    }.boxed()
   }
 
   fn protocol_identifier(&self) -> &'static str {
@@ -131,7 +131,7 @@ impl ProtocolHandler for Satisfyer {
     // Store off result before the match, so we drop the lock ASAP.
     let manager = self.manager.clone();
     let last_command = self.last_command.clone();
-    Box::pin(async move {
+    async move {
       let result = manager.lock().await.update_vibration(&message, true)?;
       if let Some(cmds) = result {
         let data = if cmds.len() == 1 {
@@ -163,7 +163,7 @@ impl ProtocolHandler for Satisfyer {
           .await?;
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 }
 

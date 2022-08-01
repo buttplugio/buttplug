@@ -181,7 +181,7 @@ impl ProtocolHandler for Lovense {
     message: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
-    Box::pin(async move {
+    async move {
       let write_fut = device.write_value(&HardwareWriteCmd::new(
         Endpoint::Tx,
         b"Battery;".to_vec(),
@@ -228,7 +228,7 @@ impl ProtocolHandler for Lovense {
         "Lovense".to_owned(),
         "Lovense Device disconnected while getting Battery info.".to_owned(),
       ))
-    })
+    }.boxed()
   }
 }
 

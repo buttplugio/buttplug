@@ -52,23 +52,23 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
 
   fn start_scanning(&mut self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
-    Box::pin(async move {
+    async move {
       is_scanning.store(true, Ordering::SeqCst);
       Ok(())
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let is_scanning = self.is_scanning.clone();
     let sender = self.sender.clone();
-    Box::pin(async move {
+    async move {
       is_scanning.store(false, Ordering::SeqCst);
       sender
         .send(HardwareCommunicationManagerEvent::ScanningFinished)
         .await
         .expect("Test, assuming infallible");
       Ok(())
-    })
+    }.boxed()
   }
 
   fn scanning_status(&self) -> bool {

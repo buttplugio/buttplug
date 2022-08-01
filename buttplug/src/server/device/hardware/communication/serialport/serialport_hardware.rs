@@ -279,10 +279,10 @@ impl HardwareInternal for SerialPortHardware {
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
-    Box::pin(async move {
+    async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    })
+    }.boxed()
   }
 
   fn read_value(
@@ -291,7 +291,7 @@ impl HardwareInternal for SerialPortHardware {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     // TODO Should check endpoint validity and length requirements
     let receiver = self.port_receiver.clone();
-    Box::pin(async move {
+    async move {
       let mut recv_mut = receiver.lock().await;
       Ok(RawReading::new(
         0,
@@ -302,7 +302,7 @@ impl HardwareInternal for SerialPortHardware {
           .unwrap_or_else(|| Some(vec![]))
           .expect("Always set to Some before unwrapping."),
       ))
-    })
+    }.boxed()
   }
 
   fn write_value(
@@ -312,13 +312,13 @@ impl HardwareInternal for SerialPortHardware {
     let sender = self.port_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
-    Box::pin(async move {
+    async move {
       sender
         .send(data)
         .await
         .expect("Tasks should exist if we get here.");
       Ok(())
-    })
+    }.boxed()
   }
 
   fn subscribe(
@@ -329,7 +329,7 @@ impl HardwareInternal for SerialPortHardware {
     let data_receiver = self.port_receiver.clone();
     let event_sender = self.device_event_sender.clone();
     let address = self.address.clone();
-    Box::pin(async move {
+    async move {
       async_manager::spawn(async move {
         // TODO There's only one subscribable endpoint on a serial port, so we
         // should check to make sure we don't have multiple subscriptions so we
@@ -355,16 +355,16 @@ impl HardwareInternal for SerialPortHardware {
         }
       });
       Ok(())
-    })
+    }.boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Serial port does not support unsubscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 }
 

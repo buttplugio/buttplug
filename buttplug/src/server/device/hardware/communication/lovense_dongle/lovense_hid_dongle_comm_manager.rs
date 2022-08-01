@@ -215,7 +215,7 @@ impl LovenseHIDDongleCommunicationManager {
     let read_token = self.thread_cancellation_token.child_token();
     let write_token = self.thread_cancellation_token.child_token();
     let dongle_available = self.dongle_available.clone();
-    Box::pin(async move {
+    async move {
       let (writer_sender, writer_receiver) = channel(256);
       let (reader_sender, reader_receiver) = channel(256);
       let api = HidApi::new().map_err(|_| {
@@ -262,7 +262,7 @@ impl LovenseHIDDongleCommunicationManager {
         .expect("We've already spun up the state machine so we know this receiver exists.");
       info!("Found Lovense HID Dongle");
       Ok(())
-    })
+    }.boxed()
   }
 
   pub fn scanning_status(&self) -> Arc<AtomicBool> {
@@ -279,24 +279,24 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
     debug!("Lovense Dongle Manager scanning for devices");
     let sender = self.machine_sender.clone();
     self.is_scanning.store(true, Ordering::SeqCst);
-    Box::pin(async move {
+    async move {
       sender
         .send(LovenseDeviceCommand::StartScanning)
         .await
         .expect("Machine always exists as long as this object does.");
       Ok(())
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let sender = self.machine_sender.clone();
-    Box::pin(async move {
+    async move {
       sender
         .send(LovenseDeviceCommand::StopScanning)
         .await
         .expect("Machine always exists as long as this object does.");
       Ok(())
-    })
+    }.boxed()
   }
 
   fn scanning_status(&self) -> bool {

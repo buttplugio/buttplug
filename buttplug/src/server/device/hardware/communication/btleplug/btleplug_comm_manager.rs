@@ -19,7 +19,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-
+use futures::future::FutureExt;
 use tokio::sync::mpsc::{channel, Sender};
 
 #[derive(Default, Clone)]
@@ -67,7 +67,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
     let scanning_status = self.scanning_status.clone();
     // Set to true just to make sure we don't call ScanningFinished too early.
     scanning_status.store(true, Ordering::SeqCst);
-    Box::pin(async move {
+    async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StartScanning)
         .await
@@ -84,14 +84,14 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
       } else {
         Ok(())
       }
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
     let adapter_event_sender = self.adapter_event_sender.clone();
     // Just assume any outcome of this means we're done scanning.
     self.scanning_status.store(false, Ordering::SeqCst);
-    Box::pin(async move {
+    async move {
       if adapter_event_sender
         .send(BtleplugAdapterCommand::StopScanning)
         .await
@@ -107,7 +107,7 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
       } else {
         Ok(())
       }
-    })
+    }.boxed()
   }
 
   fn scanning_status(&self) -> bool {

@@ -88,7 +88,7 @@ impl ProtocolHandler for Hgod {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();
-    Box::pin(async move {
+    async move {
       let result = manager.lock().await.update_vibration(&message, false)?;
       info!("Hgod Result: {:?}", result);
       if result.is_none() {
@@ -109,7 +109,7 @@ impl ProtocolHandler for Hgod {
         }
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 }
 

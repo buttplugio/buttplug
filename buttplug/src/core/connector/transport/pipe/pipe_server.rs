@@ -19,7 +19,7 @@ use crate::core::{
   },
   messages::serializer::ButtplugSerializedMessage,
 };
-use futures::future::BoxFuture;
+use futures::future::{BoxFuture, FutureExt};
 use std::sync::Arc;
 #[cfg(target_os = "windows")]
 use tokio::net::windows::named_pipe;
@@ -176,7 +176,7 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
     let address = self.address.clone();
-    Box::pin(async move {
+    async move {
       #[cfg(target_os = "windows")]
       let server = {
         let server = named_pipe::ServerOptions::new()
@@ -218,15 +218,15 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
         .await;
       });
       Ok(())
-    })
+    }.boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
     let disconnect_notifier = self.disconnect_notifier;
-    Box::pin(async move {
+    async move {
       disconnect_notifier.notify_waiters();
       Ok(())
-    })
+    }.boxed()
   }
 }
 

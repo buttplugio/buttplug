@@ -29,7 +29,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use dashmap::DashMap;
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   fmt::{self, Debug},
   sync::Arc,
@@ -194,12 +194,12 @@ impl TestDeviceInternal {
   pub fn disconnect(&self) -> ButtplugResultFuture {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
-    Box::pin(async move {
+    async move {
       sender
         .send(HardwareEvent::Disconnected(address))
         .expect("Test");
       Ok(())
-    })
+    }.boxed()
   }
 }
 
@@ -232,19 +232,19 @@ impl HardwareInternal for TestDevice {
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.event_sender.clone();
     let address = self.address.clone();
-    Box::pin(async move {
+    async move {
       sender
         .send(HardwareEvent::Disconnected(address))
         .expect("Test");
       Ok(())
-    })
+    }.boxed()
   }
 
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    Box::pin(future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))))
+    future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))).boxed()
   }
 
   fn write_value(
@@ -254,7 +254,7 @@ impl HardwareInternal for TestDevice {
     let channels = self.endpoint_channels.clone();
     let data_command = msg.clone().into();
     let endpoint = msg.endpoint;
-    Box::pin(async move {
+    async move {
       // Since we're only accessing a channel, we can use a read lock here.
       match channels.get(&endpoint) {
         Some(device_channel) => {
@@ -268,24 +268,24 @@ impl HardwareInternal for TestDevice {
         }
         None => Err(ButtplugDeviceError::InvalidEndpoint(endpoint)),
       }
-    })
+    }.boxed()
   }
 
   fn subscribe(
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Test device does not support subscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Test device does not support unsubscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 }

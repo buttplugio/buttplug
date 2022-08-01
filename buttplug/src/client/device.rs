@@ -45,7 +45,7 @@ use crate::{
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
-use futures::{future, Stream};
+use futures::{future::{self, FutureExt}, Stream};
 use std::{
   collections::HashMap,
   fmt,
@@ -223,7 +223,6 @@ impl ButtplugClientDevice {
     let device_connected = self.device_connected.clone();
     let id = msg.id();
     let device_name = self.name.clone();
-    Box::pin(
       async move {
         if !client_connected.load(Ordering::SeqCst) {
           error!("Client not connected, cannot run device command");
@@ -251,8 +250,8 @@ impl ButtplugClientDevice {
           Ok(msg)
         }
       }
-      .instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id)),
-    )
+      .instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id))
+      .boxed()
   }
 
   pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
@@ -265,7 +264,7 @@ impl ButtplugClientDevice {
   where
     T: 'static + Send + Sync,
   {
-    Box::pin(future::ready(Err(ButtplugClientError::ButtplugError(err))))
+    future::ready(Err(ButtplugClientError::ButtplugError(err))).boxed()
   }
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
@@ -275,7 +274,7 @@ impl ButtplugClientDevice {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
-    Box::pin(async move {
+    async move {
       match send_fut.await? {
         ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
         ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugError::from(_err).into()),
@@ -287,7 +286,7 @@ impl ButtplugClientDevice {
           .into(),
         ),
       }
-    })
+    }.boxed()
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
@@ -458,7 +457,7 @@ impl ButtplugClientDevice {
 
     let msg = ButtplugCurrentSpecClientMessage::BatteryLevelCmd(BatteryLevelCmd::new(self.index));
     let send_fut = self.send_message(msg);
-    Box::pin(async move {
+    async move {
       match send_fut.await? {
         ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => {
           Ok(reading.battery_level())
@@ -472,7 +471,7 @@ impl ButtplugClientDevice {
           .into(),
         ),
       }
-    })
+    }.boxed()
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
@@ -483,7 +482,7 @@ impl ButtplugClientDevice {
     }
     let msg = ButtplugCurrentSpecClientMessage::RSSILevelCmd(RSSILevelCmd::new(self.index));
     let send_fut = self.send_message(msg);
-    Box::pin(async move {
+    async move {
       match send_fut.await? {
         ButtplugCurrentSpecServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level()),
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
@@ -495,7 +494,7 @@ impl ButtplugClientDevice {
           .into(),
         ),
       }
-    })
+    }.boxed()
   }
 
   pub fn raw_write(
@@ -536,7 +535,7 @@ impl ButtplugClientDevice {
       timeout,
     ));
     let send_fut = self.send_message(msg);
-    Box::pin(async move {
+    async move {
       match send_fut.await? {
         ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data().clone()),
         ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
@@ -548,7 +547,7 @@ impl ButtplugClientDevice {
           .into(),
         ),
       }
-    })
+    }.boxed()
   }
 
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
@@ -563,7 +562,7 @@ impl ButtplugClientDevice {
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
-    if self.message_attributes.raw_unsubscribe_cmd().is_none() {
+    if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd)
           .into(),

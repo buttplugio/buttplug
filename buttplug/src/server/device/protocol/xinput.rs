@@ -18,7 +18,7 @@ use crate::{
   },
 };
 use byteorder::WriteBytesExt;
-use futures::future::BoxFuture;
+use futures::future::{BoxFuture, FutureExt};
 use std::sync::Arc;
 
 generic_protocol_setup!(XInput, "xinput");
@@ -67,7 +67,7 @@ impl ProtocolHandler for XInput {
     device: Arc<Hardware>,
     msg: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    Box::pin(async move {
+    async move {
       let rawreading = device
         .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
@@ -87,6 +87,6 @@ impl ProtocolHandler for XInput {
         messages::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery])
           .into(),
       )
-    })
+    }.boxed()
   }
 }

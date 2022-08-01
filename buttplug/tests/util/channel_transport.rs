@@ -106,12 +106,12 @@ impl ButtplugConnectorTransport for ChannelTransport {
         };
       }
     });
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 
   fn disconnect(self) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     self.disconnect_notifier.notify_waiters();
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 }
 

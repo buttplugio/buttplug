@@ -253,14 +253,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       }
     };
 
-    Box::pin(async move { fut.await })
+    async move { fut.await }.boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
     let disconnect_notifier = self.disconnect_notifier;
-    Box::pin(async move {
+    async move {
       disconnect_notifier.notify_waiters();
       Ok(())
-    })
+    }.boxed()
   }
 }

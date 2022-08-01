@@ -26,7 +26,7 @@ use crate::{
   },
   util::device_configuration::create_test_dcm,
 };
-use futures::future;
+use futures::future::{self, FutureExt};
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -160,7 +160,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     let devices_vec = self.devices.clone();
     let device_sender = self.device_sender.clone();
     let is_scanning = self.is_scanning.clone();
-    Box::pin(async move {
+    async move {
       is_scanning.store(true, Ordering::SeqCst);
       let mut devices = devices_vec.lock().await;
       if devices.is_empty() {
@@ -191,11 +191,11 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
         error!("Error sending scanning finished. Scanning may not register as finished now!");
       }
       Ok(())
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 
   // Assume tests can scan for now, this would be a good place to instrument for device manager

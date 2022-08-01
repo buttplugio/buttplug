@@ -23,7 +23,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use futures::future::BoxFuture;
+use futures::future::{BoxFuture, FutureExt};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
@@ -123,7 +123,7 @@ impl ProtocolHandler for LovenseConnectService {
     device: Arc<Hardware>,
     msg: messages::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
-    Box::pin(async move {
+    async move {
       // This is a dummy read. We just store the battery level in the device
       // implementation and it's the only thing read will return.
       let reading = device
@@ -139,6 +139,6 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .into(),
       )
-    })
+    }.boxed()
   }
 }

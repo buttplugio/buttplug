@@ -26,7 +26,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use futures::future;
+use futures::future::{self, FutureExt};
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, time::Duration};
 use thiserror::Error;
@@ -108,13 +108,13 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
 
   fn start_scanning(&mut self) -> ButtplugResultFuture {
     if self.cancellation_token.is_some() {
-      return Box::pin(future::ready(Ok(())));
+      return future::ready(Ok(())).boxed();
     }
     let comm_manager = self.comm_manager.clone();
     let token = CancellationToken::new();
     let child_token = token.child_token();
     self.cancellation_token = Some(token);
-    Box::pin(async move {
+    async move {
       async_manager::spawn(async move {
         loop {
           if let Err(err) = comm_manager.scan().await {
@@ -128,15 +128,15 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
         }
       });
       Ok(())
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
     if self.cancellation_token.is_none() {
-      return Box::pin(future::ready(Ok(())));
+      return future::ready(Ok(())).boxed();
     }
     self.cancellation_token.take().unwrap().cancel();
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 
   fn scanning_status(&self) -> bool {

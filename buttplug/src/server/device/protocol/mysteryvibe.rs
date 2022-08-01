@@ -74,11 +74,11 @@ impl ButtplugProtocolFactory for MysteryVibeFactory {
   > {
     let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     let info_fut = hardware.write_value(msg);
-    Box::pin(async move {
+    async move {
       info_fut.await?;
       let device_attributes = builder.create_from_hardware(&hardware)?;
       Ok(Arc::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    })
+    }.boxed()
   }
 
   fn protocol_identifier(&self) -> &'static str {
@@ -117,7 +117,7 @@ impl ProtocolHandler for MysteryVibe {
     let manager = self.manager.clone();
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();
-    Box::pin(async move {
+    async move {
       let result = manager.lock().await.update_vibration(&message, true)?;
       info!("MV Result: {:?}", result);
       if result.is_none() {
@@ -138,7 +138,7 @@ impl ProtocolHandler for MysteryVibe {
         update_running.store(true, Ordering::SeqCst);
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 }
 

@@ -13,7 +13,7 @@ pub mod errors;
 pub mod messages;
 
 use errors::ButtplugError;
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 
 pub type ButtplugResult<T = ()> = Result<T, ButtplugError>;
 pub type ButtplugResultFuture<T = ()> = BoxFuture<'static, ButtplugResult<T>>;
@@ -23,6 +23,6 @@ where
   T: Send + 'static,
 {
   fn from(error: ButtplugError) -> BoxFuture<'static, Result<T, ButtplugError>> {
-    Box::pin(future::ready(Err(error)))
+    future::ready(Err(error)).boxed()
   }
 }

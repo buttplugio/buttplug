@@ -252,7 +252,7 @@ where
         .expect("Already checked that this would be a valid take().");
       let (connector_outgoing_sender, connector_outgoing_receiver) = channel(256);
       self.event_loop_sender = Some(connector_outgoing_sender);
-      Box::pin(async move {
+      async move {
         let (transport_outgoing_sender, transport_outgoing_receiver) = channel(256);
         let (transport_incoming_sender, transport_incoming_receiver) = channel(256);
         match transport
@@ -281,7 +281,7 @@ where
           }
           Err(e) => Err(e),
         }
-      })
+      }.boxed()
     } else {
       ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
@@ -290,12 +290,12 @@ where
   fn disconnect(&self) -> ButtplugConnectorResultFuture {
     if let Some(ref sender) = self.event_loop_sender {
       let sender_clone = sender.clone();
-      Box::pin(async move {
+      async move {
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Close)
           .await
           .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-      })
+      }.boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
     }
@@ -304,12 +304,12 @@ where
   fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture {
     if let Some(ref sender) = self.event_loop_sender {
       let sender_clone = sender.clone();
-      Box::pin(async move {
+      async move {
         sender_clone
           .send(ButtplugRemoteConnectorMessage::Message(msg))
           .await
           .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-      })
+      }.boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
     }

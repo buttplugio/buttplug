@@ -35,7 +35,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 use std::fmt::{self, Debug};
 use std::sync::{
   atomic::{AtomicBool, Ordering},
@@ -174,19 +174,19 @@ impl HardwareInternal for LovenseDongleHardware {
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
-    Box::pin(async move {
+    async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    })
+    }.boxed()
   }
 
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support read".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn write_value(
@@ -196,7 +196,7 @@ impl HardwareInternal for LovenseDongleHardware {
     let port_sender = self.device_outgoing.clone();
     let address = self.address.clone();
     let data = msg.data.clone();
-    Box::pin(async move {
+    async move {
       let outgoing_msg = LovenseDongleOutgoingMessage {
         func: LovenseDongleMessageFunc::Command,
         message_type: LovenseDongleMessageType::Toy,
@@ -215,24 +215,24 @@ impl HardwareInternal for LovenseDongleHardware {
           error!("Port closed during writing.");
           ButtplugDeviceError::DeviceNotConnected("Port closed during writing".to_owned())
         })
-    })
+    }.boxed()
   }
 
   fn subscribe(
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support subscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support unsubscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 }

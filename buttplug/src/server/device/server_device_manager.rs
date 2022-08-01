@@ -46,7 +46,7 @@ use crate::{
   util::async_manager,
 };
 use dashmap::DashMap;
-use futures::future;
+use futures::future::{self, FutureExt};
 use std::{convert::TryFrom, sync::Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
@@ -216,7 +216,7 @@ pub struct ServerDeviceManager {
 impl ServerDeviceManager {
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
-    Box::pin(async move {
+    async move {
       if command_sender
         .send(DeviceManagerCommand::StartScanning)
         .await
@@ -225,12 +225,12 @@ impl ServerDeviceManager {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 
   fn stop_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
-    Box::pin(async move {
+    async move {
       if command_sender
         .send(DeviceManagerCommand::StopScanning)
         .await
@@ -239,13 +239,13 @@ impl ServerDeviceManager {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 
   pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {
     let device_map = self.devices.clone();
     // TODO This could use some error reporting.
-    Box::pin(async move {
+    async move {
       let fut_vec: Vec<_> = device_map
         .iter()
         .map(|dev| {
@@ -255,7 +255,7 @@ impl ServerDeviceManager {
         .collect();
       future::join_all(fut_vec).await;
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 
   fn parse_device_message(
@@ -266,7 +266,7 @@ impl ServerDeviceManager {
       Some(device) => {
         let fut = device.parse_message(device_msg);
         // Create a future to run the message through the device, then handle adding the id to the result.
-        Box::pin(async move { fut.await })
+        async move { fut.await }.boxed()
       }
       None => ButtplugDeviceError::DeviceNotAvailable(device_msg.device_index()).into(),
     }
@@ -288,7 +288,7 @@ impl ServerDeviceManager {
           .collect();
         let mut device_list = DeviceList::new(devices);
         device_list.set_id(msg.id());
-        Box::pin(future::ready(Ok(device_list.into())))
+        future::ready(Ok(device_list.into())).boxed()
       }
       ButtplugDeviceManagerMessageUnion::StopAllDevices(_) => self.stop_all_devices(),
       ButtplugDeviceManagerMessageUnion::StartScanning(_) => self.start_scanning(),

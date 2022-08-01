@@ -43,7 +43,7 @@ use crate::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use core::hash::{Hash, Hasher};
-use futures::future;
+use futures::future::{self, FutureExt};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
@@ -256,7 +256,7 @@ impl ServerDevice {
   /// Disconnect from the device, if it's connected.
   pub fn disconnect(&self) -> ButtplugResultFuture {
     let fut = self.hardware.disconnect();
-    Box::pin(async move { fut.await.map_err(|err| err.into()) })
+    async move { fut.await.map_err(|err| err.into()) }.boxed()
   }
 
   /// Retreive the message attributes for the device.
@@ -375,14 +375,14 @@ impl ServerDevice {
     command_message: ButtplugDeviceCommandMessageUnion,
   ) -> ButtplugServerResultFuture {
     if let Err(err) = self.supports_message(&command_message) {
-      return Box::pin(future::ready(Err(err)));
+      return future::ready(Err(err)).boxed();
     }
 
     // If a handler implements handle message, bypass all of our parsing and let it do its own
     // thing. This should be a very rare thing.
     if self.handler.has_handle_message() {
       let fut = self.handle_generic_command_result(self.handler.handle_message(&command_message));
-      return Box::pin(async move { fut.await });
+      return async move { fut.await }.boxed();
     }
 
     match command_message {
@@ -397,12 +397,12 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::SingleMotorVibrateCmd(msg) => {
         self.handle_single_motor_vibrate_cmd(msg)
       }
-      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => Box::pin(future::ready(Err(
+      ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      ))), // self.handle_battery_level_cmd(msg),
-      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => Box::pin(future::ready(Err(
+      )).boxed(), // self.handle_battery_level_cmd(msg),
+      ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      ))), //self.handle_rssi_level_cmd(msg),
+      )).boxed(), //self.handle_rssi_level_cmd(msg),
 
       // Message that return lists of hardware commands which we'll handle sending to the devices
       // here, in order to reduce boilerplate in the implementations. Generic messages that we can
@@ -416,20 +416,20 @@ impl ServerDevice {
           .expect("Already checked existence");
         for command in msg.scalars() {
           if command.index() > attrs.len() as u32 {
-            return Box::pin(future::ready(Err(
+            return future::ready(Err(
               ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index())
                 .into(),
-            )));
+            )).boxed();
           }
           if *attrs[command.index() as usize].actuator_type() != command.actuator_type() {
-            return Box::pin(future::ready(Err(
+            return future::ready(Err(
               ButtplugDeviceError::DeviceActuatorTypeMismatch(
                 self.name(),
                 command.actuator_type(),
                 *attrs[command.index() as usize].actuator_type(),
               )
               .into(),
-            )));
+            )).boxed();
           }
         }
 
@@ -438,14 +438,14 @@ impl ServerDevice {
           .update_scalar(&msg, self.handler.needs_full_command_set())
         {
           Ok(values) => values,
-          Err(err) => return Box::pin(future::ready(Err(err))),
+          Err(err) => return future::ready(Err(err)).boxed(),
         };
 
         if commands.is_empty() {
           debug!(
             "No commands generated for incoming device packet, skipping and returning success."
           );
-          return Box::pin(future::ready(Ok(messages::Ok::default().into())));
+          return future::ready(Ok(messages::Ok::default().into())).boxed();
         }
 
         self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
@@ -453,7 +453,7 @@ impl ServerDevice {
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
         let commands = match self.generic_command_manager.update_rotation(&msg) {
           Ok(values) => values,
-          Err(err) => return Box::pin(future::ready(Err(err))),
+          Err(err) => return future::ready(Err(err)).boxed(),
         };
         self.handle_generic_command_result(self.handler.handle_rotate_cmd(&commands))
       }
@@ -477,15 +477,15 @@ impl ServerDevice {
         self.handle_sensor_unsubscribe_cmd(msg)
       }
       // Everything else, which is mostly older messages, or special things that require reads.
-      ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => Box::pin(future::ready(Err(
+      ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      ))), //self.handler.handle_kiiroo_cmd( msg),
+      )).boxed(), //self.handler.handle_kiiroo_cmd( msg),
     }
   }
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
     let hardware = self.hardware.clone();
-    Box::pin(async move {
+    async move {
       // Run commands in order, otherwise we may end up sending out of order. This may take a while,
       // but it's what 99% of protocols expect. If they want something else, they can implement it
       // themselves.
@@ -496,7 +496,7 @@ impl ServerDevice {
         hardware.parse_message(&command).await?;
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 
   fn handle_generic_command_result(
@@ -505,7 +505,7 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let hardware_commands = match command_result {
       Ok(commands) => commands,
-      Err(err) => return Box::pin(future::ready(Err(err.into()))),
+      Err(err) => return future::ready(Err(err.into())).boxed(),
     };
 
     self.handle_hardware_commands(hardware_commands)
@@ -517,12 +517,12 @@ impl ServerDevice {
     commands
       .iter()
       .for_each(|msg| fut_vec.push(self.parse_message(msg.clone())));
-    Box::pin(async move {
+    async move {
       for fut in fut_vec {
         fut.await?;
       }
       Ok(messages::Ok::default().into())
-    })
+    }.boxed()
   }
 
   fn check_sensor_command(
@@ -561,13 +561,13 @@ impl ServerDevice {
     );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
-    Box::pin(async move {
+    async move {
       result?;
       handler
         .handle_sensor_read_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    })
+    }.boxed()
   }
 
   fn handle_sensor_subscribe_cmd(
@@ -585,13 +585,13 @@ impl ServerDevice {
     );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
-    Box::pin(async move {
+    async move {
       result?;
       handler
         .handle_sensor_subscribe_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    })
+    }.boxed()
   }
 
   fn handle_sensor_unsubscribe_cmd(
@@ -609,13 +609,13 @@ impl ServerDevice {
     );
     let device = self.hardware.clone();
     let handler = self.handler.clone();
-    Box::pin(async move {
+    async move {
       result?;
       handler
         .handle_sensor_unsubscribe_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    })
+    }.boxed()
   }
 
   fn handle_single_motor_vibrate_cmd(
@@ -653,18 +653,18 @@ impl ServerDevice {
   fn handle_raw_write_cmd(&self, message: messages::RawWriteCmd) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.write_value(&message.into());
-    Box::pin(async move {
+    async move {
       fut
         .await
         .map(|_| messages::Ok::new(id).into())
         .map_err(|err| err.into())
-    })
+    }.boxed()
   }
 
   fn handle_raw_read_cmd(&self, message: messages::RawReadCmd) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.read_value(&message.into());
-    Box::pin(async move {
+    async move {
       fut
         .await
         .map(|mut msg| {
@@ -672,7 +672,7 @@ impl ServerDevice {
           msg.into()
         })
         .map_err(|err| err.into())
-    })
+    }.boxed()
   }
 
   fn handle_raw_unsubscribe_cmd(
@@ -681,12 +681,12 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.unsubscribe(&message.into());
-    Box::pin(async move {
+    async move {
       fut
         .await
         .map(|_| messages::Ok::new(id).into())
         .map_err(|err| err.into())
-    })
+    }.boxed()
   }
 
   fn handle_raw_subscribe_cmd(
@@ -695,11 +695,11 @@ impl ServerDevice {
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.subscribe(&message.into());
-    Box::pin(async move {
+    async move {
       fut
         .await
         .map(|_| messages::Ok::new(id).into())
         .map_err(|err| err.into())
-    })
+    }.boxed()
   }
 }

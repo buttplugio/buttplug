@@ -31,7 +31,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use byteorder::{LittleEndian, ReadBytesExt};
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 use rusty_xinput::{XInputHandle, XInputUsageError};
 use std::{
   fmt::{self, Debug},
@@ -136,7 +136,7 @@ impl HardwareInternal for XInputHardware {
   }
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Ok(())))
+    future::ready(Ok(())).boxed()
   }
 
   fn read_value(
@@ -145,7 +145,7 @@ impl HardwareInternal for XInputHardware {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
-    Box::pin(async move {
+    async move {
       let battery = handle
         .get_gamepad_battery_information(index as u32)
         .map_err(|e| {
@@ -156,7 +156,7 @@ impl HardwareInternal for XInputHardware {
         Endpoint::Rx,
         vec![battery.battery_level.0],
       ))
-    })
+    }.boxed()
   }
 
   fn write_value(
@@ -166,7 +166,7 @@ impl HardwareInternal for XInputHardware {
     let handle = self.handle.clone();
     let index = self.index;
     let data = msg.data.clone();
-    Box::pin(async move {
+    async move {
       let mut cursor = Cursor::new(data);
       let left_motor_speed = cursor
         .read_u16::<LittleEndian>()
@@ -179,25 +179,25 @@ impl HardwareInternal for XInputHardware {
         .map_err(|e: XInputUsageError| {
           ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
         })
-    })
+    }.boxed()
   }
 
   fn subscribe(
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "XInput hardware does not support subscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "XInput hardware does not support unsubscribe".to_owned(),
-    ))))
+    ))).boxed()
   }
 }
 

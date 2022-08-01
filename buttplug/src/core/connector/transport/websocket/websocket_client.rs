@@ -110,7 +110,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     };
     let address = self.address.clone();
 
-    Box::pin(async move {
+    async move {
       match connect_async_with_tls_connector(&address, tls_connector).await {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
@@ -205,15 +205,15 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error),
         )),
       }
-    })
+    }.boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
     let disconnect_notifier = self.disconnect_notifier;
-    Box::pin(async move {
+    async move {
       // If we can't send the message, we have no loop, so we're not connected.
       disconnect_notifier.notify_waiters();
       Ok(())
-    })
+    }.boxed()
   }
 }

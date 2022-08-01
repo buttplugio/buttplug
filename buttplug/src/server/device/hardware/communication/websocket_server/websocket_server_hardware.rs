@@ -262,19 +262,19 @@ impl HardwareInternal for WebsocketServerHardware {
 
   fn disconnect(&self) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let connected = self.connected.clone();
-    Box::pin(async move {
+    async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    })
+    }.boxed()
   }
 
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    Box::pin(future::ready(Err(ButtplugDeviceError::UnhandledCommand(
+    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Websocket Hardware does not support read".to_owned(),
-    ))))
+    ))).boxed()
   }
 
   fn write_value(
@@ -284,14 +284,14 @@ impl HardwareInternal for WebsocketServerHardware {
     let sender = self.outgoing_sender.clone();
     let data = msg.data.clone();
     // TODO Should check endpoint validity
-    Box::pin(async move {
+    async move {
       sender.send(data).await.map_err(|err| {
         ButtplugDeviceError::DeviceCommunicationError(format!(
           "Could not write value to websocket device: {}",
           err
         ))
       })
-    })
+    }.boxed()
   }
 
   fn subscribe(
@@ -299,7 +299,7 @@ impl HardwareInternal for WebsocketServerHardware {
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
-      return Box::pin(future::ready(Ok(())));
+      return future::ready(Ok(())).boxed();
     }
     // TODO Should check endpoint validity
     let mut data_receiver = self.incoming_broadcaster.subscribe();
@@ -307,7 +307,7 @@ impl HardwareInternal for WebsocketServerHardware {
     let address = self.info.address.clone();
     let subscribed = self.subscribed.clone();
     let subscribed_token = self.subscribe_token.clone();
-    Box::pin(async move {
+    async move {
       subscribed.store(true, Ordering::SeqCst);
       let token = CancellationToken::new();
       *(subscribed_token.lock().await) = Some(token.child_token());
@@ -337,7 +337,7 @@ impl HardwareInternal for WebsocketServerHardware {
         info!("Data channel closed, ending websocket server device listener task");
       });
       Ok(())
-    })
+    }.boxed()
   }
 
   fn unsubscribe(
@@ -347,18 +347,18 @@ impl HardwareInternal for WebsocketServerHardware {
     if self.subscribed.load(Ordering::SeqCst) {
       let subscribed = self.subscribed.clone();
       let subscribed_token = self.subscribe_token.clone();
-      Box::pin(async move {
+      async move {
         subscribed.store(false, Ordering::SeqCst);
         let token = (subscribed_token.lock().await)
           .take()
           .expect("If we were subscribed, we'll have a token.");
         token.cancel();
         Ok(())
-      })
+      }.boxed()
     } else {
-      Box::pin(future::ready(Err(
+      future::ready(Err(
         ButtplugDeviceError::DeviceCommunicationError("Device not subscribed.".to_owned()),
-      )))
+      )).boxed()
     }
   }
 }

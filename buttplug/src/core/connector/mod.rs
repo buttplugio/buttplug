@@ -72,7 +72,7 @@ use crate::{
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use displaydoc::Display;
-use futures::future::{self, BoxFuture};
+use futures::future::{self, BoxFuture, FutureExt};
 #[cfg(all(feature = "server", feature = "client"))]
 pub use in_process_connector::{
   ButtplugInProcessClientConnector,
@@ -126,7 +126,7 @@ where
   T: Send + 'static,
 {
   fn from(err: ButtplugConnectorError) -> BoxFuture<'static, Result<T, ButtplugConnectorError>> {
-    Box::pin(future::ready(Err(err)))
+    future::ready(Err(err)).boxed()
   }
 }
 

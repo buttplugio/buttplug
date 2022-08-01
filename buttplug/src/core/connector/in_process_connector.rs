@@ -16,7 +16,7 @@ use crate::{
   util::async_manager,
 };
 use futures::{
-  future::{self, BoxFuture},
+  future::{self, BoxFuture, FutureExt},
   StreamExt,
 };
 use std::{
@@ -129,7 +129,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       let send = message_sender.clone();
       self.server_outbound_sender = message_sender;
       let server_recv = self.server.event_stream();
-      Box::pin(async move {
+      async move {
         async_manager::spawn(async move {
           info!("Starting In Process Client Connector Event Sender Loop");
           pin_mut!(server_recv);
@@ -147,7 +147,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
         }.instrument(tracing::info_span!("InProcessClientConnectorEventSenderLoop")));
         connected.store(true, Ordering::SeqCst);
         Ok(())
-      })
+      }.boxed()
     } else {
       ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
@@ -156,7 +156,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
   fn disconnect(&self) -> ButtplugConnectorResultFuture {
     if self.connected.load(Ordering::SeqCst) {
       self.connected.store(false, Ordering::SeqCst);
-      Box::pin(future::ready(Ok(())))
+      future::ready(Ok(())).boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
     }
@@ -171,7 +171,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
       .expect("This is in-process so message conversions will always work.");
     let output_fut = self.server.parse_message(input);
     let sender = self.server_outbound_sender.clone();
-    Box::pin(async move {
+    async move {
       let output: ButtplugCurrentSpecServerMessage = output_fut
         .await
         .unwrap_or_else(|e| e.into())
@@ -181,6 +181,6 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
         .send(output)
         .await
         .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-    })
+    }.boxed()
   }
 }

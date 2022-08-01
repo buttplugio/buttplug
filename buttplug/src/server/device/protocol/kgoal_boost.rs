@@ -74,7 +74,7 @@ impl ProtocolHandler for KGoalBoost {
     // Byte 2: Always 0x04
     // Byte 3-4: Normalized u16 Reading
     // Byte 5-6: Raw u16 Reading
-    Box::pin(async move {
+    async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
       if sensors.is_empty() {
@@ -137,7 +137,7 @@ impl ProtocolHandler for KGoalBoost {
       }
       sensors.insert(*message.sensor_index());
       Ok(messages::Ok::new(message.id()).into())
-    })
+    }.boxed()
   }
 
   fn handle_sensor_unsubscribe_cmd(
@@ -149,7 +149,7 @@ impl ProtocolHandler for KGoalBoost {
       return future::ready(Ok(messages::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
-    Box::pin(async move {
+    async move {
       // If we have no sensors we're currently subscribed to, we'll need to bring up our BLE
       // characteristic subscription.
       sensors.remove(message.sensor_index());
@@ -159,6 +159,6 @@ impl ProtocolHandler for KGoalBoost {
           .await?;
       }
       Ok(messages::Ok::new(message.id()).into())
-    })
+    }.boxed()
   }
 }

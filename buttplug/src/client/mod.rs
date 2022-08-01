@@ -43,7 +43,7 @@ pub use device::{
   ScalarCommand,
 };
 use futures::{
-  future::{self, BoxFuture},
+  future::{self, BoxFuture, FutureExt},
   Stream,
 };
 use std::sync::{
@@ -294,9 +294,9 @@ impl ButtplugClient {
   /// that even on failure, the client will be disconnected.
   pub fn disconnect(&self) -> ButtplugClientResultFuture {
     if !self.connected() {
-      return Box::pin(future::ready(Err(
+      return future::ready(Err(
         ButtplugConnectorError::ConnectorNotConnected.into(),
-      )));
+      )).boxed();
     }
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
@@ -305,11 +305,11 @@ impl ButtplugClient {
     let msg = ButtplugClientRequest::Disconnect(fut.get_state_clone());
     let send_fut = self.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
-    Box::pin(async move {
+    async move {
       send_fut.await?;
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    })
+    }.boxed()
   }
 
   /// Tells server to start scanning for devices.
@@ -360,12 +360,12 @@ impl ButtplugClient {
     // The message sender doesn't require an async send now, but we still want
     // to delay execution as part of our future in order to keep task coherency.
     let message_sender = self.message_sender.clone();
-    Box::pin(async move {
+    async move {
       message_sender
         .send(msg)
         .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
       Ok(())
-    })
+    }.boxed()
   }
 
   fn send_message(
@@ -373,9 +373,9 @@ impl ButtplugClient {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugServerMessageResultFuture {
     if !self.connected() {
-      Box::pin(future::ready(Err(
+      future::ready(Err(
         ButtplugConnectorError::ConnectorNotConnected.into(),
-      )))
+      )).boxed()
     } else {
       self.send_message_ignore_connect_status(msg)
     }
@@ -396,10 +396,10 @@ impl ButtplugClient {
 
     // Send message to internal loop and wait for return.
     let send_fut = self.send_message_to_event_loop(internal_msg);
-    Box::pin(async move {
+    async move {
       send_fut.await?;
       fut.await
-    })
+    }.boxed()
   }
 
   /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
@@ -409,7 +409,7 @@ impl ButtplugClient {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
-    Box::pin(async move { send_fut.await.map(|_| ()) })
+    async move { send_fut.await.map(|_| ()) }.boxed()
   }
 
   /// Retreives a list of currently connected devices.
@@ -423,7 +423,7 @@ impl ButtplugClient {
 
   pub fn ping(&self) -> ButtplugClientResultFuture {
     let ping_fut = self.send_message_expect_ok(Ping::default().into());
-    Box::pin(async move { ping_fut.await })
+    async move { ping_fut.await }.boxed()
   }
 
   pub fn server_name(&self) -> Option<String> {
