@@ -32,6 +32,7 @@ use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
 };
+use dashmap::DashSet;
 use futures::{
   future::{self, BoxFuture, FutureExt},
   Stream,
@@ -41,9 +42,8 @@ use std::{
   collections::HashMap,
   fmt::{self, Debug},
   pin::Pin,
-  sync::Arc
+  sync::Arc,
 };
-use dashmap::DashSet;
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
@@ -297,7 +297,7 @@ impl<T: Peripheral + 'static> BtlePlugHardware<T> {
       device,
       endpoints,
       event_stream,
-      subscribed_endpoints: Arc::new(DashSet::new())
+      subscribed_endpoints: Arc::new(DashSet::new()),
     }
   }
 }
@@ -385,7 +385,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let endpoint = msg.endpoint;
     if self.subscribed_endpoints.contains(&endpoint) {
-      debug!("Endpoint {} already subscribed, ignoring and returning Ok.", endpoint);
+      debug!(
+        "Endpoint {} already subscribed, ignoring and returning Ok.",
+        endpoint
+      );
       return Box::pin(future::ready(Ok(())));
     }
     let characteristic = match self.endpoints.get(&endpoint) {
@@ -416,7 +419,10 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let endpoint = msg.endpoint;
     if !self.subscribed_endpoints.contains(&endpoint) {
-      debug!("Endpoint {} already unsubscribed, ignoring and returning Ok.", endpoint);
+      debug!(
+        "Endpoint {} already unsubscribed, ignoring and returning Ok.",
+        endpoint
+      );
       return Box::pin(future::ready(Ok(())));
     }
     let characteristic = match self.endpoints.get(&msg.endpoint) {

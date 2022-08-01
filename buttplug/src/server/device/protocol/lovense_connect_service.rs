@@ -131,8 +131,13 @@ impl ProtocolHandler for LovenseConnectService {
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(
-        messages::SensorReading::new(msg.device_index(), *msg.sensor_index(), *msg.sensor_type(), vec![reading.data()[0] as i32])
-          .into(),
+        messages::SensorReading::new(
+          msg.device_index(),
+          *msg.sensor_index(),
+          *msg.sensor_type(),
+          vec![reading.data()[0] as i32],
+        )
+        .into(),
       )
     })
   }

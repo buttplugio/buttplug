@@ -13,14 +13,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorReadCmd {
-  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]  
+  #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
   sensor_index: u32,
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
   sensor_type: SensorType,
 }
@@ -31,7 +31,7 @@ impl SensorReadCmd {
       id: 1,
       device_index,
       sensor_index,
-      sensor_type
+      sensor_type,
     }
   }
 }

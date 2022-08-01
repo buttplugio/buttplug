@@ -18,10 +18,10 @@ pub struct SensorUnsubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorIndex"))]
-  #[getset(get="pub")]  
+  #[getset(get = "pub")]
   sensor_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "SensorType"))]
-  #[getset(get="pub")]  
+  #[getset(get = "pub")]
   sensor_type: SensorType,
 }
 
@@ -31,7 +31,7 @@ impl SensorUnsubscribeCmd {
       id: 1,
       device_index,
       sensor_index,
-      sensor_type
+      sensor_type,
     }
   }
 }

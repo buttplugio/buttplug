@@ -14,7 +14,8 @@ use super::messages::{
   ButtplugDeviceMessageType,
   ButtplugMessageSpecVersion,
   Endpoint,
-  ErrorCode, SensorType,
+  ErrorCode,
+  SensorType,
 };
 #[cfg(feature = "server")]
 use crate::server::device::hardware::communication::HardwareSpecificError;
@@ -177,7 +178,7 @@ pub enum ButtplugDeviceError {
   /// Sensor Type Mismatch: Index {0} got command for {1}, but expects {2}
   DeviceSensorTypeMismatch(u32, SensorType, SensorType),
   /// Protocol does not have an implementation available for Sensor Type {0}
-  ProtocolSensorNotSupported(SensorType)
+  ProtocolSensorNotSupported(SensorType),
 }
 
 /// Unknown errors occur in exceptional circumstances where no other error type

@@ -9,8 +9,14 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     messages::{
-      self, ButtplugDeviceMessage, ButtplugMessage, ButtplugServerDeviceMessage,
-      ButtplugServerMessage, Endpoint, SensorReading, SensorType,
+      self,
+      ButtplugDeviceMessage,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      ButtplugServerMessage,
+      Endpoint,
+      SensorReading,
+      SensorType,
     },
   },
   server::device::{
@@ -22,7 +28,8 @@ use crate::{
 use dashmap::DashSet;
 use futures::{
   future::{self, BoxFuture},
-  FutureExt, StreamExt,
+  FutureExt,
+  StreamExt,
 };
 use std::{pin::Pin, sync::Arc};
 use tokio::sync::broadcast;
@@ -127,7 +134,6 @@ impl ProtocolHandler for KGoalBoost {
             }
           }
         });
-
       }
       sensors.insert(*message.sensor_index());
       Ok(messages::Ok::new(message.id()).into())

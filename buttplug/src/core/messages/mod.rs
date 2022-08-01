@@ -79,8 +79,8 @@ pub use message_attributes::{
   DeviceMessageAttributesV1,
   DeviceMessageAttributesV2,
   GenericDeviceMessageAttributes,
+  SensorDeviceMessageAttributes,
   SensorType,
-  SensorDeviceMessageAttributes
 };
 pub use ok::Ok;
 pub use ping::Ping;
@@ -438,7 +438,7 @@ pub enum ButtplugServerMessage {
   SensorReading(SensorReading),
   // Deprecated Server Messages
   BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading)
+  RSSILevelReading(RSSILevelReading),
 }
 
 /// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
@@ -459,7 +459,7 @@ pub enum ButtplugServerDeviceMessage {
   BatteryLevelReading(BatteryLevelReading),
   RSSILevelReading(RSSILevelReading),
   // Generic Sensor Reading Messages
-  SensorReading(SensorReading)
+  SensorReading(SensorReading),
 }
 
 /// Type alias for the latest version of client-to-server messages.
@@ -849,5 +849,5 @@ pub enum ButtplugDeviceCommandMessageUnion {
   ScalarCmd(ScalarCmd),
   SensorReadCmd(SensorReadCmd),
   SensorSubscribeCmd(SensorSubscribeCmd),
-  SensorUnsubscribeCmd(SensorUnsubscribeCmd)
+  SensorUnsubscribeCmd(SensorUnsubscribeCmd),
 }

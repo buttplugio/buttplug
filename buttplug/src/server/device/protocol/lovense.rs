@@ -205,8 +205,13 @@ impl ProtocolHandler for Lovense {
               let start_pos = if data_str.contains('s') { 1 } else { 0 };
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
-                  messages::SensorReading::new(message.device_index(), 0, messages::SensorType::Battery, vec![level as i32])
-                    .into(),
+                  messages::SensorReading::new(
+                    message.device_index(),
+                    0,
+                    messages::SensorType::Battery,
+                    vec![level as i32],
+                  )
+                  .into(),
                 );
               }
             }

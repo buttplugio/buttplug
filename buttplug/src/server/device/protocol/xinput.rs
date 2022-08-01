@@ -83,7 +83,10 @@ impl ProtocolHandler for XInput {
           )
         }
       };
-      Ok(messages::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery]).into())
+      Ok(
+        messages::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery])
+          .into(),
+      )
     })
   }
 }

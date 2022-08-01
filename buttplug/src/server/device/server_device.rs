@@ -14,10 +14,21 @@ use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{
-      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage,
-      ButtplugDeviceMessageType, ButtplugMessage, ButtplugServerDeviceMessage,
-      DeviceMessageAttributes, Endpoint, RawReading, RawSubscribeCmd, ScalarCmd, ScalarSubcommand,
-      SensorDeviceMessageAttributes, SensorType,
+      self,
+      ActuatorType,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceMessage,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      ButtplugServerDeviceMessage,
+      DeviceMessageAttributes,
+      Endpoint,
+      RawReading,
+      RawSubscribeCmd,
+      ScalarCmd,
+      ScalarSubcommand,
+      SensorDeviceMessageAttributes,
+      SensorType,
     },
     ButtplugResultFuture,
   },
@@ -38,7 +49,8 @@ use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
 
 use super::{
-  configuration::ProtocolDeviceAttributes, protocol::generic_command_manager::GenericCommandManager,
+  configuration::ProtocolDeviceAttributes,
+  protocol::generic_command_manager::GenericCommandManager,
 };
 
 #[derive(Debug)]
@@ -180,7 +192,8 @@ impl Hash for ServerDevice {
   }
 }
 
-impl Eq for ServerDevice {}
+impl Eq for ServerDevice {
+}
 
 impl PartialEq for ServerDevice {
   fn eq(&self, other: &Self) -> bool {
@@ -257,27 +270,26 @@ impl ServerDevice {
   /// endpoints.
   pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
     let identifier = self.identifier.clone();
-    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(move |hardware_event| {
-      let id = identifier.clone();
-      match hardware_event {
-        HardwareEvent::Disconnected(_) => ServerDeviceEvent::Disconnected(id),
-        HardwareEvent::Notification(_address, endpoint, data) => {
-          // TODO Figure out how we're going to parse raw data into something sendable to the client.
-          ServerDeviceEvent::Notification(
-            id,
-            ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
-          )
+    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(
+      move |hardware_event| {
+        let id = identifier.clone();
+        match hardware_event {
+          HardwareEvent::Disconnected(_) => ServerDeviceEvent::Disconnected(id),
+          HardwareEvent::Notification(_address, endpoint, data) => {
+            // TODO Figure out how we're going to parse raw data into something sendable to the client.
+            ServerDeviceEvent::Notification(
+              id,
+              ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
+            )
+          }
         }
-      }
-    });
+      },
+    );
 
     let identifier = self.identifier.clone();
     let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
       let id = identifier.clone();
-      ServerDeviceEvent::Notification(
-        id,
-        incoming_message
-      )
+      ServerDeviceEvent::Notification(id, incoming_message)
     });
     hardware_stream.merge(handler_mapped_stream)
   }
@@ -551,7 +563,10 @@ impl ServerDevice {
     let handler = self.handler.clone();
     Box::pin(async move {
       result?;
-      handler.handle_sensor_read_cmd(device, message).await.map_err(|e| e.into())
+      handler
+        .handle_sensor_read_cmd(device, message)
+        .await
+        .map_err(|e| e.into())
     })
   }
 
@@ -572,7 +587,10 @@ impl ServerDevice {
     let handler = self.handler.clone();
     Box::pin(async move {
       result?;
-      handler.handle_sensor_subscribe_cmd(device, message).await.map_err(|e| e.into())
+      handler
+        .handle_sensor_subscribe_cmd(device, message)
+        .await
+        .map_err(|e| e.into())
     })
   }
 
@@ -593,7 +611,10 @@ impl ServerDevice {
     let handler = self.handler.clone();
     Box::pin(async move {
       result?;
-      handler.handle_sensor_unsubscribe_cmd(device, message).await.map_err(|e| e.into())
+      handler
+        .handle_sensor_unsubscribe_cmd(device, message)
+        .await
+        .map_err(|e| e.into())
     })
   }
 
