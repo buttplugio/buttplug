@@ -40,7 +40,7 @@ impl SensorReading {
     data: Vec<i32>,
   ) -> Self {
     Self {
-      id: 1,
+      id: 0,
       device_index,
       sensor_index,
       sensor_type,

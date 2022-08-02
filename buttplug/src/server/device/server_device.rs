@@ -47,6 +47,7 @@ use futures::future::{self, FutureExt};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
+use dashmap::DashSet;
 
 use super::{
   configuration::ProtocolDeviceAttributes,
@@ -176,6 +177,7 @@ pub struct ServerDevice {
   generic_command_manager: GenericCommandManager,
   /// Unique identifier for the device
   identifier: ServerDeviceIdentifier,
+  raw_subscribed_endpoints: Arc<DashSet<Endpoint>>
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -217,6 +219,7 @@ impl ServerDevice {
       handler,
       hardware,
       attributes: attributes.clone(),
+      raw_subscribed_endpoints: Arc::new(DashSet::new())
     }
   }
 
@@ -270,21 +273,26 @@ impl ServerDevice {
   /// endpoints.
   pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
     let identifier = self.identifier.clone();
-    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream()).map(
-      move |hardware_event| {
-        let id = identifier.clone();
-        match hardware_event {
-          HardwareEvent::Disconnected(_) => ServerDeviceEvent::Disconnected(id),
-          HardwareEvent::Notification(_address, endpoint, data) => {
-            // TODO Figure out how we're going to parse raw data into something sendable to the client.
-            ServerDeviceEvent::Notification(
-              id,
-              ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
-            )
+    let raw_endpoints = self.raw_subscribed_endpoints.clone();
+    let hardware_stream = 
+      convert_broadcast_receiver_to_stream(self.hardware.event_stream())
+        .filter_map(move |hardware_event| {
+          let id = identifier.clone();
+          match hardware_event {
+            HardwareEvent::Disconnected(_) => Some(ServerDeviceEvent::Disconnected(id)),
+            HardwareEvent::Notification(_address, endpoint, data) => {
+              // TODO Figure out how we're going to parse raw data into something sendable to the client.
+              if raw_endpoints.contains(&endpoint) {
+                Some(ServerDeviceEvent::Notification(
+                  id,
+                  ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
+                ))
+              } else {
+                None
+              }
+            }
           }
-        }
-      },
-    );
+        });
 
     let identifier = self.identifier.clone();
     let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
@@ -680,26 +688,40 @@ impl ServerDevice {
     message: messages::RawUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
+    let endpoint = message.endpoint();
     let fut = self.hardware.unsubscribe(&message.into());
+    let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
-      fut
+      if !raw_endpoints.contains(&endpoint) {
+        return Ok(messages::Ok::new(id).into());
+      }
+      let result = fut
         .await
         .map(|_| messages::Ok::new(id).into())
-        .map_err(|err| err.into())
+        .map_err(|err| err.into());
+      raw_endpoints.remove(&endpoint);
+      result
     }.boxed()
   }
 
   fn handle_raw_subscribe_cmd(
     &self,
     message: messages::RawSubscribeCmd,
-  ) -> ButtplugServerResultFuture {
+  ) -> ButtplugServerResultFuture {    
     let id = message.id();
+    let endpoint = message.endpoint();
     let fut = self.hardware.subscribe(&message.into());
+    let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
-      fut
+      if raw_endpoints.contains(&endpoint) {
+        return Ok(messages::Ok::new(id).into());
+      }
+      let result = fut
         .await
         .map(|_| messages::Ok::new(id).into())
-        .map_err(|err| err.into())
+        .map_err(|err| err.into());
+      raw_endpoints.insert(endpoint);
+      result
     }.boxed()
   }
 }

@@ -442,7 +442,9 @@ pub enum ButtplugServerMessage {
 }
 
 /// Represents all possible messages a [ButtplugServer][crate::server::ButtplugServer] can send to a
-/// [ButtplugClient][crate::client::ButtplugClient] that denote a response from a device.
+/// [ButtplugClient][crate::client::ButtplugClient] that denote an EVENT from a device. These are
+/// only used in notifications, so read requests will not need to be added here, only messages that
+/// will require Id of 0.
 #[derive(
   Debug,
   Clone,
@@ -455,11 +457,17 @@ pub enum ButtplugServerMessage {
 pub enum ButtplugServerDeviceMessage {
   // Generic commands
   RawReading(RawReading),
-  // Sensor Reading Messages
-  BatteryLevelReading(BatteryLevelReading),
-  RSSILevelReading(RSSILevelReading),
   // Generic Sensor Reading Messages
   SensorReading(SensorReading),
+}
+
+impl From<ButtplugServerDeviceMessage> for ButtplugServerMessage {
+  fn from(other: ButtplugServerDeviceMessage) -> Self {
+    match other {
+      ButtplugServerDeviceMessage::RawReading(msg) => ButtplugServerMessage::RawReading(msg),
+      ButtplugServerDeviceMessage::SensorReading(msg) => ButtplugServerMessage::SensorReading(msg),
+    }
+  }
 }
 
 /// Type alias for the latest version of client-to-server messages.

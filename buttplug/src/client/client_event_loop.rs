@@ -252,6 +252,16 @@ where
             ));
         }
       }
+      ButtplugCurrentSpecServerMessage::SensorReading(msg) => {
+        let device_idx = msg.device_index();
+        if let Some(device) = self.device_map.get(&device_idx) {
+          device
+            .value()
+            .queue_event(ButtplugClientDeviceEvent::Message(
+              ButtplugCurrentSpecServerMessage::from(msg),
+            ));
+        }
+      }      
       ButtplugCurrentSpecServerMessage::Error(e) => {
         self.send_client_event(ButtplugClientEvent::Error(e.into()));
       }

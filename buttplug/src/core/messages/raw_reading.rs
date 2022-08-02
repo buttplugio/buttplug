@@ -27,7 +27,7 @@ pub struct RawReading {
 impl RawReading {
   pub fn new(device_index: u32, endpoint: Endpoint, data: Vec<u8>) -> Self {
     Self {
-      id: 1,
+      id: 0,
       device_index,
       endpoint,
       data,

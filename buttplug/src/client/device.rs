@@ -20,7 +20,6 @@ use crate::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
       ActuatorType,
-      BatteryLevelCmd,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecDeviceMessageType,
       ButtplugCurrentSpecServerMessage,
@@ -30,7 +29,6 @@ use crate::{
       DeviceMessageInfo,
       Endpoint,
       LinearCmd,
-      RSSILevelCmd,
       RawReadCmd,
       RawSubscribeCmd,
       RawUnsubscribeCmd,
@@ -39,13 +37,17 @@ use crate::{
       RotationSubcommand,
       ScalarCmd,
       ScalarSubcommand,
+      SensorReadCmd,
+      SensorSubscribeCmd,
+      SensorType,
+      SensorUnsubscribeCmd,
       StopDeviceCmd,
       VectorSubcommand,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
-use futures::{future::{self, FutureExt}, Stream};
+use futures::{future, FutureExt, Stream};
 use std::{
   collections::HashMap,
   fmt,
@@ -223,35 +225,35 @@ impl ButtplugClientDevice {
     let device_connected = self.device_connected.clone();
     let id = msg.id();
     let device_name = self.name.clone();
-      async move {
-        if !client_connected.load(Ordering::SeqCst) {
-          error!("Client not connected, cannot run device command");
-          return Err(ButtplugConnectorError::ConnectorNotConnected.into());
-        } else if !device_connected.load(Ordering::SeqCst) {
-          error!("Device not connected, cannot run device command");
-          return Err(
-            ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
-          );
-        }
-        let fut = ButtplugServerMessageFuture::default();
-        message_sender
-          .send(ButtplugClientRequest::Message(
-            ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()),
-          ))
-          .map_err(|_| {
-            ButtplugClientError::ButtplugConnectorError(
-              ButtplugConnectorError::ConnectorChannelClosed,
-            )
-          })?;
-        let msg = fut.await?;
-        if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
-          Err(ButtplugError::from(_err).into())
-        } else {
-          Ok(msg)
-        }
+    async move {
+      if !client_connected.load(Ordering::SeqCst) {
+        error!("Client not connected, cannot run device command");
+        return Err(ButtplugConnectorError::ConnectorNotConnected.into());
+      } else if !device_connected.load(Ordering::SeqCst) {
+        error!("Device not connected, cannot run device command");
+        return Err(
+          ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
+        );
       }
-      .instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id))
-      .boxed()
+      let fut = ButtplugServerMessageFuture::default();
+      message_sender
+        .send(ButtplugClientRequest::Message(
+          ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()),
+        ))
+        .map_err(|_| {
+          ButtplugClientError::ButtplugConnectorError(
+            ButtplugConnectorError::ConnectorChannelClosed,
+          )
+        })?;
+      let msg = fut.await?;
+      if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
+        Err(ButtplugError::from(_err).into())
+      } else {
+        Ok(msg)
+      }
+    }
+    .instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id))
+    .boxed()
   }
 
   pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
@@ -448,53 +450,75 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
-  pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
-    if self.message_attributes.battery_level_cmd().is_none() {
+  pub fn subscribe_pressure(&self) -> ButtplugClientResultFuture {
+    if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::BatteryLevelCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
+          .into(),
       );
     }
+    let msg = SensorSubscribeCmd::new(self.index, 0, SensorType::Pressure).into();
+    self.send_message_expect_ok(msg)
+  }
 
-    let msg = ButtplugCurrentSpecClientMessage::BatteryLevelCmd(BatteryLevelCmd::new(self.index));
-    let send_fut = self.send_message(msg);
-    async move {
-      match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::BatteryLevelReading(reading) => {
-          Ok(reading.battery_level())
-        }
-        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
+  pub fn unsubscribe_pressure(&self) -> ButtplugClientResultFuture {
+    if self.message_attributes.sensor_subscribe_cmd().is_none() {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
           .into(),
-        ),
+      );
+    }
+    let msg = SensorUnsubscribeCmd::new(self.index, 0, SensorType::Pressure).into();
+    self.send_message_expect_ok(msg)
+  }
+
+  fn read_single_sensor(&self, sensor_type: &SensorType) -> ButtplugClientResultFuture<Vec<i32>> {
+    if self.message_attributes.sensor_read_cmd().is_none() {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorReadCmd).into(),
+      );
+    }
+    let sensor_indexes: Vec<u32> = self
+      .message_attributes
+      .sensor_read_cmd()
+      .as_ref()
+      .expect("Already check existence")
+      .iter()
+      .enumerate()
+      .filter(|x| *x.1.sensor_type() == *sensor_type)
+      .map(|x| x.0 as u32)
+      .collect();
+    if sensor_indexes.len() != 1 {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::ProtocolSensorNotSupported(*sensor_type).into(),
+      );
+    }    
+    let msg = SensorReadCmd::new(self.index, sensor_indexes[0], *sensor_type).into();
+    let reply = self.send_message(msg);
+    async move {    
+      if let ButtplugCurrentSpecServerMessage::SensorReading(data) = reply.await? {
+        Ok(data.data().clone())
+      } else {
+        Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned())).into())
       }
     }.boxed()
   }
 
+  pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
+    let send_fut = self.read_single_sensor(&SensorType::Battery);
+    Box::pin(async move {
+      let data = send_fut.await?;
+      let battery_level = data[0];
+      Ok(battery_level as f64 / 100.0f64)
+    })
+  }
+
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
-    if self.message_attributes.rssi_level_cmd().is_none() {
-      return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RSSILevelCmd).into(),
-      );
-    }
-    let msg = ButtplugCurrentSpecClientMessage::RSSILevelCmd(RSSILevelCmd::new(self.index));
-    let send_fut = self.send_message(msg);
-    async move {
-      match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::RSSILevelReading(reading) => Ok(reading.rssi_level()),
-        ButtplugCurrentSpecServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
-          .into(),
-        ),
-      }
-    }.boxed()
+    let send_fut = self.read_single_sensor(&SensorType::RSSI);
+    Box::pin(async move {
+      let data = send_fut.await?;
+      Ok(data[0])
+    })
   }
 
   pub fn raw_write(
@@ -564,8 +588,7 @@ impl ButtplugClientDevice {
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd)
-          .into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
       );
     }
     let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(

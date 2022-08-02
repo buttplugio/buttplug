@@ -299,9 +299,14 @@ impl ServerDeviceManagerEventLoop {
           }
         }
       }
-      ServerDeviceEvent::Notification(_identifier, _message) => {
-        // TODO At some point here we need to fill this in for RawSubscribe and
-        // other sensor subscriptions.
+      ServerDeviceEvent::Notification(_, message) => {
+        if self
+          .server_sender
+          .send(message.into())
+          .is_err()
+        {
+          debug!("Server not currently available, dropping Device Added event.");
+        }        
       }
     }
   }
