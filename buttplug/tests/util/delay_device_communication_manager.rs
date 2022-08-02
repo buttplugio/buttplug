@@ -18,6 +18,7 @@ use std::sync::{
   Arc,
 };
 use tokio::sync::mpsc::Sender;
+use futures::FutureExt;
 
 #[derive(Default)]
 pub struct DelayDeviceCommunicationManagerBuilder {}

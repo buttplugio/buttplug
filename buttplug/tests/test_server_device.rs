@@ -82,7 +82,6 @@ fn test_server_raw_message() {
         assert!(da.device_messages().raw_read_cmd().is_some());
         assert!(da.device_messages().raw_write_cmd().is_some());
         assert!(da.device_messages().raw_subscribe_cmd().is_some());
-        assert!(da.device_messages().raw_unsubscribe_cmd().is_some());
         assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
         return;
       } else {
@@ -120,7 +119,6 @@ fn test_server_no_raw_message() {
         assert!(da.device_messages().raw_read_cmd().is_none());
         assert!(da.device_messages().raw_write_cmd().is_none());
         assert!(da.device_messages().raw_subscribe_cmd().is_none());
-        assert!(da.device_messages().raw_unsubscribe_cmd().is_none());
         break;
       } else {
         panic!(
