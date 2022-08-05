@@ -57,7 +57,7 @@ use crate::{
 /// build your own connector, add your device manager to those, and use the
 /// `run()` method to pass it in.
 #[cfg(all(feature = "server", feature = "client"))]
-pub async fn in_process_client(client_name: &str) -> ButtplugClient {
+pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> ButtplugClient {
   let mut server_builder = ButtplugServerBuilder::default();
 
   #[cfg(feature = "btleplug-manager")]
@@ -96,7 +96,9 @@ pub async fn in_process_client(client_name: &str) -> ButtplugClient {
     use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
     server_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
-
+  if allow_raw_messages {
+    server_builder.allow_raw_messages();
+  }
   let server = server_builder.finish().unwrap();
   let connector = ButtplugInProcessClientConnectorBuilder::default()
     .server(server)
