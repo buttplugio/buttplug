@@ -706,9 +706,8 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  /*
   use super::*;
-  use crate::core::messages::{ButtplugDeviceMessageType, Endpoint};
+  use crate::core::messages::{DeviceMessageAttributesBuilder, GenericDeviceMessageAttributes};
   use std::collections::{HashMap, HashSet};
 
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
@@ -716,187 +715,172 @@ mod test {
     if allow_raw_messages {
       builder.allow_raw_messages();
     }
-    let specifiers = vec![ProtocolCommunicationSpecifier::BluetoothLE(
+    let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(
       BluetoothLESpecifier::new(
         HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
         HashSet::new(),
         HashMap::new(),
       ),
-    )];
-    let mut attributes = HashMap::new();
-    attributes.insert(
-      ProtocolAttributesType::Identifier("P".to_owned()),
-      Arc::new(ProtocolDeviceAttributes::new(
-        ProtocolAttributesType::Identifier("P".to_owned()),
-        Some("Lovense Edge".to_owned()),
-        None,
-        HashMap::new(),
-        None,
-      )),
     );
-    let pdc = ProtocolDeviceConfiguration::new(specifiers, attributes);
-    builder.protocol_device_configuration("lovense", &pdc);
+    builder.communication_specifier("lovense", specifiers);
+    builder.protocol_attributes(ProtocolAttributesIdentifier::new("lovense", &ProtocolAttributesType::Identifier("P".to_owned()), &None),
+    ProtocolDeviceAttributes::new(
+      ProtocolAttributesType::Identifier("P".to_owned()),
+      Some("Lovense Edge".to_owned()),
+      None,
+      DeviceMessageAttributesBuilder::default()
+        .scalar_cmd(&vec![GenericDeviceMessageAttributes::new("Edge Vibrator 1", 20, crate::core::messages::ActuatorType::Vibrate), 
+                                GenericDeviceMessageAttributes::new("Edge Vibrator 2", 20, crate::core::messages::ActuatorType::Vibrate)])
+        .finish(),
+      None,
+    ));
     builder.finish().unwrap()
   }
 
-    #[test]
-    fn test_config_equals() {
-      let config = create_unit_test_dcm(false);
-      let launch =
-        ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]));
-      assert!(config.protocol_instance_factory(&launch).is_some());
-    }
+  #[test]
+  fn test_config_equals() {
+    let config = create_unit_test_dcm(false);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
+      BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]),
+    );
+    assert!(!config.protocol_specializers(&spec).is_empty());
+  }
 
-    #[test]
-    fn test_config_wildcard_equals() {
-      let config = create_unit_test_dcm(false);
-      let lovense = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-Whatever",
-        &[],
-      ));
-      assert!(config.protocol_instance_factory(&lovense).is_some());
-    }
+  #[test]
+  fn test_config_wildcard_equals() {
+    let config = create_unit_test_dcm(false);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
+      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
+    );
+    assert!(!config.protocol_specializers(&spec).is_empty());
+  }
 
-    #[test]
-    #[ignore = "Still need to update message attributes in create_unit_test_dcm"]
-    fn test_specific_device_config_creation() {
-      let config = create_unit_test_dcm(false);
-      let lovense = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-Whatever",
-        &[],
-      ));
-      let builder = config
-        .protocol_instance_factory(&lovense)
-        .expect("Test, assuming infallible");
-      let config = builder
-        .configuration()
-        .device_attributes(&ProtocolAttributesType::Identifier("P".to_owned()))
-        .expect("Test, assuming infallible");
-      // Make sure we got the right name
-      assert_eq!(config.name(), "Lovense Edge");
-      // Make sure we overwrote the default of 1
-      assert_eq!(
-        config
-          .message_attributes(&ButtplugDeviceMessageType::VibrateCmd)
-          .expect("Test, assuming infallible")
-          .feature_count()
-          .expect("Test, assuming infallible"),
-        2
-      );
-    }
+  #[test]
+  fn test_specific_device_config_creation() {
+    let dcm = create_unit_test_dcm(false);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
+      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
+    );
+    assert!(!dcm.protocol_specializers(&spec).is_empty());
+    let config = dcm
+      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .expect("Should be found");
+    // Make sure we got the right name
+    assert_eq!(config.name(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert_eq!(
+      config
+        .message_attributes()
+        .scalar_cmd()
+        .as_ref()
+        .expect("Test, assuming infallible")
+        .get(0)
+        .expect("Test, assuming infallible")
+        .step_count(),
+      20
+    );
+  }
 
-    #[test]
-    fn test_raw_device_config_creation() {
-      let config = create_unit_test_dcm(true);
-      let lovense = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-Whatever",
-        &[],
-      ));
-      let builder = config
-        .protocol_instance_factory(&lovense)
-        .expect("Test, assuming infallible");
-      let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", true, builder.configuration().clone(), HashMap::new());
-      let config = device_attr_builder
-        .create("DoesNotMatter", &ProtocolAttributesType::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
-        .expect("Test, assuming infallible");
-      // Make sure we got the right name
-      assert_eq!(config.name(), "Lovense Edge");
-      // Make sure we overwrote the default of 1
-      assert!(config.allows_message(&ButtplugDeviceMessageType::RawWriteCmd));
-      assert!(config.allows_message(&ButtplugDeviceMessageType::RawReadCmd));
-      assert!(config.allows_message(&ButtplugDeviceMessageType::RawSubscribeCmd));
-      assert!(config.allows_message(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
-    }
+  #[test]
+  fn test_raw_device_config_creation() {
+    let dcm = create_unit_test_dcm(true);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
+      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
+    );
+    assert!(!dcm.protocol_specializers(&spec).is_empty());
+    let config = dcm
+      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .expect("Should be found");
+    // Make sure we got the right name
+    assert_eq!(config.name(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert!(config.message_attributes().raw_read_cmd().is_some());
+    assert!(config.message_attributes().raw_write_cmd().is_some());
+    assert!(config.message_attributes().raw_subscribe_cmd().is_some());
+    assert!(config.message_attributes().raw_unsubscribe_cmd().is_some());
+  }
 
-    #[test]
-    fn test_non_raw_device_config_creation() {
-      let config = create_unit_test_dcm(false);
-      let lovense = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
-        "LVS-Whatever",
-        &[],
-      ));
-      let builder = config
-        .protocol_instance_factory(&lovense)
-        .expect("Test, assuming infallible");
-        let device_attr_builder = ProtocolDeviceAttributesBuilder::new("lovense", false, builder.configuration().clone(), HashMap::new());
-        let config = device_attr_builder
-          .create(&"DoesNotMatter", &ProtocolAttributesType::Identifier("P".to_owned()), &vec![Endpoint::Tx, Endpoint::Rx])
-          .expect("Test, assuming infallible");
-        // Make sure we got the right name
-        assert_eq!(config.name(), "Lovense Edge");
-      // Make sure we got the right name
-      assert_eq!(config.name(), "Lovense Edge");
-      // Make sure we overwrote the default of 1
-      assert!(!config.allows_message(&ButtplugDeviceMessageType::RawWriteCmd));
-      assert!(!config.allows_message(&ButtplugDeviceMessageType::RawReadCmd));
-      assert!(!config.allows_message(&ButtplugDeviceMessageType::RawSubscribeCmd));
-      assert!(!config.allows_message(&ButtplugDeviceMessageType::RawUnsubscribeCmd));
-    }
-  */
+  #[test]
+  fn test_non_raw_device_config_creation() {
+    let dcm = create_unit_test_dcm(false);
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
+      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
+    );
+    assert!(!dcm.protocol_specializers(&spec).is_empty());
+    let config = dcm
+      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .expect("Should be found");
+    // Make sure we got the right name
+    assert_eq!(config.name(), "Lovense Edge");
+    // Make sure we overwrote the default of 1
+    assert!(config.message_attributes().raw_read_cmd().is_none());
+    assert!(config.message_attributes().raw_write_cmd().is_none());
+    assert!(config.message_attributes().raw_subscribe_cmd().is_none());
+    assert!(config.message_attributes().raw_unsubscribe_cmd().is_none());
+  }
 
   /*
-    #[test]
-    fn test_user_config_loading() {
-      // Assume we have a nobra's entry in the device config.
-      let mut config = create_test_dcm(false);
-      assert!(config.protocol_definitions().contains_key("nobra"));
-      assert!(config
-        .protocol_definitions()
-        .get("nobra")
-        .expect("Test, assuming infallible")
-        .serial
-        .as_ref()
-        .is_some());
-      assert_eq!(
-        config
+      #[test]
+      fn test_user_config_loading() {
+        // Assume we have a nobra's entry in the device config.
+        let mut config = create_test_dcm(false);
+        assert!(config.protocol_definitions().contains_key("nobra"));
+        assert!(config
           .protocol_definitions()
           .get("nobra")
           .expect("Test, assuming infallible")
           .serial
           .as_ref()
-          .expect("Test, assuming infallible")
-          .len(),
-        1
-      );
+          .is_some());
+        assert_eq!(
+          config
+            .protocol_definitions()
+            .get("nobra")
+            .expect("Test, assuming infallible")
+            .serial
+            .as_ref()
+            .expect("Test, assuming infallible")
+            .len(),
+          1
+        );
 
-      // Now try overriding it, make sure we still only have 1.
-      config = create_test_dcm(false);
-      let mut nobra_def = ProtocolDefinition::default();
-      let mut serial_specifier = SerialSpecifier::default();
-      serial_specifier.port = "COM1".to_owned();
-      nobra_def.serial = Some(vec![serial_specifier]);
-      config.add_protocol_definition("nobra", nobra_def);
-      assert!(config.protocol_definitions().contains_key("nobra"));
-      assert!(config
-        .protocol_definitions()
-        .get("nobra")
-        .expect("Test, assuming infallible")
-        .serial
-        .as_ref()
-        .is_some());
-      assert_eq!(
-        config
+        // Now try overriding it, make sure we still only have 1.
+        config = create_test_dcm(false);
+        let mut nobra_def = ProtocolDefinition::default();
+        let mut serial_specifier = SerialSpecifier::default();
+        serial_specifier.port = "COM1".to_owned();
+        nobra_def.serial = Some(vec![serial_specifier]);
+        config.add_protocol_definition("nobra", nobra_def);
+        assert!(config.protocol_definitions().contains_key("nobra"));
+        assert!(config
+          .protocol_definitions()
+          .get("nobra")
+          .expect("Test, assuming infallible")
+          .serial
+          .as_ref()
+          .is_some());
+        assert_eq!(
+          config
+            .protocol_definitions()
+            .get("nobra")
+            .expect("Test, assuming infallible")
+            .serial
+            .as_ref()
+            .expect("Test, assuming infallible")
+            .len(),
+          1
+        );
+        assert!(config
           .protocol_definitions()
           .get("nobra")
           .expect("Test, assuming infallible")
           .serial
           .as_ref()
           .expect("Test, assuming infallible")
-          .len(),
-        1
-      );
-      assert!(config
-        .protocol_definitions()
-        .get("nobra")
-        .expect("Test, assuming infallible")
-        .serial
-        .as_ref()
-        .expect("Test, assuming infallible")
-        .iter()
-        .any(|x| x.port == "COM1"));
-    }
+          .iter()
+          .any(|x| x.port == "COM1"));
+      }
   */
-
   // TODO Test invalid config load (not json)
 
   // TODO Test calculation/change of Step Count via Step Range
