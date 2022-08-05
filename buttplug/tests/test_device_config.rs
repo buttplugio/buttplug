@@ -42,8 +42,9 @@ const BASE_CONFIG_JSON: &str = r#"
           ],
           "name": "OhMiBod Lumen",
           "messages": {
-            "VibrateCmd": [
+            "ScalarCmd": [
               {
+                "ActuatorType": "Vibrate",
                 "StepCount": 100
               }
             ]
@@ -59,10 +60,10 @@ const BASE_CONFIG_JSON: &str = r#"
 #[test]
 fn test_basic_device_config() {
   async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default()
+    ButtplugServerBuilder::default()
       .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
       .finish()
-      .is_ok());
+      .unwrap();
   });
 }
 
