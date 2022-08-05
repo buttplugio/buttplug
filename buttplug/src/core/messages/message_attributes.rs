@@ -102,6 +102,10 @@ pub struct DeviceMessageAttributes {
 }
 
 impl DeviceMessageAttributes {
+  pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributes> {
+    self.raw_subscribe_cmd()
+  }
+
   pub fn message_allowed(&self, message_type: &ButtplugDeviceMessageType) -> bool {
     match message_type {
       ButtplugDeviceMessageType::ScalarCmd => self.scalar_cmd.is_some(),
