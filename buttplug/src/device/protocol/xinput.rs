@@ -1,12 +1,19 @@
 use super::{ButtplugDeviceResultFuture, ButtplugProtocol, ButtplugProtocolCommandHandler};
 use crate::{
   core::{
-    errors::ButtplugMessageError,
-    messages::{self, ButtplugDeviceCommandMessageUnion, DeviceMessageAttributesMap},
+    errors::{ButtplugDeviceError, ButtplugMessageError},
+    messages::{
+      self,
+      BatteryLevelReading,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugServerMessage,
+      DeviceMessageAttributesMap,
+    },
   },
   device::{
     protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
     DeviceImpl,
+    DeviceReadCmd,
     DeviceWriteCmd,
     Endpoint,
   },
@@ -90,6 +97,33 @@ impl ButtplugProtocolCommandHandler for XInput {
         }
         Err(e) => Err(e),
       }
+    })
+  }
+
+  fn handle_battery_level_cmd(
+    &self,
+    device: Arc<DeviceImpl>,
+    _message: messages::BatteryLevelCmd,
+  ) -> ButtplugDeviceResultFuture {
+    Box::pin(async move {
+      let rawreading = device
+        .read_value(DeviceReadCmd::new(Endpoint::Rx, 0, 0))
+        .await?;
+      let id = rawreading.device_index();
+      let battery = match rawreading.data()[0] {
+        0 => 0.0,
+        1 => 0.33,
+        2 => 0.66,
+        3 => 1.0,
+        _ => {
+          return Err(
+            ButtplugDeviceError::DeviceCommunicationError(format!("something went wrong")).into(),
+          )
+        }
+      };
+      Ok(ButtplugServerMessage::BatteryLevelReading(
+        BatteryLevelReading::new(id, battery),
+      ))
     })
   }
 }

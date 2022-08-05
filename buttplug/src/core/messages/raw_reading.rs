@@ -35,6 +35,10 @@ impl RawReading {
     }
   }
 
+  pub fn device_index(&self) -> u32 {
+    self.device_index
+  }
+
   pub fn endpoint(&self) -> Endpoint {
     self.endpoint
   }

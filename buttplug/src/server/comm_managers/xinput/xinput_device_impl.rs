@@ -67,7 +67,7 @@ impl ButtplugDeviceImplCreator for XInputDeviceImplCreator {
     let device_impl = DeviceImpl::new(
       &self.index.to_string(),
       &create_address(self.index),
-      &[Endpoint::Tx],
+      &[Endpoint::Tx, Endpoint::Rx],
       Box::new(device_impl_internal),
     );
     Ok(device_impl)
@@ -113,7 +113,20 @@ impl DeviceImplInternal for XInputDeviceImpl {
     &self,
     _msg: DeviceReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugError>> {
-    panic!("We should never get here!");
+    let handle = self.handle.clone();
+    let index = self.index;
+    Box::pin(async move {
+      let battery = handle
+        .get_gamepad_battery_information(index as u32)
+        .map_err(|e| {
+          ButtplugDeviceError::from(ButtplugDeviceSpecificError::XInputError(format!("{:?}", e)))
+        })?;
+      Ok(RawReading::new(
+        index as u32,
+        Endpoint::Rx,
+        vec![battery.battery_level.0],
+      ))
+    })
   }
 
   fn write_value(&self, msg: DeviceWriteCmd) -> ButtplugResultFuture {
