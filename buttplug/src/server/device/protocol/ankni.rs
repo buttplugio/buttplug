@@ -94,82 +94,40 @@ impl ProtocolHandler for Ankni {
   }
 }
 
-/*
 #[cfg(all(test, feature = "server"))]
 mod test {
+  use super::Ankni;
   use crate::{
-    core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
+    core::messages::{Endpoint, ActuatorType},
     server::device::{
-      hardware::communication::test::{check_test_recv_value, new_bluetoothle_test_device},
+      protocol::ProtocolHandler,
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
-    util::async_manager,
   };
 
   #[test]
   pub fn test_ankni_protocol() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("DSJM")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-            0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-          ],
-          true,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd,
-            0xfd, 0xfd, 0xfd, 0xfd, 0x00, 0x00,
-          ],
-          true,
-        )),
-      );
-
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
+    let handler = Ankni {};
+    assert_eq!(
+      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 0x02))]),
+      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
+        Endpoint::Tx,
+        vec![
             0x03, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          ],
-          true,
-        )),
-      );
-      // Test to make sure we handle packet IDs across protocol clones correctly.
-      device
-        .parse_message(StopDeviceCmd::new(0).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x03, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-          ],
-          true,
-        )),
-      );
-    });
+        ],
+        true
+      ))])
+    );
+    assert_eq!(
+      handler.handle_scalar_cmd(&vec![
+        Some((ActuatorType::Vibrate, 0x00)),
+      ]),
+      Ok(vec![
+        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x03, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00], true)),
+      ])
+    );
   }
 }
-*/
+

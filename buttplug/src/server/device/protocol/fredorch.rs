@@ -173,18 +173,13 @@ impl ProtocolHandler for Fredorch {
   }
 }
 
-/*
 #[cfg(all(test, feature = "server"))]
 mod test {
+  use super::Fredorch;
   use crate::{
-    core::messages::{Endpoint, FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
+    core::messages::{Endpoint, FleshlightLaunchFW12Cmd},
     server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      hardware::communication::test::{
-        check_test_recv_empty,
-        check_test_recv_value,
-        new_bluetoothle_test_device,
-      },
+      hardware::{HardwareCommand, HardwareWriteCmd}, protocol::ProtocolHandler,
     },
     util::async_manager,
   };
@@ -192,187 +187,30 @@ mod test {
   #[test]
   pub fn test_fredorch_fleshlight_fw12cmd() {
     async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("YXlinksSPP")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-
-      // Initialisation
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x01, 0xc0, 0xc3,
-          ],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      // Movement
-      device
-        .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
+      let device = Fredorch::default();
+      let command = device.handle_fleshlight_launch_fw12_cmd(FleshlightLaunchFW12Cmd::new(0, 50, 50)).unwrap();
+      assert_eq!(command,
+        vec![HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x07, 0x00, 0x07, 0x00, 0x4b, 0x00,
             0x4b, 0x00, 0x01, 0x2e, 0x7b,
           ],
           false,
-        )),
+        ))],
       );
-      assert!(check_test_recv_empty(&command_receiver));
 
-      device
-        .parse_message(FleshlightLaunchFW12Cmd::new(0, 99, 99).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
+      let command = device.handle_fleshlight_launch_fw12_cmd(FleshlightLaunchFW12Cmd::new(0, 99, 99)).unwrap();
+      assert_eq!(command,
+        vec![HardwareCommand::Write(HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![
             0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x0f, 0x00, 0x0f, 0x00, 0x96, 0x00,
             0x96, 0x00, 0x01, 0xbc, 0x52,
           ],
           false,
-        )),
+        ))],
       );
-      assert!(check_test_recv_empty(&command_receiver));
-    });
-  }
-
-  #[test]
-  pub fn test_fredorch_linearcmd() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("YXlinksSPP")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-
-      // Initialisation
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x01, 0xc0, 0xc3,
-          ],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      // Movement
-      device
-        .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 200, 0.51)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x07, 0x00, 0x07, 0x00, 0x4b, 0x00,
-            0x4b, 0x00, 0x01, 0x2e, 0x7b,
-          ],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      device
-        .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 50, 1.0)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![
-            0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x0f, 0x00, 0x0f, 0x00, 0x96, 0x00,
-            0x96, 0x00, 0x01, 0xbc, 0x52,
-          ],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
     });
   }
 }
-*/
