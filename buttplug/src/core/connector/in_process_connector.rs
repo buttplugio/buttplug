@@ -48,27 +48,24 @@ impl ButtplugInProcessClientConnectorBuilder {
 /// In-process Buttplug Server Connector
 ///
 /// The In-Process Connector contains a [ButtplugServer], meaning that both the
-/// [ButtplugClient][crate::client::ButtplugClient] and [ButtplugServer] will
-/// exist in the same process. This is useful for developing applications, or
-/// for distributing an applications without requiring access to an outside
-/// [ButtplugServer].
+/// [ButtplugClient][crate::client::ButtplugClient] and [ButtplugServer] will exist in the same
+/// process. This is useful for developing applications, or for distributing an applications without
+/// requiring access to an outside [ButtplugServer].
 ///
 /// # Notes
 ///
-/// Buttplug, as a project, is built in a way that tries to make sure all
-/// programs will work with new versions of the library. This is why we have
-/// [ButtplugClient][crate::client::ButtplugClient] for applications, and
-/// Connectors to access out-of-process [ButtplugServer]s over IPC, network,
-/// etc. It means that the out-of-process server can be upgraded by the user at
-/// any time, even if the [ButtplugClient][crate::client::ButtplugClient] using
-/// application hasn't been upgraded. This allows the program to support
-/// hardware that may not have even been released when it was published.
+/// Buttplug is built in a way that tries to make sure all programs will work with new versions of
+/// the library. This is why we have [ButtplugClient][crate::client::ButtplugClient] for
+/// applications, and Connectors to access out-of-process [ButtplugServer]s over IPC, network, etc.
+/// It means that the out-of-process server can be upgraded by the user at any time, even if the
+/// [ButtplugClient][crate::client::ButtplugClient] using application hasn't been upgraded. This
+/// allows the program to support hardware that may not have even been released when it was
+/// published.
 ///
-/// While including an EmbeddedConnector in your application is the quickest and
-/// easiest way to develop (and we highly recommend developing that way), and
-/// also an easy way to get users up and running as quickly as possible, we
-/// recommend also including some sort of IPC Connector in order for your
-/// application to connect to newer servers when they come out.
+/// While including an EmbeddedConnector in your application is the quickest and easiest way to
+/// develop (and we highly recommend developing that way), and also an easy way to get users up and
+/// running as quickly as possible, we recommend also including some sort of IPC Connector in order
+/// for your application to connect to newer servers when they come out.
 #[cfg(feature = "server")]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
