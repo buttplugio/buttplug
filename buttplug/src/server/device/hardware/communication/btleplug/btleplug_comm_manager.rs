@@ -27,7 +27,7 @@ pub struct BtlePlugCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(BtlePlugCommunicationManager::new(sender))

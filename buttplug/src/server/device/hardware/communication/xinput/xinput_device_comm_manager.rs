@@ -35,7 +35,7 @@ pub struct XInputDeviceCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for XInputDeviceCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TimedRetryCommunicationManager::new(

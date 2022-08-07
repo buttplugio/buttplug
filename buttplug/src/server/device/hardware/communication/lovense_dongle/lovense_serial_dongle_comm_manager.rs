@@ -140,7 +140,7 @@ pub struct LovenseSerialDongleCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for LovenseSerialDongleCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseSerialDongleCommunicationManager::new(sender))

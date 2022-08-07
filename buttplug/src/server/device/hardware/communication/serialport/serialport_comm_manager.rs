@@ -25,7 +25,7 @@ pub struct SerialPortCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for SerialPortCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TimedRetryCommunicationManager::new(

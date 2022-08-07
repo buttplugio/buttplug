@@ -98,7 +98,7 @@ pub struct LovenseConnectServiceCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for LovenseConnectServiceCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TimedRetryCommunicationManager::new(

@@ -47,7 +47,7 @@ pub enum HardwareCommunicationManagerEvent {
 
 pub trait HardwareCommunicationManagerBuilder: Send {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager>;
 }

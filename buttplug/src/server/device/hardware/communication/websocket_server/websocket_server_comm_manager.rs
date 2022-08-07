@@ -57,7 +57,7 @@ impl WebsocketServerDeviceCommunicationManagerBuilder {
 
 impl HardwareCommunicationManagerBuilder for WebsocketServerDeviceCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(WebsocketServerDeviceCommunicationManager::new(

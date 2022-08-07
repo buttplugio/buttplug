@@ -147,7 +147,7 @@ impl ServerDeviceManagerBuilder {
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
     let mut comm_managers = Vec::new();
-    for builder in &self.comm_managers {
+    for builder in &mut self.comm_managers {
       let comm_mgr = builder.finish(device_event_sender.clone());
 
       if comm_managers

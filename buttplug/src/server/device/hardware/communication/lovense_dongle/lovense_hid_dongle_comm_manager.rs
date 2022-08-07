@@ -155,7 +155,7 @@ pub struct LovenseHIDDongleCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for LovenseHIDDongleCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(LovenseHIDDongleCommunicationManager::new(sender))
