@@ -41,6 +41,7 @@ pub use device::{
   LinearCommand,
   RotateCommand,
   ScalarCommand,
+  VibrateCommand,
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},

@@ -77,15 +77,32 @@ pub enum ButtplugClientDeviceEvent {
 /// a device. Units are in absolute speed values (0.0-1.0).
 pub enum ScalarCommand {
   /// Sets all vibration features of a device to the same speed.
-  Scalar(f64),
+  Scalar((f64, ActuatorType)),
   /// Sets vibration features to speed based on the index of the speed in the
   /// vec (i.e. motor 0 is set to `SpeedVec[0]`, motor 1 is set to
   /// `SpeedVec[1]`, etc...)
-  ScalarVec(Vec<f64>),
+  ScalarVec(Vec<(f64, ActuatorType)>),
   /// Sets vibration features indicated by index to requested speed. For
   /// instance, if the map has an entry of (1, 0.5), it will set motor 1 to a
   /// speed of 0.5.
-  ScalarMap(HashMap<u32, f64>),
+  ScalarMap(HashMap<u32, (f64, ActuatorType)>),
+}
+
+/// Convenience enum for forming [VibrateCmd] commands.
+///
+/// Allows users to easily specify speeds across different vibration features in
+/// a device. Units are in absolute speed values (0.0-1.0).
+pub enum VibrateCommand {
+  /// Sets all vibration features of a device to the same speed.
+  Vibrate(f64),
+  /// Sets vibration features to speed based on the index of the speed in the
+  /// vec (i.e. motor 0 is set to `SpeedVec[0]`, motor 1 is set to
+  /// `SpeedVec[1]`, etc...)
+  VibrateVec(Vec<f64>),
+  /// Sets vibration features indicated by index to requested speed. For
+  /// instance, if the map has an entry of (1, 0.5), it will set motor 1 to a
+  /// speed of 0.5.
+  VibrateMap(HashMap<u32, f64>),
 }
 
 /// Convenience enum for forming [RotateCmd] commands.
@@ -297,7 +314,7 @@ impl ButtplugClientDevice {
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
-  pub fn vibrate(&self, speed_cmd: ScalarCommand) -> ButtplugClientResultFuture {
+  pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
@@ -315,13 +332,13 @@ impl ButtplugClientDevice {
 
     let mut speed_vec: Vec<ScalarSubcommand>;
     match speed_cmd {
-      ScalarCommand::Scalar(speed) => {
+      VibrateCommand::Vibrate(speed) => {
         speed_vec = Vec::with_capacity(vibrator_count as usize);
         for i in 0..vibrator_count {
           speed_vec.push(ScalarSubcommand::new(i, speed, ActuatorType::Vibrate));
         }
       }
-      ScalarCommand::ScalarMap(map) => {
+      VibrateCommand::VibrateMap(map) => {
         if map.len() as u32 > vibrator_count {
           return self.create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(vibrator_count, map.len() as u32)
@@ -338,7 +355,7 @@ impl ButtplugClientDevice {
           speed_vec.push(ScalarSubcommand::new(idx, speed, ActuatorType::Vibrate));
         }
       }
-      ScalarCommand::ScalarVec(vec) => {
+      VibrateCommand::VibrateVec(vec) => {
         if vec.len() as u32 > vibrator_count {
           return self.create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(vibrator_count, vec.len() as u32)
@@ -354,6 +371,62 @@ impl ButtplugClientDevice {
     let msg = ScalarCmd::new(self.index, speed_vec).into();
     self.send_message_expect_ok(msg)
   }
+
+pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
+  if self.message_attributes.scalar_cmd().is_none() {
+    return self.create_boxed_future_client_error(
+      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
+    );
+  }
+
+  let scalar_count: u32 = self
+  .message_attributes
+  .scalar_cmd()
+  .as_ref()
+  .expect("Already checked existence")
+  .len() as u32;
+
+  let mut scalar_vec: Vec<ScalarSubcommand>;
+  match scalar_cmd {
+    ScalarCommand::Scalar((scalar, actuator)) => {
+      scalar_vec = Vec::with_capacity(scalar_count as usize);
+      for i in 0..scalar_count {
+        scalar_vec.push(ScalarSubcommand::new(i, *scalar, *actuator));
+      }
+    }
+    ScalarCommand::ScalarMap(map) => {
+      if map.len() as u32 > scalar_count {
+        return self.create_boxed_future_client_error(
+          ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32)
+            .into(),
+        );
+      }
+      scalar_vec = Vec::with_capacity(map.len() as usize);
+      for (idx, (scalar, actuator)) in map {
+        if *idx >= scalar_count {
+          return self.create_boxed_future_client_error(
+            ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
+          );
+        }
+        scalar_vec.push(ScalarSubcommand::new(*idx, *scalar, *actuator));
+      }
+    }
+    ScalarCommand::ScalarVec(vec) => {
+      if vec.len() as u32 > scalar_count {
+        return self.create_boxed_future_client_error(
+          ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32)
+            .into(),
+        );
+      }
+      scalar_vec = Vec::with_capacity(vec.len() as usize);
+      for (i, (scalar, actuator)) in vec.iter().enumerate() {
+        scalar_vec.push(ScalarSubcommand::new(i as u32, *scalar, *actuator));
+      }
+    }
+  }
+  let msg = ScalarCmd::new(self.index, scalar_vec).into();
+  self.send_message_expect_ok(msg)
+}
 
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
