@@ -72,7 +72,7 @@ hidapi = { version = "1.4.1", default-features = false, features = ["linux-stati
 wasm-bindgen = { version = "0.2.80", optional = true }
 tokio = { version = "1.17.0", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.3"
-prost = "0.10.1"
+prost = "0.11"
 tokio-util = "0.7.1"
 reqwest = { version = "0.11.10", optional = true, features = ["native-tls"] }
 serde-aux = "3.0.1"
@@ -101,7 +101,7 @@ targets = []
 features = ["default", "unstable"]
 
 [build-dependencies]
-prost-build = "0.10.1"
+prost-build = "0.11"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows = { version = "0.36.0", features = ["Devices_Bluetooth", "Foundation"] }
