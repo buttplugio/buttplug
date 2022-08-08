@@ -35,13 +35,13 @@ pub struct ButtplugInProcessClientConnectorBuilder {
 }
 
 impl ButtplugInProcessClientConnectorBuilder {
-  pub fn server(mut self, server: ButtplugServer) -> Self {
+  pub fn server(&mut self, server: ButtplugServer) -> &mut Self {
     self.server = Some(server);
     self
   }
 
-  pub fn finish(self) -> ButtplugInProcessClientConnector {
-    ButtplugInProcessClientConnector::new(self.server)
+  pub fn finish(&mut self) -> ButtplugInProcessClientConnector {
+    ButtplugInProcessClientConnector::new(self.server.take())
   }
 }
 
