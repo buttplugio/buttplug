@@ -4,9 +4,10 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
+/*
 extern crate buttplug;
 mod util;
+pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{
   core::messages::{
@@ -21,7 +22,6 @@ use buttplug::{
   },
   server::{
     device::{
-      hardware::communication::test::check_test_recv_value,
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServer,
@@ -196,3 +196,4 @@ fn test_version0_singlemotorvibratecmd() {
     );
   });
 }
+ */

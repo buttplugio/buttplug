@@ -1,0 +1,53 @@
+devices:
+  - identifier: 
+      name: "DSJM"
+      address: null
+      identifier: "Default"
+    expected_name: "Ankni Candy"
+device_commands: 
+  # Initialization
+  - !receive
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01]
+            write_with_response: true
+  - !receive
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x02, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0xfd, 0x00, 0x00,]
+            write_with_response: true
+  # Commands
+  - !send
+      device_index: 0
+      messages:
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,]
+            write_with_response: true
+  - !send
+      device_index: 0
+      messages:
+        - !StopDeviceCmd
+            Id: 1
+            DeviceIndex: 0
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,]
+            write_with_response: true

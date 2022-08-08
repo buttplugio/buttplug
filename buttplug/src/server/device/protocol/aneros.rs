@@ -32,38 +32,3 @@ impl ProtocolHandler for Aneros {
     .into()])
   }
 }
-
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use super::Aneros;
-  use crate::{
-    core::messages::{ActuatorType, Endpoint},
-    server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::ProtocolHandler,
-    },
-  };
-
-  #[test]
-  pub fn test_aneros_protocol() {
-    let handler = Aneros {};
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![Some((ActuatorType::Vibrate, 64))]),
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![0xF1, 64],
-        false
-      ))])
-    );
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![
-        Some((ActuatorType::Vibrate, 13)),
-        Some((ActuatorType::Vibrate, 64))
-      ]),
-      Ok(vec![
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 13], false)),
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF2, 64], false))
-      ])
-    );
-  }
-}

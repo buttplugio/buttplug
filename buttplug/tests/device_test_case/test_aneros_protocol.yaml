@@ -1,0 +1,66 @@
+devices:
+  - identifier: 
+      name: "Massage Demo"
+      address: null
+      identifier: "Default"
+    expected_name: "Aneros Vivi"
+device_commands:
+  # Commands
+  - !send
+      device_index: 0
+      messages: 
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0xF1, 0x40]
+            write_with_response: false
+  - !send
+      device_index: 0
+      messages:
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.1
+                ActuatorType: Vibrate
+              - Index: 1
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xF1, 0x0d]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xF2, 0x40]
+            write_with_response: false
+  - !send
+      device_index: 0
+      messages:
+        - !StopDeviceCmd
+            Id: 1
+            DeviceIndex: 0
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xF1, 0x00]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xF2, 0x00]
+            write_with_response: false      

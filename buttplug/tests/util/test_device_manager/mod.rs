@@ -9,23 +9,22 @@ mod test_device;
 #[cfg(feature = "server")]
 mod test_device_comm_manager;
 
-use crate::{
+use buttplug::{
   server::device::hardware::HardwareCommand,
   util::stream::{iffy_is_empty_check, recv_now},
 };
 use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
-  TestDeviceEndpointChannel,
-  TestDeviceInternal,
   TestHardwareConnector,
+  TestDeviceChannelHost
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
-  new_bluetoothle_test_device,
+  //new_bluetoothle_test_device,
   TestDeviceCommunicationManager,
   TestDeviceCommunicationManagerBuilder,
-  TestDeviceCommunicationManagerHelper,
+  TestDeviceIdentifier
 };
 use tokio::sync::mpsc::Receiver;
 

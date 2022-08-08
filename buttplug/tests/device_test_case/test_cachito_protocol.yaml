@@ -1,0 +1,86 @@
+devices:
+  - identifier: 
+      name: "CCTSK"
+      address: null
+      identifier: "Default"
+    expected_name: "Cachito Lure Tao"
+device_commands:
+  # Commands
+  - !send
+      device_index: 0
+      messages: 
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [2, 1, 3, 0]
+            write_with_response: false
+  - !send
+      device_index: 0
+      messages:
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.1
+                ActuatorType: Vibrate
+              - Index: 1
+                Scalar: 0.5
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [2, 1, 1, 0]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [3, 2, 50, 0]
+            write_with_response: false
+  - !send
+      device_index: 0
+      messages:
+        - !ScalarCmd
+            Id: 1
+            DeviceIndex: 0
+            Scalars: 
+              - Index: 0
+                Scalar: 0.1
+                ActuatorType: Vibrate
+              - Index: 1
+                Scalar: 0.9
+                ActuatorType: Vibrate
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [3, 2, 90, 0]
+            write_with_response: false            
+  - !send
+      device_index: 0
+      messages:
+        - !StopDeviceCmd
+            Id: 1
+            DeviceIndex: 0
+  - !receive
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [2, 1, 0, 0]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [3, 2, 0, 0]
+            write_with_response: false      

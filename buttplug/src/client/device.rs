@@ -429,7 +429,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
 }
 
   /// Commands device to move linearly, assuming it has the features to do so.
-  pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
+  pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
@@ -443,7 +443,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
       LinearCommand::Linear(dur, pos) => {
         linear_vec = Vec::with_capacity(linear_count as usize);
         for i in 0..linear_count {
-          linear_vec.push(VectorSubcommand::new(i, dur, pos));
+          linear_vec.push(VectorSubcommand::new(i, *dur, *pos));
         }
       }
       LinearCommand::LinearMap(map) => {
@@ -454,12 +454,12 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
         }
         linear_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (dur, pos)) in map {
-          if idx > linear_count - 1 {
+          if *idx >= linear_count {
             return self.create_boxed_future_client_error(
-              ButtplugDeviceError::DeviceFeatureIndexError(linear_count, idx).into(),
+              ButtplugDeviceError::DeviceFeatureIndexError(linear_count, *idx).into(),
             );
           }
-          linear_vec.push(VectorSubcommand::new(idx, dur, pos));
+          linear_vec.push(VectorSubcommand::new(*idx, *dur, *pos));
         }
       }
       LinearCommand::LinearVec(vec) => {

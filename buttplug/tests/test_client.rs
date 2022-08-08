@@ -4,9 +4,9 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
+/*
 mod util;
-use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device};
+use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device, test_device_manager::check_test_recv_value};
 extern crate buttplug;
 extern crate tracing;
 
@@ -24,13 +24,13 @@ use buttplug::{
   },
   server::{
     device::{
-      hardware::communication::test::check_test_recv_value,
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServerBuilder,
   },
   util::async_manager,
 };
+
 use futures::{future::BoxFuture, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
@@ -258,3 +258,4 @@ fn test_stop_all_devices_and_device_command_range() {
 // TODO Test receiving unmatched DeviceRemoved
 // TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
 // TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
+*/

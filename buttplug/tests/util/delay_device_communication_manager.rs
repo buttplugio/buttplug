@@ -25,7 +25,7 @@ pub struct DelayDeviceCommunicationManagerBuilder {}
 
 impl HardwareCommunicationManagerBuilder for DelayDeviceCommunicationManagerBuilder {
   fn finish(
-    &self,
+    &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(DelayDeviceCommunicationManager::new(sender))

@@ -7,7 +7,7 @@
 
 mod util;
 use buttplug::{
-  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, ScalarCommand},
+  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{self, ButtplugClientMessage, DeviceMessageAttributes},
@@ -22,6 +22,8 @@ use util::test_client_with_device;
 #[cfg(feature = "server")]
 #[test]
 fn test_client_device_connected_status() {
+    use buttplug::server::device::hardware::HardwareEvent;
+
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
 
@@ -41,7 +43,8 @@ fn test_client_device_connected_status() {
     let mut device_event_stream = test_device.event_stream();
     assert!(test_device.connected());
     device
-      .disconnect()
+      .sender
+      .send(HardwareEvent::Disconnected("Test Disconnect".to_owned()))
       .await
       .expect("Test, assuming infallible.");
     while let Some(msg) = device_event_stream.next().await {
@@ -101,6 +104,8 @@ fn test_client_device_client_disconnected_status() {
 #[cfg(feature = "server")]
 #[test]
 fn test_client_device_connected_no_event_listener() {
+    use buttplug::server::device::hardware::HardwareEvent;
+
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
 
@@ -110,7 +115,8 @@ fn test_client_device_connected_no_event_listener() {
       .expect("Test, assuming infallible.");
     Delay::new(Duration::from_millis(100)).await;
     device
-      .disconnect()
+      .sender
+      .send(HardwareEvent::Disconnected("Test Disconnect".to_owned()))
       .await
       .expect("Test, assuming infallible.");
     Delay::new(Duration::from_millis(100)).await;
@@ -144,7 +150,7 @@ fn test_client_device_invalid_command() {
     let test_device = client_device.expect("Test, assuming infallible.");
     assert!(matches!(
       test_device
-        .vibrate(ScalarCommand::Scalar(2.0))
+        .vibrate(VibrateCommand::Vibrate(2.0))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(
@@ -153,7 +159,7 @@ fn test_client_device_invalid_command() {
     ));
     assert!(matches!(
       test_device
-        .vibrate(ScalarCommand::ScalarVec(vec!(0.5, 0.5, 0.5)))
+        .vibrate(VibrateCommand::VibrateVec(vec!(0.5, 0.5, 0.5)))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
@@ -162,7 +168,7 @@ fn test_client_device_invalid_command() {
     ));
     assert!(matches!(
       test_device
-        .vibrate(ScalarCommand::ScalarVec(vec!()))
+        .vibrate(VibrateCommand::VibrateVec(vec!()))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(

@@ -4,15 +4,15 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
+/*
 mod util;
+pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     messages::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
   },
   server::{
-    device::hardware::communication::test::TestDeviceCommunicationManagerBuilder,
     ButtplugServerBuilder,
   },
   util::async_manager,
@@ -265,3 +265,4 @@ fn test_repeated_address_additions() {
     }
   });
 }
+*/

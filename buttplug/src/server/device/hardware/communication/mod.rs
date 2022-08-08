@@ -18,8 +18,6 @@ pub mod websocket_server;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
 
-pub mod test;
-
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,

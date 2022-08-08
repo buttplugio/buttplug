@@ -4,8 +4,12 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-
+/*
 mod util;
+pub use util::test_device_manager::{
+  check_test_recv_value,
+  TestDeviceCommunicationManagerBuilder,
+};
 
 use buttplug::{
   core::{
@@ -20,10 +24,6 @@ use buttplug::{
   },
   server::{
     device::{
-      hardware::communication::test::{
-        check_test_recv_value,
-        TestDeviceCommunicationManagerBuilder,
-      },
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServer,
@@ -500,3 +500,4 @@ fn test_server_builder_user_device_config_old_config_version() {
 // TODO Test scan with no comm managers
 // TODO Test message with no RequestServerInfo first
 // TODO Test sending device command for device that doesn't exist (in server)
+*/
