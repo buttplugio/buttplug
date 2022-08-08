@@ -56,6 +56,7 @@ use std::{
     Arc,
   },
 };
+use getset::{Getters, CopyGetters};
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;
 
@@ -125,6 +126,7 @@ pub enum LinearCommand {
 
 pub type ButtplugClientDeviceMessageType = ButtplugCurrentSpecDeviceMessageType;
 
+#[derive(Getters, CopyGetters)]
 /// Client-usable representation of device connected to the corresponding
 /// [ButtplugServer][crate::server::ButtplugServer]
 ///
@@ -133,14 +135,17 @@ pub type ButtplugClientDeviceMessageType = ButtplugCurrentSpecDeviceMessageType;
 /// to a device connected to the server.
 pub struct ButtplugClientDevice {
   /// Name of the device
-  pub name: String,
+  #[getset(get="pub")]
+  name: String,
   /// Index of the device, matching the index in the
   /// [ButtplugServer][crate::server::ButtplugServer]'s
   /// [DeviceManager][crate::server::device_manager::DeviceManager].
+  #[getset(get_copy="pub")]
   index: u32,
   /// Map of messages the device can take, along with the attributes of those
   /// messages.
-  pub message_attributes: DeviceMessageAttributes,
+  #[getset(get="pub")]
+  message_attributes: DeviceMessageAttributes,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
@@ -601,10 +606,6 @@ impl ButtplugClientDevice {
   pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
     self.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
-  }
-
-  pub fn index(&self) -> u32 {
-    self.index
   }
 
   pub(super) fn set_device_connected(&self, connected: bool) {
