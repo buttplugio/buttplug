@@ -12,13 +12,14 @@ use crate::{
 use async_trait::async_trait;
 use futures::future::BoxFuture;
 use tokio::sync::broadcast;
+use serde::{Serialize, Deserialize};
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
   pub endpoint: Endpoint,
@@ -54,7 +55,7 @@ impl From<RawReadCmd> for HardwareReadCmd {
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
   pub endpoint: Endpoint,
@@ -94,7 +95,7 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct HardwareSubscribeCmd {
   /// Endpoint to subscribe to notifications from.
   pub endpoint: Endpoint,
@@ -121,7 +122,7 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct HardwareUnsubscribeCmd {
   pub endpoint: Endpoint,
 }
@@ -143,14 +144,10 @@ impl From<RawUnsubscribeCmd> for HardwareUnsubscribeCmd {
 
 /// Enumeration of all possible commands that can be sent to a
 /// [Hardware](crate::device::Hardware).
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum HardwareCommand {
   Write(HardwareWriteCmd),
-  // TODO Figure out how to handle arbitrary reads/returns
-  //
-  // These don't happen a lot and are usually part of init right now.
-
-  // Read(HardwareReadCmd),
+  // Read not included here because it needs to be called directly so the response can be handled.
   Subscribe(HardwareSubscribeCmd),
   Unsubscribe(HardwareUnsubscribeCmd),
 }
@@ -172,13 +169,6 @@ impl From<RawUnsubscribeCmd> for HardwareCommand {
     HardwareCommand::Unsubscribe(msg.into())
   }
 }
-/*
-impl From<HardwareReadCmd> for HardwareCommand {
-  fn from(msg: HardwareReadCmd) -> Self {
-    HardwareCommand::Read(msg)
-  }
-}
- */
 
 impl From<HardwareWriteCmd> for HardwareCommand {
   fn from(msg: HardwareWriteCmd) -> Self {
