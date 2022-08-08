@@ -2627,6 +2627,7 @@
           "Bach smart",
           "CycSA",
           "UFOSA",
+          "UFO-TW",
           "VorzePiston",
           "ROCKET"
         ],
@@ -2709,6 +2710,30 @@
               }
             ],
             "VorzeA10CycloneCmd": {}
+          }
+        },
+        {
+          "identifier": [
+            "UFO-TW"
+          ],
+          "name": "Vorze UFO TW",
+          "messages": {
+            "RotateCmd": [
+              {
+                "StepRange": [
+                  0,
+                  99
+                ],
+                "ActuatorType": "Rotate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  99
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ]
           }
         },
         {

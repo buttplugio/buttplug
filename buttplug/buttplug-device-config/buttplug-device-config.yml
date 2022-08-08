@@ -1419,6 +1419,7 @@ protocols:
         - Bach smart
         - CycSA
         - UFOSA
+        - UFO-TW
         - VorzePiston
         - ROCKET
       services:
@@ -1458,6 +1459,15 @@ protocols:
             - StepRange: [0, 99]
               ActuatorType: Rotate
           VorzeA10CycloneCmd: {}
+      - identifier:
+          - UFO-TW
+        name: Vorze UFO TW
+        messages:
+          RotateCmd:
+            - StepRange: [0, 99]
+              ActuatorType: Rotate
+            - StepRange: [0, 99]
+              ActuatorType: Rotate
       - identifier:
           - VorzePiston
         name: Vorze Piston

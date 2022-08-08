@@ -1,0 +1,45 @@
+devices:
+  - identifier: 
+      name: "UFOSA"
+    expected_name: "Vorze UFO SA"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 0.5
+            Clockwise: true
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x01, 0xB2]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 1
+            Clockwise: false
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x01, 0x63]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x02, 0x01, 0x00]
+            write_with_response: true
