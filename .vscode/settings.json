@@ -1,5 +1,16 @@
 {
   "rust-analyzer.diagnostics.disabled": [
    "macro-error"
-  ]
+  ],
+  "yaml.customTags": [
+    "!Messages mapping",
+    "!Commands mapping",
+    "!ScalarCmd mapping",
+    "!StopDeviceCmd mapping",
+    "!FleshlightLaunchFW12Cmd mapping",
+    "!LinearCmd mapping",
+    "!Write mapping",
+    "!Subscribe mapping",
+    "!Unsubscribe mapping"
+  ],  
 }
