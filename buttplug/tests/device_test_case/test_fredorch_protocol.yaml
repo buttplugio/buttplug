@@ -6,35 +6,35 @@ devices:
     expected_name: "Fredorch Device"
 device_commands: 
   # Initialization
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5]
             write_with_response: false
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6]
             write_with_response: false
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
             data: [0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc0, 0xc3]
             write_with_response: false
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16]
             write_with_response: false
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
@@ -44,7 +44,7 @@ device_commands:
   # Commands
   #
   # How do we send FleshlightLaunchFW12Cmd?!
-  - !send
+  - !Messages
       device_index: 0
       messages:
         - !LinearCmd
@@ -54,14 +54,14 @@ device_commands:
               - Index: 0
                 Position: 0.51
                 Duration: 200
-  - !receive
+  - !Commands
       device_index: 0
       commands:
         - !Write
             endpoint: tx
             data: [0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x07, 0x00, 0x07, 0x00, 0x4b, 0x00, 0x4b, 0x00, 0x01, 0x2e, 0x7b]
             write_with_response: false
-  - !send
+  - !Messages
       device_index: 0
       messages:
         - !LinearCmd
@@ -71,7 +71,7 @@ device_commands:
               - Index: 0
                 Position: 1.0
                 Duration: 50
-  - !receive
+  - !Commands
       device_index: 0
       commands:
         - !Write

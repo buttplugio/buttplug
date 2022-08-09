@@ -6,7 +6,7 @@ devices:
     expected_name: "Aneros Vivi"
 device_commands:
   # Commands
-  - !send
+  - !Messages
       device_index: 0
       messages: 
         - !ScalarCmd
@@ -16,14 +16,14 @@ device_commands:
               - Index: 0
                 Scalar: 0.5
                 ActuatorType: Vibrate
-  - !receive
+  - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
             data: [0xF1, 0x40]
             write_with_response: false
-  - !send
+  - !Messages
       device_index: 0
       messages:
         - !ScalarCmd
@@ -36,7 +36,7 @@ device_commands:
               - Index: 1
                 Scalar: 0.5
                 ActuatorType: Vibrate
-  - !receive
+  - !Commands
       device_index: 0
       commands:
         - !Write
@@ -47,13 +47,13 @@ device_commands:
             endpoint: tx
             data: [0xF2, 0x40]
             write_with_response: false
-  - !send
+  - !Messages
       device_index: 0
       messages:
         - !StopDeviceCmd
             Id: 1
             DeviceIndex: 0
-  - !receive
+  - !Commands
       device_index: 0
       commands:
         - !Write

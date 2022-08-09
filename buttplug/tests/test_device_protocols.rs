@@ -5,7 +5,7 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent, ScalarCommand, LinearCommand},
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
-    messages::{ButtplugDeviceCommandMessageUnion, ScalarCmd, ScalarSubcommand},
+    messages::ButtplugDeviceCommandMessageUnion,
   },
   server::{device::hardware::HardwareCommand, ButtplugServerBuilder},
   util::async_manager
@@ -23,11 +23,11 @@ struct TestDevice {
 
 #[derive(Serialize, Deserialize)]
 enum TestCommand {
-  send {
+  Messages {
     device_index: u32,
     messages: Vec<ButtplugDeviceCommandMessageUnion>,
   },
-  receive {
+  Commands {
     device_index: u32,
     commands: Vec<HardwareCommand>,
   },
@@ -93,7 +93,7 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 
   for command in &test_case.device_commands {
     match command {
-      TestCommand::send { device_index, messages } => {
+      TestCommand::Messages { device_index, messages } => {
         let device = client.devices()[*device_index as usize].clone();
         for message in messages {
           use ButtplugDeviceCommandMessageUnion::*;
@@ -115,7 +115,7 @@ async fn run_test_case(test_case: &DeviceTestCase) {
           }
         }
       }
-      TestCommand::receive { device_index, commands } => {
+      TestCommand::Commands { device_index, commands } => {
         let device_receiver = &mut device_channels[*device_index as usize].receiver;
         for command in commands {
           tokio::select! {
