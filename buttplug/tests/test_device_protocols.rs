@@ -14,6 +14,7 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use util::test_device_manager::{TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier};
 use tracing::*;
+use test_case::test_case;
 
 #[derive(Serialize, Deserialize)]
 struct TestDevice {
@@ -136,31 +137,24 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   }
 }
 
-#[test]
-fn test_device_protocols() {
+#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
+#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
+#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory
-    let test_case_dir = std::path::Path::new(
+    let test_file_path = std::path::Path::new(
       &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
     )
-    .join(std::path::Path::new("tests"))
-    .join(std::path::Path::new("device_test_case"));
-
-    let paths = std::fs::read_dir(&test_case_dir).unwrap();
-
-    for path in paths {
-      // Load a test file
-      if !path.as_ref().unwrap().metadata().unwrap().is_file() {
-        continue;
-      }
-      // Given the test case object, run the test across all client versions.
-      let file_path = path.unwrap().path();
-      println!("Running test case {:?}", file_path);
-      let yaml_test_case =
-        std::fs::read_to_string(&file_path).expect(&format!("Cannot read file {:?}", file_path));
-      let test_case =
-        serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.");
-      run_test_case(&test_case).await;
-    }
+    .join("tests")
+    .join("device_test_case")
+    .join(test_file);
+    // Given the test case object, run the test across all client versions.
+    let yaml_test_case =
+      std::fs::read_to_string(&test_file_path).expect(&format!("Cannot read file {:?}", test_file_path));
+    let test_case =
+      serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.");
+    run_test_case(&test_case).await;
   });
 }
