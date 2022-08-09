@@ -22,7 +22,6 @@ use buttplug::{
   },
 };
 pub use channel_transport::*;
-use std::sync::Arc;
 
 use crate::util::test_device_manager::TestDeviceIdentifier;
 
@@ -88,16 +87,20 @@ pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
   assert!(client.connected());
   client
 }
-/*
+
 #[allow(dead_code)]
 pub async fn test_server_with_device(
   device_type: &str,
-) -> (ButtplugServer, Arc<TestDeviceInternal>) {
+  allow_raw_message: bool
+) -> (ButtplugServer, TestDeviceChannelHost) {
+  let mut builder = TestDeviceCommunicationManagerBuilder::default();
+  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None, &ProtocolAttributesType::Default));
+
   let mut server_builder = ButtplugServerBuilder::default();
-  let builder = TestDeviceCommunicationManagerBuilder::default();
+  if allow_raw_message {
+    server_builder.allow_raw_messages();
+  }
   server_builder.comm_manager(builder);
   let server = server_builder.finish().unwrap();
-  let device = helper.add_ble_device(device_type).await;
   (server, device)
 }
-*/

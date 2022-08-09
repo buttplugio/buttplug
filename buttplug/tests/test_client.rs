@@ -4,7 +4,7 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-/*
+
 mod util;
 use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device, test_device_manager::check_test_recv_value};
 extern crate buttplug;
@@ -197,7 +197,7 @@ fn test_client_ping() {
     assert!(client.ping().await.is_err());
   });
 }
-
+/*
 // Tests both the stop all devices functionality, as well as both ends of the
 // command range for is_in_command_range message validation.
 #[cfg(feature = "server")]
@@ -249,7 +249,7 @@ fn test_stop_all_devices_and_device_command_range() {
     assert!(client.stop_all_devices().await.is_ok());
   });
 }
-
+*/
 // TODO Test calling connect twice
 // TODO Test calling disconnect twice w/o connection
 // TODO Test invalid return on RequestServerInfo
@@ -258,4 +258,3 @@ fn test_stop_all_devices_and_device_command_range() {
 // TODO Test receiving unmatched DeviceRemoved
 // TODO Test receiving Error when expecting Ok (i.e. StartScanning returns an error)
 // TODO Test receiving wrong message expecting Ok (i.e. StartScanning returns DeviceList)
-*/

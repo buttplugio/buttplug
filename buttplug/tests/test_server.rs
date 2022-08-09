@@ -4,11 +4,15 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-/*
+
 mod util;
-pub use util::test_device_manager::{
+pub use util::{
+  test_server_with_device,
+  test_device_manager::{
+    TestDeviceIdentifier,
   check_test_recv_value,
   TestDeviceCommunicationManagerBuilder,
+  }
 };
 
 use buttplug::{
@@ -22,8 +26,9 @@ use buttplug::{
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  server::{
+  server::{    
     device::{
+      configuration::ProtocolAttributesType,
       hardware::{HardwareCommand, HardwareWriteCmd},
     },
     ButtplugServer,
@@ -144,12 +149,13 @@ fn test_ping_timeout() {
 #[test]
 fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
+    let mut builder = TestDeviceCommunicationManagerBuilder::default();
+    let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+  
     let mut server_builder = ButtplugServerBuilder::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
-    server_builder.max_ping_time(100).comm_manager(builder);
+    server_builder.max_ping_time(100);
+    server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
-    let device = helper.add_ble_device("Massage Demo").await;
 
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -185,11 +191,9 @@ fn test_device_stop_on_ping_timeout() {
       )
       .await
       .expect("Test, assuming infallible.");
-    let command_receiver = device
-      .endpoint_receiver(&Endpoint::Tx)
-      .expect("Test, assuming infallible.");
+
     check_test_recv_value(
-      &command_receiver,
+      &mut device,
       HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
     );
     /*
@@ -243,13 +247,13 @@ fn test_invalid_device_index() {
 #[test]
 fn test_device_index_generation() {
   async_manager::block_on(async {
+    let mut builder = TestDeviceCommunicationManagerBuilder::default();
+    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+  
     let mut server_builder = ButtplugServerBuilder::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
     server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
-    let _ = helper.add_ble_device("Massage Demo").await;
-    let _ = helper.add_ble_device("Massage Demo").await;
 
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -293,13 +297,13 @@ fn test_device_index_generation() {
 #[test]
 fn test_server_scanning_finished() {
   async_manager::block_on(async {
+    let mut builder = TestDeviceCommunicationManagerBuilder::default();
+    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+  
     let mut server_builder = ButtplugServerBuilder::default();
-    let builder = TestDeviceCommunicationManagerBuilder::default();
-    let helper = builder.helper();
     server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
-    let _ = helper.add_ble_device("Massage Demo").await;
-    let _ = helper.add_ble_device("Massage Demo").await;
 
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -500,4 +504,3 @@ fn test_server_builder_user_device_config_old_config_version() {
 // TODO Test scan with no comm managers
 // TODO Test message with no RequestServerInfo first
 // TODO Test sending device command for device that doesn't exist (in server)
-*/

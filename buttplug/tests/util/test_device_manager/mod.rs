@@ -30,11 +30,11 @@ use tokio::sync::mpsc::Receiver;
 
 #[allow(dead_code)]
 pub fn check_test_recv_value(
-  receiver: &Arc<Mutex<Receiver<HardwareCommand>>>,
+  receiver: &mut TestDeviceChannelHost,
   command: HardwareCommand,
 ) {
   assert_eq!(
-    recv_now(&mut receiver.lock().expect("Test"))
+    recv_now(&mut receiver.receiver)
       .expect("No messages received")
       .expect("Test"),
     command

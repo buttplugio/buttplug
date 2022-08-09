@@ -4,7 +4,7 @@
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
-/*
+
 extern crate buttplug;
 mod util;
 pub use util::test_device_manager::check_test_recv_value;
@@ -83,7 +83,7 @@ fn test_version2_connection() {
 #[test]
 fn test_version0_device_added_device_list() {
   async_manager::block_on(async {
-    let (server, _) = test_server_with_device("Massage Demo").await;
+    let (server, _) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
     let serializer = ButtplugServerJSONSerializer::default();
@@ -136,7 +136,7 @@ fn test_version0_device_added_device_list() {
 #[test]
 fn test_version0_singlemotorvibratecmd() {
   async_manager::block_on(async {
-    let (server, device) = test_server_with_device("Massage Demo").await;
+    let (server, mut device) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
     let serializer = ButtplugServerJSONSerializer::default();
@@ -187,13 +187,9 @@ fn test_version0_singlemotorvibratecmd() {
       serializer.serialize(vec!(output2)),
       r#"[{"Ok":{"Id":2}}]"#.to_owned().into()
     );
-    let command_receiver = device
-      .endpoint_receiver(&Endpoint::Tx)
-      .expect("Test, assuming infallible.");
     check_test_recv_value(
-      &command_receiver,
+      &mut device,
       HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
     );
   });
 }
- */

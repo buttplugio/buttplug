@@ -37,12 +37,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TestDeviceIdentifier {
   name: String,
-  address: Option<String>,
+  address: String,
   identifier: ProtocolAttributesType
 }
 
 impl TestDeviceIdentifier {
   pub fn new(name: &str, address: Option<String>, identifier: &ProtocolAttributesType) -> Self {
+    // Vaguely, not really random number. Works well enough to be an address that
+    // doesn't collide.    
+    let address = address.unwrap_or_else(|| {
+      SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Test")
+        .subsec_nanos()
+        .to_string()
+    });    
     Self { name: name.to_owned(), address, identifier: identifier.clone() }
   }
 }
@@ -81,15 +90,7 @@ fn new_uninitialized_ble_test_device(
   identifier: &TestDeviceIdentifier,
   device_channel: TestDeviceChannelDevice
 ) -> TestHardwareConnector {
-  // Vaguely, not really random number. Works well enough to be an address that
-  // doesn't collide.
-  let address = identifier.address.clone().unwrap_or_else(|| {
-    SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .expect("Test")
-      .subsec_nanos()
-      .to_string()
-  });
+  let address = identifier.address.clone();
   let specifier =
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&identifier.name, &[]));
   let hardware = TestDevice::new(&identifier.name, &address, device_channel);
@@ -132,7 +133,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
           name: device.name.clone(),
-          address: device.address.unwrap_or("TestDeviceAddress".to_owned()),
+          address: device.address,
           creator: Box::new(device_creator),
       });
     }
