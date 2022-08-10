@@ -11,6 +11,8 @@
     "!LinearCmd mapping",
     "!Write mapping",
     "!Subscribe mapping",
-    "!Unsubscribe mapping"
+    "!Unsubscribe mapping",
+    "!Notifications sequence",
+    "!Events mapping"
   ],  
 }

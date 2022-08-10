@@ -26,12 +26,15 @@ use buttplug::{
     },
   }, util::async_manager,
 };
+
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture, FutureExt};
 use std::{
+  sync::Arc,
   fmt::{self, Debug},
   collections::HashSet,
 };
+use dashmap::DashSet;
 use tokio::sync::{broadcast, mpsc};
 
 pub struct TestHardwareConnector {
@@ -139,6 +142,7 @@ pub struct TestDevice {
   endpoints: HashSet<Endpoint>,
   test_device_channel: mpsc::Sender<HardwareCommand>,
   event_sender: broadcast::Sender<HardwareEvent>,
+  subscribed_endpoints: Arc<DashSet<Endpoint>>
 }
 
 impl TestDevice {
@@ -149,16 +153,23 @@ impl TestDevice {
     let event_sender_clone = event_sender.clone();
     let address_clone = address.to_owned();
     let (command_sender, mut receiver) = (test_device_channel.sender, test_device_channel.receiver);
+    let subscribed_endpoints = Arc::new(DashSet::new());
+    let subscribed_endpoints_clone = subscribed_endpoints.clone();
     async_manager::spawn(async move {
       while let Some(event) = receiver.recv().await {
-        if let HardwareEvent::Disconnected(_) = event {
-          event_sender_clone
-            .send(HardwareEvent::Disconnected(address_clone.clone()))
-            .expect("Test");
-        } else {
-          event_sender_clone
-            .send(event)
-            .expect("Test");
+        match event {
+          HardwareEvent::Disconnected(_) => {
+            event_sender_clone
+              .send(HardwareEvent::Disconnected(address_clone.clone()))
+              .expect("Test");
+          }
+          HardwareEvent::Notification(_, endpoint, data) => {
+            if subscribed_endpoints_clone.contains(&endpoint) {
+              event_sender_clone
+                .send(HardwareEvent::Notification(address_clone.clone(), endpoint, data))
+                .expect("Test");
+            }
+          }
         }
       }
     });
@@ -168,7 +179,8 @@ impl TestDevice {
       address: address.to_owned(),
       endpoints: HashSet::new(),
       test_device_channel: command_sender,
-      event_sender
+      event_sender,
+      subscribed_endpoints
     }
   }
 
@@ -182,6 +194,20 @@ impl TestDevice {
 
   pub fn address(&self) -> String {
     self.address.clone()
+  }
+
+  fn send_command(
+    &self,
+    data_command: HardwareCommand
+  ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
+    let sender = self.test_device_channel.clone();
+    async move {
+      sender
+        .send(data_command)
+        .await
+        .expect("Test");
+      Ok(())
+    }.boxed()
   }
 }
 
@@ -215,32 +241,28 @@ impl HardwareInternal for TestDevice {
     if !self.endpoints.contains(&msg.endpoint) {
       return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
     }
-    let sender = self.test_device_channel.clone();
-    let data_command = msg.clone().into();
-    async move {
-      sender
-        .send(data_command)
-        .await
-        .expect("Test");
-      Ok(())
-    }.boxed()
+    self.send_command(msg.clone().into())
   }
 
   fn subscribe(
     &self,
-    _msg: &HardwareSubscribeCmd,
+    msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Test device does not support subscribe".to_owned(),
-    ))).boxed()
+    if !self.endpoints.contains(&msg.endpoint) {
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+    }
+    self.subscribed_endpoints.insert(msg.endpoint);
+    self.send_command(msg.clone().into())
   }
 
   fn unsubscribe(
     &self,
-    _msg: &HardwareUnsubscribeCmd,
+    msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Test device does not support unsubscribe".to_owned(),
-    ))).boxed()
+    if !self.endpoints.contains(&msg.endpoint) {
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+    }
+    self.subscribed_endpoints.remove(&msg.endpoint);
+    self.send_command(msg.clone().into())
   }
 }

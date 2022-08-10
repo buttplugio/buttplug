@@ -5,9 +5,9 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent, ScalarCommand, LinearCommand},
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
-    messages::ButtplugDeviceCommandMessageUnion,
+    messages::{ButtplugDeviceCommandMessageUnion, Endpoint},
   },
-  server::{device::hardware::HardwareCommand, ButtplugServerBuilder},
+  server::{device::hardware::{HardwareCommand, HardwareEvent}, ButtplugServerBuilder},
   util::async_manager
 };
 use futures::StreamExt;
@@ -23,6 +23,18 @@ struct TestDevice {
 }
 
 #[derive(Serialize, Deserialize)]
+struct TestHardwareNotification {
+  endpoint: Endpoint,
+  data: Vec<u8>
+}
+
+#[derive(Serialize, Deserialize)]
+enum TestHardwareEvent {
+  Notifications(Vec<TestHardwareNotification>),
+  Disconnect
+}
+
+#[derive(Serialize, Deserialize)]
 enum TestCommand {
   Messages {
     device_index: u32,
@@ -32,6 +44,10 @@ enum TestCommand {
     device_index: u32,
     commands: Vec<HardwareCommand>,
   },
+  Events {
+    device_index: u32,
+    events: Vec<TestHardwareEvent>,
+  }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -39,6 +55,7 @@ struct DeviceTestCase {
   devices: Vec<TestDevice>,
   device_config_file: Option<String>,
   user_device_config_file: Option<String>,
+  device_init: Option<Vec<TestCommand>>,
   device_commands: Vec<TestCommand>,
 }
 
@@ -65,11 +82,55 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   client.connect(in_process_connector_builder.finish()).await.expect("Test client couldn't connect to embedded process");
   client.start_scanning().await.expect("Scanning should work.");
 
+  if let Some(device_init) = &test_case.device_init {
+    // Parse send message into client calls, receives into response checks
+    for command in device_init {
+      match command {
+        TestCommand::Messages { device_index: _, messages: _ } => {
+          panic!("Shouldn't have messages during initialization");
+        }
+        TestCommand::Commands { device_index, commands } => {
+          let device_receiver = &mut device_channels[*device_index as usize].receiver;
+          for command in commands {
+            tokio::select! {
+              _ = tokio::time::sleep(Duration::from_millis(100)) => {
+                panic!("Timeout while waiting for device output!")
+              }
+              event = device_receiver.recv() => {
+                info!("Got event {:?}", event);
+                if let Some(command_event) = event {
+                  assert_eq!(command_event, *command);
+                } else {
+                  panic!("Should not drop device command receiver");
+                }
+              }
+            }
+          }
+        }
+        TestCommand::Events { device_index, events } => {
+          let device_sender = &device_channels[*device_index as usize].sender;
+          for event in events {
+            match event {
+              TestHardwareEvent::Notifications(notifications) => {
+                for notification in notifications {
+                  device_sender.send(HardwareEvent::Notification(String::new(), notification.endpoint, notification.data.clone())).await.expect("Should always succeed");
+                }
+              }
+              TestHardwareEvent::Disconnect => {
+  
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   // Scan for devices, wait 'til we get all of the ones we're expecting. Also check names at this
   // point.
   loop {
     tokio::select! {
-      _ = tokio::time::sleep(Duration::from_millis(100)) => {
+      _ = tokio::time::sleep(Duration::from_millis(300)) => {
         panic!("Timeout while waiting for device scan return!")
       }
       event = event_stream.next() => {
@@ -91,7 +152,6 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   }
   
   // Parse send message into client calls, receives into response checks
-
   for command in &test_case.device_commands {
     match command {
       TestCommand::Messages { device_index, messages } => {
@@ -133,6 +193,21 @@ async fn run_test_case(test_case: &DeviceTestCase) {
           }
         }
       }
+      TestCommand::Events { device_index, events } => {
+        let device_sender = &device_channels[*device_index as usize].sender;
+        for event in events {
+          match event {
+            TestHardwareEvent::Notifications(notifications) => {
+              for notification in notifications {
+                device_sender.send(HardwareEvent::Notification(String::new(), notification.endpoint, notification.data.clone())).await.expect("Should always succeed");
+              }
+            }
+            TestHardwareEvent::Disconnect => {
+
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -141,6 +216,7 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 #[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory
