@@ -150,7 +150,7 @@ fn test_ping_timeout() {
 fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
-    let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+    let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.max_ping_time(100);
@@ -248,8 +248,8 @@ fn test_invalid_device_index() {
 fn test_device_index_generation() {
   async_manager::block_on(async {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
-    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
-    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
+    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.comm_manager(builder);
@@ -298,8 +298,8 @@ fn test_device_index_generation() {
 fn test_server_scanning_finished() {
   async_manager::block_on(async {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
-    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
-    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+    let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
+    let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
   
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.comm_manager(builder);

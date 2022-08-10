@@ -2,7 +2,6 @@ devices:
   - identifier: 
       name: "DSJM"
       address: null
-      identifier: "Default"
     expected_name: "Ankni Candy"
 device_commands: 
   # Initialization

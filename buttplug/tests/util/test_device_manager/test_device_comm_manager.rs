@@ -38,11 +38,10 @@ use serde::{Deserialize, Serialize};
 pub struct TestDeviceIdentifier {
   name: String,
   address: String,
-  identifier: ProtocolAttributesType
 }
 
 impl TestDeviceIdentifier {
-  pub fn new(name: &str, address: Option<String>, identifier: &ProtocolAttributesType) -> Self {
+  pub fn new(name: &str, address: Option<String>) -> Self {
     // Vaguely, not really random number. Works well enough to be an address that
     // doesn't collide.    
     let address = address.unwrap_or_else(|| {
@@ -52,7 +51,7 @@ impl TestDeviceIdentifier {
         .subsec_nanos()
         .to_string()
     });    
-    Self { name: name.to_owned(), address, identifier: identifier.clone() }
+    Self { name: name.to_owned(), address }
   }
 }
 

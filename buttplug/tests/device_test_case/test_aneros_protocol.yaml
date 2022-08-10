@@ -2,7 +2,6 @@ devices:
   - identifier: 
       name: "Massage Demo"
       address: null
-      identifier: "Default"
     expected_name: "Aneros Vivi"
 device_commands:
   # Commands

@@ -2,7 +2,6 @@ devices:
   - identifier: 
       name: "YXlinksSPP"
       address: null
-      identifier: "Default"
     expected_name: "Fredorch Device"
 device_commands: 
   # Initialization

@@ -18,7 +18,7 @@ use buttplug::{
   core::connector::ButtplugInProcessClientConnectorBuilder,
   server::{
     ButtplugServer,
-    ButtplugServerBuilder, device::configuration::ProtocolAttributesType,
+    ButtplugServerBuilder
   },
 };
 pub use channel_transport::*;
@@ -50,7 +50,7 @@ pub async fn test_client() -> ButtplugClient {
 #[allow(dead_code)]
 pub async fn test_client_with_device() -> (ButtplugClient, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
-  let device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None, &ProtocolAttributesType::Default));
+  let device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
   let mut server_builder = ButtplugServerBuilder::default();
   server_builder.comm_manager(builder);
@@ -94,7 +94,7 @@ pub async fn test_server_with_device(
   allow_raw_message: bool
 ) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
-  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None, &ProtocolAttributesType::Default));
+  let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));
 
   let mut server_builder = ButtplugServerBuilder::default();
   if allow_raw_message {
