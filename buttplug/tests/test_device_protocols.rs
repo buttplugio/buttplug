@@ -100,7 +100,6 @@ struct DeviceTestCase {
 }
 
 async fn run_test_case(test_case: &DeviceTestCase) {
-  tracing_subscriber::fmt::init();
   // Create our TestDeviceManager with the device identifier we want to create
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device_channels = vec![];
@@ -219,13 +218,13 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   }
 }
 
-//#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
-//#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
-//#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
-//#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
-//#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
-//#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
-//#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
+#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
+#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
+#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
+#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
 #[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (All Devices)")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
