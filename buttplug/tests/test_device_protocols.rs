@@ -161,7 +161,7 @@ async fn run_test_case(test_case: &DeviceTestCase) {
           match message {
             ScalarCmd(msg) => {
               // TODO Kinda weird that we're having to rebuild the message.
-              device.scalar(&ScalarCommand::ScalarVec(msg.scalars().iter().map(|x| (x.scalar(), x.actuator_type())).collect())).await.expect("Should always succeed.");
+              device.scalar(&ScalarCommand::ScalarMap(msg.scalars().iter().map(|x| (x.index(), (x.scalar(), x.actuator_type()))).collect())).await.expect("Should always succeed.");
             }
             StopDeviceCmd(_) => {
               // TODO Kinda weird that we're having to rebuild the message.
@@ -217,6 +217,7 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Constrict)")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory
