@@ -119,39 +119,78 @@ pub struct Lovense {
 }
 
 impl ProtocolHandler for Lovense {
-  // TODO THIS WILL BREAK FOR THE MAX AIR BLADDER AT THE MOMENT
   fn handle_scalar_cmd(
     &self,
     cmds: &Vec<Option<(ActuatorType, u32)>>,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Lovense is the same situation as the Lovehoney Desire, where commands
-    // are different if we're addressing all motors or seperate motors.
-    // Difference here being that there's Lovense variants with different
-    // numbers of motors.
-    //
-    // Neat way of checking if everything is the same via
-    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-    //
-    // Just make sure we're not matching on None, 'cause if that's the case
-    // we ain't got shit to do.
-    if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-      let lovense_cmd = format!("Vibrate:{};", cmds[0].expect("Already checked validity").1)
+    let mut hardware_cmds = vec![];
+
+    // Handle vibration commands, these will be by far the most common.
+    let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::Vibrate
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+
+    if !vibrate_cmds.is_empty() {
+      // Lovense is the same situation as the Lovehoney Desire, where commands
+      // are different if we're addressing all motors or seperate motors.
+      // Difference here being that there's Lovense variants with different
+      // numbers of motors.
+      //
+      // Neat way of checking if everything is the same via
+      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+      //
+      // Just make sure we're not matching on None, 'cause if that's the case
+      // we ain't got shit to do.
+      if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1])
+      {
+        let lovense_cmd = format!(
+          "Vibrate:{};",
+          vibrate_cmds[0].1
+        )
         .as_bytes()
         .to_vec();
-      return Ok(vec![HardwareWriteCmd::new(
-        Endpoint::Tx,
-        lovense_cmd,
-        false,
-      )
-      .into()]);
-    }
-    let mut hardware_cmds = vec![];
-    for (i, cmd) in cmds.iter().enumerate() {
-      if let Some((_, speed)) = cmd {
-        let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        return Ok(vec![HardwareWriteCmd::new(
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into()]);
+      }
+      for (i, cmd) in cmds.iter().enumerate() {
+        if let Some((_, speed)) = cmd {
+          let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
+          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        }
       }
     }
+
+    // Handle vibration commands, these will be by far the most common.
+    let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::Constrict
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+    if !constrict_cmds.is_empty() {
+      // Only the max has a constriction system, and there's only one, so just parse the first command.
+      let lovense_cmd = format!("Air:Level:{};", constrict_cmds[0].1).as_bytes().to_vec();
+
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    }
+
     Ok(hardware_cmds)
   }
 
@@ -228,7 +267,8 @@ impl ProtocolHandler for Lovense {
         "Lovense".to_owned(),
         "Lovense Device disconnected while getting Battery info.".to_owned(),
       ))
-    }.boxed()
+    }
+    .boxed()
   }
 }
 
