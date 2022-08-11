@@ -479,7 +479,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
   }
 
   /// Commands device to rotate, assuming it has the features to do so.
-  pub fn rotate(&self, rotate_cmd: RotateCommand) -> ButtplugClientResultFuture {
+  pub fn rotate(&self, rotate_cmd: &RotateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.rotate_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
@@ -493,7 +493,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
       RotateCommand::Rotate(speed, clockwise) => {
         rotate_vec = Vec::with_capacity(rotate_count as usize);
         for i in 0..rotate_count {
-          rotate_vec.push(RotationSubcommand::new(i, speed, clockwise));
+          rotate_vec.push(RotationSubcommand::new(i, *speed, *clockwise));
         }
       }
       RotateCommand::RotateMap(map) => {
@@ -504,12 +504,12 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
         }
         rotate_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (speed, clockwise)) in map {
-          if idx > rotate_count - 1 {
+          if *idx > rotate_count - 1 {
             return self.create_boxed_future_client_error(
-              ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, idx).into(),
+              ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, *idx).into(),
             );
           }
-          rotate_vec.push(RotationSubcommand::new(idx, speed, clockwise));
+          rotate_vec.push(RotationSubcommand::new(*idx, *speed, *clockwise));
         }
       }
       RotateCommand::RotateVec(vec) => {
