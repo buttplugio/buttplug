@@ -1,7 +1,6 @@
 devices:
   - identifier: 
       name: "LVS-DoesntMatter"
-      address: null
     expected_name: "Lovense Nora"
 device_init: 
   # Initialization

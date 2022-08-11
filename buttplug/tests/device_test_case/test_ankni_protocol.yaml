@@ -1,7 +1,6 @@
 devices:
   - identifier: 
       name: "DSJM"
-      address: null
     expected_name: "Ankni Candy"
 device_init:
   - !Commands

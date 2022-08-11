@@ -34,9 +34,20 @@ use std::{
 use tokio::sync::mpsc::Sender;
 use serde::{Deserialize, Serialize};
 
+pub fn generate_address() -> String {
+  // Vaguely, not really random number. Works well enough to be an address that
+  // doesn't collide.
+  SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Test")
+        .subsec_nanos()
+        .to_string()
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct TestDeviceIdentifier {
-  name: String,
+  name: String, 
+  #[serde(default = "generate_address")]
   address: String,
 }
 
@@ -45,11 +56,7 @@ impl TestDeviceIdentifier {
     // Vaguely, not really random number. Works well enough to be an address that
     // doesn't collide.    
     let address = address.unwrap_or_else(|| {
-      SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Test")
-        .subsec_nanos()
-        .to_string()
+      generate_address()
     });    
     Self { name: name.to_owned(), address }
   }

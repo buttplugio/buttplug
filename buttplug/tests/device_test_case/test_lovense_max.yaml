@@ -1,7 +1,6 @@
 devices:
   - identifier: 
       name: "LVS-DoesntMatter"
-      address: null
     expected_name: "Lovense Max"
 device_init: 
   # Initialization

@@ -1,7 +1,6 @@
 devices:
   - identifier: 
       name: "CCTSK"
-      address: null
     expected_name: "Cachito Lure Tao"
 device_commands:
   # Commands
