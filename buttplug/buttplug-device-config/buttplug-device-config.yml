@@ -220,7 +220,7 @@ protocols:
             - StepCount: 20
               FeatureDescriptor: Vibrator
               ActuatorType: Vibrate
-            - StepCount: 4
+            - StepCount: 5
               FeatureDescriptor: Air Pump
               ActuatorType: Constrict
       - identifier:

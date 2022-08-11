@@ -132,7 +132,7 @@
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 4,
+                "StepCount": 5,
                 "FeatureDescriptor": "Air Pump",
                 "ActuatorType": "Constrict"
               }
