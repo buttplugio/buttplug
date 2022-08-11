@@ -32,10 +32,27 @@ use futures::future::{self, BoxFuture, FutureExt};
 use std::{
   sync::Arc,
   fmt::{self, Debug},
-  collections::HashSet,
+  collections::{HashSet, VecDeque},
 };
 use dashmap::DashSet;
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::{broadcast, mpsc, Mutex};
+use serde::{Serialize, Deserialize};
+
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TestHardwareNotification {
+  endpoint: Endpoint,
+  data: Vec<u8>
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum TestHardwareEvent {
+  // Values to be emitted from subscriptions
+  Notifications(Vec<TestHardwareNotification>),
+  // Values to be emitted when calls to ReadValue happen
+  Reads(Vec<TestHardwareNotification>),
+  Disconnect
+}
 
 pub struct TestHardwareConnector {
   specifier: ProtocolCommunicationSpecifier,
@@ -113,13 +130,13 @@ impl HardwareSpecializer for TestHardwareSpecializer {
 }
 
 pub struct TestDeviceChannelHost {
-  pub sender: mpsc::Sender<HardwareEvent>,
+  pub sender: mpsc::Sender<TestHardwareEvent>,
   pub receiver: mpsc::Receiver<HardwareCommand>,
 }
 
 pub struct TestDeviceChannelDevice {
   pub sender: mpsc::Sender<HardwareCommand>,
-  pub receiver: mpsc::Receiver<HardwareEvent>,
+  pub receiver: mpsc::Receiver<TestHardwareEvent>,
 }
 
 pub fn new_device_channel(
@@ -142,7 +159,8 @@ pub struct TestDevice {
   endpoints: HashSet<Endpoint>,
   test_device_channel: mpsc::Sender<HardwareCommand>,
   event_sender: broadcast::Sender<HardwareEvent>,
-  subscribed_endpoints: Arc<DashSet<Endpoint>>
+  subscribed_endpoints: Arc<DashSet<Endpoint>>,
+  read_data: Arc<Mutex<VecDeque<RawReading>>>
 }
 
 impl TestDevice {
@@ -155,19 +173,29 @@ impl TestDevice {
     let (command_sender, mut receiver) = (test_device_channel.sender, test_device_channel.receiver);
     let subscribed_endpoints = Arc::new(DashSet::new());
     let subscribed_endpoints_clone = subscribed_endpoints.clone();
+    let read_data = Arc::new(Mutex::new(VecDeque::new()));
+    let read_data_clone = read_data.clone();
     async_manager::spawn(async move {
       while let Some(event) = receiver.recv().await {
         match event {
-          HardwareEvent::Disconnected(_) => {
+          TestHardwareEvent::Disconnect => {
             event_sender_clone
               .send(HardwareEvent::Disconnected(address_clone.clone()))
               .expect("Test");
           }
-          HardwareEvent::Notification(_, endpoint, data) => {
-            if subscribed_endpoints_clone.contains(&endpoint) {
-              event_sender_clone
-                .send(HardwareEvent::Notification(address_clone.clone(), endpoint, data))
-                .expect("Test");
+          TestHardwareEvent::Notifications(notifications) => {
+            for notification in notifications {
+              if subscribed_endpoints_clone.contains(&notification.endpoint) {
+                event_sender_clone
+                  .send(HardwareEvent::Notification(address_clone.clone(), notification.endpoint, notification.data.clone()))
+                  .expect("Test");
+              }
+            }
+          }
+          TestHardwareEvent::Reads(events) => {
+            let mut guard = read_data_clone.lock().await;
+            for read in events {
+              guard.push_front(RawReading::new(0, read.endpoint, read.data.clone()));
             }
           }
         }
@@ -180,7 +208,8 @@ impl TestDevice {
       endpoints: HashSet::new(),
       test_device_channel: command_sender,
       event_sender,
-      subscribed_endpoints
+      subscribed_endpoints,
+      read_data
     }
   }
 
@@ -231,7 +260,16 @@ impl HardwareInternal for TestDevice {
     &self,
     msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
-    future::ready(Ok(RawReading::new(0, msg.endpoint, vec![]))).boxed()
+    let reads = self.read_data.clone();
+    let msg = msg.clone();
+    async move {
+      let read_msg = reads.lock().await.pop_back().unwrap();
+      if read_msg.endpoint() != msg.endpoint {
+        Err(ButtplugDeviceError::DeviceCommunicationError(format!("Read endpoint {} while expecting endpoint {}", read_msg.endpoint(), msg.endpoint)).into())
+      } else {
+        Ok(read_msg)
+      }
+    }.boxed()
   }
 
   fn write_value(

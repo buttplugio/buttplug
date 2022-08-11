@@ -9,9 +9,11 @@ pub mod test_device_manager;
 mod delay_device_communication_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 mod channel_transport;
-use test_device_manager::{
+pub use test_device_manager::{
   TestDeviceCommunicationManagerBuilder,
-  TestDeviceChannelHost
+  TestDeviceChannelHost,
+  TestHardwareEvent,
+  TestHardwareNotification
 };
 use buttplug::{
   client::ButtplugClient,

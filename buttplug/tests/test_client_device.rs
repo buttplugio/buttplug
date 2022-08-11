@@ -17,13 +17,14 @@ use buttplug::{
 use futures::StreamExt;
 use futures_timer::Delay;
 use std::{sync::Arc, time::Duration};
-use util::test_client_with_device;
+use util::{
+  test_client_with_device,
+  test_device_manager::TestHardwareEvent
+};
 
 #[cfg(feature = "server")]
 #[test]
 fn test_client_device_connected_status() {
-    use buttplug::server::device::hardware::HardwareEvent;
-
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
 
@@ -44,7 +45,7 @@ fn test_client_device_connected_status() {
     assert!(test_device.connected());
     device
       .sender
-      .send(HardwareEvent::Disconnected("Test Disconnect".to_owned()))
+      .send(TestHardwareEvent::Disconnect)
       .await
       .expect("Test, assuming infallible.");
     while let Some(msg) = device_event_stream.next().await {
@@ -104,8 +105,6 @@ fn test_client_device_client_disconnected_status() {
 #[cfg(feature = "server")]
 #[test]
 fn test_client_device_connected_no_event_listener() {
-    use buttplug::server::device::hardware::HardwareEvent;
-
   async_manager::block_on(async {
     let (client, device) = test_client_with_device().await;
 
@@ -116,7 +115,7 @@ fn test_client_device_connected_no_event_listener() {
     Delay::new(Duration::from_millis(100)).await;
     device
       .sender
-      .send(HardwareEvent::Disconnected("Test Disconnect".to_owned()))
+      .send(TestHardwareEvent::Disconnect)
       .await
       .expect("Test, assuming infallible.");
     Delay::new(Duration::from_millis(100)).await;

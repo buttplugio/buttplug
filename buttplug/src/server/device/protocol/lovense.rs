@@ -271,5 +271,3 @@ impl ProtocolHandler for Lovense {
     .boxed()
   }
 }
-
-// TODO Gonna need to add the ability to set subscribe data in tests before writing Lovense tests.
