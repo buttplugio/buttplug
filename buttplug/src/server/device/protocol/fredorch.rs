@@ -12,7 +12,7 @@ use crate::{
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareSubscribeCmd, HardwareEvent},
     protocol::{
       fleshlight_launch_helper::calculate_speed,
       generic_protocol_initializer_setup,
@@ -24,10 +24,17 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::sync::{
-  atomic::{AtomicU8, Ordering},
-  Arc,
+use futures::FutureExt;
+use std::{
+  sync::{
+    atomic::{AtomicU8, Ordering},
+    Arc,
+  },
+  time::Duration,
 };
+use tokio::time::sleep;
+
+const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 500;
 
 const CRC_HI: [u8; 256] = [
   0, 193, 129, 64, 1, 192, 128, 65, 1, 192, 128, 65, 0, 193, 129, 64, 1, 192, 128, 65, 0, 193, 129,
@@ -80,53 +87,91 @@ impl ProtocolInitializer for FredorchInitializer {
     &mut self,
     hardware: Arc<Hardware>,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    // Set the device to program mode
-    let mut data: Vec<u8> = vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01];
-    let mut crc = crc16(&data);
-    data.push(crc[0]);
-    data.push(crc[1]);
+    let mut event_receiver = hardware.event_stream();
     hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-      .await?;
+        .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+        .await?;
 
-    // Set the program mode to record
-    data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00];
-    crc = crc16(&data);
-    data.push(crc[0]);
-    data.push(crc[1]);
-    hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-      .await?;
-
-    // Program the device to move to position 0 at speed 5
-    data = vec![
-      0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
-      0x00, 0x01,
+    let init: Vec<(String, Vec<u8>)> = vec![
+      (
+        "Set the device to program mode".to_owned(),
+        vec![0x01, 0x06, 0x00, 0x64, 0x00, 0x01],
+      ),
+      (
+        "Set the program mode to record".to_owned(),
+        vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x00],
+      ),
+      (
+        "Program the device to move to position 0 at speed 5".to_owned(),
+        vec![
+          0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x01,
+        ],
+      ),
+      (
+        "Run the program".to_owned(),
+        vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01],
+      ),
+      (
+        "Set the program to repeat".to_owned(),
+        vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01],
+      ),
     ];
-    crc = crc16(&data);
-    data.push(crc[0]);
-    data.push(crc[1]);
-    hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-      .await?;
 
-    // Run the program
-    data = vec![0x01, 0x06, 0x00, 0x69, 0x00, 0x01];
-    crc = crc16(&data);
-    data.push(crc[0]);
-    data.push(crc[1]);
-    hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-      .await?;
+    // expect 0, 1, 0, 1, 1 on connect
+    select! {
+      event = event_receiver.recv().fuse() => {
+        if let Ok(HardwareEvent::Notification(_, _, n)) = event {
+          debug!("Fredorch: wake up - received {:?}", n);
+        } else {
+          return Err(
+            ButtplugDeviceError::ProtocolSpecificError(
+              "Fredorch".to_owned(),
+              "Fredorch Device disconnected while initialising.".to_owned(),
+            )
+            .into(),
+          );
+        }
+      }
+      _ = sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
+        // Or not?
+      }
+    }
 
-    // Set the program to repeat
-    data = vec![0x01, 0x06, 0x00, 0x6a, 0x00, 0x01];
-    crc = crc16(&data);
-    data.push(crc[0]);
-    data.push(crc[1]);
-    hardware
-      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.clone(), false))
-      .await?;
+    for mut data in init {
+      let crc = crc16(&data.1);
+      data.1.push(crc[0]);
+      data.1.push(crc[1]);
+      debug!("Fredorch: {} - sent {:?}", data.0, data.1);
+      hardware
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, data.1.clone(), false))
+        .await?;
+
+      select! {
+        event = event_receiver.recv().fuse() => {
+          if let Ok(HardwareEvent::Notification(_, _, n)) = event {
+            debug!("Fredorch: {} - received {:?}", data.0, n);
+          } else {
+            return Err(
+              ButtplugDeviceError::ProtocolSpecificError(
+                "Fredorch".to_owned(),
+                "Fredorch Device disconnected while initialising.".to_owned(),
+              )
+              .into(),
+            );
+          }
+        }
+        _ = sleep(Duration::from_millis(FREDORCH_COMMAND_TIMEOUT_MS)).fuse() => {
+          return Err(
+              ButtplugDeviceError::ProtocolSpecificError(
+                "Fredorch".to_owned(),
+                "Fredorch Device timed out while initialising.".to_owned(),
+              )
+              .into(),
+            );
+        }
+      }
+    }
 
     Ok(Arc::new(Fredorch::default()))
   }
