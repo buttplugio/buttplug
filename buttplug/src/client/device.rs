@@ -314,7 +314,7 @@ impl ButtplugClientDevice {
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
-  pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
+  pub fn vibrate(&self, speed_cmd: &VibrateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
@@ -335,7 +335,7 @@ impl ButtplugClientDevice {
       VibrateCommand::Vibrate(speed) => {
         speed_vec = Vec::with_capacity(vibrator_count as usize);
         for i in 0..vibrator_count {
-          speed_vec.push(ScalarSubcommand::new(i, speed, ActuatorType::Vibrate));
+          speed_vec.push(ScalarSubcommand::new(i, *speed, ActuatorType::Vibrate));
         }
       }
       VibrateCommand::VibrateMap(map) => {
@@ -347,12 +347,12 @@ impl ButtplugClientDevice {
         }
         speed_vec = Vec::with_capacity(map.len() as usize);
         for (idx, speed) in map {
-          if idx > vibrator_count - 1 {
+          if *idx > vibrator_count - 1 {
             return self.create_boxed_future_client_error(
-              ButtplugDeviceError::DeviceFeatureIndexError(vibrator_count, idx).into(),
+              ButtplugDeviceError::DeviceFeatureIndexError(vibrator_count, *idx).into(),
             );
           }
-          speed_vec.push(ScalarSubcommand::new(idx, speed, ActuatorType::Vibrate));
+          speed_vec.push(ScalarSubcommand::new(*idx, *speed, ActuatorType::Vibrate));
         }
       }
       VibrateCommand::VibrateVec(vec) => {
