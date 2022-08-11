@@ -6,11 +6,28 @@ device_init:
   # Initialization
   - !Commands
       device_index: 0
-      commands: 
+      commands:
+        - !Subscribe
+          endpoint: rx
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            data: [0x00, 0x01, 0x00, 0x01, 0x01]
+  - !Commands
+      device_index: 0
+      commands:
         - !Write
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5]
             write_with_response: false
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: rx
+          data: [0x01, 0x06, 0x00, 0x64, 0x00, 0x01, 0x09, 0xd5]
   - !Commands
       device_index: 0
       commands: 
@@ -18,6 +35,12 @@ device_init:
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6]
             write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x00, 0x59, 0xd6]
   - !Commands
       device_index: 0
       commands: 
@@ -25,6 +48,12 @@ device_init:
             endpoint: tx
             data: [0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc0, 0xc3]
             write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            data: [0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc0, 0xc3]
   - !Commands
       device_index: 0
       commands: 
@@ -32,6 +61,12 @@ device_init:
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16]
             write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            data: [0x01, 0x06, 0x00, 0x69, 0x00, 0x01, 0x98, 0x16]
   - !Commands
       device_index: 0
       commands: 
@@ -39,6 +74,12 @@ device_init:
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16]
             write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            data: [0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16]
 device_commands:            
   # Commands
   #
