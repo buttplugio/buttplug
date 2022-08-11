@@ -2,7 +2,7 @@ mod util;
 use std::time::Duration;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientEvent, ScalarCommand, LinearCommand},
+  client::{ButtplugClient, ButtplugClientEvent, ScalarCommand, LinearCommand, RotateCommand},
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
     messages::{ButtplugDeviceCommandMessageUnion, Endpoint},
@@ -167,8 +167,11 @@ async fn run_test_case(test_case: &DeviceTestCase) {
               // TODO Kinda weird that we're having to rebuild the message.
               device.stop().await.expect("Stop failed");
             }
+            RotateCmd(msg) => {
+              device.rotate(&RotateCommand::RotateMap(msg.rotations().iter().map(|x| (x.index(), (x.speed(), x.clockwise()))).collect())).await.expect("Should always succeed.");
+            }
             LinearCmd(msg) => {
-              device.linear(&LinearCommand::LinearVec(msg.vectors().iter().map(|x| (x.duration(), *x.position())).collect())).await.expect("Should always succeed.")
+              device.linear(&LinearCommand::LinearVec(msg.vectors().iter().map(|x| (x.duration(), *x.position())).collect())).await.expect("Should always succeed.");
             }
             _ => {
 
@@ -217,7 +220,8 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
-#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Constrict)")]
+#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
+#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory

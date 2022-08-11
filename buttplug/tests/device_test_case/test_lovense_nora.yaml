@@ -2,7 +2,7 @@ devices:
   - identifier: 
       name: "LVS-DoesntMatter"
       address: null
-    expected_name: "Lovense Max"
+    expected_name: "Lovense Nora"
 device_init: 
   # Initialization
   - !Commands
@@ -20,8 +20,8 @@ device_init:
       events:
         - !Notifications
           - endpoint: rx
-            # "B:11:0082059AD3BD;"
-            data: [66, 58, 49, 49, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
+            # "A:11:0082059AD3BD;"
+            data: [65, 58, 49, 49, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
 device_commands:
   - !Messages
       device_index: 0
@@ -55,21 +55,26 @@ device_commands:
             # "Vibrate:0;"
             data: [86, 105, 98, 114, 97, 116, 101, 58, 48, 59]
             write_with_response: false       
+        - !Write
+            endpoint: tx
+            # "Rotate:0;"
+            data: [82, 111, 116, 97, 116, 101, 58, 48, 59]
+            write_with_response: false       
   - !Messages
       device_index: 0
       messages: 
-        - !ScalarCmd
+        - !RotateCmd
             Id: 1
             DeviceIndex: 0
-            Scalars: 
-              - Index: 1
-                Scalar: 0.5
-                ActuatorType: Constrict
+            Rotations: 
+              - Index: 0
+                Speed: 0.5
+                Clockwise: true
   - !Commands
       device_index: 0
       commands: 
         - !Write
             endpoint: tx
-            # "Air:Level:3;"
-            data: [65, 105, 114, 58, 76, 101, 118, 101, 108, 58, 51, 59]
+            # "Rotate:10;"
+            data: [82, 111, 116, 97, 116, 101, 58, 49, 48, 59]
             write_with_response: false
