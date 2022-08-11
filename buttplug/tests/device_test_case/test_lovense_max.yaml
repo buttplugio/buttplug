@@ -26,13 +26,9 @@ device_commands:
   - !Messages
       device_index: 0
       messages: 
-        - !ScalarCmd
-            Id: 1
-            DeviceIndex: 0
-            Scalars: 
-              - Index: 0
-                Scalar: 0.5
-                ActuatorType: Vibrate
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
   - !Commands
       device_index: 0
       commands: 
@@ -44,9 +40,7 @@ device_commands:
   - !Messages
       device_index: 0
       messages: 
-        - !StopDeviceCmd 
-            Id: 1
-            DeviceIndex: 0
+        - !Stop 
   - !Commands
       device_index: 0
       commands: 
@@ -58,13 +52,10 @@ device_commands:
   - !Messages
       device_index: 0
       messages: 
-        - !ScalarCmd
-            Id: 1
-            DeviceIndex: 0
-            Scalars: 
-              - Index: 1
-                Scalar: 0.5
-                ActuatorType: Constrict
+        - !Scalar
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Constrict
   - !Commands
       device_index: 0
       commands: 

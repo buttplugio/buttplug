@@ -3,7 +3,7 @@ devices:
       name: "YXlinksSPP"
       address: null
     expected_name: "Fredorch Device"
-device_commands: 
+device_init: 
   # Initialization
   - !Commands
       device_index: 0
@@ -40,19 +40,17 @@ device_commands:
             endpoint: tx
             data: [0x01, 0x06, 0x00, 0x6a, 0x00, 0x01, 0x68, 0x16]
             write_with_response: false
+device_commands:            
   # Commands
   #
-  # How do we send FleshlightLaunchFW12Cmd?!
+  # TODO How do we send FleshlightLaunchFW12Cmd?!
   - !Messages
       device_index: 0
       messages:
-        - !LinearCmd
-            Id: 1
-            DeviceIndex: 0
-            Vectors: 
-              - Index: 0
-                Position: 0.51
-                Duration: 200
+        - !Linear
+          - Index: 0
+            Position: 0.51
+            Duration: 200
   - !Commands
       device_index: 0
       commands:
@@ -63,13 +61,10 @@ device_commands:
   - !Messages
       device_index: 0
       messages:
-        - !LinearCmd
-            Id: 1
-            DeviceIndex: 0
-            Vectors: 
-              - Index: 0
-                Position: 1.0
-                Duration: 50
+        - !Linear
+          - Index: 0
+            Position: 1.0
+            Duration: 50
   - !Commands
       device_index: 0
       commands:

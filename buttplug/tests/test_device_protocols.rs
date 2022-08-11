@@ -2,10 +2,10 @@ mod util;
 use std::time::Duration;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientEvent, ScalarCommand, LinearCommand, RotateCommand},
+  client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent, ScalarCommand, LinearCommand, RotateCommand, ButtplugClientError, VibrateCommand},
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
-    messages::{ButtplugDeviceCommandMessageUnion, Endpoint},
+    messages::{ButtplugDeviceCommandMessageUnion, Endpoint, ScalarSubcommand, VibrateSubcommand, RotationSubcommand, VectorSubcommand},
   },
   server::{device::hardware::{HardwareCommand, HardwareEvent}, ButtplugServerBuilder},
   util::async_manager
@@ -14,6 +14,7 @@ use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use util::test_device_manager::{TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier};
 use tracing::*;
+use std::sync::Arc;
 use test_case::test_case;
 
 #[derive(Serialize, Deserialize)]
@@ -34,11 +35,48 @@ enum TestHardwareEvent {
   Disconnect
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+enum TestClientCommand {
+  Scalar(Vec<ScalarSubcommand>),
+  Vibrate(Vec<VibrateSubcommand>),
+  Rotate(Vec<RotationSubcommand>),
+  Linear(Vec<VectorSubcommand>),
+  Battery,
+  Stop,
+  RSSI
+}
+
+impl TestClientCommand {
+  pub async fn run(&self, device: &Arc<ButtplugClientDevice>) {
+    use TestClientCommand::*;
+    match self {
+      Scalar(msg) => {
+        device.scalar(&ScalarCommand::ScalarMap(msg.iter().map(|x| (x.index(), (x.scalar(), x.actuator_type()))).collect())).await.expect("Should always succeed.");
+      }
+      Vibrate(msg) => {
+        device.vibrate(&VibrateCommand::VibrateMap(msg.iter().map(|x| (x.index(), x.speed())).collect())).await.expect("Should always succeed.");
+      }
+      Stop => {
+        device.stop().await.expect("Stop failed");
+      }
+      Rotate(msg) => {
+        device.rotate(&RotateCommand::RotateMap(msg.iter().map(|x| (x.index(), (x.speed(), x.clockwise()))).collect())).await.expect("Should always succeed.");
+      }
+      Linear(msg) => {
+        device.linear(&LinearCommand::LinearVec(msg.iter().map(|x| (x.duration(), *x.position())).collect())).await.expect("Should always succeed.");
+      }
+      _ => {
+        panic!("Tried to run unhandled TestClientCommand type {:?}", self);
+      }
+    }
+  }
+}
+
 #[derive(Serialize, Deserialize)]
 enum TestCommand {
   Messages {
     device_index: u32,
-    messages: Vec<ButtplugDeviceCommandMessageUnion>,
+    messages: Vec<TestClientCommand>,
   },
   Commands {
     device_index: u32,
@@ -155,28 +193,9 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   for command in &test_case.device_commands {
     match command {
       TestCommand::Messages { device_index, messages } => {
-        let device = client.devices()[*device_index as usize].clone();
+        let device = &client.devices()[*device_index as usize];
         for message in messages {
-          use ButtplugDeviceCommandMessageUnion::*;
-          match message {
-            ScalarCmd(msg) => {
-              // TODO Kinda weird that we're having to rebuild the message.
-              device.scalar(&ScalarCommand::ScalarMap(msg.scalars().iter().map(|x| (x.index(), (x.scalar(), x.actuator_type()))).collect())).await.expect("Should always succeed.");
-            }
-            StopDeviceCmd(_) => {
-              // TODO Kinda weird that we're having to rebuild the message.
-              device.stop().await.expect("Stop failed");
-            }
-            RotateCmd(msg) => {
-              device.rotate(&RotateCommand::RotateMap(msg.rotations().iter().map(|x| (x.index(), (x.speed(), x.clockwise()))).collect())).await.expect("Should always succeed.");
-            }
-            LinearCmd(msg) => {
-              device.linear(&LinearCommand::LinearVec(msg.vectors().iter().map(|x| (x.duration(), *x.position())).collect())).await.expect("Should always succeed.");
-            }
-            _ => {
-
-            }
-          }
+          message.run(device).await;
         }
       }
       TestCommand::Commands { device_index, commands } => {

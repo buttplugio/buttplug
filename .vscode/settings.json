@@ -5,14 +5,18 @@
   "yaml.customTags": [
     "!Messages mapping",
     "!Commands mapping",
-    "!ScalarCmd mapping",
-    "!StopDeviceCmd mapping",
+    "!Scalar sequence",
+    "!Stop",
     "!FleshlightLaunchFW12Cmd mapping",
-    "!LinearCmd mapping",
+    "!Linear sequence",
     "!Write mapping",
     "!Subscribe mapping",
     "!Unsubscribe mapping",
     "!Notifications sequence",
-    "!Events mapping"
+    "!Events mapping",
+    "!Rotate sequence",
+    "!Battery",
+    "!RSSI",
+    "!Vibrate sequence",
   ],  
 }
