@@ -1,3 +1,9 @@
+# 0.7.0
+
+## Changes
+
+- Remove ButtplugProtocolProperties - No longer used in main library
+
 # v0.6.2 - 2021/02/04
 
 ## Changes

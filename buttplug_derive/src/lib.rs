@@ -282,33 +282,3 @@ fn impl_buttplug_server_message_type_macro(ast: &syn::DeriveInput) -> TokenStrea
   };
   gen.into()
 }
-
-#[proc_macro_derive(ButtplugProtocolProperties)]
-pub fn buttplug_protocol_properties_derive(input: TokenStream) -> TokenStream {
-  // Construct a representation of Rust code as a syntax tree
-  // that we can manipulate
-  let ast = syn::parse(input).expect("Failure will cause compile failure.");
-
-  // Build the trait implementation
-  impl_buttplug_protocol_properties_macro(&ast)
-}
-
-fn impl_buttplug_protocol_properties_macro(ast: &syn::DeriveInput) -> TokenStream {
-  let name = &ast.ident;
-  let gen = quote! {
-      impl ButtplugProtocolProperties for #name {
-          fn name(&self) -> &str {
-            self.device_attributes.name()
-          }
-
-          fn device_attributes(&self) -> &ProtocolDeviceAttributes {
-            &self.device_attributes
-          }
-
-          fn stop_commands(&self) -> Vec<ButtplugDeviceCommandMessageUnion> {
-            self.stop_commands.clone()
-          }
-        }
-  };
-  gen.into()
-}
