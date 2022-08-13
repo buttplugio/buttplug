@@ -433,7 +433,7 @@ pub trait ProtocolHandler: Sync + Send {
         &mut (match *actuator {
           ActuatorType::Constrict => self.handle_scalar_constrict_cmd(index as u32, *scalar)?,
           ActuatorType::Inflate => self.handle_scalar_inflate_cmd(index as u32, *scalar)?,
-          ActuatorType::Oscillation => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
+          ActuatorType::Oscillate => self.handle_scalar_oscillate_cmd(index as u32, *scalar)?,
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
           ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,

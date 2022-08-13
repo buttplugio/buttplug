@@ -18,7 +18,7 @@ pub enum ActuatorType {
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
-  Oscillation,
+  Oscillate,
   Constrict,
   Inflate,
   // For instances where we specify a position to move to ASAP. Usually servos, probably for the
