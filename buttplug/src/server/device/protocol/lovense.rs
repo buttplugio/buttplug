@@ -125,12 +125,13 @@ impl ProtocolHandler for Lovense {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
 
-    // Handle vibration commands, these will be by far the most common.
+    // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
+    // uses lovense vibrate commands internally too, so we can include them here.
     let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
       .iter()
       .filter(|x| {
         if let Some(val) = x {
-          val.0 == ActuatorType::Vibrate
+          [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
         } else {
           false
         }

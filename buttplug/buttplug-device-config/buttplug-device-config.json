@@ -230,7 +230,15 @@
           "identifier": [
             "F"
           ],
-          "name": "Lovense Ridge"
+          "name": "Lovense Ridge",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepCount": 20,
+                "ActuatorType": "Oscillate"
+              }
+            ]
+          }
         },
         {
           "identifier": [

@@ -270,6 +270,10 @@ protocols:
       - identifier:
           - F
         name: Lovense Ridge
+        messages:
+          ScalarCmd:
+            - StepCount: 20
+              ActuatorType: Oscillate       
       - identifier:
           - J
         name: Lovense Dolce
