@@ -6,12 +6,13 @@
 // for full license information.
 
 use super::*;
-use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+pub use getset::{Getters, CopyGetters};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[getset(get_copy="pub")]
 pub struct RotationSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -29,30 +30,19 @@ impl RotationSubcommand {
       clockwise,
     }
   }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn speed(&self) -> f64 {
-    self.speed
-  }
-
-  pub fn clockwise(&self) -> bool {
-    self.clockwise
-  }
 }
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RotateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  device_index: u32,
   #[getset(get="pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "Rotations"))]
-  pub rotations: Vec<RotationSubcommand>,
+  #[getset(get="pub")]
+  rotations: Vec<RotationSubcommand>,
 }
 
 impl RotateCmd {

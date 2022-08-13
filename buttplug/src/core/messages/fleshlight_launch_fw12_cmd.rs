@@ -8,10 +8,12 @@
 //! Fleshlight FW v1.2 Command (Version 0 Message, Deprecated)
 
 use super::*;
+use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -19,8 +21,10 @@ pub struct FleshlightLaunchFW12Cmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
+  #[getset(get_copy="pub")]
   position: u8,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[getset(get_copy="pub")]
   speed: u8,
 }
 
@@ -32,14 +36,6 @@ impl FleshlightLaunchFW12Cmd {
       position,
       speed,
     }
-  }
-
-  pub fn position(&self) -> u8 {
-    self.position
-  }
-
-  pub fn speed(&self) -> u8 {
-    self.speed
   }
 }
 

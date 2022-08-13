@@ -222,9 +222,9 @@ impl ButtplugClientDevice {
     sender: broadcast::Sender<ButtplugClientRequest>,
   ) -> Self {
     ButtplugClientDevice::new(
-      &*info.device_name,
-      info.device_index,
-      &info.device_messages,
+      info.device_name(),
+      info.device_index(),
+      info.device_messages(),
       sender,
     )
   }

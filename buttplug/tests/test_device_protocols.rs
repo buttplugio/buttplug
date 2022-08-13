@@ -51,7 +51,7 @@ impl TestClientCommand {
         device.rotate(&RotateCommand::RotateMap(msg.iter().map(|x| (x.index(), (x.speed(), x.clockwise()))).collect())).await.expect("Should always succeed.");
       }
       Linear(msg) => {
-        device.linear(&LinearCommand::LinearVec(msg.iter().map(|x| (x.duration(), *x.position())).collect())).await.expect("Should always succeed.");
+        device.linear(&LinearCommand::LinearVec(msg.iter().map(|x| (x.duration(), x.position())).collect())).await.expect("Should always succeed.");
       }
       Battery{ expected_power, run_async } => {
         if *run_async {

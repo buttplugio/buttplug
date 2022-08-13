@@ -8,16 +8,18 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
 /// Battery level response
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct BatteryLevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "BatteryLevel"))]
+  #[getset(get_copy="pub")]
   battery_level: f64,
 }
 
@@ -28,10 +30,6 @@ impl BatteryLevelReading {
       device_index,
       battery_level,
     }
-  }
-
-  pub fn battery_level(&self) -> f64 {
-    self.battery_level
   }
 }
 

@@ -228,7 +228,7 @@ impl GenericCommandManager {
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // command.
-    if msg.rotations.is_empty() {
+    if msg.rotations().is_empty() {
       return Err(
         ButtplugDeviceError::ProtocolRequirementError(
           "RotateCmd has 0 commands, will not do anything.".to_owned(),
@@ -244,7 +244,7 @@ impl GenericCommandManager {
     // old values. Otherwise, we should always send whatever command we're
     // going to send.
     let mut result: Vec<Option<(u32, bool)>> = vec![None; self.rotations.len()];
-    for rotate_command in &msg.rotations {
+    for rotate_command in msg.rotations() {
       let index = rotate_command.index() as usize;
       // Since we're going to iterate here anyways, we do our index check
       // here instead of in a filter above.
@@ -252,7 +252,7 @@ impl GenericCommandManager {
         return Err(
           ButtplugDeviceError::ProtocolRequirementError(format!(
             "RotateCmd has {} commands, device has {} rotators.",
-            msg.rotations.len(),
+            msg.rotations().len(),
             self.rotations.len()
           ))
           .into(),

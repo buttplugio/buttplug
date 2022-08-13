@@ -8,9 +8,11 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::{Getters, CopyGetters};
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[getset(get_copy="pub")]
 pub struct VibrateSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -22,17 +24,9 @@ impl VibrateSubcommand {
   pub fn new(index: u32, speed: f64) -> Self {
     Self { index, speed }
   }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn speed(&self) -> f64 {
-    self.speed
-  }
 }
 
-#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -40,6 +34,7 @@ pub struct VibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speeds"))]
+  #[getset(get="pub")]
   speeds: Vec<VibrateSubcommand>,
 }
 
@@ -50,10 +45,6 @@ impl VibrateCmd {
       device_index,
       speeds,
     }
-  }
-
-  pub fn speeds(&self) -> &Vec<VibrateSubcommand> {
-    &self.speeds
   }
 }
 

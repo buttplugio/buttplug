@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
-#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -17,8 +18,10 @@ pub struct VorzeA10CycloneCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[getset(get_copy="pub")]
   speed: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Clockwise"))]
+  #[getset(get_copy="pub")]
   clockwise: bool,
 }
 
@@ -30,14 +33,6 @@ impl VorzeA10CycloneCmd {
       speed,
       clockwise,
     }
-  }
-
-  pub fn speed(&self) -> u32 {
-    self.speed
-  }
-
-  pub fn clockwise(&self) -> bool {
-    self.clockwise
   }
 }
 

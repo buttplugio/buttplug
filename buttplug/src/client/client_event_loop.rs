@@ -140,7 +140,7 @@ where
       "Trying to create a client device from DeviceMessageInfo: {:?}",
       info
     );
-    match self.device_map.get(&info.device_index) {
+    match self.device_map.get(&info.device_index()) {
       // If the device already exists in our map, clone it.
       Some(dev) => {
         debug!("Device already exists, creating clone.");
@@ -153,7 +153,7 @@ where
           info,
           self.from_client_sender.clone(),
         ));
-        self.device_map.insert(info.device_index, device.clone());
+        self.device_map.insert(info.device_index(), device.clone());
         device
       }
     }
@@ -309,7 +309,7 @@ where
       ButtplugClientRequest::HandleDeviceList(device_list) => {
         trace!("Device list received, updating map.");
         for d in device_list.devices() {
-          if self.device_map.contains_key(&d.device_index) {
+          if self.device_map.contains_key(&d.device_index()) {
             continue;
           }
           let device = self.create_client_device(d);

@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -17,6 +18,7 @@ pub struct SingleMotorVibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
+  #[getset(get_copy="pub")]
   speed: f64,
 }
 
@@ -27,10 +29,6 @@ impl SingleMotorVibrateCmd {
       device_index,
       speed,
     }
-  }
-
-  pub fn speed(&self) -> f64 {
-    self.speed
   }
 }
 

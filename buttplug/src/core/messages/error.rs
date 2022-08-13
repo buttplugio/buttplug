@@ -13,6 +13,7 @@ use crate::core::errors::*;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
+use getset::{Getters, CopyGetters};
 
 /// Error codes pertaining to error classes that can be represented in the
 /// Buttplug [Error] message.
@@ -32,18 +33,20 @@ pub enum ErrorCode {
 // Error is one of the few things that can have either a System ID or message
 // ID, so there's really not much to check here. Use the default trait impl for
 // ButtplugMessageValidator.
-#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Error {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   /// Specifies the class of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorCode"))]
-  pub error_code: ErrorCode,
+  #[getset(get_copy="pub")]
+  error_code: ErrorCode,
   /// Description of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
-  pub error_message: String,
+  #[getset(get="pub")]
+  error_message: String,
   #[cfg_attr(feature = "serialize-json", serde(skip))]
   original_error: Option<ButtplugError>,
 }
@@ -109,18 +112,20 @@ impl From<ButtplugError> for Error {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator)]
+#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
-  pub(super) id: u32,
+  id: u32,
   /// Specifies the class of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorCode"))]
-  pub error_code: ErrorCode,
+  #[getset(get_copy="pub")]
+  error_code: ErrorCode,
   /// Description of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
-  pub error_message: String,
+  #[getset(get="pub")]
+  error_message: String,
 }
 
 impl ErrorV0 {

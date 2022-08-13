@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RSSILevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -17,6 +18,7 @@ pub struct RSSILevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "RSSILevel"))]
+  #[getset(get_copy="pub")]
   rssi_level: i32,
 }
 
@@ -27,10 +29,6 @@ impl RSSILevelReading {
       device_index,
       rssi_level,
     }
-  }
-
-  pub fn rssi_level(&self) -> i32 {
-    self.rssi_level
   }
 }
 

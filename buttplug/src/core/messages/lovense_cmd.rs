@@ -8,12 +8,13 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::Getters;
 
 /// Lovense specific commands (Version 0 Message, **Deprecated**)
 // As this message is considered deprecated and is not actually implemented for
 // Lovense devices even on spec v1 connections, we can put a null validator on
 // it.
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -21,6 +22,7 @@ pub struct LovenseCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
+  #[getset(get="pub")]
   command: String,
 }
 

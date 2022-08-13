@@ -6,11 +6,12 @@
 // for full license information.
 
 use super::*;
+use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Kiiroo Command (Version 0 Message, Deprecated in spec)
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -18,6 +19,7 @@ pub struct KiirooCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
+  #[getset(get="pub")]
   command: String,
 }
 
@@ -28,10 +30,6 @@ impl KiirooCmd {
       device_index,
       command: command.to_owned(),
     }
-  }
-
-  pub fn command(&self) -> &String {
-    &self.command
   }
 }
 

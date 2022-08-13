@@ -8,10 +8,12 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::{Getters, CopyGetters};
 
 /// Move device to a certain position in a certain amount of time
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[getset(get_copy="pub")]
 pub struct VectorSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   pub index: u32,
@@ -29,21 +31,9 @@ impl VectorSubcommand {
       position,
     }
   }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn duration(&self) -> u32 {
-    self.duration
-  }
-
-  pub fn position(&self) -> &f64 {
-    &self.position
-  }
 }
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -51,6 +41,7 @@ pub struct LinearCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Vectors"))]
+  #[getset(get="pub")]
   vectors: Vec<VectorSubcommand>,
 }
 
@@ -61,10 +52,6 @@ impl LinearCmd {
       device_index,
       vectors,
     }
-  }
-
-  pub fn vectors(&self) -> &Vec<VectorSubcommand> {
-    &self.vectors
   }
 }
 

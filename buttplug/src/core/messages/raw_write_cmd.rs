@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::{Getters, CopyGetters};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawWriteCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -17,10 +18,13 @@ pub struct RawWriteCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[getset(get_copy="pub")]
   endpoint: Endpoint,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
+  #[getset(get="pub")]
   data: Vec<u8>,
   #[cfg_attr(feature = "serialize-json", serde(rename = "WriteWithResponse"))]
+  #[getset(get_copy="pub")]
   write_with_response: bool,
 }
 
@@ -38,18 +42,6 @@ impl RawWriteCmd {
       data,
       write_with_response,
     }
-  }
-
-  pub fn endpoint(&self) -> Endpoint {
-    self.endpoint
-  }
-
-  pub fn data(&self) -> &Vec<u8> {
-    &self.data
-  }
-
-  pub fn write_with_response(&self) -> bool {
-    self.write_with_response
   }
 }
 

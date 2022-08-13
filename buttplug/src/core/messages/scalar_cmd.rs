@@ -8,10 +8,12 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::{Getters, CopyGetters};
 
 /// Generic command for setting a level (single magnitude value) of a device feature.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+#[getset(get_copy="pub")]
 pub struct ScalarSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -29,21 +31,9 @@ impl ScalarSubcommand {
       actuator_type,
     }
   }
-
-  pub fn index(&self) -> u32 {
-    self.index
-  }
-
-  pub fn scalar(&self) -> f64 {
-    self.scalar
-  }
-
-  pub fn actuator_type(&self) -> ActuatorType {
-    self.actuator_type
-  }
 }
 
-#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone)]
+#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ScalarCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -51,6 +41,7 @@ pub struct ScalarCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Scalars"))]
+  #[getset(get="pub")]
   scalars: Vec<ScalarSubcommand>,
 }
 
@@ -61,10 +52,6 @@ impl ScalarCmd {
       device_index,
       scalars,
     }
-  }
-
-  pub fn scalars(&self) -> &Vec<ScalarSubcommand> {
-    &self.scalars
   }
 }
 

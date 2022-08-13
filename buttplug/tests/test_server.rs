@@ -27,10 +27,7 @@ use buttplug::{
     },
   },
   server::{    
-    device::{
-      configuration::ProtocolAttributesType,
-      hardware::{HardwareCommand, HardwareWriteCmd},
-    },
+    device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServer,
     ButtplugServerBuilder,
   },
@@ -137,7 +134,7 @@ fn test_ping_timeout() {
     // Check that we got an event back about the ping out.
     let msg = recv.next().await.expect("Test, assuming infallible.");
     if let ButtplugServerMessage::Error(e) = msg {
-      if messages::ErrorCode::ErrorPing != e.error_code {
+      if messages::ErrorCode::ErrorPing != e.error_code() {
         panic!("Didn't get a ping error");
       }
     } else {

@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::Getters;
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Test {
   /// Message Id, used for matching message pairs in remote connection instances.
@@ -17,6 +18,7 @@ pub struct Test {
   id: u32,
   /// Test string, which will be echoed back to client when sent to server.
   #[cfg_attr(feature = "serialize-json", serde(rename = "TestString"))]
+  #[getset(get="pub")]
   test_string: String,
 }
 

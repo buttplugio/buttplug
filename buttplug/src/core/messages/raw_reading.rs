@@ -8,10 +8,11 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::{Getters, CopyGetters};
 
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
-#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageValidator, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageValidator, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -19,8 +20,10 @@ pub struct RawReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[getset(get_copy="pub")]
   endpoint: Endpoint,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Data"))]
+  #[getset(get="pub")]
   data: Vec<u8>,
 }
 
@@ -32,14 +35,6 @@ impl RawReading {
       endpoint,
       data,
     }
-  }
-
-  pub fn endpoint(&self) -> Endpoint {
-    self.endpoint
-  }
-
-  pub fn data(&self) -> &Vec<u8> {
-    &self.data
   }
 }
 

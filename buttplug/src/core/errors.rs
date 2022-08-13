@@ -222,21 +222,21 @@ pub enum ButtplugError {
 impl From<messages::Error> for ButtplugError {
   /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
   fn from(error: messages::Error) -> Self {
-    match error.error_code {
+    match error.error_code() {
       ErrorCode::ErrorDevice => {
-        ButtplugDeviceError::UntypedDeserializedError(error.error_message).into()
+        ButtplugDeviceError::UntypedDeserializedError(error.error_message().clone()).into()
       }
       ErrorCode::ErrorMessage => {
-        ButtplugMessageError::UntypedDeserializedError(error.error_message).into()
+        ButtplugMessageError::UntypedDeserializedError(error.error_message().clone()).into()
       }
       ErrorCode::ErrorHandshake => {
-        ButtplugHandshakeError::UntypedDeserializedError(error.error_message).into()
+        ButtplugHandshakeError::UntypedDeserializedError(error.error_message().clone()).into()
       }
       ErrorCode::ErrorUnknown => {
-        ButtplugUnknownError::UntypedDeserializedError(error.error_message).into()
+        ButtplugUnknownError::UntypedDeserializedError(error.error_message().clone()).into()
       }
       ErrorCode::ErrorPing => {
-        ButtplugPingError::UntypedDeserializedError(error.error_message).into()
+        ButtplugPingError::UntypedDeserializedError(error.error_message().clone()).into()
       }
     }
   }

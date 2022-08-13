@@ -8,8 +8,9 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawSubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -17,6 +18,7 @@ pub struct RawSubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
+  #[getset(get_copy="pub")]
   endpoint: Endpoint,
 }
 
@@ -27,10 +29,6 @@ impl RawSubscribeCmd {
       device_index,
       endpoint,
     }
-  }
-
-  pub fn endpoint(&self) -> Endpoint {
-    self.endpoint
   }
 }
 

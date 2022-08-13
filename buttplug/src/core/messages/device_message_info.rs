@@ -6,19 +6,23 @@
 // for full license information.
 
 use super::*;
+use getset::{Getters, CopyGetters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  #[getset(get_copy="pub")]
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  pub device_name: String,
+  #[getset(get="pub")]
+  device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: DeviceMessageAttributes,
+  #[getset(get="pub")]
+  device_messages: DeviceMessageAttributes,
 }
 
 impl DeviceMessageInfo {
@@ -45,15 +49,18 @@ impl From<DeviceAdded> for DeviceMessageInfo {
   }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfoV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  #[getset(get_copy="pub")]
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  pub device_name: String,
+  #[getset(get="pub")]
+  device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: DeviceMessageAttributesV2,
+  #[getset(get="pub")]
+  device_messages: DeviceMessageAttributesV2,
 }
 
 impl From<DeviceAdded> for DeviceMessageInfoV2 {
@@ -74,15 +81,18 @@ impl From<DeviceMessageInfo> for DeviceMessageInfoV2 {
   }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfoV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  #[getset(get_copy="pub")]
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  pub device_name: String,
+  #[getset(get="pub")]
+  device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: DeviceMessageAttributesV1,
+  #[getset(get="pub")]  
+  device_messages: DeviceMessageAttributesV1,
 }
 
 impl From<DeviceAdded> for DeviceMessageInfoV1 {
@@ -103,15 +113,18 @@ impl From<DeviceMessageInfoV2> for DeviceMessageInfoV1 {
   }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  pub device_index: u32,
+  #[getset(get_copy="pub")]
+  device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  pub device_name: String,
+  #[getset(get="pub")]
+  device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  pub device_messages: Vec<ButtplugDeviceMessageType>,
+  #[getset(get="pub")]
+  device_messages: Vec<ButtplugDeviceMessageType>,
 }
 
 impl From<DeviceAdded> for DeviceMessageInfoV0 {

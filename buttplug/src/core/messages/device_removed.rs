@@ -10,13 +10,15 @@
 use super::*;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
+use getset::CopyGetters;
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceRemoved {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
+  #[getset(get_copy="pub")]
   device_index: u32,
 }
 
@@ -26,10 +28,6 @@ impl DeviceRemoved {
       id: 0,
       device_index,
     }
-  }
-
-  pub fn device_index(&self) -> u32 {
-    self.device_index
   }
 }
 

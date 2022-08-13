@@ -176,7 +176,7 @@ impl ProtocolHandler for TheHandy {
       vectors: vec![handyplug::linear_cmd::Vector {
         index: 0,
         duration: message.vectors()[0].duration(),
-        position: *message.vectors()[0].position(),
+        position: message.vectors()[0].position(),
       }],
     };
     let linear_payload = handyplug::Payload {

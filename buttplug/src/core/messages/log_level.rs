@@ -11,7 +11,7 @@ use std::cmp::Ord;
 use tracing::Level;
 
 /// Log Levels (Version 1 Message, Deprecated)
-#[derive(Debug, PartialEq, Clone, Ord, PartialOrd, Eq)]
+#[derive(Debug, PartialEq, Clone, Ord, PartialOrd, Eq, Copy)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum LogLevel {
   Off = 0,

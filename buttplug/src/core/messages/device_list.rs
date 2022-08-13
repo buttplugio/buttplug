@@ -7,26 +7,24 @@
 
 use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 use super::*;
+use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// List of all devices currently connected to the server.
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceList {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[getset(get="pub")]
   devices: Vec<DeviceMessageInfo>,
 }
 
 impl DeviceList {
   pub fn new(devices: Vec<DeviceMessageInfo>) -> Self {
     Self { id: 1, devices }
-  }
-
-  pub fn devices(&self) -> &Vec<DeviceMessageInfo> {
-    &self.devices
   }
 }
 
@@ -36,12 +34,13 @@ impl ButtplugMessageValidator for DeviceList {
   }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[getset(get="pub")]
   devices: Vec<DeviceMessageInfoV2>,
 }
 
@@ -64,12 +63,13 @@ impl ButtplugMessageValidator for DeviceListV2 {
   }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[getset(get="pub")]
   devices: Vec<DeviceMessageInfoV1>,
 }
 
@@ -93,12 +93,13 @@ impl ButtplugMessageValidator for DeviceListV1 {
   }
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage)]
+#[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
+  #[getset(get="pub")]
   devices: Vec<DeviceMessageInfoV0>,
 }
 
