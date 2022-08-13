@@ -1,7 +1,8 @@
+# Test battery output for a device with scalar message setting overrides.
 devices:
   - identifier: 
-      name: "LVS-DoesntMatter"
-    expected_name: "Lovense Hush"
+      name: "LVS-DoesntMatter2"
+    expected_name: "Lovense Edge"
 device_init: 
   # Initialization
   - !Commands
@@ -19,8 +20,8 @@ device_init:
       events:
         - !Notifications
           - endpoint: rx
-            # "Z:11:0082059AD3BD;"
-            data: [90, 58, 49, 49, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
+            # "P:11:0082059AD3BD;"
+            data: [80, 58, 49, 49, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]            
 device_commands:
   - !Messages
       device_index: 0

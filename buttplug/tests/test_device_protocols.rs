@@ -225,7 +225,9 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
 #[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
 #[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
-#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (All Devices)")]
+#[test_case("test_lovense_ridge.yaml" ; "Lovense Protocol - Lovense Ridge (Oscillate)")]
+#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
+#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory
