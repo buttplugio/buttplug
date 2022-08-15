@@ -177,7 +177,8 @@ impl HardwareInternal for LovenseDongleHardware {
     async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn read_value(
@@ -186,7 +187,8 @@ impl HardwareInternal for LovenseDongleHardware {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support read".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn write_value(
@@ -215,7 +217,8 @@ impl HardwareInternal for LovenseDongleHardware {
           error!("Port closed during writing.");
           ButtplugDeviceError::DeviceNotConnected("Port closed during writing".to_owned())
         })
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -224,7 +227,8 @@ impl HardwareInternal for LovenseDongleHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support subscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn unsubscribe(
@@ -233,6 +237,7 @@ impl HardwareInternal for LovenseDongleHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Dongle does not support unsubscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 }

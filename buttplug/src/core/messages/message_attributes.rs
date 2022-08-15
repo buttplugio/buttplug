@@ -9,7 +9,7 @@ use crate::core::{
   errors::ButtplugDeviceError,
   messages::{ButtplugDeviceMessageType, Endpoint},
 };
-use getset::{Getters, Setters, MutGetters};
+use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
@@ -39,7 +39,9 @@ pub enum SensorType {
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, MutGetters, Setters)]
+#[derive(
+  Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, MutGetters, Setters,
+)]
 pub struct DeviceMessageAttributes {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub")]
@@ -280,7 +282,11 @@ pub struct GenericDeviceMessageAttributes {
 }
 
 impl GenericDeviceMessageAttributes {
-  pub fn new(feature_descriptor: &str, step_range: &RangeInclusive<u32>, actuator_type: ActuatorType) -> Self {
+  pub fn new(
+    feature_descriptor: &str,
+    step_range: &RangeInclusive<u32>,
+    actuator_type: ActuatorType,
+  ) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
@@ -567,8 +573,11 @@ mod test {
 
   #[test]
   pub fn test_step_count_calculation() {
-    let mut vibrate_attributes =
-      GenericDeviceMessageAttributes::new("test", &RangeInclusive::new(0, 10), ActuatorType::Vibrate);
+    let mut vibrate_attributes = GenericDeviceMessageAttributes::new(
+      "test",
+      &RangeInclusive::new(0, 10),
+      ActuatorType::Vibrate,
+    );
     assert_eq!(vibrate_attributes.step_count(), 10);
     vibrate_attributes.set_step_range(RangeInclusive::new(3u32, 7));
     assert_eq!(vibrate_attributes.step_count(), 4);

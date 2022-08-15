@@ -7,12 +7,12 @@
 
 mod util;
 pub use util::{
-  test_server_with_device,
   test_device_manager::{
+    check_test_recv_value,
+    TestDeviceCommunicationManagerBuilder,
     TestDeviceIdentifier,
-  check_test_recv_value,
-  TestDeviceCommunicationManagerBuilder,
-  }
+  },
+  test_server_with_device,
 };
 
 use buttplug::{
@@ -26,7 +26,7 @@ use buttplug::{
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  server::{    
+  server::{
     device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServer,
     ButtplugServerBuilder,
@@ -148,7 +148,7 @@ fn test_device_stop_on_ping_timeout() {
   async_manager::block_on(async {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
-  
+
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.max_ping_time(100);
     server_builder.comm_manager(builder);
@@ -247,7 +247,7 @@ fn test_device_index_generation() {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
     let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
-  
+
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();
@@ -297,7 +297,7 @@ fn test_server_scanning_finished() {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
     let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
-  
+
     let mut server_builder = ButtplugServerBuilder::default();
     server_builder.comm_manager(builder);
     let server = server_builder.finish().unwrap();

@@ -139,6 +139,7 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .into(),
       )
-    }.boxed()
+    }
+    .boxed()
   }
 }

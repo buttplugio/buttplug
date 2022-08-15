@@ -205,7 +205,8 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
           ButtplugConnectorTransportSpecificError::TungsteniteError(websocket_error),
         )),
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
@@ -214,6 +215,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
       // If we can't send the message, we have no loop, so we're not connected.
       disconnect_notifier.notify_waiters();
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }

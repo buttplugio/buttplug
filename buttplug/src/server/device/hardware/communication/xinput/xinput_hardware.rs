@@ -156,7 +156,8 @@ impl HardwareInternal for XInputHardware {
         Endpoint::Rx,
         vec![battery.battery_level.0],
       ))
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn write_value(
@@ -179,7 +180,8 @@ impl HardwareInternal for XInputHardware {
         .map_err(|e: XInputUsageError| {
           ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
         })
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -188,7 +190,8 @@ impl HardwareInternal for XInputHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "XInput hardware does not support subscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn unsubscribe(
@@ -197,7 +200,8 @@ impl HardwareInternal for XInputHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "XInput hardware does not support unsubscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 }
 

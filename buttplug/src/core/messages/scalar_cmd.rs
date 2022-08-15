@@ -6,14 +6,14 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 /// Generic command for setting a level (single magnitude value) of a device feature.
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct ScalarSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -41,7 +41,7 @@ pub struct ScalarCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Scalars"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   scalars: Vec<ScalarSubcommand>,
 }
 

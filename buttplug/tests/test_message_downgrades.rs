@@ -21,9 +21,7 @@ use buttplug::{
     BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
   },
   server::{
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-    },
+    device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServer,
   },
   util::async_manager,

@@ -218,7 +218,8 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
         .await;
       });
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
@@ -226,7 +227,8 @@ impl ButtplugConnectorTransport for ButtplugPipeServerTransport {
     async move {
       disconnect_notifier.notify_waiters();
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }
 

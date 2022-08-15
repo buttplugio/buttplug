@@ -19,7 +19,7 @@ pub struct KiirooCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   command: String,
 }
 

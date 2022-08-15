@@ -16,25 +16,22 @@ use buttplug::{
 use std::sync::{Arc, Mutex};
 pub use test_device::{
   TestDevice,
-  TestHardwareConnector,
   TestDeviceChannelHost,
+  TestHardwareConnector,
   TestHardwareEvent,
-  TestHardwareNotification
+  TestHardwareNotification,
 };
 #[cfg(feature = "server")]
 pub use test_device_comm_manager::{
   //new_bluetoothle_test_device,
   TestDeviceCommunicationManager,
   TestDeviceCommunicationManagerBuilder,
-  TestDeviceIdentifier
+  TestDeviceIdentifier,
 };
 use tokio::sync::mpsc::Receiver;
 
 #[allow(dead_code)]
-pub fn check_test_recv_value(
-  receiver: &mut TestDeviceChannelHost,
-  command: HardwareCommand,
-) {
+pub fn check_test_recv_value(receiver: &mut TestDeviceChannelHost, command: HardwareCommand) {
   assert_eq!(
     recv_now(&mut receiver.receiver)
       .expect("No messages received")

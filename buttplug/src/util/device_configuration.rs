@@ -131,12 +131,12 @@ pub struct ProtocolDefinition {
   #[serde(default)]
   configurations: Vec<ProtocolAttributes>,
 }
- 
+
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserDeviceConfigPair {
   identifier: UserConfigDeviceIdentifier,
-  config: UserDeviceConfig
+  config: UserDeviceConfig,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
@@ -148,12 +148,14 @@ pub struct UserConfigDefinition {
   user_device_configs: Vec<UserDeviceConfigPair>,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash)]
+#[derive(
+  Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash,
+)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDeviceIdentifier {
   address: String,
   protocol: String,
-  identifier: Option<String>
+  identifier: Option<String>,
 }
 
 impl Into<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
@@ -287,10 +289,14 @@ fn add_user_configs_to_protocol(
   }
   for user_config in user_config_def.user_device_configs() {
     if *user_config.config().allow().as_ref().unwrap_or(&false) {
-      external_config.allow_list.push(user_config.identifier().address().clone());
+      external_config
+        .allow_list
+        .push(user_config.identifier().address().clone());
     }
     if *user_config.config().deny().as_ref().unwrap_or(&false) {
-      external_config.deny_list.push(user_config.identifier().address().clone());
+      external_config
+        .deny_list
+        .push(user_config.identifier().address().clone());
     }
     if let Some(index) = user_config.config().index().as_ref() {
       external_config
@@ -381,7 +387,6 @@ pub fn load_protocol_configs_from_json(
   user_config_str: Option<String>,
   skip_version_check: bool,
 ) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
-
   if main_config_str.is_some() {
     info!("Loading from custom base device configuration...")
   } else {

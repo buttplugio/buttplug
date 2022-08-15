@@ -300,13 +300,9 @@ impl ServerDeviceManagerEventLoop {
         }
       }
       ServerDeviceEvent::Notification(_, message) => {
-        if self
-          .server_sender
-          .send(message.into())
-          .is_err()
-        {
+        if self.server_sender.send(message.into()).is_err() {
           debug!("Server not currently available, dropping Device Added event.");
-        }        
+        }
       }
     }
   }

@@ -261,7 +261,7 @@ where
               ButtplugCurrentSpecServerMessage::from(msg),
             ));
         }
-      }      
+      }
       ButtplugCurrentSpecServerMessage::Error(e) => {
         self.send_client_event(ButtplugClientEvent::Error(e.into()));
       }

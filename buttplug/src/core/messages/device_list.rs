@@ -18,7 +18,7 @@ pub struct DeviceList {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   devices: Vec<DeviceMessageInfo>,
 }
 
@@ -40,7 +40,7 @@ pub struct DeviceListV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   devices: Vec<DeviceMessageInfoV2>,
 }
 
@@ -69,7 +69,7 @@ pub struct DeviceListV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   devices: Vec<DeviceMessageInfoV1>,
 }
 
@@ -99,7 +99,7 @@ pub struct DeviceListV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Devices"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   devices: Vec<DeviceMessageInfoV0>,
 }
 

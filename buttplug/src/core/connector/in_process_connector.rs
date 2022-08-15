@@ -178,6 +178,7 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
         .send(output)
         .await
         .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-    }.boxed()
+    }
+    .boxed()
   }
 }

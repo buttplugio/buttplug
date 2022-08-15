@@ -9,11 +9,11 @@
 
 use super::*;
 use crate::core::errors::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "serialize-json")]
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use getset::{Getters, CopyGetters};
 
 /// Error codes pertaining to error classes that can be represented in the
 /// Buttplug [Error] message.
@@ -41,11 +41,11 @@ pub struct Error {
   id: u32,
   /// Specifies the class of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorCode"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   error_code: ErrorCode,
   /// Description of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   error_message: String,
   #[cfg_attr(feature = "serialize-json", serde(skip))]
   original_error: Option<ButtplugError>,
@@ -112,7 +112,9 @@ impl From<ButtplugError> for Error {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, Getters, CopyGetters)]
+#[derive(
+  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, Getters, CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ErrorV0 {
   /// Message Id, used for matching message pairs in remote connection instances.
@@ -120,11 +122,11 @@ pub struct ErrorV0 {
   id: u32,
   /// Specifies the class of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorCode"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   error_code: ErrorCode,
   /// Description of the error.
   #[cfg_attr(feature = "serialize-json", serde(rename = "ErrorMessage"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   error_message: String,
 }
 

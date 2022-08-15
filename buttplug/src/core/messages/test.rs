@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::Getters;
 
 #[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -18,7 +18,7 @@ pub struct Test {
   id: u32,
   /// Test string, which will be echoed back to client when sent to server.
   #[cfg_attr(feature = "serialize-json", serde(rename = "TestString"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   test_string: String,
 }
 

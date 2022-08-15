@@ -11,8 +11,8 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
+use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
-use serde::{Serialize, Deserialize};
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///

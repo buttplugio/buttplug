@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::Getters;
 
 /// Lovense specific commands (Version 0 Message, **Deprecated**)
 // As this message is considered deprecated and is not actually implemented for
@@ -22,7 +22,7 @@ pub struct LovenseCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Command"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   command: String,
 }
 

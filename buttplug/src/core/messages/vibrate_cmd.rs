@@ -6,13 +6,13 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 #[derive(Debug, Default, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct VibrateSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -34,7 +34,7 @@ pub struct VibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speeds"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   speeds: Vec<VibrateSubcommand>,
 }
 

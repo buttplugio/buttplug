@@ -6,7 +6,6 @@
 // for full license information.
 
 mod util;
-pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
@@ -16,6 +15,7 @@ use buttplug::{
 };
 use futures::{pin_mut, StreamExt};
 use std::matches;
+pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
 use util::test_server_with_device;
 
 // Test devices that have protocols that support movements not all devices do.

@@ -261,6 +261,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
     async move {
       disconnect_notifier.notify_waiters();
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }

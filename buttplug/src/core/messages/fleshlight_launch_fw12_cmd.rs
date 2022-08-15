@@ -12,7 +12,6 @@ use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct FleshlightLaunchFW12Cmd {
@@ -21,10 +20,10 @@ pub struct FleshlightLaunchFW12Cmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   position: u8,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Speed"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   speed: u8,
 }
 

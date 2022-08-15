@@ -533,7 +533,8 @@ pub trait ProtocolHandler: Sync + Send {
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn handle_sensor_unsubscribe_cmd(
@@ -543,7 +544,8 @@ pub trait ProtocolHandler: Sync + Send {
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: BatteryCmd".to_string(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn handle_sensor_read_cmd(
@@ -555,7 +557,8 @@ pub trait ProtocolHandler: Sync + Send {
       SensorType::Battery => self.handle_battery_level_cmd(device, message),
       _ => future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: SensorReadCmd".to_string(),
-      ))).boxed(),
+      )))
+      .boxed(),
     }
   }
 
@@ -581,11 +584,13 @@ pub trait ProtocolHandler: Sync + Send {
         );
         debug!("Got battery reading: {}", battery_level);
         Ok(battery_reading.into())
-      }.boxed()
+      }
+      .boxed()
     } else {
       future::ready(Err(ButtplugDeviceError::UnhandledCommand(
         "Command not implemented for this protocol: SensorReadCmd".to_string(),
-      ))).boxed()
+      )))
+      .boxed()
     }
   }
 
@@ -596,7 +601,8 @@ pub trait ProtocolHandler: Sync + Send {
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Command not implemented for this protocol: SensorReadCmd".to_string(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn event_stream(

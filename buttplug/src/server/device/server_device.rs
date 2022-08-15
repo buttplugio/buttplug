@@ -43,11 +43,11 @@ use crate::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use core::hash::{Hash, Hasher};
+use dashmap::DashSet;
 use futures::future::{self, FutureExt};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
-use dashmap::DashSet;
 
 use super::{
   configuration::ProtocolDeviceAttributes,
@@ -177,7 +177,7 @@ pub struct ServerDevice {
   generic_command_manager: GenericCommandManager,
   /// Unique identifier for the device
   identifier: ServerDeviceIdentifier,
-  raw_subscribed_endpoints: Arc<DashSet<Endpoint>>
+  raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -219,7 +219,7 @@ impl ServerDevice {
       handler,
       hardware,
       attributes: attributes.clone(),
-      raw_subscribed_endpoints: Arc::new(DashSet::new())
+      raw_subscribed_endpoints: Arc::new(DashSet::new()),
     }
   }
 
@@ -274,25 +274,24 @@ impl ServerDevice {
   pub fn event_stream(&self) -> impl futures::Stream<Item = ServerDeviceEvent> + Send {
     let identifier = self.identifier.clone();
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
-    let hardware_stream = 
-      convert_broadcast_receiver_to_stream(self.hardware.event_stream())
-        .filter_map(move |hardware_event| {
-          let id = identifier.clone();
-          match hardware_event {
-            HardwareEvent::Disconnected(_) => Some(ServerDeviceEvent::Disconnected(id)),
-            HardwareEvent::Notification(_address, endpoint, data) => {
-              // TODO Figure out how we're going to parse raw data into something sendable to the client.
-              if raw_endpoints.contains(&endpoint) {
-                Some(ServerDeviceEvent::Notification(
-                  id,
-                  ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
-                ))
-              } else {
-                None
-              }
+    let hardware_stream = convert_broadcast_receiver_to_stream(self.hardware.event_stream())
+      .filter_map(move |hardware_event| {
+        let id = identifier.clone();
+        match hardware_event {
+          HardwareEvent::Disconnected(_) => Some(ServerDeviceEvent::Disconnected(id)),
+          HardwareEvent::Notification(_address, endpoint, data) => {
+            // TODO Figure out how we're going to parse raw data into something sendable to the client.
+            if raw_endpoints.contains(&endpoint) {
+              Some(ServerDeviceEvent::Notification(
+                id,
+                ButtplugServerDeviceMessage::RawReading(RawReading::new(0, endpoint, data)),
+              ))
+            } else {
+              None
             }
           }
-        });
+        }
+      });
 
     let identifier = self.identifier.clone();
     let handler_mapped_stream = self.handler.event_stream().map(move |incoming_message| {
@@ -407,10 +406,12 @@ impl ServerDevice {
       }
       ButtplugDeviceCommandMessageUnion::BatteryLevelCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      )).boxed(), // self.handle_battery_level_cmd(msg),
+      ))
+      .boxed(), // self.handle_battery_level_cmd(msg),
       ButtplugDeviceCommandMessageUnion::RSSILevelCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      )).boxed(), //self.handle_rssi_level_cmd(msg),
+      ))
+      .boxed(), //self.handle_rssi_level_cmd(msg),
 
       // Message that return lists of hardware commands which we'll handle sending to the devices
       // here, in order to reduce boilerplate in the implementations. Generic messages that we can
@@ -427,7 +428,8 @@ impl ServerDevice {
             return future::ready(Err(
               ButtplugDeviceError::DeviceFeatureIndexError(attrs.len() as u32, command.index())
                 .into(),
-            )).boxed();
+            ))
+            .boxed();
           }
           if *attrs[command.index() as usize].actuator_type() != command.actuator_type() {
             return future::ready(Err(
@@ -437,7 +439,8 @@ impl ServerDevice {
                 *attrs[command.index() as usize].actuator_type(),
               )
               .into(),
-            )).boxed();
+            ))
+            .boxed();
           }
         }
 
@@ -487,7 +490,8 @@ impl ServerDevice {
       // Everything else, which is mostly older messages, or special things that require reads.
       ButtplugDeviceCommandMessageUnion::KiirooCmd(_) => future::ready(Err(
         ButtplugDeviceError::ProtocolNotImplemented("Being Lazy".to_owned()).into(),
-      )).boxed(), //self.handler.handle_kiiroo_cmd( msg),
+      ))
+      .boxed(), //self.handler.handle_kiiroo_cmd( msg),
     }
   }
 
@@ -504,7 +508,8 @@ impl ServerDevice {
         hardware.parse_message(&command).await?;
       }
       Ok(messages::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_generic_command_result(
@@ -530,7 +535,8 @@ impl ServerDevice {
         fut.await?;
       }
       Ok(messages::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn check_sensor_command(
@@ -575,7 +581,8 @@ impl ServerDevice {
         .handle_sensor_read_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_sensor_subscribe_cmd(
@@ -599,7 +606,8 @@ impl ServerDevice {
         .handle_sensor_subscribe_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_sensor_unsubscribe_cmd(
@@ -623,7 +631,8 @@ impl ServerDevice {
         .handle_sensor_unsubscribe_cmd(device, message)
         .await
         .map_err(|e| e.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_single_motor_vibrate_cmd(
@@ -666,7 +675,8 @@ impl ServerDevice {
         .await
         .map(|_| messages::Ok::new(id).into())
         .map_err(|err| err.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_raw_read_cmd(&self, message: messages::RawReadCmd) -> ButtplugServerResultFuture {
@@ -680,7 +690,8 @@ impl ServerDevice {
           msg.into()
         })
         .map_err(|err| err.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_raw_unsubscribe_cmd(
@@ -701,13 +712,14 @@ impl ServerDevice {
         .map_err(|err| err.into());
       raw_endpoints.remove(&endpoint);
       result
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_raw_subscribe_cmd(
     &self,
     message: messages::RawSubscribeCmd,
-  ) -> ButtplugServerResultFuture {    
+  ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
     let fut = self.hardware.subscribe(&message.into());
@@ -722,6 +734,7 @@ impl ServerDevice {
         .map_err(|err| err.into());
       raw_endpoints.insert(endpoint);
       result
-    }.boxed()
+    }
+    .boxed()
   }
 }

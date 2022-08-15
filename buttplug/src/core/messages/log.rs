@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 /// Log message received from server (Version 1 Message, Deprecated)
 #[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
@@ -17,10 +17,10 @@ pub struct Log {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "LogLevel"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   log_level: LogLevel,
   #[cfg_attr(feature = "serialize-json", serde(rename = "LogMessage"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   log_message: String,
 }
 

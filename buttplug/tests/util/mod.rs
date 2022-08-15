@@ -5,25 +5,22 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-pub mod test_device_manager;
 mod delay_device_communication_manager;
+pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 mod channel_transport;
-pub use test_device_manager::{
-  TestDeviceCommunicationManagerBuilder,
-  TestDeviceChannelHost,
-  TestHardwareEvent,
-  TestHardwareNotification
-};
 use buttplug::{
   client::ButtplugClient,
   core::connector::ButtplugInProcessClientConnectorBuilder,
-  server::{
-    ButtplugServer,
-    ButtplugServerBuilder
-  },
+  server::{ButtplugServer, ButtplugServerBuilder},
 };
 pub use channel_transport::*;
+pub use test_device_manager::{
+  TestDeviceChannelHost,
+  TestDeviceCommunicationManagerBuilder,
+  TestHardwareEvent,
+  TestHardwareNotification,
+};
 
 use crate::util::test_device_manager::TestDeviceIdentifier;
 
@@ -93,7 +90,7 @@ pub async fn test_client_with_delayed_device_manager() -> ButtplugClient {
 #[allow(dead_code)]
 pub async fn test_server_with_device(
   device_type: &str,
-  allow_raw_message: bool
+  allow_raw_message: bool,
 ) -> (ButtplugServer, TestDeviceChannelHost) {
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let device = builder.add_test_device(&TestDeviceIdentifier::new(device_type, None));

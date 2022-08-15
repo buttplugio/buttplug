@@ -287,7 +287,8 @@ impl HardwareCommunicationManager for LovenseSerialDongleCommunicationManager {
         .await
         .expect("If we're getting scan requests, we should a task to throw it at.");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
@@ -298,7 +299,8 @@ impl HardwareCommunicationManager for LovenseSerialDongleCommunicationManager {
         .await
         .expect("If we're getting scan requests, we should a task to throw it at.");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn scanning_status(&self) -> bool {

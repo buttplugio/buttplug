@@ -5,25 +5,29 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use tracing::*;
-use super::{test_device::{TestHardwareConnector, new_device_channel, TestDeviceChannelHost, TestDeviceChannelDevice}, TestDevice};
-use buttplug::{
-  core::{ButtplugResultFuture},
-  server::device::{
-    configuration::{
-      BluetoothLESpecifier,
-      ProtocolCommunicationSpecifier,
-    },
+use super::{
+  test_device::{
+    new_device_channel,
+    TestDeviceChannelDevice,
+    TestDeviceChannelHost,
+    TestHardwareConnector,
   },
+  TestDevice,
+};
+use buttplug::{
+  core::ButtplugResultFuture,
+  server::device::configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
   server::device::{
+    configuration::ProtocolAttributesType,
     hardware::communication::{
       HardwareCommunicationManager,
       HardwareCommunicationManagerBuilder,
       HardwareCommunicationManagerEvent,
-    }, configuration::ProtocolAttributesType,
+    },
   },
 };
 use futures::future::{self, FutureExt};
+use serde::{Deserialize, Serialize};
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -32,22 +36,22 @@ use std::{
   time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::mpsc::Sender;
-use serde::{Deserialize, Serialize};
+use tracing::*;
 
 pub fn generate_address() -> String {
   info!("Generating random address for test device");
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
   SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Test")
-        .subsec_nanos()
-        .to_string()
+    .duration_since(UNIX_EPOCH)
+    .expect("Test")
+    .subsec_nanos()
+    .to_string()
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TestDeviceIdentifier {
-  name: String, 
+  name: String,
   //#[serde(default = "generate_address")]
   address: String,
 }
@@ -55,28 +59,35 @@ pub struct TestDeviceIdentifier {
 impl TestDeviceIdentifier {
   pub fn new(name: &str, address: Option<String>) -> Self {
     // Vaguely, not really random number. Works well enough to be an address that
-    // doesn't collide.    
-    let address = address.unwrap_or_else(|| {
-      generate_address()
-    });
-    Self { name: name.to_owned(), address }
+    // doesn't collide.
+    let address = address.unwrap_or_else(|| generate_address());
+    Self {
+      name: name.to_owned(),
+      address,
+    }
   }
 }
 
 pub struct TestDeviceCommunicationManagerBuilder {
-  devices: Option<Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>>
+  devices: Option<Vec<(TestDeviceIdentifier, TestDeviceChannelDevice)>>,
 }
 
 impl Default for TestDeviceCommunicationManagerBuilder {
   fn default() -> Self {
-    Self { devices: Some(vec!()) }
+    Self {
+      devices: Some(vec![]),
+    }
   }
 }
 
 impl TestDeviceCommunicationManagerBuilder {
   pub fn add_test_device(&mut self, device: &TestDeviceIdentifier) -> TestDeviceChannelHost {
     let (host_channel, device_channel) = new_device_channel();
-    self.devices.as_mut().expect("Devices vec does not exist, is this running twice?").push((device.clone(), device_channel));
+    self
+      .devices
+      .as_mut()
+      .expect("Devices vec does not exist, is this running twice?")
+      .push((device.clone(), device_channel));
     host_channel
   }
 }
@@ -88,18 +99,22 @@ impl HardwareCommunicationManagerBuilder for TestDeviceCommunicationManagerBuild
   ) -> Box<dyn HardwareCommunicationManager> {
     Box::new(TestDeviceCommunicationManager::new(
       sender,
-      self.devices.take().expect("Devices vec does not exist, is this running twice?"),
+      self
+        .devices
+        .take()
+        .expect("Devices vec does not exist, is this running twice?"),
     ))
   }
 }
 
 fn new_uninitialized_ble_test_device(
   identifier: &TestDeviceIdentifier,
-  device_channel: TestDeviceChannelDevice
+  device_channel: TestDeviceChannelDevice,
 ) -> TestHardwareConnector {
   let address = identifier.address.clone();
-  let specifier =
-    ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(&identifier.name, &[]));
+  let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
+    BluetoothLESpecifier::new_from_device(&identifier.name, &[]),
+  );
   let hardware = TestDevice::new(&identifier.name, &address, device_channel);
   TestHardwareConnector::new(specifier, hardware)
 }
@@ -133,15 +148,15 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
       warn!("No devices for test device comm manager to emit, did you mean to do this?");
     }
 
-    let mut events = vec!();
+    let mut events = vec![];
 
     while let Some((device, test_channel)) = self.devices.pop() {
       let device_creator = new_uninitialized_ble_test_device(&device, test_channel);
 
       events.push(HardwareCommunicationManagerEvent::DeviceFound {
-          name: device.name.clone(),
-          address: device.address,
-          creator: Box::new(device_creator),
+        name: device.name.clone(),
+        address: device.address,
+        creator: Box::new(device_creator),
       });
     }
     let device_sender = self.device_sender.clone();
@@ -149,11 +164,7 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
     async move {
       is_scanning.store(true, Ordering::SeqCst);
       for event in events {
-        if device_sender
-          .send(event)
-          .await
-          .is_err()
-        {
+        if device_sender.send(event).await.is_err() {
           error!("Device channel no longer open.");
         }
       }
@@ -167,7 +178,8 @@ impl HardwareCommunicationManager for TestDeviceCommunicationManager {
         error!("Error sending scanning finished. Scanning may not register as finished now!");
       }
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {

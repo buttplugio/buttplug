@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::CopyGetters;
 
 /// Battery level response
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters)]
@@ -19,7 +19,7 @@ pub struct BatteryLevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "BatteryLevel"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   battery_level: f64,
 }
 

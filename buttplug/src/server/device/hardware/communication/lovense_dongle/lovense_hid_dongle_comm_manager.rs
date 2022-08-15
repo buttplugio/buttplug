@@ -262,7 +262,8 @@ impl LovenseHIDDongleCommunicationManager {
         .expect("We've already spun up the state machine so we know this receiver exists.");
       info!("Found Lovense HID Dongle");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   pub fn scanning_status(&self) -> Arc<AtomicBool> {
@@ -285,7 +286,8 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
         .await
         .expect("Machine always exists as long as this object does.");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
@@ -296,7 +298,8 @@ impl HardwareCommunicationManager for LovenseHIDDongleCommunicationManager {
         .await
         .expect("Machine always exists as long as this object does.");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn scanning_status(&self) -> bool {

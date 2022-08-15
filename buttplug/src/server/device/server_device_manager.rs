@@ -225,7 +225,8 @@ impl ServerDeviceManager {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&self) -> ButtplugServerResultFuture {
@@ -239,7 +240,8 @@ impl ServerDeviceManager {
         // TODO Fill in error.
       }
       Ok(messages::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   pub(crate) fn stop_all_devices(&self) -> ButtplugServerResultFuture {
@@ -255,7 +257,8 @@ impl ServerDeviceManager {
         .collect();
       future::join_all(fut_vec).await;
       Ok(messages::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn parse_device_message(

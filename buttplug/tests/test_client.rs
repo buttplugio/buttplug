@@ -6,7 +6,12 @@
 // for full license information.
 
 mod util;
-use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device, test_device_manager::check_test_recv_value};
+use util::{
+  test_client,
+  test_client_with_delayed_device_manager,
+  test_client_with_device,
+  test_device_manager::check_test_recv_value,
+};
 extern crate buttplug;
 extern crate tracing;
 
@@ -23,9 +28,7 @@ use buttplug::{
     messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, Endpoint},
   },
   server::{
-    device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-    },
+    device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServerBuilder,
   },
   util::async_manager,

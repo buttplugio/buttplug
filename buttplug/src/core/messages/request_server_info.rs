@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 fn return_version0() -> ButtplugMessageSpecVersion {
   ButtplugMessageSpecVersion::Version0
@@ -19,7 +19,7 @@ pub struct RequestServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ClientName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   client_name: String,
   // Default for this message is set to 0, as this field didn't exist in the
   // first version of the protocol.
@@ -28,7 +28,7 @@ pub struct RequestServerInfo {
     serde(rename = "MessageVersion"),
     serde(default = "return_version0")
   )]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
 }
 

@@ -334,11 +334,15 @@ mod test {
     },
     server::device::configuration::ProtocolAttributesType,
   };
-  use std::ops::{RangeInclusive};
+  use std::ops::RangeInclusive;
 
   #[test]
   pub fn test_command_generator_vibration() {
-    let scalar_attrs = GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
+    let scalar_attrs = GenericDeviceMessageAttributes::new(
+      "Test",
+      &RangeInclusive::new(0, 20),
+      ActuatorType::Vibrate,
+    );
     let scalar_attributes = DeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs.clone()])
       .finish();
@@ -402,11 +406,17 @@ mod test {
 
   #[test]
   pub fn test_command_generator_vibration_step_range() {
-    let mut vibrate_attrs_1 =
-      GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
+    let mut vibrate_attrs_1 = GenericDeviceMessageAttributes::new(
+      "Test",
+      &RangeInclusive::new(0, 20),
+      ActuatorType::Vibrate,
+    );
     vibrate_attrs_1.set_step_range(RangeInclusive::new(10, 15));
-    let mut vibrate_attrs_2 =
-      GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
+    let mut vibrate_attrs_2 = GenericDeviceMessageAttributes::new(
+      "Test",
+      &RangeInclusive::new(0, 20),
+      ActuatorType::Vibrate,
+    );
     vibrate_attrs_2.set_step_range(RangeInclusive::new(10, 20));
 
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
@@ -472,7 +482,11 @@ mod test {
 
   #[test]
   pub fn test_command_generator_rotation() {
-    let rotate_attrs = GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Rotate);
+    let rotate_attrs = GenericDeviceMessageAttributes::new(
+      "Test",
+      &RangeInclusive::new(0, 20),
+      ActuatorType::Rotate,
+    );
 
     let rotate_attributes = DeviceMessageAttributesBuilder::default()
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])

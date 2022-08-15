@@ -126,7 +126,8 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
         }
       });
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {

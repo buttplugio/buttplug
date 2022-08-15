@@ -13,12 +13,12 @@ use buttplug::{
     HardwareCommunicationManagerEvent,
   },
 };
+use futures::FutureExt;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
 use tokio::sync::mpsc::Sender;
-use futures::FutureExt;
 
 #[derive(Default)]
 pub struct DelayDeviceCommunicationManagerBuilder {}
@@ -56,7 +56,8 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
     async move {
       is_scanning.store(true, Ordering::SeqCst);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
@@ -69,7 +70,8 @@ impl HardwareCommunicationManager for DelayDeviceCommunicationManager {
         .await
         .expect("Test, assuming infallible");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn scanning_status(&self) -> bool {

@@ -433,7 +433,8 @@ impl ButtplugServer {
       info!("Server disconnected, stopping all devices...");
       let _ = stop_fut.await;
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   /// Sends a [ButtplugClientMessage] to be parsed by the server (for handshake or ping), or passed
@@ -487,21 +488,21 @@ impl ButtplugServer {
     };
     // Simple way to set the ID on the way out. Just rewrap
     // the returned future to make sure it happens.
-      async move {
-        out_fut
-          .await
-          .map(|mut ok_msg| {
-            ok_msg.set_id(id);
-            ok_msg
-          })
-          .map_err(|err| {
-            let mut error = messages::Error::from(err);
-            error.set_id(id);
-            error
-          })
-      }
-      .instrument(info_span!("Buttplug Server Message", id = id))
-      .boxed()
+    async move {
+      out_fut
+        .await
+        .map(|mut ok_msg| {
+          ok_msg.set_id(id);
+          ok_msg
+        })
+        .map_err(|err| {
+          let mut error = messages::Error::from(err);
+          error.set_id(id);
+          error
+        })
+    }
+    .instrument(info_span!("Buttplug Server Message", id = id))
+    .boxed()
   }
 
   /// Performs the [RequestServerInfo]([ServerInfo](crate::core::message::RequestServerInfo) /
@@ -527,15 +528,19 @@ impl ButtplugServer {
     }
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
-    let out_msg =
-      messages::ServerInfo::new(&self.server_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION, self.max_ping_time);
+    let out_msg = messages::ServerInfo::new(
+      &self.server_name,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self.max_ping_time,
+    );
     let connected = self.connected.clone();
     async move {
       ping_timer.start_ping_timer().await;
       connected.store(true, Ordering::SeqCst);
       debug!("Server handshake check successful.");
       Result::Ok(out_msg.into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   /// Update the [PingTimer] with the latest received ping message.
@@ -547,7 +552,8 @@ impl ButtplugServer {
     async move {
       fut.await;
       Result::Ok(messages::Ok::new(msg.id()).into())
-    }.boxed()
+    }
+    .boxed()
   }
 }
 

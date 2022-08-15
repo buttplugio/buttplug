@@ -8,19 +8,40 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugClientRequest,
-  ButtplugClientResultFuture, ButtplugServerMessageFuture,
+  ButtplugClientError,
+  ButtplugClientMessageFuturePair,
+  ButtplugClientRequest,
+  ButtplugClientResultFuture,
+  ButtplugServerMessageFuture,
 };
 use crate::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      ActuatorType, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecDeviceMessageType,
-      ButtplugCurrentSpecServerMessage, ButtplugDeviceMessageType, ButtplugMessage,
-      DeviceMessageAttributes, DeviceMessageInfo, Endpoint, LinearCmd, RawReadCmd, RawSubscribeCmd,
-      RawUnsubscribeCmd, RawWriteCmd, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand,
-      SensorReadCmd, SensorSubscribeCmd, SensorType, SensorUnsubscribeCmd, StopDeviceCmd,
+      ActuatorType,
+      ButtplugCurrentSpecClientMessage,
+      ButtplugCurrentSpecDeviceMessageType,
+      ButtplugCurrentSpecServerMessage,
+      ButtplugDeviceMessageType,
+      ButtplugMessage,
+      DeviceMessageAttributes,
+      DeviceMessageInfo,
+      Endpoint,
+      LinearCmd,
+      RawReadCmd,
+      RawSubscribeCmd,
+      RawUnsubscribeCmd,
+      RawWriteCmd,
+      RotateCmd,
+      RotationSubcommand,
+      ScalarCmd,
+      ScalarSubcommand,
+      SensorReadCmd,
+      SensorSubscribeCmd,
+      SensorType,
+      SensorUnsubscribeCmd,
+      StopDeviceCmd,
       VectorSubcommand,
     },
   },
@@ -688,7 +709,8 @@ impl ButtplugClientDevice {
   }
 }
 
-impl Eq for ButtplugClientDevice {}
+impl Eq for ButtplugClientDevice {
+}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

@@ -6,13 +6,13 @@
 // for full license information.
 
 use super::*;
+pub use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-pub use getset::{Getters, CopyGetters};
 
 #[derive(Debug, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct RotationSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
   index: u32,
@@ -39,9 +39,9 @@ pub struct RotateCmd {
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   #[cfg_attr(feature = "serialize-json", serde(rename = "Rotations"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   rotations: Vec<RotationSubcommand>,
 }
 

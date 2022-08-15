@@ -17,10 +17,7 @@ use buttplug::{
 use futures::StreamExt;
 use futures_timer::Delay;
 use std::{sync::Arc, time::Duration};
-use util::{
-  test_client_with_device,
-  test_device_manager::TestHardwareEvent
-};
+use util::{test_client_with_device, test_device_manager::TestHardwareEvent};
 
 #[cfg(feature = "server")]
 #[test]

@@ -685,7 +685,10 @@ impl DeviceConfigurationManager {
       attributes_identifier: identifier.attributes_identifier().clone(),
       protocol: identifier.protocol().clone(),
     }) {
-      debug!("Protocol + Identifier device config found for {:?}", identifier);
+      debug!(
+        "Protocol + Identifier device config found for {:?}",
+        identifier
+      );
       attrs.flatten()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
@@ -712,7 +715,7 @@ mod test {
   use crate::core::messages::{DeviceMessageAttributesBuilder, GenericDeviceMessageAttributes};
   use std::{
     collections::{HashMap, HashSet},
-    ops::RangeInclusive
+    ops::RangeInclusive,
   };
 
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
@@ -720,55 +723,79 @@ mod test {
     if allow_raw_messages {
       builder.allow_raw_messages();
     }
-    let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new(
-        HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
-        HashSet::new(),
-        HashMap::new(),
+    let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
+      HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
+      HashSet::new(),
+      HashMap::new(),
+    ));
+    builder.communication_specifier("lovense", specifiers);
+    builder.protocol_attributes(
+      ProtocolAttributesIdentifier::new(
+        "lovense",
+        &ProtocolAttributesType::Identifier("P".to_owned()),
+        &None,
+      ),
+      ProtocolDeviceAttributes::new(
+        ProtocolAttributesType::Identifier("P".to_owned()),
+        Some("Lovense Edge".to_owned()),
+        None,
+        DeviceMessageAttributesBuilder::default()
+          .scalar_cmd(&vec![
+            GenericDeviceMessageAttributes::new(
+              "Edge Vibrator 1",
+              &RangeInclusive::new(0, 20),
+              crate::core::messages::ActuatorType::Vibrate,
+            ),
+            GenericDeviceMessageAttributes::new(
+              "Edge Vibrator 2",
+              &RangeInclusive::new(0, 20),
+              crate::core::messages::ActuatorType::Vibrate,
+            ),
+          ])
+          .finish(),
+        None,
       ),
     );
-    builder.communication_specifier("lovense", specifiers);
-    builder.protocol_attributes(ProtocolAttributesIdentifier::new("lovense", &ProtocolAttributesType::Identifier("P".to_owned()), &None),
-    ProtocolDeviceAttributes::new(
-      ProtocolAttributesType::Identifier("P".to_owned()),
-      Some("Lovense Edge".to_owned()),
-      None,
-      DeviceMessageAttributesBuilder::default()
-        .scalar_cmd(&vec![GenericDeviceMessageAttributes::new("Edge Vibrator 1", &RangeInclusive::new(0, 20), crate::core::messages::ActuatorType::Vibrate), 
-                                GenericDeviceMessageAttributes::new("Edge Vibrator 2", &RangeInclusive::new(0, 20), crate::core::messages::ActuatorType::Vibrate)])
-        .finish(),
-      None,
-    ));
     builder.finish().unwrap()
   }
 
   #[test]
   fn test_config_equals() {
     let config = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new_from_device("LovenseDummyTestName", &[]),
-    );
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LovenseDummyTestName",
+      &[],
+    ));
     assert!(!config.protocol_specializers(&spec).is_empty());
   }
 
   #[test]
   fn test_config_wildcard_equals() {
     let config = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
-    );
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &[],
+    ));
     assert!(!config.protocol_specializers(&spec).is_empty());
   }
 
   #[test]
   fn test_specific_device_config_creation() {
     let dcm = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
-    );
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &[],
+    ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config = dcm
-      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .protocol_device_attributes(
+        &ServerDeviceIdentifier::new(
+          "Whatever",
+          "lovense",
+          &ProtocolAttributesType::Identifier("P".to_owned()),
+        ),
+        &vec![],
+      )
       .expect("Should be found");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
@@ -789,12 +816,20 @@ mod test {
   #[test]
   fn test_raw_device_config_creation() {
     let dcm = create_unit_test_dcm(true);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
-    );
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &[],
+    ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config = dcm
-      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .protocol_device_attributes(
+        &ServerDeviceIdentifier::new(
+          "Whatever",
+          "lovense",
+          &ProtocolAttributesType::Identifier("P".to_owned()),
+        ),
+        &vec![],
+      )
       .expect("Should be found");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");
@@ -808,12 +843,20 @@ mod test {
   #[test]
   fn test_non_raw_device_config_creation() {
     let dcm = create_unit_test_dcm(false);
-    let spec = ProtocolCommunicationSpecifier::BluetoothLE(
-      BluetoothLESpecifier::new_from_device("LVS-Whatever", &[]),
-    );
+    let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
+      "LVS-Whatever",
+      &[],
+    ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
     let config = dcm
-      .protocol_device_attributes(&ServerDeviceIdentifier::new("Whatever", "lovense", &ProtocolAttributesType::Identifier("P".to_owned())), &vec![])
+      .protocol_device_attributes(
+        &ServerDeviceIdentifier::new(
+          "Whatever",
+          "lovense",
+          &ProtocolAttributesType::Identifier("P".to_owned()),
+        ),
+        &vec![],
+      )
       .expect("Should be found");
     // Make sure we got the right name
     assert_eq!(config.name(), "Lovense Edge");

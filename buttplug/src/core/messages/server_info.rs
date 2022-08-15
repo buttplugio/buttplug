@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::{Getters, CopyGetters};
 
 #[derive(Debug, ButtplugMessage, PartialEq, Eq, Clone, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -16,13 +16,13 @@ pub struct ServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   max_ping_time: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   server_name: String,
 }
 
@@ -53,22 +53,22 @@ pub struct ServerInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MajorVersion"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   major_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MinorVersion"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   minor_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "BuildVersion"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   build_version: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MessageVersion"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   message_version: ButtplugMessageSpecVersion,
   #[cfg_attr(feature = "serialize-json", serde(rename = "MaxPingTime"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   max_ping_time: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ServerName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   server_name: String,
 }
 

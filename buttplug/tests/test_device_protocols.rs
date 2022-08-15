@@ -2,20 +2,32 @@ mod util;
 use std::time::Duration;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientDevice, ButtplugClientEvent, ScalarCommand, LinearCommand, RotateCommand, VibrateCommand},
+  client::{
+    ButtplugClient,
+    ButtplugClientDevice,
+    ButtplugClientEvent,
+    LinearCommand,
+    RotateCommand,
+    ScalarCommand,
+    VibrateCommand,
+  },
   core::{
     connector::ButtplugInProcessClientConnectorBuilder,
-    messages::{ScalarSubcommand, VibrateSubcommand, RotationSubcommand, VectorSubcommand},
+    messages::{RotationSubcommand, ScalarSubcommand, VectorSubcommand, VibrateSubcommand},
   },
-  server::{device::hardware::{HardwareCommand}, ButtplugServerBuilder},
-  util::async_manager
+  server::{device::hardware::HardwareCommand, ButtplugServerBuilder},
+  util::async_manager,
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
-use util::test_device_manager::{TestDeviceCommunicationManagerBuilder, TestDeviceIdentifier, TestHardwareEvent};
-use tracing::*;
 use std::sync::Arc;
 use test_case::test_case;
+use tracing::*;
+use util::test_device_manager::{
+  TestDeviceCommunicationManagerBuilder,
+  TestDeviceIdentifier,
+  TestHardwareEvent,
+};
 
 #[derive(Serialize, Deserialize)]
 struct TestDevice {
@@ -30,9 +42,12 @@ enum TestClientCommand {
   Vibrate(Vec<VibrateSubcommand>),
   Rotate(Vec<RotationSubcommand>),
   Linear(Vec<VectorSubcommand>),
-  Battery { expected_power: f64, run_async: bool },
+  Battery {
+    expected_power: f64,
+    run_async: bool,
+  },
   Stop,
-  RSSI
+  RSSI,
 }
 
 impl TestClientCommand {
@@ -40,21 +55,50 @@ impl TestClientCommand {
     use TestClientCommand::*;
     match self {
       Scalar(msg) => {
-        device.scalar(&ScalarCommand::ScalarMap(msg.iter().map(|x| (x.index(), (x.scalar(), x.actuator_type()))).collect())).await.expect("Should always succeed.");
+        device
+          .scalar(&ScalarCommand::ScalarMap(
+            msg
+              .iter()
+              .map(|x| (x.index(), (x.scalar(), x.actuator_type())))
+              .collect(),
+          ))
+          .await
+          .expect("Should always succeed.");
       }
       Vibrate(msg) => {
-        device.vibrate(&VibrateCommand::VibrateMap(msg.iter().map(|x| (x.index(), x.speed())).collect())).await.expect("Should always succeed.");
+        device
+          .vibrate(&VibrateCommand::VibrateMap(
+            msg.iter().map(|x| (x.index(), x.speed())).collect(),
+          ))
+          .await
+          .expect("Should always succeed.");
       }
       Stop => {
         device.stop().await.expect("Stop failed");
       }
       Rotate(msg) => {
-        device.rotate(&RotateCommand::RotateMap(msg.iter().map(|x| (x.index(), (x.speed(), x.clockwise()))).collect())).await.expect("Should always succeed.");
+        device
+          .rotate(&RotateCommand::RotateMap(
+            msg
+              .iter()
+              .map(|x| (x.index(), (x.speed(), x.clockwise())))
+              .collect(),
+          ))
+          .await
+          .expect("Should always succeed.");
       }
       Linear(msg) => {
-        device.linear(&LinearCommand::LinearVec(msg.iter().map(|x| (x.duration(), x.position())).collect())).await.expect("Should always succeed.");
+        device
+          .linear(&LinearCommand::LinearVec(
+            msg.iter().map(|x| (x.duration(), x.position())).collect(),
+          ))
+          .await
+          .expect("Should always succeed.");
       }
-      Battery{ expected_power, run_async } => {
+      Battery {
+        expected_power,
+        run_async,
+      } => {
         if *run_async {
           // This is a special case specifically for lovense, since they read their battery off of
           // their notification endpoint. This is a mess but it does the job.
@@ -88,7 +132,7 @@ enum TestCommand {
   Events {
     device_index: u32,
     events: Vec<TestHardwareEvent>,
-  }
+  },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -122,8 +166,10 @@ async fn run_test_case(test_case: &DeviceTestCase) {
     .join("device_test_case")
     .join("config")
     .join(device_config_file);
-  
-    server_builder.device_configuration_json(Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config")));
+
+    server_builder.device_configuration_json(Some(
+      std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
+    ));
   }
   if let Some(user_device_config_file) = &test_case.user_device_config_file {
     let config_file_path = std::path::Path::new(
@@ -133,7 +179,9 @@ async fn run_test_case(test_case: &DeviceTestCase) {
     .join("device_test_case")
     .join("config")
     .join(user_device_config_file);
-    server_builder.user_device_configuration_json(Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config")));
+    server_builder.user_device_configuration_json(Some(
+      std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
+    ));
   }
   let server = server_builder.finish().expect("Should always build");
 
@@ -144,17 +192,29 @@ async fn run_test_case(test_case: &DeviceTestCase) {
 
   let mut event_stream = client.event_stream();
 
-  client.connect(in_process_connector_builder.finish()).await.expect("Test client couldn't connect to embedded process");
-  client.start_scanning().await.expect("Scanning should work.");
+  client
+    .connect(in_process_connector_builder.finish())
+    .await
+    .expect("Test client couldn't connect to embedded process");
+  client
+    .start_scanning()
+    .await
+    .expect("Scanning should work.");
 
   if let Some(device_init) = &test_case.device_init {
     // Parse send message into client calls, receives into response checks
     for command in device_init {
       match command {
-        TestCommand::Messages { device_index: _, messages: _ } => {
+        TestCommand::Messages {
+          device_index: _,
+          messages: _,
+        } => {
           panic!("Shouldn't have messages during initialization");
         }
-        TestCommand::Commands { device_index, commands } => {
+        TestCommand::Commands {
+          device_index,
+          commands,
+        } => {
           let device_receiver = &mut device_channels[*device_index as usize].receiver;
           for command in commands {
             tokio::select! {
@@ -172,7 +232,10 @@ async fn run_test_case(test_case: &DeviceTestCase) {
             }
           }
         }
-        TestCommand::Events { device_index, events } => {
+        TestCommand::Events {
+          device_index,
+          events,
+        } => {
           let device_sender = &device_channels[*device_index as usize].sender;
           for event in events {
             device_sender.send(event.clone()).await.unwrap();
@@ -211,17 +274,23 @@ async fn run_test_case(test_case: &DeviceTestCase) {
       }
     }
   }
-  
+
   // Parse send message into client calls, receives into response checks
   for command in &test_case.device_commands {
     match command {
-      TestCommand::Messages { device_index, messages } => {
+      TestCommand::Messages {
+        device_index,
+        messages,
+      } => {
         let device = &client.devices()[*device_index as usize];
         for message in messages {
           message.run(device).await;
         }
       }
-      TestCommand::Commands { device_index, commands } => {
+      TestCommand::Commands {
+        device_index,
+        commands,
+      } => {
         let device_receiver = &mut device_channels[*device_index as usize].receiver;
         for command in commands {
           tokio::select! {
@@ -238,7 +307,10 @@ async fn run_test_case(test_case: &DeviceTestCase) {
           }
         }
       }
-      TestCommand::Events { device_index, events } => {
+      TestCommand::Events {
+        device_index,
+        events,
+      } => {
         let device_sender = &device_channels[*device_index as usize].sender;
         for event in events {
           device_sender.send(event.clone()).await.unwrap();
@@ -269,10 +341,9 @@ fn test_device_protocols(test_file: &str) {
     .join("device_test_case")
     .join(test_file);
     // Given the test case object, run the test across all client versions.
-    let yaml_test_case =
-      std::fs::read_to_string(&test_file_path).expect(&format!("Cannot read file {:?}", test_file_path));
-    let test_case =
-      serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.");
+    let yaml_test_case = std::fs::read_to_string(&test_file_path)
+      .expect(&format!("Cannot read file {:?}", test_file_path));
+    let test_case = serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.");
     run_test_case(&test_case).await;
   });
 }

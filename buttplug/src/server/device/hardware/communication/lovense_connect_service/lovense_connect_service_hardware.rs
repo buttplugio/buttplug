@@ -147,7 +147,8 @@ impl HardwareInternal for LovenseServiceHardware {
         Endpoint::Rx,
         vec![battery_level.load(Ordering::SeqCst)],
       ))
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn write_value(
@@ -168,7 +169,8 @@ impl HardwareInternal for LovenseServiceHardware {
           Err(ButtplugDeviceError::UnhandledCommand(err.to_string()))
         }
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -177,7 +179,8 @@ impl HardwareInternal for LovenseServiceHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Connect does not support subscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn unsubscribe(
@@ -186,6 +189,7 @@ impl HardwareInternal for LovenseServiceHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Lovense Connect does not support unsubscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 }

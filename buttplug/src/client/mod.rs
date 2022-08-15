@@ -295,9 +295,7 @@ impl ButtplugClient {
   /// that even on failure, the client will be disconnected.
   pub fn disconnect(&self) -> ButtplugClientResultFuture {
     if !self.connected() {
-      return future::ready(Err(
-        ButtplugConnectorError::ConnectorNotConnected.into(),
-      )).boxed();
+      return future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed();
     }
     // Send the connector to the internal loop for management. Once we throw
     // the connector over, the internal loop will handle connecting and any
@@ -310,7 +308,8 @@ impl ButtplugClient {
       send_fut.await?;
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   /// Tells server to start scanning for devices.
@@ -366,7 +365,8 @@ impl ButtplugClient {
         .send(msg)
         .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn send_message(
@@ -374,9 +374,7 @@ impl ButtplugClient {
     msg: ButtplugCurrentSpecClientMessage,
   ) -> ButtplugServerMessageResultFuture {
     if !self.connected() {
-      future::ready(Err(
-        ButtplugConnectorError::ConnectorNotConnected.into(),
-      )).boxed()
+      future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed()
     } else {
       self.send_message_ignore_connect_status(msg)
     }
@@ -400,7 +398,8 @@ impl ButtplugClient {
     async move {
       send_fut.await?;
       fut.await
-    }.boxed()
+    }
+    .boxed()
   }
 
   /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]

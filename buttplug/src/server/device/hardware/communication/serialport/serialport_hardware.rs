@@ -282,7 +282,8 @@ impl HardwareInternal for SerialPortHardware {
     async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn read_value(
@@ -302,7 +303,8 @@ impl HardwareInternal for SerialPortHardware {
           .unwrap_or_else(|| Some(vec![]))
           .expect("Always set to Some before unwrapping."),
       ))
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn write_value(
@@ -318,7 +320,8 @@ impl HardwareInternal for SerialPortHardware {
         .await
         .expect("Tasks should exist if we get here.");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -355,7 +358,8 @@ impl HardwareInternal for SerialPortHardware {
         }
       });
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn unsubscribe(
@@ -364,7 +368,8 @@ impl HardwareInternal for SerialPortHardware {
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Serial port does not support unsubscribe".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 }
 

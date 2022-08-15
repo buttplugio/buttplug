@@ -137,7 +137,8 @@ impl ProtocolHandler for KGoalBoost {
       }
       sensors.insert(*message.sensor_index());
       Ok(messages::Ok::new(message.id()).into())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn handle_sensor_unsubscribe_cmd(
@@ -159,6 +160,7 @@ impl ProtocolHandler for KGoalBoost {
           .await?;
       }
       Ok(messages::Ok::new(message.id()).into())
-    }.boxed()
+    }
+    .boxed()
   }
 }

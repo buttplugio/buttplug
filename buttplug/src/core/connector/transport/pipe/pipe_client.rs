@@ -185,7 +185,8 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
         .await;
       });
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn disconnect(self) -> ButtplugConnectorResultFuture {
@@ -194,7 +195,8 @@ impl ButtplugConnectorTransport for ButtplugPipeClientTransport {
       // If we can't send the message, we have no loop, so we're not connected.
       disconnect_notifier.notify_waiters();
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }
 

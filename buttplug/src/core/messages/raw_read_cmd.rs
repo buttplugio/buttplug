@@ -6,9 +6,9 @@
 // for full license information.
 
 use super::*;
+use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
-use getset::CopyGetters;
 
 #[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -18,13 +18,13 @@ pub struct RawReadCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Endpoint"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   endpoint: Endpoint,
   #[cfg_attr(feature = "serialize-json", serde(rename = "ExpectedLength"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   expected_length: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Timeout"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   timeout: u32,
 }
 

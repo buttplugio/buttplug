@@ -281,7 +281,8 @@ where
           }
           Err(e) => Err(e),
         }
-      }.boxed()
+      }
+      .boxed()
     } else {
       ButtplugConnectorError::ConnectorAlreadyConnected.into()
     }
@@ -295,7 +296,8 @@ where
           .send(ButtplugRemoteConnectorMessage::Close)
           .await
           .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-      }.boxed()
+      }
+      .boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
     }
@@ -309,7 +311,8 @@ where
           .send(ButtplugRemoteConnectorMessage::Message(msg))
           .await
           .map_err(|_| ButtplugConnectorError::ConnectorNotConnected)
-      }.boxed()
+      }
+      .boxed()
     } else {
       ButtplugConnectorError::ConnectorNotConnected.into()
     }

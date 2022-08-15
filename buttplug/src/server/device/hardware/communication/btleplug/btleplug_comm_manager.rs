@@ -15,11 +15,11 @@ use crate::{
   },
   util::async_manager,
 };
+use futures::future::FutureExt;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use futures::future::FutureExt;
 use tokio::sync::mpsc::{channel, Sender};
 
 #[derive(Default, Clone)]
@@ -84,7 +84,8 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
       } else {
         Ok(())
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn stop_scanning(&mut self) -> ButtplugResultFuture {
@@ -107,7 +108,8 @@ impl HardwareCommunicationManager for BtlePlugCommunicationManager {
       } else {
         Ok(())
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn scanning_status(&self) -> bool {

@@ -8,7 +8,7 @@
 use super::device_message_info::{DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 use super::*;
 
-use getset::{Getters, CopyGetters};
+use getset::{CopyGetters, Getters};
 
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
@@ -22,13 +22,13 @@ pub struct DeviceAdded {
   // DeviceAdded is not considered a device message because it only notifies of existence and is not
   // a command (and goes from server to client), therefore we have to define the getter ourselves.
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_messages: DeviceMessageAttributes,
 }
 
@@ -59,13 +59,13 @@ pub struct DeviceAddedV2 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_messages: DeviceMessageAttributesV2,
 }
 
@@ -96,13 +96,13 @@ pub struct DeviceAddedV1 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_messages: DeviceMessageAttributesV1,
 }
 
@@ -134,13 +134,13 @@ pub struct DeviceAddedV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
   id: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   device_index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_name: String,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   device_messages: Vec<ButtplugDeviceMessageType>,
 }
 

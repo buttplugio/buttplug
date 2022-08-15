@@ -312,7 +312,8 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     async move {
       let _ = device.disconnect().await;
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn write_value(
@@ -322,9 +323,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
-          msg.endpoint,
-        ))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
       }
     };
     let device = self.device.clone();
@@ -344,7 +343,8 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
           ))
         }
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn read_value(
@@ -356,9 +356,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
-          msg.endpoint,
-        ))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
       }
     };
     let device = self.device.clone();
@@ -376,7 +374,8 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
           ))
         }
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -394,9 +393,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
-          msg.endpoint,
-        ))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
@@ -410,7 +407,8 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       })?;
       endpoints.insert(endpoint);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn unsubscribe(
@@ -428,9 +426,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     let characteristic = match self.endpoints.get(&msg.endpoint) {
       Some(chr) => chr.clone(),
       None => {
-        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(
-          msg.endpoint,
-        ))).boxed();
+        return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
       }
     };
     let endpoints = self.subscribed_endpoints.clone();
@@ -444,6 +440,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       })?;
       endpoints.remove(&endpoint);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }

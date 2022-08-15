@@ -24,25 +24,25 @@ use buttplug::{
       HardwareUnsubscribeCmd,
       HardwareWriteCmd,
     },
-  }, util::async_manager,
+  },
+  util::async_manager,
 };
 
 use async_trait::async_trait;
-use futures::future::{self, BoxFuture, FutureExt};
-use std::{
-  sync::Arc,
-  fmt::{self, Debug},
-  collections::{HashSet, VecDeque},
-};
 use dashmap::DashSet;
+use futures::future::{self, BoxFuture, FutureExt};
+use serde::{Deserialize, Serialize};
+use std::{
+  collections::{HashSet, VecDeque},
+  fmt::{self, Debug},
+  sync::Arc,
+};
 use tokio::sync::{broadcast, mpsc, Mutex};
-use serde::{Serialize, Deserialize};
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TestHardwareNotification {
   endpoint: Endpoint,
-  data: Vec<u8>
+  data: Vec<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -51,7 +51,7 @@ pub enum TestHardwareEvent {
   Notifications(Vec<TestHardwareNotification>),
   // Values to be emitted when calls to ReadValue happen
   Reads(Vec<TestHardwareNotification>),
-  Disconnect
+  Disconnect,
 }
 
 pub struct TestHardwareConnector {
@@ -96,7 +96,9 @@ pub struct TestHardwareSpecializer {
 
 impl TestHardwareSpecializer {
   fn new(hardware: TestDevice) -> Self {
-    Self { hardware: Some(hardware) }
+    Self {
+      hardware: Some(hardware),
+    }
   }
 }
 
@@ -139,18 +141,19 @@ pub struct TestDeviceChannelDevice {
   pub receiver: mpsc::Receiver<TestHardwareEvent>,
 }
 
-pub fn new_device_channel(
-) -> (TestDeviceChannelHost, TestDeviceChannelDevice) {
+pub fn new_device_channel() -> (TestDeviceChannelHost, TestDeviceChannelDevice) {
   let (host_sender, device_receiver) = mpsc::channel(256);
   let (device_sender, host_receiver) = mpsc::channel(256);
-  (TestDeviceChannelHost {
-    sender: host_sender,
-    receiver: host_receiver,
-  },
-  TestDeviceChannelDevice {
-    sender: device_sender,
-    receiver: device_receiver  
-  })
+  (
+    TestDeviceChannelHost {
+      sender: host_sender,
+      receiver: host_receiver,
+    },
+    TestDeviceChannelDevice {
+      sender: device_sender,
+      receiver: device_receiver,
+    },
+  )
 }
 
 pub struct TestDevice {
@@ -160,7 +163,7 @@ pub struct TestDevice {
   test_device_channel: mpsc::Sender<HardwareCommand>,
   event_sender: broadcast::Sender<HardwareEvent>,
   subscribed_endpoints: Arc<DashSet<Endpoint>>,
-  read_data: Arc<Mutex<VecDeque<RawReading>>>
+  read_data: Arc<Mutex<VecDeque<RawReading>>>,
 }
 
 impl TestDevice {
@@ -187,7 +190,11 @@ impl TestDevice {
             for notification in notifications {
               if subscribed_endpoints_clone.contains(&notification.endpoint) {
                 event_sender_clone
-                  .send(HardwareEvent::Notification(address_clone.clone(), notification.endpoint, notification.data.clone()))
+                  .send(HardwareEvent::Notification(
+                    address_clone.clone(),
+                    notification.endpoint,
+                    notification.data.clone(),
+                  ))
                   .expect("Test");
               }
             }
@@ -209,7 +216,7 @@ impl TestDevice {
       test_device_channel: command_sender,
       event_sender,
       subscribed_endpoints,
-      read_data
+      read_data,
     }
   }
 
@@ -227,16 +234,14 @@ impl TestDevice {
 
   fn send_command(
     &self,
-    data_command: HardwareCommand
+    data_command: HardwareCommand,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     let sender = self.test_device_channel.clone();
     async move {
-      sender
-        .send(data_command)
-        .await
-        .expect("Test");
+      sender.send(data_command).await.expect("Test");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 }
 
@@ -253,7 +258,8 @@ impl HardwareInternal for TestDevice {
         .send(HardwareEvent::Disconnected(address))
         .expect("Test");
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn read_value(
@@ -265,11 +271,19 @@ impl HardwareInternal for TestDevice {
     async move {
       let read_msg = reads.lock().await.pop_back().unwrap();
       if read_msg.endpoint() != msg.endpoint {
-        Err(ButtplugDeviceError::DeviceCommunicationError(format!("Read endpoint {} while expecting endpoint {}", read_msg.endpoint(), msg.endpoint)).into())
+        Err(
+          ButtplugDeviceError::DeviceCommunicationError(format!(
+            "Read endpoint {} while expecting endpoint {}",
+            read_msg.endpoint(),
+            msg.endpoint
+          ))
+          .into(),
+        )
       } else {
         Ok(read_msg)
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn write_value(

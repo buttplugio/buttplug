@@ -265,7 +265,8 @@ impl HardwareInternal for WebsocketServerHardware {
     async move {
       connected.store(false, Ordering::SeqCst);
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn read_value(
@@ -274,7 +275,8 @@ impl HardwareInternal for WebsocketServerHardware {
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Websocket Hardware does not support read".to_owned(),
-    ))).boxed()
+    )))
+    .boxed()
   }
 
   fn write_value(
@@ -291,7 +293,8 @@ impl HardwareInternal for WebsocketServerHardware {
           err
         ))
       })
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn subscribe(
@@ -337,7 +340,8 @@ impl HardwareInternal for WebsocketServerHardware {
         info!("Data channel closed, ending websocket server device listener task");
       });
       Ok(())
-    }.boxed()
+    }
+    .boxed()
   }
 
   fn unsubscribe(
@@ -354,11 +358,13 @@ impl HardwareInternal for WebsocketServerHardware {
           .expect("If we were subscribed, we'll have a token.");
         token.cancel();
         Ok(())
-      }.boxed()
+      }
+      .boxed()
     } else {
-      future::ready(Err(
-        ButtplugDeviceError::DeviceCommunicationError("Device not subscribed.".to_owned()),
-      )).boxed()
+      future::ready(Err(ButtplugDeviceError::DeviceCommunicationError(
+        "Device not subscribed.".to_owned(),
+      )))
+      .boxed()
     }
   }
 }
