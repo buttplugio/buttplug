@@ -39,7 +39,7 @@ impl ScalarGenericCommand {
   pub fn new(attributes: &GenericDeviceMessageAttributes) -> Self {
     Self {
       actuator: attributes.actuator_type().clone(),
-      step_range: attributes.step_range(),
+      step_range: attributes.step_range().clone(),
       value: AtomicU32::new(0),
     }
   }
@@ -91,7 +91,7 @@ impl GenericCommandManager {
     if let Some(attrs) = attributes.message_attributes.rotate_cmd() {
       rotations.resize_with(attrs.len(), || (AtomicU32::new(0), AtomicBool::new(false)));
       for attr in attrs {
-        rotation_step_ranges.push(attr.step_range());
+        rotation_step_ranges.push(attr.step_range().clone());
       }
 
       // TODO Can we assume clockwise is false here? We might send extra
@@ -334,11 +334,11 @@ mod test {
     },
     server::device::configuration::ProtocolAttributesType,
   };
-  use std::ops::RangeInclusive;
+  use std::ops::{RangeInclusive};
 
   #[test]
   pub fn test_command_generator_vibration() {
-    let scalar_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
+    let scalar_attrs = GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
     let scalar_attributes = DeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs.clone()])
       .finish();
@@ -403,11 +403,11 @@ mod test {
   #[test]
   pub fn test_command_generator_vibration_step_range() {
     let mut vibrate_attrs_1 =
-      GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
-    vibrate_attrs_1.set_step_range(&RangeInclusive::new(10, 15));
+      GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
+    vibrate_attrs_1.set_step_range(RangeInclusive::new(10, 15));
     let mut vibrate_attrs_2 =
-      GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Vibrate);
-    vibrate_attrs_2.set_step_range(&RangeInclusive::new(10, 20));
+      GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Vibrate);
+    vibrate_attrs_2.set_step_range(RangeInclusive::new(10, 20));
 
     let vibrate_attributes = DeviceMessageAttributesBuilder::default()
       .scalar_cmd(&vec![vibrate_attrs_1, vibrate_attrs_2])
@@ -472,7 +472,7 @@ mod test {
 
   #[test]
   pub fn test_command_generator_rotation() {
-    let rotate_attrs = GenericDeviceMessageAttributes::new("Test", 20, ActuatorType::Rotate);
+    let rotate_attrs = GenericDeviceMessageAttributes::new("Test", &RangeInclusive::new(0, 20), ActuatorType::Rotate);
 
     let rotate_attributes = DeviceMessageAttributesBuilder::default()
       .rotate_cmd(&vec![rotate_attrs.clone(), rotate_attrs])

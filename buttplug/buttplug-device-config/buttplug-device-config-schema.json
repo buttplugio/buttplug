@@ -24,7 +24,7 @@
             "type": "string",
             "$ref": "#/components/uuid"
           }
-        },        
+        },
         "services": {
           "type": "object",
           "patternProperties": {
@@ -141,13 +141,8 @@
       "type": "integer",
       "minimum": 1
     },
-    "StepCount": {
-      "description": "Specifies granularity of each feature on the device.",
-      "minimum": 1,
-      "type": "integer"
-    },
     "StepRange": {
-      "description": "Specifies the range of steps to use for a device. Devices will use 0 as a stop, so range is for 0 < x <= StepCount.",
+      "description": "Specifies the range of steps to use for a device. Devices will use the low end value as a stop.",
       "type": "array",
       "items": {
         "type": "integer"
@@ -173,8 +168,8 @@
       "items": {
         "type": "object",
         "properties": {
-          "StepCount": {
-            "$ref": "#/components/StepCount"
+          "StepRange": {
+            "$ref": "#/components/StepRange"
           },
           "FeatureOrder": {
             "$ref": "#/components/FeatureOrder"
@@ -187,7 +182,7 @@
           }
         },
         "required": [
-          "StepCount",
+          "StepRange",
           "ActuatorType"
         ],
         "additionalProperties": false,
@@ -225,7 +220,7 @@
         "minProperties": 0
       },
       "minItems": 1
-    },    
+    },
     "GenericUserMessageAttributes": {
       "description": "Attributes for device messages that can be configured by the user.",
       "type": "array",
@@ -377,7 +372,7 @@
       },
       "minItems": 1
     }
-  },  
+  },
   "type": "object",
   "properties": {
     "version": {

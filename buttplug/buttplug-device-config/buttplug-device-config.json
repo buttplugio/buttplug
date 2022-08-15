@@ -102,7 +102,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 20,
+              "StepRange": [
+                0,
+                20
+              ],
               "ActuatorType": "Vibrate"
             }
           ],
@@ -127,12 +130,18 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "FeatureDescriptor": "Vibrator",
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 5,
+                "StepRange": [
+                  0,
+                  5
+                ],
                 "FeatureDescriptor": "Air Pump",
                 "ActuatorType": "Constrict"
               }
@@ -147,11 +156,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -166,7 +181,10 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Rotate"
               }
             ]
@@ -234,7 +252,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Oscillate"
               }
             ]
@@ -248,11 +269,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -272,11 +299,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -299,7 +332,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 20,
+              "StepRange": [
+                0,
+                20
+              ],
               "ActuatorType": "Vibrate"
             }
           ],
@@ -330,11 +366,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ],
@@ -358,7 +400,10 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Rotate"
               }
             ],
@@ -442,11 +487,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ],
@@ -476,11 +527,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 20,
+                "StepRange": [
+                  0,
+                  20
+                ],
                 "ActuatorType": "Vibrate"
               }
             ],
@@ -513,11 +570,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 65535,
+              "StepRange": [
+                0,
+                65535
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 65535,
+              "StepRange": [
+                0,
+                65535
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -548,7 +611,10 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 99,
+              "StepRange": [
+                0,
+                99
+              ],
               "ActuatorType": "Position"
             }
           ],
@@ -588,7 +654,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -626,11 +695,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -685,7 +760,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -754,11 +832,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3,
+                "StepRange": [
+                  0,
+                  3
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -772,11 +856,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3,
+                "StepRange": [
+                  0,
+                  3
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -790,11 +880,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 3,
+                "StepRange": [
+                  0,
+                  3
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -838,7 +934,10 @@
           ],
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -939,7 +1038,10 @@
           ],
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -972,11 +1074,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1013,7 +1121,10 @@
           ],
           "ScalarCmd": [
             {
-              "StepCount": 77,
+              "StepRange": [
+                0,
+                77
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1055,7 +1166,10 @@
           ],
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1100,11 +1214,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1137,27 +1257,45 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 56,
+              "StepRange": [
+                0,
+                56
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1184,11 +1322,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 56,
+                "StepRange": [
+                  0,
+                  56
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 56,
+                "StepRange": [
+                  0,
+                  56
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1221,7 +1365,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 10,
+              "StepRange": [
+                0,
+                10
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1294,7 +1441,10 @@
           ],
           "ScalarCmd": [
             {
-              "StepCount": 255,
+              "StepRange": [
+                0,
+                255
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1321,11 +1471,17 @@
             ],
             "ScalarCmd": [
               {
-                "StepCount": 255,
+                "StepRange": [
+                  0,
+                  255
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 255,
+                "StepRange": [
+                  0,
+                  255
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1349,15 +1505,24 @@
             ],
             "ScalarCmd": [
               {
-                "StepCount": 255,
+                "StepRange": [
+                  0,
+                  255
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 255,
+                "StepRange": [
+                  0,
+                  255
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 2,
+                "StepRange": [
+                  0,
+                  2
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1398,7 +1563,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1466,11 +1634,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1484,11 +1658,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1502,11 +1682,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1520,11 +1706,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1558,7 +1750,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 12,
+              "StepRange": [
+                0,
+                12
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1573,11 +1768,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 27,
+                "StepRange": [
+                  0,
+                  27
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 27,
+                "StepRange": [
+                  0,
+                  27
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1591,7 +1792,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 22,
+                "StepRange": [
+                  0,
+                  22
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1611,11 +1815,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 12,
+                "StepRange": [
+                  0,
+                  12
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 12,
+                "StepRange": [
+                  0,
+                  12
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1629,7 +1839,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 22,
+                "StepRange": [
+                  0,
+                  22
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1644,7 +1857,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 27,
+                "StepRange": [
+                  0,
+                  27
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1660,11 +1876,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 27,
+                "StepRange": [
+                  0,
+                  27
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 27,
+                "StepRange": [
+                  0,
+                  27
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1708,7 +1930,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 8,
+              "StepRange": [
+                0,
+                8
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1731,35 +1956,59 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1786,19 +2035,31 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 15,
+                "StepRange": [
+                  0,
+                  15
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1828,15 +2089,24 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -1851,7 +2121,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1865,12 +2138,18 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate",
                 "FeatureOrder": 0
               }
@@ -1885,12 +2164,18 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate",
                 "FeatureOrder": 0
               }
@@ -1905,11 +2190,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1923,15 +2214,24 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1975,7 +2275,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -1989,7 +2292,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2003,7 +2309,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2017,13 +2326,19 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ],
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ],
@@ -2038,7 +2353,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2052,7 +2370,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2066,7 +2387,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 6,
+                "StepRange": [
+                  0,
+                  6
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2104,7 +2428,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ],
@@ -2119,7 +2446,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ],
@@ -2134,7 +2464,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ],
@@ -2150,7 +2483,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ],
@@ -2171,7 +2507,10 @@
         "messages": {
           "RotateCmd": [
             {
-              "StepCount": 10,
+              "StepRange": [
+                0,
+                10
+              ],
               "ActuatorType": "Rotate"
             }
           ]
@@ -2190,7 +2529,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 255,
+              "StepRange": [
+                0,
+                255
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2224,7 +2566,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 4,
+                "StepRange": [
+                  0,
+                  4
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2238,7 +2583,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 4,
+                "StepRange": [
+                  0,
+                  4
+                ],
                 "ActuatorType": "Position"
               }
             ]
@@ -2274,7 +2622,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2288,7 +2639,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2302,7 +2656,10 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Rotate"
               }
             ],
@@ -2317,7 +2674,10 @@
           "messages": {
             "RotateCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Rotate"
               }
             ],
@@ -2332,7 +2692,10 @@
           "messages": {
             "LinearCmd": [
               {
-                "StepCount": 99,
+                "StepRange": [
+                  0,
+                  99
+                ],
                 "ActuatorType": "Position"
               }
             ]
@@ -2356,7 +2719,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 255,
+              "StepRange": [
+                0,
+                255
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2375,7 +2741,10 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 99,
+              "StepRange": [
+                0,
+                99
+              ],
               "ActuatorType": "Position"
             }
           ]
@@ -2399,7 +2768,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2428,7 +2800,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 19,
+              "StepRange": [
+                0,
+                19
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2477,11 +2852,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 10,
+              "StepRange": [
+                0,
+                10
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 1,
+              "StepRange": [
+                0,
+                1
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2504,7 +2885,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2527,11 +2911,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 10,
+              "StepRange": [
+                0,
+                10
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 5,
+              "StepRange": [
+                0,
+                5
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2554,7 +2944,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 50,
+              "StepRange": [
+                0,
+                50
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2578,13 +2971,19 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 255,
+              "StepRange": [
+                0,
+                255
+              ],
               "ActuatorType": "Vibrate"
             }
           ],
           "RotateCmd": [
             {
-              "StepCount": 255,
+              "StepRange": [
+                0,
+                255
+              ],
               "ActuatorType": "Rotate"
             }
           ]
@@ -2623,7 +3022,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 8,
+              "StepRange": [
+                0,
+                8
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2638,12 +3040,18 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 8,
+                "StepRange": [
+                  0,
+                  8
+                ],
                 "ActuatorType": "Vibrate",
                 "FeatureOrder": 1
               },
               {
-                "StepCount": 8,
+                "StepRange": [
+                  0,
+                  8
+                ],
                 "FeatureOrder": 0,
                 "ActuatorType": "Vibrate"
               }
@@ -2658,11 +3066,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 8,
+                "StepRange": [
+                  0,
+                  8
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 8,
+                "StepRange": [
+                  0,
+                  8
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2702,7 +3116,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 4,
+                "StepRange": [
+                  0,
+                  4
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2733,7 +3150,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 9,
+              "StepRange": [
+                0,
+                9
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2771,11 +3191,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2801,11 +3227,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2828,12 +3260,18 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 127,
+              "StepRange": [
+                0,
+                127
+              ],
               "FeatureDescriptor": "Perineum Vibrator",
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 127,
+              "StepRange": [
+                0,
+                127
+              ],
               "FeatureDescriptor": "Internal Vibrator",
               "ActuatorType": "Vibrate"
             }
@@ -2859,11 +3297,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 127,
+              "StepRange": [
+                0,
+                127
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 127,
+              "StepRange": [
+                0,
+                127
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2884,7 +3328,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 127,
+                "StepRange": [
+                  0,
+                  127
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2898,7 +3345,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 127,
+                "StepRange": [
+                  0,
+                  127
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -2941,7 +3391,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2963,7 +3416,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -2987,7 +3443,10 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Position"
             }
           ],
@@ -3012,11 +3471,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 5,
+              "StepRange": [
+                0,
+                5
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3053,11 +3518,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 5,
+              "StepRange": [
+                0,
+                5
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 5,
+              "StepRange": [
+                0,
+                5
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3080,7 +3551,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 15,
+              "StepRange": [
+                0,
+                15
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3107,7 +3581,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3140,11 +3617,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3167,7 +3650,10 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Position"
             }
           ],
@@ -3192,7 +3678,10 @@
         "messages": {
           "LinearCmd": [
             {
-              "StepCount": 150,
+              "StepRange": [
+                0,
+                150
+              ],
               "ActuatorType": "Position"
             }
           ],
@@ -3216,7 +3705,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 68,
+              "StepRange": [
+                0,
+                68
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3242,11 +3734,17 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 1,
+              "StepRange": [
+                0,
+                1
+              ],
               "ActuatorType": "Vibrate"
             },
             {
-              "StepCount": 1,
+              "StepRange": [
+                0,
+                1
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3270,7 +3768,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3294,7 +3795,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 10,
+              "StepRange": [
+                0,
+                10
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3322,7 +3826,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 121,
+              "StepRange": [
+                0,
+                121
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3384,7 +3891,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 100,
+              "StepRange": [
+                0,
+                100
+              ],
               "ActuatorType": "Vibrate"
             }
           ]
@@ -3399,7 +3909,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3413,11 +3926,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3437,7 +3956,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3451,11 +3973,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3469,7 +3997,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3483,11 +4014,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3501,7 +4038,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3515,11 +4055,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3533,11 +4079,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3551,11 +4103,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3570,11 +4128,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3589,11 +4153,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3608,11 +4178,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3634,11 +4210,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3654,11 +4236,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3674,11 +4262,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3692,11 +4286,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3712,11 +4312,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3732,11 +4338,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3753,15 +4365,24 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3777,11 +4398,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3838,11 +4465,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3857,11 +4490,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3875,7 +4514,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3889,7 +4531,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3904,7 +4549,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3919,11 +4567,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3939,11 +4593,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3957,7 +4617,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3971,7 +4634,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -3985,11 +4651,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4003,7 +4675,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4017,11 +4692,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4035,7 +4716,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4100,11 +4784,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4125,11 +4815,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4144,11 +4840,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4200,11 +4902,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4221,11 +4929,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4253,11 +4967,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4273,11 +4993,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4300,11 +5026,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4319,11 +5051,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4351,11 +5089,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4369,11 +5113,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4387,7 +5137,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4402,11 +5155,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4433,7 +5192,10 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4447,11 +5209,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4466,11 +5234,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4492,11 +5266,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4525,11 +5305,17 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               },
               {
-                "StepCount": 100,
+                "StepRange": [
+                  0,
+                  100
+                ],
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -4557,7 +5343,10 @@
         "messages": {
           "ScalarCmd": [
             {
-              "StepCount": 3,
+              "StepRange": [
+                0,
+                3
+              ],
               "ActuatorType": "Vibrate"
             }
           ]

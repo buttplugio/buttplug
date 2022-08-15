@@ -708,7 +708,10 @@ impl DeviceConfigurationManager {
 mod test {
   use super::*;
   use crate::core::messages::{DeviceMessageAttributesBuilder, GenericDeviceMessageAttributes};
-  use std::collections::{HashMap, HashSet};
+  use std::{
+    collections::{HashMap, HashSet},
+    ops::RangeInclusive
+  };
 
   fn create_unit_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
     let mut builder = DeviceConfigurationManagerBuilder::default();
@@ -729,8 +732,8 @@ mod test {
       Some("Lovense Edge".to_owned()),
       None,
       DeviceMessageAttributesBuilder::default()
-        .scalar_cmd(&vec![GenericDeviceMessageAttributes::new("Edge Vibrator 1", 20, crate::core::messages::ActuatorType::Vibrate), 
-                                GenericDeviceMessageAttributes::new("Edge Vibrator 2", 20, crate::core::messages::ActuatorType::Vibrate)])
+        .scalar_cmd(&vec![GenericDeviceMessageAttributes::new("Edge Vibrator 1", &RangeInclusive::new(0, 20), crate::core::messages::ActuatorType::Vibrate), 
+                                GenericDeviceMessageAttributes::new("Edge Vibrator 2", &RangeInclusive::new(0, 20), crate::core::messages::ActuatorType::Vibrate)])
         .finish(),
       None,
     ));

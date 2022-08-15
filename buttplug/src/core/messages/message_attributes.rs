@@ -9,7 +9,7 @@ use crate::core::{
   errors::ButtplugDeviceError,
   messages::{ButtplugDeviceMessageType, Endpoint},
 };
-use getset::{Getters, Setters};
+use getset::{Getters, Setters, MutGetters};
 use serde::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
@@ -39,18 +39,18 @@ pub enum SensorType {
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, MutGetters, Setters)]
 pub struct DeviceMessageAttributes {
   // Generic commands
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   scalar_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   linear_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
@@ -270,67 +270,37 @@ pub struct GenericDeviceMessageAttributes {
   #[serde(rename = "FeatureDescriptor")]
   #[serde(default = "unspecified_feature")]
   feature_descriptor: String,
-  // This is the count we'll load from our config file, but we'll calculate it internally when
-  // someone asks for it just in case we also have a step range.
-  #[serde(rename = "StepCount")]
-  step_count: u32,
   #[getset(get = "pub")]
   #[serde(rename = "ActuatorType")]
   actuator_type: ActuatorType,
   #[serde(rename = "StepRange")]
   #[serde(skip_serializing)]
-  step_range: Option<RangeInclusive<u32>>,
+  #[getset(get = "pub", set = "pub")]
+  step_range: RangeInclusive<u32>,
 }
 
 impl GenericDeviceMessageAttributes {
-  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
+  pub fn new(feature_descriptor: &str, step_range: &RangeInclusive<u32>, actuator_type: ActuatorType) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
-      step_count,
       actuator_type,
-      step_range: None,
+      step_range: step_range.clone(),
     }
   }
 
   pub fn step_count(&self) -> u32 {
-    if let Some(range) = &self.step_range {
-      range.end() - range.start()
-    } else {
-      self.step_count
-    }
-  }
-
-  pub fn step_range(&self) -> RangeInclusive<u32> {
-    if let Some(range) = &self.step_range {
-      range.clone()
-    } else {
-      RangeInclusive::new(0, self.step_count)
-    }
-  }
-
-  pub fn set_step_range(&mut self, range: &RangeInclusive<u32>) {
-    self.step_range = Some(range.clone());
+    self.step_range.end() - self.step_range.start()
   }
 
   pub fn is_valid(
     &self,
     message_type: &ButtplugDeviceMessageType,
   ) -> Result<(), ButtplugDeviceError> {
-    if let Some(step_range) = &self.step_range {
-      // if step ranges are set up manually, they must be included for all acutators.
-      if !step_range.contains(&self.step_count) {
-        Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-          "Step range array values must have max value of step for {}.",
-          message_type
-        )))
-      } else if step_range.is_empty() {
-        Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-          "Step range out of order for {}, must be start <= x <= end.",
-          message_type
-        )))
-      } else {
-        Ok(())
-      }
+    if self.step_range.is_empty() {
+      Err(ButtplugDeviceError::DeviceConfigurationError(format!(
+        "Step range out of order for {}, must be start <= x <= end.",
+        message_type
+      )))
     } else {
       Ok(())
     }
@@ -598,9 +568,9 @@ mod test {
   #[test]
   pub fn test_step_count_calculation() {
     let mut vibrate_attributes =
-      GenericDeviceMessageAttributes::new("test", 10, ActuatorType::Vibrate);
+      GenericDeviceMessageAttributes::new("test", &RangeInclusive::new(0, 10), ActuatorType::Vibrate);
     assert_eq!(vibrate_attributes.step_count(), 10);
-    vibrate_attributes.set_step_range(&RangeInclusive::new(3u32, 7));
+    vibrate_attributes.set_step_range(RangeInclusive::new(3u32, 7));
     assert_eq!(vibrate_attributes.step_count(), 4);
   }
 }
