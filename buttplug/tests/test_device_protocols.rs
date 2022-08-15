@@ -21,6 +21,7 @@ use test_case::test_case;
 struct TestDevice {
   identifier: TestDeviceIdentifier,
   expected_name: Option<String>,
+  expected_display_name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -100,16 +101,40 @@ struct DeviceTestCase {
 }
 
 async fn run_test_case(test_case: &DeviceTestCase) {
+  tracing_subscriber::fmt::init();
   // Create our TestDeviceManager with the device identifier we want to create
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device_channels = vec![];
   for device in &test_case.devices {
+    info!("identifier: {:?}", device.identifier);
     device_channels.push(builder.add_test_device(&device.identifier));
   }
 
   // Bring up a server with the TDM
   let mut server_builder = ButtplugServerBuilder::default();
   server_builder.comm_manager(builder);
+
+  if let Some(device_config_file) = &test_case.device_config_file {
+    let config_file_path = std::path::Path::new(
+      &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
+    )
+    .join("tests")
+    .join("device_test_case")
+    .join("config")
+    .join(device_config_file);
+  
+    server_builder.device_configuration_json(Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config")));
+  }
+  if let Some(user_device_config_file) = &test_case.user_device_config_file {
+    let config_file_path = std::path::Path::new(
+      &std::env::var("CARGO_MANIFEST_DIR").expect("Should have manifest path"),
+    )
+    .join("tests")
+    .join("device_test_case")
+    .join("config")
+    .join(user_device_config_file);
+    server_builder.user_device_configuration_json(Some(std::fs::read_to_string(config_file_path).expect("Should be able to load config")));
+  }
   let server = server_builder.finish().expect("Should always build");
 
   // Connect client
@@ -170,6 +195,11 @@ async fn run_test_case(test_case: &DeviceTestCase) {
           if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_name {
             assert_eq!(*expected_name, *device_added.name());
           }
+          /*
+          if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_display_name {
+            assert_eq!(*expected_name, *device_added.display_name());
+          }
+          */
           if client.devices().len() == test_case.devices.len() {
             break;
           }
@@ -218,16 +248,17 @@ async fn run_test_case(test_case: &DeviceTestCase) {
   }
 }
 
-#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
-#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
-#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
-#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
-#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
-#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
-#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
-#[test_case("test_lovense_ridge.yaml" ; "Lovense Protocol - Lovense Ridge (Oscillate)")]
-#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
-#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
+//#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
+//#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+//#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
+//#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+//#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+//#[test_case("test_lovense_max.yaml" ; "Lovense Protocol - Lovense Max (Vibrate/Constrict)")]
+//#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
+//#[test_case("test_lovense_ridge.yaml" ; "Lovense Protocol - Lovense Ridge (Oscillate)")]
+//#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
+//#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
+#[test_case("test_lovense_ridge_user_config.yaml" ; "Lovense Protocol - Lovense Ridge (User Config)")]
 fn test_device_protocols(test_file: &str) {
   async_manager::block_on(async {
     // Load the file list from the test cases directory

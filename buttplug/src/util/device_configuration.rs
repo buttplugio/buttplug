@@ -29,7 +29,7 @@ use crate::{
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -65,9 +65,17 @@ impl ProtocolDeviceConfiguration {
   }
 }
 
-#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Getters, Setters)]
+pub struct GenericUserDeviceMessageAttributes {
+  #[getset(get = "pub")]
+  #[serde(rename = "StepRange")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  step_range: Option<RangeInclusive<i32>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone)]
 #[getset(get = "pub", set = "pub")]
-pub struct DeviceUserConfig {
+pub struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   #[serde(rename = "display-name")]
@@ -123,13 +131,40 @@ pub struct ProtocolDefinition {
   #[serde(default)]
   configurations: Vec<ProtocolAttributes>,
 }
+ 
+#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
+pub struct UserDeviceConfigPair {
+  identifier: UserConfigDeviceIdentifier,
+  config: UserDeviceConfig
+}
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct UserConfigDefinition {
+  #[serde(default)]
   specifiers: HashMap<String, ProtocolDefinition>,
-  #[serde(rename = "devices", with = "vectorize")]
-  user_configs: HashMap<ServerDeviceIdentifier, DeviceUserConfig>,
+  #[serde(rename = "devices")]
+  user_device_configs: Vec<UserDeviceConfigPair>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
+pub struct UserConfigDeviceIdentifier {
+  address: String,
+  protocol: String,
+  identifier: Option<String>
+}
+
+impl Into<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
+  fn into(self) -> ServerDeviceIdentifier {
+    let server_identifier = if let Some(ident_string) = self.identifier {
+      ProtocolAttributesType::Identifier(ident_string)
+    } else {
+      ProtocolAttributesType::Default
+    };
+    ServerDeviceIdentifier::new(&self.address, &self.protocol, &server_identifier)
+  }
 }
 
 #[derive(Default, Debug, Getters)]
@@ -250,28 +285,31 @@ fn add_user_configs_to_protocol(
       base_protocol_def.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
     }
   }
-  for (specifier, user_config) in user_config_def.user_configs() {
-    if *user_config.allow().as_ref().unwrap_or(&false) {
-      external_config.allow_list.push(specifier.address().clone());
+  for user_config in user_config_def.user_device_configs() {
+    if *user_config.config().allow().as_ref().unwrap_or(&false) {
+      external_config.allow_list.push(user_config.identifier().address().clone());
     }
-    if *user_config.deny().as_ref().unwrap_or(&false) {
-      external_config.deny_list.push(specifier.address().clone());
+    if *user_config.config().deny().as_ref().unwrap_or(&false) {
+      external_config.deny_list.push(user_config.identifier().address().clone());
     }
-    if let Some(index) = user_config.index().as_ref() {
+    if let Some(index) = user_config.config().index().as_ref() {
       external_config
         .reserved_indexes
-        .insert(*index, specifier.clone());
+        .insert(*index, user_config.identifier().clone().into());
     }
+    let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
+
     let config_attrs = ProtocolDeviceAttributes::new(
-      specifier.attributes_identifier().clone(),
+      server_ident.attributes_identifier().clone(),
       None,
-      user_config.display_name.clone(),
-      user_config.messages.clone().unwrap_or_default(),
+      user_config.config().display_name.clone(),
+      user_config.config().messages.clone().unwrap_or_default(),
       None,
     );
+    info!("Adding user config for {:?}", server_ident);
     external_config
       .user_configs
-      .insert(specifier.clone(), config_attrs);
+      .insert(server_ident, config_attrs);
   }
 }
 
@@ -343,6 +381,12 @@ pub fn load_protocol_configs_from_json(
   user_config_str: Option<String>,
   skip_version_check: bool,
 ) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
+
+  if main_config_str.is_some() {
+    info!("Loading from custom base device configuration...")
+  } else {
+    info!("Loading from internal base device configuration...")
+  }
   // Start by loading the main config
   let main_config = load_protocol_config_from_json(
     &main_config_str.unwrap_or_else(|| DEVICE_CONFIGURATION_JSON.to_owned()),
@@ -380,10 +424,13 @@ pub fn load_protocol_configs_from_json(
 
   // Then load the user config
   if let Some(user_config) = user_config_str {
+    info!("Loading user configuration from string.");
     let config = load_protocol_config_from_json(&user_config, skip_version_check)?;
     if let Some(user_configs) = config.user_configs {
       add_user_configs_to_protocol(&mut external_config, user_configs);
     }
+  } else {
+    info!("No user configuration given.");
   }
 
   Ok(external_config)

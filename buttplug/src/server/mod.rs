@@ -303,6 +303,12 @@ impl ButtplugServerBuilder {
         .protocol_attributes(ident.clone(), attributes.clone());
     }
 
+    for (ident, attributes) in protocol_map.user_configs() {
+      self
+        .device_manager_builder
+        .protocol_attributes(ident.into(), attributes.clone());
+    }
+
     let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);
 
     // Spawn the ping timer task, assuming the ping time is > 0.

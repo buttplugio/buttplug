@@ -221,21 +221,6 @@
       },
       "minItems": 1
     },
-    "GenericUserMessageAttributes": {
-      "description": "Attributes for device messages that can be configured by the user.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "StepRange": {
-            "$ref": "#/components/StepRange"
-          }
-        },
-        "additionalProperties": false,
-        "minProperties": 0
-      },
-      "minItems": 1
-    },
     "DeviceMessagesEx": {
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "object",
@@ -287,46 +272,37 @@
       "type": "object",
       "properties": {
         "ScalarCmd": {
-          "$ref": "#/components/GenericUserMessageAttributes"
+          "$ref": "#/components/GenericMessageAttributes"
         },
         "VibrateCmd": {
-          "$ref": "#/components/GenericUserMessageAttributes"
+          "$ref": "#/components/GenericMessageAttributes"
         },
         "LinearCmd": {
-          "$ref": "#/components/GenericUserMessageAttributes"
+          "$ref": "#/components/GenericMessageAttributes"
         },
         "RotateCmd": {
-          "$ref": "#/components/GenericUserMessageAttributes"
+          "$ref": "#/components/GenericMessageAttributes"
         }
       },
       "additionalProperties": false
     },
     "user-config": {
       "type": "object",
-      "patternProperties": {
-        "^.*$": {
-          "type": "object",
-          "properties": {
-            "actual-name": {
-              "type": "string"
-            },
-            "allow": {
-              "type": "boolean"
-            },
-            "deny": {
-              "type": "boolean"
-            },
-            "display-name": {
-              "type": "string"
-            },
-            "index": {
-              "type": "integer"
-            },
-            "messages": {
-              "$ref": "#/components/UserDeviceMessagesEx"
-            }
-          },
-          "additionalProperties": false
+      "properties": {
+        "allow": {
+          "type": "boolean"
+        },
+        "deny": {
+          "type": "boolean"
+        },
+        "display-name": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "messages": {
+          "$ref": "#/components/UserDeviceMessagesEx"
         }
       },
       "additionalProperties": false
@@ -445,8 +421,40 @@
           }
         },
         "devices": {
-          "$ref": "#/components/user-config"
-        }         
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "identifier": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "protocol": {
+                    "type": "string"
+                  },
+                  "identifier": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "address",
+                  "protocol"
+                ]
+              },
+              "config": {
+                "$ref": "#/components/user-config"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "identifier",
+              "config"
+            ]
+          }
+        }
       },
       "additionalProperties": false
     },

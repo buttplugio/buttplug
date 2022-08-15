@@ -35,6 +35,7 @@ use tokio::sync::mpsc::Sender;
 use serde::{Deserialize, Serialize};
 
 pub fn generate_address() -> String {
+  info!("Generating random address for test device");
   // Vaguely, not really random number. Works well enough to be an address that
   // doesn't collide.
   SystemTime::now()
@@ -44,10 +45,10 @@ pub fn generate_address() -> String {
         .to_string()
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TestDeviceIdentifier {
   name: String, 
-  #[serde(default = "generate_address")]
+  //#[serde(default = "generate_address")]
   address: String,
 }
 
@@ -57,7 +58,7 @@ impl TestDeviceIdentifier {
     // doesn't collide.    
     let address = address.unwrap_or_else(|| {
       generate_address()
-    });    
+    });
     Self { name: name.to_owned(), address }
   }
 }

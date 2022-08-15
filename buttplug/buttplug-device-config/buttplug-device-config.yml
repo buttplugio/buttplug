@@ -274,6 +274,7 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 20]
               ActuatorType: Oscillate
+              FeatureDescriptor: Fucking Machine Oscillation Speed
       - identifier:
           - J
         name: Lovense Dolce

@@ -8,46 +8,26 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  ButtplugClientError,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientRequest,
-  ButtplugClientResultFuture,
-  ButtplugServerMessageFuture,
+  ButtplugClientError, ButtplugClientMessageFuturePair, ButtplugClientRequest,
+  ButtplugClientResultFuture, ButtplugServerMessageFuture,
 };
 use crate::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
-      ActuatorType,
-      ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecDeviceMessageType,
-      ButtplugCurrentSpecServerMessage,
-      ButtplugDeviceMessageType,
-      ButtplugMessage,
-      DeviceMessageAttributes,
-      DeviceMessageInfo,
-      Endpoint,
-      LinearCmd,
-      RawReadCmd,
-      RawSubscribeCmd,
-      RawUnsubscribeCmd,
-      RawWriteCmd,
-      RotateCmd,
-      RotationSubcommand,
-      ScalarCmd,
-      ScalarSubcommand,
-      SensorReadCmd,
-      SensorSubscribeCmd,
-      SensorType,
-      SensorUnsubscribeCmd,
-      StopDeviceCmd,
+      ActuatorType, ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecDeviceMessageType,
+      ButtplugCurrentSpecServerMessage, ButtplugDeviceMessageType, ButtplugMessage,
+      DeviceMessageAttributes, DeviceMessageInfo, Endpoint, LinearCmd, RawReadCmd, RawSubscribeCmd,
+      RawUnsubscribeCmd, RawWriteCmd, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand,
+      SensorReadCmd, SensorSubscribeCmd, SensorType, SensorUnsubscribeCmd, StopDeviceCmd,
       VectorSubcommand,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, FutureExt, Stream};
+use getset::{CopyGetters, Getters};
 use std::{
   collections::HashMap,
   fmt,
@@ -56,7 +36,6 @@ use std::{
     Arc,
   },
 };
-use getset::{Getters, CopyGetters};
 use tokio::sync::broadcast;
 use tracing_futures::Instrument;
 
@@ -152,16 +131,16 @@ pub type ButtplugClientDeviceMessageType = ButtplugCurrentSpecDeviceMessageType;
 /// to a device connected to the server.
 pub struct ButtplugClientDevice {
   /// Name of the device
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   name: String,
   /// Index of the device, matching the index in the
   /// [ButtplugServer][crate::server::ButtplugServer]'s
   /// [DeviceManager][crate::server::device_manager::DeviceManager].
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   index: u32,
   /// Map of messages the device can take, along with the attributes of those
   /// messages.
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   message_attributes: DeviceMessageAttributes,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
@@ -310,7 +289,8 @@ impl ButtplugClientDevice {
           .into(),
         ),
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
@@ -372,61 +352,59 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
-pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
-  if self.message_attributes.scalar_cmd().is_none() {
-    return self.create_boxed_future_client_error(
-      ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
-    );
-  }
-
-  let scalar_count: u32 = self
-  .message_attributes
-  .scalar_cmd()
-  .as_ref()
-  .expect("Already checked existence")
-  .len() as u32;
-
-  let mut scalar_vec: Vec<ScalarSubcommand>;
-  match scalar_cmd {
-    ScalarCommand::Scalar((scalar, actuator)) => {
-      scalar_vec = Vec::with_capacity(scalar_count as usize);
-      for i in 0..scalar_count {
-        scalar_vec.push(ScalarSubcommand::new(i, *scalar, *actuator));
-      }
+  pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
+    if self.message_attributes.scalar_cmd().is_none() {
+      return self.create_boxed_future_client_error(
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
+      );
     }
-    ScalarCommand::ScalarMap(map) => {
-      if map.len() as u32 > scalar_count {
-        return self.create_boxed_future_client_error(
-          ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32)
-            .into(),
-        );
+
+    let scalar_count: u32 = self
+      .message_attributes
+      .scalar_cmd()
+      .as_ref()
+      .expect("Already checked existence")
+      .len() as u32;
+
+    let mut scalar_vec: Vec<ScalarSubcommand>;
+    match scalar_cmd {
+      ScalarCommand::Scalar((scalar, actuator)) => {
+        scalar_vec = Vec::with_capacity(scalar_count as usize);
+        for i in 0..scalar_count {
+          scalar_vec.push(ScalarSubcommand::new(i, *scalar, *actuator));
+        }
       }
-      scalar_vec = Vec::with_capacity(map.len() as usize);
-      for (idx, (scalar, actuator)) in map {
-        if *idx >= scalar_count {
+      ScalarCommand::ScalarMap(map) => {
+        if map.len() as u32 > scalar_count {
           return self.create_boxed_future_client_error(
-            ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
+            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
-        scalar_vec.push(ScalarSubcommand::new(*idx, *scalar, *actuator));
+        scalar_vec = Vec::with_capacity(map.len() as usize);
+        for (idx, (scalar, actuator)) in map {
+          if *idx >= scalar_count {
+            return self.create_boxed_future_client_error(
+              ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
+            );
+          }
+          scalar_vec.push(ScalarSubcommand::new(*idx, *scalar, *actuator));
+        }
+      }
+      ScalarCommand::ScalarVec(vec) => {
+        if vec.len() as u32 > scalar_count {
+          return self.create_boxed_future_client_error(
+            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
+          );
+        }
+        scalar_vec = Vec::with_capacity(vec.len() as usize);
+        for (i, (scalar, actuator)) in vec.iter().enumerate() {
+          scalar_vec.push(ScalarSubcommand::new(i as u32, *scalar, *actuator));
+        }
       }
     }
-    ScalarCommand::ScalarVec(vec) => {
-      if vec.len() as u32 > scalar_count {
-        return self.create_boxed_future_client_error(
-          ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32)
-            .into(),
-        );
-      }
-      scalar_vec = Vec::with_capacity(vec.len() as usize);
-      for (i, (scalar, actuator)) in vec.iter().enumerate() {
-        scalar_vec.push(ScalarSubcommand::new(i as u32, *scalar, *actuator));
-      }
-    }
+    let msg = ScalarCmd::new(self.index, scalar_vec).into();
+    self.send_message_expect_ok(msg)
   }
-  let msg = ScalarCmd::new(self.index, scalar_vec).into();
-  self.send_message_expect_ok(msg)
-}
 
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
@@ -570,16 +548,22 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::ProtocolSensorNotSupported(*sensor_type).into(),
       );
-    }    
+    }
     let msg = SensorReadCmd::new(self.index, sensor_indexes[0], *sensor_type).into();
     let reply = self.send_message(msg);
-    async move {    
+    async move {
       if let ButtplugCurrentSpecServerMessage::SensorReading(data) = reply.await? {
         Ok(data.data().clone())
       } else {
-        Err(ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType("SensorReading".to_owned())).into())
+        Err(
+          ButtplugError::ButtplugMessageError(ButtplugMessageError::UnexpectedMessageType(
+            "SensorReading".to_owned(),
+          ))
+          .into(),
+        )
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
@@ -602,7 +586,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
   pub fn raw_write(
     &self,
     endpoint: Endpoint,
-    data: Vec<u8>,
+    data: &Vec<u8>,
     write_with_response: bool,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_write_cmd().is_none() {
@@ -613,7 +597,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
     let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmd::new(
       self.index,
       endpoint,
-      data,
+      data.clone(),
       write_with_response,
     ));
     self.send_message_expect_ok(msg)
@@ -649,7 +633,8 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
           .into(),
         ),
       }
-    }.boxed()
+    }
+    .boxed()
   }
 
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
@@ -703,8 +688,7 @@ pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
   }
 }
 
-impl Eq for ButtplugClientDevice {
-}
+impl Eq for ButtplugClientDevice {}
 
 impl PartialEq for ButtplugClientDevice {
   fn eq(&self, other: &Self) -> bool {

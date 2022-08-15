@@ -324,7 +324,6 @@ impl ProtocolDeviceAttributes {
   }
 
   /// Check to make sure the message attributes of an instance are valid.
-  // TODO Can we do this in new() instead and return a result there?
   fn is_valid(&self) -> Result<(), ButtplugDeviceError> {
     if let Some(attrs) = self.message_attributes.scalar_cmd() {
       for attr in attrs {
@@ -679,18 +678,21 @@ impl DeviceConfigurationManager {
     raw_endpoints: &[Endpoint],
   ) -> Option<ProtocolDeviceAttributes> {
     let mut flat_attrs = if let Some(attrs) = self.protocol_attributes.get(&identifier.into()) {
+      debug!("User device config found for {:?}", identifier);
       attrs.flatten()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
       attributes_identifier: identifier.attributes_identifier().clone(),
       protocol: identifier.protocol().clone(),
     }) {
+      debug!("Protocol + Identifier device config found for {:?}", identifier);
       attrs.flatten()
     } else if let Some(attrs) = self.protocol_attributes.get(&ProtocolAttributesIdentifier {
       address: None,
       attributes_identifier: ProtocolAttributesType::Default,
       protocol: identifier.protocol().clone(),
     }) {
+      debug!("Protocol device config found for {:?}", identifier);
       attrs.flatten()
     } else {
       return None;

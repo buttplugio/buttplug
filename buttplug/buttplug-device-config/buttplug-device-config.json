@@ -256,7 +256,8 @@
                   0,
                   20
                 ],
-                "ActuatorType": "Oscillate"
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
               }
             ]
           }
