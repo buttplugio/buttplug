@@ -37,7 +37,6 @@ use dashmap::DashMap;
 pub use device::{
   ButtplugClientDevice,
   ButtplugClientDeviceEvent,
-  ButtplugClientDeviceMessageType,
   LinearCommand,
   RotateCommand,
   ScalarCommand,

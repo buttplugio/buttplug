@@ -21,7 +21,6 @@ use crate::{
     messages::{
       ActuatorType,
       ButtplugCurrentSpecClientMessage,
-      ButtplugCurrentSpecDeviceMessageType,
       ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
       ButtplugMessage,
@@ -140,8 +139,6 @@ pub enum LinearCommand {
   /// motor 1 to move to position 0.5 over the course of 500ms.
   LinearMap(HashMap<u32, (u32, f64)>),
 }
-
-pub type ButtplugClientDeviceMessageType = ButtplugCurrentSpecDeviceMessageType;
 
 #[derive(Getters, CopyGetters)]
 /// Client-usable representation of device connected to the corresponding
