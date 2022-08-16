@@ -4,15 +4,33 @@
 
 - Messages Added:
   - ScalarCmd
-  - ScalarReadCmd
-  - ScalarReading
+    - Replaces VibrateCmd and adds ability to easily extend with new actuator types that take a
+      single value.
+  - SensorReadCmd
+    - Replaces Battery/RSSI messages and adds ability to easily extend with new sensor types.
+  - SensorSubscribeCmd
+    - Allows users to receive realtime updates from devices (pressure sensors kegelcizers,
+      accelerometers in toys that have them, etc...)
+  - SensorUnsubscribeCmd
+  - SensorReading
 - Messages Changed:
   - DeviceList/DeviceAdded
-    - Added Message Attributes _FeatureDescriptor_, _ActuatorType_, _StepRange_, _SensorType_
+    - Remove _FeatureCount_, Message Attributes are now an array of attribute objects instead of
+      many fields of arrays that had to be reconstructed. Should reduce bookkeeping.
+    - Added Message Attributes _FeatureDescriptor_, _ActuatorType_, _SensorType_
+    - Added Device Attributes _DisplayName_
 - Messages Deprecated:
   - VibrateCmd
     - Superceded by ScalarCmd. Will still be available via API calls in client APIs, just no longer
       needs to be a specific message in the protocol.
+  - BatteryLevelCmd
+    - Superceded by SensorReadCmd
+  - RSSILevelCmd
+    - Superceded by SensorReadCmd
+  - BatteryLevelReading
+    - Superceded by SensorReading
+  - RSSILevelReading
+    - Superceded by SensorReading
 
 ## Version 2 (2020-09-28)
 
