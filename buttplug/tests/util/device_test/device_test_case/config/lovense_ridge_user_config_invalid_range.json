@@ -1,0 +1,28 @@
+{
+  "version": 65,
+  "user-configs": {
+    "devices": [
+      {
+        "identifier": {
+          "address": "UserConfigTest",
+          "protocol": "lovense",
+          "identifier": "F"
+        },
+        "config": {
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  30
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

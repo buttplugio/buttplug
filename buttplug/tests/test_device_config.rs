@@ -45,7 +45,7 @@ const BASE_CONFIG_JSON: &str = r#"
             "ScalarCmd": [
               {
                 "ActuatorType": "Vibrate",
-                "StepCount": 100
+                "StepRange": [0, 100]
               }
             ]
           }

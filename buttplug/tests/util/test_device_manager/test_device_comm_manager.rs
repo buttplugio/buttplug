@@ -52,7 +52,7 @@ pub fn generate_address() -> String {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TestDeviceIdentifier {
   name: String,
-  //#[serde(default = "generate_address")]
+  #[serde(default = "generate_address")]
   address: String,
 }
 
