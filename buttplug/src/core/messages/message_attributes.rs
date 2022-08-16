@@ -338,7 +338,7 @@ pub struct SensorDeviceMessageAttributes {
   sensor_type: SensorType,
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange")]
-  sensor_range: [u32; 2],
+  sensor_range: RangeInclusive<u32>,
 }
 
 /*
