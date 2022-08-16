@@ -18,7 +18,6 @@ use buttplug::{
   core::ButtplugResultFuture,
   server::device::configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
   server::device::{
-    configuration::ProtocolAttributesType,
     hardware::communication::{
       HardwareCommunicationManager,
       HardwareCommunicationManagerBuilder,

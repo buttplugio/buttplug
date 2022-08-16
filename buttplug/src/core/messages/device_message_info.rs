@@ -70,6 +70,17 @@ impl From<DeviceAdded> for DeviceMessageInfoV2 {
   }
 }
 
+impl From<DeviceAddedV2> for DeviceMessageInfoV2 {
+  fn from(device_added: DeviceAddedV2) -> Self {
+    // No structural difference, it's all content changes
+    Self {
+      device_index: device_added.device_index(),
+      device_name: device_added.device_name().clone(),
+      device_messages: device_added.device_messages().clone(),
+    }
+  }
+}
+
 impl From<DeviceMessageInfo> for DeviceMessageInfoV2 {
   fn from(device_message_info: DeviceMessageInfo) -> Self {
     // No structural difference, it's all content changes

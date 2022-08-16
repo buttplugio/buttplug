@@ -63,7 +63,7 @@ pub use battery_level_cmd::BatteryLevelCmd;
 pub use battery_level_reading::BatteryLevelReading;
 pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
 pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
-pub use device_message_info::DeviceMessageInfo;
+pub use device_message_info::{DeviceMessageInfo, DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
 pub use device_removed::DeviceRemoved;
 pub use endpoint::Endpoint;
 pub use error::{Error, ErrorCode, ErrorV0};
