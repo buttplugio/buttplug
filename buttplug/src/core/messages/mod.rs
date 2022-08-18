@@ -27,7 +27,7 @@ mod linear_cmd;
 mod log;
 mod log_level;
 mod lovense_cmd;
-mod message_attributes;
+mod client_device_message_attributes;
 mod ok;
 mod ping;
 mod raw_read_cmd;
@@ -72,13 +72,15 @@ pub use kiiroo_cmd::KiirooCmd;
 pub use linear_cmd::{LinearCmd, VectorSubcommand};
 pub use log_level::LogLevel;
 pub use lovense_cmd::LovenseCmd;
-pub use message_attributes::{
+pub use client_device_message_attributes::{
   ActuatorType,
-  DeviceMessageAttributes,
-  DeviceMessageAttributesBuilder,
-  DeviceMessageAttributesV1,
-  DeviceMessageAttributesV2,
-  GenericDeviceMessageAttributes,
+  ClientDeviceMessageAttributes,
+  ClientDeviceMessageAttributesBuilder,
+  ClientDeviceMessageAttributesV1,
+  ClientDeviceMessageAttributesV2,
+  ClientGenericDeviceMessageAttributes,
+  NullDeviceMessageAttributes,
+  RawDeviceMessageAttributes,
   SensorDeviceMessageAttributes,
   SensorType,
 };
@@ -528,7 +530,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV2ServerMessage {
   TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV1ClientMessage {
+pub enum ButtplugSpecV1ClientMessage {
   // Handshake messages
   RequestServerInfo(RequestServerInfo),
   Ping(Ping),
@@ -556,7 +558,7 @@ pub(crate) enum ButtplugSpecV1ClientMessage {
   Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV1ServerMessage {
+pub enum ButtplugSpecV1ServerMessage {
   // Status messages
   Ok(Ok),
   Error(ErrorV0),
@@ -615,7 +617,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV1ServerMessage {
   TryFromButtplugClientMessage,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV0ClientMessage {
+pub enum ButtplugSpecV0ClientMessage {
   RequestLog(RequestLog),
   Ping(Ping),
   // Handshake messages
@@ -641,7 +643,7 @@ pub(crate) enum ButtplugSpecV0ClientMessage {
   Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
-pub(crate) enum ButtplugSpecV0ServerMessage {
+pub enum ButtplugSpecV0ServerMessage {
   // Status messages
   Ok(Ok),
   Error(ErrorV0),

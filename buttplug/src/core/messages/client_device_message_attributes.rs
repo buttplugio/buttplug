@@ -37,25 +37,32 @@ pub enum SensorType {
   // Gyro,
 }
 
-// Unlike other message components, MessageAttributes is always turned on for
-// serialization, because it's used by device configuration files also.
+// This will look almost exactly like ServerDeviceMessageAttributes. However, it will only contain
+// information we want the client to know, i.e. step counts versus specific step ranges. This is
+// what will be sent to the client as part of DeviceAdded/DeviceList messages. It should not be used
+// for outside configuration/serialization, rather it should be a subset of that information.
+//
+// For many messages, client and server configurations may be exactly the same. If they are not,
+// then we denote this by prefixing the type with Client/Server. Server attributes will usually be
+// hosted in the server/device/configuration module.
 #[derive(
-  Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, Getters, MutGetters, Setters,
+  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters,
 )]
-pub struct DeviceMessageAttributes {
+#[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
+pub struct ClientDeviceMessageAttributes {
   // Generic commands
   #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  scalar_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
+  scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
   #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  rotate_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
+  rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
   #[getset(get = "pub", get_mut = "pub")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
-  linear_cmd: Option<Vec<GenericDeviceMessageAttributes>>,
+  linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
 
   // Sensor Messages
   #[getset(get = "pub")]
@@ -103,7 +110,7 @@ pub struct DeviceMessageAttributes {
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
-impl DeviceMessageAttributes {
+impl ClientDeviceMessageAttributes {
   pub fn raw_unsubscribe_cmd(&self) -> &Option<RawDeviceMessageAttributes> {
     self.raw_subscribe_cmd()
   }
@@ -151,80 +158,26 @@ impl DeviceMessageAttributes {
       ButtplugDeviceMessageType::LovenseCmd => false,
     }
   }
-
-  pub fn merge(&self, child: &DeviceMessageAttributes) -> DeviceMessageAttributes {
-    Self {
-      rotate_cmd: child
-        .rotate_cmd()
-        .clone()
-        .or_else(|| self.rotate_cmd().clone()),
-      linear_cmd: child
-        .linear_cmd()
-        .clone()
-        .or_else(|| self.linear_cmd().clone()),
-      scalar_cmd: child
-        .scalar_cmd()
-        .clone()
-        .or_else(|| self.scalar_cmd().clone()),
-      sensor_read_cmd: child
-        .sensor_read_cmd()
-        .clone()
-        .or_else(|| self.sensor_read_cmd().clone()),
-      sensor_subscribe_cmd: child
-        .sensor_subscribe_cmd()
-        .clone()
-        .or_else(|| self.sensor_subscribe_cmd().clone()),
-      stop_device_cmd: NullDeviceMessageAttributes::default(),
-      raw_read_cmd: child
-        .raw_read_cmd()
-        .clone()
-        .or_else(|| self.raw_read_cmd().clone()),
-      raw_write_cmd: child
-        .raw_write_cmd()
-        .clone()
-        .or_else(|| self.raw_write_cmd().clone()),
-      raw_subscribe_cmd: child
-        .raw_subscribe_cmd()
-        .clone()
-        .or_else(|| self.raw_subscribe_cmd().clone()),
-      fleshlight_launch_fw12_cmd: child
-        .fleshlight_launch_fw12_cmd()
-        .clone()
-        .or_else(|| self.fleshlight_launch_fw12_cmd().clone()),
-      vorze_a10_cyclone_cmd: child
-        .vorze_a10_cyclone_cmd()
-        .clone()
-        .or_else(|| self.vorze_a10_cyclone_cmd().clone()),
-    }
-  }
-
-  pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    let raw_attrs = RawDeviceMessageAttributes {
-      endpoints: endpoints.clone().to_vec(),
-    };
-    self.raw_read_cmd = Some(raw_attrs.clone());
-    self.raw_write_cmd = Some(raw_attrs.clone());
-    self.raw_subscribe_cmd = Some(raw_attrs.clone());
-  }
 }
+
 
 #[derive(Default)]
-pub struct DeviceMessageAttributesBuilder {
-  attrs: DeviceMessageAttributes,
+pub struct ClientDeviceMessageAttributesBuilder {
+  attrs: ClientDeviceMessageAttributes,
 }
 
-impl DeviceMessageAttributesBuilder {
-  pub fn scalar_cmd(&mut self, attrs: &Vec<GenericDeviceMessageAttributes>) -> &Self {
+impl ClientDeviceMessageAttributesBuilder {
+  pub fn scalar_cmd(&mut self, attrs: &Vec<ClientGenericDeviceMessageAttributes>) -> &Self {
     self.attrs.scalar_cmd = Some(attrs.clone());
     self
   }
 
-  pub fn rotate_cmd(&mut self, attrs: &Vec<GenericDeviceMessageAttributes>) -> &Self {
+  pub fn rotate_cmd(&mut self, attrs: &Vec<ClientGenericDeviceMessageAttributes>) -> &Self {
     self.attrs.rotate_cmd = Some(attrs.clone());
     self
   }
 
-  pub fn linear_cmd(&mut self, attrs: &Vec<GenericDeviceMessageAttributes>) -> &Self {
+  pub fn linear_cmd(&mut self, attrs: &Vec<ClientGenericDeviceMessageAttributes>) -> &Self {
     self.attrs.linear_cmd = Some(attrs.clone());
     self
   }
@@ -254,10 +207,11 @@ impl DeviceMessageAttributesBuilder {
     self
   }
 
-  pub fn finish(&self) -> DeviceMessageAttributes {
+  pub fn finish(&self) -> ClientDeviceMessageAttributes {
     self.attrs.clone()
   }
 }
+
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributes {}
@@ -267,7 +221,7 @@ fn unspecified_feature() -> String {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
-pub struct GenericDeviceMessageAttributes {
+pub struct ClientGenericDeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "FeatureDescriptor")]
   #[serde(default = "unspecified_feature")]
@@ -275,41 +229,29 @@ pub struct GenericDeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "ActuatorType")]
   actuator_type: ActuatorType,
-  #[serde(rename = "StepRange")]
-  #[serde(skip_serializing)]
-  #[getset(get = "pub", set = "pub")]
-  step_range: RangeInclusive<u32>,
+  #[serde(rename = "StepCount")]
+  #[getset(get = "pub")]
+  step_count: u32
 }
 
-impl GenericDeviceMessageAttributes {
+impl ClientGenericDeviceMessageAttributes {
   pub fn new(
     feature_descriptor: &str,
-    step_range: &RangeInclusive<u32>,
+    step_count: u32,
     actuator_type: ActuatorType,
   ) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
-      step_range: step_range.clone(),
+      step_count
     }
-  }
-
-  pub fn step_count(&self) -> u32 {
-    self.step_range.end() - self.step_range.start()
   }
 
   pub fn is_valid(
     &self,
     message_type: &ButtplugDeviceMessageType,
   ) -> Result<(), ButtplugDeviceError> {
-    if self.step_range.is_empty() {
-      Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-        "Step range out of order for {}, must be start <= x <= end.",
-        message_type
-      )))
-    } else {
-      Ok(())
-    }
+    Ok(())
   }
 }
 
@@ -350,7 +292,7 @@ impl SensorDeviceMessageAttributes {
  */
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
-pub struct DeviceMessageAttributesV2 {
+pub struct ClientDeviceMessageAttributesV2 {
   // Generic commands
   #[getset(get = "pub")]
   #[serde(rename = "VibrateCmd")]
@@ -405,8 +347,8 @@ pub struct DeviceMessageAttributesV2 {
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
-impl From<DeviceMessageAttributes> for DeviceMessageAttributesV2 {
-  fn from(other: DeviceMessageAttributes) -> Self {
+impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
+  fn from(other: ClientDeviceMessageAttributes) -> Self {
     Self {
       vibrate_cmd: other
         .scalar_cmd()
@@ -469,33 +411,33 @@ pub struct GenericDeviceMessageAttributesV2 {
 }
 
 impl GenericDeviceMessageAttributesV2 {
-  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: Vec<GenericDeviceMessageAttributes>) -> Self {
+  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: Vec<ClientGenericDeviceMessageAttributes>) -> Self {
     let mut feature_count = 0u32;
     let mut step_count = vec![];
     for attr in attributes_vec {
       if *attr.actuator_type() == ActuatorType::Vibrate {
         feature_count += 1;
-        step_count.push(attr.step_count());
+        step_count.push(*attr.step_count());
       }
     }
     Self {
       feature_count,
-      step_count,
+      step_count
     }
   }
 }
 
-impl From<Vec<GenericDeviceMessageAttributes>> for GenericDeviceMessageAttributesV2 {
-  fn from(attributes_vec: Vec<GenericDeviceMessageAttributes>) -> Self {
+impl From<Vec<ClientGenericDeviceMessageAttributes>> for GenericDeviceMessageAttributesV2 {
+  fn from(attributes_vec: Vec<ClientGenericDeviceMessageAttributes>) -> Self {
     Self {
       feature_count: attributes_vec.len() as u32,
-      step_count: attributes_vec.iter().map(|x| x.step_count()).collect(),
+      step_count: attributes_vec.iter().map(|x| *x.step_count()).collect(),
     }
   }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
-pub struct DeviceMessageAttributesV1 {
+pub struct ClientDeviceMessageAttributesV1 {
   // Generic commands
   #[getset(get = "pub")]
   #[serde(rename = "VibrateCmd")]
@@ -526,8 +468,8 @@ pub struct DeviceMessageAttributesV1 {
   vorze_a10_cyclone_cmd: Option<NullDeviceMessageAttributes>,
 }
 
-impl From<DeviceMessageAttributesV2> for DeviceMessageAttributesV1 {
-  fn from(other: DeviceMessageAttributesV2) -> Self {
+impl From<ClientDeviceMessageAttributesV2> for ClientDeviceMessageAttributesV1 {
+  fn from(other: ClientDeviceMessageAttributesV2) -> Self {
     Self {
       vibrate_cmd: other
         .vibrate_cmd()
@@ -564,22 +506,5 @@ impl From<GenericDeviceMessageAttributesV2> for GenericDeviceMessageAttributesV1
     Self {
       feature_count: *attributes.feature_count(),
     }
-  }
-}
-
-#[cfg(test)]
-mod test {
-  use super::*;
-
-  #[test]
-  pub fn test_step_count_calculation() {
-    let mut vibrate_attributes = GenericDeviceMessageAttributes::new(
-      "test",
-      &RangeInclusive::new(0, 10),
-      ActuatorType::Vibrate,
-    );
-    assert_eq!(vibrate_attributes.step_count(), 10);
-    vibrate_attributes.set_step_range(RangeInclusive::new(3u32, 7));
-    assert_eq!(vibrate_attributes.step_count(), 4);
   }
 }

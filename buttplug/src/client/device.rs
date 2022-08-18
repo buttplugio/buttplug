@@ -24,7 +24,7 @@ use crate::{
       ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
       ButtplugMessage,
-      DeviceMessageAttributes,
+      ClientDeviceMessageAttributes,
       DeviceMessageInfo,
       Endpoint,
       LinearCmd,
@@ -159,7 +159,7 @@ pub struct ButtplugClientDevice {
   /// Map of messages the device can take, along with the attributes of those
   /// messages.
   #[getset(get = "pub")]
-  message_attributes: DeviceMessageAttributes,
+  message_attributes: ClientDeviceMessageAttributes,
   /// Sends commands from the [ButtplugClientDevice] instance to the
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
@@ -192,7 +192,7 @@ impl ButtplugClientDevice {
   pub(super) fn new(
     name: &str,
     index: u32,
-    message_attributes: &DeviceMessageAttributes,
+    message_attributes: &ClientDeviceMessageAttributes,
     message_sender: broadcast::Sender<ButtplugClientRequest>,
   ) -> Self {
     info!(

@@ -138,13 +138,16 @@
 //!
 
 pub mod specifier;
+mod server_device_message_attributes;
 pub use specifier::*;
+
+pub use server_device_message_attributes::{ServerDeviceMessageAttributes, ServerGenericDeviceMessageAttributes, ServerDeviceMessageAttributesBuilder};
 
 use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, ProtocolSpecializer};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ButtplugDeviceMessageType, DeviceMessageAttributes, Endpoint},
+    messages::{ButtplugDeviceMessageType, Endpoint},
   },
   server::device::ServerDeviceIdentifier,
 };
@@ -252,7 +255,7 @@ pub struct ProtocolDeviceAttributes {
   /// User configured name of the device this instance represents, assuming one exists.
   display_name: Option<String>,
   /// Message attributes for this device instance.
-  pub(super) message_attributes: DeviceMessageAttributes,
+  pub(super) message_attributes: ServerDeviceMessageAttributes,
 }
 
 impl ProtocolDeviceAttributes {
@@ -261,7 +264,7 @@ impl ProtocolDeviceAttributes {
     identifier: ProtocolAttributesType,
     name: Option<String>,
     display_name: Option<String>,
-    message_attributes: DeviceMessageAttributes,
+    message_attributes: ServerDeviceMessageAttributes,
     parent: Option<Arc<ProtocolDeviceAttributes>>,
   ) -> Self {
     Self {
@@ -349,7 +352,7 @@ impl ProtocolDeviceAttributes {
   }
 
   /// Retreive a map of all message attributes for this instance.
-  pub fn message_attributes(&self) -> DeviceMessageAttributes {
+  pub fn message_attributes(&self) -> ServerDeviceMessageAttributes {
     if let Some(parent) = &self.parent {
       parent.message_attributes().merge(&self.message_attributes)
     } else {
@@ -711,8 +714,7 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  use super::*;
-  use crate::core::messages::{DeviceMessageAttributesBuilder, GenericDeviceMessageAttributes};
+  use super::{*, server_device_message_attributes::{ServerDeviceMessageAttributesBuilder, ServerGenericDeviceMessageAttributes}};
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,
@@ -739,14 +741,14 @@ mod test {
         ProtocolAttributesType::Identifier("P".to_owned()),
         Some("Lovense Edge".to_owned()),
         None,
-        DeviceMessageAttributesBuilder::default()
+        ServerDeviceMessageAttributesBuilder::default()
           .scalar_cmd(&vec![
-            GenericDeviceMessageAttributes::new(
+            ServerGenericDeviceMessageAttributes::new(
               "Edge Vibrator 1",
               &RangeInclusive::new(0, 20),
               crate::core::messages::ActuatorType::Vibrate,
             ),
-            GenericDeviceMessageAttributes::new(
+            ServerGenericDeviceMessageAttributes::new(
               "Edge Vibrator 2",
               &RangeInclusive::new(0, 20),
               crate::core::messages::ActuatorType::Vibrate,

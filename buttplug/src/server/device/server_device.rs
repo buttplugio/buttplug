@@ -21,7 +21,7 @@ use crate::{
       ButtplugDeviceMessageType,
       ButtplugMessage,
       ButtplugServerDeviceMessage,
-      DeviceMessageAttributes,
+      ClientDeviceMessageAttributes,
       Endpoint,
       RawReading,
       RawSubscribeCmd,
@@ -50,7 +50,7 @@ use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt;
 
 use super::{
-  configuration::ProtocolDeviceAttributes,
+  configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
   protocol::generic_command_manager::GenericCommandManager,
 };
 
@@ -263,7 +263,7 @@ impl ServerDevice {
   }
 
   /// Retreive the message attributes for the device.
-  pub fn message_attributes(&self) -> DeviceMessageAttributes {
+  pub fn message_attributes(&self) -> ServerDeviceMessageAttributes {
     self.attributes.message_attributes()
   }
 

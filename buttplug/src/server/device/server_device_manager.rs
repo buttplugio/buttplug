@@ -286,7 +286,7 @@ impl ServerDeviceManager {
           .iter()
           .map(|device| {
             let dev = device.value();
-            DeviceMessageInfo::new(*device.key(), &dev.name(), dev.message_attributes())
+            DeviceMessageInfo::new(*device.key(), &dev.name(), dev.message_attributes().clone().into())
           })
           .collect();
         let mut device_list = DeviceList::new(devices);

@@ -7,7 +7,7 @@
 
 use super::json::JSONValidator;
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::DeviceMessageAttributes},
+  core::errors::ButtplugDeviceError,
   server::device::{
     configuration::{
       BluetoothLESpecifier,
@@ -22,7 +22,7 @@ use crate::{
       SerialSpecifier,
       USBSpecifier,
       WebsocketSpecifier,
-      XInputSpecifier,
+      XInputSpecifier, ServerDeviceMessageAttributes,
     },
     ServerDeviceIdentifier,
   },
@@ -88,7 +88,7 @@ pub struct UserDeviceConfig {
   deny: Option<bool>,
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
-  messages: Option<DeviceMessageAttributes>,
+  messages: Option<ServerDeviceMessageAttributes>,
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   index: Option<u32>,
@@ -102,7 +102,7 @@ pub struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   name: Option<String>,
   #[serde(skip_serializing_if = "Option::is_none")]
-  messages: Option<DeviceMessageAttributes>,
+  messages: Option<ServerDeviceMessageAttributes>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
