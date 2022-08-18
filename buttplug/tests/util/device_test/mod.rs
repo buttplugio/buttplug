@@ -1,5 +1,5 @@
 pub mod client;
-
+pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
 use serde::{Serialize, Deserialize};
 use buttplug::{

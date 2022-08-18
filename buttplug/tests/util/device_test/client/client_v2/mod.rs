@@ -77,7 +77,6 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
 
 
 pub async fn run_test_case(test_case: &DeviceTestCase) {
-  tracing_subscriber::fmt::init();
   // Create our TestDeviceManager with the device identifier we want to create
   let mut builder = TestDeviceCommunicationManagerBuilder::default();
   let mut device_channels = vec![];
