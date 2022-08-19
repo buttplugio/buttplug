@@ -89,7 +89,8 @@ where
       Err(e) => {
         let err_vec: Vec<jsonschema::ValidationError> = e.collect();
         Err(ButtplugSerializerError::JsonSerializerError(format!(
-          "Error during JSON Schema Validation: {:?}",
+          "Error during JSON Schema Validation - Message: {} - Error: {:?}",
+          json_msg,
           err_vec
         )))
       }
