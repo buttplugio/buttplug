@@ -12,10 +12,7 @@
           "messages": {
             "ScalarCmd": [
               {
-                "StepRange": [
-                  0,
-                  10
-                ],
+                "StepRange": [0, 10],
                 "ActuatorType": "Oscillate",
                 "FeatureDescriptor": "Fucking Machine Oscillation Speed"
               }

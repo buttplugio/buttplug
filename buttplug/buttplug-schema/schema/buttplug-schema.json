@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Buttplug Message Schema",
-  "version": 1,
+  "version": 3,
   "description": "The JSON Protocol format for the Buttplug Protocol.",
   "components": {
     "Id": {
@@ -37,6 +37,27 @@
         "Id"
       ]
     },
+    "SystemIdMessage": {
+      "description": "Message sent by the server that is not in direct reply to a message send from the client, and always uses system Id.",
+      "properties": {
+        "Id": { "$ref": "#/components/SystemId" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id"
+      ]
+    },
+    "DeviceIndexMessage": {
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex"
+      ]
+    },
     "DeviceMessages": {
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "array",
@@ -61,7 +82,6 @@
         },
         "FeatureCount": { "$ref": "#/components/FeatureCount" },
         "StepCount": { "$ref": "#/components/StepCount" },
-        "StepRange": { "$ref": "#/components/StepRange" },
         "ActuatorType": { 
           "description": "Denotes type of actuator (Vibrator, Linear, Oscillator, etc...)",
           "type": "string"
@@ -85,33 +105,36 @@
       "additionalProperties": false,
       "minProperties": 0
     },
-    "PatternMessageAttributes": {
-      "description": "Attributes for PatternPlaybackCmd.",
+    "RangeInclusive": {
+      "description": "Serialization of Rust's RangeInclusive Type",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "SensorMessageAttributes": {
+      "description": "Attributes for sensor device messages.",
       "type": "object",
       "properties": {
-        "FeatureCount": { "$ref": "#/components/FeatureCount" },
-        "StepCount": { "$ref": "#/components/StepCount" },
-        "ActuatorType": {
-          "description": "Types of actuators for pattern playback (Vibrate, Rotate, Linear)",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "SensorType": {
+          "type": "string"
         },
-        "Patterns": {
-          "description": "Names of patterns to play back, per actuator.",
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+        "FeatureDescriptor": {
+          "type": "string"
+        },
+        "SensorRange": {
+          "$ref": "#/components/RangeInclusive"
         }
       },
       "additionalProperties": false,
-      "minProperties": 0
-    },
+      "required": [
+        "SensorType",
+        "FeatureDescriptor",
+        "SensorRange"
+      ]
+    },    
     "DeviceMessagesEx": {
       "description": "A list of the messages a device will accept on this server implementation.",
       "type": "object",
@@ -124,8 +147,20 @@
             "minItems": 1
         },
         "VibrateCmd": { "$ref": "#/components/GenericMessageAttributes" },
-        "LinearCmd": { "$ref": "#/components/GenericMessageAttributes" },
-        "RotateCmd": { "$ref": "#/components/GenericMessageAttributes" },
+        "LinearCmd": { 
+          "type": "array",
+          "items": {
+            "$ref": "#/components/GenericMessageAttributes",
+            "minItems": 1
+          }
+        },
+        "RotateCmd": { 
+          "type": "array",
+          "items": {
+            "$ref": "#/components/GenericMessageAttributes",
+            "minItems": 1
+          }
+        },
         "LovenseCmd": { "$ref": "#/components/NullMessageAttributes" },
         "VorzeA10CycloneCmd": { "$ref": "#/components/NullMessageAttributes" },
         "KiirooCmd": { "$ref": "#/components/NullMessageAttributes" },
@@ -133,6 +168,20 @@
         "FleshlightLaunchFW12Cmd": { "$ref": "#/components/NullMessageAttributes" },
         "BatteryLevelCmd": { "$ref": "#/components/NullMessageAttributes" },
         "RSSILevelCmd": { "$ref": "#/components/NullMessageAttributes" },
+        "SensorReadCmd": { 
+          "type": "array",
+          "items": {
+            "$ref": "#/components/SensorMessageAttributes",
+            "minItems": 1
+          }
+        },
+        "SensorSubscribeCmd": { 
+          "type": "array",
+          "items": {
+            "$ref": "#/components/SensorMessageAttributes",
+            "minItems": 1
+          }
+        },
         "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
         "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
         "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
@@ -140,27 +189,7 @@
       },
       "additionalProperties": false
     },
-    "SystemIdMessage": {
-      "description": "Message sent by the server that is not in direct reply to a message send from the client, and always uses system Id.",
-      "properties": {
-        "Id": { "$ref": "#/components/SystemId" }
-      },
-      "additionalProperties": false,
-      "required": [
-        "Id"
-      ]
-    },
-    "DeviceIndexMessage": {
-      "properties": {
-        "Id": { "$ref": "#/components/Id" },
-        "DeviceIndex": { "$ref": "#/components/DeviceIndex" }
-      },
-      "additionalProperties": false,
-      "required": [
-        "Id",
-        "DeviceIndex"
-      ]
-    },
+
     "FeatureCount": {
       "description": "Number of features on device.",
       "type": "integer",
@@ -901,7 +930,84 @@
         "DeviceIndex",
         "Vectors"
       ]
-    }
+    },
+    "SensorReadCmd": {
+      "type": "object",
+      "description": "Sends a request to read a sensor value.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "SensorIndex": { "type": "integer" },
+        "SensorType": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "SensorIndex",
+        "SensorType"
+      ]      
+    },
+    "SensorReading": {
+      "type": "object",
+      "description": "Returns from either a sensor read request or a subscribed sensor event.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "SensorIndex": { "type": "integer" },
+        "SensorType": { "type": "string" },
+        "Data": { 
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "SensorIndex",
+        "SensorType",
+        "Data"
+      ]      
+    },
+    "SensorSubscribeCmd": {
+      "type": "object",
+      "description": "Sends a request to subscribe for updates to a sensor value.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "SensorIndex": { "type": "integer" },
+        "SensorType": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "SensorIndex",
+        "SensorType"
+      ]      
+    },
+    "SensorUnsubscribeCmd": {
+      "type": "object",
+      "description": "Sends a request to subscribe for updates to a sensor value.",
+      "properties": {
+        "Id": { "$ref": "#/components/Id" },
+        "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+        "SensorIndex": { "type": "integer" },
+        "SensorType": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Id",
+        "DeviceIndex",
+        "SensorIndex",
+        "SensorType"
+      ]      
+    }    
   },
   "type": "array",
   "items": {
@@ -935,6 +1041,10 @@
       "RSSILevelCmd": { "$ref": "#/messages/RSSILevelCmd" },
       "RSSILevelReading": { "$ref": "#/messages/RSSILevelReading" },
       "ScanningFinished": { "$ref": "#/messages/ScanningFinished" },
+      "SensorReadCmd": { "$ref": "#/messages/SensorReadCmd" },
+      "SensorReading": { "$ref": "#/messages/SensorReading" },
+      "SensorSubscribeCmd": { "$ref": "#/messages/SensorSubscribeCmd" },
+      "SensorUnsubscribeCmd": { "$ref": "#/messages/SensorUnsubscribeCmd" },
       "ServerInfo": { "$ref": "#/messages/ServerInfo" },
       "SingleMotorVibrateCmd": { "$ref": "#/messages/SingleMotorVibrateCmd" },
       "StartScanning": { "$ref": "#/messages/StartScanning" },

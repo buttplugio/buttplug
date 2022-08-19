@@ -10,7 +10,7 @@ use crate::core::{
   messages::{ButtplugDeviceMessageType, Endpoint},
 };
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
 use std::ops::RangeInclusive;
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -270,6 +270,16 @@ impl RawDeviceMessageAttributes {
   }
 }
 
+fn range_sequence_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+  let mut seq = serializer.serialize_seq(Some(2))?;
+  seq.serialize_element(range.start())?;
+  seq.serialize_element(range.end())?;
+  seq.end()
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]
 pub struct SensorDeviceMessageAttributes {
   #[getset(get = "pub")]
@@ -279,7 +289,7 @@ pub struct SensorDeviceMessageAttributes {
   #[serde(rename = "SensorType")]
   sensor_type: SensorType,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorRange")]
+  #[serde(rename = "SensorRange", serialize_with="range_sequence_serialize")]
   sensor_range: RangeInclusive<u32>,
 }
 
