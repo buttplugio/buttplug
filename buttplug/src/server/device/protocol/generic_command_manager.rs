@@ -11,7 +11,6 @@ use crate::{
     messages::{
       ActuatorType,
       ButtplugDeviceCommandMessageUnion,
-      ClientGenericDeviceMessageAttributes,
       LinearCmd,
       RotateCmd,
       RotationSubcommand,

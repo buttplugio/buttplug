@@ -6,7 +6,7 @@ use buttplug::{
   util::async_manager
 };
 use tokio::sync::Notify;
-use crate::util::{TestDeviceChannelHost, device_test::connector::{ChannelServerConnector, channel_transport::ChannelTransport, ChannelClientConnectorCurrent, build_channel_connector}};
+use crate::util::{TestDeviceChannelHost, device_test::connector::build_channel_connector};
 
 use super::super::{DeviceTestCase, TestCommand, TestClientCommand, super::TestDeviceCommunicationManagerBuilder};
 use std::{sync::Arc, time::Duration};

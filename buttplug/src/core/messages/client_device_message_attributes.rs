@@ -247,9 +247,11 @@ impl ClientGenericDeviceMessageAttributes {
     }
   }
 
+  // This is created out of already verified server device message attributes, so we'll assume it's
+  // fine.
   pub fn is_valid(
     &self,
-    message_type: &ButtplugDeviceMessageType,
+    _: &ButtplugDeviceMessageType,
   ) -> Result<(), ButtplugDeviceError> {
     Ok(())
   }

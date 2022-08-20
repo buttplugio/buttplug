@@ -21,7 +21,6 @@ use crate::{
       ButtplugDeviceMessageType,
       ButtplugMessage,
       ButtplugServerDeviceMessage,
-      ClientDeviceMessageAttributes,
       Endpoint,
       RawReading,
       RawSubscribeCmd,

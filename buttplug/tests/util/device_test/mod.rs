@@ -1,3 +1,5 @@
+// Since all of the uses of this module are generated, dead code resolution doesn't work.
+#![allow(dead_code)]
 pub mod client;
 pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};

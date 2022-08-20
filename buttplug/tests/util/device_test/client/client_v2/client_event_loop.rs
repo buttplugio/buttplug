@@ -27,7 +27,6 @@ use buttplug::{
   },
 };
 use dashmap::DashMap;
-use futures::FutureExt;
 use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,

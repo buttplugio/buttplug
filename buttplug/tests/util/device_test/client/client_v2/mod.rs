@@ -19,7 +19,7 @@ use tracing::*;
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
   use TestClientCommand::*;
   match command {
-    Scalar(msg) => {
+    Scalar(_) => {
       panic!("Can't run scalar tests on V2!");
     }
     Vibrate(msg) => {

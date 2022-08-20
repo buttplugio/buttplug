@@ -290,17 +290,16 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
-    let mut vibrator_count: u32 = 0;
-    if let Some(features) = self
+    let vibrator_count: u32 = if let Some(features) = self
       .message_attributes
       .vibrate_cmd()
     {
-      vibrator_count = *features.feature_count();
+      *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
       );
-    }
+    };
     let mut speed_vec: Vec<VibrateSubcommand>;
     match speed_cmd {
       VibrateCommand::Speed(speed) => {
@@ -345,17 +344,16 @@ impl ButtplugClientDevice {
 
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
-    let mut linear_count: u32 = 0;
-    if let Some(features) = self
+    let linear_count: u32 = if let Some(features) = self
       .message_attributes
       .linear_cmd()
     {
-      linear_count = *features.feature_count();
+      *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
       );
-    }
+    };
     let mut linear_vec: Vec<VectorSubcommand>;
     match linear_cmd {
       LinearCommand::Linear(dur, pos) => {
@@ -398,17 +396,16 @@ impl ButtplugClientDevice {
 
   /// Commands device to rotate, assuming it has the features to do so.
   pub fn rotate(&self, rotate_cmd: RotateCommand) -> ButtplugClientResultFuture {
-    let mut rotate_count: u32 = 0;
-    if let Some(features) = self
+    let rotate_count: u32 = if let Some(features) = self
       .message_attributes
       .rotate_cmd()
     {
-      rotate_count = *features.feature_count();
+      *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
       );
-    }
+    };
     let mut rotate_vec: Vec<RotationSubcommand>;
     match rotate_cmd {
       RotateCommand::Rotate(speed, clockwise) => {
