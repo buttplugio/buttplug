@@ -334,8 +334,7 @@ mod test {
       // Valid json and message type but not an array.
       "{\"Ok\":{\"Id\":0}}",
       // Valid json and message type but not an array.
-      // TODO This should fail (Ok can't have an Id of 0), but currently doesn't.
-      // "[{\"Ok\":{\"Id\":0}}]",
+      "[{\"Ok\":{\"Id\":0}}]",
       // Valid json and message type but with extra content
       "[{\"Ok\":{\"NotAField\":\"NotAValue\",\"Id\":1}}]",
     ];
@@ -347,7 +346,7 @@ mod test {
     .into()]);
     for msg in incorrect_incoming_messages {
       let res = serializer.deserialize(ButtplugSerializedMessage::Text(msg.to_owned()));
-      assert!(res.is_err());
+      assert!(res.is_err(), "{} should be an error", msg);
       if let Err(ButtplugSerializerError::MessageSpecVersionNotReceived) = res {
         assert!(false, "Wrong error!");
       }
