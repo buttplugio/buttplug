@@ -103,7 +103,7 @@ async fn remote_connector_event_loop<
       StreamValue::Incoming(remote_msg) => {
         match remote_msg {
           ButtplugTransportIncomingMessage::Message(serialized_msg) => {
-            match serializer.deserialize(serialized_msg) {
+            match serializer.deserialize(&serialized_msg) {
               Ok(array) => {
                 for smsg in array {
                   // TODO Test validity here.
@@ -118,7 +118,8 @@ async fn remote_connector_event_loop<
                 error!(
                   "{}",
                   format!(
-                    "Got invalid messages from remote Buttplug connection: {:?}",
+                    "Got invalid messages from remote Buttplug connection - Message: {:?} - Error: {:?}",
+                    serialized_msg,
                     e
                   )
                 );
@@ -142,7 +143,7 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg = serializer.serialize(vec![msg.clone()]);
+            let serialized_msg = serializer.serialize(&vec![msg.clone()]);
             if transport_outgoing_sender
               .send(serialized_msg)
               .await

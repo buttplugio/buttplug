@@ -10,7 +10,7 @@
 #[cfg(feature = "serialize-json")]
 mod json_serializer;
 #[cfg(feature = "serialize-json")]
-pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer};
+pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugClientJSONSerializerImpl, ButtplugServerJSONSerializer};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -56,7 +56,7 @@ pub trait ButtplugMessageSerializer: Default + Sync + Send {
   type Outbound;
   fn deserialize(
     &self,
-    msg: ButtplugSerializedMessage,
+    msg: &ButtplugSerializedMessage,
   ) -> ButtplugSerializerResult<Vec<Self::Inbound>>;
-  fn serialize(&self, msg: Vec<Self::Outbound>) -> ButtplugSerializedMessage;
+  fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage;
 }

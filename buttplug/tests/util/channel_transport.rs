@@ -136,14 +136,14 @@ impl ChannelClientTestHelper {
       outgoing_sender,
     )))));
     let client_serializer = ButtplugClientJSONSerializer::default();
-    let rsi_setup_msg = client_serializer.serialize(vec![messages::RequestServerInfo::new(
+    let rsi_setup_msg = client_serializer.serialize(&vec![messages::RequestServerInfo::new(
       "Test client",
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     )
     .into()]);
     let server_serializer = ButtplugServerJSONSerializer::default();
     server_serializer
-      .deserialize(rsi_setup_msg)
+      .deserialize(&rsi_setup_msg)
       .expect("Test, assuming infallible");
     Self {
       client,
@@ -215,7 +215,7 @@ impl ChannelClientTestHelper {
   pub async fn next_client_message(&self) -> ButtplugClientMessage {
     self
       .server_serializer
-      .deserialize(
+      .deserialize(&
         self
           .recv_outgoing()
           .await
@@ -246,7 +246,7 @@ impl ChannelClientTestHelper {
   pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
-        self.server_serializer.serialize(vec![msg]),
+        self.server_serializer.serialize(&vec![msg]),
       ))
       .await;
   }
@@ -254,7 +254,7 @@ impl ChannelClientTestHelper {
   pub async fn send_server_incoming(&self, msg: ButtplugCurrentSpecClientMessage) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
-        self.client_serializer.serialize(vec![msg]),
+        self.client_serializer.serialize(&vec![msg]),
       ))
       .await;
   }
@@ -320,7 +320,7 @@ impl ChannelServerTestHelper {
   pub async fn send_client_incoming(&self, msg: ButtplugServerMessage) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
-        self.server_serializer.serialize(vec![msg]),
+        self.server_serializer.serialize(&vec![msg]),
       ))
       .await;
   }
@@ -328,7 +328,7 @@ impl ChannelServerTestHelper {
   pub async fn send_server_incoming(&self, msg: ButtplugCurrentSpecClientMessage) {
     self
       .send_incoming(ButtplugTransportIncomingMessage::Message(
-        self.client_serializer.serialize(vec![msg]),
+        self.client_serializer.serialize(&vec![msg]),
       ))
       .await;
   }
