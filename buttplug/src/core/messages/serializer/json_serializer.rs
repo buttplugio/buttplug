@@ -246,16 +246,39 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
   }
 }
 
-pub struct ButtplugClientJSONSerializer {
+pub struct ButtplugClientJSONSerializerImpl {
   validator: JSONSchema,
 }
 
-impl Default for ButtplugClientJSONSerializer {
+impl Default for ButtplugClientJSONSerializerImpl {
   fn default() -> Self {
     Self {
       validator: create_message_validator(),
     }
   }
+}
+
+impl ButtplugClientJSONSerializerImpl {
+  pub fn deserialize<T>(
+    &self,
+    msg: &ButtplugSerializedMessage,
+  ) -> Result<Vec<T>, ButtplugSerializerError> where T: serde::de::DeserializeOwned + Clone, {
+    if let ButtplugSerializedMessage::Text(text_msg) = msg {
+      deserialize_to_message::<T>(&self.validator, text_msg)
+    } else {
+      Err(ButtplugSerializerError::BinaryDeserializationError)
+    }
+  }
+
+  pub fn serialize<T>(&self, msg: &Vec<T>) -> ButtplugSerializedMessage where
+  T: ButtplugMessage + Serialize + Deserialize<'static> {
+    ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
+  }
+}
+
+#[derive(Default)]
+pub struct ButtplugClientJSONSerializer {
+  serializer_impl: ButtplugClientJSONSerializerImpl
 }
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
@@ -264,17 +287,13 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 
   fn deserialize(
     &self,
-    msg: ButtplugSerializedMessage,
-  ) -> Result<Vec<ButtplugCurrentSpecServerMessage>, ButtplugSerializerError> {
-    if let ButtplugSerializedMessage::Text(text_msg) = msg {
-      deserialize_to_message::<Self::Inbound>(&self.validator, text_msg)
-    } else {
-      Err(ButtplugSerializerError::BinaryDeserializationError)
-    }
+    msg: &ButtplugSerializedMessage,
+  ) -> Result<Vec<Self::Inbound>, ButtplugSerializerError> {
+    self.serializer_impl.deserialize(msg)
   }
 
-  fn serialize(&self, msg: Vec<ButtplugCurrentSpecClientMessage>) -> ButtplugSerializedMessage {
-    ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
+  fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage {
+    self.serializer_impl.serialize(msg)    
   }
 }
 

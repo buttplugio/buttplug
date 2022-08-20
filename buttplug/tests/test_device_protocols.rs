@@ -62,8 +62,23 @@ fn test_device_protocols_json_v3(test_file: &str) {
 // TODO Still need to fix V2 battery conversion
 //#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
 //#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
-fn test_device_protocols_v2(test_file: &str) {
+fn test_device_protocols_embedded_v2(test_file: &str) {
   async_manager::block_on(async {
-    util::device_test::client::client_v2::run_test_case(&load_test_case(test_file).await).await;
+    util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await).await;
+  });
+}
+
+#[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
+#[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
+#[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
+#[test_case("test_lovense_nora.yaml" ; "Lovense Protocol - Lovense Nora (Vibrate/Rotate)")]
+// TODO Still need to fix V2 battery conversion
+//#[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
+//#[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
+fn test_device_protocols_json_v2(test_file: &str) {
+  async_manager::block_on(async {
+    util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
   });
 }
