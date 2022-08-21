@@ -34,8 +34,8 @@ use buttplug::{
   util::async_manager,
 };
 use futures::{pin_mut, Stream, StreamExt};
-use futures_timer::Delay;
 use std::time::Duration;
+use tokio::time::sleep;
 
 async fn setup_test_server(
   msg_union: messages::ButtplugClientMessage,
@@ -117,14 +117,14 @@ fn test_ping_timeout() {
     pin_mut!(recv);
     let msg =
       messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-    Delay::new(Duration::from_millis(150)).await;
+    sleep(Duration::from_millis(150)).await;
     let reply = server.parse_message(msg.into()).await;
     assert!(
       reply.is_ok(),
       "ping timer shouldn't start until handshake finished. {:?}",
       reply
     );
-    Delay::new(Duration::from_millis(300)).await;
+    sleep(Duration::from_millis(300)).await;
     let pingmsg = messages::Ping::default();
     let result = server.parse_message(pingmsg.into()).await;
     let err = result.unwrap_err();

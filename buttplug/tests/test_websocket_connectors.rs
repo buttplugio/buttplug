@@ -7,24 +7,28 @@
 
 // The tests in this file can fail on CI if there isn't a timed retry.
 
-#[cfg(all(feature = "websockets", target = "windows"))]
+#[cfg(feature = "websockets")]
 mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
-    connector::{
-      ButtplugRemoteClientConnector,
-      ButtplugRemoteServerConnector,
-      ButtplugWebsocketClientTransport,
-      ButtplugWebsocketServerTransport,
-      ButtplugWebsocketServerTransportBuilder,
+    core::{
+      connector::{
+        ButtplugRemoteClientConnector,
+        ButtplugRemoteServerConnector,
+        ButtplugWebsocketClientTransport,
+        ButtplugWebsocketServerTransport,
+        ButtplugWebsocketServerTransportBuilder,
+      },  
+      messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     },
-    core::messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     server::ButtplugRemoteServer,
     util::async_manager,
   };
-  use futures_timer::Delay;
-  use std::sync::Arc;
-  use std::time::Duration;
+  use std::{
+    sync::Arc,
+    time::Duration
+  };
+  use tokio::time::sleep;
 
   #[test]
   fn test_client_ws_client_server_ws_server_insecure() {
@@ -60,7 +64,7 @@ mod websocket_connector_tests {
           connected = true;
           break;
         }
-        Delay::new(Duration::from_secs(1)).await;
+        sleep(Duration::from_secs(1)).await;
       }
       assert!(connected);
       server
@@ -105,7 +109,7 @@ mod websocket_connector_tests {
           connected = true;
           break;
         }
-        Delay::new(Duration::from_secs(1)).await;
+        sleep(Duration::from_secs(1)).await;
       }
       assert!(connected);
       server

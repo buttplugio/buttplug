@@ -15,8 +15,8 @@ use buttplug::{
   util::async_manager,
 };
 use futures::StreamExt;
-use futures_timer::Delay;
 use std::{sync::Arc, time::Duration};
+use tokio::time::sleep;
 use util::{test_client_with_device, test_device_manager::TestHardwareEvent};
 
 #[cfg(feature = "server")]
@@ -109,19 +109,19 @@ fn test_client_device_connected_no_event_listener() {
       .start_scanning()
       .await
       .expect("Test, assuming infallible.");
-    Delay::new(Duration::from_millis(100)).await;
+    sleep(Duration::from_millis(100)).await;
     device
       .sender
       .send(TestHardwareEvent::Disconnect)
       .await
       .expect("Test, assuming infallible.");
-    Delay::new(Duration::from_millis(100)).await;
+    sleep(Duration::from_millis(100)).await;
     client
       .disconnect()
       .await
       .expect("Test, assuming infallible.");
     assert!(!client.connected());
-    Delay::new(Duration::from_millis(100)).await;
+    sleep(Duration::from_millis(100)).await;
   });
 }
 

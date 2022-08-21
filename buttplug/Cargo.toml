@@ -28,7 +28,7 @@ lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
 tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
-wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures", "futures-timer/wasm-bindgen"]
+wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -56,7 +56,6 @@ lazy_static = "1.4.0"
 byteorder = "1.4.3"
 thiserror = "1.0.31"
 async-tungstenite = { version = "0.17.2", optional = true }
-futures-timer = "3.0.2"
 wasm-bindgen-futures = { version = "0.4.32", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.36"

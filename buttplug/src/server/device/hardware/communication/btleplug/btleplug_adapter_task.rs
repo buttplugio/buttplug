@@ -12,7 +12,6 @@ use btleplug::{
   platform::{Adapter, Manager, PeripheralId},
 };
 use futures::{future::FutureExt, StreamExt};
-use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -20,7 +19,10 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::{
+  sync::mpsc::{Receiver, Sender},
+  time::sleep
+};
 
 #[derive(Debug, Clone, Copy)]
 pub enum BtleplugAdapterCommand {
@@ -148,7 +150,7 @@ impl BtleplugAdapterTask {
     loop {
       let adapter_found = self.adapter_connected.load(Ordering::SeqCst);
       if !adapter_found {
-        Delay::new(Duration::from_secs(1)).await;
+        sleep(Duration::from_secs(1)).await;
       }
       adapter = match manager.adapters().await {
         Ok(adapters) => {

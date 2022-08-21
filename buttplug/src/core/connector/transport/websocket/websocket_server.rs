@@ -21,13 +21,16 @@ use crate::{
   util::async_manager,
 };
 use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
-use futures_timer::Delay;
 use std::{sync::Arc, time::Duration};
-use tokio::net::TcpListener;
-use tokio::sync::{
-  mpsc::{Receiver, Sender},
-  Notify,
+use tokio::{
+  net::TcpListener,
+  sync::{
+    mpsc::{Receiver, Sender},
+    Notify,
+  },
+  time::sleep
 };
+
 
 #[derive(Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportBuilder {
@@ -80,8 +83,6 @@ async fn run_connection_loop<S>(
 
   // Start pong count at 1, so we'll clear it after sending our first ping.
   let mut pong_count = 1u32;
-  let mut sleep = Delay::new(Duration::from_millis(1000)).fuse();
-
   loop {
     select! {
       _ = disconnect_notifier.notified().fuse() => {
@@ -91,7 +92,7 @@ async fn run_connection_loop<S>(
           return;
         }
       },
-      _ = sleep => {
+      _ = sleep(Duration::from_millis(1000)).fuse() => {
         if pong_count == 0 {
           warn!("No pongs received, considering connection closed.");
           return;
@@ -104,7 +105,6 @@ async fn run_connection_loop<S>(
           warn!("Cannot send ping to client, considering connection closed.");
           return;
         }
-        sleep = Delay::new(Duration::from_millis(1000)).fuse();
       },
       serialized_msg = request_receiver.recv().fuse() => {
         if let Some(serialized_msg) = serialized_msg {

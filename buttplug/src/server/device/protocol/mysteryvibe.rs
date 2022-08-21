@@ -18,7 +18,6 @@ use crate::{
   },
   util::async_manager,
 };
-use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -98,7 +97,7 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
     .await
     .is_ok()
   {
-    Delay::new(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
+    sleep(Duration::from_millis(MYSTERYVIBE_COMMAND_DELAY_MS)).await;
     current_command = command_holder.read().await.clone();
     info!("MV Command: {:?}", current_command);
   }

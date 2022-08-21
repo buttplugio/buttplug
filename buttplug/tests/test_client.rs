@@ -33,9 +33,11 @@ use buttplug::{
 };
 
 use futures::{future::BoxFuture, StreamExt};
-use futures_timer::Delay;
 use std::time::Duration;
-use tokio::sync::mpsc::Sender;
+use tokio::{
+  sync::mpsc::Sender,
+  time::sleep
+};
 
 
 #[derive(Default)]
@@ -193,7 +195,7 @@ fn test_client_ping() {
       .await
       .expect("Test, assuming infallible.");
     assert!(client.ping().await.is_ok());
-    Delay::new(Duration::from_millis(800)).await;
+    sleep(Duration::from_millis(800)).await;
     // TODO Watch for ping events
     assert!(client.ping().await.is_err());
   });

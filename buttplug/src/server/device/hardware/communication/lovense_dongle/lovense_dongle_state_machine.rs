@@ -13,7 +13,10 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::{
+  time::sleep,
+  sync::mpsc::{channel, Receiver, Sender}
+};
 
 // I found this hot dog on the ground at
 // https://news.ycombinator.com/item?id=22752907 and dusted it off. It still
@@ -314,7 +317,7 @@ impl LovenseDongleState for LovenseCheckForAlreadyConnectedDevice {
             _ => warn!("Cannot handle incoming message {:?}", incoming_msg),
         }
       },
-      _ = futures_timer::Delay::new(std::time::Duration::from_millis(250)).fuse() => {
+      _ = sleep(std::time::Duration::from_millis(250)).fuse() => {
         // noop, just fall thru.
       }
     }

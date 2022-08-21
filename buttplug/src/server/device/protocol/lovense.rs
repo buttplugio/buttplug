@@ -19,7 +19,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
-use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -27,6 +26,7 @@ use std::{
   },
   time::Duration,
 };
+use tokio::time::sleep;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -88,7 +88,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
             );
           }
         }
-        _ = Delay::new(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
+        _ = sleep(Duration::from_millis(LOVENSE_COMMAND_TIMEOUT_MS)).fuse() => {
           count += 1;
           if count > LOVENSE_COMMAND_RETRY {
             warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);

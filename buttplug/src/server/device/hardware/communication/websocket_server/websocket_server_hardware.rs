@@ -37,7 +37,6 @@ use futures::{
   SinkExt,
   StreamExt,
 };
-use futures_timer::Delay;
 use std::{
   fmt::{self, Debug},
   sync::{
@@ -46,10 +45,13 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{
-  broadcast,
-  mpsc::{channel, Receiver, Sender},
-  Mutex,
+use tokio::{
+  time::sleep,
+  sync::{
+    broadcast,
+    mpsc::{channel, Receiver, Sender},
+    Mutex,
+  }
 };
 use tokio_util::sync::CancellationToken;
 
@@ -69,11 +71,9 @@ async fn run_connection_loop<S>(
   // Start pong count at 1, so we'll clear it after sending our first ping.
   let mut pong_count = 1u32;
 
-  let mut sleep = Delay::new(Duration::from_millis(1000)).fuse();
-
   loop {
     select! {
-      _ = sleep => {
+      _ = sleep(Duration::from_millis(1000)).fuse() => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
           return;
@@ -86,7 +86,6 @@ async fn run_connection_loop<S>(
           error!("Cannot send ping to client, considering connection closed.");
           return;
         }
-        sleep = Delay::new(Duration::from_millis(1000)).fuse();
       }
       ws_msg = request_receiver.recv().fuse() => {
         if let Some(binary_msg) = ws_msg {

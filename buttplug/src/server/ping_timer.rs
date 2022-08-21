@@ -7,7 +7,6 @@
 
 use crate::util::async_manager;
 use futures::{Future, FutureExt};
-use futures_timer::Delay;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -15,7 +14,10 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{mpsc, Notify};
+use tokio::{
+  time::sleep,
+  sync::{mpsc, Notify}
+};
 
 pub enum PingMessage {
   Ping,
@@ -34,7 +36,7 @@ async fn ping_timer(
   let mut pinged = false;
   loop {
     select! {
-      _ = Delay::new(Duration::from_millis(max_ping_time.into())).fuse() => {
+      _ = sleep(Duration::from_millis(max_ping_time.into())).fuse() => {
         if started {
           if !pinged {
             notifier.notify_waiters();
