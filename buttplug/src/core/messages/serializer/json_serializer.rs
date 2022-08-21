@@ -82,18 +82,21 @@ where
     .map_err(|e| {
       ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
     })
-    .and_then(|json_msg| match validator.validate(&json_msg) {
-      Ok(_) => serde_json::from_value(json_msg.clone()).map_err(|e| {
-        ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
-      }),
-      Err(e) => {
+    .and_then(|json_msg| {
+      if validator.is_valid(&json_msg) {
+        serde_json::from_value(json_msg.clone()).map_err(|e| {
+          ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
+        })
+      } else {
+        // If is_valid fails, re-run validation to get our error message.
+        let e = validator.validate(&json_msg).err().expect("We can't get here without validity checks failing.");
         let err_vec: Vec<jsonschema::ValidationError> = e.collect();
         Err(ButtplugSerializerError::JsonSerializerError(format!(
           "Error during JSON Schema Validation - Message: {} - Error: {:?}",
           json_msg,
           err_vec
         )))
-      }
+      }    
     })
 }
 
