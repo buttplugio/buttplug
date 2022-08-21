@@ -83,7 +83,7 @@ pub struct Patoo {}
 impl ProtocolHandler for Patoo {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>,
+    cmds: &[Option<(ActuatorType, u32)>]
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     // Default to vibes

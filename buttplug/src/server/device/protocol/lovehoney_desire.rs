@@ -24,7 +24,7 @@ pub struct LovehoneyDesire {}
 impl ProtocolHandler for LovehoneyDesire {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>,
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // The Lovehoney Desire has 2 types of commands
     //

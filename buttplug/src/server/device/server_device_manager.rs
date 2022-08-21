@@ -146,13 +146,13 @@ impl ServerDeviceManagerBuilder {
 
     let (device_command_sender, device_command_receiver) = mpsc::channel(256);
     let (device_event_sender, device_event_receiver) = mpsc::channel(256);
-    let mut comm_managers = Vec::new();
+    let mut comm_managers: Vec<Box<dyn HardwareCommunicationManager>> = Vec::new();
     for builder in &mut self.comm_managers {
       let comm_mgr = builder.finish(device_event_sender.clone());
 
       if comm_managers
         .iter()
-        .any(|mgr: &Box<dyn HardwareCommunicationManager>| mgr.name() == comm_mgr.name())
+        .any(|mgr| mgr.name() == comm_mgr.name())
       {
         return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
           comm_mgr.name().to_owned(),

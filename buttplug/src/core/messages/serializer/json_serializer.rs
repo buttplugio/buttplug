@@ -62,7 +62,7 @@ where
   serde_json::to_string(&[&msg]).expect("Infallible serialization")
 }
 
-pub fn vec_to_protocol_json<T>(msg: &Vec<T>) -> String
+pub fn vec_to_protocol_json<T>(msg: &[T]) -> String
 where
   T: ButtplugMessage + Serialize + Deserialize<'static>,
 {
@@ -103,7 +103,7 @@ where
 
 fn serialize_to_version(
   version: ButtplugMessageSpecVersion,
-  msgs: &Vec<ButtplugServerMessage>,
+  msgs: &[ButtplugServerMessage],
 ) -> ButtplugSerializedMessage {
   ButtplugSerializedMessage::Text(match version {
     ButtplugMessageSpecVersion::Version0 => {
@@ -228,7 +228,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     Ok(msg_union.iter().cloned().map(|m| m.into()).collect())
   }
 
-  fn serialize(&self, msgs: &Vec<ButtplugServerMessage>) -> ButtplugSerializedMessage {
+  fn serialize(&self, msgs: &[ButtplugServerMessage]) -> ButtplugSerializedMessage {
     if let Some(version) = self.message_version.get() {
       serialize_to_version(*version, msgs)
     } else {
@@ -277,7 +277,7 @@ impl ButtplugClientJSONSerializerImpl {
     }
   }
 
-  pub fn serialize<T>(&self, msg: &Vec<T>) -> ButtplugSerializedMessage
+  pub fn serialize<T>(&self, msg: &[T]) -> ButtplugSerializedMessage
   where
     T: ButtplugMessage + Serialize + Deserialize<'static>,
   {
@@ -301,7 +301,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
     self.serializer_impl.deserialize(msg)
   }
 
-  fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage {
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
     self.serializer_impl.serialize(msg)
   }
 }

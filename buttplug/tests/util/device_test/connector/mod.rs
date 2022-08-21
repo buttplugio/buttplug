@@ -43,7 +43,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializerV2 {
     self.serializer_impl.deserialize(msg)
   }
 
-  fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage {
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage {
     self.serializer_impl.serialize(msg)
   }
 }

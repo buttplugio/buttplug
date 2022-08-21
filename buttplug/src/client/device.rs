@@ -610,7 +610,7 @@ impl ButtplugClientDevice {
   pub fn raw_write(
     &self,
     endpoint: Endpoint,
-    data: &Vec<u8>,
+    data: &[u8],
     write_with_response: bool,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_write_cmd().is_none() {
@@ -621,7 +621,7 @@ impl ButtplugClientDevice {
     let msg = ButtplugCurrentSpecClientMessage::RawWriteCmd(RawWriteCmd::new(
       self.index,
       endpoint,
-      data.clone(),
+      data,
       write_with_response,
     ));
     self.send_message_expect_ok(msg)

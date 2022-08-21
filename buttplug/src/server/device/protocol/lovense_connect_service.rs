@@ -62,7 +62,7 @@ impl LovenseConnectService {
 impl ProtocolHandler for LovenseConnectService {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>,
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Lovense is the same situation as the Lovehoney Desire, where commands
     // are different if we're addressing all motors or seperate motors.

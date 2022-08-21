@@ -24,7 +24,7 @@ pub struct HtkBm {}
 impl ProtocolHandler for HtkBm {
   fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<(ActuatorType, u32)>>,
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut cmd_vec = vec![];
     if cmds.len() == 2 {

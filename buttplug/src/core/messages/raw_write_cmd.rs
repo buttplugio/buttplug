@@ -32,14 +32,14 @@ impl RawWriteCmd {
   pub fn new(
     device_index: u32,
     endpoint: Endpoint,
-    data: Vec<u8>,
+    data: &[u8],
     write_with_response: bool,
   ) -> Self {
     Self {
       id: 1,
       device_index,
       endpoint,
-      data,
+      data: data.to_vec(),
       write_with_response,
     }
   }

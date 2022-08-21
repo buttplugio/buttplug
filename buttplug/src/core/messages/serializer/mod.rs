@@ -62,5 +62,5 @@ pub trait ButtplugMessageSerializer: Default + Sync + Send {
     &self,
     msg: &ButtplugSerializedMessage,
   ) -> ButtplugSerializerResult<Vec<Self::Inbound>>;
-  fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage;
+  fn serialize(&self, msg: &[Self::Outbound]) -> ButtplugSerializedMessage;
 }

@@ -424,7 +424,7 @@ pub trait ProtocolHandler: Sync + Send {
   // actuators, they should just implement their own version of this method.
   fn handle_scalar_cmd(
     &self,
-    commands: &Vec<Option<(ActuatorType, u32)>>,
+    commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut command_vec = vec![];
     for (index, command) in commands.iter().enumerate().filter(|(_, x)| x.is_some()) {

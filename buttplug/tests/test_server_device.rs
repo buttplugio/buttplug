@@ -147,7 +147,7 @@ fn test_reject_on_no_raw_message() {
         let mut should_be_err;
         should_be_err = server
           .parse_message(
-            messages::RawWriteCmd::new(da.device_index(), Endpoint::Tx, vec![0x0], false).into(),
+            messages::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &vec![0x0], false).into(),
           )
           .await;
         assert!(should_be_err.is_err());

@@ -499,7 +499,7 @@ impl ButtplugClientDevice {
     let msg = ButtplugSpecV2ClientMessage::RawWriteCmd(RawWriteCmd::new(
       self.index,
       endpoint,
-      data,
+      &data,
       write_with_response,
     ));
     self.send_message_expect_ok(msg)
