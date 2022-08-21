@@ -223,8 +223,7 @@
         },
         "RawReadCmd": { "$ref": "#/components/RawMessageAttributes" },
         "RawWriteCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" },
-        "RawUnsubscribeCmd": { "$ref": "#/components/RawMessageAttributes" }
+        "RawSubscribeCmd": { "$ref": "#/components/RawMessageAttributes" }
       },
       "additionalProperties": false
     },

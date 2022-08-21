@@ -347,6 +347,10 @@ pub struct ClientDeviceMessageAttributesV2 {
   #[serde(rename = "RawSubscribeCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   raw_subscribe_cmd: Option<RawDeviceMessageAttributes>,
+  #[getset(get = "pub")]
+  #[serde(rename = "RawUnsubscribeCmd")]
+  #[serde(skip_serializing_if = "Option::is_none")]
+  raw_unsubscribe_cmd: Option<RawDeviceMessageAttributes>,
 
   // Needed to load from config for fallback, but unused here.
   #[getset(get = "pub")]
@@ -365,7 +369,7 @@ impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
       vibrate_cmd: other
         .scalar_cmd()
         .as_ref()
-        .map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(x.clone())),
+        .map(|x| GenericDeviceMessageAttributesV2::vibrate_cmd_from_scalar_cmd(&x)),
       rotate_cmd: other
         .rotate_cmd()
         .as_ref()
@@ -406,6 +410,7 @@ impl From<ClientDeviceMessageAttributes> for ClientDeviceMessageAttributesV2 {
       raw_read_cmd: other.raw_read_cmd().clone(),
       raw_write_cmd: other.raw_write_cmd().clone(),
       raw_subscribe_cmd: other.raw_subscribe_cmd().clone(),
+      raw_unsubscribe_cmd: other.raw_subscribe_cmd().clone(),
       fleshlight_launch_fw12_cmd: other.fleshlight_launch_fw12_cmd().clone(),
       vorze_a10_cyclone_cmd: other.vorze_a10_cyclone_cmd().clone(),
     }
@@ -423,7 +428,7 @@ pub struct GenericDeviceMessageAttributesV2 {
 }
 
 impl GenericDeviceMessageAttributesV2 {
-  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: Vec<ClientGenericDeviceMessageAttributes>) -> Self {
+  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: &[ClientGenericDeviceMessageAttributes]) -> Self {
     let mut feature_count = 0u32;
     let mut step_count = vec![];
     for attr in attributes_vec {
