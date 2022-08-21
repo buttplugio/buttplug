@@ -8,8 +8,13 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  client::{ButtplugClientError, ButtplugClientResultFuture, ButtplugClientMessageFuturePair, ButtplugServerMessageFuture},
-  client_event_loop::ButtplugClientRequest
+  client::{
+    ButtplugClientError,
+    ButtplugClientMessageFuturePair,
+    ButtplugClientResultFuture,
+    ButtplugServerMessageFuture,
+  },
+  client_event_loop::ButtplugClientRequest,
 };
 use buttplug::{
   core::{
@@ -17,10 +22,10 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     messages::{
       BatteryLevelCmd,
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
       ButtplugDeviceMessageType,
       ButtplugMessage,
+      ButtplugSpecV2ClientMessage,
+      ButtplugSpecV2ServerMessage,
       ClientDeviceMessageAttributesV2,
       DeviceMessageInfoV2,
       Endpoint,
@@ -41,6 +46,7 @@ use buttplug::{
   util::stream::convert_broadcast_receiver_to_stream,
 };
 use futures::{future, Stream};
+use getset::Getters;
 use std::{
   collections::HashMap,
   fmt,
@@ -49,7 +55,6 @@ use std::{
     Arc,
   },
 };
-use getset::Getters;
 use tokio::sync::broadcast;
 use tracing::*;
 use tracing_futures::Instrument;
@@ -268,10 +273,7 @@ impl ButtplugClientDevice {
 
   /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
   /// message, otherwise returns a [ButtplugError]
-  fn send_message_expect_ok(
-    &self,
-    msg: ButtplugSpecV2ClientMessage,
-  ) -> ButtplugClientResultFuture {
+  fn send_message_expect_ok(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
@@ -290,10 +292,7 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: VibrateCommand) -> ButtplugClientResultFuture {
-    let vibrator_count: u32 = if let Some(features) = self
-      .message_attributes
-      .vibrate_cmd()
-    {
+    let vibrator_count: u32 = if let Some(features) = self.message_attributes.vibrate_cmd() {
       *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
@@ -344,10 +343,7 @@ impl ButtplugClientDevice {
 
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: LinearCommand) -> ButtplugClientResultFuture {
-    let linear_count: u32 = if let Some(features) = self
-      .message_attributes
-      .linear_cmd()
-    {
+    let linear_count: u32 = if let Some(features) = self.message_attributes.linear_cmd() {
       *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
@@ -396,10 +392,7 @@ impl ButtplugClientDevice {
 
   /// Commands device to rotate, assuming it has the features to do so.
   pub fn rotate(&self, rotate_cmd: RotateCommand) -> ButtplugClientResultFuture {
-    let rotate_count: u32 = if let Some(features) = self
-      .message_attributes
-      .rotate_cmd()
-    {
+    let rotate_count: u32 = if let Some(features) = self.message_attributes.rotate_cmd() {
       *features.feature_count()
     } else {
       return self.create_boxed_future_client_error(
@@ -456,9 +449,7 @@ impl ButtplugClientDevice {
     let send_fut = self.send_message(msg);
     Box::pin(async move {
       match send_fut.await? {
-        ButtplugSpecV2ServerMessage::BatteryLevelReading(reading) => {
-          Ok(reading.battery_level())
-        }
+        ButtplugSpecV2ServerMessage::BatteryLevelReading(reading) => Ok(reading.battery_level()),
         ButtplugSpecV2ServerMessage::Error(err) => Err(ButtplugError::from(err).into()),
         msg => Err(
           ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
@@ -504,7 +495,7 @@ impl ButtplugClientDevice {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
       );
-    }    
+    }
     let msg = ButtplugSpecV2ClientMessage::RawWriteCmd(RawWriteCmd::new(
       self.index,
       endpoint,
@@ -524,7 +515,7 @@ impl ButtplugClientDevice {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
       );
-    }    
+    }
     let msg = ButtplugSpecV2ClientMessage::RawReadCmd(RawReadCmd::new(
       self.index,
       endpoint,
@@ -561,12 +552,12 @@ impl ButtplugClientDevice {
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd).into(),
+        ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawUnsubscribeCmd)
+          .into(),
       );
     }
-    let msg = ButtplugSpecV2ClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(
-      self.index, endpoint,
-    ));
+    let msg =
+      ButtplugSpecV2ClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(self.index, endpoint));
     self.send_message_expect_ok(msg)
   }
 

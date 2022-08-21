@@ -16,8 +16,8 @@ use buttplug::{
   util::async_manager,
 };
 use futures::{
-  pin_mut,
   future::{self, BoxFuture, FutureExt},
+  pin_mut,
   StreamExt,
 };
 use std::{
@@ -27,8 +27,8 @@ use std::{
     Arc,
   },
 };
-use tracing::*;
 use tokio::sync::mpsc::{channel, Sender};
+use tracing::*;
 use tracing_futures::Instrument;
 
 #[derive(Default)]

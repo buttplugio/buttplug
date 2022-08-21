@@ -137,11 +137,15 @@
 //! ### User Configurations
 //!
 
-pub mod specifier;
 mod server_device_message_attributes;
+pub mod specifier;
 pub use specifier::*;
 
-pub use server_device_message_attributes::{ServerDeviceMessageAttributes, ServerGenericDeviceMessageAttributes, ServerDeviceMessageAttributesBuilder};
+pub use server_device_message_attributes::{
+  ServerDeviceMessageAttributes,
+  ServerDeviceMessageAttributesBuilder,
+  ServerGenericDeviceMessageAttributes,
+};
 
 use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, ProtocolSpecializer};
 use crate::{
@@ -714,7 +718,13 @@ impl DeviceConfigurationManager {
 
 #[cfg(test)]
 mod test {
-  use super::{*, server_device_message_attributes::{ServerDeviceMessageAttributesBuilder, ServerGenericDeviceMessageAttributes}};
+  use super::{
+    server_device_message_attributes::{
+      ServerDeviceMessageAttributesBuilder,
+      ServerGenericDeviceMessageAttributes,
+    },
+    *,
+  };
   use std::{
     collections::{HashMap, HashSet},
     ops::RangeInclusive,

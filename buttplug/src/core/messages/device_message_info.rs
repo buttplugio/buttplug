@@ -20,7 +20,10 @@ pub struct DeviceMessageInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceName"))]
   #[getset(get = "pub")]
   device_name: String,
-  #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceDisplayName", skip_serializing_if = "Option::is_none"))]
+  #[cfg_attr(
+    feature = "serialize-json",
+    serde(rename = "DeviceDisplayName", skip_serializing_if = "Option::is_none")
+  )]
   #[getset(get = "pub")]
   device_display_name: Option<String>,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]

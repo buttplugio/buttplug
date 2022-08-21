@@ -171,8 +171,8 @@ fn test_version0_singlemotorvibratecmd() {
     let output2 = server
       .parse_message(
         serializer
-          .deserialize(&
-            r#"[{"SingleMotorVibrateCmd": { "Id": 2, "DeviceIndex": 0, "Speed": 0.5}}]"#
+          .deserialize(
+            &r#"[{"SingleMotorVibrateCmd": { "Id": 2, "DeviceIndex": 0, "Speed": 0.5}}]"#
               .to_owned()
               .into(),
           )

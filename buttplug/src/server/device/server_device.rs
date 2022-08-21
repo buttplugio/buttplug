@@ -16,18 +16,22 @@ use crate::{
     messages::{
       self,
       ActuatorType,
+      BatteryLevelReading,
       ButtplugDeviceCommandMessageUnion,
       ButtplugDeviceMessage,
       ButtplugDeviceMessageType,
       ButtplugMessage,
       ButtplugServerDeviceMessage,
+      ButtplugServerMessage,
       Endpoint,
+      RSSILevelReading,
       RawReading,
       RawSubscribeCmd,
       ScalarCmd,
       ScalarSubcommand,
       SensorDeviceMessageAttributes,
-      SensorType, SensorReadCmd, BatteryLevelReading, ButtplugServerMessage, RSSILevelReading,
+      SensorReadCmd,
+      SensorType,
     },
     ButtplugResultFuture,
   },
@@ -730,9 +734,7 @@ impl ServerDevice {
     .boxed()
   }
 
-  fn handle_battery_level_cmd(
-    &self
-  ) -> ButtplugServerResultFuture {
+  fn handle_battery_level_cmd(&self) -> ButtplugServerResultFuture {
     // See if we have a battery sensor.
     if let Some(sensor_attributes) = self.message_attributes().sensor_read_cmd() {
       for (index, sensor) in sensor_attributes.iter().enumerate() {
@@ -744,23 +746,32 @@ impl ServerDevice {
             let return_msg = sensor_read.await?;
             if let ButtplugServerMessage::SensorReading(reading) = return_msg {
               if reading.sensor_type() == SensorType::Battery {
-                Ok(BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64).into())
+                Ok(
+                  BatteryLevelReading::new(0, reading.data()[0] as f64 / sensor_range_end as f64)
+                    .into(),
+                )
               } else {
-                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery)))
+                Err(ButtplugError::ButtplugDeviceError(
+                  ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
+                ))
               }
             } else {
-              Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery)))
+              Err(ButtplugError::ButtplugDeviceError(
+                ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
+              ))
             }
-          }.boxed();
+          }
+          .boxed();
         }
       }
     }
-    future::ready(Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery)))).boxed()
+    future::ready(Err(ButtplugError::ButtplugDeviceError(
+      ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::Battery),
+    )))
+    .boxed()
   }
 
-  fn handle_rssi_level_cmd(
-    &self
-  ) -> ButtplugServerResultFuture {
+  fn handle_rssi_level_cmd(&self) -> ButtplugServerResultFuture {
     // See if we have a battery sensor.
     if let Some(sensor_attributes) = self.message_attributes().sensor_read_cmd() {
       for (index, sensor) in sensor_attributes.iter().enumerate() {
@@ -773,15 +784,23 @@ impl ServerDevice {
               if reading.sensor_type() == SensorType::RSSI {
                 Ok(RSSILevelReading::new(0, reading.data()[0]).into())
               } else {
-                Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI)))
+                Err(ButtplugError::ButtplugDeviceError(
+                  ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+                ))
               }
             } else {
-              Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI)))
+              Err(ButtplugError::ButtplugDeviceError(
+                ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+              ))
             }
-          }.boxed();
+          }
+          .boxed();
         }
       }
     }
-    future::ready(Err(ButtplugError::ButtplugDeviceError(ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI)))).boxed()    
+    future::ready(Err(ButtplugError::ButtplugDeviceError(
+      ButtplugDeviceError::ProtocolSensorNotSupported(SensorType::RSSI),
+    )))
+    .boxed()
   }
 }

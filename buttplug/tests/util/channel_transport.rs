@@ -215,8 +215,8 @@ impl ChannelClientTestHelper {
   pub async fn next_client_message(&self) -> ButtplugClientMessage {
     self
       .server_serializer
-      .deserialize(&
-        self
+      .deserialize(
+        &self
           .recv_outgoing()
           .await
           .expect("Test, assuming infallible"),

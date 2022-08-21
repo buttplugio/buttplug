@@ -7,9 +7,7 @@
 
 mod delay_device_communication_manager;
 pub mod device_test;
-pub use device_test::{
-  DeviceTestCase,
-};
+pub use device_test::DeviceTestCase;
 pub mod test_device_manager;
 pub use delay_device_communication_manager::DelayDeviceCommunicationManagerBuilder;
 mod channel_transport;

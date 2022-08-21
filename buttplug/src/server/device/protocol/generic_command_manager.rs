@@ -322,14 +322,12 @@ mod test {
 
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::{
-    core::messages::{
-      ActuatorType,
-      RotateCmd,
-      RotationSubcommand,
-      ScalarCmd,
-      ScalarSubcommand,
+    core::messages::{ActuatorType, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand},
+    server::device::configuration::{
+      ProtocolAttributesType,
+      ServerDeviceMessageAttributesBuilder,
+      ServerGenericDeviceMessageAttributes,
     },
-    server::device::configuration::{ProtocolAttributesType, ServerGenericDeviceMessageAttributes, ServerDeviceMessageAttributesBuilder},
   };
   use std::ops::RangeInclusive;
 

@@ -10,7 +10,11 @@
 #[cfg(feature = "serialize-json")]
 mod json_serializer;
 #[cfg(feature = "serialize-json")]
-pub use json_serializer::{ButtplugClientJSONSerializer, ButtplugClientJSONSerializerImpl, ButtplugServerJSONSerializer};
+pub use json_serializer::{
+  ButtplugClientJSONSerializer,
+  ButtplugClientJSONSerializerImpl,
+  ButtplugServerJSONSerializer,
+};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

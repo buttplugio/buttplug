@@ -3,11 +3,11 @@
 pub mod client;
 pub mod connector;
 use super::{TestDeviceIdentifier, TestHardwareEvent};
-use serde::{Serialize, Deserialize};
 use buttplug::{
-  core::messages::{ScalarSubcommand, VibrateSubcommand, VectorSubcommand, RotationSubcommand},
-  server::device::hardware::HardwareCommand
+  core::messages::{RotationSubcommand, ScalarSubcommand, VectorSubcommand, VibrateSubcommand},
+  server::device::hardware::HardwareCommand,
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct TestDevice {

@@ -8,22 +8,20 @@
 //! Implementation of internal Buttplug Client event loop.
 
 use super::{
-  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   client::{ButtplugClientEvent, ButtplugClientMessageFuturePair},
   client_message_sorter::ClientMessageSorter,
+  device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
 };
-use buttplug::{
-  core::{
-    connector::{ButtplugConnector, ButtplugConnectorStateShared},
-    errors::{ButtplugDeviceError, ButtplugError},
-    messages::{
-      ButtplugSpecV2ClientMessage,
-      ButtplugSpecV2ServerMessage,
-      ButtplugDeviceMessage,
-      ButtplugMessageValidator,
-      DeviceListV2,
-      DeviceMessageInfoV2,
-    },
+use buttplug::core::{
+  connector::{ButtplugConnector, ButtplugConnectorStateShared},
+  errors::{ButtplugDeviceError, ButtplugError},
+  messages::{
+    ButtplugDeviceMessage,
+    ButtplugMessageValidator,
+    ButtplugSpecV2ClientMessage,
+    ButtplugSpecV2ServerMessage,
+    DeviceListV2,
+    DeviceMessageInfoV2,
   },
 };
 use dashmap::DashMap;
@@ -31,7 +29,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use tokio::sync::{broadcast, mpsc}; 
+use tokio::sync::{broadcast, mpsc};
 use tracing::*;
 
 /// Enum used for communication from the client to the event loop.

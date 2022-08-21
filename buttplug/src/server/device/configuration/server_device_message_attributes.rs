@@ -1,9 +1,23 @@
 use std::ops::RangeInclusive;
 
-use serde::{Serialize, Deserialize};
 use getset::{Getters, MutGetters, Setters};
+use serde::{Deserialize, Serialize};
 
-use crate::core::{messages::{SensorDeviceMessageAttributes, NullDeviceMessageAttributes, RawDeviceMessageAttributes, ButtplugDeviceMessageType, SensorType, Endpoint, ActuatorType, ClientGenericDeviceMessageAttributes, ClientDeviceMessageAttributes, ClientDeviceMessageAttributesBuilder}, errors::ButtplugDeviceError};
+use crate::core::{
+  errors::ButtplugDeviceError,
+  messages::{
+    ActuatorType,
+    ButtplugDeviceMessageType,
+    ClientDeviceMessageAttributes,
+    ClientDeviceMessageAttributesBuilder,
+    ClientGenericDeviceMessageAttributes,
+    Endpoint,
+    NullDeviceMessageAttributes,
+    RawDeviceMessageAttributes,
+    SensorDeviceMessageAttributes,
+    SensorType,
+  },
+};
 
 // Unlike other message components, MessageAttributes is always turned on for
 // serialization, because it's used by device configuration files also.

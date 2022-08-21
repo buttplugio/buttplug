@@ -10,7 +10,7 @@ use crate::core::{
   messages::{ButtplugDeviceMessageType, Endpoint},
 };
 use getset::{Getters, MutGetters, Setters};
-use serde::{Deserialize, Serialize, Serializer, ser::SerializeSeq};
+use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};
 use std::ops::RangeInclusive;
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -45,9 +45,7 @@ pub enum SensorType {
 // For many messages, client and server configurations may be exactly the same. If they are not,
 // then we denote this by prefixing the type with Client/Server. Server attributes will usually be
 // hosted in the server/device/configuration module.
-#[derive(
-  Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters,
-)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Getters, MutGetters, Setters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ClientDeviceMessageAttributes {
   // Generic commands
@@ -160,7 +158,6 @@ impl ClientDeviceMessageAttributes {
   }
 }
 
-
 #[derive(Default)]
 pub struct ClientDeviceMessageAttributesBuilder {
   attrs: ClientDeviceMessageAttributes,
@@ -212,7 +209,6 @@ impl ClientDeviceMessageAttributesBuilder {
   }
 }
 
-
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NullDeviceMessageAttributes {}
 
@@ -231,28 +227,21 @@ pub struct ClientGenericDeviceMessageAttributes {
   actuator_type: ActuatorType,
   #[serde(rename = "StepCount")]
   #[getset(get = "pub")]
-  step_count: u32
+  step_count: u32,
 }
 
 impl ClientGenericDeviceMessageAttributes {
-  pub fn new(
-    feature_descriptor: &str,
-    step_count: u32,
-    actuator_type: ActuatorType,
-  ) -> Self {
+  pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
-      step_count
+      step_count,
     }
   }
 
   // This is created out of already verified server device message attributes, so we'll assume it's
   // fine.
-  pub fn is_valid(
-    &self,
-    _: &ButtplugDeviceMessageType,
-  ) -> Result<(), ButtplugDeviceError> {
+  pub fn is_valid(&self, _: &ButtplugDeviceMessageType) -> Result<(), ButtplugDeviceError> {
     Ok(())
   }
 }
@@ -272,9 +261,12 @@ impl RawDeviceMessageAttributes {
   }
 }
 
-fn range_sequence_serialize<S>(range: &RangeInclusive<u32>, serializer: S) -> Result<S::Ok, S::Error>
+fn range_sequence_serialize<S>(
+  range: &RangeInclusive<u32>,
+  serializer: S,
+) -> Result<S::Ok, S::Error>
 where
-    S: Serializer,
+  S: Serializer,
 {
   let mut seq = serializer.serialize_seq(Some(2))?;
   seq.serialize_element(range.start())?;
@@ -291,7 +283,7 @@ pub struct SensorDeviceMessageAttributes {
   #[serde(rename = "SensorType")]
   sensor_type: SensorType,
   #[getset(get = "pub")]
-  #[serde(rename = "SensorRange", serialize_with="range_sequence_serialize")]
+  #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
   sensor_range: RangeInclusive<u32>,
 }
 
@@ -428,7 +420,9 @@ pub struct GenericDeviceMessageAttributesV2 {
 }
 
 impl GenericDeviceMessageAttributesV2 {
-  pub fn vibrate_cmd_from_scalar_cmd(attributes_vec: &[ClientGenericDeviceMessageAttributes]) -> Self {
+  pub fn vibrate_cmd_from_scalar_cmd(
+    attributes_vec: &[ClientGenericDeviceMessageAttributes],
+  ) -> Self {
     let mut feature_count = 0u32;
     let mut step_count = vec![];
     for attr in attributes_vec {
@@ -439,7 +433,7 @@ impl GenericDeviceMessageAttributesV2 {
     }
     Self {
       feature_count,
-      step_count
+      step_count,
     }
   }
 }

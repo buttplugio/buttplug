@@ -15,6 +15,7 @@
 
 mod battery_level_cmd;
 mod battery_level_reading;
+mod client_device_message_attributes;
 mod device_added;
 mod device_list;
 mod device_message_info;
@@ -27,7 +28,6 @@ mod linear_cmd;
 mod log;
 mod log_level;
 mod lovense_cmd;
-mod client_device_message_attributes;
 mod ok;
 mod ping;
 mod raw_read_cmd;
@@ -61,17 +61,6 @@ mod vorze_a10_cyclone_cmd;
 pub use self::log::Log;
 pub use battery_level_cmd::BatteryLevelCmd;
 pub use battery_level_reading::BatteryLevelReading;
-pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
-pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
-pub use device_message_info::{DeviceMessageInfo, DeviceMessageInfoV0, DeviceMessageInfoV1, DeviceMessageInfoV2};
-pub use device_removed::DeviceRemoved;
-pub use endpoint::Endpoint;
-pub use error::{Error, ErrorCode, ErrorV0};
-pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
-pub use kiiroo_cmd::KiirooCmd;
-pub use linear_cmd::{LinearCmd, VectorSubcommand};
-pub use log_level::LogLevel;
-pub use lovense_cmd::LovenseCmd;
 pub use client_device_message_attributes::{
   ActuatorType,
   ClientDeviceMessageAttributes,
@@ -84,6 +73,22 @@ pub use client_device_message_attributes::{
   SensorDeviceMessageAttributes,
   SensorType,
 };
+pub use device_added::{DeviceAdded, DeviceAddedV0, DeviceAddedV1, DeviceAddedV2};
+pub use device_list::{DeviceList, DeviceListV0, DeviceListV1, DeviceListV2};
+pub use device_message_info::{
+  DeviceMessageInfo,
+  DeviceMessageInfoV0,
+  DeviceMessageInfoV1,
+  DeviceMessageInfoV2,
+};
+pub use device_removed::DeviceRemoved;
+pub use endpoint::Endpoint;
+pub use error::{Error, ErrorCode, ErrorV0};
+pub use fleshlight_launch_fw12_cmd::FleshlightLaunchFW12Cmd;
+pub use kiiroo_cmd::KiirooCmd;
+pub use linear_cmd::{LinearCmd, VectorSubcommand};
+pub use log_level::LogLevel;
+pub use lovense_cmd::LovenseCmd;
 pub use ok::Ok;
 pub use ping::Ping;
 pub use raw_read_cmd::RawReadCmd;

@@ -2,7 +2,8 @@ use buttplug::{
   core::{
     connector::{
       transport::{ButtplugConnectorTransport, ButtplugTransportIncomingMessage},
-      ButtplugConnectorError, ButtplugConnectorResultFuture,
+      ButtplugConnectorError,
+      ButtplugConnectorResultFuture,
     },
     messages::serializer::ButtplugSerializedMessage,
   },
@@ -13,8 +14,8 @@ use std::sync::Arc;
 use tokio::{
   select,
   sync::{
-    Mutex,
     mpsc::{Receiver, Sender},
+    Mutex,
     Notify,
   },
 };

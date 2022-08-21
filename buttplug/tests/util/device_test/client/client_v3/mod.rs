@@ -1,16 +1,28 @@
-
+use crate::util::{device_test::connector::build_channel_connector, TestDeviceChannelHost};
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientDevice, ScalarCommand, VibrateCommand, RotateCommand, LinearCommand, ButtplugClientEvent},
-  core::connector::ButtplugInProcessClientConnectorBuilder,  
-  server::{ButtplugServerBuilder, ButtplugServer, ButtplugRemoteServer},
-  util::async_manager
+  client::{
+    ButtplugClient,
+    ButtplugClientDevice,
+    ButtplugClientEvent,
+    LinearCommand,
+    RotateCommand,
+    ScalarCommand,
+    VibrateCommand,
+  },
+  core::connector::ButtplugInProcessClientConnectorBuilder,
+  server::{ButtplugRemoteServer, ButtplugServer, ButtplugServerBuilder},
+  util::async_manager,
 };
 use tokio::sync::Notify;
-use crate::util::{TestDeviceChannelHost, device_test::connector::build_channel_connector};
 
-use super::super::{DeviceTestCase, TestCommand, TestClientCommand, super::TestDeviceCommunicationManagerBuilder};
-use std::{sync::Arc, time::Duration};
+use super::super::{
+  super::TestDeviceCommunicationManagerBuilder,
+  DeviceTestCase,
+  TestClientCommand,
+  TestCommand,
+};
 use futures::StreamExt;
+use std::{sync::Arc, time::Duration};
 use tracing::*;
 
 async fn run_test_client_command(command: &TestClientCommand, device: &Arc<ButtplugClientDevice>) {
@@ -75,7 +87,10 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
       }
     }
     _ => {
-      panic!("Tried to run unhandled TestClientCommand type {:?}", command);
+      panic!(
+        "Tried to run unhandled TestClientCommand type {:?}",
+        command
+      );
     }
   }
 }
@@ -122,7 +137,10 @@ fn build_server(test_case: &DeviceTestCase) -> (ButtplugServer, Vec<TestDeviceCh
       std::fs::read_to_string(config_file_path).expect("Should be able to load config"),
     ));
   }
-  (server_builder.finish().expect("Should always build"), device_channels)
+  (
+    server_builder.finish().expect("Should always build"),
+    device_channels,
+  )
 }
 
 pub async fn run_embedded_test_case(test_case: &DeviceTestCase) {
@@ -146,7 +164,10 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   let (server, device_channels) = build_server(test_case);
   let remote_server = ButtplugRemoteServer::new(server);
   async_manager::spawn(async move {
-    remote_server.start(server_connector).await.expect("Should always succeed");
+    remote_server
+      .start(server_connector)
+      .await
+      .expect("Should always succeed");
   });
 
   // Connect client
@@ -158,7 +179,11 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   run_test_case(client, device_channels, test_case).await;
 }
 
-pub async fn run_test_case(client: ButtplugClient, mut device_channels: Vec<TestDeviceChannelHost>, test_case: &DeviceTestCase) {
+pub async fn run_test_case(
+  client: ButtplugClient,
+  mut device_channels: Vec<TestDeviceChannelHost>,
+  test_case: &DeviceTestCase,
+) {
   let mut event_stream = client.event_stream();
 
   client

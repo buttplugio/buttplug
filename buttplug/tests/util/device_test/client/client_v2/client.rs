@@ -7,14 +7,16 @@
 
 // The last version of the v2 client, taken from Buttplug v5.1.4
 
+use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
+use super::device::ButtplugClientDevice;
 use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
     messages::{
+      ButtplugMessageSpecVersion,
       ButtplugSpecV2ClientMessage,
       ButtplugSpecV2ServerMessage,
-      ButtplugMessageSpecVersion,
       Ping,
       RequestDeviceList,
       RequestServerInfo,
@@ -29,12 +31,7 @@ use buttplug::{
     stream::convert_broadcast_receiver_to_stream,
   },
 };
-use super::client_event_loop::{ButtplugClientEventLoop, ButtplugClientRequest};
 use dashmap::DashMap;
-use super::device::{
-  ButtplugClientDevice,
-};
-use tracing::*;
 use futures::{
   future::{self, BoxFuture},
   Stream,
@@ -45,6 +42,7 @@ use std::sync::{
 };
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
+use tracing::*;
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
@@ -88,10 +86,7 @@ pub struct ButtplugClientMessageFuturePair {
 }
 
 impl ButtplugClientMessageFuturePair {
-  pub fn new(
-    msg: ButtplugSpecV2ClientMessage,
-    waker: ButtplugServerMessageStateShared,
-  ) -> Self {
+  pub fn new(msg: ButtplugSpecV2ClientMessage, waker: ButtplugServerMessageStateShared) -> Self {
     Self { msg, waker }
   }
 }
@@ -195,8 +190,8 @@ impl ButtplugClient {
     mut connector: ConnectorType,
   ) -> Result<(), ButtplugClientError>
   where
-    ConnectorType: ButtplugConnector<ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage>
-      + 'static,
+    ConnectorType:
+      ButtplugConnector<ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage> + 'static,
   {
     if self.connected() {
       return Err(ButtplugClientError::ButtplugConnectorError(
@@ -365,10 +360,7 @@ impl ButtplugClient {
     })
   }
 
-  fn send_message(
-    &self,
-    msg: ButtplugSpecV2ClientMessage,
-  ) -> ButtplugServerMessageResultFuture {
+  fn send_message(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugServerMessageResultFuture {
     if !self.connected() {
       Box::pin(future::ready(Err(
         ButtplugConnectorError::ConnectorNotConnected.into(),
@@ -401,10 +393,7 @@ impl ButtplugClient {
 
   /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
   /// type ButtplugMessage back from the server.
-  fn send_message_expect_ok(
-    &self,
-    msg: ButtplugSpecV2ClientMessage,
-  ) -> ButtplugClientResultFuture {
+  fn send_message_expect_ok(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
     Box::pin(async move { send_fut.await.map(|_| ()).map_err(|err| err) })
   }

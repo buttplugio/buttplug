@@ -17,12 +17,10 @@ use super::{
 use buttplug::{
   core::ButtplugResultFuture,
   server::device::configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
-  server::device::{
-    hardware::communication::{
-      HardwareCommunicationManager,
-      HardwareCommunicationManagerBuilder,
-      HardwareCommunicationManagerEvent,
-    },
+  server::device::hardware::communication::{
+    HardwareCommunicationManager,
+    HardwareCommunicationManagerBuilder,
+    HardwareCommunicationManagerEvent,
   },
 };
 use futures::future::{self, FutureExt};

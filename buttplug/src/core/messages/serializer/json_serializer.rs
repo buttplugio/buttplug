@@ -89,14 +89,16 @@ where
         })
       } else {
         // If is_valid fails, re-run validation to get our error message.
-        let e = validator.validate(&json_msg).err().expect("We can't get here without validity checks failing.");
+        let e = validator
+          .validate(&json_msg)
+          .err()
+          .expect("We can't get here without validity checks failing.");
         let err_vec: Vec<jsonschema::ValidationError> = e.collect();
         Err(ButtplugSerializerError::JsonSerializerError(format!(
           "Error during JSON Schema Validation - Message: {} - Error: {:?}",
-          json_msg,
-          err_vec
+          json_msg, err_vec
         )))
-      }    
+      }
     })
 }
 
@@ -265,7 +267,10 @@ impl ButtplugClientJSONSerializerImpl {
   pub fn deserialize<T>(
     &self,
     msg: &ButtplugSerializedMessage,
-  ) -> Result<Vec<T>, ButtplugSerializerError> where T: serde::de::DeserializeOwned + Clone, {
+  ) -> Result<Vec<T>, ButtplugSerializerError>
+  where
+    T: serde::de::DeserializeOwned + Clone,
+  {
     if let ButtplugSerializedMessage::Text(text_msg) = msg {
       deserialize_to_message::<T>(&self.validator, text_msg)
     } else {
@@ -273,15 +278,17 @@ impl ButtplugClientJSONSerializerImpl {
     }
   }
 
-  pub fn serialize<T>(&self, msg: &Vec<T>) -> ButtplugSerializedMessage where
-  T: ButtplugMessage + Serialize + Deserialize<'static> {
+  pub fn serialize<T>(&self, msg: &Vec<T>) -> ButtplugSerializedMessage
+  where
+    T: ButtplugMessage + Serialize + Deserialize<'static>,
+  {
     ButtplugSerializedMessage::Text(vec_to_protocol_json(msg))
   }
 }
 
 #[derive(Default)]
 pub struct ButtplugClientJSONSerializer {
-  serializer_impl: ButtplugClientJSONSerializerImpl
+  serializer_impl: ButtplugClientJSONSerializerImpl,
 }
 
 impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
@@ -296,7 +303,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
   }
 
   fn serialize(&self, msg: &Vec<Self::Outbound>) -> ButtplugSerializedMessage {
-    self.serializer_impl.serialize(msg)    
+    self.serializer_impl.serialize(msg)
   }
 }
 

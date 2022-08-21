@@ -7,15 +7,15 @@
 
 //! Handling of remote message pairing and future resolution.
 
-use buttplug::{
-  core::messages::{ButtplugSpecV2ServerMessage, ButtplugMessage, ButtplugMessageValidator},
+use super::client::{
+  ButtplugClientError,
+  ButtplugClientMessageFuturePair,
+  ButtplugServerMessageStateShared,
 };
-use super::{
-  client::{
-    ButtplugClientError,
-    ButtplugClientMessageFuturePair,
-    ButtplugServerMessageStateShared,
-  },
+use buttplug::core::messages::{
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugSpecV2ServerMessage,
 };
 use dashmap::DashMap;
 use std::sync::{
