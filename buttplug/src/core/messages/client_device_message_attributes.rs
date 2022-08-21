@@ -262,15 +262,16 @@ impl RawDeviceMessageAttributes {
 }
 
 fn range_sequence_serialize<S>(
-  range: &RangeInclusive<u32>,
+  range_vec: &Vec<RangeInclusive<u32>>,
   serializer: S,
 ) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
 {
-  let mut seq = serializer.serialize_seq(Some(2))?;
-  seq.serialize_element(range.start())?;
-  seq.serialize_element(range.end())?;
+  let mut seq = serializer.serialize_seq(Some(range_vec.len()))?;
+  for range in range_vec {
+    seq.serialize_element(&vec![*range.start(), *range.end()])?;
+  }
   seq.end()
 }
 
@@ -284,7 +285,7 @@ pub struct SensorDeviceMessageAttributes {
   sensor_type: SensorType,
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
-  sensor_range: RangeInclusive<u32>,
+  sensor_range: Vec<RangeInclusive<u32>>,
 }
 
 /*

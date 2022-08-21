@@ -114,8 +114,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ]
@@ -345,8 +347,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ]
@@ -386,8 +390,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ]
@@ -413,8 +419,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ]
@@ -507,8 +515,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ]
@@ -547,8 +557,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ]
@@ -928,8 +940,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -1032,8 +1046,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -1115,8 +1131,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -1160,8 +1178,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -1435,8 +1455,10 @@
               "FeatureDescriptor": "Battery Level",
               "SensorType": "Battery",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -1465,8 +1487,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ],
@@ -1499,8 +1523,10 @@
                 "FeatureDescriptor": "Battery Level",
                 "SensorType": "Battery",
                 "SensorRange": [
-                  0,
-                  100
+                  [
+                    0,
+                    100
+                  ]
                 ]
               }
             ],
@@ -5376,8 +5402,10 @@
               "SensorType": "Battery",
               "FeatureDescriptor": "Battery Level",
               "SensorRange": [
-                0,
-                100
+                [
+                  0,
+                  100
+                ]
               ]
             }
           ],
@@ -5386,16 +5414,20 @@
               "SensorType": "Pressure",
               "FeatureDescriptor": "Pelvic Pressure (Normalized)",
               "SensorRange": [
-                0,
-                1000
+                [
+                  0,
+                  1000
+                ]
               ]
             },
             {
               "SensorType": "Pressure",
               "FeatureDescriptor": "Pelvic Pressure (Unnormalized)",
               "SensorRange": [
-                0,
-                1000
+                [
+                  0,
+                  1000
+                ]
               ]
             }
           ]

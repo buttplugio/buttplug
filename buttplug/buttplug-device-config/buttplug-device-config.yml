@@ -208,7 +208,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
     configurations:
       # For lovense, our identifiers are the letters returned from the
       # DeviceInfo query sent on initialization.
@@ -311,7 +311,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
     configurations:
       # For lovense service, our identifiers are the device names as the service
       # reports them. Note that if we're getting device info from the remote
@@ -332,7 +332,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
       - identifier:
           - Nora
         name: Lovense Nora
@@ -343,7 +343,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
       - identifier:
           - Ambi
         name: Lovense Ambi
@@ -386,7 +386,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
       - identifier:
           - ED
         name: Lovense Gush
@@ -402,7 +402,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
       - identifier:
           - T
         name: Lovense Calor
@@ -618,7 +618,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
@@ -672,7 +672,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
@@ -711,7 +711,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         ScalarCmd:
           - StepRange: [0, 77]
             ActuatorType: Vibrate
@@ -737,7 +737,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
@@ -873,7 +873,7 @@ protocols:
         SensorReadCmd:
           - FeatureDescriptor: Battery Level
             SensorType: Battery
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         ScalarCmd:
           - StepRange: [0, 255]
             ActuatorType: Vibrate
@@ -887,7 +887,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
           ScalarCmd:
             - StepRange: [0, 255]
               ActuatorType: Vibrate
@@ -900,7 +900,7 @@ protocols:
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
-              SensorRange: [0, 100]
+              SensorRange: [[0, 100]]
           ScalarCmd:
             - StepRange: [0, 255]
               ActuatorType: Vibrate
@@ -2756,14 +2756,14 @@ protocols:
         SensorReadCmd:
           - SensorType: Battery
             FeatureDescriptor: Battery Level
-            SensorRange: [0, 100]
+            SensorRange: [[0, 100]]
         SensorSubscribeCmd:
           - SensorType: Pressure
             FeatureDescriptor: Pelvic Pressure (Normalized)
-            SensorRange: [0, 1000]
+            SensorRange: [[0, 1000]]
           - SensorType: Pressure
             FeatureDescriptor: Pelvic Pressure (Unnormalized)
-            SensorRange: [0, 1000]
+            SensorRange: [[0, 1000]]
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

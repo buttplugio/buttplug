@@ -741,7 +741,7 @@ impl ServerDevice {
         if *sensor.sensor_type() == SensorType::Battery {
           let sensor_read_msg = SensorReadCmd::new(0, index as u32, SensorType::Battery);
           let sensor_read = self.handle_sensor_read_cmd(sensor_read_msg);
-          let sensor_range_end = *sensor.sensor_range().end();
+          let sensor_range_end = *sensor.sensor_range()[0].end();
           return async move {
             let return_msg = sensor_read.await?;
             if let ButtplugServerMessage::SensorReading(reading) = return_msg {

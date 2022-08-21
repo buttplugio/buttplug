@@ -172,7 +172,11 @@
           "type": "string"
         },
         "SensorRange": {
-          "$ref": "#/components/RangeInclusive"
+          "type": "array",
+          "items": {
+            "$ref": "#/components/RangeInclusive"
+          },
+          "minItems": 1
         }
       },
       "additionalProperties": false,
@@ -287,11 +291,6 @@
       "description": "Specifies granularity of each feature on the device.",
       "minimum": 1,
       "type": "integer"
-    },
-    "StepRange": {
-      "description": "Specifies the minimum/maximum level for an actuator ScalarCmd or LevelReading message.",
-      "type": "number",
-      "minItems": 2
     }
   },
   "messages": {

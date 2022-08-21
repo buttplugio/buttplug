@@ -203,7 +203,11 @@
             "type": "string"
           },
           "SensorRange": {
-            "$ref": "#/components/StepRange"
+            "type": "array",
+            "items": {
+              "$ref": "#/components/StepRange"
+            },
+            "minItems": 1
           }
         },
         "required": [
