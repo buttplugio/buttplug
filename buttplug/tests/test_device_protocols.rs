@@ -29,6 +29,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
 #[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
 #[test_case("test_lovense_ridge_user_config.yaml" ; "Lovense Protocol - Lovense Ridge (User Config)")]
+#[test_case("test_user_config_display_name.yaml" ; "User Config Display Name")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await).await;
@@ -46,6 +47,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_lovense_battery.yaml" ; "Lovense Protocol - Lovense Battery (Default Devices)")]
 #[test_case("test_lovense_battery_non_default.yaml" ; "Lovense Protocol - Lovense Battery (Non-Default Devices)")]
 #[test_case("test_lovense_ridge_user_config.yaml" ; "Lovense Protocol - Lovense Ridge (User Config)")]
+#[test_case("test_user_config_display_name.yaml" ; "User Config Display Name")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {

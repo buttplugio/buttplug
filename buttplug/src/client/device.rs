@@ -151,6 +151,9 @@ pub struct ButtplugClientDevice {
   /// Name of the device
   #[getset(get = "pub")]
   name: String,
+  /// Display name of the device
+  #[getset(get = "pub")]
+  display_name: Option<String>,
   /// Index of the device, matching the index in the
   /// [ButtplugServer][crate::server::ButtplugServer]'s
   /// [DeviceManager][crate::server::device_manager::DeviceManager].
@@ -191,6 +194,7 @@ impl ButtplugClientDevice {
   /// functions for forming device control messages.
   pub(super) fn new(
     name: &str,
+    display_name: &Option<String>,
     index: u32,
     message_attributes: &ClientDeviceMessageAttributes,
     message_sender: broadcast::Sender<ButtplugClientRequest>,
@@ -205,6 +209,7 @@ impl ButtplugClientDevice {
 
     Self {
       name: name.to_owned(),
+      display_name: display_name.clone(),
       index,
       message_attributes: message_attributes.clone(),
       event_loop_sender: message_sender,
@@ -220,6 +225,7 @@ impl ButtplugClientDevice {
   ) -> Self {
     ButtplugClientDevice::new(
       info.device_name(),
+      info.device_display_name(),
       info.device_index(),
       info.device_messages(),
       sender,

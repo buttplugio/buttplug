@@ -223,11 +223,9 @@ pub async fn run_test_case(client: ButtplugClient, mut device_channels: Vec<Test
           if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_name {
             assert_eq!(*expected_name, *device_added.name());
           }
-          /*
-          if let Some(expected_name) = &test_case.devices[device_added.index() as usize].expected_display_name {
-            assert_eq!(*expected_name, *device_added.display_name());
+          if let Some(expected_display_name) = &test_case.devices[device_added.index() as usize].expected_display_name {
+            assert_eq!(Some(expected_display_name.clone()), *device_added.display_name());
           }
-          */
           if client.devices().len() == test_case.devices.len() {
             break;
           }

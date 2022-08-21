@@ -309,6 +309,7 @@
               "properties": {
                 "DeviceName": { "$ref": "#/components/DeviceName" },
                 "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+                "DeviceDisplayName": { "type": "string" },
                 "DeviceMessages": { "$ref": "#/components/DeviceMessagesV3" }
               },
               "additionalProperties": false,
@@ -333,6 +334,7 @@
           "Id": { "$ref": "#/components/SystemId" },
           "DeviceName": { "$ref": "#/components/DeviceName" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
+          "DeviceDisplayName": { "type": "string" },
           "DeviceMessages": { "$ref": "#/components/DeviceMessagesV3" }
         },
         "additionalProperties": false,
