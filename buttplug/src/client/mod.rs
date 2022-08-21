@@ -52,7 +52,6 @@ use std::sync::{
 };
 use thiserror::Error;
 use tokio::sync::{broadcast, mpsc, Mutex};
-use tracing::{span::Span, Level};
 use tracing_futures::Instrument;
 
 /// Result type used for public APIs.
@@ -174,7 +173,6 @@ pub struct ButtplugClient {
   // Sender to relay messages to the internal client loop
   message_sender: broadcast::Sender<ButtplugClientRequest>,
   connected: Arc<AtomicBool>,
-  _client_span: Arc<Mutex<Option<Span>>>,
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
 
@@ -187,7 +185,6 @@ impl ButtplugClient {
       server_name: Arc::new(Mutex::new(None)),
       event_stream,
       message_sender,
-      _client_span: Arc::new(Mutex::new(None)),
       connected: Arc::new(AtomicBool::new(false)),
       device_map: Arc::new(DashMap::new()),
     }
@@ -207,12 +204,6 @@ impl ButtplugClient {
       ));
     }
 
-    // TODO I cannot remember why this is here or what it does.
-    *self._client_span.lock().await = {
-      let span = span!(Level::INFO, "Client");
-      let _ = span.enter();
-      Some(span)
-    };
     info!("Connecting to server.");
     let (connector_sender, connector_receiver) = mpsc::channel(256);
     connector.connect(connector_sender).await.map_err(|e| {
