@@ -5,24 +5,18 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
 use crate::{
-  core::messages::{
-    self,
-    ButtplugDeviceCommandMessageUnion,
-    Endpoint
+  core::{errors::ButtplugDeviceError, messages::Endpoint},
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{HardwareCommand, HardwareWriteCmd, Hardware},
+    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,},
+    ServerDeviceIdentifier,
   },
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
-    },
-  },
-  util::async_manager,
+  util::async_manager
 };
-use futures_timer::Delay;
+use futures::FutureExt;
+use async_trait::async_trait;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -30,50 +24,54 @@ use std::{
   },
   time::Duration,
 };
-use tokio::sync::{Mutex, RwLock};
+use tokio::{
+  time::sleep,
+  sync::RwLock
+};
 
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
 
+generic_protocol_initializer_setup!(Hgod, "hgod");
+
+#[derive(Default)]
+pub struct HgodInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for HgodInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(Hgod::new(&hardware)))
+  }
+}
+
 pub struct Hgod {
-  device_attributes: ProtocolDeviceAttributes,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
+  hardware: Arc<Hardware>,
   current_command: Arc<RwLock<Vec<u8>>>,
   updater_running: Arc<AtomicBool>,
 }
 
-crate::default_protocol_properties_definition!(Hgod);
-
 impl Hgod {
-  const PROTOCOL_IDENTIFIER: &'static str = "hgod";
-
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
+  fn new(hardware: &Arc<Hardware>) -> Self {
     Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
+      hardware: hardware.clone(),
       updater_running: Arc::new(AtomicBool::new(false)),
       current_command: Arc::new(RwLock::new(vec![0x55, 0x04, 0, 0, 0, 0])),
     }
   }
 }
 
-impl ButtplugProtocol for Hgod {}
-
-super::default_protocol_trait_declaration!(Hgod);
-
 async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Hgod Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device
-    .write_value(HardwareWriteCmd::new(Endpoint::Tx, current_command, true))
+    .write_value(&HardwareWriteCmd::new(Endpoint::Tx, current_command, true))
     .await
     .is_ok()
   {
-    Delay::new(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
+    sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
     current_command = command_holder.read().await.clone();
     info!("Hgod Command: {:?}", current_command);
   }
@@ -81,35 +79,27 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
 }
 
 impl ProtocolHandler for Hgod {
-  fn handle_vibrate_cmd(
-    &self,
-    cmds: &Vec<Option<u32>>,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let manager = self.manager.clone();
+  fn handle_scalar_vibrate_cmd(
+      &self,
+      _index: u32,
+      scalar: u32,
+    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();
-    async move {
-      let result = manager.lock().await.update_vibration(&message, false)?;
-      info!("Hgod Result: {:?}", result);
-      if result.is_none() {
-        return Ok(messages::Ok::default().into());
+    let hardware = self.hardware.clone();
+    async_manager::spawn(async move {
+      let write_mutex = current_command.clone();
+      let mut command_writer = write_mutex.write().await;
+      let command: Vec<u8> = vec![0x55, 0x04, 0, 0, 0, scalar as u8];
+      *command_writer = command;
+      if !update_running.load(Ordering::SeqCst) {
+        async_manager::spawn(
+          async move { vibration_update_handler(hardware, current_command).await },
+        );
+        update_running.store(true, Ordering::SeqCst);
       }
-      if let Some(cmds) = result {
-        if let Some(speed) = cmds[0] {
-          let write_mutex = current_command.clone();
-          let mut command_writer = write_mutex.write().await;
-          let command: Vec<u8> = vec![0x55, 0x04, 0, 0, 0, speed as u8];
-          *command_writer = command;
-          if !update_running.load(Ordering::SeqCst) {
-            async_manager::spawn(
-              async move { vibration_update_handler(device, current_command).await },
-            );
-            update_running.store(true, Ordering::SeqCst);
-          }
-        }
-      }
-      Ok(messages::Ok::default().into())
-    }.boxed()
+    }.boxed());
+    Ok(vec![])
   }
 }
 

@@ -18,6 +18,7 @@ pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
 pub mod fredorch;
+pub mod hgod;
 pub mod hismith;
 pub mod htk_bm;
 pub mod jejoue;
@@ -66,7 +67,6 @@ pub mod youou;
 pub mod zalo;
 
 /*
-pub mod hgod;
 pub mod mysteryvibe;
 pub mod satisfyer;
 */
@@ -146,7 +146,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     fredorch::setup::FredorchIdentifierFactory::default(),
   );
 
-  //add_to_protocol_map(&mut map, hgod::HgodFactory::default());
+  add_to_protocol_map(&mut map, hgod::setup::HgodIdentifierFactory::default());
 
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
   add_to_protocol_map(
