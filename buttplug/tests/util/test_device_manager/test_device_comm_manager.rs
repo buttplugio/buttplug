@@ -57,7 +57,7 @@ impl TestDeviceIdentifier {
   pub fn new(name: &str, address: Option<String>) -> Self {
     // Vaguely, not really random number. Works well enough to be an address that
     // doesn't collide.
-    let address = address.unwrap_or_else(|| generate_address());
+    let address = address.unwrap_or_else(generate_address);
     Self {
       name: name.to_owned(),
       address,

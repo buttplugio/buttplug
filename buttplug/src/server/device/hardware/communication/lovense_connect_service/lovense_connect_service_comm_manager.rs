@@ -156,7 +156,7 @@ impl LovenseConnectServiceCommunicationManager {
       return;
     }
     for host in self.known_hosts.iter() {
-      match get_local_info(&*host).await {
+      match get_local_info(&host).await {
         Some(info) => {
           for (_, toy) in info.data.iter() {
             if !toy.connected {

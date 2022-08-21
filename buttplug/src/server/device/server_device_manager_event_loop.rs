@@ -268,7 +268,7 @@ impl ServerDeviceManagerEventLoop {
           device_index,
           &device.name(),
           &device.display_name(),
-          &device.message_attributes().clone().into(),
+          &device.message_attributes().into(),
         );
         self.device_map.insert(device_index, device);
         // After that, we can send out to the server's event listeners to let

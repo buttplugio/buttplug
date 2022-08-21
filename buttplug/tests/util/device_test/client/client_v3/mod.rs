@@ -77,7 +77,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
         // This is a special case specifically for lovense, since they read their battery off of
         // their notification endpoint. This is a mess but it does the job.
         let device = device.clone();
-        let expected_power = expected_power.clone();
+        let expected_power = *expected_power;
         async_manager::spawn(async move {
           let battery_level = device.battery_level().await.unwrap();
           assert_eq!(battery_level, expected_power);

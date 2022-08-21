@@ -14,7 +14,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
       .join(test_file);
   // Given the test case object, run the test across all client versions.
   let yaml_test_case = std::fs::read_to_string(&test_file_path)
-    .expect(&format!("Cannot read file {:?}", test_file_path));
+    .unwrap_or_else(|_| panic!("Cannot read file {:?}", test_file_path));
   serde_yaml::from_str(&yaml_test_case).expect("Could not parse yaml for file.")
 }
 

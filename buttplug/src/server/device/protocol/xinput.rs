@@ -55,8 +55,7 @@ impl ProtocolHandler for XInput {
         ButtplugDeviceError::ProtocolSpecificError(
           "XInput".to_owned(),
           "Cannot convert XInput value for processing".to_owned(),
-        )
-        .into(),
+        ),
       );
     }
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, cmd, false).into()])
@@ -79,7 +78,7 @@ impl ProtocolHandler for XInput {
         3 => 100,
         _ => {
           return Err(
-            ButtplugDeviceError::DeviceCommunicationError(format!("something went wrong")).into(),
+            ButtplugDeviceError::DeviceCommunicationError("something went wrong".to_string()),
           )
         }
       };

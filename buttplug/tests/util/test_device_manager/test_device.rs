@@ -267,7 +267,7 @@ impl HardwareInternal for TestDevice {
     msg: &HardwareReadCmd,
   ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
     let reads = self.read_data.clone();
-    let msg = msg.clone();
+    let msg = *msg;
     async move {
       let read_msg = reads.lock().await.pop_back().unwrap();
       if read_msg.endpoint() != msg.endpoint {
@@ -276,8 +276,7 @@ impl HardwareInternal for TestDevice {
             "Read endpoint {} while expecting endpoint {}",
             read_msg.endpoint(),
             msg.endpoint
-          ))
-          .into(),
+          )),
         )
       } else {
         Ok(read_msg)
@@ -304,7 +303,7 @@ impl HardwareInternal for TestDevice {
       return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
     }
     self.subscribed_endpoints.insert(msg.endpoint);
-    self.send_command(msg.clone().into())
+    self.send_command((*msg).into())
   }
 
   fn unsubscribe(
@@ -315,6 +314,6 @@ impl HardwareInternal for TestDevice {
       return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
     }
     self.subscribed_endpoints.remove(&msg.endpoint);
-    self.send_command(msg.clone().into())
+    self.send_command((*msg).into())
   }
 }

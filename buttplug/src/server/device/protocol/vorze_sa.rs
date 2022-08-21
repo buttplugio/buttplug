@@ -77,7 +77,7 @@ impl VorzeSA {
 }
 
 #[repr(u8)]
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum VorzeDevice {
   Bach = 6,
   Piston = 3,

@@ -806,7 +806,7 @@ mod test {
           "lovense",
           &ProtocolAttributesType::Identifier("P".to_owned()),
         ),
-        &vec![],
+        &[],
       )
       .expect("Should be found");
     // Make sure we got the right name
@@ -840,7 +840,7 @@ mod test {
           "lovense",
           &ProtocolAttributesType::Identifier("P".to_owned()),
         ),
-        &vec![],
+        &[],
       )
       .expect("Should be found");
     // Make sure we got the right name
@@ -867,7 +867,7 @@ mod test {
           "lovense",
           &ProtocolAttributesType::Identifier("P".to_owned()),
         ),
-        &vec![],
+        &[],
       )
       .expect("Should be found");
     // Make sure we got the right name

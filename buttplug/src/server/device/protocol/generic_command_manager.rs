@@ -37,7 +37,7 @@ struct ScalarGenericCommand {
 impl ScalarGenericCommand {
   pub fn new(attributes: &ServerGenericDeviceMessageAttributes) -> Self {
     Self {
-      actuator: attributes.actuator_type().clone(),
+      actuator: *attributes.actuator_type(),
       step_range: attributes.step_range().clone(),
       value: AtomicU32::new(0),
     }
@@ -150,7 +150,7 @@ impl GenericCommandManager {
     // values before switching them out.
     if match_all {
       for (index, cmd) in self.scalars.iter().enumerate() {
-        result[index] = Some((cmd.actuator().clone(), cmd.value.load(SeqCst)));
+        result[index] = Some((*cmd.actuator(), cmd.value.load(SeqCst)));
       }
     }
     for scalar_command in msg.scalars() {
@@ -339,7 +339,7 @@ mod test {
       ActuatorType::Vibrate,
     );
     let scalar_attributes = ServerDeviceMessageAttributesBuilder::default()
-      .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs.clone()])
+      .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
       .finish();
     let device_attributes = ProtocolDeviceAttributes::new(
       ProtocolAttributesType::Default,

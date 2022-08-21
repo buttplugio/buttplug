@@ -395,7 +395,7 @@ impl ButtplugClient {
   /// type ButtplugMessage back from the server.
   fn send_message_expect_ok(&self, msg: ButtplugSpecV2ClientMessage) -> ButtplugClientResultFuture {
     let send_fut = self.send_message(msg);
-    Box::pin(async move { send_fut.await.map(|_| ()).map_err(|err| err) })
+    Box::pin(async move { send_fut.await.map(|_| ()) })
   }
 
   /// Retreives a list of currently connected devices.

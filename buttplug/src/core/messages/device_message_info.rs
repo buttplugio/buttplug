@@ -42,7 +42,7 @@ impl DeviceMessageInfo {
       device_index,
       device_name: device_name.to_owned(),
       device_display_name: device_display_name.clone(),
-      device_messages: device_messages.to_owned(),
+      device_messages,
     }
   }
 }

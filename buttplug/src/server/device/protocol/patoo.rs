@@ -49,7 +49,7 @@ impl ProtocolIdentifier for PatooIdentifier {
     // Force the identifier lookup to the non-numeric portion
     let c: Vec<char> = hardware.name().chars().collect();
     let mut i = 0;
-    while i < c.len() && !c[i].is_digit(10) {
+    while i < c.len() && !c[i].is_ascii_digit() {
       i += 1;
     }
     let name: String = c[0..i].iter().collect();

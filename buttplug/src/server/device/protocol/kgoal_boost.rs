@@ -102,33 +102,27 @@ impl ProtocolHandler for KGoalBoost {
                 // Extract our two pressure values.
                 let normalized = (data[3] as i32) << 8 | data[4] as i32;
                 let unnormalized = (data[5] as i32) << 8 | data[6] as i32;
-                if stream_sensors.contains(&0) {
-                  if sender
+                if stream_sensors.contains(&0) && sender
                     .send(
                       SensorReading::new(device_index, 0, SensorType::Pressure, vec![normalized])
                         .into(),
                     )
-                    .is_err()
-                  {
-                    debug!(
-                      "Hardware device listener for KGoal Boost shut down, returning from task."
-                    );
-                    return;
-                  }
+                    .is_err() {
+                  debug!(
+                    "Hardware device listener for KGoal Boost shut down, returning from task."
+                  );
+                  return;
                 }
-                if stream_sensors.contains(&1) {
-                  if sender
+                if stream_sensors.contains(&1) && sender
                     .send(
                       SensorReading::new(device_index, 0, SensorType::Pressure, vec![unnormalized])
                         .into(),
                     )
-                    .is_err()
-                  {
-                    debug!(
-                      "Hardware device listener for KGoal Boost shut down, returning from task."
-                    );
-                    return;
-                  }
+                    .is_err() {
+                  debug!(
+                    "Hardware device listener for KGoal Boost shut down, returning from task."
+                  );
+                  return;
                 }
               }
             }

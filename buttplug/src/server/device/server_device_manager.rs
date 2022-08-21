@@ -290,7 +290,7 @@ impl ServerDeviceManager {
               *device.key(),
               &dev.name(),
               &dev.display_name(),
-              dev.message_attributes().clone().into(),
+              dev.message_attributes().into(),
             )
           })
           .collect();
@@ -317,14 +317,10 @@ impl ServerDeviceManager {
   }
 
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
-    if let Some(device) = self.devices.get(&index) {
-      Some(ServerDeviceInfo {
+    self.devices.get(&index).map(|device| ServerDeviceInfo {
         identifier: device.value().identifier().clone(),
         display_name: device.value().display_name(),
       })
-    } else {
-      None
-    }
   }
 }
 

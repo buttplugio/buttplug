@@ -10,13 +10,12 @@ use util::{
   test_client,
   test_client_with_delayed_device_manager,
   test_client_with_device,
-  test_device_manager::check_test_recv_value,
 };
 extern crate buttplug;
 extern crate tracing;
 
 use buttplug::{
-  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent, ScalarCommand},
+  client::{ButtplugClient, ButtplugClientError, ButtplugClientEvent},
   core::{
     connector::{
       ButtplugConnector,
@@ -25,10 +24,9 @@ use buttplug::{
       ButtplugInProcessClientConnectorBuilder,
     },
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage, Endpoint},
+    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::{
-    device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServerBuilder,
   },
   util::async_manager,
@@ -38,7 +36,7 @@ use futures::{future::BoxFuture, StreamExt};
 use futures_timer::Delay;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;
-use tracing::info;
+
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}

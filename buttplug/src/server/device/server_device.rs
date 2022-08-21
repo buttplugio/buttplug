@@ -313,7 +313,7 @@ impl ServerDevice {
       self
         .attributes
         .allows_message(&msg_type)
-        .then(|| ())
+        .then_some(())
         .ok_or(ButtplugDeviceError::MessageNotSupported(msg_type))
     };
 

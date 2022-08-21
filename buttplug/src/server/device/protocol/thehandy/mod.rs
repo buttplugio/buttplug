@@ -146,7 +146,7 @@ impl ProtocolHandler for TheHandy {
     // TODO Use the command manager to check this.
     if message.vectors().len() != 1 {
       return Err(
-        ButtplugDeviceError::DeviceFeatureCountMismatch(1, message.vectors().len() as u32).into(),
+        ButtplugDeviceError::DeviceFeatureCountMismatch(1, message.vectors().len() as u32),
       );
     }
 

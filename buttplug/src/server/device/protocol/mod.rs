@@ -646,7 +646,7 @@ macro_rules! generic_protocol_initializer_setup {
   ( $protocol_name:ident, $protocol_identifier:tt) => {
     paste::paste! {
       pub mod setup {
-        use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+        use $crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
         #[derive(Default)]
         pub struct [< $protocol_name IdentifierFactory >] {}
 
