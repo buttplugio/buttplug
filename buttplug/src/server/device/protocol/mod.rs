@@ -51,6 +51,7 @@ pub mod picobong;
 pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
+pub mod satisfyer;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_iker;
@@ -68,7 +69,7 @@ pub mod zalo;
 
 /*
 pub mod mysteryvibe;
-pub mod satisfyer;
+
 */
 
 use crate::{
@@ -244,7 +245,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     raw_protocol::setup::RawProtocolIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
-  //add_to_protocol_map(&mut map, satisfyer::SatisfyerFactory::default());
+  add_to_protocol_map(&mut map, satisfyer::setup::SatisfyerIdentifierFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
