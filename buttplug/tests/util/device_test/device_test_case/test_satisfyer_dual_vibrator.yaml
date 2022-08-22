@@ -1,0 +1,69 @@
+devices:
+  - identifier: 
+      name: "SF Whatever"
+    expected_name: "Satisfyer Double Desire"
+device_init:
+  - !Events
+      device_index: 0
+      events: 
+        - !Reads
+            - endpoint: rxblemodel
+              # The number 10160, but it needs to be u32 so 4 bytes.
+              data: [0x0, 0x0, 0x27, 0xB0]
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: command
+            data: [0x01]
+            write_with_response: true
+device_commands: 
+  # We'll get a stop packet first as the repeat task spins up.
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 1
+            Speed: 0.25
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x19, 0x19, 0x19, 0x19, 0x32, 0x32, 0x32, 0x32]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x32, 0x32, 0x32, 0x32, 0x4B, 0x4B, 0x4B, 0x4B]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0, 0x0, 0x0, 0x0, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: false
