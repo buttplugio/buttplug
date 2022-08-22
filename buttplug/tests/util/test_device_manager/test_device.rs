@@ -269,6 +269,19 @@ impl HardwareInternal for TestDevice {
     let reads = self.read_data.clone();
     let msg = *msg;
     async move {
+      let mut count = 0;
+      loop {
+        if count == 5 {
+          panic!("Not getting expected read in time!");
+        }
+        {
+          if reads.lock().await.len() > 0 {
+            break;
+          }
+        } 
+        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
+        count += 1;
+      }
       let read_msg = reads.lock().await.pop_back().unwrap();
       if read_msg.endpoint() != msg.endpoint {
         Err(
