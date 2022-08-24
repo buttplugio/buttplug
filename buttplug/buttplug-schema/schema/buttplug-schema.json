@@ -309,6 +309,7 @@
                 "DeviceName": { "$ref": "#/components/DeviceName" },
                 "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
                 "DeviceDisplayName": { "type": "string" },
+                "DeviceMessageTimingGap": { "type": "integer" },
                 "DeviceMessages": { "$ref": "#/components/DeviceMessagesV3" }
               },
               "additionalProperties": false,
@@ -334,6 +335,7 @@
           "DeviceName": { "$ref": "#/components/DeviceName" },
           "DeviceIndex": { "$ref": "#/components/DeviceIndex" },
           "DeviceDisplayName": { "type": "string" },
+          "DeviceMessageTimingGap": { "type": "integer" },
           "DeviceMessages": { "$ref": "#/components/DeviceMessagesV3" }
         },
         "additionalProperties": false,

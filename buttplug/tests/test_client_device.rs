@@ -194,6 +194,7 @@ fn test_client_repeated_deviceadded_message() {
         1,
         "Test Device",
         &None,
+        &None,
         &ClientDeviceMessageAttributes::default(),
       );
       helper_clone
@@ -242,6 +243,7 @@ fn test_client_repeated_deviceremoved_message() {
       let device_added = messages::DeviceAdded::new(
         1,
         "Test Device",
+        &None,
         &None,
         &ClientDeviceMessageAttributes::default(),
       );

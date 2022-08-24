@@ -268,6 +268,7 @@ impl ServerDeviceManagerEventLoop {
           device_index,
           &device.name(),
           &device.display_name(),
+          &None,
           &device.message_attributes().into(),
         );
         self.device_map.insert(device_index, device);

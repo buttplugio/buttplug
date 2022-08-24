@@ -290,6 +290,7 @@ impl ServerDeviceManager {
               *device.key(),
               &dev.name(),
               &dev.display_name(),
+              &None,
               dev.message_attributes().into(),
             )
           })
