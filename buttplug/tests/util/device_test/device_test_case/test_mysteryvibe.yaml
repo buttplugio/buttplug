@@ -1,0 +1,47 @@
+devices:
+  - identifier: 
+      name: "MV Crescendo"
+    expected_name: "MysteryVibe Crescendo"
+device_init:
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: txmode
+            data: [0x43, 0x02, 0x00]
+            write_with_response: true
+device_commands: 
+  # We'll get a stop packet first as the repeat task spins up.
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: txvibrate
+            data: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 5
+            Speed: 1.0
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: txvibrate
+            data: [28, 0, 0, 0, 0, 56]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: txvibrate
+            data: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+            write_with_response: false

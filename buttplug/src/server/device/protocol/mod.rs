@@ -45,6 +45,7 @@ pub mod mannuo;
 pub mod maxpro;
 pub mod mizzzee;
 pub mod motorbunny;
+pub mod mysteryvibe;
 pub mod nobra;
 pub mod patoo;
 pub mod picobong;
@@ -66,11 +67,6 @@ pub mod xinput;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
-
-/*
-pub mod mysteryvibe;
-
-*/
 
 use crate::{
   core::{
@@ -229,7 +225,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     motorbunny::setup::MotorbunnyIdentifierFactory::default(),
   );
-  //add_to_protocol_map(&mut map, mysteryvibe::MysteryVibeFactory::default());
+  add_to_protocol_map(&mut map, mysteryvibe::setup::MysteryVibeIdentifierFactory::default());
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
   add_to_protocol_map(

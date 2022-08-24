@@ -199,7 +199,7 @@ pub async fn run_test_case(
           let device_receiver = &mut device_channels[*device_index as usize].receiver;
           for command in commands {
             tokio::select! {
-              _ = tokio::time::sleep(Duration::from_millis(100)) => {
+              _ = tokio::time::sleep(Duration::from_millis(500)) => {
                 panic!("Timeout while waiting for device output!")
               }
               event = device_receiver.recv() => {
@@ -275,7 +275,7 @@ pub async fn run_test_case(
         let device_receiver = &mut device_channels[*device_index as usize].receiver;
         for command in commands {
           tokio::select! {
-            _ = tokio::time::sleep(Duration::from_millis(100)) => {
+            _ = tokio::time::sleep(Duration::from_millis(500)) => {
               panic!("Timeout while waiting for device output!")
             }
             event = device_receiver.recv() => {

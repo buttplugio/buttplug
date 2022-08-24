@@ -5,27 +5,48 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::{ButtplugProtocol, ButtplugProtocolFactory, ButtplugProtocolCommandHandler};
+
 use crate::{
-  core::messages::{self, ButtplugDeviceCommandMessageUnion, Endpoint},
-  server::{
-    ButtplugServerResultFuture,
-    device::{
-      protocol::{generic_command_manager::GenericCommandManager, ButtplugProtocolProperties},
-      configuration::{ProtocolDeviceAttributes, ProtocolDeviceAttributesBuilder},
-      hardware::{Hardware, HardwareWriteCmd},
+  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
+  server::device::{
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
     },
+    ServerDeviceIdentifier,
   },
-  util::async_manager,
+  util::async_manager
 };
+use async_trait::async_trait;
 use std::{
-  sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-  },
-  time::Duration,
+  sync::Arc,
+  time::Duration
 };
-use tokio::sync::{Mutex, RwLock};
+use tokio::{
+  sync::RwLock,
+  time::sleep
+};
+
+generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
+
+#[derive(Default)]
+pub struct MysteryVibeInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for MysteryVibeInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
+    hardware.write_value(&msg).await?;
+    Ok(Arc::new(MysteryVibe::new(hardware)))
+  }
+}
 
 // Time between Mysteryvibe update commands, in milliseconds. This is basically
 // a best guess derived from watching packet timing a few years ago.
@@ -34,62 +55,11 @@ use tokio::sync::{Mutex, RwLock};
 //
 const MYSTERYVIBE_COMMAND_DELAY_MS: u64 = 93;
 
-
-pub struct MysteryVibe {
-  device_attributes: ProtocolDeviceAttributes,
-  manager: Arc<Mutex<GenericCommandManager>>,
-  stop_commands: Vec<ButtplugDeviceCommandMessageUnion>,
-  current_command: Arc<RwLock<Vec<u8>>>,
-  updater_running: Arc<AtomicBool>,
-}
-
-impl MysteryVibe {
-  const PROTOCOL_IDENTIFIER: &'static str = "mysteryvibe";
-
-  fn new(device_attributes: ProtocolDeviceAttributes) -> Self {
-    let manager = GenericCommandManager::new(&device_attributes);
-
-    Self {
-      device_attributes,
-      stop_commands: manager.stop_commands(),
-      manager: Arc::new(Mutex::new(manager)),
-      updater_running: Arc::new(AtomicBool::new(false)),
-      current_command: Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0])),
-    }
-  }
-}
-
-#[derive(Default, Debug)]
-pub struct MysteryVibeFactory {}
-
-impl ButtplugProtocolFactory for MysteryVibeFactory {
-  fn try_create(
-    &self,
-    hardware: Arc<Hardware>,
-    builder: ProtocolDeviceAttributesBuilder,
-  ) -> futures::future::BoxFuture<
-    'static,
-    Result<Box<dyn ButtplugProtocol>, crate::core::errors::ButtplugError>,
-  > {
-    let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
-    let info_fut = hardware.write_value(msg);
-    async move {
-      info_fut.await?;
-      let device_attributes = builder.create_from_hardware(&hardware)?;
-      Ok(Arc::new(MysteryVibe::new(device_attributes)) as Box<dyn ButtplugProtocol>)
-    }.boxed()
-  }
-
-  fn protocol_identifier(&self) -> &'static str {
-    "mysteryvibe"
-  }
-}
-
 async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwLock<Vec<u8>>>) {
   info!("Entering Mysteryvibe Control Loop");
   let mut current_command = command_holder.read().await.clone();
   while device
-    .write_value(HardwareWriteCmd::new(
+    .write_value(&HardwareWriteCmd::new(
       Endpoint::TxVibrate,
       current_command,
       false,
@@ -104,40 +74,44 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
   info!("Mysteryvibe control loop exiting, most likely due to device disconnection.");
 }
 
-crate::default_protocol_properties_definition!(MysteryVibe);
+pub struct MysteryVibe {
+  current_command: Arc<RwLock<Vec<u8>>>,
+}
 
-impl ButtplugProtocol for MysteryVibe {}
+impl MysteryVibe {
+  fn new(device: Arc<Hardware>) -> Self {
+    let current_command = Arc::new(RwLock::new(vec![0u8, 0, 0, 0, 0, 0]));
+    let current_command_clone = current_command.clone();
+    async_manager::spawn(
+      async move { vibration_update_handler(device, current_command_clone).await },
+    );
+    Self {
+      current_command
+    }
+  }
+}
 
 impl ProtocolHandler for MysteryVibe {
-  fn handle_vibrate_cmd(
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
+  fn handle_scalar_cmd(
     &self,
-    cmds: &Vec<Option<u32>>,
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let manager = self.manager.clone();
     let current_command = self.current_command.clone();
-    let update_running = self.updater_running.clone();
-    async move {
-      let result = manager.lock().await.update_vibration(&message, true)?;
-      info!("MV Result: {:?}", result);
-      if result.is_none() {
-        return Ok(messages::Ok::default().into());
-      }
+    let cmds = cmds.to_vec();
+    async_manager::spawn(async move {
       let write_mutex = current_command.clone();
       let mut command_writer = write_mutex.write().await;
-      let command: Vec<u8> = result
-        .expect("Already checked validity")
+      let command: Vec<u8> = cmds
         .into_iter()
-        .map(|x| x.expect("Validity ensured via GCM match_all") as u8)
+        .map(|x| x.expect("Validity ensured via GCM match_all").1 as u8)
         .collect();
       *command_writer = command;
-      if !update_running.load(Ordering::SeqCst) {
-        async_manager::spawn(
-          async move { vibration_update_handler(device, current_command).await },
-        );
-        update_running.store(true, Ordering::SeqCst);
-      }
-      Ok(messages::Ok::default().into())
-    }.boxed()
+    });
+    Ok(vec![])
   }
 }
 
