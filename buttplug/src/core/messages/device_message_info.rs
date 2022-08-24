@@ -49,7 +49,7 @@ impl DeviceMessageInfo {
       device_index,
       device_name: device_name.to_owned(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: device_message_timing_gap.clone(),
+      device_message_timing_gap: *device_message_timing_gap,
       device_messages,
     }
   }
@@ -61,7 +61,7 @@ impl From<DeviceAdded> for DeviceMessageInfo {
       device_index: device_added.device_index(),
       device_name: device_added.device_name().clone(),
       device_display_name: device_added.device_display_name().clone(),
-      device_message_timing_gap: device_added.device_message_timing_gap().clone(),
+      device_message_timing_gap: *device_added.device_message_timing_gap(),
       device_messages: device_added.device_messages().clone(),
     }
   }

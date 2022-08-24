@@ -181,7 +181,7 @@ impl ServerDeviceMessageAttributes {
   }
 
   pub fn add_raw_messages(&mut self, endpoints: &[Endpoint]) {
-    let raw_attrs = RawDeviceMessageAttributes::new(&endpoints.to_vec());
+    let raw_attrs = RawDeviceMessageAttributes::new(endpoints);
     self.raw_read_cmd = Some(raw_attrs.clone());
     self.raw_write_cmd = Some(raw_attrs.clone());
     self.raw_subscribe_cmd = Some(raw_attrs);

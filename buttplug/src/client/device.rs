@@ -61,6 +61,10 @@ use tracing_futures::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]
+// The message enum is what we'll fly with this most of the time. DeviceRemoved/ClientDisconnect
+// will happen at most once, so we don't care that those contentless traits still take up > 200
+// bytes.
+#[allow(clippy::large_enum_variant)]
 pub enum ButtplugClientDeviceEvent {
   /// Device has disconnected from server.
   DeviceRemoved,
@@ -530,25 +534,25 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
-  pub fn subscribe_pressure(&self) -> ButtplugClientResultFuture {
+  pub fn subscribe_sensor(&self, sensor_index: u32, sensor_type: SensorType) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
           .into(),
       );
     }
-    let msg = SensorSubscribeCmd::new(self.index, 0, SensorType::Pressure).into();
+    let msg = SensorSubscribeCmd::new(self.index, sensor_index, sensor_type).into();
     self.send_message_expect_ok(msg)
   }
 
-  pub fn unsubscribe_pressure(&self) -> ButtplugClientResultFuture {
+  pub fn unsubscribe_sensor(&self, sensor_index: u32, sensor_type: SensorType) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
           .into(),
       );
     }
-    let msg = SensorUnsubscribeCmd::new(self.index, 0, SensorType::Pressure).into();
+    let msg = SensorUnsubscribeCmd::new(self.index, sensor_index, sensor_type).into();
     self.send_message_expect_ok(msg)
   }
 

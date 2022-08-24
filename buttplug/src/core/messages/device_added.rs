@@ -57,7 +57,7 @@ impl DeviceAdded {
       device_index,
       device_name: device_name.to_string(),
       device_display_name: device_display_name.clone(),
-      device_message_timing_gap: device_message_timing_gap.clone(),
+      device_message_timing_gap: *device_message_timing_gap,
       device_messages: device_messages.clone(),
     }
   }

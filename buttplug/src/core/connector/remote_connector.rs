@@ -143,7 +143,7 @@ async fn remote_connector_event_loop<
           ButtplugRemoteConnectorMessage::Message(msg) => {
             // Create future sets our message ID, so make sure this
             // happens before we send out the message.
-            let serialized_msg = serializer.serialize(&vec![msg.clone()]);
+            let serialized_msg = serializer.serialize(&[msg.clone()]);
             if transport_outgoing_sender
               .send(serialized_msg)
               .await
