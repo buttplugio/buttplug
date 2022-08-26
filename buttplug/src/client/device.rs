@@ -97,15 +97,15 @@ pub enum ScalarCommand {
 /// a device. Units are in absolute speed values (0.0-1.0).
 pub enum VibrateCommand {
   /// Sets all vibration features of a device to the same speed.
-  Vibrate(f64),
+  Speed(f64),
   /// Sets vibration features to speed based on the index of the speed in the
   /// vec (i.e. motor 0 is set to `SpeedVec[0]`, motor 1 is set to
   /// `SpeedVec[1]`, etc...)
-  VibrateVec(Vec<f64>),
+  SpeedVec(Vec<f64>),
   /// Sets vibration features indicated by index to requested speed. For
   /// instance, if the map has an entry of (1, 0.5), it will set motor 1 to a
   /// speed of 0.5.
-  VibrateMap(HashMap<u32, f64>),
+  SpeedMap(HashMap<u32, f64>),
 }
 
 /// Convenience enum for forming [RotateCmd] commands.
@@ -340,13 +340,13 @@ impl ButtplugClientDevice {
 
     let mut speed_vec: Vec<ScalarSubcommand>;
     match speed_cmd {
-      VibrateCommand::Vibrate(speed) => {
+      VibrateCommand::Speed(speed) => {
         speed_vec = Vec::with_capacity(vibrator_count as usize);
         for i in 0..vibrator_count {
           speed_vec.push(ScalarSubcommand::new(i, *speed, ActuatorType::Vibrate));
         }
       }
-      VibrateCommand::VibrateMap(map) => {
+      VibrateCommand::SpeedMap(map) => {
         if map.len() as u32 > vibrator_count {
           return self.create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(vibrator_count, map.len() as u32)
@@ -363,7 +363,7 @@ impl ButtplugClientDevice {
           speed_vec.push(ScalarSubcommand::new(*idx, *speed, ActuatorType::Vibrate));
         }
       }
-      VibrateCommand::VibrateVec(vec) => {
+      VibrateCommand::SpeedVec(vec) => {
         if vec.len() as u32 > vibrator_count {
           return self.create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(vibrator_count, vec.len() as u32)

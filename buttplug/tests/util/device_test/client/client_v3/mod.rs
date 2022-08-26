@@ -41,7 +41,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
     }
     Vibrate(msg) => {
       device
-        .vibrate(&VibrateCommand::VibrateMap(
+        .vibrate(&VibrateCommand::SpeedMap(
           msg.iter().map(|x| (x.index(), x.speed())).collect(),
         ))
         .await
