@@ -27,9 +27,11 @@ use buttplug::{
   server::{device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
 };
 use futures::StreamExt;
-use futures_timer::Delay;
 use std::time::Duration;
-use tokio::io::{self, AsyncBufReadExt, BufReader};
+use tokio::{
+  io::{self, AsyncBufReadExt, BufReader},
+  time::sleep
+};
 use tracing::{info, span, Level};
 
 async fn device_enumeration_example() {
@@ -48,7 +50,7 @@ async fn device_enumeration_example() {
 
   tokio::spawn(async move {
     let mut builder = ButtplugServerBuilder::default();
-    builder.device_manager_builder().comm_manager(BtlePlugCommunicationManagerBuilder::default());
+    builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
     let server = ButtplugRemoteServer::new(builder.finish().unwrap()); //ButtplugPipeServerTransportBuilder::default().finish();
     server
       .start(ButtplugRemoteServerConnector::<
@@ -182,16 +184,16 @@ async fn device_enumeration_example() {
           // Spawn off the reaction, so if we get multiple devices they all fire
           // simultaneously instead of waiting for each other.
           async_manager::spawn(async move {
-            println!("We got a device: {}", device.name);
-            device.vibrate(VibrateCommand::Speed(1.0)).await.unwrap();
-            println!("{} should start vibrating!", device.name);
-            Delay::new(Duration::from_secs(1)).await;
+            println!("We got a device: {}", device.name());
+            device.vibrate(&VibrateCommand::Speed(1.0)).await.unwrap();
+            println!("{} should start vibrating!", device.name());
+            sleep(Duration::from_secs(1)).await;
             // All devices also have a "stop" command that will make
             // them stop whatever they're doing.
             device.stop().await.unwrap();
             println!("Battery: {}", device.battery_level().await.unwrap());
-            println!("{} should stop vibrating!", device.name);
-            Delay::new(Duration::from_secs(1)).await;
+            println!("{} should stop vibrating!", device.name());
+            sleep(Duration::from_secs(1)).await;
           });
         }
         ButtplugClientEvent::ScanningFinished => {
@@ -232,7 +234,7 @@ async fn device_enumeration_example() {
   // will error if that has happened.
   println!("Devices currently connected:");
   for dev in client.devices() {
-    println!("- {}", dev.name);
+    println!("- {}", dev.name());
   }
   // And now we're done!
   println!("Exiting example");

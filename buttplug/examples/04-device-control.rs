@@ -11,14 +11,13 @@
 use buttplug::{
   client::{
     ButtplugClientDevice,
-    ButtplugClientDeviceMessageType,
     ButtplugClientEvent,
     VibrateCommand,
   },
   util::in_process_client,
 };
 use futures::StreamExt;
-use futures_timer::Delay;
+use tokio::time::sleep;
 use std::{sync::Arc, time::Duration};
 
 async fn device_control_example() {
@@ -28,7 +27,7 @@ async fn device_control_example() {
   // connect_in_process convenience method. This creates an in process connector
   // for us, and also adds all of the device managers built into the library to
   // the server it uses. Handy!
-  let client = in_process_client("Test Client").await;
+  let client = in_process_client("Test Client", false).await;
   let mut event_stream = client.event_stream();
 
   // We'll mostly be doing the same thing we did in example #3, up until we get
@@ -84,26 +83,26 @@ async fn device_control_example() {
       //
       // For this example, we'll use the simple single value.
       if dev
-        .message_attributes
-        .vibrate_cmd()
+        .message_attributes()
+        .scalar_cmd()
         .is_some()
       {
-        if let Err(e) = dev.vibrate(VibrateCommand::Speed(1.0)).await {
+        if let Err(e) = dev.vibrate(&VibrateCommand::Speed(1.0)).await {
           println!("Error sending vibrate command to device! {}", e);
           return;
         }
-        println!("{} should start vibrating!", dev.name);
-        Delay::new(Duration::from_secs(1)).await;
+        println!("{} should start vibrating!", dev.name());
+        sleep(Duration::from_secs(1)).await;
         // All devices also have a "stop" command that will make
         // them stop whatever they're doing.
         if let Err(e) = dev.stop().await {
           println!("Error sending stop command to device! {}", e);
           return;
         }
-        println!("{} should stop vibrating!", dev.name);
-        Delay::new(Duration::from_secs(1)).await;
+        println!("{} should stop vibrating!", dev.name());
+        sleep(Duration::from_secs(1)).await;
       } else {
-        println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name);
+        println!("{} doesn't vibrate! This example should be updated to handle rotation and linear movement!", dev.name());
       }
     }
   };
@@ -115,7 +114,7 @@ async fn device_control_example() {
       .expect("We own the client so the event stream shouldn't die.")
     {
       ButtplugClientEvent::DeviceAdded(dev) => {
-        println!("We got a device: {}", dev.name);
+        println!("We got a device: {}", dev.name());
         let fut = vibrate_device(dev);
         tokio::spawn(async move {
           fut.await;
