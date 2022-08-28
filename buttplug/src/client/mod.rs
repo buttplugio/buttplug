@@ -14,7 +14,7 @@ use crate::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
-    messages::{
+    message::{
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       Ping,

@@ -10,7 +10,7 @@ mod util;
 pub use util::test_device_manager::check_test_recv_value;
 
 use buttplug::{
-  core::messages::{
+  core::message::{
     self,
     serializer::{
       ButtplugMessageSerializer,
@@ -104,7 +104,7 @@ fn test_version0_device_added_device_list() {
       );
     // Skip JSON parsing here, we aren't converting versions.
     let reply = server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
     // Check that we got an event back about scanning finishing.
@@ -157,7 +157,7 @@ fn test_version0_singlemotorvibratecmd() {
       );
     // Skip JSON parsing here, we aren't converting versions.
     let reply = server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await;
     assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
     // Check that we got an event back about scanning finishing.

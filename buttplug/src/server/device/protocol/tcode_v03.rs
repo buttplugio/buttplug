@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint},
+    message::{self, Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -24,7 +24,7 @@ pub struct TCodeV03 {}
 impl ProtocolHandler for TCodeV03 {
   fn handle_linear_cmd(
     &self,
-    msg: messages::LinearCmd,
+    msg: message::LinearCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut msg_vec = vec![];
     for v in msg.vectors() {

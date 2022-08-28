@@ -18,7 +18,7 @@ use crate::{
       ButtplugConnectorError,
       ButtplugConnectorResultFuture,
     },
-    messages::serializer::ButtplugSerializedMessage,
+    message::serializer::ButtplugSerializedMessage,
   },
   util::async_manager,
 };

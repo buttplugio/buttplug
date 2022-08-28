@@ -10,7 +10,7 @@ use byteorder::LittleEndian;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
     hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
@@ -64,7 +64,7 @@ impl ProtocolHandler for XInput {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: messages::SensorReadCmd,
+    msg: message::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     async move {
       let rawreading = device
@@ -83,7 +83,7 @@ impl ProtocolHandler for XInput {
         }
       };
       Ok(
-        messages::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery])
+        message::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery])
           .into(),
       )
     }

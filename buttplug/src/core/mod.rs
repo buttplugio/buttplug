@@ -10,7 +10,7 @@
 #[cfg(any(feature = "client", feature = "server"))]
 pub mod connector;
 pub mod errors;
-pub mod messages;
+pub mod message;
 
 use errors::ButtplugError;
 use futures::future::{self, BoxFuture, FutureExt};

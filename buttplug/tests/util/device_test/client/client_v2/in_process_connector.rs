@@ -10,7 +10,7 @@
 use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    messages::{ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage},
+    message::{ButtplugSpecV2ClientMessage, ButtplugSpecV2ServerMessage},
   },
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,

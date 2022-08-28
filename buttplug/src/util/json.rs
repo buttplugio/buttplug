@@ -10,7 +10,7 @@
 //! buttplug message de/serializers in both the client and server. Uses the
 //! jsonschema library.
 
-use crate::core::messages::serializer::ButtplugSerializerError;
+use crate::core::message::serializer::ButtplugSerializerError;
 use jsonschema::JSONSchema;
 
 pub struct JSONValidator {

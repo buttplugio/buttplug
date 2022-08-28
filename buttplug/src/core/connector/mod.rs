@@ -68,7 +68,7 @@ pub mod remote_connector;
 pub mod transport;
 
 use crate::{
-  core::messages::{serializer::ButtplugSerializedMessage, ButtplugMessage},
+  core::message::{serializer::ButtplugSerializedMessage, ButtplugMessage},
   util::future::{ButtplugFuture, ButtplugFutureStateShared},
 };
 use displaydoc::Display;

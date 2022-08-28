@@ -5,7 +5,7 @@ use buttplug::core::{
     ButtplugRemoteConnector,
     ButtplugRemoteServerConnector,
   },
-  messages::{
+  message::{
     serializer::{
       ButtplugClientJSONSerializer,
       ButtplugClientJSONSerializerImpl,

@@ -10,7 +10,7 @@ use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   core::{
   connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
-  messages::serializer::ButtplugClientJSONSerializer,
+  message::serializer::ButtplugClientJSONSerializer,
   }
 };
 use futures::StreamExt;

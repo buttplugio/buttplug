@@ -14,7 +14,7 @@ use super::{
   ButtplugConnectorResultFuture,
 };
 use crate::{
-  core::messages::{
+  core::message::{
     serializer::{
       ButtplugClientJSONSerializer,
       ButtplugMessageSerializer,

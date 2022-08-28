@@ -12,7 +12,7 @@ use super::server_device_manager_event_loop::ServerDeviceManagerEventLoop;
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugMessageError},
-    messages::{
+    message::{
       self,
       ButtplugClientMessage,
       ButtplugDeviceCommandMessageUnion,
@@ -224,7 +224,7 @@ impl ServerDeviceManager {
       {
         // TODO Fill in error.
       }
-      Ok(messages::Ok::default().into())
+      Ok(message::Ok::default().into())
     }
     .boxed()
   }
@@ -239,7 +239,7 @@ impl ServerDeviceManager {
       {
         // TODO Fill in error.
       }
-      Ok(messages::Ok::default().into())
+      Ok(message::Ok::default().into())
     }
     .boxed()
   }
@@ -252,11 +252,11 @@ impl ServerDeviceManager {
         .iter()
         .map(|dev| {
           let device = dev.value();
-          device.parse_message(messages::StopDeviceCmd::new(1).into())
+          device.parse_message(message::StopDeviceCmd::new(1).into())
         })
         .collect();
       future::join_all(fut_vec).await;
-      Ok(messages::Ok::default().into())
+      Ok(message::Ok::default().into())
     }
     .boxed()
   }

@@ -13,7 +13,7 @@ use crate::{
     ButtplugClientMessageFuturePair,
     ButtplugServerMessageStateShared,
   },
-  core::messages::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
+  core::message::{ButtplugCurrentSpecServerMessage, ButtplugMessage, ButtplugMessageValidator},
 };
 use dashmap::DashMap;
 use std::sync::{

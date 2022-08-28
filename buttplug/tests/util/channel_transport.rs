@@ -16,7 +16,7 @@ use buttplug::{
       ButtplugRemoteClientConnector,
       ButtplugRemoteServerConnector,
     },
-    messages::{
+    message::{
       self,
       serializer::ButtplugMessageSerializer,
       serializer::{
@@ -136,7 +136,7 @@ impl ChannelClientTestHelper {
       outgoing_sender,
     )))));
     let client_serializer = ButtplugClientJSONSerializer::default();
-    let rsi_setup_msg = client_serializer.serialize(&vec![messages::RequestServerInfo::new(
+    let rsi_setup_msg = client_serializer.serialize(&vec![message::RequestServerInfo::new(
       "Test client",
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     )
@@ -193,9 +193,9 @@ impl ChannelClientTestHelper {
     // Just assume we get an RSI message
     self
       .send_client_incoming(
-        messages::ServerInfo::new(
+        message::ServerInfo::new(
           "test server",
-          messages::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+          message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
           0,
         )
         .into(),
@@ -206,7 +206,7 @@ impl ChannelClientTestHelper {
       self.next_client_message().await,
       ButtplugClientMessage::RequestDeviceList(..)
     ));
-    let mut dl = messages::DeviceList::new(vec![]);
+    let mut dl = message::DeviceList::new(vec![]);
     dl.set_id(2);
     self.send_client_incoming(dl.into()).await;
     finish_notifier.notified().await;

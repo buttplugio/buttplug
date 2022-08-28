@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint},
+    message::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -54,14 +54,14 @@ pub struct KiirooV2 {
 impl ProtocolHandler for KiirooV2 {
   fn handle_linear_cmd(
     &self,
-    message: messages::LinearCmd,
+    message: message::LinearCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = message.vectors()[0].clone();
     // In the protocol, we know max speed is 99, so convert here. We have to
     // use AtomicU8 because there's no AtomicF64 yet.
     let previous_position = self.previous_position.load(Ordering::SeqCst);
     let distance = (previous_position as f64 - (v.position * 99f64)).abs() / 99f64;
-    let fl_cmd = messages::FleshlightLaunchFW12Cmd::new(
+    let fl_cmd = message::FleshlightLaunchFW12Cmd::new(
       0,
       (v.position * 99f64) as u8,
       (calculate_speed(distance, v.duration) * 99f64) as u8,
@@ -71,7 +71,7 @@ impl ProtocolHandler for KiirooV2 {
 
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
-    message: messages::FleshlightLaunchFW12Cmd,
+    message: message::FleshlightLaunchFW12Cmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let position = message.position();
     self.previous_position.store(position, Ordering::SeqCst);

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ActuatorType, Endpoint},
+    message::{ActuatorType, Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
@@ -48,7 +48,7 @@ impl ProtocolHandler for HtkBm {
 mod test {
   use super::HtkBm;
   use crate::{
-    core::messages::{ActuatorType, Endpoint},
+    core::message::{ActuatorType, Endpoint},
     server::device::{
       hardware::{HardwareCommand, HardwareWriteCmd},
       protocol::ProtocolHandler,

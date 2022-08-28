@@ -7,7 +7,7 @@
 
 use crate::core::{
   errors::ButtplugDeviceError,
-  messages::{ButtplugDeviceMessageType, Endpoint},
+  message::{ButtplugDeviceMessageType, Endpoint},
 };
 use getset::{Getters, MutGetters, Setters};
 use serde::{ser::SerializeSeq, Deserialize, Serialize, Serializer};

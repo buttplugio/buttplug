@@ -12,7 +12,7 @@ use buttplug::{
   core::{
     connector::transport::ButtplugTransportIncomingMessage,
     errors::{ButtplugError, ButtplugUnknownError},
-    messages::{
+    message::{
       self,
       serializer::ButtplugSerializedMessage,
       ButtplugClientMessage,
@@ -50,16 +50,16 @@ fn test_garbled_client_rsi_response() {
       .await;
     helper
       .send_client_incoming(
-        messages::ServerInfo::new(
+        message::ServerInfo::new(
           "test server",
-          messages::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+          message::BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
           0,
         )
         .into(),
       )
       .await;
     let _ = helper.recv_outgoing().await;
-    let mut dl = messages::DeviceList::new(vec![]);
+    let mut dl = message::DeviceList::new(vec![]);
     dl.set_id(2);
     helper.send_client_incoming(dl.into()).await;
     finish_notifier.notified().await;
@@ -77,7 +77,7 @@ fn test_serialized_error_relay() {
         helper_clone.next_client_message().await,
         ButtplugClientMessage::StartScanning(..)
       ));
-      let mut error_msg = ButtplugServerMessage::Error(messages::Error::from(ButtplugError::from(
+      let mut error_msg = ButtplugServerMessage::Error(message::Error::from(ButtplugError::from(
         ButtplugUnknownError::NoDeviceCommManagers,
       )));
       error_msg.set_id(3);

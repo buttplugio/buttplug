@@ -20,7 +20,7 @@ use buttplug::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    messages::{
+    message::{
       BatteryLevelCmd,
       ButtplugDeviceMessageType,
       ButtplugMessage,

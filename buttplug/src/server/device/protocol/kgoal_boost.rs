@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{
+    message::{
       self,
       ButtplugDeviceMessage,
       ButtplugMessage,
@@ -62,10 +62,10 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_subscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::SensorSubscribeCmd,
+    message: message::SensorSubscribeCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if self.subscribed_sensors.contains(message.sensor_index()) {
-      return future::ready(Ok(messages::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     // Readout value: 0x000104000005d3
@@ -130,7 +130,7 @@ impl ProtocolHandler for KGoalBoost {
         });
       }
       sensors.insert(*message.sensor_index());
-      Ok(messages::Ok::new(message.id()).into())
+      Ok(message::Ok::new(message.id()).into())
     }
     .boxed()
   }
@@ -138,10 +138,10 @@ impl ProtocolHandler for KGoalBoost {
   fn handle_sensor_unsubscribe_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::SensorUnsubscribeCmd,
+    message: message::SensorUnsubscribeCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     if !self.subscribed_sensors.contains(message.sensor_index()) {
-      return future::ready(Ok(messages::Ok::new(message.id()).into())).boxed();
+      return future::ready(Ok(message::Ok::new(message.id()).into())).boxed();
     }
     let sensors = self.subscribed_sensors.clone();
     async move {
@@ -153,7 +153,7 @@ impl ProtocolHandler for KGoalBoost {
           .unsubscribe(&HardwareUnsubscribeCmd::new(Endpoint::RxPressure))
           .await?;
       }
-      Ok(messages::Ok::new(message.id()).into())
+      Ok(message::Ok::new(message.id()).into())
     }
     .boxed()
   }

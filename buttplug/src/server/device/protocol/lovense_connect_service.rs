@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -121,7 +121,7 @@ impl ProtocolHandler for LovenseConnectService {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    msg: messages::SensorReadCmd,
+    msg: message::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     async move {
       // This is a dummy read. We just store the battery level in the device
@@ -131,7 +131,7 @@ impl ProtocolHandler for LovenseConnectService {
         .await?;
       debug!("Battery level: {}", reading.data()[0]);
       Ok(
-        messages::SensorReading::new(
+        message::SensorReading::new(
           msg.device_index(),
           *msg.sensor_index(),
           *msg.sensor_type(),

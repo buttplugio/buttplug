@@ -8,7 +8,7 @@
 use super::{ButtplugMessageSerializer, ButtplugSerializedMessage, ButtplugSerializerError};
 use crate::core::{
   errors::{ButtplugError, ButtplugHandshakeError},
-  messages::{
+  message::{
     self,
     ButtplugClientMessage,
     ButtplugCurrentSpecClientMessage,
@@ -41,7 +41,7 @@ pub fn create_message_validator() -> JSONSchema {
   JSONSchema::compile(&schema).expect("Built in schema better be valid")
 }
 pub struct ButtplugServerJSONSerializer {
-  pub(super) message_version: OnceCell<messages::ButtplugMessageSpecVersion>,
+  pub(super) message_version: OnceCell<message::ButtplugMessageSpecVersion>,
   validator: JSONSchema,
 }
 
@@ -113,7 +113,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV0ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => ButtplugSpecV0ServerMessage::Error(
-            messages::Error::from(ButtplugError::from(err)).into(),
+            message::Error::from(ButtplugError::from(err)).into(),
           ),
         })
         .collect();
@@ -126,7 +126,7 @@ fn serialize_to_version(
         .map(|msg| match ButtplugSpecV1ServerMessage::try_from(msg) {
           Ok(msgv0) => msgv0,
           Err(err) => ButtplugSpecV1ServerMessage::Error(
-            messages::Error::from(ButtplugError::from(err)).into(),
+            message::Error::from(ButtplugError::from(err)).into(),
           ),
         })
         .collect();
@@ -309,7 +309,7 @@ impl ButtplugMessageSerializer for ButtplugClientJSONSerializer {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::core::messages::{RequestServerInfo, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
+  use crate::core::message::{RequestServerInfo, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION};
 
   #[test]
   fn test_correct_message_version() {

@@ -19,7 +19,7 @@ mod websocket_connector_tests {
         ButtplugWebsocketServerTransport,
         ButtplugWebsocketServerTransportBuilder,
       },  
-      messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
+      message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     },
     server::ButtplugRemoteServer,
     util::async_manager,

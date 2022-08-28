@@ -15,7 +15,7 @@ use super::{
 use buttplug::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
-  messages::{
+  message::{
     ButtplugDeviceMessage,
     ButtplugMessageValidator,
     ButtplugSpecV2ClientMessage,

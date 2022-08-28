@@ -16,7 +16,7 @@ use super::{
 use crate::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
   errors::{ButtplugDeviceError, ButtplugError},
-  messages::{
+  message::{
     ButtplugCurrentSpecClientMessage,
     ButtplugCurrentSpecServerMessage,
     ButtplugDeviceMessage,

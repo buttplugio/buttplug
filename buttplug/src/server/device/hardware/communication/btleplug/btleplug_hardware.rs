@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{

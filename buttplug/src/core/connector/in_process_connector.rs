@@ -10,7 +10,7 @@
 use crate::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorResultFuture},
-    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,

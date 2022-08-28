@@ -15,7 +15,7 @@ use super::lovense_dongle_messages::{
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},

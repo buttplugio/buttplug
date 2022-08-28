@@ -22,7 +22,7 @@ use buttplug::{
     ButtplugRemoteServerConnector,
     ButtplugWebsocketClientTransport,
   },
-  messages::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
+  message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
 },
   server::{device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
 };

@@ -12,7 +12,7 @@ use super::client::{
   ButtplugClientMessageFuturePair,
   ButtplugServerMessageStateShared,
 };
-use buttplug::core::messages::{
+use buttplug::core::message::{
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugSpecV2ServerMessage,

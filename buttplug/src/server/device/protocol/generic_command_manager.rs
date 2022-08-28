@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{
+    message::{
       ActuatorType,
       ButtplugDeviceCommandMessageUnion,
       LinearCmd,
@@ -322,7 +322,7 @@ mod test {
 
   use super::{GenericCommandManager, ProtocolDeviceAttributes};
   use crate::{
-    core::messages::{ActuatorType, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand},
+    core::message::{ActuatorType, RotateCmd, RotationSubcommand, ScalarCmd, ScalarSubcommand},
     server::device::configuration::{
       ProtocolAttributesType,
       ServerDeviceMessageAttributesBuilder,

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint},
+    message::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -157,7 +157,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_linear_cmd(
     &self,
-    msg: messages::LinearCmd,
+    msg: message::LinearCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let v = msg.vectors()[0].clone();
 
@@ -181,7 +181,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_vorze_a10_cyclone_cmd(
     &self,
-    msg: messages::VorzeA10CycloneCmd,
+    msg: message::VorzeA10CycloneCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.handle_rotate_cmd(&vec![Some((msg.speed(), msg.clockwise()))])
   }

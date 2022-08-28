@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::{
   errors::ButtplugDeviceError,
-  messages::{
+  message::{
     ActuatorType,
     ButtplugDeviceMessageType,
     ClientDeviceMessageAttributes,

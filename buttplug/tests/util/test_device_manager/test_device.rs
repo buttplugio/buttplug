@@ -8,7 +8,7 @@
 use buttplug::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::{
     configuration::ProtocolCommunicationSpecifier,

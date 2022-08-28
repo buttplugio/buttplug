@@ -9,7 +9,7 @@ use super::lovense_connect_service_comm_manager::{get_local_info, LovenseService
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::{
     configuration::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier},

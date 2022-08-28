@@ -9,7 +9,7 @@ use super::xinput_device_comm_manager::XInputControllerIndex;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{

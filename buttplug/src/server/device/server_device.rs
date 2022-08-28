@@ -13,7 +13,7 @@ use std::{
 use crate::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{
+    message::{
       self,
       ActuatorType,
       BatteryLevelReading,
@@ -452,7 +452,7 @@ impl ServerDevice {
           debug!(
             "No commands generated for incoming device packet, skipping and returning success."
           );
-          return future::ready(Ok(messages::Ok::default().into())).boxed();
+          return future::ready(Ok(message::Ok::default().into())).boxed();
         }
 
         self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
@@ -503,7 +503,7 @@ impl ServerDevice {
       for command in commands {
         hardware.parse_message(&command).await?;
       }
-      Ok(messages::Ok::default().into())
+      Ok(message::Ok::default().into())
     }
     .boxed()
   }
@@ -530,7 +530,7 @@ impl ServerDevice {
       for fut in fut_vec {
         fut.await?;
       }
-      Ok(messages::Ok::default().into())
+      Ok(message::Ok::default().into())
     }
     .boxed()
   }
@@ -559,7 +559,7 @@ impl ServerDevice {
     }
   }
 
-  fn handle_sensor_read_cmd(&self, message: messages::SensorReadCmd) -> ButtplugServerResultFuture {
+  fn handle_sensor_read_cmd(&self, message: message::SensorReadCmd) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       self
         .message_attributes()
@@ -583,7 +583,7 @@ impl ServerDevice {
 
   fn handle_sensor_subscribe_cmd(
     &self,
-    message: messages::SensorSubscribeCmd,
+    message: message::SensorSubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       self
@@ -608,7 +608,7 @@ impl ServerDevice {
 
   fn handle_sensor_unsubscribe_cmd(
     &self,
-    message: messages::SensorUnsubscribeCmd,
+    message: message::SensorUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let result = self.check_sensor_command(
       self
@@ -633,7 +633,7 @@ impl ServerDevice {
 
   fn handle_single_motor_vibrate_cmd(
     &self,
-    message: messages::SingleMotorVibrateCmd,
+    message: message::SingleMotorVibrateCmd,
   ) -> ButtplugServerResultFuture {
     if let Some(attr) = self.attributes.message_attributes().scalar_cmd() {
       let speed = message.speed();
@@ -663,19 +663,19 @@ impl ServerDevice {
     }
   }
 
-  fn handle_raw_write_cmd(&self, message: messages::RawWriteCmd) -> ButtplugServerResultFuture {
+  fn handle_raw_write_cmd(&self, message: message::RawWriteCmd) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.write_value(&message.into());
     async move {
       fut
         .await
-        .map(|_| messages::Ok::new(id).into())
+        .map(|_| message::Ok::new(id).into())
         .map_err(|err| err.into())
     }
     .boxed()
   }
 
-  fn handle_raw_read_cmd(&self, message: messages::RawReadCmd) -> ButtplugServerResultFuture {
+  fn handle_raw_read_cmd(&self, message: message::RawReadCmd) -> ButtplugServerResultFuture {
     let id = message.id();
     let fut = self.hardware.read_value(&message.into());
     async move {
@@ -692,7 +692,7 @@ impl ServerDevice {
 
   fn handle_raw_unsubscribe_cmd(
     &self,
-    message: messages::RawUnsubscribeCmd,
+    message: message::RawUnsubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
@@ -700,11 +700,11 @@ impl ServerDevice {
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if !raw_endpoints.contains(&endpoint) {
-        return Ok(messages::Ok::new(id).into());
+        return Ok(message::Ok::new(id).into());
       }
       let result = fut
         .await
-        .map(|_| messages::Ok::new(id).into())
+        .map(|_| message::Ok::new(id).into())
         .map_err(|err| err.into());
       raw_endpoints.remove(&endpoint);
       result
@@ -714,7 +714,7 @@ impl ServerDevice {
 
   fn handle_raw_subscribe_cmd(
     &self,
-    message: messages::RawSubscribeCmd,
+    message: message::RawSubscribeCmd,
   ) -> ButtplugServerResultFuture {
     let id = message.id();
     let endpoint = message.endpoint();
@@ -722,11 +722,11 @@ impl ServerDevice {
     let raw_endpoints = self.raw_subscribed_endpoints.clone();
     async move {
       if raw_endpoints.contains(&endpoint) {
-        return Ok(messages::Ok::new(id).into());
+        return Ok(message::Ok::new(id).into());
       }
       let result = fut
         .await
-        .map(|_| messages::Ok::new(id).into())
+        .map(|_| message::Ok::new(id).into())
         .map_err(|err| err.into());
       raw_endpoints.insert(endpoint);
       result

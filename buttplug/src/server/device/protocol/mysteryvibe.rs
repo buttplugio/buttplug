@@ -7,7 +7,7 @@
 
 
 use crate::{
-  core::{errors::ButtplugDeviceError, messages::{Endpoint, ActuatorType}},
+  core::{errors::ButtplugDeviceError, message::{Endpoint, ActuatorType}},
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},

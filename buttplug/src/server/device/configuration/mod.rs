@@ -151,7 +151,7 @@ use super::protocol::{get_default_protocol_map, ProtocolIdentifierFactory, Proto
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ButtplugDeviceMessageType, Endpoint},
+    message::{ButtplugDeviceMessageType, Endpoint},
   },
   server::device::ServerDeviceIdentifier,
 };
@@ -756,12 +756,12 @@ mod test {
             ServerGenericDeviceMessageAttributes::new(
               "Edge Vibrator 1",
               &RangeInclusive::new(0, 20),
-              crate::core::messages::ActuatorType::Vibrate,
+              crate::core::message::ActuatorType::Vibrate,
             ),
             ServerGenericDeviceMessageAttributes::new(
               "Edge Vibrator 2",
               &RangeInclusive::new(0, 20),
-              crate::core::messages::ActuatorType::Vibrate,
+              crate::core::message::ActuatorType::Vibrate,
             ),
           ])
           .finish(),

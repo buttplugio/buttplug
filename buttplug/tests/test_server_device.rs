@@ -9,7 +9,7 @@ mod util;
 use buttplug::{
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+    message::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
   },
   util::async_manager,
 };
@@ -31,13 +31,13 @@ fn test_capabilities_exposure() {
 
     server
       .parse_message(
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
           .into(),
       )
       .await
       .expect("Test, assuming infallible.");
     server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await
       .expect("Test, assuming infallible.");
     while let Some(msg) = recv.next().await {
@@ -58,13 +58,13 @@ fn test_server_raw_message() {
     pin_mut!(recv);
     assert!(server
       .parse_message(
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
           .into()
       )
       .await
       .is_ok());
     assert!(server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await
       .is_ok());
     while let Some(msg) = recv.next().await {
@@ -94,13 +94,13 @@ fn test_server_no_raw_message() {
     pin_mut!(recv);
     assert!(server
       .parse_message(
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
           .into()
       )
       .await
       .is_ok());
     assert!(server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await
       .is_ok());
     while let Some(msg) = recv.next().await {
@@ -130,13 +130,13 @@ fn test_reject_on_no_raw_message() {
     pin_mut!(recv);
     assert!(server
       .parse_message(
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
+        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
           .into()
       )
       .await
       .is_ok());
     assert!(server
-      .parse_message(messages::StartScanning::default().into())
+      .parse_message(message::StartScanning::default().into())
       .await
       .is_ok());
     while let Some(msg) = recv.next().await {
@@ -147,7 +147,7 @@ fn test_reject_on_no_raw_message() {
         let mut should_be_err;
         should_be_err = server
           .parse_message(
-            messages::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &vec![0x0], false).into(),
+            message::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &vec![0x0], false).into(),
           )
           .await;
         assert!(should_be_err.is_err());
@@ -157,7 +157,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
+          .parse_message(message::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
@@ -166,7 +166,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+          .parse_message(message::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(
@@ -175,7 +175,7 @@ fn test_reject_on_no_raw_message() {
         ));
 
         should_be_err = server
-          .parse_message(messages::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+          .parse_message(message::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
           .await;
         assert!(should_be_err.is_err());
         assert!(matches!(

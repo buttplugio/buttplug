@@ -40,7 +40,7 @@ impl ButtplugMessageValidator for Ok {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugCurrentSpecServerMessage, Ok};
+  use crate::core::message::{ButtplugCurrentSpecServerMessage, Ok};
 
   const OK_STR: &str = "{\"Ok\":{\"Id\":0}}";
 

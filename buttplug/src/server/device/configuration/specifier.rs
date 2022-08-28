@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::core::messages::Endpoint;
+use crate::core::message::Endpoint;
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};

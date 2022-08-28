@@ -7,7 +7,7 @@
 
 //! Buttplug Error Structs/Enums, representing protocol errors.
 
-use super::messages::{
+use super::message::{
   self,
   serializer::ButtplugSerializerError,
   ActuatorType,
@@ -219,9 +219,9 @@ pub enum ButtplugError {
   ButtplugUnknownError(#[from] ButtplugUnknownError),
 }
 
-impl From<messages::Error> for ButtplugError {
+impl From<message::Error> for ButtplugError {
   /// Turns a Buttplug Protocol Error Message [super::messages::Error] into a [ButtplugError] type.
-  fn from(error: messages::Error) -> Self {
+  fn from(error: message::Error) -> Self {
     match error.error_code() {
       ErrorCode::ErrorDevice => {
         ButtplugDeviceError::UntypedDeserializedError(error.error_message().clone()).into()

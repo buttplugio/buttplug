@@ -5,7 +5,7 @@ use std::fmt::Debug;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd},
+    message::{Endpoint, RawReadCmd, RawReading, RawSubscribeCmd, RawUnsubscribeCmd, RawWriteCmd},
   },
   server::device::configuration::ProtocolCommunicationSpecifier,
 };

@@ -17,7 +17,7 @@ use crate::core::{
     ButtplugConnectorError,
     ButtplugConnectorResultFuture,
   },
-  messages::serializer::ButtplugSerializedMessage,
+  message::serializer::ButtplugSerializedMessage,
 };
 use futures::future::{BoxFuture, FutureExt};
 use std::sync::Arc;
@@ -239,7 +239,7 @@ mod test {
   use crate::{
     core::{
       connector::{transport::ButtplugConnectorTransport, ButtplugRemoteServerConnector},
-      messages::serializer::ButtplugServerJSONSerializer,
+      message::serializer::ButtplugServerJSONSerializer,
     },
     server::ButtplugRemoteServer,
     util::async_manager,

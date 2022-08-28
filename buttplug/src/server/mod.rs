@@ -66,7 +66,7 @@ use self::device::{
 use crate::{
   core::{
     errors::*,
-    messages::{
+    message::{
       self,
       ButtplugClientMessage,
       ButtplugDeviceCommandMessageUnion,
@@ -327,7 +327,7 @@ impl ButtplugServerBuilder {
           });
           // TODO Should the event sender return a result instead of an error message?
           if output_sender_clone
-            .send(messages::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
+            .send(message::Error::from(ButtplugError::from(ButtplugPingError::PingedOut)).into())
             .is_err()
           {
             error!("Server disappeared, cannot update about ping out.");
@@ -415,7 +415,7 @@ impl ButtplugServer {
   }
 
   /// Disconnects the server from a client, if it is connected.
-  pub fn disconnect(&self) -> BoxFuture<Result<(), messages::Error>> {
+  pub fn disconnect(&self) -> BoxFuture<Result<(), message::Error>> {
     debug!("Buttplug Server {} disconnect requested", self.server_name);
     let ping_timer = self.ping_timer.clone();
     let stop_scanning_fut =
@@ -442,7 +442,7 @@ impl ButtplugServer {
   pub fn parse_message(
     &self,
     msg: ButtplugClientMessage,
-  ) -> BoxFuture<'static, Result<ButtplugServerMessage, messages::Error>> {
+  ) -> BoxFuture<'static, Result<ButtplugServerMessage, message::Error>> {
     trace!(
       "Buttplug Server {} received message to client parse: {:?}",
       self.server_name,
@@ -454,11 +454,11 @@ impl ButtplugServer {
       // we haven't received RequestServerInfo first, but we do want to know if
       // we pinged out.
       let error = if self.ping_timer.pinged_out() {
-        Some(messages::Error::from(ButtplugError::from(
+        Some(message::Error::from(ButtplugError::from(
           ButtplugPingError::PingedOut,
         )))
       } else if !matches!(msg, ButtplugClientMessage::RequestServerInfo(_)) {
-        Some(messages::Error::from(ButtplugError::from(
+        Some(message::Error::from(ButtplugError::from(
           ButtplugHandshakeError::RequestServerInfoExpected,
         )))
       } else {
@@ -496,7 +496,7 @@ impl ButtplugServer {
           ok_msg
         })
         .map_err(|err| {
-          let mut error = messages::Error::from(err);
+          let mut error = message::Error::from(err);
           error.set_id(id);
           error
         })
@@ -510,7 +510,7 @@ impl ButtplugServer {
   /// Protocol Spec](https://buttplug-spec.docs.buttplug.io). This is the first thing that must
   /// happens upon connection to the server, in order to make sure the server can speak the same
   /// protocol version as the client.
-  fn perform_handshake(&self, msg: messages::RequestServerInfo) -> ButtplugServerResultFuture {
+  fn perform_handshake(&self, msg: message::RequestServerInfo) -> ButtplugServerResultFuture {
     if self.connected() {
       return ButtplugHandshakeError::HandshakeAlreadyHappened.into();
     }
@@ -528,7 +528,7 @@ impl ButtplugServer {
     }
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
-    let out_msg = messages::ServerInfo::new(
+    let out_msg = message::ServerInfo::new(
       &self.server_name,
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
       self.max_ping_time,
@@ -544,14 +544,14 @@ impl ButtplugServer {
   }
 
   /// Update the [PingTimer] with the latest received ping message.
-  fn handle_ping(&self, msg: messages::Ping) -> ButtplugServerResultFuture {
+  fn handle_ping(&self, msg: message::Ping) -> ButtplugServerResultFuture {
     if self.max_ping_time == 0 {
       return ButtplugPingError::PingTimerNotRunning.into();
     }
     let fut = self.ping_timer.update_ping_time();
     async move {
       fut.await;
-      Result::Ok(messages::Ok::new(msg.id()).into())
+      Result::Ok(message::Ok::new(msg.id()).into())
     }
     .boxed()
   }
@@ -560,7 +560,7 @@ impl ButtplugServer {
 #[cfg(test)]
 mod test {
   use crate::{
-    core::messages::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+    core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,
     util::async_manager,
   };
@@ -570,7 +570,7 @@ mod test {
     async_manager::block_on(async {
       let server = ButtplugServer::default();
       let msg =
-        messages::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
       let mut reply = server.parse_message(msg.clone().into()).await;
       assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 

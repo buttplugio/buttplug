@@ -18,7 +18,7 @@ use crate::{
   core::{
     connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
-    messages::{
+    message::{
       ActuatorType,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,

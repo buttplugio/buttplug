@@ -10,7 +10,7 @@ use crate::{
   core::{
     connector::ButtplugConnector,
     errors::ButtplugError,
-    messages::{
+    message::{
       self,
       ButtplugClientMessage,
       ButtplugMessage,
@@ -74,7 +74,7 @@ async fn run_server<ConnectorType>(
           async_manager::spawn(async move {
             if let Err(e) = client_message.is_valid() {
               error!("Message not valid: {:?} - Error: {}", client_message, e);
-              let mut err_msg = messages::Error::from(ButtplugError::from(e));
+              let mut err_msg = message::Error::from(ButtplugError::from(e));
               err_msg.set_id(client_message.id());
               connector_clone.send(err_msg.into());
               return;

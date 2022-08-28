@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{ButtplugDeviceCommandMessageUnion, Endpoint},
+    message::{ButtplugDeviceCommandMessageUnion, Endpoint},
   },
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},

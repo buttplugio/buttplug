@@ -13,7 +13,7 @@ use buttplug::{
   core::{
     connector::{ButtplugConnector, ButtplugConnectorError, ButtplugConnectorFuture},
     errors::{ButtplugError, ButtplugHandshakeError},
-    messages::{
+    message::{
       ButtplugMessageSpecVersion,
       ButtplugSpecV2ClientMessage,
       ButtplugSpecV2ServerMessage,

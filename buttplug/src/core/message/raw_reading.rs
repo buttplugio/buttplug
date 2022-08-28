@@ -43,7 +43,7 @@ impl RawReading {
 #[cfg(feature = "serialize-json")]
 #[cfg(test)]
 mod test {
-  use crate::core::messages::{ButtplugCurrentSpecServerMessage, Endpoint, RawReading};
+  use crate::core::message::{ButtplugCurrentSpecServerMessage, Endpoint, RawReading};
 
   #[test]
   fn test_endpoint_deserialize() {

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
+    message::{self, ActuatorType, ButtplugDeviceMessage, ButtplugServerMessage, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -216,7 +216,7 @@ impl ProtocolHandler for Lovense {
   fn handle_battery_level_cmd(
     &self,
     device: Arc<Hardware>,
-    message: messages::SensorReadCmd,
+    message: message::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     let mut device_notification_receiver = device.event_stream();
     async move {
@@ -243,10 +243,10 @@ impl ProtocolHandler for Lovense {
               let start_pos = if data_str.contains('s') { 1 } else { 0 };
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
-                  messages::SensorReading::new(
+                  message::SensorReading::new(
                     message.device_index(),
                     0,
-                    messages::SensorType::Battery,
+                    message::SensorType::Battery,
                     vec![level as i32],
                   )
                   .into(),

@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{self, Endpoint},
+    message::{self, Endpoint},
   },
   server::device::{
     configuration::ProtocolAttributesType,
@@ -138,7 +138,7 @@ impl ProtocolHandler for Satisfyer {
 
   fn handle_scalar_cmd(
     &self,
-    commands: &[Option<(messages::ActuatorType, u32)>],
+    commands: &[Option<(message::ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let data = if commands.len() == 1 {
       let command_val = commands[0].as_ref().unwrap().1 as u8;

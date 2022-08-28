@@ -24,7 +24,7 @@ use buttplug::{
       ButtplugInProcessClientConnectorBuilder,
     },
     errors::{ButtplugDeviceError, ButtplugError},
-    messages::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+    message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::{
     ButtplugServerBuilder,

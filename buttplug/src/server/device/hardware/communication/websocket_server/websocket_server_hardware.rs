@@ -9,7 +9,7 @@ use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitIn
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    messages::{Endpoint, RawReading},
+    message::{Endpoint, RawReading},
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},

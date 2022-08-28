@@ -6,7 +6,7 @@
 // for full license information.
 
 use crate::{
-  core::messages::{ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished},
+  core::message::{ButtplugServerMessage, DeviceAdded, DeviceRemoved, ScanningFinished},
   server::device::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
