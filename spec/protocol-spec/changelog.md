@@ -13,12 +13,15 @@
       accelerometers in toys that have them, etc...)
   - SensorUnsubscribeCmd
   - SensorReading
+    - Data returned from either sensor being read, or a subscription event.
 - Messages Changed:
   - DeviceList/DeviceAdded
     - Remove _FeatureCount_, Message Attributes are now an array of attribute objects instead of
       many fields of arrays that had to be reconstructed. Should reduce bookkeeping.
     - Added Message Attributes _FeatureDescriptor_, _ActuatorType_, _SensorType_
     - Added Device Attributes _DisplayName_
+    - For messages that have matching "undo" types, like RawSubscribe/RawUnsubscribe or
+      SensorSubscribe/SensorUnsubscribe, only the initial command is relayed in the message attributes of _DeviceAdded_ or _DeviceList_. The arguments for these commands are the same, and it's assumed that if you can do something that has a matching undo, you'll only need to know about one.
 - Messages Deprecated:
   - VibrateCmd
     - Superceded by ScalarCmd. Will still be available via API calls in client APIs, just no longer

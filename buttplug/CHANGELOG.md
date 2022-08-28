@@ -1,32 +1,74 @@
-# 6.0.0 (Unknown)
+# 6.0.0 (2022-08-29)
 
 ## Breaking Changes
 
-- `connector` module moved to `core` instead of top level
-- Renamed `messages` module to `message` (to stay with singular style module naming)
+- `connector` module moved to `core` instead of top level.
+- Renamed `messages` module to `message` (to stay with singular style module naming).
 - `device` module now split between `core` (Endpoints struct now in `message` module) and `server`
-  (impl, protocols, configs, everything that is server specific now lives there)
-- Device configuration file format changed to remove language specifier for device names, as these
-  were never actually used.
-- User Device Configuration File format completely overhauled to handle device specifiers
-- Move in-process client creation utility method to util module
+  (impl, protocols, configs, everything that is server specific now lives there).
+- `DeviceImpl` renamed to `Hardware` to clearly signify that it is how we actually communicate with
+  hardware (real or virtual).
+- `ButtplugDevice` renamed to `ServerDevice`, to denote that it's the representation of the device
+  in the server, now clearly separate from `ClientDevice`.
+  - Gosh I am really bad at naming things.
+- Device configuration file format changed to work with new format of DeviceAdded/DeviceList
+  messages. Also removed language specifier for device names, as these were never actually
+  used.
+- User Device Configuration File format completely overhauled to handle device specifiers (easier
+  way to identify unique devices).
+- In-process client creation utility method moved to util module.
 - Buttplug Server and its components are now constructable via builders, and are immutable after
   construction. This makes management and additions far easier to reason about, and there was no
   reason for mutability there anyways.
 - Running StartScanning when a scan is already running no longer throws an error.
-- GenericCommandManager is now internally mutable
+- Except in some special cases (WebBluetooth, mostly), device scans will now run until StopScanning
+  is sent. Waiting for the ScanningFinished event is no longer recommended on platforms without these special needs.
+- GenericCommandManager is now internally mutable, simplifying borrow handling.
 - Removed "connected()" status getter from Hardware implementations. We assume that, if a device
   instance is alive, it's connected. Otherwise the device manager will have dropped it. This assumption was made in earlier versions of the library because this was never used, it is now just being made explicit.
+- Protocol handlers completely rewritten to minimize amount of code handling. Protocol handlers
+  should now handle device identification, initialization, and simple command handling, with all other management (generic command caching, etc) handled in owner structs or traits above the handler itself.
+- Replace pub struct members with getset calls.
 
 ## Features
 
 - Overhauled device configuration system so it can de/serialize and handle user configuration
   stacking. This is important for being able to load, edit, and save configs from outside the
   library, in applications like Intiface Desktop.
-- Simplified the device creation system.
-- Added TimedRetryHardwareCommunicationManager wrapper, for generic handling of hot plugging in comm
-  managers that don't constantly scan (XInput, USB, etc...)
-- Added ScalarCmd
+- Simplified the device creation system, making tracing how a device goes from advertisement to
+  usable device somewhat clearer (but it's still complicated af).
+- Added TimedRetryHardwareCommunicationManager wrapper, for generic retry handling of hot plugging
+  in comm managers that don't constantly scan (XInput, USB, etc...).
+- Added ScalarCmd message
+  - These will replace messages that take a single scalar parameter, specifically VibrateCmd.
+    ScalarCmd adds an extra attribute, called _ActuatorType_, that denotes what the scalar commands
+    affects when it is sent. For instance, with vibrators the actuator type is _Vibrate_, for
+    flywheel fucking machines (hismith, lovense, etc) and some strokers it's _Oscillate_, for the
+    Lovense Max air bladder it's _Constrict_, etc... This allows us to add new simple acutation
+    types via types of ScalarCmd instead of having to add a new message to the protocol for every type.
+- Added SensorReadCmd/SensorSubscribeCmd/SensorUnsubscribeCmd/SensorReading messages
+- Added Hardware Support
+  - KGoal Boost
+  - Hismith Fucking Machines
+  - XInput Battery Levels
+  - Lovense Max Air Bladder (via ScalarCmd Constrict Actuator Type)
+- New scriptable test system for end-to-end (virtual) device testing, across v2 and v3 of the
+  Buttplug Protocol (v0/v1 coming in a later update).
+- Device configurations now specify a step range instead of step count. This allows users to
+  customize the range of values a device can take, for instance setting a maximum speed that Buttplug will run a device at. Clients are still given Step Count for the number of states available for a message. For instance, if a device has a normal range of [0, 10], a client would get a step count of 10. However if a device has a range of [0, 5], the client would only see a step count of 5.
+- Added `FeatureDescriptor` to device features. This will describe what certain features of devices
+  are, relating to their availble device commands. For instance, we can denote which Lovense Edge vibrator is the insertable vibrator versus which is the perineum vibrator, and that information is sent to the client.
+
+## Bugfixes
+
+- Fixed issue with collisions for devices that don't advertise enough information in their
+  bluetooth advertisement (namely, Satisfyer and Magic Motion devices).
+- Rebuilt Buttplug JSON Schema to handle all message spec versions simultaneously yet clearly
+  (versus the vague, underspecified mess it was before).
+- Ping timeouts now actually stop devices
+- Close the server side of a websocket when the client side closes (this was causing issues with
+  websocket tests on macos/linux, we can run those tests now!)
+
 
 # 5.1.10 (2022-05-07)
 
