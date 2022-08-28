@@ -139,7 +139,7 @@ pub enum LinearCommand {
   /// `LinearVec[0]`, motor 1 is set to `LinearVec[1]`, etc...)
   LinearVec(Vec<(u32, f64)>),
   /// Sets linear features indicated by index to requested position/duration.
-  /// For instance, if the map has an entry of (1, (0.5, 500)), it will set
+  /// For instance, if the map has an entry of (1, (500, 0.50)), it will set
   /// motor 1 to move to position 0.5 over the course of 500ms.
   LinearMap(HashMap<u32, (u32, f64)>),
 }
