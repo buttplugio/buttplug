@@ -45,8 +45,12 @@
     affects when it is sent. For instance, with vibrators the actuator type is _Vibrate_, for
     flywheel fucking machines (hismith, lovense, etc) and some strokers it's _Oscillate_, for the
     Lovense Max air bladder it's _Constrict_, etc... This allows us to add new simple acutation
-    types via types of ScalarCmd instead of having to add a new message to the protocol for every type.
+    types via types of ScalarCmd instead of having to add a new message to the protocol for every
+    type.
 - Added SensorReadCmd/SensorSubscribeCmd/SensorUnsubscribeCmd/SensorReading messages
+  - Allows Buttplug to take input from devices, instead of just sending them commands. Replaces
+    BatteryLevelCmd/RSSILevelCmd currently, but also adds the ability to read other sensors like
+    buttons, pressure sensors, etc.
 - Added Hardware Support
   - KGoal Boost
   - Hismith Fucking Machines
@@ -55,9 +59,16 @@
 - New scriptable test system for end-to-end (virtual) device testing, across v2 and v3 of the
   Buttplug Protocol (v0/v1 coming in a later update).
 - Device configurations now specify a step range instead of step count. This allows users to
-  customize the range of values a device can take, for instance setting a maximum speed that Buttplug will run a device at. Clients are still given Step Count for the number of states available for a message. For instance, if a device has a normal range of [0, 10], a client would get a step count of 10. However if a device has a range of [0, 5], the client would only see a step count of 5.
+  customize the range of values a device can take, for instance setting a maximum speed that
+  Buttplug will run a device at. Clients are still given Step Count for the number of states
+  available for a message. For instance, if a device has a normal range of [0, 10], a client would
+  get a step count of 10. However if a device has a range of [0, 5], the client would only see a
+  step count of 5. Changing the bottom of the range will allow the user to set a lower bound as well
+  as an upper bound, which is useful for linear devices to isolate a stroking range.
 - Added `FeatureDescriptor` to device features. This will describe what certain features of devices
-  are, relating to their availble device commands. For instance, we can denote which Lovense Edge vibrator is the insertable vibrator versus which is the perineum vibrator, and that information is sent to the client.
+  are, relating to their available device commands. For instance, we can denote which Lovense Edge
+  vibrator is the insertable vibrator versus which is the perineum vibrator, and that information is
+  sent to the client.
 
 ## Bugfixes
 
