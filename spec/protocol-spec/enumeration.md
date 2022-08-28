@@ -1,14 +1,12 @@
 # Enumeration Messages
 
-Messages relating to finding and getting information about devices
-connected to the system.
+Messages relating to finding and getting information about devices connected to the system.
 
 ---
 ## StartScanning
 
-**Description:** Client request to have the server start scanning for
-devices on all busses that it knows about. Useful for protocols like
-Bluetooth, which require an explicit discovery phase.
+**Description:** Client request to have the server start scanning for devices on all busses that it
+knows about. Useful for protocols like Bluetooth, which require an explicit discovery phase.
 
 **Introduced In Spec Version:** 0
 
@@ -47,9 +45,8 @@ sequenceDiagram
 ---
 ## StopScanning
 
-**Description:** Client request to have the server stop scanning for
-devices. Useful for protocols like Bluetooth, which may not timeout
-otherwise.
+**Description:** Client request to have the server stop scanning for devices. Useful for protocols
+like Bluetooth, which may not timeout otherwise.
 
 **Introduced In Spec Version:** 0
 
@@ -91,10 +88,11 @@ sequenceDiagram
 ---
 ## ScanningFinished
 
-**Description:** Sent by the server once it has stopped scanning on
-all busses. Since systems may have timeouts that are not controlled by
-the server, this is a separate message from the StopScanning flow.
-ScanningFinished can happen without a StopScanning call.
+**Description:** Sent by the server once it has stopped scanning on all busses. Since systems may
+have timeouts that are not controlled by the server, this is a separate message from the
+StopScanning flow. ScanningFinished can happen without a StopScanning call.
+
+In reality, this event is usually only useful when working with systems that can only scan for a single device at a time, like WebBluetooth. When on normal desktop/mobile APIs, it should be assumed that running StartScanning/StopScanning will be the main usage.
 
 **Introduced In Spec Version:** 0
 
@@ -133,8 +131,8 @@ sequenceDiagram
 ---
 ## RequestDeviceList
 
-**Description:** Client request to have the server send over its known
-device list, without starting a full scan.
+**Description:** Client request to have the server send over its known device list, without starting
+a full scan.
 
 **Introduced In Spec Version:** 0
 
@@ -175,20 +173,30 @@ sequenceDiagram
 
 **Introduced In Spec Version:** 0
 
-**Last Updated In Spec Version:** 1 (See [Deprecated
-Messages](deprecated.md#devicelist-version-0) for older versions.)
+**Last Updated In Spec Version:** 3 (See [Deprecated Messages](deprecated.md) for older versions.)
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
 * _Devices_ (array): Array of device objects
-  * _DeviceName_ (string): Descriptive name of the device
-  * _DeviceIndex_ (unsigned integer): Index used to identify the device when sending Device Messages.
+  * _DeviceName_ (string): Descriptive name of the device, as taken from the base device
+    configuration file.
+  * _DeviceIndex_ (unsigned integer): Index used to identify the device when sending Device
+    Messages.
+  * _DeviceMessageGap_ (_optional_, unsigned integer): Recommended minimum gap between device
+    commands, in milliseconds. This is only a recommendation, and will not be enforced on the
+    server, as most times the server does not actually know the exact message gap timing required
+    (hence this being recommended). Enforcement on the client (with developer option to disable) is
+    encouraged. Optional field, not required to be included in message. Missing value should be assumed that server does not know recommended message gap.
+  * _DeviceDisplayName_ (_optional_, string): User provided display name for a device. Useful for
+    cases where a users may have multiple of the same device connected. Optional field, not required
+    to be included in message. Missing value means that no device display name is set, and device
+    name should be used.
   * _DeviceMessages_ (dictionary): Accepted Device Messages 
     * Keys (string): Type names of Device Messages that the device will accept
-    * Values ([Message
+    * Values (Array of [Message
       Attributes](enumeration.md#message-attributes-for-devicelist-and-deviceadded)):
-      Attributes for the Device Messages.
+      Attributes for the Device Messages. Each feature is a seperate array element, and its index in the array matches how it should be addressed in generic command messages. For instance, in the example below, the Clitoral Stimulator would be Actuator Index 0 in ScalarCmd.
 
 **Expected Response:**
 
@@ -211,18 +219,34 @@ sequenceDiagram
       "Id": 1,
       "Devices": [
         {
-          "DeviceName": "TestDevice 1",
+          "DeviceName": "Test Vibrator",
           "DeviceIndex": 0,
           "DeviceMessages": {
-            "VibrateCmd": { "FeatureCount": 2 },
+            "ScalarCmd": [
+              {
+                "StepCount": 20,
+                "FeatureDescriptor": "Clitoral Stimulator",
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepCount": 20,
+                "FeatureDescriptor": "Insertable Vibrator",
+                "ActuatorType": "Vibrate"
+              }
+            ],
             "StopDeviceCmd": {}
           }
         },
         {
-          "DeviceName": "TestDevice 2",
+          "DeviceName": "Test Stroker",
           "DeviceIndex": 1,
+          "DeviceMessageGap": 100,
+          "DeviceDisplayName": "User set name",
           "DeviceMessages": {
-            "LinearCmd": { "FeatureCount": 1 },
+            "LinearCmd": [ {
+              "StepRange": [0, 100],
+              "FeatureDescriptor": "Stroker"
+            } ],
             "StopDeviceCmd": {}
           }
         }
@@ -235,27 +259,35 @@ sequenceDiagram
 ---
 ## DeviceAdded
 
-**Description:** Sent by the server whenever a device is added to the
-system. Can happen at any time after identification, as it is assumed
-many server implementations will support devices with hotplugging
-capabilities that do not require specific scanning/discovery sessions.
+**Description:** Sent by the server whenever a device is added to the system. Can happen at any time
+after identification stage (i.e. after client is connected), as it is assumed many server
+implementations will support devices with hotplugging capabilities that do not require specific
+scanning/discovery sessions.
 
 **Introduced In Spec Version:** 0
 
-**Last Updated In Spec Version**: 1 (See [Deprecated
-Messages](deprecated.md#deviceadded-version-0) for older versions.)
+**Last Updated In Spec Version**: 3 (See [Deprecated Messages](deprecated.md) for older versions.)
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
-* _DeviceName_ (string): Descriptive name of the device
-* _DeviceIndex_ (unsigned integer): Index used to identify the device
-  when sending Device Messages.
+* _DeviceName_ (string): Descriptive name of the device, as taken from the base device
+  configuration file.
+* _DeviceIndex_ (unsigned integer): Index used to identify the device when sending Device Messages.
+* _DeviceMessageGap_ (_optional_, unsigned integer): Recommended minimum gap between device
+  commands, in milliseconds. This is only a recommendation, and will not be enforced on the
+  server, as most times the server does not actually know the exact message gap timing required
+  (hence this being recommended). Enforcement on the client (with developer option to disable) is
+  encouraged. Optional field, not required to be included in message. Missing value should be assumed that server does not know recommended message gap.
+* _DeviceDisplayName_ (_optional_, string): User provided display name for a device. Useful for
+  cases where a users may have multiple of the same device connected. Optional field, not required
+  to be included in message. Missing value means that no device display name is set, and device
+  name should be used.
 * _DeviceMessages_ (dictionary): Accepted Device Messages 
   * Keys (string): Type names of Device Messages that the device will accept
-  * Values ([Message
-    Attributes](enumeration.md#message-attributes-for-devicelist-and-deviceadded)):
-    Attributes for the Device Messages.
+  * Values (Array of [Message
+    Attributes](enumeration.md#message-attributes-for-devicelist-and-deviceadded)): Attributes for
+    the Device Messages. Each feature is a seperate array element, and its index in the array matches how it should be addressed in generic command messages. For instance, in the example below, the Clitoral Stimulator would be Actuator Index 0 in ScalarCmd.
 
 **Expected Response:**
 
@@ -277,12 +309,25 @@ sequenceDiagram
   {
     "DeviceAdded": {
       "Id": 0,
-      "DeviceName": "TestDevice 1",
+      "DeviceName": "Test Vibrator",
       "DeviceIndex": 0,
+      "DeviceMessageGap": 100,
+      "DeviceDisplayName": "Rabbit Vibrator",
       "DeviceMessages": {
-        "VibrateCmd": { "FeatureCount": 2 },
+        "ScalarCmd": [
+          {
+            "StepCount": 20,
+            "FeatureDescriptor": "Clitoral Stimulator",
+            "ActuatorType": "Vibrate"
+          },
+          {
+            "StepCount": 20,
+            "FeatureDescriptor": "Insertable Vibrator",
+            "ActuatorType": "Vibrate"
+          }
+        ],
         "StopDeviceCmd": {}
-      }
+       }
     }
   }
 ]
@@ -291,59 +336,49 @@ sequenceDiagram
 ---
 ## Message Attributes for DeviceList and DeviceAdded
 
-**Description:** A collection of message attributes. This object is always the child of a Device
-Message type name within a [DeviceList](enumeration.md#devicelist) or
+**Description:** A collection of message attributes. This object is always an array element of a
+Device Message key/value pair within a [DeviceList](enumeration.md#devicelist) or
 [DeviceAdded](enumeration.md#deviceadded) message. Not all attributes are relevant for all Device
 Messages on all Devices; in these cases the attributes will not be included.
 
+**Introduced In Spec Version:** 1
+
+**Last Updated In Spec Version**: 3 (See [Deprecated Messages](deprecated.md) for older versions.)
+
 **Attributes:**
 
-* _FeatureCount_
-  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
-  * Type: unsigned int
-  * Description: Number of features the Device Message may address. This attribute is used to define
-    the capabilities of generic device control messages. The meaning of "feature" is specific to the
-    context of the message the attribute is attached to. For instance, the FeatureCount attribute of
-    a VibrateCmd message will refer to the number of vibration motors that can be controlled on a
-    device advertising the VibrateCmd message.
+* _FeatureDescriptor_
+  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd, SensorReadCmd
+  * Type: String
+  * Description: Text descriptor for a feature.
 * _StepCount_ 
   * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
-  * Type: array of unsigned int
-  * Minimum value: 1
-  * Description: For each feature, lists the number of discrete steps the feature can use. Returning
-    to the VibrateCmd example from the above _FeatureCount_ specification, if a device had 2 motors,
-    and each motor has 20 steps of vibration speeds from 0%-100% (this is exactly what the Lovense
-    Edge is), the _StepCount_ attribute would be [20, 20]. Having the array allows use to specify
-    different amounts of steps for multiple vibrators on the device.
-* _StepRange_
-  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd
-  * Type: array of 2 unsigned ints
-  * Maximum Value: Value of _StepCount_ for feature
-  * Description: Value that can be set by users to denote minimum and maximum value ranges for a
-    device scalar, rotation speed, linear position, etc... This value will only occur in User Configurations, and will not be used in base device definitions.
+  * Type: unsigned int
+  * Description: For each feature, lists the number of discrete steps the feature can use. This
+    value can be used in calculating the 0.0-1.0 range required for ScalarCmd and other messages.
 * _ActuatorType_
-  * Valid for Messages: ScalarCmd 
-  * Type: array of strings
+  * Valid for Messages: ScalarCmd
+  * Type: String
   * Description: Type of actuator this feature represents.
 * _SensorType_
-  * Valid for Messages: ScalarSensorReadCmd
-  * Type: array of strings
+  * Valid for Messages: SensorReadCmd
+  * Type: String
   * Description: Sensor types that can be read by Sensor.
-* _FeatureDescriptors_
-  * Valid for Messages: ScalarCmd, RotateCmd, LinearCmd, SensorReadCmd
-  * Type: array of strings
-  * Description: Text descriptor for each actuator represented by the
-    message.
+* _SensorRange_
+  * Valid for Messages: SensorReadCmd (but applies to values returned by SensorReading)
+  * Type: array of arrays of 2 integers
+  * Description: Range of values a sensor can return. As sensors can possibly return multiple values
+    in the same SensorReading message (i.e. an 3-axis accelerometer may return all 3 axes in one read), this is sent as an array of ranges. The length of this array will always match the number of readings that will be returned from a sensor, and can be used to find the reading count for a sensor.
 * _Endpoints_
   * Valid for Messages: RawReadCmd, RawWriteCmd, RawSubscribeCmd
   * Type: array of strings
-  * Description: Endpoints that can be used by Raw commands
+  * Description: Endpoints that can be used by Raw commands.
 
 ---
 ## DeviceRemoved
 
-**Description:** Sent by the server whenever a device is removed from  
-the system. Can happen at any time after identification.
+**Description:** Sent by the server whenever a device is removed from the system. Can happen at any
+time after identification.
 
 **Introduced In Spec Version:** 0
 
@@ -352,8 +387,7 @@ the system. Can happen at any time after identification.
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned integer): Index used to identify the device
-  when sending Device Messages.
+* _DeviceIndex_ (unsigned integer): Index used to identify the device when sending Device Messages.
 
 **Expected Response:**
 

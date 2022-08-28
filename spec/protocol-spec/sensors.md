@@ -5,31 +5,34 @@ sensors on devices, including batteries, radio levels, accelerometers,
 buttons, etc.
 
 ---
-## BatteryLevelCmd
+## SensorReadCmd
 
-**Description:** Requests that a device send its battery level.
+**Description:** Client request to have a device return the current value for a sensor
 
-**Introduced In Spec Version:** 2
+**Introduced In Spec Version:** 3
 
-**Last Updated In Spec Version:** 2
+**Last Updated In Spec Version:** 3
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned int): Index of device to query for battery reading.
+* _DeviceIndex_ (unsigned int): Index of device to read data from.
+* _SensorIndex_ (unsigned int): Index of sensor on device to read data from (index relates to
+  position of sensor in SensorReadCmd message attributes).
+* _SensorType_ (string): Type of sensor, used as confirmation of context, must match value in
+  SensorReadCmd message attributes.
 
 **Expected Response:**
 
-* [BatteryLevelReading](sensors.html#batterylevelreading) message with
-  matching Id on successful request.
+* SensorReading message with matching Id on successful request.
 * Error message on value or message error.
 
 **Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
-    Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
+    Client->>+Server: SensorReadCmd Id=1
+    Server->>-Client: SensorReading Id=1
 </mermaid>
 
 **Serialization Example:**
@@ -37,80 +40,87 @@ sequenceDiagram
 ```json
 [
   {
-    "BatteryLevelCmd": {
-      "Id": 1,
-      "DeviceIndex": 0
-    }
-  }
-]
-```
----
-## BatteryLevelReading
-
-**Description:** Message containing a battery level reading from a
-device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
-
-**Introduced In Spec Version:** 2
-
-**Last Updated In Spec Version:** 2
-
-**Fields:**
-
-* _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned int): Index of device battery reading is from.
-* _BatteryLevel_ (double): Battery Level with a range of [0.0-1.0]
-
-**Expected Response:**
-
-* None. Server-to-Client message only.
-
-**Flow Diagram:**
-
-<mermaid>
-sequenceDiagram
-    Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
-    Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
-</mermaid>
-
-**Serialization Example:**
-
-```json
-[
-  {
-    "BatteryLevelReading": {
+    "SensorReadCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "BatteryLevel": 0.5
+      "SensorIndex": "0",
+      "SensorType": "Pressure"
     }
   }
 ]
 ```
+
 ---
-## RSSILevelCmd
+## SensorReading
 
-**Description:** Requests that a device send its RSSI level.
+**Description:** Server response when data is read (in response to SensorReadCmd) or received (after
+SensorSubscribe) from a device sensor.
 
-**Introduced In Spec Version:** 2
+**Introduced In Spec Version:** 3
 
-**Last Updated In Spec Version:** 2
+**Last Updated In Spec Version:** 3
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned int): Index of device to query for RSSI level.
+* _DeviceIndex_ (unsigned int): Index of device to read data from.
+* _SensorIndex_ (unsigned int): Index of sensor on device that data was read from (index relates to
+  position of sensor in SensorReadCmd message attributes).
+* _SensorType_ (string): Type of sensor.
+* _Data_ (array of signed int): Array of signed integers representing data. Signed integers are used
+  due to varying return values (for instance, RSSI is negative, battery is [0, 100], buttons are [0,
+  1], etc...). Information on formatting/units of measurement/etc may be included in feature
+  descriptors.
+
+**Serialization Example:**
+
+```json
+[
+  {
+    "SensorReading": {
+      "Id": 1,
+      "DeviceIndex": 0,
+      "SensorIndex": 0,
+      "SensorType": "Pressure",
+      "Data": [591]
+    }
+  }
+]
+```
+
+---
+## SensorSubscribeCmd
+
+**Description:** Client request to have the server subscribe and send all data that comes in from a
+device sensor that is not explicitly read. Usually useful for Bluetooth notify endpoints, or other
+streaming data endpoints.
+
+**Introduced In Spec Version:** 3
+
+**Last Updated In Spec Version:** 3
+
+**Fields:**
+
+* _Id_ (unsigned int): Message Id
+* _DeviceIndex_ (unsigned int): Index of device to read data from.
+* _SensorIndex_ (unsigned int): Index of sensor on device to read data from (index relates to
+  position of sensor in SensorReadCmd message attributes).
+* _SensorType_ (string): Type of sensor, used as confirmation of context, must match value in
+  SensorReadCmd message attributes.
 
 **Expected Response:**
 
-* [RSSILevelReading](sensors.html#rssilevelreading) message with
-  matching Id on successful request.
+* Ok if subscription is successful, followed by SensorReading messages on all new readings.
 * Error message on value or message error.
 
 **Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
-    Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
+    Client->>+Server: SensorSubscribeCmd Id=1
+    Server->>-Client: Ok Id=1
+    Server->>+Client: SensorReading Id=0
+    Server->>+Client: SensorReading Id=0
 </mermaid>
 
 **Serialization Example:**
@@ -118,39 +128,46 @@ sequenceDiagram
 ```json
 [
   {
-    "RSSILevelCmd": {
+    "SensorSubscribeCmd": {
       "Id": 1,
-      "DeviceIndex": 0
+      "DeviceIndex": 0,
+      "SensorIndex": 0,
+      "SensorType": "Pressure"
     }
   }
 ]
 ```
+
 ---
-## RSSILevelReading
+## SensorUnsubscribeCmd
 
-**Description:** Message containing a RSSI level reading from a
-device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
+**Description:** Client request to have the server unsubscribe from a device sensor to which it had
+previously subscribed.
 
-**Introduced In Spec Version:** 2
+**Introduced In Spec Version:** 3
 
-**Last Updated In Spec Version:** 2
+**Last Updated In Spec Version:** 3
 
 **Fields:**
 
 * _Id_ (unsigned int): Message Id
-* _DeviceIndex_ (unsigned int): Index of device the reading is from.
-* _RSSILevel_ (int): RSSI Level, usually expressed as db gain, usually [-100:0]
+* _DeviceIndex_ (unsigned int): Index of device to read data from.
+* _SensorIndex_ (unsigned int): Index of sensor on device to read data from (index relates to
+  position of sensor in SensorReadCmd message attributes).
+* _SensorType_ (string): Type of sensor, used as confirmation of context, must match value in
+  SensorReadCmd message attributes.
 
 **Expected Response:**
 
-* None. Server-to-Client message only.
+* Ok if unsubscription is successful.
+* Error message on value or message error.
 
 **Flow Diagram:**
 
 <mermaid>
 sequenceDiagram
-    Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
-    Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
+    Client->>+Server: SensorUnsubscribeCmd Id=1
+    Server->>-Client: Ok Id=1
 </mermaid>
 
 **Serialization Example:**
@@ -158,11 +175,13 @@ sequenceDiagram
 ```json
 [
   {
-    "RSSILevelReading": {
+    "SensorUnsubscribeCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "RSSILevel": -40
+      "SensorIndex": 0,
+      "SensorType": "Pressure"
     }
   }
 ]
 ```
+

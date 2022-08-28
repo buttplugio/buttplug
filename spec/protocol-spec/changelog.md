@@ -1,6 +1,6 @@
 # Spec Changelog
 
-## Version 3 (2022-??-??)
+## Version 3 (2022-08-29)
 
 - Messages Added:
   - ScalarCmd
@@ -19,7 +19,7 @@
     - Remove _FeatureCount_, Message Attributes are now an array of attribute objects instead of
       many fields of arrays that had to be reconstructed. Should reduce bookkeeping.
     - Added Message Attributes _FeatureDescriptor_, _ActuatorType_, _SensorType_
-    - Added Device Attributes _DisplayName_
+    - Added Device Attributes _DisplayName_, _DeviceMessageGap_
     - For messages that have matching "undo" types, like RawSubscribe/RawUnsubscribe or
       SensorSubscribe/SensorUnsubscribe, only the initial command is relayed in the message attributes of _DeviceAdded_ or _DeviceList_. The arguments for these commands are the same, and it's assumed that if you can do something that has a matching undo, you'll only need to know about one.
 - Messages Deprecated:
