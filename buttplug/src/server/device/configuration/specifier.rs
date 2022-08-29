@@ -229,7 +229,7 @@ pub struct USBSpecifier {
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub")]
 pub struct WebsocketSpecifier {
-  pub names: HashSet<String>,
+  names: HashSet<String>,
 }
 
 impl WebsocketSpecifier {
