@@ -20,7 +20,7 @@ use buttplug::{
     ButtplugPipeServerTransportBuilder,
     ButtplugRemoteClientConnector,
     ButtplugRemoteServerConnector,
-    ButtplugWebsocketClientTransport,
+    // ButtplugWebsocketClientTransport,
   },
   message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
 },
@@ -59,7 +59,8 @@ async fn device_enumeration_example() {
       >::new(
         ButtplugPipeServerTransportBuilder::new("\\\\.\\pipe\\testpipe").finish(),
       ))
-      .await;
+      .await
+      .unwrap();
   });
 
   tokio::time::sleep(std::time::Duration::from_millis(100)).await;
