@@ -224,7 +224,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     motorbunny::setup::MotorbunnyIdentifierFactory::default(),
   );
-  add_to_protocol_map(&mut map, mysteryvibe::setup::MysteryVibeIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
   add_to_protocol_map(
@@ -240,7 +243,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     raw_protocol::setup::RawProtocolIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
-  add_to_protocol_map(&mut map, satisfyer::setup::SatisfyerIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    satisfyer::setup::SatisfyerIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

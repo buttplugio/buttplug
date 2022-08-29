@@ -15,8 +15,8 @@ use std::{
   time::Duration,
 };
 use tokio::{
+  sync::{mpsc, Notify},
   time::sleep,
-  sync::{mpsc, Notify}
 };
 
 pub enum PingMessage {

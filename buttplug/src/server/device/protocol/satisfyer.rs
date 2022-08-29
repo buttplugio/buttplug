@@ -19,7 +19,13 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
-use std::{sync::{Arc, atomic::{AtomicU8, Ordering}}, time::Duration};
+use std::{
+  sync::{
+    atomic::{AtomicU8, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -102,11 +108,7 @@ async fn send_satisfyer_updates(device: Arc<Hardware>, data: Arc<[AtomicU8; 2]>)
     let command_val_1 = data[1].load(Ordering::SeqCst);
     let command = form_command(command_val_0, command_val_1);
     if let Err(e) = device
-      .write_value(&HardwareWriteCmd::new(
-        Endpoint::Tx,
-        command,
-        false,
-      ))
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, command, false))
       .await
     {
       error!(
@@ -151,7 +153,7 @@ impl ProtocolHandler for Satisfyer {
       self.last_command[0].store(command_val_0, Ordering::SeqCst);
       self.last_command[1].store(command_val_1, Ordering::SeqCst);
       form_command(command_val_0, command_val_1)
-    };    
+    };
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }

@@ -24,7 +24,7 @@ pub struct WeVibe8Bit {}
 impl ProtocolHandler for WeVibe8Bit {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0u32)).1 as u8;
     let r_speed_ext = cmds

@@ -24,7 +24,7 @@ pub struct Zalo {}
 impl ProtocolHandler for Zalo {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // Store off result before the match, so we drop the lock ASAP.
     let speed0: u8 = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;

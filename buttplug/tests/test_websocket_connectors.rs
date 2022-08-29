@@ -18,16 +18,13 @@ mod websocket_connector_tests {
         ButtplugWebsocketClientTransport,
         ButtplugWebsocketServerTransport,
         ButtplugWebsocketServerTransportBuilder,
-      },  
+      },
       message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     },
     server::ButtplugRemoteServer,
     util::async_manager,
   };
-  use std::{
-    sync::Arc,
-    time::Duration
-  };
+  use std::{sync::Arc, time::Duration};
   use tokio::time::sleep;
 
   #[test]

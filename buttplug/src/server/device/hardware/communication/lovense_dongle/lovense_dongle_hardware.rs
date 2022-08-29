@@ -13,10 +13,7 @@ use super::lovense_dongle_messages::{
   OutgoingLovenseData,
 };
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{BluetoothLESpecifier, ProtocolCommunicationSpecifier},
     hardware::{

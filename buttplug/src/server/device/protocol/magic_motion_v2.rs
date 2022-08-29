@@ -24,7 +24,7 @@ pub struct MagicMotionV2 {}
 impl ProtocolHandler for MagicMotionV2 {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let data = if cmds.len() == 1 {
       vec![

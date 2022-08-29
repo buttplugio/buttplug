@@ -9,16 +9,12 @@
 // device can do, then send it a command (assuming it vibrates)!
 
 use buttplug::{
-  client::{
-    ButtplugClientDevice,
-    ButtplugClientEvent,
-    VibrateCommand,
-  },
+  client::{ButtplugClientDevice, ButtplugClientEvent, VibrateCommand},
   util::in_process_client,
 };
 use futures::StreamExt;
-use tokio::time::sleep;
 use std::{sync::Arc, time::Duration};
+use tokio::time::sleep;
 
 async fn device_control_example() {
   // Onto the final example! Controlling devices.
@@ -82,11 +78,7 @@ async fn device_control_example() {
       // - A vector of values, which can address most or all feature indexes.
       //
       // For this example, we'll use the simple single value.
-      if dev
-        .message_attributes()
-        .scalar_cmd()
-        .is_some()
-      {
+      if dev.message_attributes().scalar_cmd().is_some() {
         if let Err(e) = dev.vibrate(&VibrateCommand::Speed(1.0)).await {
           println!("Error sending vibrate command to device! {}", e);
           return;

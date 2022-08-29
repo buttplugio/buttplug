@@ -80,7 +80,7 @@ pub struct Vibratissimo {}
 impl ProtocolHandler for Vibratissimo {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut data: Vec<u8> = Vec::new();
     for cmd in cmds {

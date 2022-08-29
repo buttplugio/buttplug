@@ -14,8 +14,8 @@ use std::sync::{
   Arc,
 };
 use tokio::{
+  sync::mpsc::{channel, Receiver, Sender},
   time::sleep,
-  sync::mpsc::{channel, Receiver, Sender}
 };
 
 // I found this hot dog on the ground at

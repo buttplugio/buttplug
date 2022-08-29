@@ -7,10 +7,7 @@
 
 use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitInfo;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},
     hardware::{
@@ -47,12 +44,12 @@ use std::{
   time::Duration,
 };
 use tokio::{
-  time::sleep,
   sync::{
     broadcast,
     mpsc::{channel, Receiver, Sender},
     Mutex,
-  }
+  },
+  time::sleep,
 };
 use tokio_util::sync::CancellationToken;
 

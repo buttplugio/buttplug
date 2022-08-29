@@ -11,9 +11,9 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
-use getset::{Getters, CopyGetters};
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -21,7 +21,7 @@ use getset::{Getters, CopyGetters};
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
   endpoint: Endpoint,
@@ -60,13 +60,13 @@ impl From<RawReadCmd> for HardwareReadCmd {
 #[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   endpoint: Endpoint,
   /// Data to write to endpoint
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   data: Vec<u8>,
   /// Only used with Bluetooth LE writing. If true, use WriteWithResponse commands when sending data to device.
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   write_with_response: bool,
 }
 
@@ -101,7 +101,7 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct HardwareSubscribeCmd {
   /// Endpoint to subscribe to notifications from.
   endpoint: Endpoint,
@@ -129,7 +129,7 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
 #[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
-#[getset(get_copy="pub")]
+#[getset(get_copy = "pub")]
 pub struct HardwareUnsubscribeCmd {
   endpoint: Endpoint,
 }
@@ -196,28 +196,24 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
 }
 
 #[derive(Debug, Clone, Getters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct HardwareReading {
   endpoint: Endpoint,
-  data: Vec<u8>
+  data: Vec<u8>,
 }
 
 impl HardwareReading {
   pub fn new(endpoint: Endpoint, data: &Vec<u8>) -> Self {
     Self {
       endpoint,
-      data: data.clone()
+      data: data.clone(),
     }
   }
 }
 
 impl From<HardwareReading> for RawReading {
   fn from(reading: HardwareReading) -> Self {
-    RawReading::new(
-      0,
-      *reading.endpoint(),
-      reading.data().clone()
-    )
+    RawReading::new(0, *reading.endpoint(), reading.data().clone())
   }
 }
 

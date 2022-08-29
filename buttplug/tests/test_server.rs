@@ -115,8 +115,7 @@ fn test_ping_timeout() {
       .expect("Test, assuming infallible.");
     let recv = server.event_stream();
     pin_mut!(recv);
-    let msg =
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     sleep(Duration::from_millis(150)).await;
     let reply = server.parse_message(msg.into()).await;
     assert!(
@@ -157,8 +156,7 @@ fn test_device_stop_on_ping_timeout() {
     let recv = server.event_stream();
     pin_mut!(recv);
 
-    let msg =
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let mut reply = server.parse_message(msg.into()).await;
     assert!(reply.is_ok());
     reply = server
@@ -227,8 +225,7 @@ fn test_repeated_handshake() {
 #[test]
 fn test_invalid_device_index() {
   async_manager::block_on(async {
-    let msg =
-      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let (server, _) = setup_test_server(msg.into()).await;
     let reply = server
       .parse_message(message::VibrateCmd::new(10, vec![]).into())

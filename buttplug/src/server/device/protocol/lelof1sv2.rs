@@ -86,12 +86,10 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
             .await?;
         }
       } else {
-        return Err(
-          ButtplugDeviceError::ProtocolSpecificError(
-            "LeloF1sV2".to_owned(),
-            "Lelo F1s V2 didn't provided valid security handshake".to_owned(),
-          ),
-        );
+        return Err(ButtplugDeviceError::ProtocolSpecificError(
+          "LeloF1sV2".to_owned(),
+          "Lelo F1s V2 didn't provided valid security handshake".to_owned(),
+        ));
       }
     }
   }

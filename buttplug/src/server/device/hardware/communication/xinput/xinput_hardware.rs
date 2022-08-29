@@ -7,10 +7,7 @@
 
 use super::xinput_device_comm_manager::XInputControllerIndex;
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, XInputSpecifier},

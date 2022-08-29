@@ -9,9 +9,9 @@
 use buttplug::{
   client::{ButtplugClient, ButtplugClientEvent},
   core::{
-  connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
-  message::serializer::ButtplugClientJSONSerializer,
-  }
+    connector::{ButtplugRemoteClientConnector, ButtplugWebsocketClientTransport},
+    message::serializer::ButtplugClientJSONSerializer,
+  },
 };
 use futures::StreamExt;
 use tracing_subscriber;

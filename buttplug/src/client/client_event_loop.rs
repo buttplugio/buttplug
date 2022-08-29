@@ -347,7 +347,10 @@ where
         },
       };
     }
-    self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
+    self
+      .device_map
+      .iter()
+      .for_each(|val| val.value().set_client_connected(false));
 
     let device_indexes: Vec<u32> = self.device_map.iter().map(|k| *k.key()).collect();
     device_indexes

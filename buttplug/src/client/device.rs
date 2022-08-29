@@ -534,7 +534,11 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
-  pub fn subscribe_sensor(&self, sensor_index: u32, sensor_type: SensorType) -> ButtplugClientResultFuture {
+  pub fn subscribe_sensor(
+    &self,
+    sensor_index: u32,
+    sensor_type: SensorType,
+  ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
@@ -545,7 +549,11 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
-  pub fn unsubscribe_sensor(&self, sensor_index: u32, sensor_type: SensorType) -> ButtplugClientResultFuture {
+  pub fn unsubscribe_sensor(
+    &self,
+    sensor_index: u32,
+    sensor_type: SensorType,
+  ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
       return self.create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)

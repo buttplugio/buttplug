@@ -61,7 +61,7 @@ pub struct WeVibe {}
 impl ProtocolHandler for WeVibe {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let r_speed_int = cmds[0].unwrap_or((ActuatorType::Vibrate, 0)).1 as u8;
     let r_speed_ext = cmds

@@ -338,7 +338,8 @@ pub enum ButtplugServerMessage {
 #[derive(
   Debug,
   Clone,
-  PartialEq, Eq,
+  PartialEq,
+  Eq,
   ButtplugMessage,
   ButtplugMessageValidator,
   ButtplugServerMessageType,
@@ -500,9 +501,7 @@ impl TryFrom<ButtplugServerMessage> for ButtplugSpecV2ServerMessage {
     match msg {
       ButtplugServerMessage::Ok(msg) => Ok(ButtplugSpecV2ServerMessage::Ok(msg)),
       ButtplugServerMessage::Error(msg) => Ok(ButtplugSpecV2ServerMessage::Error(msg)),
-      ButtplugServerMessage::ServerInfo(msg) => {
-        Ok(ButtplugSpecV2ServerMessage::ServerInfo(msg))
-      }
+      ButtplugServerMessage::ServerInfo(msg) => Ok(ButtplugSpecV2ServerMessage::ServerInfo(msg)),
       ButtplugServerMessage::DeviceList(msg) => {
         Ok(ButtplugSpecV2ServerMessage::DeviceList(msg.into()))
       }

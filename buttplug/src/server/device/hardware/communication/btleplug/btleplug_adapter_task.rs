@@ -21,7 +21,7 @@ use std::{
 };
 use tokio::{
   sync::mpsc::{Receiver, Sender},
-  time::sleep
+  time::sleep,
 };
 
 #[derive(Debug, Clone, Copy)]

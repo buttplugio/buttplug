@@ -16,19 +16,19 @@ use crate::{
   util::async_manager,
 };
 use futures::{FutureExt, StreamExt};
+use getset::{CopyGetters, Getters};
 use serde::{Deserialize, Serialize};
 use tokio::{net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
-use getset::{Getters, CopyGetters};
 
 // Packet format received from external devices.
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, CopyGetters)]
 pub struct WebsocketServerDeviceCommManagerInitInfo {
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   identifier: String,
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   address: String,
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   version: u32,
 }
 

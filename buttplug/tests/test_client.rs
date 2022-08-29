@@ -6,11 +6,7 @@
 // for full license information.
 
 mod util;
-use util::{
-  test_client,
-  test_client_with_delayed_device_manager,
-  test_client_with_device,
-};
+use util::{test_client, test_client_with_delayed_device_manager, test_client_with_device};
 extern crate buttplug;
 extern crate tracing;
 
@@ -26,19 +22,13 @@ use buttplug::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
-  server::{
-    ButtplugServerBuilder,
-  },
+  server::ButtplugServerBuilder,
   util::async_manager,
 };
 
 use futures::{future::BoxFuture, StreamExt};
 use std::time::Duration;
-use tokio::{
-  sync::mpsc::Sender,
-  time::sleep
-};
-
+use tokio::{sync::mpsc::Sender, time::sleep};
 
 #[derive(Default)]
 struct ButtplugFailingConnector {}

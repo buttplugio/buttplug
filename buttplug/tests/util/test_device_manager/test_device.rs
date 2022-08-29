@@ -6,10 +6,7 @@
 // for full license information.
 
 use buttplug::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::ProtocolCommunicationSpecifier,
     hardware::{
@@ -19,10 +16,11 @@ use buttplug::{
       HardwareEvent,
       HardwareInternal,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
-      HardwareWriteCmd, HardwareReading,
+      HardwareWriteCmd,
     },
   },
   util::async_manager,
@@ -278,19 +276,17 @@ impl HardwareInternal for TestDevice {
           if reads.lock().await.len() > 0 {
             break;
           }
-        } 
+        }
         tokio::time::sleep(std::time::Duration::from_millis(10)).await;
         count += 1;
       }
       let read_msg = reads.lock().await.pop_back().unwrap();
       if *read_msg.endpoint() != msg.endpoint() {
-        Err(
-          ButtplugDeviceError::DeviceCommunicationError(format!(
-            "Read endpoint {} while expecting endpoint {}",
-            read_msg.endpoint(),
-            msg.endpoint()
-          )),
-        )
+        Err(ButtplugDeviceError::DeviceCommunicationError(format!(
+          "Read endpoint {} while expecting endpoint {}",
+          read_msg.endpoint(),
+          msg.endpoint()
+        )))
       } else {
         Ok(read_msg)
       }

@@ -5,9 +5,11 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::{
-  core::{errors::ButtplugDeviceError, message::{Endpoint, ActuatorType}},
+  core::{
+    errors::ButtplugDeviceError,
+    message::{ActuatorType, Endpoint},
+  },
   server::device::{
     configuration::ProtocolAttributesType,
     hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
@@ -19,17 +21,11 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
-  util::async_manager
+  util::async_manager,
 };
 use async_trait::async_trait;
-use std::{
-  sync::Arc,
-  time::Duration
-};
-use tokio::{
-  sync::RwLock,
-  time::sleep
-};
+use std::{sync::Arc, time::Duration};
+use tokio::{sync::RwLock, time::sleep};
 
 generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
 
@@ -85,9 +81,7 @@ impl MysteryVibe {
     async_manager::spawn(
       async move { vibration_update_handler(device, current_command_clone).await },
     );
-    Self {
-      current_command
-    }
+    Self { current_command }
   }
 }
 

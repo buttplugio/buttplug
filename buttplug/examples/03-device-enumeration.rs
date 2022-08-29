@@ -16,21 +16,25 @@ use buttplug::{
 use buttplug::{
   core::{
     connector::{
-    ButtplugPipeClientTransportBuilder,
-    ButtplugPipeServerTransportBuilder,
-    ButtplugRemoteClientConnector,
-    ButtplugRemoteServerConnector,
-    // ButtplugWebsocketClientTransport,
+      ButtplugPipeClientTransportBuilder,
+      ButtplugPipeServerTransportBuilder,
+      ButtplugRemoteClientConnector,
+      ButtplugRemoteServerConnector,
+      // ButtplugWebsocketClientTransport,
+    },
+    message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
   },
-  message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
-},
-  server::{device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder, ButtplugRemoteServer, ButtplugServerBuilder},
+  server::{
+    device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder,
+    ButtplugRemoteServer,
+    ButtplugServerBuilder,
+  },
 };
 use futures::StreamExt;
 use std::time::Duration;
 use tokio::{
   io::{self, AsyncBufReadExt, BufReader},
-  time::sleep
+  time::sleep,
 };
 use tracing::{info, span, Level};
 

@@ -47,10 +47,10 @@ use crate::{
 };
 use dashmap::DashMap;
 use futures::future::{self, FutureExt};
+use getset::Getters;
 use std::{convert::TryFrom, sync::Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
-use getset::Getters;
 
 #[derive(Debug)]
 pub(super) enum DeviceManagerCommand {
@@ -59,7 +59,7 @@ pub(super) enum DeviceManagerCommand {
 }
 
 #[derive(Debug, Getters)]
-#[getset(get="pub")]
+#[getset(get = "pub")]
 pub struct ServerDeviceInfo {
   identifier: ServerDeviceIdentifier,
   display_name: Option<String>,
@@ -321,9 +321,9 @@ impl ServerDeviceManager {
 
   pub fn device_info(&self, index: u32) -> Option<ServerDeviceInfo> {
     self.devices.get(&index).map(|device| ServerDeviceInfo {
-        identifier: device.value().identifier().clone(),
-        display_name: device.value().display_name(),
-      })
+      identifier: device.value().identifier().clone(),
+      display_name: device.value().display_name(),
+    })
   }
 }
 

@@ -9,14 +9,19 @@ use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{HardwareCommand, HardwareWriteCmd, Hardware},
-    protocol::{generic_protocol_initializer_setup, ProtocolHandler, ProtocolIdentifier, ProtocolInitializer,},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
     ServerDeviceIdentifier,
   },
-  util::async_manager
+  util::async_manager,
 };
-use futures::FutureExt;
 use async_trait::async_trait;
+use futures::FutureExt;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -24,10 +29,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::{
-  time::sleep,
-  sync::RwLock
-};
+use tokio::{sync::RwLock, time::sleep};
 
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
@@ -80,25 +82,28 @@ async fn vibration_update_handler(device: Arc<Hardware>, command_holder: Arc<RwL
 
 impl ProtocolHandler for Hgod {
   fn handle_scalar_vibrate_cmd(
-      &self,
-      _index: u32,
-      scalar: u32,
-    ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_command = self.current_command.clone();
     let update_running = self.updater_running.clone();
     let hardware = self.hardware.clone();
-    async_manager::spawn(async move {
-      let write_mutex = current_command.clone();
-      let mut command_writer = write_mutex.write().await;
-      let command: Vec<u8> = vec![0x55, 0x04, 0, 0, 0, scalar as u8];
-      *command_writer = command;
-      if !update_running.load(Ordering::SeqCst) {
-        async_manager::spawn(
-          async move { vibration_update_handler(hardware, current_command).await },
-        );
-        update_running.store(true, Ordering::SeqCst);
+    async_manager::spawn(
+      async move {
+        let write_mutex = current_command.clone();
+        let mut command_writer = write_mutex.write().await;
+        let command: Vec<u8> = vec![0x55, 0x04, 0, 0, 0, scalar as u8];
+        *command_writer = command;
+        if !update_running.load(Ordering::SeqCst) {
+          async_manager::spawn(
+            async move { vibration_update_handler(hardware, current_command).await },
+          );
+          update_running.store(true, Ordering::SeqCst);
+        }
       }
-    }.boxed());
+      .boxed(),
+    );
     Ok(vec![])
   }
 }

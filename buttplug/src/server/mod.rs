@@ -263,7 +263,7 @@ impl ButtplugServerBuilder {
       self.device_configuration_json.clone(),
       self.user_device_configuration_json.clone(),
       false,
-      &mut self.device_manager_builder
+      &mut self.device_manager_builder,
     )
     .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
@@ -280,7 +280,7 @@ impl ButtplugServerBuilder {
     let ping_time = self.max_ping_time.unwrap_or(0);
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
- 
+
     // Spawn the ping timer task, assuming the ping time is > 0.
     if ping_time > 0 {
       let device_manager_clone = device_manager.clone();

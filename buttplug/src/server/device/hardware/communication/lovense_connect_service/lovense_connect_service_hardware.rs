@@ -7,10 +7,7 @@
 
 use super::lovense_connect_service_comm_manager::{get_local_info, LovenseServiceToyInfo};
 use crate::{
-  core::{
-    errors::ButtplugDeviceError,
-    message::{Endpoint},
-  },
+  core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
     configuration::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier},
     hardware::{
@@ -19,8 +16,8 @@ use crate::{
       HardwareConnector,
       HardwareEvent,
       HardwareInternal,
-      HardwareReading,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,

@@ -192,15 +192,18 @@ impl Into<ClientDeviceMessageAttributes> for ServerDeviceMessageAttributes {
   fn into(self) -> ClientDeviceMessageAttributes {
     let mut builder = ClientDeviceMessageAttributesBuilder::default();
     if let Some(scalar_cmd) = self.scalar_cmd {
-      let commands: Vec<ClientGenericDeviceMessageAttributes> = scalar_cmd.iter().cloned().map(|x| x.into()).collect();
+      let commands: Vec<ClientGenericDeviceMessageAttributes> =
+        scalar_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.scalar_cmd(&commands);
     }
     if let Some(rotate_cmd) = self.rotate_cmd {
-      let commands: Vec<ClientGenericDeviceMessageAttributes> = rotate_cmd.iter().cloned().map(|x| x.into()).collect();
+      let commands: Vec<ClientGenericDeviceMessageAttributes> =
+        rotate_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.rotate_cmd(&commands);
     }
     if let Some(linear_cmd) = self.linear_cmd {
-      let commands: Vec<ClientGenericDeviceMessageAttributes> = linear_cmd.iter().cloned().map(|x| x.into()).collect();
+      let commands: Vec<ClientGenericDeviceMessageAttributes> =
+        linear_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.linear_cmd(&commands);
     }
     if let Some(sensor_read_cmd) = self.sensor_read_cmd {

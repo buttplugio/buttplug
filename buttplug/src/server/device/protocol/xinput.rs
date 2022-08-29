@@ -29,7 +29,7 @@ pub struct XInput {}
 impl ProtocolHandler for XInput {
   fn handle_scalar_cmd(
     &self,
-    cmds: &[Option<(ActuatorType, u32)>]
+    cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     // XInput is fast enough that we can ignore the commands handed
     // back by the manager and just form our own packet. This means
@@ -51,12 +51,10 @@ impl ProtocolHandler for XInput {
         )
         .is_err()
     {
-      return Err(
-        ButtplugDeviceError::ProtocolSpecificError(
-          "XInput".to_owned(),
-          "Cannot convert XInput value for processing".to_owned(),
-        ),
-      );
+      return Err(ButtplugDeviceError::ProtocolSpecificError(
+        "XInput".to_owned(),
+        "Cannot convert XInput value for processing".to_owned(),
+      ));
     }
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, cmd, false).into()])
   }
@@ -76,14 +74,19 @@ impl ProtocolHandler for XInput {
         2 => 66,
         3 => 100,
         _ => {
-          return Err(
-            ButtplugDeviceError::DeviceCommunicationError("something went wrong".to_string()),
-          )
+          return Err(ButtplugDeviceError::DeviceCommunicationError(
+            "something went wrong".to_string(),
+          ))
         }
       };
       Ok(
-        message::SensorReading::new(msg.device_index(), *msg.sensor_index(), *msg.sensor_type(), vec![battery])
-          .into(),
+        message::SensorReading::new(
+          msg.device_index(),
+          *msg.sensor_index(),
+          *msg.sensor_type(),
+          vec![battery],
+        )
+        .into(),
       )
     }
     .boxed()

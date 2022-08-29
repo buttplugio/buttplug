@@ -25,10 +25,11 @@ use crate::{
       WebsocketSpecifier,
       XInputSpecifier,
     },
-    ServerDeviceIdentifier, ServerDeviceManagerBuilder,
+    ServerDeviceIdentifier,
+    ServerDeviceManagerBuilder,
   },
 };
-use getset::{Getters, MutGetters, Setters, CopyGetters};
+use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, ops::RangeInclusive};
 
@@ -322,13 +323,13 @@ fn add_user_configs_to_protocol(
 
 #[derive(Deserialize, Serialize, Debug, Getters, CopyGetters)]
 struct ProtocolConfiguration {
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   version: u32,
   #[serde(default)]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   protocols: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "user-configs", default)]
-  #[getset(get="pub")]
+  #[getset(get = "pub")]
   user_configs: Option<UserConfigDefinition>,
 }
 
@@ -390,7 +391,7 @@ fn load_protocol_config_from_json(
 fn load_protocol_configs_internal(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
-  skip_version_check: bool
+  skip_version_check: bool,
 ) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
   if main_config_str.is_some() {
     info!("Loading from custom base device configuration...")
@@ -450,10 +451,11 @@ pub fn load_protocol_configs(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
   skip_version_check: bool,
-  device_manager_builder: &mut ServerDeviceManagerBuilder
+  device_manager_builder: &mut ServerDeviceManagerBuilder,
 ) -> Result<(), ButtplugDeviceError> {
-  let external_config = load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
-  
+  let external_config =
+    load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
+
   for address in external_config.allow_list() {
     device_manager_builder.allowed_address(address);
   }
@@ -468,19 +470,16 @@ pub fn load_protocol_configs(
 
   for (name, specifiers) in external_config.protocol_specifiers() {
     for spec in specifiers {
-      device_manager_builder
-        .communication_specifier(name, spec.clone());
+      device_manager_builder.communication_specifier(name, spec.clone());
     }
   }
 
   for (ident, attributes) in external_config.protocol_attributes() {
-    device_manager_builder
-      .protocol_attributes(ident.clone(), attributes.clone());
+    device_manager_builder.protocol_attributes(ident.clone(), attributes.clone());
   }
 
   for (ident, attributes) in external_config.user_configs() {
-    device_manager_builder
-      .protocol_attributes(ident.into(), attributes.clone());
+    device_manager_builder.protocol_attributes(ident.into(), attributes.clone());
   }
 
   Ok(())
@@ -489,7 +488,7 @@ pub fn load_protocol_configs(
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
   let devices = load_protocol_configs_internal(None, None, false)
     .expect("If this fails, the whole library goes with it.");
-    let mut builder = DeviceConfigurationManagerBuilder::default();
+  let mut builder = DeviceConfigurationManagerBuilder::default();
   if allow_raw_messages {
     builder.allow_raw_messages();
   }

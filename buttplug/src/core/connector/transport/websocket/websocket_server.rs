@@ -28,9 +28,8 @@ use tokio::{
     mpsc::{Receiver, Sender},
     Notify,
   },
-  time::sleep
+  time::sleep,
 };
-
 
 #[derive(Clone, Debug)]
 pub struct ButtplugWebsocketServerTransportBuilder {
