@@ -2779,6 +2779,57 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 3]
             ActuatorType: Vibrate
+  hismith:
+    btle:
+      names:
+        - HISMITH
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+        0000ff90-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb
+#    defaults:  # Disabled until hismith fucking machines are supported
+#      name: Hismith device
+#      messages:
+#        ScalarCmd:
+#          - StepRange: [0, 100]
+#            ActuatorType: Oscillate
+#            FeatureDescriptor: Fucking Machine Oscillation Speed
+    configurations:
+#      - identifier:
+#          - "1001"
+#        name: Hismith Sex Machine
+#        messages:
+#          ScalarCmd:
+#            - StepRange: [0, 100]
+#              ActuatorType: Oscillate
+#              FeatureDescriptor: Fucking Machine Oscillation Speed
+#      - identifier:
+#          - "1002"
+#        name: Hismith Pro Traveler
+#        messages:
+#          ScalarCmd:
+#            - StepRange: [0, 100]
+#              ActuatorType: Oscillate
+#              FeatureDescriptor: Fucking Machine Oscillation Speed
+#      - identifier:
+#          - "1003"
+#        name: Hismith Capsule
+#        messages:
+#          ScalarCmd:
+#            - StepRange: [0, 100]
+#              ActuatorType: Oscillate
+#              FeatureDescriptor: Fucking Machine Oscillation Speed
+      - identifier:
+          - "2001"
+        name: Hismith Thrusting Cup
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Stroker Oscillation Speed
+            - StepRange: [0, 1]
+              ActuatorType: Vibrate  # Vibrator
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
