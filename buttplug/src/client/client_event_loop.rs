@@ -328,8 +328,7 @@ where
         event = self.from_connector_receiver.recv().fuse() => match event {
           None => {
             info!("Connector disconnected, exiting loop.");
-            self.send_client_event(ButtplugClientEvent::ServerDisconnect);
-            return;
+            break;
           }
           Some(msg) => {
             self.parse_connector_message(msg).await;
@@ -338,10 +337,7 @@ where
         client = self.from_client_receiver.recv().fuse() => match client {
           Err(_) => {
             info!("Client disconnected, exiting loop.");
-            self.connected_status.store(false, Ordering::SeqCst);
-            self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
-            self.send_client_event(ButtplugClientEvent::ServerDisconnect);
-            return;
+            break;
           }
           Ok(msg) => {
             if !self.parse_client_request(msg).await {
@@ -351,12 +347,13 @@ where
         },
       };
     }
+    self.device_map.iter().for_each(|val| val.value().set_client_connected(false));
 
     let device_indexes: Vec<u32> = self.device_map.iter().map(|k| *k.key()).collect();
     device_indexes
       .iter()
       .for_each(|k| self.disconnect_device(*k));
-
+    self.connected_status.store(false, Ordering::SeqCst);
     self.send_client_event(ButtplugClientEvent::ServerDisconnect);
 
     debug!("Exiting client event loop.");

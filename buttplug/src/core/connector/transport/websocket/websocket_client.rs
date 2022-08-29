@@ -130,6 +130,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                     } else {
                       info!("Connector holding websocket dropped, returning");
                       writer.close().await.unwrap_or_else(|err| error!("{}", err));
+                      if incoming_sender
+                        .send(ButtplugTransportIncomingMessage::Close("Server closed connection".to_owned()))
+                        .await
+                        .is_err()
+                      {
+                        warn!("Websocket holder has closed, exiting websocket loop.");
+                      }      
                       return;
                     }
                   },
@@ -150,7 +157,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                             .await
                             .is_err()
                           {
-                            warn!("Websocket holder has closed, exiting websocket loop.");
+                            warn!("Websocket holder has closed, exiting websocket loop.");                                
                             return;
                           }
                         }
@@ -173,6 +180,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                         Message::Frame(_) => {}
                         Message::Close(_) => {
                           info!("Websocket has requested close.");
+                          if incoming_sender
+                            .send(ButtplugTransportIncomingMessage::Close("Server closed connection".to_owned()))
+                            .await
+                            .is_err()
+                          {
+                            warn!("Websocket holder has closed, exiting websocket loop.");
+                            return;
+                          }                          
                           return;
                         }
                       },
@@ -192,6 +207,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
                     // TODO Emit a full error here that should bubble up to the client.
                     info!("Websocket requested to disconnect.");
                     writer.close().await.unwrap_or_else(|err| error!("{}", err));
+                    if incoming_sender
+                      .send(ButtplugTransportIncomingMessage::Close("Disconnect notifier triggered, closed connection".to_owned()))
+                      .await
+                      .is_err()
+                    {
+                      warn!("Websocket holder has closed, exiting websocket loop.");
+                      return;
+                    }                      
                     return;
                   }
                 }
