@@ -62,7 +62,7 @@ more info.
 
 Buttplug-rs is currently capable of controlling toys via:
 
-- Bluetooth LE
+- Bluetooth LE (Desktop and Android/iOS)
 - Serial Ports
 - USB HID
 - Lovense Devices via the Lovense Dongle (All Versions)
