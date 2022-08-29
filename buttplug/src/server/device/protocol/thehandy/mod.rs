@@ -31,11 +31,11 @@ use std::sync::{
 };
 
 mod protocomm {
-  include!(concat!(env!("OUT_DIR"), "/protocomm.rs"));
+  include!("./protocomm.rs");
 }
 
 mod handyplug {
-  include!(concat!(env!("OUT_DIR"), "/handyplug.rs"));
+  include!("./handyplug.rs");
 }
 
 generic_protocol_initializer_setup!(TheHandy, "thehandy");
