@@ -8,12 +8,64 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
+use std::sync::Arc;
 
-generic_protocol_setup!(Hismith, "hismith");
+
+pub mod setup {
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct HismithIdentifierFactory {}
+
+  impl ProtocolIdentifierFactory for HismithIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "hismith"
+    }
+
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::HismithIdentifier::default())
+    }
+  }
+}
+
+#[derive(Default)]
+pub struct HismithIdentifier {}
+
+#[async_trait]
+impl ProtocolIdentifier for HismithIdentifier {
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let result = hardware
+        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+        .await?;
+
+    let identifier = result.data().into_iter().map( |b| format!("{:02x}", b) ).collect::<String>();
+    info!("Hismith Device Identifier: {}", identifier);
+
+    Ok((ServerDeviceIdentifier::new(hardware.address(), "hismith", &ProtocolAttributesType::Identifier(identifier)), Box::new(HismithInitializer::default())))
+  }
+}
+
+#[derive(Default)]
+pub struct HismithInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for HismithInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(Hismith::default()))
+  }
+}
 
 #[derive(Default)]
 pub struct Hismith {}
@@ -24,9 +76,28 @@ impl ProtocolHandler for Hismith {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
+    let speed: u8 = if _index != 0 && scalar == 0 { 0xf0 } else { scalar as u8 };
+
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xAA, 0x04, scalar as u8, (scalar + 4) as u8],
+      vec![0xAA, idx, speed, speed + idx],
+      false,
+    )
+    .into()])
+  }
+
+  fn handle_scalar_vibrate_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
+    let speed: u8 = if _index != 0 && scalar == 0 { 0xf0 } else { scalar as u8 };
+
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xAA, idx, speed, speed + idx],
       false,
     )
     .into()])

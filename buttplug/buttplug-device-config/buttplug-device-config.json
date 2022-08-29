@@ -5466,6 +5466,48 @@
           ]
         }
       }
+    },
+    "hismith": {
+      "btle": {
+        "names": [
+          "HISMITH"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+          },
+          "0000ff90-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "2001"
+          ],
+          "name": "Hismith Thrusting Cup",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Stroker Oscillation Speed"
+              },
+              {
+                "StepRange": [
+                  0,
+                  1
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
     }
   }
 }
