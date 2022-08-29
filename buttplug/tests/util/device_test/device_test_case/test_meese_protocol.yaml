@@ -1,0 +1,53 @@
+devices:
+  - identifier: 
+      name: "Meese-V389"
+    expected_name: "Meese Tera"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x80, 0x01, 0x05]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.1
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x80, 0x01, 0x01]
+            write_with_response: true
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x80, 0x02, 0x02]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x80, 0x01, 0x00]
+            write_with_response: true
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x80, 0x02, 0x00]
+            write_with_response: true

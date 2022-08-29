@@ -2764,6 +2764,21 @@ protocols:
           - SensorType: Pressure
             FeatureDescriptor: Pelvic Pressure (Unnormalized)
             SensorRange: [[0, 1000]]
+  meese:
+    btle:
+      names:
+        - Meese-V389
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Meese Tera
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 10]
+            ActuatorType: Vibrate
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
