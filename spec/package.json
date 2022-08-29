@@ -4,8 +4,8 @@
   "description": "Buttplug Protocol Specification",
   "main": "index.js",
   "scripts": {
-    "dev": "vuepress dev protocol-spec",
-    "build": "vuepress build protocol-spec"
+    "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress dev protocol-spec",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build protocol-spec"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,8 @@
     "vuepress": "^1.9.7",
     "vuepress-plugin-matomo": "^1.0.2",
     "yarn": "^1.22.19"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
