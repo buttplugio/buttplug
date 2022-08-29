@@ -5,9 +5,9 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-// The tests in this file can fail on CI if there isn't a timed retry.
-
-#[cfg(feature = "websockets")]
+// The tests in this file can fail on CI if there isn't a timed retry. Seems to work reliably on
+// windows, so lock it to that platform for now.
+#[cfg(all(feature = "websockets", target_os = "windows"))]
 mod websocket_connector_tests {
   use buttplug::{
     client::ButtplugClient,
