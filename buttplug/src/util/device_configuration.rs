@@ -25,7 +25,7 @@ use crate::{
       WebsocketSpecifier,
       XInputSpecifier,
     },
-    ServerDeviceIdentifier,
+    ServerDeviceIdentifier, ServerDeviceManagerBuilder,
   },
 };
 use getset::{Getters, MutGetters, Setters, CopyGetters};
@@ -44,7 +44,7 @@ static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
 /// devices supported under the Kiiroo protocol. It would also contain information about the names
 /// and capabilities of different Kiiroo devices (Cliona, Onyx, Keon, etc...).
 #[derive(Debug, Clone, Getters, MutGetters, Default)]
-pub struct ProtocolDeviceConfiguration {
+struct ProtocolDeviceConfiguration {
   /// BLE/USB/etc info for device identification.
   #[getset(get = "pub(crate)", get_mut = "pub(crate)")]
   specifiers: Vec<ProtocolCommunicationSpecifier>,
@@ -67,7 +67,7 @@ impl ProtocolDeviceConfiguration {
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Getters, Setters)]
-pub struct GenericUserDeviceMessageAttributes {
+struct GenericUserDeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "StepRange")]
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -76,7 +76,7 @@ pub struct GenericUserDeviceMessageAttributes {
 
 #[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone)]
 #[getset(get = "pub", set = "pub")]
-pub struct UserDeviceConfig {
+struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   #[serde(rename = "display-name")]
@@ -97,7 +97,7 @@ pub struct UserDeviceConfig {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct ProtocolAttributes {
+struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -108,7 +108,7 @@ pub struct ProtocolAttributes {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct ProtocolDefinition {
+struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
@@ -135,14 +135,14 @@ pub struct ProtocolDefinition {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct UserDeviceConfigPair {
+struct UserDeviceConfigPair {
   identifier: UserConfigDeviceIdentifier,
   config: UserDeviceConfig,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
-pub struct UserConfigDefinition {
+struct UserConfigDefinition {
   #[serde(default)]
   specifiers: HashMap<String, ProtocolDefinition>,
   #[serde(rename = "devices")]
@@ -172,7 +172,7 @@ impl Into<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
 
 #[derive(Default, Debug, Getters)]
 #[getset(get = "pub")]
-pub struct ExternalDeviceConfiguration {
+struct ExternalDeviceConfiguration {
   allow_list: Vec<String>,
   deny_list: Vec<String>,
   reserved_indexes: HashMap<u32, ServerDeviceIdentifier>,
@@ -321,7 +321,7 @@ fn add_user_configs_to_protocol(
 }
 
 #[derive(Deserialize, Serialize, Debug, Getters, CopyGetters)]
-pub struct ProtocolConfiguration {
+struct ProtocolConfiguration {
   #[getset(get_copy="pub")]
   version: u32,
   #[serde(default)]
@@ -343,6 +343,7 @@ impl Default for ProtocolConfiguration {
 }
 
 impl ProtocolConfiguration {
+  #[allow(dead_code)]
   pub fn to_json(&self) -> String {
     serde_json::to_string(self)
       .expect("All types below this are Serialize, so this should be infallible.")
@@ -355,7 +356,7 @@ pub fn get_internal_config_version() -> u32 {
   config.version
 }
 
-pub fn load_protocol_config_from_json(
+fn load_protocol_config_from_json(
   config_str: &str,
   skip_version_check: bool,
 ) -> Result<ProtocolConfiguration, ButtplugDeviceError> {
@@ -386,10 +387,10 @@ pub fn load_protocol_config_from_json(
   }
 }
 
-pub fn load_protocol_configs_from_json(
+fn load_protocol_configs_internal(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
-  skip_version_check: bool,
+  skip_version_check: bool
 ) -> Result<ExternalDeviceConfiguration, ButtplugDeviceError> {
   if main_config_str.is_some() {
     info!("Loading from custom base device configuration...")
@@ -445,10 +446,50 @@ pub fn load_protocol_configs_from_json(
   Ok(external_config)
 }
 
+pub fn load_protocol_configs(
+  main_config_str: Option<String>,
+  user_config_str: Option<String>,
+  skip_version_check: bool,
+  device_manager_builder: &mut ServerDeviceManagerBuilder
+) -> Result<(), ButtplugDeviceError> {
+  let external_config = load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
+  
+  for address in external_config.allow_list() {
+    device_manager_builder.allowed_address(address);
+  }
+
+  for address in external_config.deny_list() {
+    device_manager_builder.denied_address(address);
+  }
+
+  for (index, address) in external_config.reserved_indexes() {
+    device_manager_builder.reserved_index(address, *index);
+  }
+
+  for (name, specifiers) in external_config.protocol_specifiers() {
+    for spec in specifiers {
+      device_manager_builder
+        .communication_specifier(name, spec.clone());
+    }
+  }
+
+  for (ident, attributes) in external_config.protocol_attributes() {
+    device_manager_builder
+      .protocol_attributes(ident.clone(), attributes.clone());
+  }
+
+  for (ident, attributes) in external_config.user_configs() {
+    device_manager_builder
+      .protocol_attributes(ident.into(), attributes.clone());
+  }
+
+  Ok(())
+}
+
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
-  let devices = load_protocol_configs_from_json(None, None, false)
+  let devices = load_protocol_configs_internal(None, None, false)
     .expect("If this fails, the whole library goes with it.");
-  let mut builder = DeviceConfigurationManagerBuilder::default();
+    let mut builder = DeviceConfigurationManagerBuilder::default();
   if allow_raw_messages {
     builder.allow_raw_messages();
   }

@@ -80,7 +80,7 @@ use crate::{
   },
   util::{
     async_manager,
-    device_configuration::{load_protocol_configs_from_json, DEVICE_CONFIGURATION_JSON},
+    device_configuration::{load_protocol_configs, DEVICE_CONFIGURATION_JSON},
     stream::convert_broadcast_receiver_to_stream,
   },
 };
@@ -259,16 +259,20 @@ impl ButtplugServerBuilder {
 
     // First, try loading our configs. If this doesn't work, nothing else will, so get it out of
     // the way first.
-    let protocol_map = load_protocol_configs_from_json(
+    load_protocol_configs(
       self.device_configuration_json.clone(),
       self.user_device_configuration_json.clone(),
       false,
+      &mut self.device_manager_builder
     )
     .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();
+
+    let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);
+
     let connected = Arc::new(AtomicBool::new(false));
     let connected_clone = connected.clone();
 
@@ -276,41 +280,7 @@ impl ButtplugServerBuilder {
     let ping_time = self.max_ping_time.unwrap_or(0);
     let ping_timer = Arc::new(PingTimer::new(ping_time));
     let ping_timeout_notifier = ping_timer.ping_timeout_waiter();
-
-    for address in protocol_map.allow_list() {
-      self.device_manager_builder.allowed_address(address);
-    }
-
-    for address in protocol_map.deny_list() {
-      self.device_manager_builder.denied_address(address);
-    }
-
-    for (index, address) in protocol_map.reserved_indexes() {
-      self.device_manager_builder.reserved_index(address, *index);
-    }
-
-    for (name, specifiers) in protocol_map.protocol_specifiers() {
-      for spec in specifiers {
-        self
-          .device_manager_builder
-          .communication_specifier(name, spec.clone());
-      }
-    }
-
-    for (ident, attributes) in protocol_map.protocol_attributes() {
-      self
-        .device_manager_builder
-        .protocol_attributes(ident.clone(), attributes.clone());
-    }
-
-    for (ident, attributes) in protocol_map.user_configs() {
-      self
-        .device_manager_builder
-        .protocol_attributes(ident.into(), attributes.clone());
-    }
-
-    let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);
-
+ 
     // Spawn the ping timer task, assuming the ping time is > 0.
     if ping_time > 0 {
       let device_manager_clone = device_manager.clone();
