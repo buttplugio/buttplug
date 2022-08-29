@@ -28,7 +28,7 @@ use crate::{
     ServerDeviceIdentifier,
   },
 };
-use getset::{Getters, MutGetters, Setters};
+use getset::{Getters, MutGetters, Setters, CopyGetters};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, ops::RangeInclusive};
 
@@ -320,13 +320,16 @@ fn add_user_configs_to_protocol(
   }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Getters, CopyGetters)]
 pub struct ProtocolConfiguration {
-  pub version: u32,
+  #[getset(get_copy="pub")]
+  version: u32,
   #[serde(default)]
-  pub protocols: Option<HashMap<String, ProtocolDefinition>>,
+  #[getset(get="pub")]
+  protocols: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "user-configs", default)]
-  pub user_configs: Option<UserConfigDefinition>,
+  #[getset(get="pub")]
+  user_configs: Option<UserConfigDefinition>,
 }
 
 impl Default for ProtocolConfiguration {

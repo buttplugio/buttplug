@@ -86,8 +86,8 @@ pub(crate) type ButtplugServerMessageFuture = ButtplugFuture<ButtplugServerMessa
 /// continue execution.
 #[derive(Clone)]
 pub struct ButtplugClientMessageFuturePair {
-  pub msg: ButtplugCurrentSpecClientMessage,
-  pub waker: ButtplugServerMessageStateShared,
+  msg: ButtplugCurrentSpecClientMessage,
+  waker: ButtplugServerMessageStateShared,
 }
 
 impl ButtplugClientMessageFuturePair {

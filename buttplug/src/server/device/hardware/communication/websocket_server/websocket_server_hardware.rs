@@ -183,7 +183,7 @@ impl WebsocketServerHardwareConnector {
     let incoming_broadcaster_clone = incoming_broadcaster.clone();
     let (device_event_sender, _) = broadcast::channel(256);
     let device_event_sender_clone = device_event_sender.clone();
-    let address = info.address.clone();
+    let address = info.address().clone();
     tokio::spawn(async move {
       run_connection_loop(
         &address,
@@ -206,7 +206,7 @@ impl WebsocketServerHardwareConnector {
 #[async_trait]
 impl HardwareConnector for WebsocketServerHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
-    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&self.info.identifier))
+    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(self.info.identifier()))
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
@@ -217,8 +217,8 @@ impl HardwareConnector for WebsocketServerHardwareConnector {
       self.incoming_broadcaster.clone(),
     );
     let hardware = Hardware::new(
-      &self.info.identifier,
-      &self.info.address,
+      self.info.identifier(),
+      self.info.address(),
       &[Endpoint::Rx, Endpoint::Tx],
       Box::new(hardware_internal),
     );
@@ -307,7 +307,7 @@ impl HardwareInternal for WebsocketServerHardware {
     // TODO Should check endpoint validity
     let mut data_receiver = self.incoming_broadcaster.subscribe();
     let event_sender = self.device_event_sender.clone();
-    let address = self.info.address.clone();
+    let address = self.info.address().clone();
     let subscribed = self.subscribed.clone();
     let subscribed_token = self.subscribe_token.clone();
     async move {

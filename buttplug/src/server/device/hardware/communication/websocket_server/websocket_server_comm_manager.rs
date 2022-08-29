@@ -19,13 +19,17 @@ use futures::{FutureExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use tokio::{net::TcpListener, sync::mpsc::Sender};
 use tokio_util::sync::CancellationToken;
+use getset::{Getters, CopyGetters};
 
 // Packet format received from external devices.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Getters, CopyGetters)]
 pub struct WebsocketServerDeviceCommManagerInitInfo {
-  pub identifier: String,
-  pub address: String,
-  pub version: u32,
+  #[getset(get="pub")]
+  identifier: String,
+  #[getset(get="pub")]
+  address: String,
+  #[getset(get_copy="pub")]
+  version: u32,
 }
 
 #[derive(Clone)]

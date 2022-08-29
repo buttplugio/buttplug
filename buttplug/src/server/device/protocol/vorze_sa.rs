@@ -162,10 +162,10 @@ impl ProtocolHandler for VorzeSA {
     let v = msg.vectors()[0].clone();
 
     let previous_position = self.previous_position.load(Ordering::SeqCst);
-    let position = v.position * 200f64;
+    let position = v.position() * 200f64;
     let distance = (previous_position as f64 - position).abs();
 
-    let speed = get_piston_speed(distance, v.duration as f64);
+    let speed = get_piston_speed(distance, v.duration() as f64);
 
     self
       .previous_position

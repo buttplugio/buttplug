@@ -13,21 +13,22 @@ use async_trait::async_trait;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
-use getset::Getters;
+use getset::{Getters, CopyGetters};
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
 /// Low level read command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy="pub")]
 pub struct HardwareReadCmd {
   /// Endpoint to read from
-  pub endpoint: Endpoint,
+  endpoint: Endpoint,
   /// Amount of data to read from endpoint
-  pub length: u32,
+  length: u32,
   /// Timeout for reading data
-  pub timeout_ms: u32,
+  timeout_ms: u32,
 }
 
 impl HardwareReadCmd {
@@ -56,14 +57,17 @@ impl From<RawReadCmd> for HardwareReadCmd {
 /// Low level write command structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize, Getters, CopyGetters)]
 pub struct HardwareWriteCmd {
   /// Endpoint to write to
-  pub endpoint: Endpoint,
+  #[getset(get_copy="pub")]
+  endpoint: Endpoint,
   /// Data to write to endpoint
-  pub data: Vec<u8>,
+  #[getset(get="pub")]
+  data: Vec<u8>,
   /// Only used with Bluetooth LE writing. If true, use WriteWithResponse commands when sending data to device.
-  pub write_with_response: bool,
+  #[getset(get_copy="pub")]
+  write_with_response: bool,
 }
 
 impl HardwareWriteCmd {
@@ -96,10 +100,11 @@ impl From<RawWriteCmd> for HardwareWriteCmd {
 /// While usually related to notify/indicate characteristics on Bluetooth LE devices, can be used
 /// with any read endpoint to signal that any information received should be automatically passed to
 /// the protocol implementation.
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy="pub")]
 pub struct HardwareSubscribeCmd {
   /// Endpoint to subscribe to notifications from.
-  pub endpoint: Endpoint,
+  endpoint: Endpoint,
 }
 
 impl HardwareSubscribeCmd {
@@ -123,9 +128,10 @@ impl From<RawSubscribeCmd> for HardwareSubscribeCmd {
 /// Low level subscribe structure, used by
 /// [ButtplugProtocol](crate::device::protocol::ButtplugProtocol) implementations when working with
 /// [Hardware](crate::device::Hardware) structures.
-#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Serialize, Deserialize, CopyGetters)]
+#[getset(get_copy="pub")]
 pub struct HardwareUnsubscribeCmd {
-  pub endpoint: Endpoint,
+  endpoint: Endpoint,
 }
 
 impl HardwareUnsubscribeCmd {

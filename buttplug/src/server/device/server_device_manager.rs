@@ -50,6 +50,7 @@ use futures::future::{self, FutureExt};
 use std::{convert::TryFrom, sync::Arc};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
+use getset::Getters;
 
 #[derive(Debug)]
 pub(super) enum DeviceManagerCommand {
@@ -57,10 +58,11 @@ pub(super) enum DeviceManagerCommand {
   StopScanning,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
+#[getset(get="pub")]
 pub struct ServerDeviceInfo {
-  pub identifier: ServerDeviceIdentifier,
-  pub display_name: Option<String>,
+  identifier: ServerDeviceIdentifier,
+  display_name: Option<String>,
 }
 
 #[derive(Default)]

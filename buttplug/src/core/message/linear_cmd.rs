@@ -16,11 +16,11 @@ use serde::{Deserialize, Serialize};
 #[getset(get_copy = "pub")]
 pub struct VectorSubcommand {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Index"))]
-  pub index: u32,
+  index: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Duration"))]
-  pub duration: u32,
+  duration: u32,
   #[cfg_attr(feature = "serialize-json", serde(rename = "Position"))]
-  pub position: f64,
+  position: f64,
 }
 
 impl VectorSubcommand {

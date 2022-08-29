@@ -283,12 +283,12 @@ impl HardwareInternal for TestDevice {
         count += 1;
       }
       let read_msg = reads.lock().await.pop_back().unwrap();
-      if *read_msg.endpoint() != msg.endpoint {
+      if *read_msg.endpoint() != msg.endpoint() {
         Err(
           ButtplugDeviceError::DeviceCommunicationError(format!(
             "Read endpoint {} while expecting endpoint {}",
             read_msg.endpoint(),
-            msg.endpoint
+            msg.endpoint()
           )),
         )
       } else {
@@ -302,8 +302,8 @@ impl HardwareInternal for TestDevice {
     &self,
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    if !self.endpoints.contains(&msg.endpoint) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+    if !self.endpoints.contains(&msg.endpoint()) {
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
     }
     self.send_command(msg.clone().into())
   }
@@ -312,10 +312,10 @@ impl HardwareInternal for TestDevice {
     &self,
     msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    if !self.endpoints.contains(&msg.endpoint) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+    if !self.endpoints.contains(&msg.endpoint()) {
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
     }
-    self.subscribed_endpoints.insert(msg.endpoint);
+    self.subscribed_endpoints.insert(msg.endpoint());
     self.send_command((*msg).into())
   }
 
@@ -323,10 +323,10 @@ impl HardwareInternal for TestDevice {
     &self,
     msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    if !self.endpoints.contains(&msg.endpoint) {
-      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
+    if !self.endpoints.contains(&msg.endpoint()) {
+      return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint()))).boxed();
     }
-    self.subscribed_endpoints.remove(&msg.endpoint);
+    self.subscribed_endpoints.remove(&msg.endpoint());
     self.send_command((*msg).into())
   }
 }
