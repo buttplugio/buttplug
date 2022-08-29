@@ -204,6 +204,9 @@ impl ButtplugClient {
       ));
     }
 
+    // If connect is being called again, clear out the device map and start over.
+    self.device_map.clear();
+
     info!("Connecting to server.");
     let (connector_sender, connector_receiver) = mpsc::channel(256);
     connector.connect(connector_sender).await.map_err(|e| {
@@ -295,8 +298,8 @@ impl ButtplugClient {
     let send_fut = self.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
     async move {
-      send_fut.await?;
       connected.store(false, Ordering::SeqCst);
+      send_fut.await?;
       Ok(())
     }
     .boxed()
