@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{
@@ -19,6 +19,7 @@ use crate::{
       HardwareEvent,
       HardwareInternal,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
@@ -350,7 +351,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     // Right now we only need read for doing a whitelist check on devices. We
     // don't care about the data we get back.
     let characteristic = match self.endpoints.get(&msg.endpoint) {
@@ -365,7 +366,7 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
       match device.read(&characteristic).await {
         Ok(data) => {
           trace!("Got reading: {:?}", data);
-          Ok(RawReading::new(0, endpoint, data))
+          Ok(HardwareReading::new(endpoint, &data))
         }
         Err(err) => {
           error!("BTLEPlug device read error: {:?}", err);

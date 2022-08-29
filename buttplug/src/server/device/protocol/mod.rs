@@ -79,7 +79,6 @@ use crate::{
       ButtplugServerDeviceMessage,
       ButtplugServerMessage,
       Endpoint,
-      RawReading,
       SensorType,
     },
   },
@@ -571,8 +570,8 @@ pub trait ProtocolHandler: Sync + Send {
       let msg = HardwareReadCmd::new(Endpoint::RxBLEBattery, 1, 0);
       let fut = device.read_value(&msg);
       async move {
-        let raw_msg: RawReading = fut.await?;
-        let battery_level = raw_msg.data()[0] as i32;
+        let hw_msg = fut.await?;
+        let battery_level = hw_msg.data()[0] as i32;
         let battery_reading = message::SensorReading::new(
           message.device_index(),
           *message.sensor_index(),

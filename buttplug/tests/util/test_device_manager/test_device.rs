@@ -8,7 +8,7 @@
 use buttplug::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::{
     configuration::ProtocolCommunicationSpecifier,
@@ -22,7 +22,7 @@ use buttplug::{
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
-      HardwareWriteCmd,
+      HardwareWriteCmd, HardwareReading,
     },
   },
   util::async_manager,
@@ -163,7 +163,7 @@ pub struct TestDevice {
   test_device_channel: mpsc::Sender<HardwareCommand>,
   event_sender: broadcast::Sender<HardwareEvent>,
   subscribed_endpoints: Arc<DashSet<Endpoint>>,
-  read_data: Arc<Mutex<VecDeque<RawReading>>>,
+  read_data: Arc<Mutex<VecDeque<HardwareReading>>>,
 }
 
 impl TestDevice {
@@ -202,7 +202,7 @@ impl TestDevice {
           TestHardwareEvent::Reads(events) => {
             let mut guard = read_data_clone.lock().await;
             for read in events {
-              guard.push_front(RawReading::new(0, read.endpoint, read.data.clone()));
+              guard.push_front(HardwareReading::new(read.endpoint, &read.data));
             }
           }
         }
@@ -265,7 +265,7 @@ impl HardwareInternal for TestDevice {
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     let reads = self.read_data.clone();
     let msg = *msg;
     async move {
@@ -283,7 +283,7 @@ impl HardwareInternal for TestDevice {
         count += 1;
       }
       let read_msg = reads.lock().await.pop_back().unwrap();
-      if read_msg.endpoint() != msg.endpoint {
+      if *read_msg.endpoint() != msg.endpoint {
         Err(
           ButtplugDeviceError::DeviceCommunicationError(format!(
             "Read endpoint {} while expecting endpoint {}",

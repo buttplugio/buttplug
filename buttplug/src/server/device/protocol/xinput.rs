@@ -67,11 +67,10 @@ impl ProtocolHandler for XInput {
     msg: message::SensorReadCmd,
   ) -> BoxFuture<Result<ButtplugServerMessage, ButtplugDeviceError>> {
     async move {
-      let rawreading = device
+      let reading = device
         .read_value(&HardwareReadCmd::new(Endpoint::Rx, 0, 0))
         .await?;
-      let id = rawreading.device_index();
-      let battery = match rawreading.data()[0] {
+      let battery = match reading.data()[0] {
         0 => 0i32,
         1 => 33,
         2 => 66,
@@ -83,7 +82,7 @@ impl ProtocolHandler for XInput {
         }
       };
       Ok(
-        message::SensorReading::new(id, *msg.sensor_index(), *msg.sensor_type(), vec![battery])
+        message::SensorReading::new(msg.device_index(), *msg.sensor_index(), *msg.sensor_type(), vec![battery])
           .into(),
       )
     }

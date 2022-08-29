@@ -8,7 +8,7 @@
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{
@@ -19,6 +19,7 @@ use crate::{
       HardwareEvent,
       HardwareInternal,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
@@ -289,15 +290,14 @@ impl HardwareInternal for SerialPortHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     // TODO Should check endpoint validity and length requirements
     let receiver = self.port_receiver.clone();
     async move {
       let mut recv_mut = receiver.lock().await;
-      Ok(RawReading::new(
-        0,
+      Ok(HardwareReading::new(
         Endpoint::Rx,
-        recv_mut
+        &recv_mut
           .recv()
           .now_or_never()
           .unwrap_or_else(|| Some(vec![]))

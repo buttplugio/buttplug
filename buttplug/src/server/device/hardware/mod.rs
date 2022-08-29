@@ -13,6 +13,7 @@ use async_trait::async_trait;
 use futures::future::BoxFuture;
 use serde::{Deserialize, Serialize};
 use tokio::sync::broadcast;
+use getset::Getters;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -188,6 +189,32 @@ impl From<HardwareUnsubscribeCmd> for HardwareCommand {
   }
 }
 
+#[derive(Debug, Clone, Getters)]
+#[getset(get="pub")]
+pub struct HardwareReading {
+  endpoint: Endpoint,
+  data: Vec<u8>
+}
+
+impl HardwareReading {
+  pub fn new(endpoint: Endpoint, data: &Vec<u8>) -> Self {
+    Self {
+      endpoint,
+      data: data.clone()
+    }
+  }
+}
+
+impl From<HardwareReading> for RawReading {
+  fn from(reading: HardwareReading) -> Self {
+    RawReading::new(
+      0,
+      *reading.endpoint(),
+      reading.data().clone()
+    )
+  }
+}
+
 /// Events that can be emitted from a [Hardware](crate::device::Hardware).
 #[derive(Debug, Clone)]
 pub enum HardwareEvent {
@@ -271,7 +298,7 @@ impl Hardware {
   pub fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     self.internal_impl.read_value(msg)
   }
 
@@ -315,7 +342,7 @@ pub trait HardwareInternal: Sync + Send {
   fn read_value(
     &self,
     msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>>;
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>>;
   /// Write a value to the device
   fn write_value(
     &self,

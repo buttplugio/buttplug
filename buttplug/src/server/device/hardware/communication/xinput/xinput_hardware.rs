@@ -9,7 +9,7 @@ use super::xinput_device_comm_manager::XInputControllerIndex;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::hardware::communication::HardwareSpecificError,
   server::device::{
@@ -21,6 +21,7 @@ use crate::{
       HardwareEvent,
       HardwareInternal,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
@@ -142,7 +143,7 @@ impl HardwareInternal for XInputHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     let handle = self.handle.clone();
     let index = self.index;
     async move {
@@ -151,10 +152,9 @@ impl HardwareInternal for XInputHardware {
         .map_err(|e| {
           ButtplugDeviceError::from(HardwareSpecificError::XInputError(format!("{:?}", e)))
         })?;
-      Ok(RawReading::new(
-        index as u32,
+      Ok(HardwareReading::new(
         Endpoint::Rx,
-        vec![battery.battery_level.0],
+        &vec![battery.battery_level.0],
       ))
     }
     .boxed()

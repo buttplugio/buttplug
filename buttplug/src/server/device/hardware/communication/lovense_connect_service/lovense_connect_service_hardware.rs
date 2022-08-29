@@ -9,7 +9,7 @@ use super::lovense_connect_service_comm_manager::{get_local_info, LovenseService
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::{
     configuration::{LovenseConnectServiceSpecifier, ProtocolCommunicationSpecifier},
@@ -19,6 +19,7 @@ use crate::{
       HardwareConnector,
       HardwareEvent,
       HardwareInternal,
+      HardwareReading,
       HardwareReadCmd,
       HardwareSpecializer,
       HardwareSubscribeCmd,
@@ -139,13 +140,12 @@ impl HardwareInternal for LovenseServiceHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     let battery_level = self.battery_level.clone();
     async move {
-      Ok(RawReading::new(
-        0,
+      Ok(HardwareReading::new(
         Endpoint::Rx,
-        vec![battery_level.load(Ordering::SeqCst)],
+        &vec![battery_level.load(Ordering::SeqCst)],
       ))
     }
     .boxed()

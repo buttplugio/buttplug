@@ -681,9 +681,10 @@ impl ServerDevice {
     async move {
       fut
         .await
-        .map(|mut msg| {
-          msg.set_id(id);
-          msg.into()
+        .map(|msg| {
+          let mut raw_msg: RawReading = msg.into();
+          raw_msg.set_id(id);
+          raw_msg.into()
         })
         .map_err(|err| err.into())
     }

@@ -9,7 +9,7 @@ use super::websocket_server_comm_manager::WebsocketServerDeviceCommManagerInitIn
 use crate::{
   core::{
     errors::ButtplugDeviceError,
-    message::{Endpoint, RawReading},
+    message::{Endpoint},
   },
   server::device::{
     configuration::{ProtocolCommunicationSpecifier, WebsocketSpecifier},
@@ -20,6 +20,7 @@ use crate::{
       HardwareEvent,
       HardwareInternal,
       HardwareReadCmd,
+      HardwareReading,
       HardwareSpecializer,
       HardwareSubscribeCmd,
       HardwareUnsubscribeCmd,
@@ -271,7 +272,7 @@ impl HardwareInternal for WebsocketServerHardware {
   fn read_value(
     &self,
     _msg: &HardwareReadCmd,
-  ) -> BoxFuture<'static, Result<RawReading, ButtplugDeviceError>> {
+  ) -> BoxFuture<'static, Result<HardwareReading, ButtplugDeviceError>> {
     future::ready(Err(ButtplugDeviceError::UnhandledCommand(
       "Websocket Hardware does not support read".to_owned(),
     )))
