@@ -1,15 +1,15 @@
 devices:
   - identifier: 
-      name: "SF Whatever"
-    expected_name: "Satisfyer Double Desire"
+      name: "SF Double Flex"
+    expected_name: "Satisfyer Double Flex"
 device_init:
   - !Events
       device_index: 0
       events: 
         - !Reads
             - endpoint: rxblemodel
-              # The number 10160, but it needs to be u32 so 4 bytes.
-              data: [0x0, 0x0, 0x27, 0xB0]
+              # The number 10065, but it needs to be u32 so 4 bytes.
+              data: [0x0, 0x0, 0x27, 0x51]
   - !Commands
       device_index: 0
       commands: 
@@ -24,6 +24,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
+            # 2 sets on the first send because we don't know the real count yet
             data: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
             write_with_response: false
   - !Messages
@@ -39,7 +40,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x32, 0x32, 0x32, 0x32, 0x19, 0x19, 0x19, 0x19]
+            data: [0x32, 0x32, 0x32, 0x32, 0x19, 0x19, 0x19, 0x19, 0x0, 0x0, 0x0, 0x0]
             write_with_response: false
   - !Messages
       device_index: 0
@@ -54,8 +55,25 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x4B, 0x4B, 0x4B, 0x4B, 0x32, 0x32, 0x32, 0x32]
+            data: [0x4B, 0x4B, 0x4B, 0x4B, 0x32, 0x32, 0x32, 0x32, 0x0, 0x0, 0x0, 0x0]
             write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+          - Index: 2
+            Speed: 0.25
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+          endpoint: tx
+          data: [0x4B, 0x4B, 0x4B, 0x4B, 0x32, 0x32, 0x32, 0x32, 0x19, 0x19, 0x19, 0x19]
+          write_with_response: false
   - !Messages
       device_index: 0
       messages:
@@ -65,5 +83,5 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x00, 0x00, 0x00, 0x00, 0x0, 0x0, 0x0, 0x0]
+            data: [0x0, 0x0, 0x0, 0x0, 0x00, 0x00, 0x00, 0x00, 0x0, 0x0, 0x0, 0x0]
             write_with_response: false

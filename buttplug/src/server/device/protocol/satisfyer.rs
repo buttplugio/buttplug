@@ -21,7 +21,7 @@ use crate::{
 use async_trait::async_trait;
 use std::{
   sync::{
-    atomic::{AtomicU8, Ordering},
+    atomic::{AtomicU8, AtomicUsize, Ordering},
     Arc,
   },
   time::Duration,
@@ -93,20 +93,24 @@ impl ProtocolInitializer for SatisfyerInitializer {
 }
 
 pub struct Satisfyer {
-  last_command: Arc<[AtomicU8; 2]>,
+  // The largest feature count is currently 5
+  feature_count: AtomicUsize,
+  last_command: Arc<[AtomicU8; 5]>,
 }
 
-fn form_command(command1: u8, command2: u8) -> Vec<u8> {
-  [[command1; 4], [command2; 4]].concat()
+fn form_command(feature_count: usize, data: Arc<[AtomicU8; 5]>) -> Vec<u8> {
+  data[0..feature_count]
+      .iter()
+      .map( |d| vec![d.load(Ordering::SeqCst); 4] )
+      .collect::<Vec<Vec<u8>>>()
+      .concat()
 }
 
 // Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
 // Therefore we try to send a command every ~1s unless something is sent/updated sooner.
-async fn send_satisfyer_updates(device: Arc<Hardware>, data: Arc<[AtomicU8; 2]>) {
+async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, data: Arc<[AtomicU8; 5]>) {
   loop {
-    let command_val_0 = data[0].load(Ordering::SeqCst);
-    let command_val_1 = data[1].load(Ordering::SeqCst);
-    let command = form_command(command_val_0, command_val_1);
+    let command = form_command(feature_count, data.clone());
     if let Err(e) = device
       .write_value(&HardwareWriteCmd::new(Endpoint::Tx, command, false))
       .await
@@ -123,13 +127,23 @@ async fn send_satisfyer_updates(device: Arc<Hardware>, data: Arc<[AtomicU8; 2]>)
 
 impl Satisfyer {
   fn new(hardware: Arc<Hardware>) -> Self {
-    let last_command = Arc::new([AtomicU8::new(0), AtomicU8::new(0)]);
+    let last_command = Arc::new([
+      AtomicU8::new(0),
+      AtomicU8::new(0),
+      AtomicU8::new(0),
+      AtomicU8::new(0),
+      AtomicU8::new(0)
+    ]);
     let last_command_clone = last_command.clone();
+    //XXX: Ideally this would be driven off of the attributes, but that would require passing
+    //     attrs into protocol_initializer.initialize(), which is a larger change than I want to
+    //     make without discussing it first
+    let feature_count = 2;
     async_manager::spawn(async move {
-      send_satisfyer_updates(hardware, last_command_clone).await;
+      send_satisfyer_updates(hardware, feature_count, last_command_clone).await;
     });
 
-    Self { last_command }
+    Self { feature_count: AtomicUsize::new(feature_count), last_command }
   }
 }
 
@@ -142,18 +156,15 @@ impl ProtocolHandler for Satisfyer {
     &self,
     commands: &[Option<(message::ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let data = if commands.len() == 1 {
-      let command_val = commands[0].as_ref().unwrap().1 as u8;
-      self.last_command[0].store(command_val, Ordering::SeqCst);
-      form_command(command_val, 0)
-    } else {
-      // These end up flipped for some reason.
-      let command_val_0 = commands[1].as_ref().unwrap().1 as u8;
-      let command_val_1 = commands[0].as_ref().unwrap().1 as u8;
-      self.last_command[0].store(command_val_0, Ordering::SeqCst);
-      self.last_command[1].store(command_val_1, Ordering::SeqCst);
-      form_command(command_val_0, command_val_1)
-    };
+    let count = commands.len();
+    self.feature_count.store(commands.len(), Ordering::SeqCst);
+
+    for i in 0..count {
+      let command_val = commands[i].as_ref().unwrap().1 as u8;
+      self.last_command[i].store(command_val, Ordering::SeqCst);
+    }
+    let data = form_command(self.feature_count.load(Ordering::SeqCst), self.last_command.clone());
+
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }
