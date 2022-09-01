@@ -30,6 +30,7 @@ use std::{
   time::Duration,
 };
 use tokio::{sync::RwLock, time::sleep};
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 // Time between Hgod update commands, in milliseconds.
 const HGOD_COMMAND_DELAY_MS: u64 = 100;
@@ -44,6 +45,7 @@ impl ProtocolInitializer for HgodInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Hgod::new(&hardware)))
   }

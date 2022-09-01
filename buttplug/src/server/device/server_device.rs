@@ -165,7 +165,7 @@ pub(super) async fn build_server_device(
 
   // Build the server device and return.
 
-  let handler = protocol_initializer.initialize(hardware.clone()).await?;
+  let handler = protocol_initializer.initialize(hardware.clone(), &attrs).await?;
 
   // We now have fully initialized hardware, return a server device.
   Ok(Some(ServerDevice::new(

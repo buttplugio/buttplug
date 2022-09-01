@@ -27,6 +27,7 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(VorzeSA, "vorze-sa");
 
@@ -38,6 +39,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let hwname = hardware.name().to_ascii_lowercase();
     let device_type = if hwname.contains("cyclone") {

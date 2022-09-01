@@ -19,6 +19,7 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -64,6 +65,7 @@ impl ProtocolInitializer for YououInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Youou::default()))
   }

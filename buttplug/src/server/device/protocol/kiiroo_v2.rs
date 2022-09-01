@@ -28,6 +28,7 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(KiirooV2, "kiiroo-v2");
 
@@ -39,6 +40,7 @@ impl ProtocolInitializer for KiirooV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Firmware, vec![0x0u8], true);
     hardware.write_value(&msg).await?;

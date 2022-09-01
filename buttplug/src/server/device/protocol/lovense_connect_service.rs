@@ -28,6 +28,7 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(LovenseConnectService, "lovense-connect-service");
 
@@ -39,6 +40,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(LovenseConnectService::new(hardware.address())))
   }

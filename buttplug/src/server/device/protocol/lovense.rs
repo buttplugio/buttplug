@@ -27,6 +27,7 @@ use std::{
   time::Duration,
 };
 use tokio::time::sleep;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
@@ -108,6 +109,7 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Lovense::default()))
   }

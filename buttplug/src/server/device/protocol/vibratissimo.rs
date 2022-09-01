@@ -19,6 +19,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -69,6 +70,7 @@ impl ProtocolInitializer for VibratissimoInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Vibratissimo::default()))
   }
