@@ -21,6 +21,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(Ankni, "ankni");
 
@@ -32,6 +33,7 @@ impl ProtocolInitializer for AnkniInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(
       Endpoint::Tx,

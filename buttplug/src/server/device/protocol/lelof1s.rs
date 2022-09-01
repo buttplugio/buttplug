@@ -24,6 +24,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(LeloF1s, "lelo-f1s");
 
@@ -35,6 +36,7 @@ impl ProtocolInitializer for LeloF1sInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo F1s needs you to hit the power button after connection
     // before it'll accept any commands. Unless we listen for event on

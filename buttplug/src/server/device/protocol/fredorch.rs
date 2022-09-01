@@ -33,6 +33,7 @@ use std::{
   time::Duration,
 };
 use tokio::time::sleep;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 500;
 
@@ -86,6 +87,7 @@ impl ProtocolInitializer for FredorchInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware

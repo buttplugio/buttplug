@@ -343,6 +343,7 @@ pub trait ProtocolInitializer: Sync + Send {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    attributes: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError>;
 }
 
@@ -397,6 +398,7 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }
@@ -691,3 +693,4 @@ macro_rules! generic_protocol_initializer_setup {
 
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
+use crate::server::device::configuration::ProtocolDeviceAttributes;

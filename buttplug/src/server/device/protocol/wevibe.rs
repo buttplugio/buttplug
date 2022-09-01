@@ -24,6 +24,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(WeVibe, "wevibe");
 
@@ -35,6 +36,7 @@ impl ProtocolInitializer for WeVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     debug!("calling WeVibe init");
     hardware

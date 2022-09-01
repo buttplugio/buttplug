@@ -24,8 +24,7 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            # 2 sets on the first send because we don't know the real count yet
-            data: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]
+            data: [0x0, 0x0, 0x0, 0x0]
             write_with_response: false
   - !Messages
       device_index: 0

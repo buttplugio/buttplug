@@ -21,11 +21,13 @@ use crate::{
 use async_trait::async_trait;
 use std::{
   sync::{
-    atomic::{AtomicU8, AtomicUsize, Ordering},
+    atomic::{AtomicU8, Ordering},
     Arc,
   },
   time::Duration,
 };
+use crate::server::device::configuration::ProtocolDeviceAttributes;
+
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -83,22 +85,26 @@ impl ProtocolInitializer for SatisfyerInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
+    attributes: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Command, vec![0x01], true);
     let info_fut = hardware.write_value(&msg);
-
     info_fut.await?;
-    Ok(Arc::new(Satisfyer::new(hardware)))
+
+    let mut feature_count = 2; // fallback to 2
+    if let Some(attrs) = attributes.message_attributes.scalar_cmd() {
+      feature_count = attrs.len();
+    }
+    Ok(Arc::new(Satisfyer::new(hardware, feature_count)))
   }
 }
 
 pub struct Satisfyer {
-  // The largest feature count is currently 5
-  feature_count: AtomicUsize,
-  last_command: Arc<[AtomicU8; 5]>,
+  feature_count: usize,
+  last_command: Arc<Vec<AtomicU8>>,
 }
 
-fn form_command(feature_count: usize, data: Arc<[AtomicU8; 5]>) -> Vec<u8> {
+fn form_command(feature_count: usize, data: Arc<Vec<AtomicU8>>) -> Vec<u8> {
   data[0..feature_count]
       .iter()
       .map( |d| vec![d.load(Ordering::SeqCst); 4] )
@@ -108,7 +114,7 @@ fn form_command(feature_count: usize, data: Arc<[AtomicU8; 5]>) -> Vec<u8> {
 
 // Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
 // Therefore we try to send a command every ~1s unless something is sent/updated sooner.
-async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, data: Arc<[AtomicU8; 5]>) {
+async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, data: Arc<Vec<AtomicU8>>) {
   loop {
     let command = form_command(feature_count, data.clone());
     if let Err(e) = device
@@ -126,24 +132,15 @@ async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, dat
 }
 
 impl Satisfyer {
-  fn new(hardware: Arc<Hardware>) -> Self {
-    let last_command = Arc::new([
-      AtomicU8::new(0),
-      AtomicU8::new(0),
-      AtomicU8::new(0),
-      AtomicU8::new(0),
-      AtomicU8::new(0)
-    ]);
+  fn new(hardware: Arc<Hardware>, feature_count: usize) -> Self {
+
+    let last_command = Arc::new((0..feature_count).map(|_| AtomicU8::new(0) ).collect::<Vec<AtomicU8>>());
     let last_command_clone = last_command.clone();
-    //XXX: Ideally this would be driven off of the attributes, but that would require passing
-    //     attrs into protocol_initializer.initialize(), which is a larger change than I want to
-    //     make without discussing it first
-    let feature_count = 2;
     async_manager::spawn(async move {
       send_satisfyer_updates(hardware, feature_count, last_command_clone).await;
     });
 
-    Self { feature_count: AtomicUsize::new(feature_count), last_command }
+    Self { feature_count, last_command }
   }
 }
 
@@ -156,14 +153,14 @@ impl ProtocolHandler for Satisfyer {
     &self,
     commands: &[Option<(message::ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let count = commands.len();
-    self.feature_count.store(commands.len(), Ordering::SeqCst);
-
-    for i in 0..count {
+    if self.feature_count != commands.len() {
+      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(self.feature_count as u32, commands.len() as u32));
+    }
+    for i in 0..commands.len() {
       let command_val = commands[i].as_ref().unwrap().1 as u8;
       self.last_command[i].store(command_val, Ordering::SeqCst);
     }
-    let data = form_command(self.feature_count.load(Ordering::SeqCst), self.last_command.clone());
+    let data = form_command(self.feature_count, self.last_command.clone());
 
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
