@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -26,8 +27,6 @@ use std::{
   },
   time::Duration,
 };
-use crate::server::device::configuration::ProtocolDeviceAttributes;
-
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -106,15 +105,19 @@ pub struct Satisfyer {
 
 fn form_command(feature_count: usize, data: Arc<Vec<AtomicU8>>) -> Vec<u8> {
   data[0..feature_count]
-      .iter()
-      .map( |d| vec![d.load(Ordering::SeqCst); 4] )
-      .collect::<Vec<Vec<u8>>>()
-      .concat()
+    .iter()
+    .map(|d| vec![d.load(Ordering::SeqCst); 4])
+    .collect::<Vec<Vec<u8>>>()
+    .concat()
 }
 
 // Satisfyer toys will drop their connections if they don't get an update within ~10 seconds.
 // Therefore we try to send a command every ~1s unless something is sent/updated sooner.
-async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, data: Arc<Vec<AtomicU8>>) {
+async fn send_satisfyer_updates(
+  device: Arc<Hardware>,
+  feature_count: usize,
+  data: Arc<Vec<AtomicU8>>,
+) {
   loop {
     let command = form_command(feature_count, data.clone());
     if let Err(e) = device
@@ -133,14 +136,20 @@ async fn send_satisfyer_updates(device: Arc<Hardware>, feature_count: usize, dat
 
 impl Satisfyer {
   fn new(hardware: Arc<Hardware>, feature_count: usize) -> Self {
-
-    let last_command = Arc::new((0..feature_count).map(|_| AtomicU8::new(0) ).collect::<Vec<AtomicU8>>());
+    let last_command = Arc::new(
+      (0..feature_count)
+        .map(|_| AtomicU8::new(0))
+        .collect::<Vec<AtomicU8>>(),
+    );
     let last_command_clone = last_command.clone();
     async_manager::spawn(async move {
       send_satisfyer_updates(hardware, feature_count, last_command_clone).await;
     });
 
-    Self { feature_count, last_command }
+    Self {
+      feature_count,
+      last_command,
+    }
   }
 }
 
@@ -154,7 +163,10 @@ impl ProtocolHandler for Satisfyer {
     commands: &[Option<(message::ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.feature_count != commands.len() {
-      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(self.feature_count as u32, commands.len() as u32));
+      return Err(ButtplugDeviceError::DeviceFeatureCountMismatch(
+        self.feature_count as u32,
+        commands.len() as u32,
+      ));
     }
     for i in 0..commands.len() {
       let command_val = commands[i].as_ref().unwrap().1 as u8;

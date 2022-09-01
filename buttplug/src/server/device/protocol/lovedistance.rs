@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -21,7 +22,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(LoveDistance, "lovedistance");
 
@@ -33,7 +33,7 @@ impl ProtocolInitializer for LoveDistanceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::Tx, vec![0xf3, 0, 0], false);
     hardware.write_value(&msg).await?;

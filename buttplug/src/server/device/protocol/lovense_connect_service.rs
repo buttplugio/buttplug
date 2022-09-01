@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -28,7 +29,6 @@ use std::sync::{
   atomic::{AtomicBool, Ordering},
   Arc,
 };
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(LovenseConnectService, "lovense-connect-service");
 
@@ -40,7 +40,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(LovenseConnectService::new(hardware.address())))
   }

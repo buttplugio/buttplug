@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -12,7 +13,7 @@ use crate::{
   },
   server::device::{
     configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd, HardwareSubscribeCmd, HardwareEvent},
+    hardware::{Hardware, HardwareCommand, HardwareEvent, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       fleshlight_launch_helper::calculate_speed,
       generic_protocol_initializer_setup,
@@ -33,7 +34,6 @@ use std::{
   time::Duration,
 };
 use tokio::time::sleep;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 500;
 
@@ -87,12 +87,12 @@ impl ProtocolInitializer for FredorchInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
     hardware
-        .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
-        .await?;
+      .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
+      .await?;
 
     let init: Vec<(String, Vec<u8>)> = vec![
       (
@@ -106,8 +106,8 @@ impl ProtocolInitializer for FredorchInitializer {
       (
         "Program the device to move to position 0 at speed 5".to_owned(),
         vec![
-          0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00,
-          0x00, 0x00, 0x01,
+          0x01, 0x10, 0x00, 0x6b, 0x00, 0x05, 0x0a, 0x00, 0x05, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x01,
         ],
       ),
       (

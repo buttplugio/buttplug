@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -26,7 +27,6 @@ use crate::{
 use async_trait::async_trait;
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::RwLock, time::sleep};
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
 
@@ -38,7 +38,7 @@ impl ProtocolInitializer for MysteryVibeInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let msg = HardwareWriteCmd::new(Endpoint::TxMode, vec![0x43u8, 0x02u8, 0x00u8], true);
     hardware.write_value(&msg).await?;

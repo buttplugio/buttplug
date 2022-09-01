@@ -26,18 +26,9 @@ impl ProtocolHandler for MizzZeeV2 {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![
-        0x69,
-        0x96,
-        0x04,
-        0x02,
-        scalar as u8,
-        0x2c,
-        scalar as u8,
-      ],
+      vec![0x69, 0x96, 0x04, 0x02, scalar as u8, 0x2c, scalar as u8],
       false,
     )
     .into()])
   }
 }
-

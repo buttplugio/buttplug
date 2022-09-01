@@ -6,6 +6,7 @@
 // for full license information.
 
 use super::fleshlight_launch_helper;
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -29,7 +30,6 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 mod protocomm {
   include!("./protocomm.rs");
@@ -49,7 +49,7 @@ impl ProtocolInitializer for TheHandyInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // Ok, here we go. This is an overly-complex nightmare but apparently "protocomm makes the
     // firmware easier".

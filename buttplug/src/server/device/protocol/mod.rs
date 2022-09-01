@@ -218,10 +218,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
   add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
-  add_to_protocol_map(
-    &mut map,
-    meese::setup::MeeseIdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     mizzzee::setup::MizzZeeIdentifierFactory::default(),
@@ -398,7 +395,7 @@ impl ProtocolInitializer for GenericProtocolInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(self.handler.take().unwrap())
   }
@@ -691,6 +688,6 @@ macro_rules! generic_protocol_initializer_setup {
   };
 }
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
