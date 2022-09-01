@@ -26,12 +26,7 @@ impl ProtocolHandler for Meese {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![
-        0x01,
-        0x80,
-        0x01 + (_index as u8),
-        (scalar as u8)
-      ],
+      vec![0x01, 0x80, 0x01 + (_index as u8), (scalar as u8)],
       true,
     )
     .into()])

@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -16,8 +17,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
-
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -45,13 +44,24 @@ impl ProtocolIdentifier for HismithIdentifier {
     hardware: Arc<Hardware>,
   ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
-        .await?;
+      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .await?;
 
-    let identifier = result.data().into_iter().map( |b| format!("{:02x}", b) ).collect::<String>();
+    let identifier = result
+      .data()
+      .into_iter()
+      .map(|b| format!("{:02x}", b))
+      .collect::<String>();
     info!("Hismith Device Identifier: {}", identifier);
 
-    Ok((ServerDeviceIdentifier::new(hardware.address(), "hismith", &ProtocolAttributesType::Identifier(identifier)), Box::new(HismithInitializer::default())))
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "hismith",
+        &ProtocolAttributesType::Identifier(identifier),
+      ),
+      Box::new(HismithInitializer::default()),
+    ))
   }
 }
 
@@ -63,7 +73,7 @@ impl ProtocolInitializer for HismithInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(Hismith::default()))
   }
@@ -79,7 +89,11 @@ impl ProtocolHandler for Hismith {
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 { 0xf0 } else { scalar as u8 };
+    let speed: u8 = if _index != 0 && scalar == 0 {
+      0xf0
+    } else {
+      scalar as u8
+    };
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -95,7 +109,11 @@ impl ProtocolHandler for Hismith {
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 { 0xf0 } else { scalar as u8 };
+    let speed: u8 = if _index != 0 && scalar == 0 {
+      0xf0
+    } else {
+      scalar as u8
+    };
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

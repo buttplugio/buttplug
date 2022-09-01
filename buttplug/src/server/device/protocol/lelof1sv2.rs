@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -31,7 +32,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(LeloF1sV2, "lelo-f1sv2");
 
@@ -43,7 +43,7 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     // The Lelo F1s V2 has a very specific pairing flow:
     // * First the device is turned on in BLE mode (long press)

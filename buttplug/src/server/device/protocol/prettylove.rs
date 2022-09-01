@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -16,7 +17,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use std::sync::Arc;
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -62,7 +62,7 @@ impl ProtocolInitializer for PrettyLoveInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     Ok(Arc::new(PrettyLove::default()))
   }

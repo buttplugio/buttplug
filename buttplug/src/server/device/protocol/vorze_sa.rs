@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -27,7 +28,6 @@ use std::sync::{
   atomic::{AtomicU8, Ordering},
   Arc,
 };
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 
 generic_protocol_initializer_setup!(VorzeSA, "vorze-sa");
 
@@ -39,7 +39,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes
+    _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let hwname = hardware.name().to_ascii_lowercase();
     let device_type = if hwname.contains("cyclone") {
@@ -152,7 +152,7 @@ impl ProtocolHandler for VorzeSA {
           vec![self.device_type as u8, VorzeActions::Rotate as u8, data],
           true,
         )
-            .into()])
+        .into()])
       } else {
         Ok(vec![])
       }
@@ -172,7 +172,8 @@ impl ProtocolHandler for VorzeSA {
         Ok(vec![HardwareWriteCmd::new(
           Endpoint::Tx,
           vec![self.device_type as u8, data_left, data_right],
-          true)
+          true,
+        )
         .into()])
       } else {
         Ok(vec![])
