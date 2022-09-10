@@ -17,6 +17,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
+use rusty_xinput::XInputHandle;
 use std::string::ToString;
 use tokio::sync::mpsc;
 
@@ -46,11 +47,16 @@ impl HardwareCommunicationManagerBuilder for XInputDeviceCommunicationManagerBui
 
 pub struct XInputDeviceCommunicationManager {
   sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
+  handle: XInputHandle
 }
 
 impl XInputDeviceCommunicationManager {
   fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
-    Self { sender }
+    Self { 
+      sender,
+      handle: rusty_xinput::XInputHandle::load_default()
+        .expect("Always loads in windows, this shouldn't run elsewhere.")
+    }
   }
 }
 
@@ -61,19 +67,17 @@ impl TimedRetryCommunicationManagerImpl for XInputDeviceCommunicationManager {
   }
 
   async fn scan(&self) -> Result<(), ButtplugDeviceError> {
-    debug!("XInput manager scanning for devices");
-    let handle = rusty_xinput::XInputHandle::load_default()
-      .expect("Always loads in windows, this shouldn't run elsewhere.");
+    trace!("XInput manager scanning for devices");
     for i in &[
       XInputControllerIndex::XInputController1,
       XInputControllerIndex::XInputController2,
       XInputControllerIndex::XInputController3,
       XInputControllerIndex::XInputController4,
     ] {
-      match handle.get_state(*i as u32) {
+      match self.handle.get_state(*i as u32) {
         Ok(_) => {
           let index = *i as u32;
-          info!("XInput manager found device {}", index);
+          debug!("XInput manager found device {}", index);
           let device_creator = Box::new(XInputHardwareConnector::new(*i));
 
           if self
