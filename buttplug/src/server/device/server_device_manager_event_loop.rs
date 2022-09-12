@@ -19,7 +19,9 @@ use crate::{
 use dashmap::{DashMap, DashSet};
 use futures::{future, FutureExt, StreamExt};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::{broadcast, mpsc};
+use tokio::time::sleep;
 use tokio_util::sync::CancellationToken;
 use tracing;
 use tracing_futures::Instrument;
@@ -178,13 +180,32 @@ impl ServerDeviceManagerEventLoop {
         // device, due to how things like advertisements work. We'll filter this at the
         // DeviceManager level to make sure that even if a badly coded DCM throws multiple found
         // events, we only listen to the first one.
-        if self.connecting_devices.contains(&address) {
+        while !self.connecting_devices.insert(address.clone()) {
           info!(
-            "Device {} currently trying to connect, ignoring new device event.",
+            "Device {} currently trying to connect, delaying new device event.",
             address
           );
-          return;
+
+          sleep(Duration::from_millis(100)).await;
+
+          // Check to make sure the device isn't already connected. If it is, drop it.
+          if self
+            .device_map
+            .iter()
+            .any(|entry| *entry.value().identifier().address() == address)
+          {
+            debug!(
+              "Device {} already connected, ignoring new device event.",
+              address
+            );
+            return;
+          }
         }
+        trace!(
+          "Inserted device address {} into connecting list {:?}.",
+          address,
+          self.connecting_devices
+        );
 
         self.connecting_devices.insert(address.clone());
         let device_event_sender_clone = self.device_event_sender.clone();
