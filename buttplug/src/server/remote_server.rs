@@ -196,6 +196,11 @@ impl ButtplugRemoteServer {
     self.disconnect_notifier.notify_waiters();
     Ok(())
   }
+
+  pub async fn shutdown(&self) -> Result<(), ButtplugError> {
+    self.server.shutdown().await?;
+    Ok(())
+  }
 }
 
 impl Drop for ButtplugRemoteServer {

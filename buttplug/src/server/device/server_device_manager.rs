@@ -325,6 +325,16 @@ impl ServerDeviceManager {
       display_name: device.value().display_name(),
     })
   }
+
+  pub fn shutdown(&self) -> ButtplugServerResultFuture {
+    let devices = self.devices.clone();
+    async move {
+      for device in devices.iter() {
+        device.value().disconnect().await?;
+      }
+      Ok(message::Ok::default().into())
+    }.boxed()
+  }
 }
 
 impl Drop for ServerDeviceManager {
