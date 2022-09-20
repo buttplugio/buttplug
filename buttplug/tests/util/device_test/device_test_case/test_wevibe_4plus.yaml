@@ -1,0 +1,76 @@
+devices:
+  - identifier: 
+      name: "4plus"
+    expected_name: "WeVibe 4 Plus"
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: true
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 1
+            Speed: 0.25
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x84, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0xc8, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x0f, 0x03, 0x00, 0x08, 0x00, 0x03, 0x00, 0x00 ]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+            write_with_response: true

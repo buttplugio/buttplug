@@ -909,7 +909,6 @@ protocols:
         - Nova
         - Pivot
         - Rave
-        - Skeena
         - Sync
         - Verge
         - Wish
@@ -943,9 +942,6 @@ protocols:
       - identifier:
           - Verge
         name: WeVibe Verge
-      - identifier:
-          - Skeena
-        name: WeVibe Skeena
       - identifier:
           - Wish
         name: WeVibe Wish
@@ -994,7 +990,6 @@ protocols:
   wevibe-8bit:
     btle:
       names:
-        - Chorus
         - Melt
         - Moxie
         - Vector
@@ -1015,15 +1010,6 @@ protocols:
           - StepRange: [0, 12]
             ActuatorType: Vibrate
     configurations:
-      - identifier:
-          - Chorus
-        name: WeVibe Chorus
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 27]
-              ActuatorType: Vibrate
-            - StepRange: [0, 27]
-              ActuatorType: Vibrate
       - identifier:
           - Melt
         name: WeVibe Melt
@@ -1083,6 +1069,23 @@ protocols:
     defaults:
       name: WeVibe Realm Reina
       messages: {}
+  wevibe-chorus:
+    btle:
+      names:
+        - Chorus
+        - skeena
+      services:
+        f000bb03-0451-4000-b000-000000000000:
+          tx: f000c000-0451-4000-b000-000000000000
+          rx: f000b000-0451-4000-b000-000000000000
+    defaults:
+      name: WeVibe Chorus
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 30]
+            ActuatorType: Vibrate
+          - StepRange: [0, 30]
+            ActuatorType: Vibrate
   youcups:
     btle:
       names:

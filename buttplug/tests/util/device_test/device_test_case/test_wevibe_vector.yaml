@@ -1,0 +1,61 @@
+devices:
+  - identifier: 
+      name: "Vector"
+    expected_name: "WeVibe Vector"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+          - Index: 1
+            Speed: 0.25
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x06, 0x09, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x09, 0x0c, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x09, 0x03, 0x02, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+            write_with_response: true
