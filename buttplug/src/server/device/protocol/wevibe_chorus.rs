@@ -16,12 +16,12 @@ use crate::{
   },
 };
 
-generic_protocol_setup!(WeVibe8Bit, "wevibe-8bit");
+generic_protocol_setup!(WeVibeChorus, "wevibe-chorus");
 
 #[derive(Default)]
-pub struct WeVibe8Bit {}
+pub struct WeVibeChorus {}
 
-impl ProtocolHandler for WeVibe8Bit {
+impl ProtocolHandler for WeVibeChorus {
   fn needs_full_command_set(&self) -> bool {
     true
   }
@@ -39,14 +39,15 @@ impl ProtocolHandler for WeVibe8Bit {
     let data = if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     } else {
+      // Note the motor order is flipped for the Chorus
       let status_byte: u8 =
-        (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
+        (if r_speed_ext == 0 { 0 } else { 1 }) | (if r_speed_int == 0 { 0 } else { 2 });
       vec![
         0x0f,
-        0x03,
+        0x1a,
         0x00,
-        r_speed_ext + 3,
-        r_speed_int + 3,
+        r_speed_int,
+        r_speed_ext,
         status_byte,
         0x00,
         0x00,

@@ -1,0 +1,57 @@
+devices:
+  - identifier: 
+      name: "Pivot"
+    expected_name: "WeVibe Pivot"
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x99, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+            write_with_response: true
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0x88, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x0f, 0x03, 0x00, 0xcc, 0x00, 0x03, 0x00, 0x00]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [ 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
+            write_with_response: true

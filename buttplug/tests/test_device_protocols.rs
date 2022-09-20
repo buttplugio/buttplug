@@ -39,6 +39,11 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -69,6 +74,11 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -94,6 +104,11 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
 fn test_device_protocols_embedded_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -118,6 +133,11 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
+#[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
+#[test_case("test_wevibe_vector.yaml" ; "WeVibe Protocol (8bit) - Vector")]
+#[test_case("test_wevibe_moxie.yaml" ; "WeVibe Protocol (8bit) - Moxie")]
+#[test_case("test_wevibe_chorus.yaml" ; "WeVibe Protocol (Chorus) - Chorus")]
 fn test_device_protocols_json_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await)
