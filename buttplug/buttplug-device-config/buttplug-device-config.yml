@@ -1829,6 +1829,12 @@ protocols:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
   nobra:
+    btle:
+      names:
+        - NobraControl*
+      services:
+        0000abf0-0000-1000-8000-00805f9b34fb:
+          tx: 0000abf1-0000-1000-8000-00805f9b34fb
     serial:
       - port: default
         baud-rate: 19200
