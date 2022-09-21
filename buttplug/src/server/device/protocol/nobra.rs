@@ -5,15 +5,42 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      generic_protocol_initializer_setup,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+    },
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
+use std::sync::Arc;
 
-generic_protocol_setup!(Nobra, "nobra");
+generic_protocol_initializer_setup!(Nobra, "nobra");
+
+#[derive(Default)]
+pub struct NobraInitializer {}
+
+#[async_trait]
+impl ProtocolInitializer for NobraInitializer {
+  async fn initialize(
+    &mut self,
+    hardware: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    hardware
+      .write_value(&HardwareWriteCmd::new(Endpoint::Tx, vec![0x70], false))
+      .await?;
+    Ok(Arc::new(Nobra::default()))
+  }
+}
 
 #[derive(Default)]
 pub struct Nobra {}
