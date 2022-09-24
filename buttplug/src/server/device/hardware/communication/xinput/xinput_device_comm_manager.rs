@@ -47,15 +47,15 @@ impl HardwareCommunicationManagerBuilder for XInputDeviceCommunicationManagerBui
 
 pub struct XInputDeviceCommunicationManager {
   sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
-  handle: XInputHandle
+  handle: XInputHandle,
 }
 
 impl XInputDeviceCommunicationManager {
   fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
-    Self { 
+    Self {
       sender,
       handle: rusty_xinput::XInputHandle::load_default()
-        .expect("Always loads in windows, this shouldn't run elsewhere.")
+        .expect("Always loads in windows, this shouldn't run elsewhere."),
     }
   }
 }

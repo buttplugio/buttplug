@@ -94,7 +94,7 @@ impl ServerDeviceIdentifier {
 pub(super) async fn build_server_device(
   device_config_manager: Arc<DeviceConfigurationManager>,
   mut hardware_connector: Box<dyn HardwareConnector>,
-  protocol_specializers: Vec<ProtocolSpecializer>
+  protocol_specializers: Vec<ProtocolSpecializer>,
 ) -> Result<ServerDevice, ButtplugDeviceError> {
   // We've already checked to make sure we have specializers in the server device manager event
   // loop. That check used to be here for sake of continuity in building devices in this method, but
@@ -158,9 +158,7 @@ pub(super) async fn build_server_device(
     .await?;
 
   // We now have fully initialized hardware, return a server device.
-  Ok(ServerDevice::new(
-    identifier, handler, hardware, &attrs,
-  ))
+  Ok(ServerDevice::new(identifier, handler, hardware, &attrs))
 }
 
 pub struct ServerDevice {

@@ -529,9 +529,7 @@ impl ButtplugServer {
   pub fn shutdown(&self) -> ButtplugServerResultFuture {
     let device_manager = self.device_manager.clone();
     //let disconnect_future = self.disconnect();
-    async move {
-      device_manager.shutdown().await
-    }.boxed()
+    async move { device_manager.shutdown().await }.boxed()
   }
 }
 

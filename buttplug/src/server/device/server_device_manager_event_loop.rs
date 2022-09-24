@@ -11,7 +11,8 @@ use crate::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
     server_device::build_server_device,
-    ServerDevice, ServerDeviceEvent,
+    ServerDevice,
+    ServerDeviceEvent,
   },
   util::async_manager,
 };
@@ -175,8 +176,9 @@ impl ServerDeviceManagerEventLoop {
         //
         // We used to do this in build_server_device, but we shouldn't mark devices as actually
         // connecting until after this happens, so we're moving it back here.
-        let protocol_specializers =
-          self.device_config_manager.protocol_specializers(&creator.specifier());
+        let protocol_specializers = self
+          .device_config_manager
+          .protocol_specializers(&creator.specifier());
 
         // If we have no identifiers, then there's nothing to do here. Throw an error.
         if protocol_specializers.is_empty() {

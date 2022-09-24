@@ -333,7 +333,8 @@ impl ServerDeviceManager {
         device.value().disconnect().await?;
       }
       Ok(message::Ok::default().into())
-    }.boxed()
+    }
+    .boxed()
   }
 }
 
