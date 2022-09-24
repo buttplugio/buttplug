@@ -144,12 +144,6 @@ impl ServerDeviceManagerEventLoop {
         address,
         creator,
       } => {
-        let span = info_span!(
-          "device creation",
-          name = tracing::field::display(name.clone()),
-          address = tracing::field::display(address.clone())
-        );
-        let _enter = span.enter();
         info!("Device {} ({}) found.", name, address);
         // Make sure the device isn't on the deny list, or is on the allow list if anything is on it.
         if !self.device_config_manager.address_allowed(&address) {
@@ -160,7 +154,8 @@ impl ServerDeviceManagerEventLoop {
           address
         );
 
-        // Check to make sure the device isn't already connected. If it is, drop it.
+        // Check to make sure the device isn't already connected. If it is, drop what we've been
+        // sent and return.
         if self
           .device_map
           .iter()
@@ -213,6 +208,11 @@ impl ServerDeviceManagerEventLoop {
 
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
+        let span = info_span!(
+          "device creation",
+          name = tracing::field::display(name.clone()),
+          address = tracing::field::display(address.clone())
+        );
 
         async_manager::spawn(async move {
           match build_server_device(device_config_manager, creator, protocol_specializers).await {
@@ -229,7 +229,7 @@ impl ServerDeviceManagerEventLoop {
             }
           }
           connecting_devices.remove(&address);
-        }.instrument(tracing::Span::current()));
+        }.instrument(span));
       }
     }
   }
