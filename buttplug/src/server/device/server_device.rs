@@ -54,7 +54,7 @@ use tokio_stream::StreamExt;
 
 use super::{
   configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
-  protocol::generic_command_manager::GenericCommandManager,
+  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer},
 };
 
 #[derive(Debug)]
@@ -94,24 +94,12 @@ impl ServerDeviceIdentifier {
 pub(super) async fn build_server_device(
   device_config_manager: Arc<DeviceConfigurationManager>,
   mut hardware_connector: Box<dyn HardwareConnector>,
-) -> Result<Option<ServerDevice>, ButtplugDeviceError> {
-  // First off, we need to see if we even have a configuration available for the device we're
-  // trying to create. If we don't, exit, because this isn't actually an error. However, if we
-  // *do* have a configuration but something goes wrong after this, then it's an error.
-  let protocol_specializers =
-    device_config_manager.protocol_specializers(&hardware_connector.specifier());
-
-  // If we have no identifiers, then there's nothing to do here. Throw an error.
-  if protocol_specializers.is_empty() {
-    debug!(
-      "{}",
-      format!(
-        "No viable protocols for hardware {:?}, ignoring.",
-        hardware_connector.specifier()
-      )
-    );
-    return Ok(None);
-  }
+  protocol_specializers: Vec<ProtocolSpecializer>
+) -> Result<ServerDevice, ButtplugDeviceError> {
+  // We've already checked to make sure we have specializers in the server device manager event
+  // loop. That check used to be here for sake of continuity in building devices in this method, but
+  // having that done before we get here fixes issues with some device advertisement timing (See
+  // #462 for more info.)
 
   // At this point, we know we've got hardware that is waiting to connect, and enough protocol
   // info to actually do something after we connect. So go ahead and connect.
@@ -170,9 +158,9 @@ pub(super) async fn build_server_device(
     .await?;
 
   // We now have fully initialized hardware, return a server device.
-  Ok(Some(ServerDevice::new(
+  Ok(ServerDevice::new(
     identifier, handler, hardware, &attrs,
-  )))
+  ))
 }
 
 pub struct ServerDevice {

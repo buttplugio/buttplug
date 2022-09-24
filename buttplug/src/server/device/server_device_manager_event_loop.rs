@@ -11,8 +11,7 @@ use crate::{
     configuration::DeviceConfigurationManager,
     hardware::communication::{HardwareCommunicationManager, HardwareCommunicationManagerEvent},
     server_device::build_server_device,
-    ServerDevice,
-    ServerDeviceEvent,
+    ServerDevice, ServerDeviceEvent,
   },
   util::async_manager,
 };
@@ -174,6 +173,28 @@ impl ServerDeviceManagerEventLoop {
           return;
         }
 
+        // First off, we need to see if we even have a configuration available for the device we're
+        // trying to create. If we don't, exit, because this isn't actually an error. However, if we
+        // actually *do* have a configuration but something goes wrong after this, then it's an
+        // error.
+        //
+        // We used to do this in build_server_device, but we shouldn't mark devices as actually
+        // connecting until after this happens, so we're moving it back here.
+        let protocol_specializers =
+          self.device_config_manager.protocol_specializers(&creator.specifier());
+
+        // If we have no identifiers, then there's nothing to do here. Throw an error.
+        if protocol_specializers.is_empty() {
+          debug!(
+            "{}",
+            format!(
+              "No viable protocols for hardware {:?}, ignoring.",
+              creator.specifier()
+            )
+          );
+          return;
+        }
+
         // Some device managers (like bluetooth) can send multiple DeviceFound events for the same
         // device, due to how things like advertisements work. We'll filter this at the
         // DeviceManager level to make sure that even if a badly coded DCM throws multiple found
@@ -187,24 +208,20 @@ impl ServerDeviceManagerEventLoop {
         }
 
         self.connecting_devices.insert(address.clone());
+
         let device_event_sender_clone = self.device_event_sender.clone();
 
         let device_config_manager = self.device_config_manager.clone();
         let connecting_devices = self.connecting_devices.clone();
 
         async_manager::spawn(async move {
-          match build_server_device(device_config_manager, creator).await {
+          match build_server_device(device_config_manager, creator, protocol_specializers).await {
             Ok(device) => {
-              // We can receive back a Ok(None) from build_server_device if we can't match any
-              // protocol to the device. This isn't really an error, it just means the device
-              // probably isn't supported by our library. Happens a lot with Bluetooth.
-              if let Some(server_device) = device {
-                if device_event_sender_clone
-                  .send(ServerDeviceEvent::Connected(Arc::new(server_device)))
-                  .await
-                  .is_err() {
-                  error!("Device manager disappeared before connection established, device will be dropped.");
-                }
+              if device_event_sender_clone
+                .send(ServerDeviceEvent::Connected(Arc::new(device)))
+                .await
+                .is_err() {
+                error!("Device manager disappeared before connection established, device will be dropped.");
               }
             },
             Err(e) => {
