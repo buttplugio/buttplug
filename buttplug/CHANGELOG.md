@@ -1,3 +1,38 @@
+# 6.0.1 (2022-09-24)
+
+## Breaking Changes
+
+- Act like these came in v6, I don't wanna rev to v7 already and afaik no one depends on this
+  version of the library yet so y'all just get to deal.
+- Device Configuration now uses major/minor semantic versions so we can identify when we can't load
+  a device config file.
+
+## Features
+
+- #480: Add Major/Minor versions to device configs.
+- Added Hardware Support:
+  - Meese Tera
+  - Hismith Thrusting Cup
+  - Vorze UFO TW
+  - Mizz Zee V2 Devices
+  - MagicMotion Bobi
+  - Satisfyer devices with > 2 vibrators
+- Add ability to shutdown a device manager and disconnect all devices explicitly
+  - Needed for mobile apps
+- Update to btleplug v0.10.1, fixing disconnect on macOS/iOS
+
+## Bugfixes
+
+- #462: Check advertisements to see whether we even have any matching configurations before trying
+  to connect to a device.
+- #483: Move Lovense Connect Server checking to every 5 seconds, which will hopefully stop rate
+  limiting
+- #481: Fix issue with device creation tracing span being applied to incorrect tasks
+- Correct timing issue in Fredorch protocol
+- #479: Make Serial and XInput DCMs less log spammy during scans
+  - Serial is backed off to scanning once per 10s, XInput now only loads the XInput library on
+    initial construction.
+
 # 6.0.0 (2022-08-29)
 
 ## Breaking Changes
