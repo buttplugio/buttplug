@@ -80,6 +80,9 @@ pub enum HardwareSpecificError {
 pub trait TimedRetryCommunicationManagerImpl: Sync + Send {
   fn name(&self) -> &'static str;
   fn can_scan(&self) -> bool;
+  fn rescan_wait_duration(&self) -> Duration {
+    Duration::from_secs(1)
+  }
   async fn scan(&self) -> Result<(), ButtplugDeviceError>;
 }
 
@@ -112,6 +115,7 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
     let token = CancellationToken::new();
     let child_token = token.child_token();
     self.cancellation_token = Some(token);
+    let duration = self.comm_manager.rescan_wait_duration();
     async move {
       async_manager::spawn(async move {
         loop {
@@ -120,7 +124,7 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
             break;
           }
           tokio::select! {
-            _ = tokio::time::sleep(Duration::from_secs(1)) => continue,
+            _ = tokio::time::sleep(duration) => continue,
             _ = child_token.cancelled() => break,
           }
         }

@@ -21,7 +21,7 @@ use dashmap::DashSet;
 use reqwest::StatusCode;
 use serde::Deserialize;
 use serde_aux::prelude::*;
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::Sender;
 
@@ -191,6 +191,10 @@ impl LovenseConnectServiceCommunicationManager {
 impl TimedRetryCommunicationManagerImpl for LovenseConnectServiceCommunicationManager {
   fn name(&self) -> &'static str {
     "LovenseServiceDeviceCommManager"
+  }
+
+  fn rescan_wait_duration(&self) -> Duration {
+    Duration::from_secs(10)
   }
 
   async fn scan(&self) -> Result<(), ButtplugDeviceError> {
