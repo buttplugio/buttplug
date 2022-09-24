@@ -352,8 +352,17 @@
   "properties": {
     "version": {
       "description": "Version of the device configuration file.",
-      "type": "integer",
-      "minimum": 0
+      "type": "object",
+      "properties": {
+        "major": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     },
     "protocols": {
       "type": "object",
@@ -395,25 +404,28 @@
     },
     "user-configs": {
       "type": "object",
-      "patternProperties": {
+      "properties": {
         "selectors": {
-          "^.*$": {
-            "type": "object",
-            "properties": {
-              "btle": {
-                "$ref": "#/components/btle-definition"
-              },
-              "serial": {
-                "$ref": "#/components/serial-definition"
-              },
-              "websocket": {
-                "$ref": "#/components/websocket-definition"
-              },
-              "usb": {
-                "$ref": "#/components/usb-definition"
-              },
-              "hid": {
-                "$ref": "#/components/usb-definition"
+          "type": "object",
+          "patternProperties": {
+            "^.*$": {
+              "type": "object",
+              "properties": {
+                "btle": {
+                  "$ref": "#/components/btle-definition"
+                },
+                "serial": {
+                  "$ref": "#/components/serial-definition"
+                },
+                "websocket": {
+                  "$ref": "#/components/websocket-definition"
+                },
+                "usb": {
+                  "$ref": "#/components/usb-definition"
+                },
+                "hid": {
+                  "$ref": "#/components/usb-definition"
+                }
               }
             },
             "additionalProperties": false

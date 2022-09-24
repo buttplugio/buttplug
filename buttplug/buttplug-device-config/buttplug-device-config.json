@@ -1,5 +1,8 @@
 {
-  "version": 65,
+  "version": {
+    "major": 1,
+    "minor": 0
+  },
   "protocols": {
     "lovense": {
       "btle": {

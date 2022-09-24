@@ -56,6 +56,67 @@ const BASE_CONFIG_JSON: &str = r#"
 }
 "#;
 
+const BASE_VALID_VERSION_CONFIG_JSON: &str = r#"
+{
+  "version": {
+    "major": 1,
+    "minor": 999
+  }
+}
+"#;
+
+const BASE_INVALID_VERSION_CONFIG_JSON: &str = r#"
+{
+  "version": {
+    "major": 999,
+    "minor": 999
+  }
+}
+"#;
+
+const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
+{
+  "version": {
+    "major": 1,
+    "minor": 999
+  },
+  "user-configs": {}
+}
+"#;
+
+#[cfg(feature = "server")]
+#[test]
+fn test_valid_null_version_config() {
+  async_manager::block_on(async move {
+    ButtplugServerBuilder::default()
+      .user_device_configuration_json(Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()))
+      .finish()
+      .unwrap();
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_valid_null_user_config() {
+  async_manager::block_on(async move {
+    ButtplugServerBuilder::default()
+      .user_device_configuration_json(Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()))
+      .finish()
+      .unwrap();
+  });
+}
+
+#[cfg(feature = "server")]
+#[test]
+fn test_invalid_null_version_config() {
+  async_manager::block_on(async move {
+    assert!(ButtplugServerBuilder::default()
+      .user_device_configuration_json(Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()))
+      .finish()
+      .is_err());
+  });
+}
+
 #[cfg(feature = "server")]
 #[test]
 #[ignore = "Still need to update for new message format"]

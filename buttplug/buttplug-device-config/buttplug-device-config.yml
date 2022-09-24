@@ -115,7 +115,9 @@
 #
 # - Serial info here is for default device configuration. Port names
 #   will have to be added by the user in the user device config file.
-version: 65
+version:
+  major: 1
+  minor: 0
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.

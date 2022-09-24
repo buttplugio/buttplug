@@ -31,7 +31,7 @@ use crate::{
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, ops::RangeInclusive};
+use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
   include_str!("../../buttplug-device-config/buttplug-device-config.json");
@@ -145,9 +145,9 @@ struct UserDeviceConfigPair {
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 struct UserConfigDefinition {
   #[serde(default)]
-  specifiers: HashMap<String, ProtocolDefinition>,
-  #[serde(rename = "devices")]
-  user_device_configs: Vec<UserDeviceConfigPair>,
+  specifiers: Option<HashMap<String, ProtocolDefinition>>,
+  #[serde(rename = "devices", default)]
+  user_device_configs: Option<Vec<UserDeviceConfigPair>>,
 }
 
 #[derive(
@@ -253,83 +253,98 @@ fn add_user_configs_to_protocol(
   external_config: &mut ExternalDeviceConfiguration,
   user_config_def: UserConfigDefinition,
 ) {
-  for (user_config_protocol, protocol_def) in user_config_def.specifiers() {
-    if !external_config
-      .protocol_specifiers
-      .contains_key(user_config_protocol)
-    {
-      continue;
-    }
+  if let Some(specifiers) = user_config_def.specifiers() {
+    for (user_config_protocol, protocol_def) in specifiers {
+      if !external_config
+        .protocol_specifiers
+        .contains_key(user_config_protocol)
+      {
+        continue;
+      }
 
-    let base_protocol_def = external_config
-      .protocol_specifiers
-      .get_mut(user_config_protocol)
-      .unwrap();
+      let base_protocol_def = external_config
+        .protocol_specifiers
+        .get_mut(user_config_protocol)
+        .unwrap();
 
-    // Make a vector out of the protocol definition specifiers
-    if let Some(usb_vec) = &protocol_def.usb {
-      usb_vec
-        .iter()
-        .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::USB(*spec)));
-    }
-    if let Some(serial_vec) = &protocol_def.serial {
-      serial_vec.iter().for_each(|spec| {
-        base_protocol_def.push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
-      });
-    }
-    if let Some(hid_vec) = &protocol_def.hid {
-      hid_vec
-        .iter()
-        .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::HID(*spec)));
-    }
-    if let Some(btle) = &protocol_def.btle {
-      base_protocol_def.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
-    }
-    if let Some(websocket) = &protocol_def.websocket {
-      base_protocol_def.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
+      // Make a vector out of the protocol definition specifiers
+      if let Some(usb_vec) = &protocol_def.usb {
+        usb_vec
+          .iter()
+          .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::USB(*spec)));
+      }
+      if let Some(serial_vec) = &protocol_def.serial {
+        serial_vec.iter().for_each(|spec| {
+          base_protocol_def.push(ProtocolCommunicationSpecifier::Serial(spec.clone()))
+        });
+      }
+      if let Some(hid_vec) = &protocol_def.hid {
+        hid_vec
+          .iter()
+          .for_each(|spec| base_protocol_def.push(ProtocolCommunicationSpecifier::HID(*spec)));
+      }
+      if let Some(btle) = &protocol_def.btle {
+        base_protocol_def.push(ProtocolCommunicationSpecifier::BluetoothLE(btle.clone()));
+      }
+      if let Some(websocket) = &protocol_def.websocket {
+        base_protocol_def.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));
+      }
     }
   }
-  for user_config in user_config_def.user_device_configs() {
-    if *user_config.config().allow().as_ref().unwrap_or(&false) {
-      external_config
-        .allow_list
-        .push(user_config.identifier().address().clone());
-    }
-    if *user_config.config().deny().as_ref().unwrap_or(&false) {
-      external_config
-        .deny_list
-        .push(user_config.identifier().address().clone());
-    }
-    if let Some(index) = user_config.config().index().as_ref() {
-      external_config
-        .reserved_indexes
-        .insert(*index, user_config.identifier().clone().into());
-    }
-    let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
+  if let Some(user_device_configs) = user_config_def.user_device_configs() {
+    for user_config in user_device_configs {
+      if *user_config.config().allow().as_ref().unwrap_or(&false) {
+        external_config
+          .allow_list
+          .push(user_config.identifier().address().clone());
+      }
+      if *user_config.config().deny().as_ref().unwrap_or(&false) {
+        external_config
+          .deny_list
+          .push(user_config.identifier().address().clone());
+      }
+      if let Some(index) = user_config.config().index().as_ref() {
+        external_config
+          .reserved_indexes
+          .insert(*index, user_config.identifier().clone().into());
+      }
+      let server_ident: ServerDeviceIdentifier = user_config.identifier.clone().into();
 
-    let config_attrs = ProtocolDeviceAttributes::new(
-      server_ident.attributes_identifier().clone(),
-      None,
-      user_config.config().display_name.clone(),
-      user_config.config().messages.clone().unwrap_or_default(),
-      None,
-    );
-    info!("Adding user config for {:?}", server_ident);
-    external_config
-      .user_configs
-      .insert(server_ident, config_attrs);
+      let config_attrs = ProtocolDeviceAttributes::new(
+        server_ident.attributes_identifier().clone(),
+        None,
+        user_config.config().display_name.clone(),
+        user_config.config().messages.clone().unwrap_or_default(),
+        None,
+      );
+      info!("Adding user config for {:?}", server_ident);
+      external_config
+        .user_configs
+        .insert(server_ident, config_attrs);
+    }
   }
 }
 
-#[derive(Deserialize, Serialize, Debug, Getters, CopyGetters)]
+#[derive(Deserialize, Serialize, Debug, CopyGetters)]
+#[getset(get_copy = "pub")]
+struct ConfigVersion {
+  major: u32,
+  minor: u32,
+}
+
+impl Display for ConfigVersion {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}.{}", self.major, self.minor)
+  }
+}
+
+#[derive(Deserialize, Serialize, Debug, Getters)]
+#[getset(get = "pub")]
 struct ProtocolConfiguration {
-  #[getset(get_copy = "pub")]
-  version: u32,
+  version: ConfigVersion,
   #[serde(default)]
-  #[getset(get = "pub")]
   protocols: Option<HashMap<String, ProtocolDefinition>>,
   #[serde(rename = "user-configs", default)]
-  #[getset(get = "pub")]
   user_configs: Option<UserConfigDefinition>,
 }
 
@@ -351,7 +366,7 @@ impl ProtocolConfiguration {
   }
 }
 
-pub fn get_internal_config_version() -> u32 {
+fn get_internal_config_version() -> ConfigVersion {
   let config: ProtocolConfiguration = serde_json::from_str(DEVICE_CONFIGURATION_JSON)
     .expect("If this fails, the whole library goes with it.");
   config.version
@@ -366,9 +381,9 @@ fn load_protocol_config_from_json(
     Ok(_) => match serde_json::from_str::<ProtocolConfiguration>(config_str) {
       Ok(protocol_config) => {
         let internal_config_version = get_internal_config_version();
-        if !skip_version_check && protocol_config.version < internal_config_version {
+        if !skip_version_check && protocol_config.version.major != internal_config_version.major {
           Err(ButtplugDeviceError::DeviceConfigurationError(format!(
-            "Device configuration file version {} is older than internal version {}. Please use a newer file.",
+            "Device configuration file major version {} is different than internal major version {}. Cannot load external files that do not have matching major version numbers.",
             protocol_config.version,
             internal_config_version
           )))
