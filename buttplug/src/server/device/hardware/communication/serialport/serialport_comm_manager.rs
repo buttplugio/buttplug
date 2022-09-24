@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use std::time::Duration;
+
 use super::SerialPortHardwareConnector;
 use crate::{
   core::errors::ButtplugDeviceError,
@@ -51,8 +53,12 @@ impl TimedRetryCommunicationManagerImpl for SerialPortCommunicationManager {
     "SerialPortCommunicationManager"
   }
 
+  fn rescan_wait_duration(&self) -> Duration {
+    Duration::from_secs(5)
+  }
+
   async fn scan(&self) -> Result<(), ButtplugDeviceError> {
-    debug!("Serial port manager scanning for devices.");
+    trace!("Serial port manager scanning for devices.");
     match available_ports() {
       Ok(ports) => {
         debug!("Got {} serial ports back", ports.len());
@@ -77,16 +83,8 @@ impl TimedRetryCommunicationManagerImpl for SerialPortCommunicationManager {
         }
       }
       Err(_) => {
-        debug!("No serial ports found");
+        trace!("No serial ports found");
       }
-    }
-    if self
-      .sender
-      .send(HardwareCommunicationManagerEvent::ScanningFinished)
-      .await
-      .is_err()
-    {
-      error!("Error sending scanning finished.");
     }
     Ok(())
   }
