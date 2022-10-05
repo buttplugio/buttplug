@@ -1,0 +1,53 @@
+devices:
+  - identifier: 
+      name: "PROSTATE VIBE"
+    expected_name: "Lovehoney Desire Prostate Vibrator"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0xF3, 0x01, 0x40]
+            write_with_response: true
+        - !Write
+          endpoint: tx
+          data: [0xF3, 0x02, 0x00]
+          write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.1
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xF3, 0x01, 0x0d]
+            write_with_response: true
+        - !Write
+            endpoint: tx
+            data: [0xF3, 0x02, 0x40]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xF3, 0x00, 0x00]
+            write_with_response: true
