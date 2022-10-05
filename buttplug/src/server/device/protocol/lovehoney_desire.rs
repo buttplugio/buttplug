@@ -22,6 +22,10 @@ generic_protocol_setup!(LovehoneyDesire, "lovehoney-desire");
 pub struct LovehoneyDesire {}
 
 impl ProtocolHandler for LovehoneyDesire {
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
@@ -49,18 +53,18 @@ impl ProtocolHandler for LovehoneyDesire {
             0,
             cmds[0].expect("Already checked value existence").1 as u8,
           ],
-          false,
+          true,
         )
         .into(),
       );
     } else {
-      // We have differening values. Set each motor separately.
+      // We have differing values. Set each motor separately.
       let mut i = 1;
 
       for cmd in cmds {
         if let Some((_, speed)) = cmd {
           msg_vec
-            .push(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF3, i, *speed as u8], false).into());
+            .push(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF3, i, *speed as u8], true).into());
         }
         i += 1;
       }
@@ -68,118 +72,3 @@ impl ProtocolHandler for LovehoneyDesire {
     Ok(msg_vec)
   }
 }
-
-/*
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use crate::{
-    core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
-    server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      hardware::communication::test::{
-        check_test_recv_empty,
-        check_test_recv_value,
-        new_bluetoothle_test_device,
-      },
-    },
-    util::async_manager,
-  };
-
-  #[test]
-  pub fn test_lovehoney_desire_protocol() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("PROSTATE VIBE")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-
-      // If we send one speed to one motor, we should only see one output.
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0xF3, 0x1, 0x40],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      // If we send the same speed to each motor, we should only get one command.
-      device
-        .parse_message(
-          VibrateCmd::new(
-            0,
-            vec![
-              VibrateSubcommand::new(0, 0.1),
-              VibrateSubcommand::new(1, 0.1),
-            ],
-          )
-          .into(),
-        )
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0xF3, 0x0, 0x0d],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      // If we send different commands to both motors, we should get 2 different commands, each with an index.
-      device
-        .parse_message(
-          VibrateCmd::new(
-            0,
-            vec![
-              VibrateSubcommand::new(0, 0.0),
-              VibrateSubcommand::new(1, 0.5),
-            ],
-          )
-          .into(),
-        )
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0xF3, 0x01, 0x00],
-          false,
-        )),
-      );
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0xF3, 0x02, 0x40],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      device
-        .parse_message(StopDeviceCmd::new(0).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(
-          Endpoint::Tx,
-          vec![0xF3, 0x02, 0x0],
-          false,
-        )),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-    });
-  }
-}
- */
