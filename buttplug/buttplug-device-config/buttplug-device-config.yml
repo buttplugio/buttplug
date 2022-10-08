@@ -2865,6 +2865,19 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 3]
             ActuatorType: Vibrate
+  pink_punch:
+    btle:
+      names:
+        - Pink_Punch
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Pink Punch Sunset Mushroom
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
