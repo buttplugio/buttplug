@@ -5695,6 +5695,32 @@
           ]
         }
       }
+    },
+    "synchro": {
+      "btle": {
+        "names": [
+          "Shinkuro"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Synchro",
+        "messages": {
+          "RotateCmd": [
+            {
+              "StepRange": [
+                0,
+                6
+              ],
+              "ActuatorType": "Rotate"
+            }
+          ]
+        }
+      }
     }
   }
 }
