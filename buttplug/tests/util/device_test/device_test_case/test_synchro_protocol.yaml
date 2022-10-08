@@ -1,0 +1,45 @@
+devices:
+  - identifier: 
+      name: "Shinkuro"
+    expected_name: "Synchro"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 0.5
+            Clockwise: true
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x01, 0x03, 0x77, 0x55]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 1
+            Clockwise: false
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x01, 0x86, 0x77, 0x55]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x01, 0x00, 0x77, 0x55]
+            write_with_response: false
