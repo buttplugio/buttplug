@@ -2852,6 +2852,19 @@ protocols:
               FeatureDescriptor: Stroker Oscillation Speed
             - StepRange: [0, 1]
               ActuatorType: Vibrate  # Vibrator
+  wetoy:
+    btle:
+      names:
+        - WeToy
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff3-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: WeToy MiNa
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

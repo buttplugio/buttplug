@@ -5617,6 +5617,32 @@
           }
         }
       ]
+    },
+    "wetoy": {
+      "btle": {
+        "names": [
+          "WeToy"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff3-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "WeToy MiNa",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
     }
   }
 }
