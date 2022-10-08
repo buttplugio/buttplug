@@ -63,6 +63,7 @@ pub mod tcode_v03;
 pub mod thehandy;
 pub mod vibratissimo;
 pub mod vorze_sa;
+pub mod wetoy;
 pub mod wevibe;
 pub mod wevibe8bit;
 pub mod wevibe_chorus;
@@ -280,6 +281,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     vorze_sa::setup::VorzeSAIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, wetoy::setup::WeToyIdentifierFactory::default());
   add_to_protocol_map(&mut map, wevibe::setup::WeVibeIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
