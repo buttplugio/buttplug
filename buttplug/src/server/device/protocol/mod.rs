@@ -51,6 +51,7 @@ pub mod mysteryvibe;
 pub mod nobra;
 pub mod patoo;
 pub mod picobong;
+pub mod pink_punch;
 pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
@@ -242,6 +243,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     picobong::setup::PicobongIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    pink_punch::setup::PinkPunchIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
