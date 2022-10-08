@@ -5669,6 +5669,32 @@
           ]
         }
       }
+    },
+    "sakuraneko": {
+      "btle": {
+        "names": [
+          "sakuraneko-01"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Sakuraneko Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
     }
   }
 }

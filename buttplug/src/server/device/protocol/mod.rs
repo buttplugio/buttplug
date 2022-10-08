@@ -55,6 +55,7 @@ pub mod pink_punch;
 pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
+pub mod sakuraneko;
 pub mod satisfyer;
 pub mod svakom;
 pub mod svakom_alex;
@@ -257,6 +258,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     raw_protocol::setup::RawProtocolIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, realov::setup::RealovIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    sakuraneko::setup::SakuranekoIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     satisfyer::setup::SatisfyerIdentifierFactory::default(),
