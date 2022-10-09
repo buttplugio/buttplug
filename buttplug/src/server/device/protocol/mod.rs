@@ -27,6 +27,7 @@ pub mod kiiroo_v2;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
+pub mod lelo_harmony;
 pub mod lelof1s;
 pub mod lelof1sv2;
 pub mod libo_elle;
@@ -175,6 +176,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     lelof1sv2::setup::LeloF1sV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    lelo_harmony::setup::LeloHarmonyIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

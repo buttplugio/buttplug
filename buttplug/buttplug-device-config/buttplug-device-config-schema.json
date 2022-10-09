@@ -8,6 +8,16 @@
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     },
+    "endpoint": {
+      "type": "object",
+      "patternProperties": {
+        "^(command|firmware|rx|rxaccel|rxblebattery|rxblemodel|rxpressure|rxtouch|tx|txmode|txshock|txvibrate|txvendorcontrol|whitelist|generic[1-2]?[0-9]|generic3[0-1])$": {
+          "$ref": "#/components/uuid"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
     "btle-definition": {
       "type": "object",
       "properties": {
@@ -52,13 +62,7 @@
           "type": "object",
           "patternProperties": {
             "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$": {
-              "type": "object",
-              "patternProperties": {
-                "^(tx|rx|firmware|txmode|txvibrate|rxtouch|rxaccel|rxpressure|whitelist)$": {
-                  "$ref": "#/components/uuid"
-                }
-              },
-              "minProperties": 1
+              "$ref": "#/components/endpoint"
             }
           },
           "minProperties": 1,
@@ -201,7 +205,8 @@
             "type": "string"
           },
           "ActuatorType": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(Vibrate|Rotate|Oscillate|Constrict|Inflate|Position)$"
           }
         },
         "required": [
