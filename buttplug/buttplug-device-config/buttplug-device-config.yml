@@ -1736,7 +1736,7 @@ protocols:
           whitelist: 00000a10-0000-1000-8000-00805f9b34fb
           # Rx is hooked up to the button characteristic
           # to help with the connection process
-          rx: 00000a10-0000-1000-8000-00805f9b34fb
+          rx: 00000a04-0000-1000-8000-00805f9b34fb
           # There are a LOT of other sensor characteristics
           # I figure we'll add them as support for those sensor
           # types is added to Buttplug
@@ -1748,6 +1748,39 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 100]
             ActuatorType: Vibrate
+  lelo-harmony:
+    btle:
+      names:
+        - IdaWave
+        - Ida Wave
+        - TianiHarmony
+        - Tiani Harmony
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          command: 0000fff1-0000-1000-8000-00805f9b34fb
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+          # whitelist is hooked up to the security characteristic
+          # which must be written to during the handshake
+          whitelist: 00000a11-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Lelo Tiani Harmony
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - IdaWave
+          - Ida Wave
+        name: Lelo Ida Wave
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+            - StepRange: [0, 100]
+              ActuatorType: Rotate
   aneros:
     btle:
       names:
@@ -2098,7 +2131,7 @@ protocols:
           data: [0x00, 0x00, 0x28]
       services:
         0000180a-0000-1000-8000-00805f9b34fb:
-          rxblemodel: 00002A24-0000-1000-8000-00805f9b34fb
+          rxblemodel: 00002a24-0000-1000-8000-00805f9b34fb
         51361500-c5e7-47c7-8a6e-47ebc99d80e8:
           command: 51361501-c5e7-47c7-8a6e-47ebc99d80e8 # Motor mode
           tx: 51361502-c5e7-47c7-8a6e-47ebc99d80e8 # Motor level
