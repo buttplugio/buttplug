@@ -118,7 +118,7 @@
 # - Serial info here is for default device configuration. Port names
 #   will have to be added by the user in the user device config file.
 
-version: 66
+version: 67
 
 protocols:
   
@@ -1439,6 +1439,7 @@ protocols:
         - Onyx2.1
         - Onyx+
         - KEON
+        - Keon R2
       services:
         00001900-0000-1000-8000-00805f9b34fb:
           # Used to clear the whitelist
@@ -1472,6 +1473,7 @@ protocols:
           FleshlightLaunchFW12Cmd: { }
       - identifier:
           - KEON
+          - Keon R2
         name:
           en-us: Kiiroo Keon
         messages:
