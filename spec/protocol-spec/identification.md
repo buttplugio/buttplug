@@ -18,12 +18,13 @@ Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
 * _Id_ \(unsigned int\): Message Id
 * _ClientName_ \(string\): Name of the client, for the server to use for UI if needed. Cannot be
   null.
-* _MessageVersion_ \(uint\): Message template version of the client software.
+* _MessageVersion_ \(uint\): Message spec version of the client software.
 
 **Expected Response:**
 
 * ServerInfo message on success
-* Error message on malformed message, null client name, or other error.
+* Error message on malformed message, null client name, server not able to use requested message
+  spec version, or other error.
 
 **Flow Diagram:**
 
@@ -60,7 +61,8 @@ template version, and ping time expectations.
 
 * _Id_ \(unsigned int\): Message Id
 * _ServerName_ \(string\): Name of the server. Can be null \(0-length\).
-* _MessageVersion_ \(uint\): Message template version of the server software.
+* _MessageVersion_ \(uint\): Message template version of the server software. Should either equal
+  the version of the client software if a match is available, or else list the maximum version the server can handle if it is less than the client version.
 * _MaxPingTime_ \(uint\): Maximum internal for pings from the client, in milliseconds. If a client
   takes to longer than this time between sending Ping messages, the server is expected to
   disconnect.
