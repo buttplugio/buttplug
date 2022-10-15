@@ -88,7 +88,19 @@ fn test_server_version_lt() {
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
-    let _ = setup_test_server(msg).await;
+    let server = ButtplugServer::default();
+    // assert_eq!(server.server_name, "Test Server");
+    match server
+      .parse_message(msg)
+      .await
+      .expect("Test, assuming infallible.")
+    {
+      ButtplugServerMessage::ServerInfo(s) => assert_eq!(
+        s,
+        message::ServerInfo::new("Buttplug Server", ButtplugMessageSpecVersion::Version2, 0)
+      ),
+      _ => panic!("Should've received ok"),
+    }
   });
 }
 

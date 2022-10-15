@@ -18,7 +18,6 @@ use buttplug::{
       ButtplugServerJSONSerializer,
     },
     Endpoint,
-    BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
   },
   server::{
     device::hardware::{HardwareCommand, HardwareWriteCmd},
@@ -45,10 +44,7 @@ fn test_version0_connection() {
     let incoming_json = serializer.serialize(&vec![incoming]);
     assert_eq!(
         incoming_json,
-        format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
-        ).into()
+        r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   });
 }
@@ -70,10 +66,7 @@ fn test_version2_connection() {
     let incoming_json = serializer.serialize(&vec![incoming]);
     assert_eq!(
         incoming_json,
-        format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
-        ).into()
+        r#"[{"ServerInfo":{"Id":1,"MessageVersion":2,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
   });
 }
@@ -97,10 +90,7 @@ fn test_version0_device_added_device_list() {
       .expect("Test, assuming infallible.");
     assert_eq!(
         serializer.serialize(&vec!(output)),
-        format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
-        ).into()
+        r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
     // Skip JSON parsing here, we aren't converting versions.
     let reply = server
@@ -150,10 +140,7 @@ fn test_version0_singlemotorvibratecmd() {
       .expect("Test, assuming infallible.");
     assert_eq!(
         serializer.serialize(&vec!(output)),
-        format!(
-          r#"[{{"ServerInfo":{{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":{},"MaxPingTime":0,"ServerName":"Buttplug Server"}}}}]"#,
-          BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION as u32
-        ).into()
+        r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
     // Skip JSON parsing here, we aren't converting versions.
     let reply = server
