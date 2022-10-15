@@ -26,6 +26,7 @@ use buttplug::{
 use futures::future::{self, FutureExt};
 use serde::{Deserialize, Serialize};
 use std::{
+  collections::HashMap,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -110,7 +111,7 @@ fn new_uninitialized_ble_test_device(
 ) -> TestHardwareConnector {
   let address = identifier.address.clone();
   let specifier = ProtocolCommunicationSpecifier::BluetoothLE(
-    BluetoothLESpecifier::new_from_device(&identifier.name, &[]),
+    BluetoothLESpecifier::new_from_device(&identifier.name, &HashMap::new(), &[]),
   );
   let hardware = TestDevice::new(&identifier.name, &address, device_channel);
   TestHardwareConnector::new(specifier, hardware)

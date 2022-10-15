@@ -34,10 +34,13 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future::{self, BoxFuture, FutureExt};
-use std::fmt::{self, Debug};
-use std::sync::{
-  atomic::{AtomicBool, Ordering},
-  Arc,
+use std::{
+  collections::HashMap,
+  fmt::{self, Debug},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  }
 };
 use tokio::sync::{broadcast, mpsc};
 
@@ -72,7 +75,7 @@ impl LovenseDongleHardwareConnector {
       //
       // Hacky, but it works.
       specifier: ProtocolCommunicationSpecifier::BluetoothLE(
-        BluetoothLESpecifier::new_from_device("LVS-DongleDevice", &[]),
+        BluetoothLESpecifier::new_from_device("LVS-DongleDevice", &HashMap::new(), &[]),
       ),
       id: id.to_string(),
       device_outgoing,

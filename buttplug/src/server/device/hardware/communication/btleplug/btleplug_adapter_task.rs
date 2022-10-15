@@ -13,6 +13,7 @@ use btleplug::{
 };
 use futures::{future::FutureExt, StreamExt};
 use std::{
+  collections::HashMap,
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -34,6 +35,7 @@ pub enum BtleplugAdapterCommand {
 struct PeripheralInfo {
   name: Option<String>,
   peripheral_id: PeripheralId,
+  manufacturer_data: HashMap<u16, Vec<u8>>,
   services: Vec<uuid::Uuid>,
 }
 
@@ -88,6 +90,7 @@ impl BtleplugAdapterTask {
     let peripheral_info = PeripheralInfo {
       name: properties.local_name.clone(),
       peripheral_id: peripheral_id.clone(),
+      manufacturer_data: properties.manufacturer_data.clone(),
       services: properties.services.clone(),
     };
 
@@ -108,6 +111,7 @@ impl BtleplugAdapterTask {
       tried_addresses.push(peripheral_info.clone());
       let device_creator = Box::new(BtleplugHardwareConnector::new(
         &device_name,
+        &properties.manufacturer_data,
         &properties.services,
         peripheral.clone(),
         adapter.clone(),

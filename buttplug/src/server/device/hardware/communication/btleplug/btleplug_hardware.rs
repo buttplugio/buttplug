@@ -49,15 +49,18 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
   // Passed in and stored as a member because otherwise it's annoying to get (properties require await)
   name: String,
   // Passed in and stored as a member because otherwise it's annoying to get (properties require await)
+  manufacturer_data: HashMap<u16, Vec<u8>>,
+  // Passed in and stored as a member because otherwise it's annoying to get (properties require await)
   services: Vec<Uuid>,
   device: T,
   adapter: Adapter,
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
-  pub fn new(name: &str, services: &[Uuid], device: T, adapter: Adapter) -> Self {
+  pub fn new(name: &str, manufacturer_data: &HashMap<u16, Vec<u8>>, services: &[Uuid], device: T, adapter: Adapter) -> Self {
     Self {
       name: name.to_owned(),
+      manufacturer_data: manufacturer_data.clone(),
       services: services.to_vec(),
       device,
       adapter,
@@ -79,6 +82,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
     ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       &self.name,
+      &self.manufacturer_data,
       &self.services,
     ))
   }

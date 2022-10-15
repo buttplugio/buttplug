@@ -737,6 +737,7 @@ mod test {
     }
     let specifiers = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new(
       HashSet::from(["LVS-*".to_owned(), "LovenseDummyTestName".to_owned()]),
+      vec![],
       HashSet::new(),
       HashMap::new(),
     ));
@@ -776,6 +777,7 @@ mod test {
     let config = create_unit_test_dcm(false);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LovenseDummyTestName",
+      &HashMap::new(),
       &[],
     ));
     assert!(!config.protocol_specializers(&spec).is_empty());
@@ -786,6 +788,7 @@ mod test {
     let config = create_unit_test_dcm(false);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
+      &HashMap::new(),
       &[],
     ));
     assert!(!config.protocol_specializers(&spec).is_empty());
@@ -796,6 +799,7 @@ mod test {
     let dcm = create_unit_test_dcm(false);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
+      &HashMap::new(),
       &[],
     ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
@@ -830,6 +834,7 @@ mod test {
     let dcm = create_unit_test_dcm(true);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
+      &HashMap::new(),
       &[],
     ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
@@ -857,6 +862,7 @@ mod test {
     let dcm = create_unit_test_dcm(false);
     let spec = ProtocolCommunicationSpecifier::BluetoothLE(BluetoothLESpecifier::new_from_device(
       "LVS-Whatever",
+      &HashMap::new(),
       &[],
     ));
     assert!(!dcm.protocol_specializers(&spec).is_empty());
