@@ -446,3 +446,14 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
     .boxed()
   }
 }
+
+impl<T: Peripheral> Drop for BtlePlugHardware<T> {
+  fn drop(&mut self) {
+    let disconnect_fut = self.disconnect();
+    async_manager::spawn(async move {
+      if let Err(e) = disconnect_fut.await {
+        error!("Error disconnecting btleplug device: {:?}", e);
+      }
+    })
+  }
+}
