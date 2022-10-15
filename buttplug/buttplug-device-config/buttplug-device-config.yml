@@ -1302,6 +1302,7 @@ protocols:
         - Onyx2.1
         - Onyx+
         - KEON
+        - Keon R2
       services:
         00001900-0000-1000-8000-00805f9b34fb:
           # Used to clear the whitelist
@@ -1330,6 +1331,7 @@ protocols:
           FleshlightLaunchFW12Cmd: { }
       - identifier:
           - KEON
+          - Keon R2
         name: Kiiroo Keon
         messages:
           LinearCmd:

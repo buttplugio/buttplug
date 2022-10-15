@@ -2460,7 +2460,8 @@
           "We-Vibe Rocketman",
           "Onyx2.1",
           "Onyx+",
-          "KEON"
+          "KEON",
+          "Keon R2"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -2513,7 +2514,8 @@
         },
         {
           "identifier": [
-            "KEON"
+            "KEON",
+            "Keon R2"
           ],
           "name": "Kiiroo Keon",
           "messages": {
