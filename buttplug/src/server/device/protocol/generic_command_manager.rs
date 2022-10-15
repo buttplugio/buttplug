@@ -179,7 +179,7 @@ impl GenericCommandManager {
         // than anything, but it's what users will expect.
         (scalar_modifier + *range_start as f64).ceil() as u32
       };
-      debug!(
+      trace!(
         "{:?} {} {} {}",
         self.scalars[index].step_range(),
         range,
