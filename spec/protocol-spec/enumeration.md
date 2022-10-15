@@ -244,7 +244,7 @@ sequenceDiagram
           "DeviceDisplayName": "User set name",
           "DeviceMessages": {
             "LinearCmd": [ {
-              "StepRange": [0, 100],
+              "StepCount": 100,
               "FeatureDescriptor": "Stroker"
             } ],
             "StopDeviceCmd": {}
