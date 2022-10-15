@@ -1,3 +1,19 @@
+# 6.1.0 (2022-10-15)
+
+## Features
+
+- Bluetooth devices can now be detected using manufacturer data in advertisements
+  - Also fixes #462
+  - This requires a major version change to the device config library, hence the minor version
+    change.
+- Add new Keon device name to device config
+
+## Bugfixes
+
+- #488: Fix issue where ServerInfo returning higher message version than RequestServerInfo can break
+  older clients.
+- #491: Implement disconnect on Drop for Bluetooth devices
+
 # 6.0.1 (2022-09-24)
 
 ## Breaking Changes
