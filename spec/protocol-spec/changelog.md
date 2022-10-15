@@ -4,10 +4,15 @@
 
 - Message Descriptions Changed:
   - ServerInfo
-    - A programming errors in multiple official reference libraries will cause connections to fail
-      if the server lists its maximum available spec version and that version is higher than the
-      client's spec version. Therefore, ServerInfo cannot return a version that is higher than the
-      client's spec verison. ServerInfo should return either a version that matches the clients, or the highest possible version below the client's. This does not change the structure of the message, just the expectations of how it should function.
+    - The original idea behind ServerInfo's message spec version output was to notify clients if a
+      new, higher version of the message spec might be available, prompting for upgrade.
+      Unfortunately, a long running programming error in multiple official reference libraries will
+      cause connections to fail if the server lists its maximum available spec version and that
+      version is higher than the client's spec version. Therefore, ServerInfo cannot return a
+      version that is higher than the client's spec verison. ServerInfo should return either a
+      version that matches the clients, or throw an error if it cannot match the client's version.
+      This does not change the structure of the message, just the expectations of how it should
+      function.
 
 ## Version 3 (2022-08-29)
 
