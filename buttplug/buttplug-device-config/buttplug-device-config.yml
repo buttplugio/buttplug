@@ -4,21 +4,17 @@
 #
 # Use user-device-config.yml for local device definitions.
 #
-# Now that we've got that bit of impoliteness out of the way... Hi,
-# I'm qDot. Welcome to the buttplug device configuration file.
+# Now that we've got that bit of impoliteness out of the way... Hi, I'm qDot. Welcome to the
+# buttplug device configuration file.
 #
-# You've managed to wander into this place we keep all of the sex toy
-# information. You're not really supposed to be here, but since you've
-# shown up, might as give you a tour.
+# You've managed to wander into this place we keep all of the sex toy information. You're not really
+# supposed to be here, but since you've shown up, might as give you a tour.
 #
-# This file is used in all Buttplug reference implementations,
-# including C#, JS, and whatever other languages we decide to
-# implement things in. It's our main source of truth for devices we
+# This file is used in Rust Buttplug implementation. It's our main source of truth for devices we
 # know about.
 #
-# Devices in Buttplug are defined in terms of their protocol. We group
-# together all devices that speak the same language. It will look
-# something like this:
+# Devices in Buttplug are defined in terms of their protocol. We group together all devices that
+# speak the same language. It will look something like this:
 #
 # protocols:
 #   lovense:
@@ -28,109 +24,86 @@
 #       services:
 #         0000fff0-0000-1000-8000-00805f9b34fb: null
 #
-# The protocols portion of the config file lists all of the protocols
-# we know, and how the devices that speak those protocols can be
-# identified. For the above example, we're looking at Lovense brand
-# hardware, all of which uses bluetooth LE, so we create a "btle"
-# configuration section for that protocol. We list the device names
-# (using a * as a wildcard, so this means "try to connect to anything
-# that starts with LVS-"). We also list the services we're interested
-# in. If a service only has rx/tx characteristics (many devices
-# emulate serial in this way), we just put "null" and let the
-# Bluetooth subtype manager sort out the characteristics on connect.
-# Otherwise, if there are multiple characteristics, we list those in
-# name/uuid form. See the definitions below for more examples.
+# The protocols portion of the config file lists all of the protocols we know, and how the devices
+# that speak those protocols can be identified. For the above example, we're looking at Lovense
+# brand hardware, all of which uses bluetooth LE, so we create a "btle" configuration section for
+# that protocol. We list the device names (using a * as a wildcard, so this means "try to connect to
+# anything that starts with LVS-"). We also list the services we're interested in. If a service only
+# has rx/tx characteristics (many devices emulate serial in this way), we just put "null" and let
+# the Bluetooth subtype manager sort out the characteristics on connect. Otherwise, if there are
+# multiple characteristics, we list those in name/uuid form. See the definitions below for more
+# examples.
 #
-# Other devices are similar. For USB/HID, we just list VID/PID pairs,
-# as that's all we have to identify with.
+# Other devices are similar. For USB/HID, we just list VID/PID pairs, as that's all we have to
+# identify with.
 #
-# Serial ports are a bit different in that we don't have a specifier
-# for them, they could be anywhere. Therefore, we just specify the
-# port settings in this file. Baud rate, data bits, etc. In Buttplug
-# Reference Servers, we allow the user to pass in another device
-# config file like this one that they've built, that can define things
-# like local port names. So the user may have a file that looks like:
+# Serial ports are a bit different in that we don't have a specifier for them, they could be
+# anywhere. Therefore, we just specify the port settings in this file. Baud rate, data bits, etc. In
+# Buttplug Reference Servers, we allow the user to pass in another device config file like this one
+# that they've built, that can define things like local port names. So the user may have a file that
+# looks like:
 #
 # protocols:
-#   erostek-et312:
+#   nobra:
 #     serial:
 #       ports:
 #         - COM4
 #
-# The user's config will be merged with this config file in the
-# server, which lets any Serial subtype manager know which port to
-# discover the device on, as well as all of the other port settings to
-# use.
+# The user's config will be merged with this config file in the server, which lets any Serial
+# subtype manager know which port to discover the device on, as well as all of the other port
+# settings to use.
 #
-# Users can also define things we're missing here, like new BTLE names
-# or IDs we haven't gotten to yet. The only thing users can't define
-# is new protocols, since those have to be implemented in source code.
+# Users can also define things we're missing here, like new BTLE names or IDs we haven't gotten to
+# yet. The only thing users can't define is new protocols, since those have to be implemented in
+# source code.
 #
-# That's pretty much it for how this file works.
-# Now for the actual protocol definitions. This is gonna get wild, so
-# I'll keep a list of rules that you can refer to up here.
+# That's pretty much it for how this file works. Now for the actual protocol definitions. This is
+# gonna get wild, so I'll keep a list of rules that you can refer to up here.
 #
-# - If you are curious about device identifiers or protocols, all
-#   of those are documented at https://stpihkal.docs.buttplug.io
+# - If you are curious about device identifiers or protocols, all of those are documented at
+#   https://stpihkal.docs.buttplug.io
 #
-# - BTLE name fields can be wildcarded using "*". This allows us to do
-#   things like searching for all devices of a certain name.
+# - BTLE name fields can be wildcarded using "*". This allows us to do things like searching for all
+#   devices of a certain name.
 #
-# - Where possible, we assume all devices have at least one output (so
-#   we can send the commands), and maybe one input. In cases
-#   otherwise, a comment should be left denoting what we're doing
+# - Where possible, we assume all devices have at least one output (so we can send the commands),
+#   and maybe one input. In cases otherwise, a comment should be left denoting what we're doing
 #   something different.
 #
-# - Most toys just mirror good ol' serial. With that in mind, we call
-#   the host-to-device line tx, and device-to-host line rx.
+# - Most toys just mirror good ol' serial. With that in mind, we call the host-to-device line tx,
+#   and device-to-host line rx.
 #
-# - If you see a "btle" connection info with service IDs but no
-#   characteristic IDs (null), this means that we'll try autodetecting
-#   the characteristics. We'll just expect it to have an input (which
-#   we'll name "rx") and an output characteristic (which we'll name
-#   "tx"), as mentioned above.
+# - A "btle" connection info with multiple service listings can mean one of two things. Either we
+#   expect the device to be identifiable as multiple services (like Lovense), or the device may have
+#   multiple services we use (like some BTLE toys that divide control and sensor between different
+#   services).
 #
-# - Similarly for USB, we'll test endpoints for r/w flags when no
-#   endpoint handles are passed. We assume all USB devices have a
-#   vendor control endpoint for Trancevibrator reasons.
+# - If you're connecting to a buttplug server and don't see a device that's listed here, it's not
+#   the fault of this config file. Servers may not implement all protocols or busses for various
+#   reasons. We just define which devices we may know about here. File an issue on the library
+#   you're using.
 #
-# - A "btle" connection info with multiple service listings can mean
-#   one of two things. Either we expect the device to be identifiable
-#   as multiple services (like Lovense), or the device may have
-#   multiple services we use (like some BTLE toys that divide control
-#   and sensor between different services).
+# - If you're connecting to a buttplug server and some device doesn't take a Buttplug message you're
+#   expecting it to, it's not the fault of this config file. Servers implement protocols, and
+#   protocols dictate which messages they are capable of sending. We don't really keep a standard
+#   for that, we just define which devices we may know about here. File an issue on the library
+#   you're using.
 #
-# - If you're connecting to a buttplug server and don't see a device
-#   that's listed here, it's not the fault of this config file.
-#   Servers may not implement all protocols or busses for various
-#   reasons. We just define which devices we may know about here. File
-#   an issue on the library you're using.
-#
-# - If you're connecting to a buttplug server and some device doesn't
-#   take a Buttplug message you're expecting it to, it's not the fault
-#   of this config file. Servers implement protocols, and protocols
-#   dictate which messages they are capable of sending. We don't
-#   really keep a standard for that, we just define which devices we
-#   may know about here. File an issue on the library you're using.
-#
-# - Serial info here is for default device configuration. Port names
-#   will have to be added by the user in the user device config file.
+# - Serial info here is for default device configuration. Port names will have to be added by the
+#   user in the user device config file.
 version:
-  major: 1
+  major: 2
   minor: 0
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
     #
-    # Lovense have changed BLE name formats at least once. For this
-    # generic device, we just use the largest wildcard we can. We do
-    # our name and capabilities finding in the protocol
-    # implementation, because we have to query the device after
-    # connection.
+    # Lovense have changed BLE name formats at least once. For this generic device, we just use the
+    # largest wildcard we can. We do our name and capabilities finding in the protocol
+    # implementation, because we have to query the device after connection.
     #
-    # The service uuids change constantly. This list is overly
-    # exhaustive, because we have to specify services in WebBluetooth
-    # and can't wildcard them. We'll add more as we find them.
+    # The service uuids change constantly. This list is overly exhaustive, because we have to
+    # specify services in WebBluetooth and can't wildcard them. We'll add more as we find them.
     btle:
       names:
         - LVS-*
@@ -2107,8 +2080,11 @@ protocols:
     btle:
       names:
         - SF *
-      advertised-services:
-        - 0000180a-0000-1000-8000-00805f9b34fb
+      manufacturer-data:
+        - company: 0x5D
+          data: [0x00, 0x00, 0x27]
+        - company: 0x5D
+          data: [0x00, 0x00, 0x28]
       services:
         0000180a-0000-1000-8000-00805f9b34fb:
           rxblemodel: 00002A24-0000-1000-8000-00805f9b34fb

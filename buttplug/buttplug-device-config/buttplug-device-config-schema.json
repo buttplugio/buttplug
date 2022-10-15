@@ -18,6 +18,29 @@
           },
           "minItems": 1
         },
+        "manufacturer-data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "company": {
+                "type": "integer"
+              },
+              "expected-length": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            },
+            "required": [
+              "company"
+            ]
+          }
+        },
         "advertised-services": {
           "type": "array",
           "items": {

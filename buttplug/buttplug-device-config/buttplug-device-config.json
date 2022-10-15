@@ -1,6 +1,6 @@
 {
   "version": {
-    "major": 1,
+    "major": 2,
     "minor": 0
   },
   "protocols": {
@@ -3979,8 +3979,23 @@
         "names": [
           "SF *"
         ],
-        "advertised-services": [
-          "0000180a-0000-1000-8000-00805f9b34fb"
+        "manufacturer-data": [
+          {
+            "company": 93,
+            "data": [
+              0,
+              0,
+              39
+            ]
+          },
+          {
+            "company": 93,
+            "data": [
+              0,
+              0,
+              40
+            ]
+          }
         ],
         "services": {
           "0000180a-0000-1000-8000-00805f9b34fb": {
