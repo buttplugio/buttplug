@@ -84,7 +84,7 @@ fn test_server_handshake_not_done_first() {
 }
 
 #[test]
-fn test_server_version_lt() {
+fn test_client_version_older_than_server() {
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
   async_manager::block_on(async {
@@ -106,7 +106,7 @@ fn test_server_version_lt() {
 
 #[test]
 #[ignore = "Needs to be rewritten to send in via the JSON parser, otherwise we're type bound due to the enum and can't fail"]
-fn test_server_version_gt() {
+fn test_server_version_older_than_client() {
   let server = ButtplugServer::default();
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
