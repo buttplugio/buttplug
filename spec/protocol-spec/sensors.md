@@ -43,7 +43,7 @@ sequenceDiagram
     "SensorReadCmd": {
       "Id": 1,
       "DeviceIndex": 0,
-      "SensorIndex": "0",
+      "SensorIndex": 0,
       "SensorType": "Pressure"
     }
   }
