@@ -40,7 +40,7 @@ use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
-  }
+  },
 };
 use tokio::sync::{broadcast, mpsc};
 
