@@ -21,14 +21,14 @@ use uuid::Uuid;
 #[getset(get = "pub", set = "pub", get_mut = "pub")]
 pub struct BluetoothLEManufacturerData {
   company: u16,
-  data: Option<Vec<u8>>
+  data: Option<Vec<u8>>,
 }
 
 impl BluetoothLEManufacturerData {
   pub fn new(company: u16, data: &Option<Vec<u8>>) -> Self {
     Self {
       company,
-      data: data.clone()
+      data: data.clone(),
     }
   }
 }
@@ -62,8 +62,16 @@ impl PartialEq for BluetoothLEManufacturerData {
     // means if manufacturer data comes back from a device shorter than the data the device config
     // expects, we could have a false match. This needs to be contexualized but that would require a
     // large device config system rewrite at the moment, so we'll just live with the bug for now.
-    let needle = if data.len() < other_data.len() { data } else { other_data };
-    let mut haystack = if data.len() > other_data.len() { data.as_slice() } else { other_data.as_slice() };
+    let needle = if data.len() < other_data.len() {
+      data
+    } else {
+      other_data
+    };
+    let mut haystack = if data.len() > other_data.len() {
+      data.as_slice()
+    } else {
+      other_data.as_slice()
+    };
     while !haystack.is_empty() {
       if haystack.starts_with(needle) {
         return true;
@@ -84,7 +92,7 @@ impl PartialEq for BluetoothLEManufacturerData {
 pub struct BluetoothLESpecifier {
   /// Set of expected advertised names for this device.
   names: HashSet<String>,
-  /// Array of possible manufacturer data values. 
+  /// Array of possible manufacturer data values.
   #[serde(default, rename = "manufacturer-data")]
   manufacturer_data: Vec<BluetoothLEManufacturerData>,
   /// Set of expected advertised services for this device.
@@ -122,8 +130,8 @@ impl PartialEq for BluetoothLESpecifier {
           return true;
         }
       }
-    }    
-    
+    }
+
     if !self.manufacturer_data.is_empty() && !other.manufacturer_data.is_empty() {
       for data in &self.manufacturer_data {
         if other.manufacturer_data.contains(data) {
@@ -161,12 +169,19 @@ impl BluetoothLESpecifier {
   }
 
   /// Creates a specifier from a BLE device advertisement.
-  pub fn new_from_device(name: &str, manufacturer_data: &HashMap<u16, Vec<u8>>, advertised_services: &[Uuid]) -> BluetoothLESpecifier {
+  pub fn new_from_device(
+    name: &str,
+    manufacturer_data: &HashMap<u16, Vec<u8>>,
+    advertised_services: &[Uuid],
+  ) -> BluetoothLESpecifier {
     let mut name_set = HashSet::new();
     name_set.insert(name.to_string());
     let mut data_vec = vec![];
     for (company, data) in manufacturer_data.iter() {
-      data_vec.push(BluetoothLEManufacturerData::new(*company, &Some(data.clone())));
+      data_vec.push(BluetoothLEManufacturerData::new(
+        *company,
+        &Some(data.clone()),
+      ));
     }
     let service_set = HashSet::from_iter(advertised_services.iter().copied());
     BluetoothLESpecifier {

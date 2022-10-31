@@ -502,11 +502,8 @@ impl ButtplugServer {
     }
     // Only start the ping timer after we've received the handshake.
     let ping_timer = self.ping_timer.clone();
-    let out_msg = message::ServerInfo::new(
-      &self.server_name,
-      msg.message_version(),
-      self.max_ping_time,
-    );
+    let out_msg =
+      message::ServerInfo::new(&self.server_name, msg.message_version(), self.max_ping_time);
     let connected = self.connected.clone();
     async move {
       ping_timer.start_ping_timer().await;

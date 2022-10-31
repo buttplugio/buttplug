@@ -57,7 +57,13 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
-  pub fn new(name: &str, manufacturer_data: &HashMap<u16, Vec<u8>>, services: &[Uuid], device: T, adapter: Adapter) -> Self {
+  pub fn new(
+    name: &str,
+    manufacturer_data: &HashMap<u16, Vec<u8>>,
+    services: &[Uuid],
+    device: T,
+    adapter: Adapter,
+  ) -> Self {
     Self {
       name: name.to_owned(),
       manufacturer_data: manufacturer_data.clone(),
