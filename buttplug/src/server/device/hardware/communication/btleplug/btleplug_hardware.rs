@@ -454,6 +454,6 @@ impl<T: Peripheral> Drop for BtlePlugHardware<T> {
       if let Err(e) = disconnect_fut.await {
         error!("Error disconnecting btleplug device: {:?}", e);
       }
-    })
+    });
   }
 }
