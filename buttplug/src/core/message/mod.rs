@@ -398,8 +398,6 @@ pub enum ButtplugSpecV3ClientMessage {
   RawUnsubscribeCmd(RawUnsubscribeCmd),
   ScalarCmd(ScalarCmd),
   // Sensor commands
-  BatteryLevelCmd(BatteryLevelCmd),
-  RSSILevelCmd(RSSILevelCmd),
   SensorReadCmd(SensorReadCmd),
   SensorSubscribeCmd(SensorSubscribeCmd),
   SensorUnsubscribeCmd(SensorUnsubscribeCmd),
