@@ -326,7 +326,12 @@ impl ServerDeviceManager {
     })
   }
 
-  pub fn shutdown(&self) -> ButtplugServerResultFuture {
+  // Only a ButtplugServer should be able to call this. We don't want to expose this capability to
+  // the outside world. Note that this could cause issues for lifetimes if someone holds this longer
+  // than the lifetime of the server that originally created it. Ideally we should lock the Server
+  // Device Manager lifetime to the owning ButtplugServer lifetime to ensure that doesn't happen,
+  // but that's going to be complicated.
+  pub(crate) fn shutdown(&self) -> ButtplugServerResultFuture {
     let devices = self.devices.clone();
     async move {
       for device in devices.iter() {
