@@ -258,6 +258,9 @@ impl BtleplugAdapterTask {
                 }
               }
             }
+          } else {
+            debug!("Command stream closed. Exiting btleplug adapter loop.");
+            return;
           }
         }
       }
