@@ -121,7 +121,6 @@ async fn run_connection_loop<S>(
             ButtplugSerializedMessage::Binary(binary_msg) => {
               if websocket_server_sender
                 .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
-
                 .await
                 .is_err() {
                 warn!("Cannot send binary value to server, considering connection closed.");
@@ -159,6 +158,13 @@ async fn run_connection_loop<S>(
                 }
                 async_tungstenite::tungstenite::Message::Ping(_) => {
                   // noop
+                  if websocket_server_sender
+                    .send(async_tungstenite::tungstenite::Message::Pong(vec!(0)))
+                    .await
+                    .is_err() {
+                    warn!("Cannot send pong to client, considering connection closed.");
+                    return;
+                  }
                   continue;
                 }
                 async_tungstenite::tungstenite::Message::Frame(_) => {
