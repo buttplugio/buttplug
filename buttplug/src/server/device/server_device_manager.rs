@@ -11,7 +11,7 @@
 use super::server_device_manager_event_loop::ServerDeviceManagerEventLoop;
 use crate::{
   core::{
-    errors::{ButtplugDeviceError, ButtplugMessageError},
+    errors::{ButtplugDeviceError, ButtplugMessageError, ButtplugUnknownError},
     message::{
       self,
       ButtplugClientMessage,
@@ -48,7 +48,7 @@ use crate::{
 use dashmap::DashMap;
 use futures::future::{self, FutureExt};
 use getset::Getters;
-use std::{convert::TryFrom, sync::Arc};
+use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicBool, Ordering}}};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 
@@ -205,6 +205,7 @@ impl ServerDeviceManagerBuilder {
       devices,
       device_command_sender,
       loop_cancellation_token,
+      running: Arc::new(AtomicBool::new(true)),
     })
   }
 }
@@ -213,6 +214,7 @@ pub struct ServerDeviceManager {
   devices: Arc<DashMap<u32, Arc<ServerDevice>>>,
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
+  running: Arc<AtomicBool>,
 }
 
 impl ServerDeviceManager {
@@ -308,6 +310,9 @@ impl ServerDeviceManager {
   }
 
   pub fn parse_message(&self, msg: ButtplugClientMessage) -> ButtplugServerResultFuture {
+    if !self.running.load(Ordering::SeqCst) {
+      return future::ready(Err(ButtplugUnknownError::DeviceManagerNotRunning.into())).boxed();
+    }
     // If this is a device command message, just route it directly to the
     // device.
     match ButtplugDeviceCommandMessageUnion::try_from(msg.clone()) {
@@ -333,7 +338,14 @@ impl ServerDeviceManager {
   // but that's going to be complicated.
   pub(crate) fn shutdown(&self) -> ButtplugServerResultFuture {
     let devices = self.devices.clone();
+    // Make sure that, once our owning server shuts us down, no one outside can use this manager
+    // again. Otherwise we can have all sorts of ownership weirdness.
+    self.running.store(false, Ordering::SeqCst);
+    let stop_scanning = self.stop_scanning();
     async move {
+      // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
+      // cleaning up if we're still scanning.
+      let _ = stop_scanning.await;
       for device in devices.iter() {
         device.value().disconnect().await?;
       }
