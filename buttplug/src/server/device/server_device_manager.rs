@@ -43,10 +43,10 @@ use crate::{
     ButtplugServerError,
     ButtplugServerResultFuture,
   },
-  util::async_manager,
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashMap;
-use futures::future::{self, FutureExt};
+use futures::{future::{self, FutureExt}, Stream};
 use getset::Getters;
 use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicBool, Ordering}}};
 use tokio::sync::{broadcast, mpsc};
@@ -139,7 +139,6 @@ impl ServerDeviceManagerBuilder {
 
   pub fn finish(
     &mut self,
-    output_sender: broadcast::Sender<ButtplugServerMessage>,
   ) -> Result<ServerDeviceManager, ButtplugServerError> {
     let config_mgr = self
       .configuration_manager_builder
@@ -156,7 +155,7 @@ impl ServerDeviceManagerBuilder {
         .iter()
         .any(|mgr| mgr.name() == comm_mgr.name())
       {
-        return Err(ButtplugServerError::DeviceManagerTypeAlreadyAdded(
+        return Err(ButtplugServerError::DeviceCommunicationManagerTypeAlreadyAdded(
           comm_mgr.name().to_owned(),
         ));
       }
@@ -189,12 +188,14 @@ impl ServerDeviceManagerBuilder {
     let devices = Arc::new(DashMap::new());
     let loop_cancellation_token = CancellationToken::new();
 
+    let output_sender = broadcast::channel(255).0;
+
     let mut event_loop = ServerDeviceManagerEventLoop::new(
       comm_managers,
       config_mgr,
       devices.clone(),
       loop_cancellation_token.child_token(),
-      output_sender,
+      output_sender.clone(),
       device_event_receiver,
       device_command_receiver,
     );
@@ -206,6 +207,7 @@ impl ServerDeviceManagerBuilder {
       device_command_sender,
       loop_cancellation_token,
       running: Arc::new(AtomicBool::new(true)),
+      output_sender
     })
   }
 }
@@ -215,9 +217,16 @@ pub struct ServerDeviceManager {
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
+  output_sender: broadcast::Sender<ButtplugServerMessage>
 }
 
 impl ServerDeviceManager {
+  pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
+    // Unlike the client API, we can expect anyone using the server to pin this
+    // themselves.
+    convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
+  }
+
   fn start_scanning(&self) -> ButtplugServerResultFuture {
     let command_sender = self.device_command_sender.clone();
     async move {

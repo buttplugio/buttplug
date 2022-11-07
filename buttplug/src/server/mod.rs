@@ -98,6 +98,7 @@ use std::{
 };
 use thiserror::Error;
 use tokio::sync::broadcast;
+use tokio_stream::StreamExt;
 use tracing_futures::Instrument;
 
 /// Result type for Buttplug Server methods, as the server will always communicate in
@@ -116,8 +117,8 @@ pub enum ButtplugServerError {
   #[error("The DeviceConfigurationManager could not be built: {0}")]
   DeviceConfigurationManagerError(ButtplugDeviceError),
   /// DeviceCommunicationManager type has already been added to the system.
-  #[error("DeviceManager of type {0} has already been added.")]
-  DeviceManagerTypeAlreadyAdded(String),
+  #[error("DeviceCommunicationManager of type {0} has already been added.")]
+  DeviceCommunicationManagerTypeAlreadyAdded(String),
   /// Protocol has already been added to the system.
   #[error("Buttplug Protocol of type {0} has already been added to the system.")]
   ProtocolAlreadyAdded(String),
@@ -271,7 +272,7 @@ impl ButtplugServerBuilder {
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();
 
-    let device_manager = Arc::new(self.device_manager_builder.finish(output_sender.clone())?);
+    let device_manager = Arc::new(self.device_manager_builder.finish()?);
 
     let connected = Arc::new(AtomicBool::new(false));
     let connected_clone = connected.clone();
@@ -371,12 +372,15 @@ impl ButtplugServer {
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugServerMessage> {
     // Unlike the client API, we can expect anyone using the server to pin this
     // themselves.
-    convert_broadcast_receiver_to_stream(self.output_sender.subscribe())
+    let server_receiver = convert_broadcast_receiver_to_stream(self.output_sender.subscribe());
+    let device_receiver = self.device_manager.event_stream();
+    let receiver = device_receiver.merge(server_receiver);
+    receiver
   }
 
   /// Returns a references to the internal device manager, for handling configuration.
-  pub fn device_manager(&self) -> &ServerDeviceManager {
-    &self.device_manager
+  pub fn device_manager(&self) -> Arc<ServerDeviceManager> {
+    self.device_manager.clone()
   }
 
   /// If true, client is currently connected to the server.

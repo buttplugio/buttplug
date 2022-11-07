@@ -12,6 +12,7 @@ use crate::{
     errors::ButtplugError,
     message::{
       self,
+      //ButtplugDeviceCommandMessageUnion,
       ButtplugClientMessage,
       ButtplugMessage,
       ButtplugMessageValidator,
@@ -28,10 +29,11 @@ use tokio::sync::{broadcast, mpsc, Notify};
 // Clone derived here to satisfy tokio broadcast requirements.
 #[derive(Clone, Debug)]
 pub enum ButtplugRemoteServerEvent {
-  Connected(String),
+  ClientConnected(String),
+  ClientDisconnected,
   DeviceAdded(u32, String, String, Option<String>),
   DeviceRemoved(u32),
-  Disconnected,
+  //DeviceCommand(ButtplugDeviceCommandMessageUnion)
 }
 
 #[derive(Error, Debug)]
@@ -58,12 +60,16 @@ async fn run_server<ConnectorType>(
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
   let server_receiver = server.event_stream();
+  let mut has_connected = false;
   pin_mut!(server_receiver);
   loop {
     select! {
       connector_msg = connector_receiver.recv().fuse() => match connector_msg {
         None => {
           info!("Connector disconnected, exiting loop.");
+          if has_connected && remote_event_sender.receiver_count() > 0 && remote_event_sender.send(ButtplugRemoteServerEvent::ClientDisconnected).is_err() {
+            warn!("Cannot update remote about client disconnection");
+          }
           break;
         }
         Some(client_message) => {
@@ -82,7 +88,8 @@ async fn run_server<ConnectorType>(
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 if let ButtplugClientMessage::RequestServerInfo(rsi) = client_message {
-                  if remote_event_sender_clone.receiver_count() > 0 && remote_event_sender_clone.send(ButtplugRemoteServerEvent::Connected(rsi.client_name().clone())).is_err() {
+                  has_connected = true;
+                  if remote_event_sender_clone.receiver_count() > 0 && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(rsi.client_name().clone())).is_err() {
                     error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                   }
                 }

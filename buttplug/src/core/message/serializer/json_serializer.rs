@@ -54,6 +54,15 @@ impl Default for ButtplugServerJSONSerializer {
   }
 }
 
+impl ButtplugServerJSONSerializer {
+  pub fn force_message_version(&self, version: &ButtplugMessageSpecVersion) {
+    self
+    .message_version
+    .set(version.clone())
+    .expect("This should only ever be called once.");
+  }
+}
+
 /// Returns the message as a string in Buttplug JSON Protocol format.
 pub fn msg_to_protocol_json<T>(msg: T) -> String
 where
