@@ -91,7 +91,7 @@ async fn run_connection_loop<S>(
           return;
         }
       },
-      _ = sleep(Duration::from_millis(1000)).fuse() => {
+      _ = sleep(Duration::from_millis(10000)).fuse() => {
         if pong_count == 0 {
           warn!("No pongs received, considering connection closed.");
           return;
