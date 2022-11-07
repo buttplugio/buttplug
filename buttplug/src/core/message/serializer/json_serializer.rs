@@ -208,12 +208,12 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
     }
     // instead of using if/else here, return in the if, which drops the borrow.
     // so we can possibly mutate it now.
-    let msg_union = deserialize_to_message::<ButtplugSpecV2ClientMessage>(&self.validator, msg)?;
+    let msg_union = deserialize_to_message::<ButtplugSpecV3ClientMessage>(&self.validator, msg)?;
     // If the message is malformed, just return an spec version not received error.
     if msg_union.is_empty() {
       return Err(ButtplugSerializerError::MessageSpecVersionNotReceived);
     }
-    if let ButtplugSpecV2ClientMessage::RequestServerInfo(rsi) = &msg_union[0] {
+    if let ButtplugSpecV3ClientMessage::RequestServerInfo(rsi) = &msg_union[0] {
       info!(
         "Setting JSON Wrapper message version to {}",
         rsi.message_version()
@@ -236,7 +236,7 @@ impl ButtplugMessageSerializer for ButtplugServerJSONSerializer {
       // RequestServerInfo message (so we can't set up our known spec
       // version), just encode to the latest and return.
       if let ButtplugServerMessage::Error(_) = &msgs[0] {
-        serialize_to_version(ButtplugMessageSpecVersion::Version2, msgs)
+        serialize_to_version(ButtplugMessageSpecVersion::Version3, msgs)
       } else {
         // If we don't even have enough info to know which message
         // version to convert to, consider this a handshake error.
