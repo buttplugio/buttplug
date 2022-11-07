@@ -274,11 +274,12 @@ impl ServerDeviceManagerEventLoop {
         let event_sender = self.device_event_sender.clone();
         async_manager::spawn(async move {
           pin_mut!(event_listener);
+          // This can fail if the event_sender loses the server before this loop dies.
           while let Some(event) = event_listener.next().await {
-            event_sender
-              .send(event)
-              .await
-              .expect("Should always succeed since it goes to the Device Manager which owns us.");
+            if event_sender.send(event).await.is_err() {
+              info!("Event sending failure in servier device manager event loop, exiting.");
+              break;
+            }
           }
         });
 
