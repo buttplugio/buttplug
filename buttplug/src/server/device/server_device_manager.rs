@@ -46,9 +46,18 @@ use crate::{
   util::{async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use dashmap::DashMap;
-use futures::{future::{self, FutureExt}, Stream};
+use futures::{
+  future::{self, FutureExt},
+  Stream,
+};
 use getset::Getters;
-use std::{convert::TryFrom, sync::{Arc, atomic::{AtomicBool, Ordering}}};
+use std::{
+  convert::TryFrom,
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
+};
 use tokio::sync::{broadcast, mpsc};
 use tokio_util::sync::CancellationToken;
 
@@ -137,9 +146,7 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn finish(
-    &mut self,
-  ) -> Result<ServerDeviceManager, ButtplugServerError> {
+  pub fn finish(&mut self) -> Result<ServerDeviceManager, ButtplugServerError> {
     let config_mgr = self
       .configuration_manager_builder
       .finish()
@@ -155,9 +162,11 @@ impl ServerDeviceManagerBuilder {
         .iter()
         .any(|mgr| mgr.name() == comm_mgr.name())
       {
-        return Err(ButtplugServerError::DeviceCommunicationManagerTypeAlreadyAdded(
-          comm_mgr.name().to_owned(),
-        ));
+        return Err(
+          ButtplugServerError::DeviceCommunicationManagerTypeAlreadyAdded(
+            comm_mgr.name().to_owned(),
+          ),
+        );
       }
 
       comm_managers.push(comm_mgr);
@@ -207,7 +216,7 @@ impl ServerDeviceManagerBuilder {
       device_command_sender,
       loop_cancellation_token,
       running: Arc::new(AtomicBool::new(true)),
-      output_sender
+      output_sender,
     })
   }
 }
@@ -217,7 +226,7 @@ pub struct ServerDeviceManager {
   device_command_sender: mpsc::Sender<DeviceManagerCommand>,
   loop_cancellation_token: CancellationToken,
   running: Arc<AtomicBool>,
-  output_sender: broadcast::Sender<ButtplugServerMessage>
+  output_sender: broadcast::Sender<ButtplugServerMessage>,
 }
 
 impl ServerDeviceManager {

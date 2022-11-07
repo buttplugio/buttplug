@@ -36,23 +36,16 @@ impl ProtocolInitializer for AnkniInitializer {
     hardware: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-
-    let check:u8;
-    let msg = HardwareReadCmd::new(
-      Endpoint::Generic0,
-      6,
-      100,
-    );
+    let check: u8;
+    let msg = HardwareReadCmd::new(Endpoint::Generic0, 6, 100);
     let reading = hardware.read_value(&msg).await?;
-
 
     let mut addrdata = Vec::with_capacity(7);
     addrdata.push(0x01);
     addrdata.extend(reading.data());
 
-    check = ((crc16(addrdata) & 0xff00)>>8) as u8;
+    check = ((crc16(addrdata) & 0xff00) >> 8) as u8;
     debug!("Ankni Checksum: {:#02X}", check);
-
 
     let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -66,8 +59,8 @@ impl ProtocolInitializer for AnkniInitializer {
     let msg = HardwareWriteCmd::new(
       Endpoint::Tx,
       vec![
-        0x01, 0x02, check, check, check, check, check, check, check, check, check, check, check, check, check,
-        check, check, check, 0x00, 0x00,
+        0x01, 0x02, check, check, check, check, check, check, check, check, check, check, check,
+        check, check, check, check, check, 0x00, 0x00,
       ],
       true,
     );
@@ -115,19 +108,18 @@ impl ProtocolHandler for Ankni {
   }
 }
 
-fn crc16(advert_data: Vec<u8>) -> u16{
+fn crc16(advert_data: Vec<u8>) -> u16 {
   let mut remain: u16 = 0;
   for byte in advert_data {
-      remain ^= (byte as u16) << 8;
-      for _ in 0..8{
-          if (remain & (1<<(u16::BITS-1))) != 0 {
-              remain <<= 1;
-              remain ^= 0x1021;
-          }
-          else { 
-              remain <<= 1;
-          }
+    remain ^= (byte as u16) << 8;
+    for _ in 0..8 {
+      if (remain & (1 << (u16::BITS - 1))) != 0 {
+        remain <<= 1;
+        remain ^= 0x1021;
+      } else {
+        remain <<= 1;
       }
+    }
   }
   return remain;
 }

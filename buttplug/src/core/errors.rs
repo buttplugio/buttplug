@@ -202,7 +202,7 @@ pub enum ButtplugUnknownError {
   /// Untyped Deserialized Error: {0}
   UntypedDeserializedError(String),
   /// Device Manager has been shut down by its owning server and is no longer available.
-  DeviceManagerNotRunning
+  DeviceManagerNotRunning,
 }
 
 /// Aggregation enum for protocol error types.
