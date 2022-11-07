@@ -60,14 +60,13 @@ async fn run_server<ConnectorType>(
   info!("Starting remote server loop");
   let shared_connector = Arc::new(connector);
   let server_receiver = server.event_stream();
-  let mut has_connected = false;
   pin_mut!(server_receiver);
   loop {
     select! {
       connector_msg = connector_receiver.recv().fuse() => match connector_msg {
         None => {
           info!("Connector disconnected, exiting loop.");
-          if has_connected && remote_event_sender.receiver_count() > 0 && remote_event_sender.send(ButtplugRemoteServerEvent::ClientDisconnected).is_err() {
+          if remote_event_sender.receiver_count() > 0 && remote_event_sender.send(ButtplugRemoteServerEvent::ClientDisconnected).is_err() {
             warn!("Cannot update remote about client disconnection");
           }
           break;
@@ -88,7 +87,6 @@ async fn run_server<ConnectorType>(
             match server_clone.parse_message(client_message.clone()).await {
               Ok(ret_msg) => {
                 if let ButtplugClientMessage::RequestServerInfo(rsi) = client_message {
-                  has_connected = true;
                   if remote_event_sender_clone.receiver_count() > 0 && remote_event_sender_clone.send(ButtplugRemoteServerEvent::ClientConnected(rsi.client_name().clone())).is_err() {
                     error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                   }
