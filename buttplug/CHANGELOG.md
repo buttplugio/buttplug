@@ -1,3 +1,33 @@
+# 6.2.0 (2022-11-05)
+
+## Features
+
+- Expose DeviceManager from server as an Arc (used for Server direct device access in Intiface Engine/Central)
+- Added Device Support
+  - WeVibe Chorus
+  - Nobra BLE Controller
+  - WeToy MiNa
+  - Pink Punch Sunset Mushroom
+  - Sakuraneko toys
+  - Synchro
+  - Lelo Tiani Harmony, Ida Wave
+
+## Bugfixes
+
+- Update to btleplug version that doesn't break Android
+- #497: If websocket server gets a ping, return a pong
+- Remove Battery/RSSI Messages from SpecV3 Union
+- Only allow DeviceManager's shutdown() to be called from within ButtplugServer
+- Fix issue with btleplug Adapter Event Loop stalling on exit
+- Fix panic in Device Manager Event Loop on very early exit
+- JSON Serializer should use V3 for decoding by default
+- Set Device Manager gating so if it is ever shut down it won't come back
+- Change Websocket server ping timing to once every 10s (was every 1s)
+- Fix Write type for Lovense Desire devices
+- Fix protocol issue in MagicMotion toys with multiple vibrators
+- Fix Ankni/Roselex protocol handshake
+- Add additional endpoints used by Ankni
+
 # 6.1.0 (2022-10-15)
 
 ## Features
