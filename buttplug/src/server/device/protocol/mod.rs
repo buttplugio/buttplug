@@ -56,6 +56,7 @@ pub mod pink_punch;
 pub mod prettylove;
 pub mod raw_protocol;
 pub mod realov;
+pub mod rez_trance_vibrator;
 pub mod sakuraneko;
 pub mod satisfyer;
 pub mod svakom;
@@ -80,14 +81,8 @@ use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{
-      self,
-      ActuatorType,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceMessage,
-      ButtplugServerDeviceMessage,
-      ButtplugServerMessage,
-      Endpoint,
-      SensorType,
+      self, ActuatorType, ButtplugDeviceCommandMessageUnion, ButtplugDeviceMessage,
+      ButtplugServerDeviceMessage, ButtplugServerMessage, Endpoint, SensorType,
     },
   },
   server::device::{
@@ -321,6 +316,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     kgoal_boost::setup::KGoalBoostIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    rez_trance_vibrator::setup::RezTranceVibratorIdentifierFactory::default(),
   );
   map
 }

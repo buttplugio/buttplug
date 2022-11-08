@@ -96,6 +96,11 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
     use crate::server::device::hardware::communication::xinput::XInputDeviceCommunicationManagerBuilder;
     server_builder.comm_manager(XInputDeviceCommunicationManagerBuilder::default());
   }
+  #[cfg(feature = "usb-manager")]
+  {
+    use crate::server::device::hardware::communication::usb::UsbCommunicationManagerBuilder;
+    server_builder.comm_manager(UsbCommunicationManagerBuilder::default());
+  }
   if allow_raw_messages {
     server_builder.allow_raw_messages();
   }

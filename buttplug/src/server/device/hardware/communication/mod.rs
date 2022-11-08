@@ -13,6 +13,8 @@ pub mod lovense_connect_service;
 pub mod lovense_dongle;
 #[cfg(feature = "serial-manager")]
 pub mod serialport;
+#[cfg(feature = "usb-manager")]
+pub mod usb;
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
@@ -74,6 +76,9 @@ pub enum HardwareSpecificError {
   #[cfg(feature = "serial-manager")]
   #[error("Serial error: {0}")]
   SerialError(String),
+  #[cfg(feature = "usb-manager")]
+  #[error("USB error: {0}")]
+  UsbError(String),
 }
 
 #[async_trait]

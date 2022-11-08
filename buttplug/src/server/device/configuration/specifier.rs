@@ -315,6 +315,15 @@ pub struct USBSpecifier {
   product_id: u16,
 }
 
+impl USBSpecifier {
+  pub fn new_from_ids(vendor_id: u16, product_id: u16) -> Self {
+    Self {
+      vendor_id,
+      product_id,
+    }
+  }
+}
+
 /// Specifier for Websocket Device Manager devices
 ///
 /// The websocket device manager is a network based manager, so we have no info other than possibly
@@ -382,5 +391,4 @@ impl PartialEq for ProtocolCommunicationSpecifier {
   }
 }
 
-impl Eq for ProtocolCommunicationSpecifier {
-}
+impl Eq for ProtocolCommunicationSpecifier {}
