@@ -33,7 +33,7 @@ use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
-  },
+  }, time::Duration,
 };
 use tokio::sync::broadcast;
 
@@ -93,6 +93,8 @@ impl LovenseServiceHardware {
     let battery_level_clone = battery_level.clone();
     async_manager::spawn(async move {
       loop {
+        // SutekhVRC/VibeCheck patch for delay because Lovense Connect HTTP servers crash (Perma DOS)
+        tokio::time::sleep(Duration::from_secs(1)).await;
         match get_local_info(&host).await {
           Some(info) => {
             for (_, toy) in info.data.iter() {
