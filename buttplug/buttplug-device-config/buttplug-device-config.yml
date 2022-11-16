@@ -108,8 +108,9 @@ protocols:
       names:
         - LVS-*
         - LOVE-*
-      advertised-services:
-        - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
+      # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to 
+      # advertised-services:
+        # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
@@ -2856,38 +2857,38 @@ protocols:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
         0000ff90-0000-1000-8000-00805f9b34fb:
           rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb
-#    defaults:  # Disabled until hismith fucking machines are supported
-#      name: Hismith device
-#      messages:
-#        ScalarCmd:
-#          - StepRange: [0, 100]
-#            ActuatorType: Oscillate
-#            FeatureDescriptor: Fucking Machine Oscillation Speed
+    defaults:  # Disabled until hismith fucking machines are supported
+      name: Hismith device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Oscillate
+            FeatureDescriptor: Fucking Machine Oscillation Speed
     configurations:
-#      - identifier:
-#          - "1001"
-#        name: Hismith Sex Machine
-#        messages:
-#          ScalarCmd:
-#            - StepRange: [0, 100]
-#              ActuatorType: Oscillate
-#              FeatureDescriptor: Fucking Machine Oscillation Speed
-#      - identifier:
-#          - "1002"
-#        name: Hismith Pro Traveler
-#        messages:
-#          ScalarCmd:
-#            - StepRange: [0, 100]
-#              ActuatorType: Oscillate
-#              FeatureDescriptor: Fucking Machine Oscillation Speed
-#      - identifier:
-#          - "1003"
-#        name: Hismith Capsule
-#        messages:
-#          ScalarCmd:
-#            - StepRange: [0, 100]
-#              ActuatorType: Oscillate
-#              FeatureDescriptor: Fucking Machine Oscillation Speed
+      - identifier:
+          - "1001"
+        name: Hismith Sex Machine
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Fucking Machine Oscillation Speed
+      - identifier:
+          - "1002"
+        name: Hismith Pro Traveler
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Fucking Machine Oscillation Speed
+      - identifier:
+          - "1003"
+        name: Hismith Capsule
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Fucking Machine Oscillation Speed
       - identifier:
           - "2001"
         name: Hismith Thrusting Cup

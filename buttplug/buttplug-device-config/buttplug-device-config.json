@@ -10,9 +10,6 @@
           "LVS-*",
           "LOVE-*"
         ],
-        "advertised-services": [
-          "0000ffb0-0000-1000-8000-00805f9b34fb"
-        ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
             "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
@@ -5682,7 +5679,76 @@
           }
         }
       },
+      "defaults": {
+        "name": "Hismith device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+            }
+          ]
+        }
+      },
       "configurations": [
+        {
+          "identifier": [
+            "1001"
+          ],
+          "name": "Hismith Sex Machine",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "1002"
+          ],
+          "name": "Hismith Pro Traveler",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "1003"
+          ],
+          "name": "Hismith Capsule",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
+        },
         {
           "identifier": [
             "2001"
