@@ -20,6 +20,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
 #[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
@@ -72,6 +73,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
 #[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
@@ -125,6 +127,7 @@ fn test_device_protocols_json_v3(test_file: &str) {
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
 #[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
@@ -170,6 +173,7 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
 #[test_case("test_ankni_protocol.yaml" ; "Ankni Protocol")]
+#[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]

@@ -37,8 +37,13 @@ impl ProtocolInitializer for AnkniInitializer {
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let check: u8;
-    let msg = HardwareReadCmd::new(Endpoint::Generic0, 6, 100);
+    let msg = HardwareReadCmd::new(Endpoint::Generic0, 16, 100);
     let reading = hardware.read_value(&msg).await?;
+
+    // No mac address on PnP characteristic, assume no handshake required
+    if reading.data().len() > 6 {
+      return Ok(Arc::new(Ankni::default()));
+    }
 
     let mut addrdata = Vec::with_capacity(7);
     addrdata.push(0x01);
