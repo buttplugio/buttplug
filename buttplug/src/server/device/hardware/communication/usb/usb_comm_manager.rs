@@ -7,6 +7,8 @@ use crate::{
     HardwareCommunicationManagerBuilder,
     HardwareCommunicationManagerEvent,
     HardwareSpecificError,
+    TimedRetryCommunicationManager,
+    TimedRetryCommunicationManagerImpl,
   },
   util::async_manager,
 };
@@ -27,7 +29,12 @@ impl HardwareCommunicationManagerBuilder for UsbCommunicationManagerBuilder {
     &mut self,
     sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
-    Box::new(UsbCommunicationManager::new(sender))
+    let comm_manager = UsbCommunicationManager::new(sender);
+    if rusb::has_hotplug() {
+      Box::new(comm_manager)
+    } else {
+      Box::new(TimedRetryCommunicationManager::new(comm_manager))
+    }
   }
 }
 
@@ -40,10 +47,6 @@ pub struct UsbCommunicationManager {
 
 impl UsbCommunicationManager {
   fn new(sender: mpsc::Sender<HardwareCommunicationManagerEvent>) -> Self {
-    assert!(
-      rusb::has_hotplug(),
-      "USB manager requires libusb hotplug support"
-    );
     Self {
       sender,
       context: rusb::Context::new().expect("USB manager couldn't create libusb context."),
@@ -139,7 +142,7 @@ async fn handle_usb_hotplug_events(
       debug!("USB manager found device {name}, {address}");
       let creator = Box::new(UsbHardwareConnector::new(
         device,
-        hotplug_receiver.resubscribe(),
+        Some(hotplug_receiver.resubscribe()),
       ));
       let event = HardwareCommunicationManagerEvent::DeviceFound {
         name,
@@ -175,5 +178,49 @@ impl rusb::Hotplug<rusb::Context> for UsbHotplugger {
     if let Err(e) = self.sender.send(UsbHotplugEvent::Left(device)) {
       error!("USB hotplugger couldn't send device left hotplug event: {e:?}");
     }
+  }
+}
+
+/// Intended as fallback if libusb doesn't have hotplug support (as is the case on Windows).
+/// In this mode we will not check for device disconnection.
+#[async_trait]
+impl TimedRetryCommunicationManagerImpl for UsbCommunicationManager {
+  fn name(&self) -> &'static str {
+    "UsbCommunicationManager"
+  }
+
+  fn can_scan(&self) -> bool {
+    true
+  }
+
+  async fn scan(&self) -> Result<(), ButtplugDeviceError> {
+    trace!("USB manager scanning for devices");
+    let devices = self
+      .context
+      .devices()
+      .map_err(|e: rusb::Error| {
+        ButtplugDeviceError::from(HardwareSpecificError::UsbError(format!("{:?}", e)))
+      })?
+      .iter()
+      .collect::<Vec<_>>();
+    for device in devices {
+      let name = device.name();
+      let address = device.qualified_address();
+      debug!("USB manager found device {name}, {address}");
+      let creator = Box::new(UsbHardwareConnector::new(device, None));
+      if let Err(e) = self
+        .sender
+        .send(HardwareCommunicationManagerEvent::DeviceFound {
+          name,
+          address,
+          creator,
+        })
+        .await
+      {
+        error!("Error sending device found message from USB manager: {e:?}");
+        break;
+      }
+    }
+    Ok(())
   }
 }

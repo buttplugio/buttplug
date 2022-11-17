@@ -79,11 +79,11 @@ pub struct UsbHardwareConnector {
 impl UsbHardwareConnector {
   pub fn new(
     device: rusb::Device<rusb::Context>,
-    hotplug_receiver: broadcast::Receiver<UsbHotplugEvent>,
+    hotplug_receiver: Option<broadcast::Receiver<UsbHotplugEvent>>,
   ) -> Self {
     Self {
       device,
-      hotplug_receiver: Some(hotplug_receiver),
+      hotplug_receiver,
     }
   }
 }
@@ -105,20 +105,21 @@ impl HardwareConnector for UsbHardwareConnector {
     let name = self.device.name();
     let address = self.device.qualified_address();
     debug!("USB connector emitting a new USB device impl: {name}, {address}");
-    if let Some(hotplug_receiver) = self.hotplug_receiver.take() {
-      let hardware_internal = UsbHardware::try_create(self.device.clone(), hotplug_receiver)?;
-      let hardware = Hardware::new(
-        &name,
-        &address,
-        &[Endpoint::TxVendorControl],
-        Box::new(hardware_internal),
-      );
-      Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
-    } else {
-      Err(ButtplugDeviceError::DeviceConnectionError(
-        "USB hardware connectors can't be reused".to_owned(),
-      ))
+    // If libusb doesn't have hotplug support, it's normal for this to be None.
+    let hotplug_receiver = self.hotplug_receiver.take();
+    if hotplug_receiver.is_none() && rusb::has_hotplug() {
+      // Otherwise, it's because this connect method has been called multiple times,
+      // but we gave the hotplug receiver to the hardware struct on by the first call.
+      warn!("USB hardware connectors shouldn't be reused. Hotplug detection disabled.");
     }
+    let hardware_internal = UsbHardware::try_create(self.device.clone(), hotplug_receiver)?;
+    let hardware = Hardware::new(
+      &name,
+      &address,
+      &[Endpoint::TxVendorControl],
+      Box::new(hardware_internal),
+    );
+    Ok(Box::new(GenericHardwareSpecializer::new(hardware)))
   }
 }
 
@@ -132,18 +133,22 @@ pub struct UsbHardware {
 impl UsbHardware {
   pub fn try_create(
     device: rusb::Device<rusb::Context>,
-    hotplug_receiver: broadcast::Receiver<UsbHotplugEvent>,
+    hotplug_receiver: Option<broadcast::Receiver<UsbHotplugEvent>>,
   ) -> Result<Self, ButtplugDeviceError> {
     let handle = device.open().map_err(|e: rusb::Error| {
       ButtplugDeviceError::from(HardwareSpecificError::UsbError(format!("{:?}", e)))
     })?;
     let (device_event_sender, _) = broadcast::channel(256);
     let address = device.qualified_address();
-    async_manager::spawn(handle_usb_hotplug_events(
-      hotplug_receiver,
-      device_event_sender.clone(),
-      address.clone(),
-    ));
+
+    if let Some(hotplug_receiver) = hotplug_receiver {
+      async_manager::spawn(handle_usb_hotplug_events(
+        hotplug_receiver,
+        device_event_sender.clone(),
+        address.clone(),
+      ));
+    }
+
     Ok(Self {
       handle: Arc::new(Mutex::new(handle)),
       address,
