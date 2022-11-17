@@ -1,0 +1,37 @@
+devices:
+  - identifier: 
+      name: "DSJM"
+    expected_name: "Ankni Candy"
+device_init:
+  - !Events
+      device_index: 0
+      events:
+        - !Reads
+          - endpoint: generic0
+            data:  [0x01, 0xA6, 0x01, 0x00 ,0x00 ,0x01 ,0x16]
+device_commands: 
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x03, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,]
+            write_with_response: true
