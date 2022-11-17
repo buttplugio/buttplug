@@ -1,0 +1,42 @@
+devices:
+  - identifier:
+      name: "Rex"
+    expected_name: "metaXsire Rex"
+device_commands:
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.5
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x23, 0x07, 0x03, 0x81, 0x03, 0x80, 0x25]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.75
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x23, 0x07, 0x03, 0x81, 0x03, 0xC0, 0x65]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0x23, 0x07, 0x03, 0x81, 0x03, 0x00, 0xA5]
+        write_with_response: false
