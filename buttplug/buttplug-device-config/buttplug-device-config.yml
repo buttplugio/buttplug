@@ -2179,7 +2179,7 @@ protocols:
         0000180a-0000-1000-8000-00805f9b34fb:
           generic0: 00002a50-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Ankni Candy
+      name: Roselex Device
       messages:
         ScalarCmd:
           - StepRange: [0, 3]
