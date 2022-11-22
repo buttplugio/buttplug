@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "DSJM"
-    expected_name: "Ankni Candy"
+    expected_name: "Roselex Device"
 device_init:
   - !Events
       device_index: 0
