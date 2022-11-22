@@ -2950,12 +2950,13 @@ protocols:
     btle:
       names:
         - HISMITH
+        - Wildolo
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
         0000ff90-0000-1000-8000-00805f9b34fb:
           rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb
-    defaults:  # Disabled until hismith fucking machines are supported
+    defaults:
       name: Hismith device
       messages:
         ScalarCmd:
@@ -2965,28 +2966,21 @@ protocols:
     configurations:
       - identifier:
           - "1001"
+          - "1005"
+          - "1101"
         name: Hismith Sex Machine
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 100]
-              ActuatorType: Oscillate
-              FeatureDescriptor: Fucking Machine Oscillation Speed
+      - identifier:
+          - "1005"
+        name: Hismith Mini Sex Machine
+      - identifier:
+          - "4001"
+        name: Auxfun Sex Machine
       - identifier:
           - "1002"
         name: Hismith Pro Traveler
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 100]
-              ActuatorType: Oscillate
-              FeatureDescriptor: Fucking Machine Oscillation Speed
       - identifier:
           - "1003"
         name: Hismith Capsule
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 100]
-              ActuatorType: Oscillate
-              FeatureDescriptor: Fucking Machine Oscillation Speed
       - identifier:
           - "2001"
         name: Hismith Thrusting Cup
@@ -2997,6 +2991,13 @@ protocols:
               FeatureDescriptor: Stroker Oscillation Speed
             - StepRange: [0, 1]
               ActuatorType: Vibrate  # Vibrator
+      - identifier:
+          - "3001"
+        name: Wildolo Device
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
   wetoy:
     btle:
       names:

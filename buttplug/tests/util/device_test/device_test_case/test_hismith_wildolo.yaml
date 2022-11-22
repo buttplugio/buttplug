@@ -1,0 +1,50 @@
+devices:
+  - identifier: 
+      name: "Wildolo"
+    expected_name: "Wildolo Device"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x30, 0x01]
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.5
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x04, 0x32, 0x36]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Vibrate
+        - Index: 0
+          Speed: 0.1
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x04, 0x0a, 0x0e]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x04, 0x00, 0x04]
+        write_with_response: false
