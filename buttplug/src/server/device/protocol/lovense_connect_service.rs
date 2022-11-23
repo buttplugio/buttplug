@@ -66,6 +66,149 @@ impl ProtocolHandler for LovenseConnectService {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    
+    let mut hardware_cmds = vec![];
+
+    // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
+    // uses lovense vibrate commands internally too, so we can include them here.
+    let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+
+    if !vibrate_cmds.is_empty() {
+      // Lovense is the same situation as the Lovehoney Desire, where commands
+      // are different if we're addressing all motors or seperate motors.
+      // Difference here being that there's Lovense variants with different
+      // numbers of motors.
+      //
+      // Neat way of checking if everything is the same via
+      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+      //
+      // Just make sure we're not matching on None, 'cause if that's the case
+      // we ain't got shit to do.
+      if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1]) {
+        let lovense_cmd = format!(
+          "Vibrate?v={}&t={}",
+          cmds[0].expect("Already checked existence").1,
+          self.address
+        )
+        .as_bytes()
+        .to_vec();
+        return Ok(vec![HardwareWriteCmd::new(
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into()]);
+      }
+      for (i, cmd) in cmds.iter().enumerate() {
+        if let Some((_, speed)) = cmd {
+          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
+          .as_bytes()
+          .to_vec();
+          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        }
+      }
+    }
+
+    // Handle constriction commands.
+    let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::Constrict
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+    if !constrict_cmds.is_empty() {
+      // Only the max has a constriction system, and there's only one, so just parse the first command.
+
+      // ~ Sutekh
+      // This would be the way to implement the AirIn command except after around 5 AirIn commands
+      // the toy will stop accepting them until an AirOut command is sent.
+      // Note: The clamp(1, 3) is technically out of spec however Lovense Connect apps dont respond to 0,4,5 steps.
+      // I don't like this
+      let lovense_cmd = format!("AirIn?v={}&t={}", constrict_cmds[0].1.clamp(1, 3), self.address)
+      .as_bytes()
+      .to_vec();
+
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+
+      // ~ Sutekh
+      // Lovense Connect constriction notes from Sutekh
+      // AirIn/AirOut commands need a v parameter
+
+      // ~ Sutekh
+      /* ===== Step Level command hack ===== - This is Okay-ish
+       * 
+       * Even though the spec says the step count is 0-5. My testing has shown that setting the v parameter to 0,4,5 values will do nothing, so I have clamped the "v" parameter (1-3).
+       * Step Level Command Hack: When the input step value is 5 do an AirOut command. This works because 0,4,5 step levels seem to do nothing when sending to Lovense Connect app.
+       * Problem: This method does not allow the AirIn command to fully finish
+       * You could make the ProtocolHandler trait have a mutable reference to self in the handle_scalar_cmd method and add an internal counter so like every 3 Airin commands u send one AirOut I guess?
+       * But I ran into an issue while trying that. I forgot where (sorry), but once u convert all the trait implementations to use mutable self reference there was an error somewhere with 
+       * an Arc<> type where u would need to implement Mutex around some object.
+      if constrict_cmds[0].1 < 5 {
+        let lovense_cmd = format!("AirIn?v={}&t={}", constrict_cmds[0].1.clamp(1, 3), self.address)
+        .as_bytes()
+        .to_vec();
+
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      } else if constrict_cmds[0].1 == 5 {
+        // This is used to allow quicker updates to constriction - Sutekh
+        // The "v" parameter does not matter here clamp to 1-3
+        let lovense_constriction_refresh_cmd = format!("AirOut?v={}&t={}", constrict_cmds[0].1.clamp(1, 3), self.address)
+        .as_bytes()
+        .to_vec();
+
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_constriction_refresh_cmd, false).into());
+      }
+      */
+
+      // ~ Sutekh
+      /* ===== Toggle Constrict On/Off Hack ===== - I like this method the best
+       * This hack will address the issue with AirIn being disabled from too many AirIn commands in a row.
+       * The idea is that you set the constrict to "toggle" on by sending one AirAuto command. It will infinitely inflate the toy.
+       * Then when u want it to stop you send an AirOut command.
+       * This toggle hack is what I will use in my fork of buttplug. Though this may be unwanted for buttplug.io
+      if constrict_cmds[0].1 < 5 {
+        let lovense_cmd = format!("AirAuto?v={}&t={}", constrict_cmds[0].1.clamp(1, 3), self.address)
+        .as_bytes()
+        .to_vec();
+
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      } else if constrict_cmds[0].1 == 5 {
+        // This is used to allow quicker updates to constriction - Sutekh
+        // The "v" parameter does not matter here clamp to 1-3
+        let lovense_constriction_refresh_cmd = format!("AirOut?v={}&t={}", constrict_cmds[0].1.clamp(1, 3), self.address)
+        .as_bytes()
+        .to_vec();
+
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_constriction_refresh_cmd, false).into());
+      }
+      */
+    }
+
+    Ok(hardware_cmds)
+  
+    /* Note from Sutekh:
+     * I removed the code below to keep the handle_scalar_cmd methods for lovense toys somewhat consistent.
+     * The patch above is almost the same as the "Lovense" ProtocolHandler implementation.
+     * I have changed the commands to the Lovense Connect API format.
+     * During my testing of the Lovense Connect app's API it seems that even though Constriction has a step range of 0-5. It only responds to values 1-3.
+     */
+    
+    /*
     // Lovense is the same situation as the Lovehoney Desire, where commands
     // are different if we're addressing all motors or seperate motors.
     // Difference here being that there's Lovense variants with different
@@ -97,6 +240,7 @@ impl ProtocolHandler for LovenseConnectService {
       }
     }
     Ok(msg_vec)
+    */
   }
 
   fn handle_rotate_cmd(

@@ -364,7 +364,27 @@
           "identifier": [
             "Max"
           ],
-          "name": "Lovense Max"
+          "name": "Lovense Max",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "FeatureDescriptor": "Vibrator",
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  5
+                ],
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              }
+            ]
+          }
         },
         {
           "identifier": [
