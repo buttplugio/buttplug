@@ -171,7 +171,7 @@ impl ProtocolHandler for Lovense {
       }
     }
 
-    // Handle vibration commands, these will be by far the most common.
+    // Handle constriction commands.
     let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
       .iter()
       .filter(|x| {
