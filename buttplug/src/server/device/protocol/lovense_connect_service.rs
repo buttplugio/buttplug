@@ -40,9 +40,20 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    attributes: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(LovenseConnectService::new(hardware.address())))
+    let mut protocol = LovenseConnectService::new(hardware.address());
+
+    if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
+      protocol.vibrator_count = scalars
+          .clone()
+          .iter()
+          .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
+          .collect::<Vec<_>>()
+          .len();
+    }
+
+    Ok(Arc::new(protocol))
   }
 }
 
@@ -50,6 +61,7 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
 pub struct LovenseConnectService {
   address: String,
   rotation_direction: Arc<AtomicBool>,
+  vibrator_count: usize,
 }
 
 impl LovenseConnectService {
@@ -93,7 +105,11 @@ impl ProtocolHandler for LovenseConnectService {
       //
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
-      if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1]) {
+      if self.vibrator_count == vibrate_cmds.len()
+          && (self.vibrator_count == 1
+          || vibrate_cmds
+          .windows(vibrate_cmds.len())
+          .all(|w| w[0] == w[1])) {
         let lovense_cmd = format!(
           "Vibrate?v={}&t={}",
           cmds[0].expect("Already checked existence").1,
