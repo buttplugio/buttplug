@@ -66,14 +66,100 @@ impl ProtocolHandler for LovenseConnectService {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let mut hardware_cmds = vec![];
+
+    // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
+    // uses lovense vibrate commands internally too, so we can include them here.
+    let vibrate_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+
+    if !vibrate_cmds.is_empty() {
+      // Lovense is the same situation as the Lovehoney Desire, where commands
+      // are different if we're addressing all motors or seperate motors.
+      // Difference here being that there's Lovense variants with different
+      // numbers of motors.
+      //
+      // Neat way of checking if everything is the same via
+      // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
+      //
+      // Just make sure we're not matching on None, 'cause if that's the case
+      // we ain't got shit to do.
+      if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1]) {
+        let lovense_cmd = format!(
+          "Vibrate?v={}&t={}",
+          cmds[0].expect("Already checked existence").1,
+          self.address
+        )
+        .as_bytes()
+        .to_vec();
+        return Ok(vec![HardwareWriteCmd::new(
+          Endpoint::Tx,
+          lovense_cmd,
+          false,
+        )
+        .into()]);
+      }
+      for (i, cmd) in cmds.iter().enumerate() {
+        if let Some((_, speed)) = cmd {
+          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
+          .as_bytes()
+          .to_vec();
+          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        }
+      }
+    }
+
+    // Handle constriction commands.
+    let constrict_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::Constrict
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+    if !constrict_cmds.is_empty() {
+
+      // Only the max has a constriction system, and there's only one, so just parse the first command.
+      /* ~ Sutekh
+       * - Implemented constriction.
+       * - Kept things consistent with the lovense handle_scalar_cmd() method.
+       * - Using AirAuto method.
+       * - Changed step count in device config file to 3.
+       */
+      let lovense_cmd = format!("AirAuto?v={}&t={}", constrict_cmds[0].1, self.address)
+      .as_bytes()
+      .to_vec();
+
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    }
+
+    Ok(hardware_cmds)
+
+    /* Note from Sutekh:
+     * I removed the code below to keep the handle_scalar_cmd methods for lovense toys somewhat consistent.
+     * The patch above is almost the same as the "Lovense" ProtocolHandler implementation.
+     * I have changed the commands to the Lovense Connect API format.
+     * During my testing of the Lovense Connect app's API it seems that even though Constriction has a step range of 0-5. It only responds to values 1-3.
+     */
+
+    /*
     // Lovense is the same situation as the Lovehoney Desire, where commands
     // are different if we're addressing all motors or seperate motors.
     // Difference here being that there's Lovense variants with different
-    // numbers of motors.
-    //
-    // Neat way of checking if everything is the same via
-    // https://sts10.github.io/2019/06/06/is-all-equal-function.html.
-    //
+@@ -77,26 +220,27 @@
     // Just make sure we're not matching on None, 'cause if that's the case
     // we ain't got shit to do.
     let mut msg_vec = vec![];
@@ -97,6 +183,7 @@ impl ProtocolHandler for LovenseConnectService {
       }
     }
     Ok(msg_vec)
+    */
   }
 
   fn handle_rotate_cmd(
