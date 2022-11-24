@@ -109,15 +109,27 @@ impl ProtocolInitializer for LovenseInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    attributes: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(Lovense::default()))
+    let mut protocol = Lovense::default();
+
+    if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
+      protocol.vibrator_count = scalars
+        .clone()
+        .iter()
+        .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
+        .collect::<Vec<_>>()
+        .len();
+    }
+
+    Ok(Arc::new(protocol))
   }
 }
 
 #[derive(Default)]
 pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
+  vibrator_count: usize,
 }
 
 impl ProtocolHandler for Lovense {
@@ -152,7 +164,12 @@ impl ProtocolHandler for Lovense {
       //
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
-      if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1]) {
+      if self.vibrator_count == vibrate_cmds.len()
+        && (self.vibrator_count == 1
+          || vibrate_cmds
+            .windows(vibrate_cmds.len())
+            .all(|w| w[0] == w[1]))
+      {
         let lovense_cmd = format!("Vibrate:{};", vibrate_cmds[0].1)
           .as_bytes()
           .to_vec();
@@ -164,7 +181,10 @@ impl ProtocolHandler for Lovense {
         .into()]);
       }
       for (i, cmd) in cmds.iter().enumerate() {
-        if let Some((_, speed)) = cmd {
+        if let Some((actuator, speed)) = cmd {
+          if ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator) {
+            continue;
+          }
           let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
           hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
         }
