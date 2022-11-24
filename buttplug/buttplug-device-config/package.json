@@ -22,11 +22,11 @@
   },
   "homepage": "https://github.com/buttplugio/buttplug-device-config#readme",
   "devDependencies": {
-    "ajv": "^8.6.1",
+    "ajv": "^8.11.2",
     "ajv-cli": "^5.0.0",
     "js-yaml": "^4.1.0"
   },
   "dependencies": {
-    "trash-cli": "^4.0.0"
+    "trash-cli": "^5.0.0"
   }
 }
