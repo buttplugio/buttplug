@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 2
+  minor: 3
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -108,7 +108,7 @@ protocols:
       names:
         - LVS-*
         - LOVE-*
-      # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to 
+      # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
       # advertised-services:
         # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
       services:
@@ -175,6 +175,9 @@ protocols:
         54300001-0023-4bd4-bbd5-a6920e4c5653: # Calor
           tx: 54300002-0023-4bd4-bbd5-a6920e4c5653
           rx: 54300003-0023-4bd4-bbd5-a6920e4c5653
+        45490001-0023-4bd4-bbd5-a6920e4c5653: # Flexer
+          tx: 45490002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45490003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name: Lovense Device
       messages:
@@ -275,6 +278,9 @@ protocols:
       - identifier:
           - T
         name: Lovense Calor
+      - identifier:
+          - EI
+        name: Lovense Flexer
   lovense-connect-service:
     lovense-connect-service:
       exists: true
@@ -390,6 +396,9 @@ protocols:
       - identifier:
           - T
         name: Lovense Calor
+      - identifier:
+          - EI
+        name: Lovense Flexer
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special
@@ -400,7 +409,7 @@ protocols:
     #
     # The specifier needs to be an object and have some content, but it
     # doesn't matter what.
-    xinput: 
+    xinput:
       exists: true
     defaults:
       name: XBox (XInput) Compatible Gamepad
@@ -417,7 +426,7 @@ protocols:
         - Onyx2
       services:
         88f80580-0000-01e6-aace-0002a5d5c51b:
-         tx: 88f80581-0000-01e6-aace-0002a5d5c51b 
+         tx: 88f80581-0000-01e6-aace-0002a5d5c51b
          rx: 88f80582-0000-01e6-aace-0002a5d5c51b
          # The Launch has a special characteristic for loading
          # firmware.
@@ -1726,7 +1735,7 @@ protocols:
           # types is added to Buttplug
     defaults:
       name: Lelo F1s
-      messages:        
+      messages:
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
