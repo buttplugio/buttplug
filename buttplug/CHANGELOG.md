@@ -1,3 +1,17 @@
+# 6.2.1 (2022-11-24)
+
+## Features
+
+- Added Lovense Max Constriction capabilities for Lovense Connect Service users
+- Added Device Support
+  - Lovense Flexer (generic vibration only)
+  - Hismith (Only available via Buttplug v3 ScalarCmd commands)
+
+## Bugfixes
+
+- Reduced polling frequency for Lovense Connect Service
+- Remove Folove advertised services (fixes Hismith device finding)
+
 # 6.2.0 (2022-11-05)
 
 ## Features
