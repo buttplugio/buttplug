@@ -11,6 +11,19 @@ keywords = ["usb", "serial", "hardware", "bluetooth", "teledildonics"]
 edition = "2021"
 exclude = ["examples/**"]
 
+[lib]
+name = "buttplug"
+path = "src/lib.rs"
+test = true
+doctest = true
+doc = true
+
+# Only build docs on one platform (linux)
+[package.metadata.docs.rs]
+targets = []
+# Features to pass to Cargo (default: [])
+features = ["default", "unstable"]
+
 [features]
 # Basic features
 default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
@@ -63,10 +76,6 @@ tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.16", features = ["json"] }
 dashmap = "5.4.0"
 displaydoc = "0.2.3"
-serialport = { version = "4.2.0", optional = true }
-# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
-# Other platforms are not affected by the feature changes.
-hidapi = { version = "1.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
 wasm-bindgen = { version = "0.2.83", optional = true }
 tokio = { version = "1.22.0", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.3"
@@ -80,30 +89,31 @@ jsonschema = { version = "0.16.1", default-features = false, features = ["resolv
 derivative = "2.2.0"
 tokio-stream = "0.1.11"
 
-[target.'cfg(windows)'.dependencies]
-rusty-xinput = "1.2.0"
-
 [dev-dependencies]
 serde_yaml = "0.9.14"
 test-case = "2.2.2"
 tokio = { version = "1.22.0", features = ["io-std"] }
 tracing-log = { version = "0.1.3", features = ["env_logger"] }
 
-[lib]
-name = "buttplug"
-path = "src/lib.rs"
-test = true
-doctest = true
-doc = true
-
-# Only build docs on one platform (linux)
-[package.metadata.docs.rs]
-targets = []
-# Features to pass to Cargo (default: [])
-features = ["default", "unstable"]
-
 [build-dependencies]
 prost-build = "0.11.2"
 
 [target.'cfg(target_os = "windows")'.dependencies]
+rusty-xinput = "1.2.0"
 windows = { version = "0.43.0", features = ["Devices_Bluetooth", "Foundation"] }
+serialport = { version = "4.2.0", optional = true }
+# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
+# Other platforms are not affected by the feature changes.
+hidapi = { version = "1.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+serialport = { version = "4.2.0", optional = true }
+# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
+# Other platforms are not affected by the feature changes.
+hidapi = { version = "1.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+serialport = { version = "4.2.0", optional = true }
+# Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
+# Other platforms are not affected by the feature changes.
+hidapi = { version = "1.5.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
