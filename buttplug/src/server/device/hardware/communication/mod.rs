@@ -5,16 +5,23 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-#[cfg(feature = "btleplug-manager")]
-pub mod btleplug;
+// Network DCMs work on all platforms
 #[cfg(feature = "lovense-connect-service-manager")]
 pub mod lovense_connect_service;
-#[cfg(feature = "lovense-dongle-manager")]
-pub mod lovense_dongle;
-#[cfg(feature = "serial-manager")]
-pub mod serialport;
 #[cfg(feature = "websocket-server-manager")]
 pub mod websocket_server;
+
+// BTLEPlug works on anything not WASM
+#[cfg(all(feature = "btleplug-manager", any(target_os = "windows", target_os = "macos", target_os = "linux", target_os="ios", target_os="android")))]
+pub mod btleplug;
+
+// Lovense Dongles and Serial Ports work on all desktop platforms
+#[cfg(all(feature = "lovense-dongle-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+pub mod lovense_dongle;
+#[cfg(all(feature = "serial-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+pub mod serialport;
+
+// XInput is windows only
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
 
@@ -68,10 +75,10 @@ pub enum HardwareSpecificError {
   #[error("XInput usage error: {0}")]
   XInputError(String),
   // Btleplug library uses Failure, not Error, on its error enum. :(
-  #[cfg(feature = "btleplug-manager")]
+    #[cfg(all(feature = "btleplug-manager", any(target_os = "windows", target_os = "macos", target_os = "linux", target_os="ios", target_os="android")))]
   #[error("Btleplug error: {0}")]
   BtleplugError(String),
-  #[cfg(feature = "serial-manager")]
+  #[cfg(all(feature = "serial-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
   #[error("Serial error: {0}")]
   SerialError(String),
 }

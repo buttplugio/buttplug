@@ -60,7 +60,7 @@ use crate::{
 pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> ButtplugClient {
   let mut server_builder = ButtplugServerBuilder::default();
 
-  #[cfg(feature = "btleplug-manager")]
+  #[cfg(all(feature = "btleplug-manager", any(target_os = "windows", target_os = "macos", target_os = "linux", target_os="ios", target_os="android")))]
   {
     use crate::server::device::hardware::communication::btleplug::BtlePlugCommunicationManagerBuilder;
     server_builder.comm_manager(BtlePlugCommunicationManagerBuilder::default());
@@ -72,7 +72,7 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
       WebsocketServerDeviceCommunicationManagerBuilder::default().listen_on_all_interfaces(true),
     );
   }
-  #[cfg(feature = "serial-manager")]
+  #[cfg(all(feature = "serial-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
   {
     use crate::server::device::hardware::communication::serialport::SerialPortCommunicationManagerBuilder;
     server_builder.comm_manager(SerialPortCommunicationManagerBuilder::default());
@@ -82,7 +82,7 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
     use crate::server::device::hardware::communication::lovense_connect_service::LovenseConnectServiceCommunicationManagerBuilder;
     server_builder.comm_manager(LovenseConnectServiceCommunicationManagerBuilder::default());
   }
-  #[cfg(feature = "lovense-dongle-manager")]
+  #[cfg(all(feature = "lovense-dongle-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
   {
     use crate::server::device::hardware::communication::lovense_dongle::{
       LovenseHIDDongleCommunicationManagerBuilder,
