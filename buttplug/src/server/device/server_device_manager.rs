@@ -360,10 +360,12 @@ impl ServerDeviceManager {
     // again. Otherwise we can have all sorts of ownership weirdness.
     self.running.store(false, Ordering::SeqCst);
     let stop_scanning = self.stop_scanning();
+    let stop_devices = self.stop_all_devices();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
       // cleaning up if we're still scanning.
       let _ = stop_scanning.await;
+      let _ = stop_devices.await;
       for device in devices.iter() {
         device.value().disconnect().await?;
       }
