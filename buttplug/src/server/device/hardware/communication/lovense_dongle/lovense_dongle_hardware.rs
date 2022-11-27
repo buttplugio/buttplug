@@ -226,19 +226,25 @@ impl HardwareInternal for LovenseDongleHardware {
     &self,
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Lovense Dongle does not support subscribe".to_owned(),
-    )))
-    .boxed()
+    // DO NOT CHANGE THIS.
+    //
+    // Lovense Dongle Subscribe/Unsubscribe basically needs to lie about subscriptions. The actual
+    // devices need subscribe/unsubscribe to get information back from their rx characteristic, but
+    // for the dongle we manage this in the state machine. Therefore we don't really have an
+    // explicit attach/detach system like bluetooth. We just act like we do.
+    future::ready(Ok(())).boxed()
   }
 
   fn unsubscribe(
     &self,
     _msg: &HardwareUnsubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    future::ready(Err(ButtplugDeviceError::UnhandledCommand(
-      "Lovense Dongle does not support unsubscribe".to_owned(),
-    )))
-    .boxed()
+    // DO NOT CHANGE THIS.
+    //
+    // Lovense Dongle Subscribe/Unsubscribe basically needs to lie about subscriptions. The actual
+    // devices need subscribe/unsubscribe to get information back from their rx characteristic, but
+    // for the dongle we manage this in the state machine. Therefore we don't really have an
+    // explicit attach/detach system like bluetooth. We just act like we do.
+    future::ready(Ok(())).boxed()
   }
 }
