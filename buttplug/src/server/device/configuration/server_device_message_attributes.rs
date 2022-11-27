@@ -277,7 +277,7 @@ impl ServerDeviceMessageAttributesBuilder {
 }
 
 fn unspecified_feature() -> String {
-  "No description available for feature".to_string()
+  "N/A".to_string()
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Getters, Setters)]

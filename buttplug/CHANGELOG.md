@@ -8,6 +8,7 @@
 - #516: XInput protocol should return true for needs_full_command_set
 - #517: Lovense Dongle should return Ok() on subscribe/unsubscribe instead of throwing
   unimplemented()
+- Shorten "No Description" message to N/A
 
 # 6.2.1 (2022-11-24)
 
