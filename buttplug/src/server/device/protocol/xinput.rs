@@ -27,6 +27,10 @@ generic_protocol_setup!(XInput, "xinput");
 pub struct XInput {}
 
 impl ProtocolHandler for XInput {
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

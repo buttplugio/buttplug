@@ -5,6 +5,7 @@
 - #515: Define capable build platforms with Device Config Managers
   - Fixes issues with trying to build for platforms like mobile and desktop at the same time, since
     it's somehow 2022 and we still can't define per-platform crate features in cargo.
+- #516: XInput protocol should return true for needs_full_command_set
 
 # 6.2.1 (2022-11-24)
 
