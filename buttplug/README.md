@@ -63,12 +63,12 @@ more info.
 Buttplug-rs is currently capable of controlling toys via:
 
 - Bluetooth LE (Desktop and Android/iOS)
-- Serial Ports
-- USB HID
-- Lovense Devices via the Lovense Dongle (All Versions)
-- Lovense Connect App
-- Websockets (for simulated and DIY devices)
-- XInput gamepads (Windows only at the moment)
+- Serial Ports (Desktop)
+- USB HID (Desktop)
+- Lovense Devices via the Lovense Dongle (HID and Serial dongles, Desktop)
+- Lovense Connect App (Desktop and Android/iOS)
+- Websockets (for simulated and DIY devices, Desktop and Android/iOS)
+- XInput gamepads (Windows only)
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
@@ -98,15 +98,16 @@ The following crate features are available
 | `client` | None | Buttplug client implementation (in-process connection only) |
 | `server` | None | Buttplug server implementation (in-process connection only) |
 | `serialize-json` | None | Serde JSON serializer for Buttplug messages, needed for remote connectors |
-| `websockets` | `tokio-runtime` | Websocket connectors, used to connect remote clients/servers, with or without SSL |
-| `btleplug-manager` | `server` | Bluetooth hardware support on Windows 10, macOS, Linux, iOS |
-| `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows 7/10, macOS, Linux |
-| `serial-manager` | `server` | Serial Port hardware support on Windows 7/10, macOS, Linux |
-| `xinput-manager` | `server` | XInput Gamepad support on Windows 7/10 |
+| `websockets` | `tokio-runtime` | Websocket connectors, used to connect remote clients (Clear/SSL)/servers (Clear Only) |
+| `btleplug-manager` | `server` | Bluetooth hardware support on Windows >=10, macOS, Linux, iOS, Android |
+| `lovense-dongle-manager` | `server` | Lovense USB Dongle support on Windows >=7, macOS, Linux |
+| `serial-manager` | `server` | Serial Port hardware support on Windows >=7, macOS, Linux |
+| `xinput-manager` | `server` | XInput Gamepad support on Windows >=7 |
+| `lovense-connect-service-manager` | `server` | Lovense Connect App support (all platforms) |
+| `websocket-server-manager` | `websockets` | Support for connecting devices via Websockets (all platforms) |
 | `dummy-runtime` | None | Runtime that panics on any spawn. Only used for tests. |
 | `tokio-runtime` | None | Uses tokio for futures |
 | `wasm-bindgen-runtime` | None | Uses the wasm-bindgen executor as a runtime (WASM only) |
-| `websocket-server-manager` | `websockets` | Support for connecting devices via Websockets |
 
 Default features are enough to build a full desktop system:
 
@@ -115,10 +116,10 @@ Default features are enough to build a full desktop system:
 - `server`
 - `serialize-json` 
 - `websocket`
-- `btleplug-manager`
-- `serial-manager`
-- `lovense-dongle-manager`
 - `websocket-server-manager`
+- `btleplug-manager` (feature builds as noop on WASM)
+- `serial-manager` (feature builds as noop on iOS, Android)
+- `lovense-dongle-manager` (feature builds as noop on iOS, Android)
 - `xinput-manager` (feature is only relevant on windows, but builds as a noop on all
   other platforms).
 
