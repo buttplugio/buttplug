@@ -1,4 +1,4 @@
-# 6.2.2 (2022-11-26)
+# 6.2.2 (2022-11-27)
 
 ## Bugfixes
 
@@ -8,7 +8,10 @@
 - #516: XInput protocol should return true for needs_full_command_set
 - #517: Lovense Dongle should return Ok() on subscribe/unsubscribe instead of throwing
   unimplemented()
+- #518: DeviceManager now stops hardware on shutdown
 - Shorten "No Description" message to N/A
+- Updated to btleplug that no longer has a common log message as Error level on CoreBluetooth
+  (macOS/iOS)
 
 # 6.2.1 (2022-11-24)
 
