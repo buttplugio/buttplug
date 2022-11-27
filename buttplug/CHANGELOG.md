@@ -1,3 +1,11 @@
+# 6.2.2 (2022-11-26)
+
+## Bugfixes
+
+- #515: Define capable build platforms with Device Config Managers
+  - Fixes issues with trying to build for platforms like mobile and desktop at the same time, since
+    it's somehow 2022 and we still can't define per-platform crate features in cargo.
+
 # 6.2.1 (2022-11-24)
 
 ## Features
