@@ -56,6 +56,19 @@ pub mod setup {
 #[derive(Default)]
 pub struct LovenseIdentifier {}
 
+fn lovense_model_resolver(type_response: String) -> String {
+  let parts = type_response.split(':').collect::<Vec<&str>>();
+  let identifier = parts[0].to_owned();
+  let version = parts[1].to_owned().parse::<i32>().unwrap_or(0);
+
+  // Flexer: version must be 3+ to control actuators separately
+  if identifier == "EI" && version >= 3 {
+    return "EI-FW3".to_string();
+  }
+
+  return identifier;
+}
+
 #[async_trait]
 impl ProtocolIdentifier for LovenseIdentifier {
   async fn identify(
@@ -63,7 +76,6 @@ impl ProtocolIdentifier for LovenseIdentifier {
     hardware: Arc<Hardware>,
   ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let mut event_receiver = hardware.event_stream();
-    let identifier;
     let mut count = 0;
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
@@ -78,8 +90,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
           if let Ok(HardwareEvent::Notification(_, _, n)) = event {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
             info!("Lovense Device Type Response: {}", type_response);
-            identifier = type_response.split(':').collect::<Vec<&str>>()[0].to_owned();
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(identifier)), Box::new(LovenseInitializer::default())));
+            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(lovense_model_resolver(type_response))), Box::new(LovenseInitializer::default())));
           } else {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -120,6 +131,12 @@ impl ProtocolInitializer for LovenseInitializer {
         .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
         .collect::<Vec<_>>()
         .len();
+
+      // This might need better tuning if other complex Lovenses are released
+      // Currently this only applies to the Flexer
+      if protocol.vibrator_count == 2 && scalars.len() > 2 {
+        protocol.use_mply = true;
+      }
     }
 
     Ok(Arc::new(protocol))
@@ -130,6 +147,7 @@ impl ProtocolInitializer for LovenseInitializer {
 pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
   vibrator_count: usize,
+  use_mply: bool,
 }
 
 impl ProtocolHandler for Lovense {
@@ -137,6 +155,30 @@ impl ProtocolHandler for Lovense {
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    if self.use_mply {
+      let lovense_cmd = format!(
+        "Mply:{};",
+        cmds
+          .iter()
+          .map(|x| if let Some(val) = x {
+            val.1.to_string()
+          } else {
+            "-1".to_string()
+          })
+          .collect::<Vec<_>>()
+          .join(":")
+      )
+      .as_bytes()
+      .to_vec();
+
+      return Ok(vec![HardwareWriteCmd::new(
+        Endpoint::Tx,
+        lovense_cmd,
+        false,
+      )
+      .into()]);
+    }
+
     let mut hardware_cmds = vec![];
 
     // Handle vibration commands, these will be by far the most common. Fucking machine oscillation
@@ -153,7 +195,21 @@ impl ProtocolHandler for Lovense {
       .map(|x| x.as_ref().expect("Already verified is some"))
       .collect();
 
-    if !vibrate_cmds.is_empty() {
+    // Lets see if we have any single direction rotation commands (the "Finger" command on the Flexer)
+    let rotate_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          [ActuatorType::Rotate].contains(&val.0)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+
+    if !rotate_cmds.is_empty() && !vibrate_cmds.is_empty() {
+    } else if !vibrate_cmds.is_empty() {
       // Lovense is the same situation as the Lovehoney Desire, where commands
       // are different if we're addressing all motors or seperate motors.
       // Difference here being that there's Lovense variants with different
@@ -173,20 +229,16 @@ impl ProtocolHandler for Lovense {
         let lovense_cmd = format!("Vibrate:{};", vibrate_cmds[0].1)
           .as_bytes()
           .to_vec();
-        return Ok(vec![HardwareWriteCmd::new(
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into()]);
-      }
-      for (i, cmd) in cmds.iter().enumerate() {
-        if let Some((actuator, speed)) = cmd {
-          if ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator) {
-            continue;
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      } else {
+        for (i, cmd) in cmds.iter().enumerate() {
+          if let Some((actuator, speed)) = cmd {
+            if ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator) {
+              continue;
+            }
+            let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
+            hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
           }
-          let lovense_cmd = format!("Vibrate{}:{};", i + 1, speed).as_bytes().to_vec();
-          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
         }
       }
     }

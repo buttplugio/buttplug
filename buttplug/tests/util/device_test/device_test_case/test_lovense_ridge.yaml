@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "LVS-DoesntMatter"
-    expected_name: "Lovense Ridge"
+    expected_name: "Lovense Sex Machine"
 device_init: 
   # Initialization
   - !Commands

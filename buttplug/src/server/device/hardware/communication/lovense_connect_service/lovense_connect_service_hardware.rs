@@ -33,7 +33,8 @@ use std::{
   sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
-  }, time::Duration,
+  },
+  time::Duration,
 };
 use tokio::sync::broadcast;
 
