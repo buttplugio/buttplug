@@ -1,0 +1,72 @@
+devices:
+  - identifier: 
+      name: "LVS-DoesntMatter"
+    expected_name: "Lovense Flexer"
+device_init: 
+  # Initialization
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rx
+        - !Write
+            endpoint: tx
+            # "DeviceType;"
+            data: [68, 101, 118, 105, 99, 101, 84, 121, 112, 101, 59]
+            write_with_response: false
+  - !Events
+      device_index: 0
+      events:
+        - !Notifications
+          - endpoint: rx
+            # "EI:03:0082059AD3BD;"
+            data: [69, 73, 58, 48, 51, 58, 48, 48, 56, 50, 48, 53, 57, 65, 68, 51, 66, 68, 59]
+device_commands:
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Scalar
+          - Index: 0
+            Scalar: 0.5
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Vibrate
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            # "Mply:10:10:-1;"
+            data: [77, 112, 108, 121, 58, 49, 48, 58, 49, 48, 58, 45, 49, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Vibrate
+          - Index: 2
+            Scalar: 0.25
+            ActuatorType: Rotate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            # "Mply:15:-1:5;"
+            data: [77, 112, 108, 121, 58, 49, 53, 58, 45, 49, 58, 53, 59]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            # "Mply:0:0:0;"
+            data: [77, 112, 108, 121, 58, 48, 58, 48, 58, 48, 59]
+            write_with_response: false

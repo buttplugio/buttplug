@@ -46,11 +46,11 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
 
     if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
       protocol.vibrator_count = scalars
-          .clone()
-          .iter()
-          .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
-          .collect::<Vec<_>>()
-          .len();
+        .clone()
+        .iter()
+        .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
+        .collect::<Vec<_>>()
+        .len();
     }
 
     Ok(Arc::new(protocol))
@@ -106,10 +106,11 @@ impl ProtocolHandler for LovenseConnectService {
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
       if self.vibrator_count == vibrate_cmds.len()
-          && (self.vibrator_count == 1
+        && (self.vibrator_count == 1
           || vibrate_cmds
-          .windows(vibrate_cmds.len())
-          .all(|w| w[0] == w[1])) {
+            .windows(vibrate_cmds.len())
+            .all(|w| w[0] == w[1]))
+      {
         let lovense_cmd = format!(
           "Vibrate?v={}&t={}",
           cmds[0].expect("Already checked existence").1,
@@ -117,19 +118,15 @@ impl ProtocolHandler for LovenseConnectService {
         )
         .as_bytes()
         .to_vec();
-        return Ok(vec![HardwareWriteCmd::new(
-          Endpoint::Tx,
-          lovense_cmd,
-          false,
-        )
-        .into()]);
-      }
-      for (i, cmd) in cmds.iter().enumerate() {
-        if let Some((_, speed)) = cmd {
-          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
-          .as_bytes()
-          .to_vec();
-          hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+      } else {
+        for (i, cmd) in cmds.iter().enumerate() {
+          if let Some((_, speed)) = cmd {
+            let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
+              .as_bytes()
+              .to_vec();
+            hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+          }
         }
       }
     }
@@ -146,8 +143,8 @@ impl ProtocolHandler for LovenseConnectService {
       })
       .map(|x| x.as_ref().expect("Already verified is some"))
       .collect();
-    if !constrict_cmds.is_empty() {
 
+    if !constrict_cmds.is_empty() {
       // Only the max has a constriction system, and there's only one, so just parse the first command.
       /* ~ Sutekh
        * - Implemented constriction.
@@ -156,8 +153,29 @@ impl ProtocolHandler for LovenseConnectService {
        * - Changed step count in device config file to 3.
        */
       let lovense_cmd = format!("AirAuto?v={}&t={}", constrict_cmds[0].1, self.address)
-      .as_bytes()
-      .to_vec();
+        .as_bytes()
+        .to_vec();
+
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+    }
+
+    // Handle "rotation" commands: Currently just applicable as the Flexer's Fingering command
+    let rotation_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          val.0 == ActuatorType::Rotate
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+
+    if !rotation_cmds.is_empty() {
+      let lovense_cmd = format!("Fingering?v={}&t={}", rotation_cmds[0].1, self.address)
+        .as_bytes()
+        .to_vec();
 
       hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
     }

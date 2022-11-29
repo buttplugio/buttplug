@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 4
+  minor: 3
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -254,7 +254,7 @@ protocols:
         name: Loveai Dolp
       - identifier:
           - F
-        name: Lovense Ridge
+        name: Lovense Sex Machine
         messages:
           ScalarCmd:
             - StepRange: [0, 20]
@@ -286,7 +286,25 @@ protocols:
         name: Lovense Calor
       - identifier:
           - EI
+        name: Lovense Flexer (Firmware update needed)
+      - identifier:
+          - EI-FW3
         name: Lovense Flexer
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Internal Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: External Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Rotate
+              FeatureDescriptor: Finger motion
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
       - identifier:
           - N
         name: Lovense Gemini
@@ -296,6 +314,10 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 20]
               ActuatorType: Vibrate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
       - identifier:
           - EA
         name: Lovense Gravity
@@ -305,6 +327,10 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 4]
               ActuatorType: Oscillate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
   lovense-connect-service:
     lovense-connect-service:
       exists: true
@@ -386,10 +412,10 @@ protocols:
           - ToyS
         name: Loveai Dolp
       - identifier:
-          - F
-        name: Lovense Ridge
+          - XMachine
+        name: Lovense Sex Machine
       - identifier:
-          - J
+          - Dolce
         name: Lovense Dolce
         messages:
           ScalarCmd:
@@ -402,10 +428,10 @@ protocols:
               SensorType: Battery
               SensorRange: [[0, 100]]
       - identifier:
-          - ED
+          - Gush
         name: Lovense Gush
       - identifier:
-          - EB
+          - Hyphy
         name: Lovense Hyphy
         messages:
           ScalarCmd:
@@ -418,11 +444,50 @@ protocols:
               SensorType: Battery
               SensorRange: [[0, 100]]
       - identifier:
-          - T
+          - Calor
         name: Lovense Calor
       - identifier:
-          - EI
+          - Flexer
         name: Lovense Flexer
+        messages:
+          ScalarCmd:
+            # Over Connect, the Flexer's vibes cannot be independently controlled
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Both Vibes
+            - StepRange: [0, 20]
+              ActuatorType: Rotate
+              FeatureDescriptor: Finger motion
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
+      - identifier:
+          - Gemini
+        name: Lovense Gemini
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
+      - identifier:
+          - Gravity
+        name: Lovense Gravity
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+            - StepRange: [0, 4]
+              ActuatorType: Oscillate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special

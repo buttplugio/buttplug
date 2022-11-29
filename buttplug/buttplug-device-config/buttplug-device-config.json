@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 4
+    "minor": 3
   },
   "protocols": {
     "lovense": {
@@ -262,7 +262,7 @@
           "identifier": [
             "F"
           ],
-          "name": "Lovense Ridge",
+          "name": "Lovense Sex Machine",
           "messages": {
             "ScalarCmd": [
               {
@@ -340,7 +340,53 @@
           "identifier": [
             "EI"
           ],
-          "name": "Lovense Flexer"
+          "name": "Lovense Flexer (Firmware update needed)"
+        },
+        {
+          "identifier": [
+            "EI-FW3"
+          ],
+          "name": "Lovense Flexer",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Internal Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "External Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Rotate",
+                "FeatureDescriptor": "Finger motion"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
         },
         {
           "identifier": [
@@ -362,6 +408,18 @@
                   20
                 ],
                 "ActuatorType": "Vibrate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
               }
             ]
           }
@@ -386,6 +444,18 @@
                   4
                 ],
                 "ActuatorType": "Oscillate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
               }
             ]
           }
@@ -570,13 +640,13 @@
         },
         {
           "identifier": [
-            "F"
+            "XMachine"
           ],
-          "name": "Lovense Ridge"
+          "name": "Lovense Sex Machine"
         },
         {
           "identifier": [
-            "J"
+            "Dolce"
           ],
           "name": "Lovense Dolce",
           "messages": {
@@ -612,13 +682,13 @@
         },
         {
           "identifier": [
-            "ED"
+            "Gush"
           ],
           "name": "Lovense Gush"
         },
         {
           "identifier": [
-            "EB"
+            "Hyphy"
           ],
           "name": "Lovense Hyphy",
           "messages": {
@@ -654,15 +724,119 @@
         },
         {
           "identifier": [
-            "T"
+            "Calor"
           ],
           "name": "Lovense Calor"
         },
         {
           "identifier": [
-            "EI"
+            "Flexer"
           ],
-          "name": "Lovense Flexer"
+          "name": "Lovense Flexer",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Both Vibes"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Rotate",
+                "FeatureDescriptor": "Finger motion"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Gemini"
+          ],
+          "name": "Lovense Gemini",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Gravity"
+          ],
+          "name": "Lovense Gravity",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  4
+                ],
+                "ActuatorType": "Oscillate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
         }
       ]
     },
