@@ -17,3 +17,5 @@ Cargo.lock
 # Intermediate directories that should be ignored
 **/*-ignore
 **/tasks.json
+
+.yarn*
