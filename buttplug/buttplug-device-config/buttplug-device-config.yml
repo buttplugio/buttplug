@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 3
+  minor: 4
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -178,6 +178,12 @@ protocols:
         45490001-0023-4bd4-bbd5-a6920e4c5653: # Flexer
           tx: 45490002-0023-4bd4-bbd5-a6920e4c5653
           rx: 45490003-0023-4bd4-bbd5-a6920e4c5653
+        4e300001-0023-4bd4-bbd5-a6920e4c5653: # Gemini
+          tx: 4e300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 4e300003-0023-4bd4-bbd5-a6920e4c5653
+        45410001-0023-4bd4-bbd5-a6920e4c5653: # Gravity
+          tx: 45410002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 45410003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name: Lovense Device
       messages:
@@ -281,6 +287,24 @@ protocols:
       - identifier:
           - EI
         name: Lovense Flexer
+      - identifier:
+          - N
+        name: Lovense Gemini
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+      - identifier:
+          - EA
+        name: Lovense Gravity
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+            - StepRange: [0, 4]
+              ActuatorType: Oscillate
   lovense-connect-service:
     lovense-connect-service:
       exists: true
