@@ -190,34 +190,34 @@ impl ProtocolHandler for LovenseConnectService {
      */
 
     /*
-    // Lovense is the same situation as the Lovehoney Desire, where commands
-    // are different if we're addressing all motors or seperate motors.
-    // Difference here being that there's Lovense variants with different
-@@ -77,26 +220,27 @@
-    // Just make sure we're not matching on None, 'cause if that's the case
-    // we ain't got shit to do.
-    let mut msg_vec = vec![];
-    if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
-      let lovense_cmd = format!(
-        "Vibrate?v={}&t={}",
-        cmds[0].expect("Already checked existence").1,
-        self.address
-      )
-      .as_bytes()
-      .to_vec();
-      msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
-    } else {
-      for (i, cmd) in cmds.iter().enumerate() {
-        if let Some((_, speed)) = cmd {
-          let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
-            .as_bytes()
-            .to_vec();
+        // Lovense is the same situation as the Lovehoney Desire, where commands
+        // are different if we're addressing all motors or seperate motors.
+        // Difference here being that there's Lovense variants with different
+    @@ -77,26 +220,27 @@
+        // Just make sure we're not matching on None, 'cause if that's the case
+        // we ain't got shit to do.
+        let mut msg_vec = vec![];
+        if cmds[0].is_some() && (cmds.len() == 1 || cmds.windows(2).all(|w| w[0] == w[1])) {
+          let lovense_cmd = format!(
+            "Vibrate?v={}&t={}",
+            cmds[0].expect("Already checked existence").1,
+            self.address
+          )
+          .as_bytes()
+          .to_vec();
           msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+        } else {
+          for (i, cmd) in cmds.iter().enumerate() {
+            if let Some((_, speed)) = cmd {
+              let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
+                .as_bytes()
+                .to_vec();
+              msg_vec.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
+            }
+          }
         }
-      }
-    }
-    Ok(msg_vec)
-    */
+        Ok(msg_vec)
+        */
   }
 
   fn handle_rotate_cmd(
