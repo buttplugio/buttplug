@@ -195,21 +195,7 @@ impl ProtocolHandler for Lovense {
       .map(|x| x.as_ref().expect("Already verified is some"))
       .collect();
 
-    // Lets see if we have any single direction rotation commands (the "Finger" command on the Flexer)
-    let rotate_cmds: Vec<&(ActuatorType, u32)> = cmds
-      .iter()
-      .filter(|x| {
-        if let Some(val) = x {
-          [ActuatorType::Rotate].contains(&val.0)
-        } else {
-          false
-        }
-      })
-      .map(|x| x.as_ref().expect("Already verified is some"))
-      .collect();
-
-    if !rotate_cmds.is_empty() && !vibrate_cmds.is_empty() {
-    } else if !vibrate_cmds.is_empty() {
+    if !vibrate_cmds.is_empty() {
       // Lovense is the same situation as the Lovehoney Desire, where commands
       // are different if we're addressing all motors or seperate motors.
       // Difference here being that there's Lovense variants with different
@@ -220,11 +206,15 @@ impl ProtocolHandler for Lovense {
       //
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
+      //
+      // Note that the windowed comparison causes mixed types as well as mixed
+      // speeds to fall back to separate commands. This is because the Gravity's
+      // thruster on Vibrate2 is independent of Vibrate
       if self.vibrator_count == vibrate_cmds.len()
         && (self.vibrator_count == 1
           || vibrate_cmds
-            .windows(vibrate_cmds.len())
-            .all(|w| w[0] == w[1]))
+            .windows(2)
+            .all(|w| w[0].0 == w[1].0 && w[0].1 == w[1].1))
       {
         let lovense_cmd = format!("Vibrate:{};", vibrate_cmds[0].1)
           .as_bytes()

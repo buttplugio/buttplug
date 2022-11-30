@@ -48,9 +48,23 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
       protocol.vibrator_count = scalars
         .clone()
         .iter()
-        .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
+        .filter(|x| [ActuatorType::Vibrate].contains(x.actuator_type()))
         .collect::<Vec<_>>()
         .len();
+      protocol.thusting_count = scalars
+        .clone()
+        .iter()
+        .filter(|x| [ActuatorType::Oscillate].contains(x.actuator_type()))
+        .collect::<Vec<_>>()
+        .len();
+
+      // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes
+      // the vibrate command... The Gravity has a vibe as well, and uses a Thrusting
+      // command for that oscillator.
+      if protocol.vibrator_count == 0 && protocol.thusting_count != 0 {
+        protocol.vibrator_count = protocol.thusting_count;
+        protocol.thusting_count = 0;
+      }
     }
 
     Ok(Arc::new(protocol))
@@ -62,6 +76,7 @@ pub struct LovenseConnectService {
   address: String,
   rotation_direction: Arc<AtomicBool>,
   vibrator_count: usize,
+  thusting_count: usize,
 }
 
 impl LovenseConnectService {
@@ -86,7 +101,11 @@ impl ProtocolHandler for LovenseConnectService {
       .iter()
       .filter(|x| {
         if let Some(val) = x {
-          [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+          if self.thusting_count == 0 {
+            [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(&val.0)
+          } else {
+            [ActuatorType::Vibrate].contains(&val.0)
+          }
         } else {
           false
         }
@@ -106,22 +125,23 @@ impl ProtocolHandler for LovenseConnectService {
       // Just make sure we're not matching on None, 'cause if that's the case
       // we ain't got shit to do.
       if self.vibrator_count == vibrate_cmds.len()
-        && (self.vibrator_count == 1
-          || vibrate_cmds
-            .windows(vibrate_cmds.len())
-            .all(|w| w[0] == w[1]))
+        && (self.vibrator_count == 1 || vibrate_cmds.windows(2).all(|w| w[0].1 == w[1].1))
       {
-        let lovense_cmd = format!(
-          "Vibrate?v={}&t={}",
-          cmds[0].expect("Already checked existence").1,
-          self.address
-        )
-        .as_bytes()
-        .to_vec();
+        let lovense_cmd = format!("Vibrate?v={}&t={}", vibrate_cmds[0].1, self.address)
+          .as_bytes()
+          .to_vec();
         hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
       } else {
         for (i, cmd) in cmds.iter().enumerate() {
-          if let Some((_, speed)) = cmd {
+          if let Some((actuator, speed)) = cmd {
+            if self.thusting_count == 0
+              && ![ActuatorType::Vibrate, ActuatorType::Oscillate].contains(actuator)
+            {
+              continue;
+            }
+            if self.thusting_count != 0 && ![ActuatorType::Vibrate].contains(actuator) {
+              continue;
+            }
             let lovense_cmd = format!("Vibrate{}?v={}&t={}", i + 1, speed, self.address)
               .as_bytes()
               .to_vec();
@@ -129,6 +149,26 @@ impl ProtocolHandler for LovenseConnectService {
           }
         }
       }
+    }
+
+    // Handle constriction commands.
+    let thrusting_cmds: Vec<&(ActuatorType, u32)> = cmds
+      .iter()
+      .filter(|x| {
+        if let Some(val) = x {
+          [ActuatorType::Oscillate].contains(&val.0)
+        } else {
+          false
+        }
+      })
+      .map(|x| x.as_ref().expect("Already verified is some"))
+      .collect();
+    if self.thusting_count != 0 && !thrusting_cmds.is_empty() {
+      let lovense_cmd = format!("Thrusting?v={}&t={}", thrusting_cmds[0].1, self.address)
+        .as_bytes()
+        .to_vec();
+
+      hardware_cmds.push(HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into());
     }
 
     // Handle constriction commands.

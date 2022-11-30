@@ -441,7 +441,7 @@
               {
                 "StepRange": [
                   0,
-                  4
+                  20
                 ],
                 "ActuatorType": "Oscillate"
               }
@@ -819,7 +819,7 @@
               {
                 "StepRange": [
                   0,
-                  4
+                  20
                 ],
                 "ActuatorType": "Oscillate"
               }

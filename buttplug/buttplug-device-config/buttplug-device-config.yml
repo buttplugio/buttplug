@@ -325,7 +325,7 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 20]
               ActuatorType: Vibrate
-            - StepRange: [0, 4]
+            - StepRange: [0, 20]
               ActuatorType: Oscillate
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
@@ -482,7 +482,7 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 20]
               ActuatorType: Vibrate
-            - StepRange: [0, 4]
+            - StepRange: [0, 20]
               ActuatorType: Oscillate
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
