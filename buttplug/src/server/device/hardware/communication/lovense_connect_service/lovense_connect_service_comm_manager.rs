@@ -19,7 +19,7 @@ use crate::{
 use async_trait::async_trait;
 use dashmap::DashSet;
 use reqwest::StatusCode;
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use serde_aux::prelude::*;
 use std::{collections::HashMap, time::Duration};
 use tokio::sync::mpsc;
@@ -39,8 +39,25 @@ pub(super) struct LovenseServiceToyInfo {
     deserialize_with = "deserialize_number_from_string"
   )]
   pub _version: i32,
-  #[serde(deserialize_with = "deserialize_number_from_string")]
+  /* ~ Sutekh
+   * Implemented a deserializer for the battery field.
+   * The battery field needs to be able to handle when the JSON field for it is null.
+   */
+  #[serde(deserialize_with = "parse_battery")]
   pub battery: i8,
+}
+
+/* ~ Sutekh
+ * Parse the LovenseServiceToyInfo battery field to handle incoming JSON null values from the Lovense Connect app.
+ * This deserializer will check if we received an i8 or null.
+ * If the value is null it will set the battery level to 0.
+ */
+fn parse_battery<'de, D>(d: D) -> Result<i8, D::Error>
+  where D: Deserializer<'de> {
+    Deserialize::deserialize(d)
+    .map(|b: Option<_>| {
+      b.unwrap_or(0)
+    })
 }
 
 #[derive(Deserialize, Debug)]
