@@ -96,7 +96,7 @@ impl ProtocolHandler for LovenseConnectService {
       if vibrate_cmds.len() == 1 || vibrate_cmds.windows(2).all(|w| w[0] == w[1]) {
         let lovense_cmd = format!(
           "Vibrate?v={}&t={}",
-          cmds[0].expect("Already checked existence").1,
+          vibrate_cmds[0].1,
           self.address
         )
         .as_bytes()
