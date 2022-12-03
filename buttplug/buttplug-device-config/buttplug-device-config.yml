@@ -1340,7 +1340,7 @@ protocols:
         - Pulse Interactive
       services:
         00001900-0000-1000-8000-00805f9b34fb:
-          # Used to clear the whitelist
+          # Used to clear the whitelist and read battery level
           whitelist: 00001901-0000-1000-8000-00805f9b34fb
           tx: 00001902-0000-1000-8000-00805f9b34fb
           rx: 00001903-0000-1000-8000-00805f9b34fb
@@ -1358,6 +1358,17 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
+          SensorReadCmd:
+            - SensorType: Battery
+              FeatureDescriptor: Battery Level
+              SensorRange: [[0, 100]]
+          SensorSubscribeCmd:
+            - SensorType: Pressure
+              FeatureDescriptor: Pressure (analog)
+              SensorRange: [[0, 65535], [0, 65535], [0, 65535], [0, 65535]]
+            - SensorType: Button
+              FeatureDescriptor: Pressure (digital)
+              SensorRange: [[0, 1], [0, 1], [0, 1], [0, 1]]
       - identifier:
           - Cliona
         name: Kiiroo Cliona

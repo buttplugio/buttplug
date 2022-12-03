@@ -2602,6 +2602,64 @@
                 ],
                 "ActuatorType": "Vibrate"
               }
+            ],
+            "SensorReadCmd": [
+              {
+                "SensorType": "Battery",
+                "FeatureDescriptor": "Battery Level",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ],
+            "SensorSubscribeCmd": [
+              {
+                "SensorType": "Pressure",
+                "FeatureDescriptor": "Pressure (analog)",
+                "SensorRange": [
+                  [
+                    0,
+                    65535
+                  ],
+                  [
+                    0,
+                    65535
+                  ],
+                  [
+                    0,
+                    65535
+                  ],
+                  [
+                    0,
+                    65535
+                  ]
+                ]
+              },
+              {
+                "SensorType": "Button",
+                "FeatureDescriptor": "Pressure (digital)",
+                "SensorRange": [
+                  [
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1
+                  ],
+                  [
+                    0,
+                    1
+                  ]
+                ]
+              }
             ]
           }
         },
