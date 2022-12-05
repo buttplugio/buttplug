@@ -5,18 +5,82 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+
+use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
     errors::ButtplugDeviceError,
     message::{ActuatorType, Endpoint},
   },
   server::device::{
-    hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{generic_protocol_setup, ProtocolHandler},
+    configuration::ProtocolAttributesType,
+    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
+    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
+    ServerDeviceIdentifier,
   },
 };
+use async_trait::async_trait;
+use std::{
+  sync::Arc,
+};
 
-generic_protocol_setup!(SvakomIker, "svakom-iker");
+pub mod setup {
+  use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
+  #[derive(Default)]
+  pub struct SvakomIkerIdentifierFactory {}
+
+  impl ProtocolIdentifierFactory for SvakomIkerIdentifierFactory {
+    fn identifier(&self) -> &str {
+      "svakom-iker"
+    }
+
+    fn create(&self) -> Box<dyn ProtocolIdentifier> {
+      Box::new(super::SvakomIkerIdentifier::default())
+    }
+  }
+}
+
+#[derive(Default)]
+pub struct SvakomIkerInitializer {}
+
+#[async_trait]
+impl ProtocolIdentifier for SvakomIkerIdentifier {
+  async fn identify(
+    &mut self,
+    hardware: Arc<Hardware>,
+  ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
+    let result = hardware
+        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+        .await?;
+    let ident =
+        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
+    if !ident.contains("Iker") {
+      return Err(ButtplugDeviceError::ProtocolSpecificError("svakom-iker".to_owned(), "Device is not an Iker".to_owned()));
+    }
+    Ok((
+      ServerDeviceIdentifier::new(
+        hardware.address(),
+        "svakom-iker",
+        &ProtocolAttributesType::Identifier(ident),
+      ),
+      Box::new(SvakomIkerInitializer::default()),
+    ))
+  }
+}
+
+#[async_trait]
+impl ProtocolInitializer for SvakomIkerInitializer {
+  async fn initialize(
+    &mut self,
+    _: Arc<Hardware>,
+    _: &ProtocolDeviceAttributes,
+  ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
+    Ok(Arc::new(SvakomIker::default()))
+  }
+}
+
+#[derive(Default)]
+pub struct SvakomIkerIdentifier {}
 
 #[derive(Default)]
 pub struct SvakomIker {}
