@@ -42,7 +42,7 @@ impl ProtocolInitializer for VorzeSAInitializer {
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let hwname = hardware.name().to_ascii_lowercase();
-    let device_type = if hwname.contains("cyclone") {
+    let device_type = if hwname.contains("cycsa") {
       VorzeDevice::Cyclone
     } else if hwname.contains("ufo-tw") {
       VorzeDevice::UfoTw
