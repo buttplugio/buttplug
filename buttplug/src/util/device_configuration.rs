@@ -19,6 +19,7 @@ use crate::{
       ProtocolAttributesType,
       ProtocolCommunicationSpecifier,
       ProtocolDeviceAttributes,
+      SDL2Specifier,
       SerialSpecifier,
       ServerDeviceMessageAttributes,
       USBSpecifier,
@@ -124,6 +125,8 @@ struct ProtocolDefinition {
   #[serde(skip_serializing_if = "Option::is_none")]
   xinput: Option<XInputSpecifier>,
   #[serde(skip_serializing_if = "Option::is_none")]
+  sdl2: Option<SDL2Specifier>,
+  #[serde(skip_serializing_if = "Option::is_none")]
   websocket: Option<WebsocketSpecifier>,
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(rename = "lovense-connect-service")]
@@ -206,6 +209,9 @@ impl From<ProtocolDefinition> for ProtocolDeviceConfiguration {
     }
     if let Some(xinput) = &protocol_def.xinput {
       specifiers.push(ProtocolCommunicationSpecifier::XInput(*xinput));
+    }
+    if let Some(sdl2) = &protocol_def.sdl2 {
+      specifiers.push(ProtocolCommunicationSpecifier::SDL2(*sdl2));
     }
     if let Some(websocket) = &protocol_def.websocket {
       specifiers.push(ProtocolCommunicationSpecifier::Websocket(websocket.clone()));

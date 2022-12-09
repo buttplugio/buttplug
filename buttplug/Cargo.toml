@@ -26,13 +26,14 @@ features = ["default", "unstable"]
 
 [features]
 # Basic features
-default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
+default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "sdl2-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
 client=[]
 server=[]
 serialize-json=[]
 # Connectors
 websockets=["serialize-json", "async-tungstenite", "native-tls"]
 # Device Communication Managers
+sdl2-manager=["server", "sdl2"]
 xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
 serial-manager=["server", "serialport"]
@@ -88,6 +89,7 @@ os_info = "3.5.1"
 jsonschema = { version = "0.16.1", default-features = false, features = ["resolve-file"] }
 derivative = "2.2.0"
 tokio-stream = "0.1.11"
+sdl2 = { version = "0.35.2", optional = true, features = ["bundled", "static-link", "hidapi"] }
 
 [dev-dependencies]
 serde_yaml = "0.9.14"

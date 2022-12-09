@@ -636,6 +636,44 @@
         }
       }
     },
+    "sdl2": {
+      "sdl2": {
+        "exists": true
+      },
+      "defaults": {
+        "name": "SDL2 Compatible Gamepad",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                65535
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                65535
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ],
+          "SensorReadCmd": [
+            {
+              "FeatureDescriptor": "Battery Level",
+              "SensorType": "Battery",
+              "SensorRange": [
+                [
+                  0,
+                  100
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
     "kiiroo-v2": {
       "btle": {
         "names": [

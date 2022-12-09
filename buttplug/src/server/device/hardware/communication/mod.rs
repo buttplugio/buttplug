@@ -12,18 +12,46 @@ pub mod lovense_connect_service;
 pub mod websocket_server;
 
 // BTLEPlug works on anything not WASM
-#[cfg(all(feature = "btleplug-manager", any(target_os = "windows", target_os = "macos", target_os = "linux", target_os="ios", target_os="android")))]
+#[cfg(all(
+  feature = "btleplug-manager",
+  any(
+    target_os = "windows",
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "ios",
+    target_os = "android"
+  )
+))]
 pub mod btleplug;
 
 // Lovense Dongles and Serial Ports work on all desktop platforms
-#[cfg(all(feature = "lovense-dongle-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+#[cfg(all(
+  feature = "lovense-dongle-manager",
+  any(target_os = "windows", target_os = "macos", target_os = "linux")
+))]
 pub mod lovense_dongle;
-#[cfg(all(feature = "serial-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+#[cfg(all(
+  feature = "serial-manager",
+  any(target_os = "windows", target_os = "macos", target_os = "linux")
+))]
 pub mod serialport;
 
 // XInput is windows only
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
+
+// SDL2 works on anything not WASM
+#[cfg(all(
+  feature = "sdl2-manager",
+  any(
+    target_os = "windows",
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "ios",
+    target_os = "android"
+  )
+))]
+pub mod sdl2;
 
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
@@ -74,11 +102,35 @@ pub enum HardwareSpecificError {
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   #[error("XInput usage error: {0}")]
   XInputError(String),
+  #[cfg(all(
+    feature = "sdl2-manager",
+    any(
+      target_os = "windows",
+      target_os = "macos",
+      target_os = "linux",
+      target_os = "ios",
+      target_os = "android"
+    )
+  ))]
+  #[error("SDL2 error: {0}")]
+  SDL2Error(String),
   // Btleplug library uses Failure, not Error, on its error enum. :(
-    #[cfg(all(feature = "btleplug-manager", any(target_os = "windows", target_os = "macos", target_os = "linux", target_os="ios", target_os="android")))]
+  #[cfg(all(
+    feature = "btleplug-manager",
+    any(
+      target_os = "windows",
+      target_os = "macos",
+      target_os = "linux",
+      target_os = "ios",
+      target_os = "android"
+    )
+  ))]
   #[error("Btleplug error: {0}")]
   BtleplugError(String),
-  #[cfg(all(feature = "serial-manager", any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+  #[cfg(all(
+    feature = "serial-manager",
+    any(target_os = "windows", target_os = "macos", target_os = "linux")
+  ))]
   #[error("Serial error: {0}")]
   SerialError(String),
 }

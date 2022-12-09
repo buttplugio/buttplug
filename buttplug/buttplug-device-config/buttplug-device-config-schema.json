@@ -131,6 +131,14 @@
         }
       }
     },
+    "sdl2-definition": {
+      "type": "object",
+      "properties": {
+        "exists": {
+          "type": "boolean"
+        }
+      }
+    },
     "lovense-connect-service-definition": {
       "type": "object",
       "properties": {

@@ -58,6 +58,7 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
+pub mod sdl2;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_iker;
@@ -272,6 +273,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     satisfyer::setup::SatisfyerIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, sdl2::setup::SDL2IdentifierFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
