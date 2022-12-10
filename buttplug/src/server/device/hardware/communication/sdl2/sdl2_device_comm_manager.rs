@@ -57,7 +57,7 @@ impl SDL2DeviceCommunicationManager {
     {
       let scanning_status = scanning_status.clone();
       thread::Builder::new()
-        .name("sdl-event-loop-thread".to_owned())
+        .name("sdl2-event-loop-thread".to_owned())
         .spawn(move || {
           if let Err(e) = sdl2_event_loop_thread(sender, scanning_status) {
             error!("SDL2 comm manager: {e}");
@@ -126,7 +126,7 @@ fn sdl2_event_loop_thread(
   let mut event_senders = HashMap::<u32, broadcast::Sender<HardwareEvent>>::new();
 
   let rt = tokio::runtime::Builder::new_current_thread()
-    .thread_name("sdl-event-loop-thread-rt")
+    .thread_name("sdl2-event-loop-thread-rt")
     .enable_all()
     .build()
     .map_err(|e| {
@@ -136,8 +136,8 @@ fn sdl2_event_loop_thread(
   let local_set = LocalSet::new();
 
   rt.block_on(async {
-    while !comm_sender.is_closed() {
-      local_set
+    loop {
+      let exit = local_set
         .run_until(sdl2_poll_event(
           &comm_sender,
           &mut event_pump,
@@ -146,6 +146,9 @@ fn sdl2_event_loop_thread(
           scanning_status.clone(),
         ))
         .await;
+      if exit {
+        break;
+      }
     }
   });
 
@@ -155,38 +158,50 @@ fn sdl2_event_loop_thread(
 
 /// Handle at most one possibly relevant SDL event.
 /// Drives the event pump.
+/// Returns true if we should stop processing SDL events.
 async fn sdl2_poll_event(
   comm_sender: &mpsc::Sender<HardwareCommunicationManagerEvent>,
   event_pump: &mut EventPump,
   joystick_subsystem: &JoystickSubsystem,
   event_senders: &mut HashMap<u32, broadcast::Sender<HardwareEvent>>,
   scanning_status: Arc<AtomicBool>,
-) {
+) -> bool {
   // Yield at least once so we have time to drive futures in the local set.
   task::yield_now().await;
 
   if let Some(event) = event_pump.poll_event() {
     match event {
       Event::JoyDeviceAdded { which: index, .. } => {
-        trace!("SDL2 comm manager found a new joystick at index {index}");
-        if !scanning_status.load(Ordering::SeqCst) {
-          trace!("SDL2 comm manager is not scanning, skipping new joystick at index {index}");
-          return;
+        debug!("SDL2 comm manager found a new joystick at index {index}");
+
+        if comm_sender.is_closed() {
+          trace!(
+            "SDL2 comm manager event sender is closed. Skipping new joystick at index {index}"
+          );
+          return false;
         }
+
+        if !scanning_status.load(Ordering::SeqCst) {
+          trace!("SDL2 comm manager is not scanning. Skipping new joystick at index {index}");
+          return false;
+        }
+
         let joystick = match joystick_subsystem.open(index) {
           Ok(joystick) => joystick,
           Err(e) => {
             trace!("Couldn't open new joystick at index {index}: {e}");
-            return;
+            return false;
           }
         };
+
         if !joystick.has_rumble() {
           trace!("New joystick at index {index} does not support rumble, skipping it");
-          return;
+          return false;
         }
+
         let name = joystick.name();
         let id = joystick.instance_id();
-        trace!("Opened new joystick at index {index} with ID {id}: {name}");
+        debug!("Opened new joystick at index {index} with ID {id}: {name}");
 
         let address = format!("{id}");
         let (event_sender, _) = broadcast::channel(256);
@@ -232,11 +247,13 @@ async fn sdl2_poll_event(
       }
 
       Event::Quit { .. } => {
-        // TODO(Vyr): this should exit the thread
-        println!("SDL says byyyeeeeeeee!");
+        debug!("SDL is quitting");
+        return true;
       }
 
       _ => {}
     }
   }
+
+  return false;
 }

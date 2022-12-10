@@ -144,9 +144,7 @@ impl HardwareInternal for SDL2Hardware {
           PowerLevel::Full => Ok(100),
           PowerLevel::Wired => Ok(100),
         },
-        Err(e) => Err(ButtplugDeviceError::DeviceSpecificError(
-          HardwareSpecificError::SDL2Error(e),
-        )),
+        Err(e) => Err(e),
       }
       .map(|r| HardwareReading::new(Endpoint::Rx, &vec![r]))
     }
@@ -176,7 +174,6 @@ impl HardwareInternal for SDL2Hardware {
           0, // indefinitely
         )
         .await
-        .map_err(|e| ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::SDL2Error(e)))
     }
     .boxed()
   }
@@ -203,12 +200,14 @@ impl HardwareInternal for SDL2Hardware {
 }
 
 trait SdlResultExt<T> {
-  fn map_sdl_error(self) -> Result<T, String>;
+  fn map_sdl_error(self) -> Result<T, ButtplugDeviceError>;
 }
 
 impl<T> SdlResultExt<T> for Result<T, IntegerOrSdlError> {
-  fn map_sdl_error(self) -> Result<T, String> {
-    self.map_err(|e| format!("{e}"))
+  fn map_sdl_error(self) -> Result<T, ButtplugDeviceError> {
+    self.map_err(|e| {
+      ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::SDL2Error(format!("{e}")))
+    })
   }
 }
 
@@ -297,16 +296,18 @@ impl SDL2JoystickActorHandle {
     &self,
     message: SDL2JoystickMessage,
     oneshot_receiver: oneshot::Receiver<T>,
-  ) -> Result<T, String> {
-    self
-      .message_sender
-      .send(message)
-      .await
-      .map_err(|e| format!("SDL2 joystick actor proxy couldn't send message: {e}"))?;
+  ) -> Result<T, ButtplugDeviceError> {
+    self.message_sender.send(message).await.map_err(|e| {
+      ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::SDL2Error(format!(
+        "SDL2 joystick actor proxy couldn't send message: {e}"
+      )))
+    })?;
     // TODO(Vyr): add a timeout here
-    oneshot_receiver
-      .await
-      .map_err(|e| format!("SDL2 joystick actor proxy couldn't receive result: {e}"))
+    oneshot_receiver.await.map_err(|e| {
+      ButtplugDeviceError::DeviceSpecificError(HardwareSpecificError::SDL2Error(format!(
+        "SDL2 joystick actor proxy couldn't receive result: {e}"
+      )))
+    })
   }
 
   pub async fn rumble(
@@ -314,7 +315,7 @@ impl SDL2JoystickActorHandle {
     low_frequency_rumble: u16,
     high_frequency_rumble: u16,
     duration_ms: u32,
-  ) -> Result<(), String> {
+  ) -> Result<(), ButtplugDeviceError> {
     let (oneshot_sender, oneshot_receiver) = oneshot::channel();
     self
       .send_message_and_wait(
@@ -329,7 +330,7 @@ impl SDL2JoystickActorHandle {
       .await?
   }
 
-  pub async fn power_level(&self) -> Result<PowerLevel, String> {
+  pub async fn power_level(&self) -> Result<PowerLevel, ButtplugDeviceError> {
     let (oneshot_sender, oneshot_receiver) = oneshot::channel();
     self
       .send_message_and_wait(
@@ -346,9 +347,9 @@ enum SDL2JoystickMessage {
     low_frequency_rumble: u16,
     high_frequency_rumble: u16,
     duration_ms: u32,
-    oneshot_sender: oneshot::Sender<Result<(), String>>,
+    oneshot_sender: oneshot::Sender<Result<(), ButtplugDeviceError>>,
   },
   PowerLevel {
-    oneshot_sender: oneshot::Sender<Result<PowerLevel, String>>,
+    oneshot_sender: oneshot::Sender<Result<PowerLevel, ButtplugDeviceError>>,
   },
 }
