@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 5
+    "minor": 6
   },
   "protocols": {
     "lovense": {
@@ -154,7 +154,7 @@
               {
                 "StepRange": [
                   0,
-                  5
+                  3
                 ],
                 "FeatureDescriptor": "Air Pump",
                 "ActuatorType": "Constrict"
