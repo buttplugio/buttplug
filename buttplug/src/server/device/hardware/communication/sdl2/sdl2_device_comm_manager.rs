@@ -9,7 +9,7 @@ use crate::{
   core::ButtplugResultFuture,
   server::device::hardware::{
     communication::{
-      sdl2::sdl2_hardware::SDL2HardwareConnector,
+      sdl2::sdl2_hardware::{SDL2HardwareConnector, SDL2JoystickActor},
       HardwareCommunicationManager,
       HardwareCommunicationManagerBuilder,
       HardwareCommunicationManagerEvent,
@@ -19,17 +19,9 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures_util::FutureExt;
-use sdl2::{
-  self,
-  event::Event,
-  joystick::{Joystick, PowerLevel},
-  EventPump,
-  IntegerOrSdlError,
-  JoystickSubsystem,
-};
+use sdl2::{self, event::Event, EventPump, JoystickSubsystem};
 use std::{
   collections::HashMap,
-  fmt::{Debug, Formatter},
   future,
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -38,7 +30,7 @@ use std::{
   thread,
 };
 use tokio::{
-  sync::{broadcast, mpsc, oneshot},
+  sync::{broadcast, mpsc},
   task::{self, LocalSet},
 };
 
@@ -105,141 +97,6 @@ impl HardwareCommunicationManager for SDL2DeviceCommunicationManager {
   fn can_scan(&self) -> bool {
     true
   }
-}
-
-trait SdlResultExt<T> {
-  fn map_sdl_error(self) -> Result<T, String>;
-}
-
-impl<T> SdlResultExt<T> for Result<T, IntegerOrSdlError> {
-  fn map_sdl_error(self) -> Result<T, String> {
-    self.map_err(|e| format!("{e}"))
-  }
-}
-
-/// Lives on the SDL2 event loop thread and responds to messages.
-struct SDL2JoystickActor {
-  joystick: Joystick,
-  message_receiver: mpsc::Receiver<SDL2JoystickMessage>,
-}
-
-struct JoystickDebug<'a>(&'a Joystick);
-
-impl Debug for JoystickDebug<'_> {
-  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("Joystick")
-      .field("instance_id", &self.0.instance_id())
-      .field("name", &self.0.name())
-      .finish_non_exhaustive()
-  }
-}
-
-impl Debug for SDL2JoystickActor {
-  fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("SDL2JoystickActor")
-      .field("joystick", &JoystickDebug(&self.joystick))
-      .field("message_receiver", &self.message_receiver)
-      .finish()
-  }
-}
-
-impl SDL2JoystickActor {
-  fn handle_message(&mut self, message: SDL2JoystickMessage) {
-    match message {
-      SDL2JoystickMessage::Rumble {
-        low_frequency_rumble,
-        high_frequency_rumble,
-        duration_ms,
-        oneshot_sender,
-      } => {
-        // If the receiver's gone, we don't care if the send fails.
-        let _ = oneshot_sender.send(
-          self
-            .joystick
-            .set_rumble(low_frequency_rumble, high_frequency_rumble, duration_ms)
-            .map_sdl_error(),
-        );
-      }
-      SDL2JoystickMessage::PowerLevel { oneshot_sender } => {
-        let _ = oneshot_sender.send(self.joystick.power_level().map_sdl_error());
-      }
-    }
-  }
-
-  async fn run(&mut self) {
-    while let Some(msg) = self.message_receiver.recv().await {
-      self.handle_message(msg);
-    }
-  }
-}
-
-/// Lives inside `SDL2Hardware` on any thread.
-/// Sends and receives messages to its actor.
-/// Sends disconnect events to the `SDL2Hardware`.
-#[derive(Clone, Debug)]
-pub struct SDL2JoystickActorHandle {
-  message_sender: mpsc::Sender<SDL2JoystickMessage>,
-}
-
-impl SDL2JoystickActorHandle {
-  async fn send_message_and_wait<T: Debug>(
-    &self,
-    message: SDL2JoystickMessage,
-    oneshot_receiver: oneshot::Receiver<T>,
-  ) -> Result<T, String> {
-    self
-      .message_sender
-      .send(message)
-      .await
-      .map_err(|e| format!("SDL2 joystick actor proxy couldn't send message: {e}"))?;
-    // TODO(Vyr): add a timeout here
-    oneshot_receiver
-      .await
-      .map_err(|e| format!("SDL2 joystick actor proxy couldn't receive result: {e}"))
-  }
-
-  pub async fn rumble(
-    &self,
-    low_frequency_rumble: u16,
-    high_frequency_rumble: u16,
-    duration_ms: u32,
-  ) -> Result<(), String> {
-    let (oneshot_sender, oneshot_receiver) = oneshot::channel();
-    self
-      .send_message_and_wait(
-        SDL2JoystickMessage::Rumble {
-          low_frequency_rumble,
-          high_frequency_rumble,
-          duration_ms,
-          oneshot_sender,
-        },
-        oneshot_receiver,
-      )
-      .await?
-  }
-
-  pub async fn power_level(&self) -> Result<PowerLevel, String> {
-    let (oneshot_sender, oneshot_receiver) = oneshot::channel();
-    self
-      .send_message_and_wait(
-        SDL2JoystickMessage::PowerLevel { oneshot_sender },
-        oneshot_receiver,
-      )
-      .await?
-  }
-}
-
-#[derive(Debug)]
-enum SDL2JoystickMessage {
-  Rumble {
-    low_frequency_rumble: u16,
-    high_frequency_rumble: u16,
-    duration_ms: u32,
-    oneshot_sender: oneshot::Sender<Result<(), String>>,
-  },
-  PowerLevel {
-    oneshot_sender: oneshot::Sender<Result<PowerLevel, String>>,
-  },
 }
 
 /// Only one thread is allowed to talk to the SDL event loop,
@@ -332,24 +189,21 @@ async fn sdl2_poll_event(
         trace!("Opened new joystick at index {index} with ID {id}: {name}");
 
         let address = format!("{id}");
-        let (message_sender, message_receiver) = mpsc::channel(256);
         let (event_sender, _) = broadcast::channel(256);
 
         event_senders.insert(joystick.instance_id(), event_sender.clone());
 
+        let joystick_actor = SDL2JoystickActor::new(joystick);
+        let joystick_actor_handle = joystick_actor.new_handle();
+
         task::spawn_local(
           async move {
-            SDL2JoystickActor {
-              joystick,
-              message_receiver,
-            }
-            .run()
-            .await
+            let mut joystick_actor = joystick_actor;
+            joystick_actor.run().await
           }
           .boxed_local(),
         );
 
-        let joystick_actor_handle = SDL2JoystickActorHandle { message_sender };
         if let Err(e) = comm_sender
           .send(HardwareCommunicationManagerEvent::DeviceFound {
             name: name.clone(),
