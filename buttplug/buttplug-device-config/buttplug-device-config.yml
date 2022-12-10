@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 3
+  minor: 4
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -199,7 +199,7 @@ protocols:
             - StepRange: [0, 20]
               FeatureDescriptor: Vibrator
               ActuatorType: Vibrate
-            - StepRange: [0, 5]
+            - StepRange: [0, 3]
               FeatureDescriptor: Air Pump
               ActuatorType: Constrict
       - identifier:
