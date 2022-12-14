@@ -11,4 +11,4 @@ codegen-units = 1
 
 # Need development sdl2 version with additional rumble-related methods
 [patch.crates-io]
-sdl2 = { git = "https://github.com/Rust-SDL2/rust-sdl2", branch = "master" }
+sdl2 = { git = "https://github.com/Rust-SDL2/rust-sdl2", rev = "a147388" }
