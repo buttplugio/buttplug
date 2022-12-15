@@ -1,0 +1,38 @@
+devices:
+  - identifier: 
+      name: "AMN NEO"
+    expected_name: "Hgod Device"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x04, 0, 0, 0, 5]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 1
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x04, 0, 0, 0, 10]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+# I think to really test stop, we need an anti-test: no further commands are expected after this point
+#  - !NoCommands
+#      device_index: 0
