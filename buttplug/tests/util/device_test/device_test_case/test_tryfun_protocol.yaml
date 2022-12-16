@@ -1,0 +1,56 @@
+devices:
+  - identifier: 
+      name: "TRYFUN-ONE"
+    expected_name: "TryFun Yuan Series"
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.5
+          ActuatorType: Oscillate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x02, 0x07, 0x05, 0xf4]
+        write_with_response: true
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.1
+          ActuatorType: Oscillate
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Rotate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x02, 0x07, 0x01, 0xf8]
+        write_with_response: true
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x02, 0x08, 0x05, 0xf3]
+        write_with_response: true
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x02, 0x07, 0x00, 0xf9]
+        write_with_response: true
+      - !Write
+        endpoint: tx
+        data: [0xAA, 0x02, 0x08, 0x00, 0xf8]
+        write_with_response: true
