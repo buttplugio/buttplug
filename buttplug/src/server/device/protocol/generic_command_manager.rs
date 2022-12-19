@@ -402,6 +402,74 @@ mod test {
   }
 
   #[test]
+  pub fn test_command_generator_vibration_match_all() {
+    let scalar_attrs = ServerGenericDeviceMessageAttributes::new(
+      "Test",
+      &RangeInclusive::new(0, 20),
+      ActuatorType::Vibrate,
+    );
+    let scalar_attributes = ServerDeviceMessageAttributesBuilder::default()
+      .scalar_cmd(&vec![scalar_attrs.clone(), scalar_attrs])
+      .finish();
+    let device_attributes = ProtocolDeviceAttributes::new(
+      ProtocolAttributesType::Default,
+      None,
+      None,
+      scalar_attributes,
+      None,
+    );
+    let mgr = GenericCommandManager::new(&device_attributes);
+    let vibrate_msg = ScalarCmd::new(
+      0,
+      vec![
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.5, ActuatorType::Vibrate),
+      ],
+    );
+    assert_eq!(
+      mgr
+        .update_scalar(&vibrate_msg, true)
+        .expect("Test, assuming infallible"),
+      vec![
+        Some((ActuatorType::Vibrate, 10)),
+        Some((ActuatorType::Vibrate, 10))
+      ]
+    );
+    assert_eq!(
+      mgr
+        .update_scalar(&vibrate_msg, true)
+        .expect("Test, assuming infallible"),
+      vec![]
+    );
+    let vibrate_msg_2 = ScalarCmd::new(
+      0,
+      vec![
+        ScalarSubcommand::new(0, 0.5, ActuatorType::Vibrate),
+        ScalarSubcommand::new(1, 0.75, ActuatorType::Vibrate),
+      ],
+    );
+    assert_eq!(
+      mgr
+        .update_scalar(&vibrate_msg_2, true)
+        .expect("Test, assuming infallible"),
+      vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 15))]
+    );
+    let vibrate_msg_invalid = ScalarCmd::new(
+      0,
+      vec![ScalarSubcommand::new(2, 0.5, ActuatorType::Vibrate)],
+    );
+    assert!(mgr.update_scalar(&vibrate_msg_invalid, false).is_err());
+
+    assert_eq!(
+      mgr.scalars(),
+      vec![
+        Some((ActuatorType::Vibrate, 10)),
+        Some((ActuatorType::Vibrate, 15))
+      ]
+    );
+  }
+
+  #[test]
   pub fn test_command_generator_vibration_step_range() {
     let mut vibrate_attrs_1 = ServerGenericDeviceMessageAttributes::new(
       "Test",
