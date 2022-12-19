@@ -437,7 +437,7 @@ impl ServerDevice {
         };
 
         if commands.is_empty() {
-          debug!(
+          trace!(
             "No commands generated for incoming device packet, skipping and returning success."
           );
           return future::ready(Ok(message::Ok::default().into())).boxed();
