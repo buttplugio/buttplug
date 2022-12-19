@@ -146,13 +146,7 @@ impl GenericCommandManager {
     // old values. Otherwise, we should always send whatever command we're
     // going to send.
     let mut result: Vec<Option<(ActuatorType, u32)>> = vec![None; self.scalars.len()];
-    // If we're in a match all situation, set up the array with all prior
-    // values before switching them out.
-    if match_all {
-      for (index, cmd) in self.scalars.iter().enumerate() {
-        result[index] = Some((*cmd.actuator(), cmd.value.load(SeqCst)));
-      }
-    }
+
     for scalar_command in msg.scalars() {
       let index = scalar_command.index() as usize;
       // Since we're going to iterate here anyways, we do our index check
@@ -191,7 +185,7 @@ impl GenericCommandManager {
       // these values get None in our return vector.
       let current_scalar = self.scalars[index].value().load(SeqCst);
       let sent_scalar = self.sent_scalar.load(SeqCst);
-      if !sent_scalar || scalar != current_scalar || match_all {
+      if !sent_scalar || scalar != current_scalar {
         self.scalars[index].value().store(scalar, SeqCst);
         result[index] = Some((*self.scalars[index].actuator(), scalar));
       }
@@ -205,6 +199,14 @@ impl GenericCommandManager {
     // to do.
     if result.iter().all(|x| x.is_none()) {
       result.clear();
+    } else if match_all {
+      // If we're in a match all situation, set up the array with all prior
+      // values before switching them out.
+      for (index, cmd) in self.scalars.iter().enumerate() {
+        if result[index].is_none() {
+          result[index] = Some((*cmd.actuator(), cmd.value.load(SeqCst)));
+        }
+      }
     }
 
     // Return the command vector for the protocol to turn into proprietary commands
