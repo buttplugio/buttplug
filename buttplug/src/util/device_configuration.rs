@@ -160,7 +160,7 @@ pub struct UserConfigDeviceIdentifier {
   identifier: Option<String>,
 }
 
-impl From <UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
+impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
   fn from(ident: UserConfigDeviceIdentifier) -> Self {
     let server_identifier = if let Some(ident_string) = ident.identifier {
       ProtocolAttributesType::Identifier(ident_string)
