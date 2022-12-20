@@ -231,7 +231,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, mannuo::setup::ManNuoIdentifierFactory::default());
   add_to_protocol_map(&mut map, maxpro::setup::MaxproIdentifierFactory::default());
   add_to_protocol_map(&mut map, meese::setup::MeeseIdentifierFactory::default());
-  add_to_protocol_map(&mut map, metaxsire::setup::MetaXSireIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    metaxsire::setup::MetaXSireIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     mizzzee::setup::MizzZeeIdentifierFactory::default(),

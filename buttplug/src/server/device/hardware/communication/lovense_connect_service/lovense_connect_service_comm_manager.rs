@@ -53,11 +53,10 @@ pub(super) struct LovenseServiceToyInfo {
  * If the value is null it will set the battery level to 0.
  */
 fn parse_battery<'de, D>(d: D) -> Result<i8, D::Error>
-  where D: Deserializer<'de> {
-    Deserialize::deserialize(d)
-    .map(|b: Option<_>| {
-      b.unwrap_or(0)
-    })
+where
+  D: Deserializer<'de>,
+{
+  Deserialize::deserialize(d).map(|b: Option<_>| b.unwrap_or(0))
 }
 
 #[derive(Deserialize, Debug)]

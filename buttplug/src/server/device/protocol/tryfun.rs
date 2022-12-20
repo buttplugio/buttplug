@@ -10,7 +10,7 @@ use crate::{
   generic_protocol_setup,
   server::device::{
     hardware::{HardwareCommand, HardwareWriteCmd},
-    protocol::{ProtocolHandler},
+    protocol::ProtocolHandler,
   },
 };
 

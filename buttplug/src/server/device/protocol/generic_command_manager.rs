@@ -452,7 +452,10 @@ mod test {
       mgr
         .update_scalar(&vibrate_msg_2, true)
         .expect("Test, assuming infallible"),
-      vec![Some((ActuatorType::Vibrate, 10)), Some((ActuatorType::Vibrate, 15))]
+      vec![
+        Some((ActuatorType::Vibrate, 10)),
+        Some((ActuatorType::Vibrate, 15))
+      ]
     );
     let vibrate_msg_invalid = ScalarCmd::new(
       0,

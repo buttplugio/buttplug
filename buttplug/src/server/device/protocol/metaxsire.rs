@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::ActuatorType;
+use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   server::device::{
@@ -12,8 +14,6 @@ use crate::{
     protocol::{generic_protocol_setup, ProtocolHandler},
   },
 };
-use crate::core::message::ActuatorType;
-use crate::core::message::ActuatorType::{Constrict, Rotate, Vibrate};
 
 generic_protocol_setup!(MetaXSire, "metaxsire");
 
@@ -29,16 +29,21 @@ impl ProtocolHandler for MetaXSire {
     &self,
     commands: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-
-    let mut data: Vec<u8> =  vec![0x23, 0x07];
+    let mut data: Vec<u8> = vec![0x23, 0x07];
     data.push((commands.len() * 3) as u8);
 
     for c in 0..commands.len() {
-      let cmd = commands[c].unwrap_or((Vibrate,0));
+      let cmd = commands[c].unwrap_or((Vibrate, 0));
       // motor number
-      data.push(0x80 | ((c+1) as u8));
+      data.push(0x80 | ((c + 1) as u8));
       // motor type: 03=vibe 04=pump 06=rotate
-      data.push(if cmd.0 == Rotate { 0x06 } else if cmd.0 == Constrict { 0x04 } else { 0x03 });
+      data.push(if cmd.0 == Rotate {
+        0x06
+      } else if cmd.0 == Constrict {
+        0x04
+      } else {
+        0x03
+      });
       data.push(cmd.1 as u8);
     }
 
