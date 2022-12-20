@@ -5,19 +5,14 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
   generic_protocol_setup,
   server::device::{
-    configuration::ProtocolAttributesType,
-    hardware::{Hardware, HardwareCommand, HardwareReadCmd, HardwareWriteCmd},
-    protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
-    ServerDeviceIdentifier,
+    hardware::{HardwareCommand, HardwareWriteCmd},
+    protocol::{ProtocolHandler},
   },
 };
-use async_trait::async_trait;
-use std::sync::Arc;
 
 generic_protocol_setup!(TryFun, "tryfun");
 
