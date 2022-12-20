@@ -497,7 +497,7 @@
           "identifier": [
             "Max"
           ],
-          "name": "Lovense Max",
+          "name": "Lovense Connect Max",
           "messages": {
             "ScalarCmd": [
               {
@@ -523,7 +523,7 @@
           "identifier": [
             "Edge"
           ],
-          "name": "Lovense Edge",
+          "name": "Lovense Connect Edge",
           "messages": {
             "ScalarCmd": [
               {
@@ -559,7 +559,7 @@
           "identifier": [
             "Nora"
           ],
-          "name": "Lovense Nora",
+          "name": "Lovense Connect Nora",
           "messages": {
             "RotateCmd": [
               {
@@ -588,49 +588,49 @@
           "identifier": [
             "Ambi"
           ],
-          "name": "Lovense Ambi"
+          "name": "Lovense Connect Ambi"
         },
         {
           "identifier": [
             "Lush"
           ],
-          "name": "Lovense Lush"
+          "name": "Lovense Connect Lush"
         },
         {
           "identifier": [
             "Hush"
           ],
-          "name": "Lovense Hush"
+          "name": "Lovense Connect Hush"
         },
         {
           "identifier": [
             "Domi"
           ],
-          "name": "Lovense Domi"
+          "name": "Lovense Connect Domi"
         },
         {
           "identifier": [
             "Osci"
           ],
-          "name": "Lovense Osci"
+          "name": "Lovense Connect Osci"
         },
         {
           "identifier": [
             "Mission"
           ],
-          "name": "Lovense Mission"
+          "name": "Lovense Connect Mission"
         },
         {
           "identifier": [
             "Ferri"
           ],
-          "name": "Lovense Ferri"
+          "name": "Lovense Connect Ferri"
         },
         {
           "identifier": [
             "Diamo"
           ],
-          "name": "Lovense Diamo"
+          "name": "Lovense Connect Diamo"
         },
         {
           "identifier": [
@@ -642,13 +642,13 @@
           "identifier": [
             "XMachine"
           ],
-          "name": "Lovense Sex Machine"
+          "name": "Lovense Connect Sex Machine"
         },
         {
           "identifier": [
             "Dolce"
           ],
-          "name": "Lovense Dolce",
+          "name": "Lovense Connect Dolce",
           "messages": {
             "ScalarCmd": [
               {
@@ -684,13 +684,13 @@
           "identifier": [
             "Gush"
           ],
-          "name": "Lovense Gush"
+          "name": "Lovense Connect Gush"
         },
         {
           "identifier": [
             "Hyphy"
           ],
-          "name": "Lovense Hyphy",
+          "name": "Lovense Connect Hyphy",
           "messages": {
             "ScalarCmd": [
               {
@@ -726,13 +726,13 @@
           "identifier": [
             "Calor"
           ],
-          "name": "Lovense Calor"
+          "name": "Lovense Connect Calor"
         },
         {
           "identifier": [
             "Flexer"
           ],
-          "name": "Lovense Flexer",
+          "name": "Lovense Connect Flexer",
           "messages": {
             "ScalarCmd": [
               {
@@ -770,7 +770,7 @@
           "identifier": [
             "Gemini"
           ],
-          "name": "Lovense Gemini",
+          "name": "Lovense Connect Gemini",
           "messages": {
             "ScalarCmd": [
               {
@@ -806,7 +806,7 @@
           "identifier": [
             "Gravity"
           ],
-          "name": "Lovense Gravity",
+          "name": "Lovense Connect Gravity",
           "messages": {
             "ScalarCmd": [
               {

@@ -126,6 +126,7 @@ impl HardwareCommunicationManagerBuilder for LovenseConnectServiceCommunicationM
 pub struct LovenseConnectServiceCommunicationManager {
   sender: mpsc::Sender<HardwareCommunicationManagerEvent>,
   known_hosts: DashSet<String>,
+  lc_override: DashSet<String>,
 }
 
 pub(super) async fn get_local_info(host: &str) -> Option<LovenseServiceLocalInfo> {
@@ -145,6 +146,12 @@ pub(super) async fn get_local_info(host: &str) -> Option<LovenseServiceLocalInfo
         .expect("If we got a 200 back, we should at least have text.");
       let info: LovenseServiceLocalInfo = serde_json::from_str(&text)
         .expect("Should always get json back from service, if we got a response.");
+
+      // If no toys are connected
+      if info.data.len() == 0 {
+        return None;
+      }
+      
       Some(info)
     }
     Err(err) => {
@@ -164,6 +171,7 @@ impl LovenseConnectServiceCommunicationManager {
     Self {
       sender,
       known_hosts: DashSet::new(),
+      lc_override: DashSet::new(),
     }
   }
 
@@ -214,6 +222,31 @@ impl TimedRetryCommunicationManagerImpl for LovenseConnectServiceCommunicationMa
   }
 
   async fn scan(&self) -> Result<(), ButtplugDeviceError> {
+    // VibeCheck Host injection patch (HACK)
+    match std::env::var("VCLC_HOST_PORT") {
+      Ok(v) => {
+        let host = format!("http://{}", v);
+        info!("Inserting {} into known_hosts for Lovense Connect Comm Manager", host);
+        // Do not add more than one override host
+        if self.lc_override.len() == 0 {
+          info!("Creating LC Override");
+          self.lc_override.insert(host.clone());
+          self.known_hosts.insert(host);
+        }
+      },
+      Err(_) => {
+        info!("Failed to get VCLC_HOST_PORT env var removing all from known_hosts");
+        // Only clear hosts if there was an override set
+        if self.lc_override.len() == 1 {
+          info!("Clearing LC Override");
+          self.known_hosts.clear();
+          self.lc_override.clear();
+        }
+      },
+    }
+
+
+
     // If we already know about a local host, check it. Otherwise, query remotely to look for local
     // hosts.
     if !self.known_hosts.is_empty() {
