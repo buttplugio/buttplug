@@ -1,3 +1,24 @@
+# 6.2.3 (2022-12-19)
+
+## Features
+
+- Added Device Support
+  - MetaXSire (all products)
+  - Lovense Gemini, Gravity, Flexer
+  - Roselex (all products)
+  - Hismith Widolo devices
+  - TryFun Yuan series devices
+- Add support for the Kiiroo Pearl 2.1 Sensors and Battery Level
+
+## Bugfixes
+
+- #532: Simplify Generic Command Manager Match-all Processing
+  - Fixes issues with Satisfyer/WeVibe/Magic Motion for applications with high thruput
+- Fix issues with Lovense vibration command formation between single/multi vibrator devices
+- Fix issue with the Vorze Cyclone SA not being addressed correctly
+- Fix Hgod protocol update loop
+- Fix deserialization of multi-type battery field in Lovense Connect service
+
 # 6.2.2 (2022-11-27)
 
 ## Bugfixes
