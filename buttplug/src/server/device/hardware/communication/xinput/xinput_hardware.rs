@@ -151,7 +151,7 @@ impl HardwareInternal for XInputHardware {
         })?;
       Ok(HardwareReading::new(
         Endpoint::Rx,
-        &vec![battery.battery_level.0],
+        &[battery.battery_level.0],
       ))
     }
     .boxed()

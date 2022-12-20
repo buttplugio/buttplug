@@ -1,15 +1,15 @@
 ///  Data structure of Session command/request packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct S0SessionCmd {
 }
 ///  Data structure of Session response packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct S0SessionResp {
     #[prost(enumeration="Status", tag="1")]
     pub status: i32,
 }
 ///  Payload structure of session data 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct Sec0Payload {
     /// !< Type of message 
     #[prost(enumeration="Sec0MsgType", tag="1")]
@@ -19,7 +19,7 @@ pub struct Sec0Payload {
 }
 /// Nested message and enum types in `Sec0Payload`.
 pub mod sec0_payload {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, Eq, PartialEq, ::prost::Oneof)]
     pub enum Payload {
         /// !< Payload data interpreted as Cmd 
         #[prost(message, tag="20")]
@@ -30,13 +30,13 @@ pub mod sec0_payload {
     }
 }
 ///  Data structure of Session command1 packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct SessionCmd1 {
     #[prost(bytes="vec", tag="2")]
     pub client_verify_data: ::prost::alloc::vec::Vec<u8>,
 }
 ///  Data structure of Session response1 packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct SessionResp1 {
     #[prost(enumeration="Status", tag="1")]
     pub status: i32,
@@ -44,13 +44,13 @@ pub struct SessionResp1 {
     pub device_verify_data: ::prost::alloc::vec::Vec<u8>,
 }
 ///  Data structure of Session command0 packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct SessionCmd0 {
     #[prost(bytes="vec", tag="1")]
     pub client_pubkey: ::prost::alloc::vec::Vec<u8>,
 }
 ///  Data structure of Session response0 packet 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct SessionResp0 {
     #[prost(enumeration="Status", tag="1")]
     pub status: i32,
@@ -60,7 +60,7 @@ pub struct SessionResp0 {
     pub device_random: ::prost::alloc::vec::Vec<u8>,
 }
 ///  Payload structure of session data 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct Sec1Payload {
     /// !< Type of message 
     #[prost(enumeration="Sec1MsgType", tag="1")]
@@ -70,7 +70,7 @@ pub struct Sec1Payload {
 }
 /// Nested message and enum types in `Sec1Payload`.
 pub mod sec1_payload {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, Eq, PartialEq, ::prost::Oneof)]
     pub enum Payload {
         /// !< Payload data interpreted as Cmd0 
         #[prost(message, tag="20")]
@@ -88,7 +88,7 @@ pub mod sec1_payload {
 }
 ///  Data structure exchanged when establishing
 ///  secure session between Host and Client 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct SessionData {
     /// !< Type of security 
     #[prost(enumeration="SecSchemeVersion", tag="2")]
@@ -98,7 +98,7 @@ pub struct SessionData {
 }
 /// Nested message and enum types in `SessionData`.
 pub mod session_data {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, Eq, PartialEq, ::prost::Oneof)]
     pub enum Proto {
         /// !< Payload data in case of security 0 
         #[prost(message, tag="10")]

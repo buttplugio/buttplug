@@ -203,10 +203,10 @@ pub struct HardwareReading {
 }
 
 impl HardwareReading {
-  pub fn new(endpoint: Endpoint, data: &Vec<u8>) -> Self {
+  pub fn new(endpoint: Endpoint, data: &[u8]) -> Self {
     Self {
       endpoint,
-      data: data.clone(),
+      data: data.to_vec(),
     }
   }
 }

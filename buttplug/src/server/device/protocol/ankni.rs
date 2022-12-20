@@ -36,7 +36,6 @@ impl ProtocolInitializer for AnkniInitializer {
     hardware: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    let check: u8;
     let msg = HardwareReadCmd::new(Endpoint::Generic0, 16, 100);
     let reading = hardware.read_value(&msg).await?;
 
@@ -49,7 +48,7 @@ impl ProtocolInitializer for AnkniInitializer {
     addrdata.push(0x01);
     addrdata.extend(reading.data());
 
-    check = ((crc16(addrdata) & 0xff00) >> 8) as u8;
+    let check = ((crc16(addrdata) & 0xff00) >> 8) as u8;
     debug!("Ankni Checksum: {:#02X}", check);
 
     let msg = HardwareWriteCmd::new(
@@ -126,5 +125,5 @@ fn crc16(advert_data: Vec<u8>) -> u16 {
       }
     }
   }
-  return remain;
+  remain
 }

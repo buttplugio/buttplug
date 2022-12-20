@@ -67,7 +67,7 @@ impl ProtocolInitializer for LeloHarmonyInitializer {
           info!(
             "Lelo Harmony isn't authorised: Tap the device's power button to complete connection."
           )
-        } else if n.len() > 0 && n[0] == 1u8 && n[1..].iter().all(|b| *b == 0u8) {
+        } else if !n.is_empty() && n[0] == 1u8 && n[1..].iter().all(|b| *b == 0u8) {
           debug!("Lelo Harmony is authorised!");
           return Ok(Arc::new(LeloHarmony::default()));
         } else {

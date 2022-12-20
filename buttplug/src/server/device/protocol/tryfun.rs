@@ -28,8 +28,8 @@ impl ProtocolHandler for TryFun {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x07, scalar as u8];
     let mut count = 0;
-    for i in 1..data.len() {
-      sum -= data[i];
+    for item in data.iter().skip(1) {
+      sum -= item;
       count += 1;
     }
     sum += count;
@@ -46,8 +46,8 @@ impl ProtocolHandler for TryFun {
     let mut sum: u8 = 0xff;
     let mut data = vec![0xAA, 0x02, 0x08, scalar as u8];
     let mut count = 0;
-    for i in 1..data.len() {
-      sum -= data[i];
+    for item in data.iter().skip(1) {
+      sum -= item;
       count += 1;
     }
     sum += count;

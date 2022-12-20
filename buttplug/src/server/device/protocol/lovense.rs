@@ -66,7 +66,7 @@ fn lovense_model_resolver(type_response: String) -> String {
     return "EI-FW3".to_string();
   }
 
-  return identifier;
+  identifier
 }
 
 #[async_trait]
@@ -129,8 +129,7 @@ impl ProtocolInitializer for LovenseInitializer {
         .clone()
         .iter()
         .filter(|x| [ActuatorType::Vibrate, ActuatorType::Oscillate].contains(x.actuator_type()))
-        .collect::<Vec<_>>()
-        .len();
+        .count();
 
       // This might need better tuning if other complex Lovenses are released
       // Currently this only applies to the Flexer
@@ -259,7 +258,7 @@ impl ProtocolHandler for Lovense {
 
   fn handle_rotate_cmd(
     &self,
-    cmds: &Vec<Option<(u32, bool)>>,
+    cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let direction = self.rotation_direction.clone();
     let mut hardware_cmds = vec![];
@@ -304,7 +303,7 @@ impl ProtocolHandler for Lovense {
               //
               // Contains() is casting a wider net than we need here, but it'll
               // do for now.
-              let start_pos = if data_str.contains('s') { 1 } else { 0 };
+              let start_pos = usize::from(data_str.contains('s'));
               if let Ok(level) = data_str[start_pos..(len - 1)].parse::<u8>() {
                 return Ok(
                   message::SensorReading::new(

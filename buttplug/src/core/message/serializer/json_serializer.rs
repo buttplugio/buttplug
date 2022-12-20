@@ -58,7 +58,7 @@ impl ButtplugServerJSONSerializer {
   pub fn force_message_version(&self, version: &ButtplugMessageSpecVersion) {
     self
       .message_version
-      .set(version.clone())
+      .set(*version)
       .expect("This should only ever be called once.");
   }
 }

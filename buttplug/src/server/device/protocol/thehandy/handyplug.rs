@@ -7,7 +7,7 @@
 // }
 // ]
 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct Ok {
     #[prost(uint32, tag="1")]
     pub id: u32,
@@ -23,7 +23,7 @@ pub struct Ok {
 // }
 // ]
 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct Error {
     #[prost(uint32, tag="1")]
     pub id: u32,
@@ -41,7 +41,7 @@ pub struct Error {
 // }
 // ]
 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct Ping {
     #[prost(uint32, tag="1")]
     pub id: u32,
@@ -57,7 +57,7 @@ pub struct Ping {
 // }
 // ]
 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct RequestServerInfo {
     #[prost(uint32, tag="1")]
     pub id: u32,
@@ -78,7 +78,7 @@ pub struct RequestServerInfo {
 // }
 // ]
 
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Eq, PartialEq, ::prost::Message)]
 pub struct ServerInfo {
     #[prost(uint32, tag="1")]
     pub id: u32,

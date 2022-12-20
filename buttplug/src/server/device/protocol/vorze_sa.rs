@@ -142,7 +142,7 @@ impl ProtocolHandler for VorzeSA {
 
   fn handle_rotate_cmd(
     &self,
-    cmds: &Vec<Option<(u32, bool)>>,
+    cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if cmds.len() == 1 {
       if let Some((speed, clockwise)) = cmds[0] {
@@ -209,6 +209,6 @@ impl ProtocolHandler for VorzeSA {
     &self,
     msg: message::VorzeA10CycloneCmd,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.handle_rotate_cmd(&vec![Some((msg.speed(), msg.clockwise()))])
+    self.handle_rotate_cmd(&[Some((msg.speed(), msg.clockwise()))])
   }
 }

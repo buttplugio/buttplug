@@ -79,7 +79,7 @@ impl PartialEq for BluetoothLEManufacturerData {
       haystack = &haystack[1..];
     }
 
-    return false;
+    false
   }
 }
 

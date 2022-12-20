@@ -145,7 +145,7 @@ impl HardwareInternal for LovenseServiceHardware {
     async move {
       Ok(HardwareReading::new(
         Endpoint::Rx,
-        &vec![battery_level.load(Ordering::SeqCst)],
+        &[battery_level.load(Ordering::SeqCst)],
       ))
     }
     .boxed()

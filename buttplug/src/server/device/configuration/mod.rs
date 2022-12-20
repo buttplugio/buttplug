@@ -399,7 +399,7 @@ impl DeviceConfigurationManagerBuilder {
     self
       .communication_specifiers
       .entry(protocol_name.to_owned())
-      .or_insert(vec![])
+      .or_default()
       .push(specifier);
     self
   }

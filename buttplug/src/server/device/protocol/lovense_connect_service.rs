@@ -49,14 +49,12 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
         .clone()
         .iter()
         .filter(|x| [ActuatorType::Vibrate].contains(x.actuator_type()))
-        .collect::<Vec<_>>()
-        .len();
+        .count();
       protocol.thusting_count = scalars
         .clone()
         .iter()
         .filter(|x| [ActuatorType::Oscillate].contains(x.actuator_type()))
-        .collect::<Vec<_>>()
-        .len();
+        .count();
 
       // The Ridge and Gravity both oscillate, but the Ridge only oscillates but takes
       // the vibrate command... The Gravity has a vibe as well, and uses a Thrusting
@@ -262,7 +260,7 @@ impl ProtocolHandler for LovenseConnectService {
 
   fn handle_rotate_cmd(
     &self,
-    cmds: &Vec<Option<(u32, bool)>>,
+    cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let mut hardware_cmds = vec![];
     if let Some(Some((speed, clockwise))) = cmds.get(0) {

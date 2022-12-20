@@ -188,37 +188,37 @@ impl ServerDeviceMessageAttributes {
   }
 }
 
-impl Into<ClientDeviceMessageAttributes> for ServerDeviceMessageAttributes {
-  fn into(self) -> ClientDeviceMessageAttributes {
+impl From<ServerDeviceMessageAttributes> for ClientDeviceMessageAttributes {
+  fn from(attrs: ServerDeviceMessageAttributes) -> Self {
     let mut builder = ClientDeviceMessageAttributesBuilder::default();
-    if let Some(scalar_cmd) = self.scalar_cmd {
+    if let Some(scalar_cmd) = attrs.scalar_cmd {
       let commands: Vec<ClientGenericDeviceMessageAttributes> =
         scalar_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.scalar_cmd(&commands);
     }
-    if let Some(rotate_cmd) = self.rotate_cmd {
+    if let Some(rotate_cmd) = attrs.rotate_cmd {
       let commands: Vec<ClientGenericDeviceMessageAttributes> =
         rotate_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.rotate_cmd(&commands);
     }
-    if let Some(linear_cmd) = self.linear_cmd {
+    if let Some(linear_cmd) = attrs.linear_cmd {
       let commands: Vec<ClientGenericDeviceMessageAttributes> =
         linear_cmd.iter().cloned().map(|x| x.into()).collect();
       builder.linear_cmd(&commands);
     }
-    if let Some(sensor_read_cmd) = self.sensor_read_cmd {
+    if let Some(sensor_read_cmd) = attrs.sensor_read_cmd {
       builder.sensor_read_cmd(&sensor_read_cmd);
     }
-    if let Some(sensor_subscribe_cmd) = self.sensor_subscribe_cmd {
+    if let Some(sensor_subscribe_cmd) = attrs.sensor_subscribe_cmd {
       builder.sensor_subscribe_cmd(&sensor_subscribe_cmd);
     }
-    if let Some(raw_read_cmd) = self.raw_read_cmd {
+    if let Some(raw_read_cmd) = attrs.raw_read_cmd {
       builder.raw_read_cmd(raw_read_cmd.endpoints());
     }
-    if let Some(raw_write_cmd) = self.raw_write_cmd {
+    if let Some(raw_write_cmd) = attrs.raw_write_cmd {
       builder.raw_write_cmd(raw_write_cmd.endpoints());
     }
-    if let Some(raw_subscribe_cmd) = self.raw_subscribe_cmd {
+    if let Some(raw_subscribe_cmd) = attrs.raw_subscribe_cmd {
       builder.raw_subscribe_cmd(raw_subscribe_cmd.endpoints());
     }
     builder.finish()
@@ -231,42 +231,42 @@ pub struct ServerDeviceMessageAttributesBuilder {
 }
 
 impl ServerDeviceMessageAttributesBuilder {
-  pub fn scalar_cmd(&mut self, attrs: &Vec<ServerGenericDeviceMessageAttributes>) -> &Self {
-    self.attrs.scalar_cmd = Some(attrs.clone());
+  pub fn scalar_cmd(&mut self, attrs: &[ServerGenericDeviceMessageAttributes]) -> &Self {
+    self.attrs.scalar_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn rotate_cmd(&mut self, attrs: &Vec<ServerGenericDeviceMessageAttributes>) -> &Self {
-    self.attrs.rotate_cmd = Some(attrs.clone());
+  pub fn rotate_cmd(&mut self, attrs: &[ServerGenericDeviceMessageAttributes]) -> &Self {
+    self.attrs.rotate_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn linear_cmd(&mut self, attrs: &Vec<ServerGenericDeviceMessageAttributes>) -> &Self {
-    self.attrs.linear_cmd = Some(attrs.clone());
+  pub fn linear_cmd(&mut self, attrs: &[ServerGenericDeviceMessageAttributes]) -> &Self {
+    self.attrs.linear_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn sensor_read_cmd(&mut self, attrs: &Vec<SensorDeviceMessageAttributes>) -> &Self {
-    self.attrs.sensor_read_cmd = Some(attrs.clone());
+  pub fn sensor_read_cmd(&mut self, attrs: &[SensorDeviceMessageAttributes]) -> &Self {
+    self.attrs.sensor_read_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn sensor_subscribe_cmd(&mut self, attrs: &Vec<SensorDeviceMessageAttributes>) -> &Self {
-    self.attrs.sensor_subscribe_cmd = Some(attrs.clone());
+  pub fn sensor_subscribe_cmd(&mut self, attrs: &[SensorDeviceMessageAttributes]) -> &Self {
+    self.attrs.sensor_subscribe_cmd = Some(attrs.to_vec());
     self
   }
 
-  pub fn raw_read_cmd(&mut self, endpoints: &Vec<Endpoint>) -> &Self {
+  pub fn raw_read_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
     self.attrs.raw_read_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
     self
   }
 
-  pub fn raw_write_cmd(&mut self, endpoints: &Vec<Endpoint>) -> &Self {
+  pub fn raw_write_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
     self.attrs.raw_write_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
     self
   }
 
-  pub fn raw_subscribe_cmd(&mut self, endpoints: &Vec<Endpoint>) -> &Self {
+  pub fn raw_subscribe_cmd(&mut self, endpoints: &[Endpoint]) -> &Self {
     self.attrs.raw_subscribe_cmd = Some(RawDeviceMessageAttributes::new(endpoints));
     self
   }
@@ -295,12 +295,12 @@ pub struct ServerGenericDeviceMessageAttributes {
   step_range: RangeInclusive<u32>,
 }
 
-impl Into<ClientGenericDeviceMessageAttributes> for ServerGenericDeviceMessageAttributes {
-  fn into(self) -> ClientGenericDeviceMessageAttributes {
+impl From<ServerGenericDeviceMessageAttributes> for ClientGenericDeviceMessageAttributes {
+  fn from(attrs: ServerGenericDeviceMessageAttributes) -> Self {
     ClientGenericDeviceMessageAttributes::new(
-      &self.feature_descriptor,
-      self.step_count(),
-      self.actuator_type,
+      &attrs.feature_descriptor,
+      attrs.step_count(),
+      attrs.actuator_type,
     )
   }
 }

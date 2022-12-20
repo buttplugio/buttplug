@@ -212,7 +212,7 @@ impl ServerDeviceManagerEventLoop {
         let connecting_devices = self.connecting_devices.clone();
         let span = info_span!(
           "device creation",
-          name = tracing::field::display(name.clone()),
+          name = tracing::field::display(name),
           address = tracing::field::display(address.clone())
         );
 

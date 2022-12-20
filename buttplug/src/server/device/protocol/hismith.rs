@@ -49,7 +49,7 @@ impl ProtocolIdentifier for HismithIdentifier {
 
     let identifier = result
       .data()
-      .into_iter()
+      .iter()
       .map(|b| format!("{:02x}", b))
       .collect::<String>();
     info!("Hismith Device Identifier: {}", identifier);

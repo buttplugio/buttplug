@@ -160,14 +160,14 @@ pub struct UserConfigDeviceIdentifier {
   identifier: Option<String>,
 }
 
-impl Into<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
-  fn into(self) -> ServerDeviceIdentifier {
-    let server_identifier = if let Some(ident_string) = self.identifier {
+impl From <UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
+  fn from(ident: UserConfigDeviceIdentifier) -> Self {
+    let server_identifier = if let Some(ident_string) = ident.identifier {
       ProtocolAttributesType::Identifier(ident_string)
     } else {
       ProtocolAttributesType::Default
     };
-    ServerDeviceIdentifier::new(&self.address, &self.protocol, &server_identifier)
+    ServerDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
   }
 }
 

@@ -87,7 +87,7 @@ impl ProtocolHandler for Youou {
     // Speed seems to be 0-247 or so.
     //
     // Anything above that sets a pattern which isn't what we want here.
-    let state: u8 = if scalar > 0 { 1 } else { 0 };
+    let state = u8::from(scalar > 0);
 
     // Scope the packet id set so we can unlock ASAP.
     let mut data = vec![

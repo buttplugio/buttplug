@@ -168,8 +168,8 @@ impl ProtocolHandler for Satisfyer {
         commands.len() as u32,
       ));
     }
-    for i in 0..commands.len() {
-      let command_val = commands[i].as_ref().unwrap().1 as u8;
+    for (i, item) in commands.iter().enumerate() {
+      let command_val = item.as_ref().unwrap().1 as u8;
       self.last_command[i].store(command_val, Ordering::SeqCst);
     }
     let data = form_command(self.feature_count, self.last_command.clone());

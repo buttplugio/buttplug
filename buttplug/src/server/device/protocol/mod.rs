@@ -559,7 +559,7 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn handle_rotate_cmd(
     &self,
-    _commands: &Vec<Option<(u32, bool)>>,
+    _commands: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     self.command_unimplemented("RotateCmd")
   }

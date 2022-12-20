@@ -131,7 +131,6 @@ impl ProtocolInitializer for FredorchInitializer {
               "Fredorch".to_owned(),
               "Fredorch Device disconnected while initialising.".to_owned(),
             )
-            .into(),
           );
         }
       }
@@ -159,7 +158,6 @@ impl ProtocolInitializer for FredorchInitializer {
                 "Fredorch".to_owned(),
                 "Fredorch Device disconnected while initialising.".to_owned(),
               )
-              .into(),
             );
           }
         }
@@ -169,7 +167,6 @@ impl ProtocolInitializer for FredorchInitializer {
                 "Fredorch".to_owned(),
                 "Fredorch Device timed out while initialising.".to_owned(),
               )
-              .into(),
             );
         }
       }

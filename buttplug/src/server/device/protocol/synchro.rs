@@ -21,7 +21,7 @@ pub struct Synchro {}
 impl ProtocolHandler for Synchro {
   fn handle_rotate_cmd(
     &self,
-    cmds: &Vec<Option<(u32, bool)>>,
+    cmds: &[Option<(u32, bool)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if let Some(Some((speed, clockwise))) = cmds.get(0) {
       Ok(vec![HardwareWriteCmd::new(

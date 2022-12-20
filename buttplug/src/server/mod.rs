@@ -374,8 +374,7 @@ impl ButtplugServer {
     // themselves.
     let server_receiver = convert_broadcast_receiver_to_stream(self.output_sender.subscribe());
     let device_receiver = self.device_manager.event_stream();
-    let receiver = device_receiver.merge(server_receiver);
-    receiver
+    device_receiver.merge(server_receiver)
   }
 
   /// Returns a references to the internal device manager, for handling configuration.
