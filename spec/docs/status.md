@@ -23,11 +23,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: StartScanning Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -68,17 +68,17 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: InvalidMsgName Id=2
     Server->>-Client: Error Id=2
-</mermaid>
+```
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: InvalidMsgId Id=Wat
     Server->>-Client: Error Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -120,11 +120,11 @@ up while a client communication thread continues to work.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: Ping Id=5
     Server->>-Client: Ok Id=5
-</mermaid>
+```
 
 **Serialization Example:**
 

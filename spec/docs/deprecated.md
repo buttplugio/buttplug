@@ -34,11 +34,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -84,12 +84,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     participant Client
     participant Server
     Server->>Client: DeviceAdded Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -136,11 +136,11 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RequestDeviceList Id=1
     Server->>-Client: DeviceList Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -205,12 +205,12 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     participant Client
     participant Server
     Server->>Client: DeviceAdded Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -304,11 +304,11 @@ Messages on all Devices; in these cases the attributes will not be included.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -351,11 +351,11 @@ None. Server-To-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -404,11 +404,11 @@ and should not be exposed to untrusted clients.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RawCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -449,11 +449,11 @@ speed.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: SingleMotorVibrateCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -495,11 +495,11 @@ related. More information on Kiiroo commands can be found in STPIHKAL.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: KiirooCmd Id=1
     Server->>Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -542,11 +542,11 @@ found in STPIHKAL.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: FleshlightLaunchFW12Cmd Id=1
     Server->>Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -591,11 +591,11 @@ related. More information on Lovense commands can be found in STPIHKAL.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: LovenseCmd Id=1
     Server->>Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -637,11 +637,11 @@ event may be related. More information on Vorze commands can be found in STPIHKA
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: VorzeA10CycloneCmd Id=1
     Server->>Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -684,11 +684,11 @@ message with a string to the server will cause the server to return a Test messa
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: Test Id=5 TestString=X
     Server->>-Client: Test Id=5 TestString=X
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -742,11 +742,11 @@ debugging.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RequestLog Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -791,13 +791,13 @@ None. Server-to-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RequestLog Id=1
     Server->>-Client: Ok Id=1
     Server->>Client: Log Id=0 LogLevel=Warn
     Server->>Client: Log Id=0 LogLevel=Trace
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -843,11 +843,11 @@ contain that information.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: VibrateCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -896,11 +896,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
     Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -938,11 +938,11 @@ device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: BatteryLevelCmd Id=1 DeviceIndex=0
     Server->>Client: BatteryLevelReading Id=1 DeviceIndex=0 BatteryLevel=0.5
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -981,11 +981,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
     Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -1023,11 +1023,11 @@ device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RSSILevelCmd Id=1 DeviceIndex=0
     Server->>Client: RSSILevelReading Id=1 DeviceIndex=0 RSSILevel=-40
-</mermaid>
+```
 
 **Serialization Example:**
 

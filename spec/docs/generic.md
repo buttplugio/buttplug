@@ -27,11 +27,11 @@ device it supports.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: StopDeviceCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -68,11 +68,11 @@ Message, since it pertains to all currently connected devices, it does not speci
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: StopAllDevices Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -128,11 +128,11 @@ limits and ranges for devices.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: ScalarCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -188,11 +188,11 @@ contain that information.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: LinearCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -247,11 +247,11 @@ contain that information.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RotateCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 

@@ -53,11 +53,11 @@ file](https://github.com/buttplugio/buttplug-device-config).
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RawWriteCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -99,11 +99,11 @@ sequenceDiagram
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RawReadCmd Id=1
     Server->>-Client: RawReading Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -180,13 +180,13 @@ streaming data endpoints.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RawSubscribeCmd Id=1
     Server->>-Client: Ok Id=1
     Server->>+Client: RawReading Id=0
     Server->>+Client: RawReading Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -227,11 +227,11 @@ previously subscribed.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: RawUnsubscribeCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 

@@ -28,11 +28,11 @@ Messages](deprecated.md#requestserverinfo-version-0) for older versions.)
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -73,11 +73,11 @@ None. Server-To-Client message only.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>Server: RequestServerInfo Id=0
     Server->>Client: ServerInfo Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 

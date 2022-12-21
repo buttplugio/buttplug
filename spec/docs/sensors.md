@@ -29,11 +29,11 @@ buttons, etc.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: SensorReadCmd Id=1
     Server->>-Client: SensorReading Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -117,13 +117,13 @@ streaming data endpoints.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: SensorSubscribeCmd Id=1
     Server->>-Client: Ok Id=1
     Server->>+Client: SensorReading Id=0
     Server->>+Client: SensorReading Id=0
-</mermaid>
+```
 
 **Serialization Example:**
 
@@ -168,11 +168,11 @@ previously subscribed.
 
 **Flow Diagram:**
 
-<mermaid>
+```mermaid
 sequenceDiagram
     Client->>+Server: SensorUnsubscribeCmd Id=1
     Server->>-Client: Ok Id=1
-</mermaid>
+```
 
 **Serialization Example:**
 
