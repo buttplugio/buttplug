@@ -12,7 +12,7 @@ all messages, even those that have been deprecated.
 ---
 ## DeviceList - Spec V0
 
-**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration.md#devicelist), which
+**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration#devicelist), which
 provides more information about feature limits of generic messages.
 
 **Description:** Server reply to a client request for a device list.
@@ -66,7 +66,7 @@ sequenceDiagram
 ---
 ## DeviceAdded - Spec V0
 
-**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration.md#devicelist), which
+**Reason for Deprecation:** Superceded by [DeviceList Version 1](enumeration#devicelist), which
 provides more information about feature limits of generic messages.
 
 **Introduced In Spec Version:** 0
@@ -108,7 +108,7 @@ sequenceDiagram
 ---
 ## DeviceList - Spec V1
 
-**Reason for Deprecation:** Superceded by [DeviceList Version 3](enumeration.md#devicelist), which
+**Reason for Deprecation:** Superceded by [DeviceList Version 3](enumeration#devicelist), which
 provides optional display name and message timing information, as well as simplifies the format of message attributes.
 
 **Description:** Server reply to a client request for a device list.
@@ -174,7 +174,7 @@ sequenceDiagram
 ---
 ## DeviceAdded - Spec V1
 
-**Reason for Deprecation:** Superceded by [DeviceAdded Version 3](enumeration.md#deviceadded), which
+**Reason for Deprecation:** Superceded by [DeviceAdded Version 3](enumeration#deviceadded), which
 provides more information about feature limits of generic messages, as well as simplifies the format of message attributes.
 
 **Description:** Sent by the server whenever a device is added to the
@@ -890,7 +890,7 @@ sequenceDiagram
 
 **Expected Response:**
 
-* [BatteryLevelReading](sensors.html#batterylevelreading) message with
+* [BatteryLevelReading](sensors#batterylevelreading) message with
   matching Id on successful request.
 * Error message on value or message error.
 
@@ -920,7 +920,7 @@ sequenceDiagram
 **Reason for Deprecation:** Superceded by SensorReading.
 
 **Description:** Message containing a battery level reading from a
-device, as requested by [BatteryLevelCmd](sensors.html#batterylevelcmd).
+device, as requested by [BatteryLevelCmd](sensors#batterylevelcmd).
 
 **Introduced In Spec Version:** 2
 
@@ -975,7 +975,7 @@ sequenceDiagram
 
 **Expected Response:**
 
-* [RSSILevelReading](sensors.html#rssilevelreading) message with
+* [RSSILevelReading](sensors#rssilevelreading) message with
   matching Id on successful request.
 * Error message on value or message error.
 
@@ -1005,7 +1005,7 @@ sequenceDiagram
 **Reason for Deprecation:** Superceded by SensorReading. Also never implemented in any official reference implementation of Buttplug.
 
 **Description:** Message containing a RSSI level reading from a
-device, as requested by [RSSILevelCmd](sensors.html#rssilevelcmd).
+device, as requested by [RSSILevelCmd](sensors#rssilevelcmd).
 
 **Introduced In Spec Version:** 2
 
