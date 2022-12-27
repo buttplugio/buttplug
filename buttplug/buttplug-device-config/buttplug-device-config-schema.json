@@ -433,7 +433,7 @@
     "user-configs": {
       "type": "object",
       "properties": {
-        "selectors": {
+        "specifiers": {
           "type": "object",
           "patternProperties": {
             "^.*$": {
