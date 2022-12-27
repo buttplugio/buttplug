@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 6
+  minor: 7
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -687,6 +687,7 @@ protocols:
         - Magic Wand
         - Fugu
         - Gballs2
+        - GBalls3
         - FM-LILAC-101
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
@@ -732,6 +733,9 @@ protocols:
       - identifier:
           - Gballs2
         name: G Vibe Gballs 2
+      - identifier:
+          - GBalls3
+        name: G Vibe Gballs 3
       - identifier:
           - FM-LILAC-101
         name: Femometer Lilac
