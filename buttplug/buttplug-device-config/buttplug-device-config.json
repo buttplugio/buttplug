@@ -1856,6 +1856,7 @@
           "4_Plus",
           "4plus",
           "Bloom",
+          "Chrous",
           "classic",
           "Classic",
           "Ditto",
@@ -1939,7 +1940,8 @@
             "4_Plus",
             "4plus",
             "classic",
-            "Classic"
+            "Classic",
+            "Chorus"
           ],
           "name": "WeVibe 4 Plus",
           "messages": {

@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 6
+  minor: 7
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -1008,6 +1008,7 @@ protocols:
         - 4_Plus # 4 Plus alias
         - 4plus # 4 Plus alias
         - Bloom
+        - Chrous # 4 Plus alias
         - classic # 4 Plus alias
         - Classic # 4 Plus alias
         - Ditto
@@ -1060,6 +1061,7 @@ protocols:
           - 4plus
           - classic
           - Classic
+          - Chorus
         name: WeVibe 4 Plus
         messages:
           ScalarCmd:
