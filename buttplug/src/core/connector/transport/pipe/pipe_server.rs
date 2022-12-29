@@ -10,10 +10,12 @@
 use crate::core::{
   connector::{
     transport::{
-      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport,
+      ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError, ButtplugConnectorResultFuture,
+    ButtplugConnectorError,
+    ButtplugConnectorResultFuture,
   },
   message::serializer::ButtplugSerializedMessage,
 };
