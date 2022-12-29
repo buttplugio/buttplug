@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-
 use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{
@@ -20,9 +19,7 @@ use crate::{
   },
 };
 use async_trait::async_trait;
-use std::{
-  sync::Arc,
-};
+use std::sync::Arc;
 
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
@@ -50,12 +47,15 @@ impl ProtocolIdentifier for SvakomIkerIdentifier {
     hardware: Arc<Hardware>,
   ) -> Result<(ServerDeviceIdentifier, Box<dyn ProtocolInitializer>), ButtplugDeviceError> {
     let result = hardware
-        .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
-        .await?;
+      .read_value(&HardwareReadCmd::new(Endpoint::RxBLEModel, 128, 500))
+      .await?;
     let ident =
-        String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
+      String::from_utf8(result.data().to_vec()).unwrap_or_else(|_| hardware.name().to_owned());
     if !ident.contains("Iker") {
-      return Err(ButtplugDeviceError::ProtocolSpecificError("svakom-iker".to_owned(), "Device is not an Iker".to_owned()));
+      return Err(ButtplugDeviceError::ProtocolSpecificError(
+        "svakom-iker".to_owned(),
+        "Device is not an Iker".to_owned(),
+      ));
     }
     Ok((
       ServerDeviceIdentifier::new(
