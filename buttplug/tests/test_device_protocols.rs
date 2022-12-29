@@ -68,6 +68,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_tryfun_protocol.yaml" ; "TryFun Protocol")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
+#[test_case("test_cowgirl_protocol.yaml" ; "The Cowgirl Protocol")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -127,6 +128,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_tryfun_protocol.yaml" ; "TryFun Protocol")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
+#[test_case("test_cowgirl_protocol.yaml" ; "The Cowgirl Protocol")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {

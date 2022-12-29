@@ -17,6 +17,7 @@ pub mod aneros;
 pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
+pub mod cowgirl;
 pub mod fredorch;
 pub mod hgod;
 pub mod hismith;
@@ -131,6 +132,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     cachito::setup::CachitoIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    cowgirl::setup::CowgirlIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,

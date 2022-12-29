@@ -6313,6 +6313,54 @@
           }
         }
       ]
+    },
+    "cowgirl": {
+      "btle": {
+        "names": [
+          "THE COWGIRL",
+          "THE UNICORN"
+        ],
+        "services": {
+          "0000fe00-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "The Cowgirl Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                255
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                255
+              ],
+              "ActuatorType": "Rotate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "THE COWGIRL"
+          ],
+          "name": "The Cowgirl"
+        },
+        {
+          "identifier": [
+            "THE UNICORN"
+          ],
+          "name": "The Unicorn"
+        }
+      ]
     }
   }
 }
