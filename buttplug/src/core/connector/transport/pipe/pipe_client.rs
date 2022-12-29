@@ -10,17 +10,15 @@
 use crate::core::{
   connector::{
     transport::{
-      ButtplugConnectorTransport,
-      ButtplugConnectorTransportSpecificError,
+      ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
       ButtplugTransportIncomingMessage,
     },
-    ButtplugConnectorError,
-    ButtplugConnectorResultFuture,
+    ButtplugConnectorError, ButtplugConnectorResultFuture,
   },
   message::serializer::ButtplugSerializedMessage,
 };
 use futures::future::{BoxFuture, FutureExt};
-use std::sync::Arc;
+use std::{io::ErrorKind, sync::Arc};
 #[cfg(target_os = "windows")]
 use tokio::net::windows::named_pipe;
 #[cfg(not(target_os = "windows"))]
@@ -122,6 +120,9 @@ async fn run_connection_loop(
                     break;
                   }
                 },
+                Err(ref e) if e.kind() == ErrorKind::WouldBlock => {
+                  continue;
+                }
                 Err(err) => {
                   error!("Error from pipe server, assuming disconnection: {:?}", err);
                   break;
