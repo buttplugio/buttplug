@@ -445,7 +445,7 @@ impl ButtplugMessageFinalizer for ButtplugSpecV3ServerMessage {
     match self {
       ButtplugSpecV3ServerMessage::DeviceAdded(da) => da.finalize(),
       ButtplugSpecV3ServerMessage::DeviceList(dl) => dl.finalize(),
-      default => return
+      _ => return
     }
   }
 }

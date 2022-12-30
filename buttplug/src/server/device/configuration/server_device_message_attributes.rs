@@ -26,15 +26,15 @@ use crate::core::{
 )]
 pub struct ServerDeviceMessageAttributes {
   // Generic commands
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   scalar_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   linear_cmd: Option<Vec<ServerGenericDeviceMessageAttributes>>,

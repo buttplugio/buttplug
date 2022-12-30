@@ -18,7 +18,7 @@ use uuid::Uuid;
 // confusing (see the messages impl).
 
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters, Eq)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct BluetoothLEManufacturerData {
   company: u16,
   data: Option<Vec<u8>>,
@@ -88,7 +88,7 @@ impl PartialEq for BluetoothLEManufacturerData {
 /// Used by protocols for identifying bluetooth devices via their advertisements, as well as
 /// defining the services and characteristics they are expected to have.
 #[derive(Serialize, Deserialize, Debug, Clone, Getters, MutGetters, Setters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct BluetoothLESpecifier {
   /// Set of expected advertised names for this device.
   names: HashSet<String>,
@@ -262,7 +262,7 @@ impl PartialEq for XInputSpecifier {
 #[derive(
   Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
 )]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct HIDSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,
@@ -274,7 +274,7 @@ pub struct HIDSpecifier {
 ///
 /// Handles serial port device identification (via port names) and configuration.
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct SerialSpecifier {
   #[serde(rename = "baud-rate")]
   baud_rate: u32,
@@ -307,7 +307,7 @@ impl PartialEq for SerialSpecifier {
 #[derive(
   Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Getters, Setters, MutGetters,
 )]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct USBSpecifier {
   #[serde(rename = "vendor-id")]
   vendor_id: u16,

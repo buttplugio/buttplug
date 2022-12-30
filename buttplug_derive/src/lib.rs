@@ -165,7 +165,7 @@ fn impl_buttplug_message_finalizer_macro(ast: &syn::DeriveInput) -> TokenStream 
   let name = &ast.ident;
 
   match &ast.data {
-    syn::Data::Enum(e) => {
+    syn::Data::Enum(_) => {
       let gen = quote! {
           impl ButtplugMessageFinalizer for #name {}
       };

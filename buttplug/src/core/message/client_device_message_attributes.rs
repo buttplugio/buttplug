@@ -51,15 +51,15 @@ pub enum SensorType {
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ClientDeviceMessageAttributes {
   // Generic commands
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "ScalarCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   scalar_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "RotateCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   rotate_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   #[serde(rename = "LinearCmd")]
   #[serde(skip_serializing_if = "Option::is_none")]
   linear_cmd: Option<Vec<ClientGenericDeviceMessageAttributes>>,
