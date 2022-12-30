@@ -187,3 +187,23 @@ where
   /// the send operation, this will return a [ButtplugConnectorError]
   fn send(&self, msg: OutboundMessageType) -> ButtplugConnectorResultFuture;
 }
+
+#[cfg(all(feature = "websockets", feature = "serialize-json"))]
+use crate::core::{
+  message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
+};
+
+/// Convenience method for creating a new Buttplug Client Websocket connector that uses the JSON
+/// serializer. This is pretty much the only connector used for IPC right now, so this makes it easy
+/// to create one without having to fill in the generic types.
+#[cfg(all(feature = "websockets", feature = "serialize-json"))]
+pub fn new_json_ws_client_connector(address: &str) -> impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage> {
+  use crate::core::message::serializer::ButtplugClientJSONSerializer;
+
+  ButtplugRemoteClientConnector::<
+      ButtplugWebsocketClientTransport,
+      ButtplugClientJSONSerializer,
+    >::new(ButtplugWebsocketClientTransport::new_insecure_connector(
+    address,
+  ))
+}
