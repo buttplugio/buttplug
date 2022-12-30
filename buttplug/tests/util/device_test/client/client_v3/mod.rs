@@ -7,7 +7,7 @@ use buttplug::{
     LinearCommand,
     RotateCommand,
     ScalarCommand,
-    VibrateCommand,
+    ScalarValueCommand,
   },
   core::connector::ButtplugInProcessClientConnectorBuilder,
   server::{ButtplugRemoteServer, ButtplugServer, ButtplugServerBuilder},
@@ -41,7 +41,7 @@ async fn run_test_client_command(command: &TestClientCommand, device: &Arc<Buttp
     }
     Vibrate(msg) => {
       device
-        .vibrate(&VibrateCommand::SpeedMap(
+        .vibrate(&ScalarValueCommand::ScalarValueMap(
           msg.iter().map(|x| (x.index(), x.speed())).collect(),
         ))
         .await

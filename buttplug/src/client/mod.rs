@@ -40,7 +40,7 @@ pub use device::{
   LinearCommand,
   RotateCommand,
   ScalarCommand,
-  VibrateCommand,
+  ScalarValueCommand,
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},

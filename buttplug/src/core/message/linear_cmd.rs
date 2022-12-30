@@ -33,7 +33,7 @@ impl VectorSubcommand {
   }
 }
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer,  PartialEq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LinearCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

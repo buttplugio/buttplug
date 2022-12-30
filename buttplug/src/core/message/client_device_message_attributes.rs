@@ -158,6 +158,24 @@ impl ClientDeviceMessageAttributes {
       ButtplugDeviceMessageType::LovenseCmd => false,
     }
   }
+
+  pub fn finalize(&mut self) {
+    if let Some(scalar_attrs) = &mut self.scalar_cmd {
+      for (i, attr) in scalar_attrs.into_iter().enumerate() {
+        attr.index = i as u32;
+      }
+    }
+    if let Some(sensor_read_attrs) = &mut self.sensor_read_cmd {
+      for (i, attr) in sensor_read_attrs.into_iter().enumerate() {
+        attr.index = i as u32;
+      }
+    }
+    if let Some(sensor_subscribe_attrs) = &mut self.sensor_subscribe_cmd {
+      for (i, attr) in sensor_subscribe_attrs.into_iter().enumerate() {
+        attr.index = i as u32;
+      }
+    }
+  }
 }
 
 #[derive(Default)]
@@ -206,7 +224,8 @@ impl ClientDeviceMessageAttributesBuilder {
     self
   }
 
-  pub fn finish(&self) -> ClientDeviceMessageAttributes {
+  pub fn finish(&mut self) -> ClientDeviceMessageAttributes {
+    self.attrs.finalize();
     self.attrs.clone()
   }
 }
@@ -230,14 +249,20 @@ pub struct ClientGenericDeviceMessageAttributes {
   #[serde(rename = "StepCount")]
   #[getset(get = "pub")]
   step_count: u32,
+  // TODO This needs to actually be part of the device info relayed to the client in spec v4.
+  #[getset(get = "pub")]
+  #[serde(skip, default)]
+  index: u32
 }
 
 impl ClientGenericDeviceMessageAttributes {
   pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
+    info!("GENERIC DEVICE MESSAGE CONSTRUCTOR CALLED");
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
       step_count,
+      index: 0
     }
   }
 
@@ -288,6 +313,10 @@ pub struct SensorDeviceMessageAttributes {
   #[getset(get = "pub")]
   #[serde(rename = "SensorRange", serialize_with = "range_sequence_serialize")]
   sensor_range: Vec<RangeInclusive<u32>>,
+  // TODO This needs to actually be part of the device info relayed to the client in spec v4.
+  #[getset(get = "pub")]
+  #[serde(skip, default)]
+  index: u32
 }
 
 /*

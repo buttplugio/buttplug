@@ -11,7 +11,7 @@ use getset::Getters;
 use serde::{Deserialize, Serialize};
 
 /// Kiiroo Command (Version 0 Message, Deprecated in spec)
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer,  PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct KiirooCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

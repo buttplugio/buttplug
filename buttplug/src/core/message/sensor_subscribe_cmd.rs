@@ -10,7 +10,7 @@ use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer,  PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SensorSubscribeCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

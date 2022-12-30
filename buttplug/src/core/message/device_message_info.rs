@@ -6,12 +6,12 @@
 // for full license information.
 
 use super::*;
-use getset::{CopyGetters, Getters};
+use getset::{CopyGetters, Getters, MutGetters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
 /// Substructure of device messages, used for attribute information (name, messages supported, etc...)
-#[derive(Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
+#[derive(Clone, Debug, PartialEq, Eq, MutGetters, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceMessageInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceIndex"))]
@@ -36,7 +36,7 @@ pub struct DeviceMessageInfo {
   #[getset(get = "pub")]
   device_message_timing_gap: Option<u32>,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut="pub")]
   device_messages: ClientDeviceMessageAttributes,
 }
 

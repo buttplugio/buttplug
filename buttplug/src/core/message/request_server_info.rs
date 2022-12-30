@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 fn return_version0() -> ButtplugMessageSpecVersion {
   ButtplugMessageSpecVersion::Version0
 }
-#[derive(Debug, ButtplugMessage, Clone, PartialEq, Eq, Getters, CopyGetters)]
+#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RequestServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

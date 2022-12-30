@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 // This message can have an Id of 0, as it can be emitted as part of a
 // subscription and won't have a matching task Id in that case.
 #[derive(
-  Debug, ButtplugDeviceMessage, ButtplugMessageValidator, PartialEq, Eq, Clone, Getters, CopyGetters,
+  Debug, ButtplugDeviceMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReading {

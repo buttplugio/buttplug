@@ -10,7 +10,7 @@ use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer,  PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct SingleMotorVibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

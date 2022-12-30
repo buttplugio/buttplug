@@ -36,3 +36,5 @@ impl ButtplugMessageValidator for DeviceRemoved {
     self.is_system_id(self.id)
   }
 }
+
+impl ButtplugMessageFinalizer for DeviceRemoved {}
