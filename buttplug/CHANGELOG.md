@@ -13,12 +13,18 @@
 - Added ergonomic action methods to ButtplugClient (ability to query for attributes related to
   scalar actions, etc...)
 - Added new_json_ws_client_connector() convenience method for creating new client connectors
+- Added Device Support
+  - GBalls v3
+  - The Cowgirl/The Unicorn
+- Removed old, unused rust book
+- Moved spec to new docs site repo (https://docs.buttplug.io)
 
 ## Bugfixes
 
 - Fixed issue where ButtplugClient could make ill-defined requests for device control. This was done
   by added finalizers to ButtplugMessage, so that DeviceAdded and DeviceList messages can include scalar/sensor indexes in their message attributes. This problem will be fixed at the spec level in spec v4.
 - Fix buttplug device config schema issue blocking use of websocket devices.
+- Fix Svakom Iker identifiers
 
 # 6.3.0 (2022-12-19)
 
