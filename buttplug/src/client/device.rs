@@ -321,13 +321,21 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
-  pub fn scalar_attributes(&self, actuator: &ActuatorType) -> Vec<ClientGenericDeviceMessageAttributes> {
+  fn scalar_value_attributes(&self, actuator: &ActuatorType) -> Vec<ClientGenericDeviceMessageAttributes> {
     if let Some(attrs) = self.message_attributes.scalar_cmd() {
       attrs
         .iter()
         .filter(|x| *x.actuator_type() == *actuator)
         .cloned()
         .collect()
+    } else {
+      vec!()
+    }
+  }
+
+  pub fn scalar_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
+    if let Some(attrs) = self.message_attributes.scalar_cmd() {
+      attrs.clone()
     } else {
       vec!()
     }
@@ -398,7 +406,7 @@ impl ButtplugClientDevice {
   }
 
   pub fn vibrate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
-    self.scalar_attributes(&ActuatorType::Vibrate)
+    self.scalar_value_attributes(&ActuatorType::Vibrate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
@@ -407,7 +415,7 @@ impl ButtplugClientDevice {
   }
 
   pub fn oscillate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
-    self.scalar_attributes(&ActuatorType::Oscillate)
+    self.scalar_value_attributes(&ActuatorType::Oscillate)
   }
 
   /// Commands device to vibrate, assuming it has the features to do so.
@@ -469,6 +477,14 @@ impl ButtplugClientDevice {
     self.send_message_expect_ok(msg)
   }
 
+  pub fn linear_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
+    if let Some(attrs) = self.message_attributes.linear_cmd() {
+      attrs.clone()
+    } else {
+      vec![]
+    }
+  }
+
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
@@ -517,6 +533,14 @@ impl ButtplugClientDevice {
     }
     let msg = LinearCmd::new(self.index, linear_vec).into();
     self.send_message_expect_ok(msg)
+  }
+
+  pub fn rotate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
+    if let Some(attrs) = self.message_attributes.linear_cmd() {
+      attrs.clone()
+    } else {
+      vec![]
+    }
   }
 
   /// Commands device to rotate, assuming it has the features to do so.
@@ -637,6 +661,18 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
+  fn has_sensor_read(&self, sensor_type: SensorType) -> bool {
+    if let Some(sensor_attrs) = self.message_attributes.sensor_read_cmd() {
+      sensor_attrs.iter().any(|x| *x.sensor_type() == sensor_type)
+    } else {
+      false
+    }
+  }
+
+  pub fn has_battery_level(&self) -> bool {
+    self.has_sensor_read(SensorType::Battery)
+  }
+
   pub fn battery_level(&self) -> ButtplugClientResultFuture<f64> {
     let send_fut = self.read_single_sensor(&SensorType::Battery);
     Box::pin(async move {
@@ -644,6 +680,10 @@ impl ButtplugClientDevice {
       let battery_level = data[0];
       Ok(battery_level as f64 / 100.0f64)
     })
+  }
+
+  pub fn has_rssi_level(&self) -> bool {
+    self.has_sensor_read(SensorType::RSSI)
   }
 
   pub fn rssi_level(&self) -> ButtplugClientResultFuture<i32> {
