@@ -47,8 +47,8 @@ dummy-runtime=[]
 unstable=[]
 
 [dependencies]
-buttplug_derive = "0.7.0"
-#buttplug_derive = { path = "../buttplug_derive" }
+buttplug_derive = "0.8.0"
+# buttplug_derive = { path = "../buttplug_derive" }
 native-tls = { version = "0.2.11", optional = true }
 futures = "0.3.25"
 futures-util = "0.3.25"
