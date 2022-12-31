@@ -2,6 +2,7 @@
 
 [![Patreon donate button](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/qdot)
 [![Github donate button](https://img.shields.io/badge/github-donate-ff69b4.svg)](https://www.github.com/sponsors/qdot)
+[![Discourse Forums](https://img.shields.io/discourse/status?label=buttplug.io%20forums&server=https%3A%2F%2Fdiscuss.buttplug.io)](https://discuss.buttplug.io)
 [![Discord](https://img.shields.io/discord/353303527587708932.svg?logo=discord)](https://discord.buttplug.io)
 [![Twitter](https://img.shields.io/twitter/follow/buttplugio.svg?style=social&logo=twitter)](https://twitter.com/buttplugio)
 
@@ -15,11 +16,11 @@
       API Documentation
     </a>
     <span> | </span>
-    <a href="https://buttplug-spec.docs.buttplug.io">
+    <a href="https://docs.buttplug.io/docs/spec">
       Protocol Spec
     </a>
     <span> | </span>
-    <a href="https://buttplug-developer-guide.docs.buttplug.io">
+    <a href="https://docs.buttplug.io/docs">
       Developer Guide
     </a>
     <span> | </span>
