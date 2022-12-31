@@ -73,6 +73,10 @@ Buttplug-rs is currently capable of controlling toys via:
 
 See [IOSTIndex](https://iostindex.com) for a full list of supported hardware (Filter on "Buttplug Rust").
 
+## Documentation and Examples
+
+To learn how to use the Buttplug Library, check out the [Buttplug Developer Guide](https://docs.buttplug.io/docs). Examples are included in this guide, and for Rust specifically, can be found [in the examples directory of the docs repo](https://github.com/buttplugio/docs.buttplug.io/tree/master/examples/rust).
+
 ## Compiling
 
 On Windows and macOS, running `cargo build` should suffice for building the project. All
