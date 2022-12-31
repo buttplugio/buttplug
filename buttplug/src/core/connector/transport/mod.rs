@@ -7,8 +7,6 @@
 
 //! Transports for remote (IPC/network/etc) communication between clients and servers
 
-#[cfg(not(target_arch = "wasm32"))]
-mod pipe;
 #[cfg(feature = "websockets")]
 mod websocket;
 use crate::core::connector::{
@@ -17,11 +15,6 @@ use crate::core::connector::{
   ButtplugSerializedMessage,
 };
 use futures::future::BoxFuture;
-#[cfg(not(target_arch = "wasm32"))]
-pub use pipe::{
-  pipe_client::{ButtplugPipeClientTransport, ButtplugPipeClientTransportBuilder},
-  pipe_server::{ButtplugPipeServerTransport, ButtplugPipeServerTransportBuilder},
-};
 use thiserror::Error;
 use tokio::sync::mpsc::{Receiver, Sender};
 #[cfg(feature = "websockets")]
