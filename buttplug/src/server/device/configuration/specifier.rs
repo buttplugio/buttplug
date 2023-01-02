@@ -234,9 +234,9 @@ impl PartialEq for LovenseConnectServiceSpecifier {
 
 /// Specifier for [XInput](crate::server::device::communication_manager::xinput) devices
 ///
-/// Network based services, has no attributes because the
-/// [XInput](crate::server::device::communication_manager::xinput) device communication manager handles all device
-/// discovery and identification itself.
+/// Has no attributes because the
+/// [XInput](crate::server::device::communication_manager::xinput)
+/// device communication manager handles all device discovery and identification itself.
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct XInputSpecifier {
   // Needed for deserialziation but unused.
@@ -251,6 +251,30 @@ impl Default for XInputSpecifier {
 }
 
 impl PartialEq for XInputSpecifier {
+  fn eq(&self, _other: &Self) -> bool {
+    true
+  }
+}
+
+/// Specifier for [SDL2](crate::server::device::communication_manager::sdl2) devices
+///
+/// Has no attributes because the
+/// [SDL2](crate::server::device::communication_manager::sdl2)
+/// device communication manager handles all device discovery and identification itself.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub struct SDL2Specifier {
+  // Needed for deserialziation but unused.
+  #[allow(dead_code)]
+  exists: bool,
+}
+
+impl Default for SDL2Specifier {
+  fn default() -> Self {
+    Self { exists: true }
+  }
+}
+
+impl PartialEq for SDL2Specifier {
   fn eq(&self, _other: &Self) -> bool {
     true
   }
@@ -360,6 +384,7 @@ pub enum ProtocolCommunicationSpecifier {
   USB(USBSpecifier),
   Serial(SerialSpecifier),
   XInput(XInputSpecifier),
+  SDL2(SDL2Specifier),
   LovenseConnectService(LovenseConnectServiceSpecifier),
   Websocket(WebsocketSpecifier),
 }
@@ -373,6 +398,7 @@ impl PartialEq for ProtocolCommunicationSpecifier {
       (BluetoothLE(self_spec), BluetoothLE(other_spec)) => self_spec == other_spec,
       (HID(self_spec), HID(other_spec)) => self_spec == other_spec,
       (XInput(self_spec), XInput(other_spec)) => self_spec == other_spec,
+      (SDL2(self_spec), SDL2(other_spec)) => self_spec == other_spec,
       (Websocket(self_spec), Websocket(other_spec)) => self_spec == other_spec,
       (LovenseConnectService(self_spec), LovenseConnectService(other_spec)) => {
         self_spec == other_spec

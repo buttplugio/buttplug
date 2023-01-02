@@ -40,6 +40,19 @@ pub mod serialport;
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
 
+// SDL2 works on anything not WASM
+#[cfg(all(
+  feature = "sdl2-manager",
+  any(
+    target_os = "windows",
+    target_os = "macos",
+    target_os = "linux",
+    target_os = "ios",
+    target_os = "android"
+  )
+))]
+pub mod sdl2;
+
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
@@ -89,6 +102,18 @@ pub enum HardwareSpecificError {
   #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
   #[error("XInput usage error: {0}")]
   XInputError(String),
+  #[cfg(all(
+    feature = "sdl2-manager",
+    any(
+      target_os = "windows",
+      target_os = "macos",
+      target_os = "linux",
+      target_os = "ios",
+      target_os = "android"
+    )
+  ))]
+  #[error("SDL2 error: {0}")]
+  SDL2Error(String),
   // Btleplug library uses Failure, not Error, on its error enum. :(
   #[cfg(all(
     feature = "btleplug-manager",
