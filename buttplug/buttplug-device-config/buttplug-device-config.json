@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 7
+    "minor": 8
   },
   "protocols": {
     "lovense": {
@@ -1863,7 +1863,6 @@
           "4_Plus",
           "4plus",
           "Bloom",
-          "Chrous",
           "classic",
           "Classic",
           "Ditto",
@@ -1947,8 +1946,7 @@
             "4_Plus",
             "4plus",
             "classic",
-            "Classic",
-            "Chorus"
+            "Classic"
           ],
           "name": "WeVibe 4 Plus",
           "messages": {
