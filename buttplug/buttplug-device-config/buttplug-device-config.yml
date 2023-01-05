@@ -111,6 +111,9 @@ protocols:
       # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
       # advertised-services:
         # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
+      manufacturer-data:
+        - company: 0x026c
+          data: [0xff, 0x21] # Folove manufacturer data (start of a pretty long array)
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
