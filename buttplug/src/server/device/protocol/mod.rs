@@ -487,7 +487,9 @@ pub trait ProtocolHandler: Sync + Send {
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
           ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
-          ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand("Unknown actuator types are not controllable.".to_owned()))?
+          ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
+            "Unknown actuator types are not controllable.".to_owned(),
+          ))?,
         }),
       );
     }

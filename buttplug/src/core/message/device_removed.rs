@@ -37,4 +37,5 @@ impl ButtplugMessageValidator for DeviceRemoved {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceRemoved {}
+impl ButtplugMessageFinalizer for DeviceRemoved {
+}

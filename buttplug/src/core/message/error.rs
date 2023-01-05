@@ -33,7 +33,15 @@ pub enum ErrorCode {
 // Error is one of the few things that can have either a System ID or message
 // ID, so there's really not much to check here. Use the default trait impl for
 // ButtplugMessageValidator.
-#[derive(Debug, Clone, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, Getters, CopyGetters)]
+#[derive(
+  Debug,
+  Clone,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  Getters,
+  CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Error {
   /// Message Id, used for matching message pairs in remote connection instances.
@@ -113,7 +121,15 @@ impl From<ButtplugError> for Error {
 }
 
 #[derive(
-  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, Getters, CopyGetters,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  Getters,
+  CopyGetters,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ErrorV0 {

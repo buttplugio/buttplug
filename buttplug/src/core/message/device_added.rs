@@ -117,7 +117,8 @@ impl ButtplugMessageValidator for DeviceAddedV2 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceAddedV2 {}
+impl ButtplugMessageFinalizer for DeviceAddedV2 {
+}
 
 #[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -157,7 +158,8 @@ impl ButtplugMessageValidator for DeviceAddedV1 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceAddedV1 {}
+impl ButtplugMessageFinalizer for DeviceAddedV1 {
+}
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -198,6 +200,7 @@ impl ButtplugMessageValidator for DeviceAddedV0 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceAddedV0 {}
+impl ButtplugMessageFinalizer for DeviceAddedV0 {
+}
 
 // TODO Test repeated message type in attributes in JSON
