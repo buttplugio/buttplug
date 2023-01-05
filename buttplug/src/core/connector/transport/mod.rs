@@ -56,4 +56,3 @@ pub enum ButtplugConnectorTransportSpecificError {
   #[error("Network error: {0}")]
   GenericNetworkError(String),
 }
-

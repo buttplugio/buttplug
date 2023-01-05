@@ -36,7 +36,7 @@ pub struct DeviceMessageInfo {
   #[getset(get = "pub")]
   device_message_timing_gap: Option<u32>,
   #[cfg_attr(feature = "serialize-json", serde(rename = "DeviceMessages"))]
-  #[getset(get = "pub", get_mut="pub(super)")]
+  #[getset(get = "pub", get_mut = "pub(super)")]
   device_messages: ClientDeviceMessageAttributes,
 }
 

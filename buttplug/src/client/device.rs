@@ -25,6 +25,7 @@ use crate::{
       ButtplugDeviceMessageType,
       ButtplugMessage,
       ClientDeviceMessageAttributes,
+      ClientGenericDeviceMessageAttributes,
       DeviceMessageInfo,
       Endpoint,
       LinearCmd,
@@ -41,7 +42,7 @@ use crate::{
       SensorType,
       SensorUnsubscribeCmd,
       StopDeviceCmd,
-      VectorSubcommand, ClientGenericDeviceMessageAttributes,
+      VectorSubcommand,
     },
   },
   util::stream::convert_broadcast_receiver_to_stream,
@@ -321,7 +322,10 @@ impl ButtplugClientDevice {
     .boxed()
   }
 
-  fn scalar_value_attributes(&self, actuator: &ActuatorType) -> Vec<ClientGenericDeviceMessageAttributes> {
+  fn scalar_value_attributes(
+    &self,
+    actuator: &ActuatorType,
+  ) -> Vec<ClientGenericDeviceMessageAttributes> {
     if let Some(attrs) = self.message_attributes.scalar_cmd() {
       attrs
         .iter()
@@ -329,7 +333,7 @@ impl ButtplugClientDevice {
         .cloned()
         .collect()
     } else {
-      vec!()
+      vec![]
     }
   }
 
@@ -337,7 +341,7 @@ impl ButtplugClientDevice {
     if let Some(attrs) = self.message_attributes.scalar_cmd() {
       attrs.clone()
     } else {
-      vec!()
+      vec![]
     }
   }
 
@@ -353,10 +357,18 @@ impl ButtplugClientDevice {
   // device, we need to resolve that we're only talking to attributes 0 and 2 here. In Message Spec
   // v3, in order to build ergonomic APIs, this requires a TON of bookkeeping on the client
   // developer side. Which fucking sucks.
-  fn scalar_from_value_command(&self, value_cmd: &ScalarValueCommand, actuator: &ActuatorType, attrs: &Vec<ClientGenericDeviceMessageAttributes>) -> ButtplugClientResultFuture {
+  fn scalar_from_value_command(
+    &self,
+    value_cmd: &ScalarValueCommand,
+    actuator: &ActuatorType,
+    attrs: &Vec<ClientGenericDeviceMessageAttributes>,
+  ) -> ButtplugClientResultFuture {
     if attrs.is_empty() {
       return self.create_boxed_future_client_error(
-        ButtplugDeviceError::UnhandledCommand(format!("ScalarCmd with {actuator} is not handled by this device")).into(),
+        ButtplugDeviceError::UnhandledCommand(format!(
+          "ScalarCmd with {actuator} is not handled by this device"
+        ))
+        .into(),
       );
     }
 
@@ -373,8 +385,7 @@ impl ButtplugClientDevice {
       ScalarValueCommand::ScalarValueMap(map) => {
         if map.len() as u32 > scalar_count {
           return self.create_boxed_future_client_error(
-            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32)
-              .into(),
+            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
         scalar_vec = Vec::with_capacity(map.len() as usize);
@@ -384,14 +395,17 @@ impl ButtplugClientDevice {
               ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
             );
           }
-          scalar_vec.push(ScalarSubcommand::new(*attrs[*idx as usize].index(), *speed, *actuator));
+          scalar_vec.push(ScalarSubcommand::new(
+            *attrs[*idx as usize].index(),
+            *speed,
+            *actuator,
+          ));
         }
       }
       ScalarValueCommand::ScalarValueVec(vec) => {
         if vec.len() as u32 > scalar_count {
           return self.create_boxed_future_client_error(
-            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32)
-              .into(),
+            ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
           );
         }
         scalar_vec = Vec::with_capacity(vec.len() as usize);
@@ -411,7 +425,11 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn vibrate(&self, speed_cmd: &ScalarValueCommand) -> ButtplugClientResultFuture {
-    self.scalar_from_value_command(speed_cmd, &ActuatorType::Vibrate, &self.vibrate_attributes())
+    self.scalar_from_value_command(
+      speed_cmd,
+      &ActuatorType::Vibrate,
+      &self.vibrate_attributes(),
+    )
   }
 
   pub fn oscillate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
@@ -420,7 +438,11 @@ impl ButtplugClientDevice {
 
   /// Commands device to vibrate, assuming it has the features to do so.
   pub fn oscillate(&self, speed_cmd: &ScalarValueCommand) -> ButtplugClientResultFuture {
-    self.scalar_from_value_command(speed_cmd, &ActuatorType::Oscillate, &self.oscillate_attributes())
+    self.scalar_from_value_command(
+      speed_cmd,
+      &ActuatorType::Oscillate,
+      &self.oscillate_attributes(),
+    )
   }
 
   pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {

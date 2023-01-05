@@ -10,7 +10,9 @@ use getset::{CopyGetters, Getters};
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters)]
+#[derive(
+  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfo {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]
@@ -47,7 +49,9 @@ impl ButtplugMessageValidator for ServerInfo {
   }
 }
 
-#[derive(Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters)]
+#[derive(
+  Debug, ButtplugMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters, CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct ServerInfoV0 {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

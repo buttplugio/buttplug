@@ -146,13 +146,16 @@ pub const BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION: ButtplugMessageSpecVersion =
   ButtplugMessageSpecVersion::Version3;
 
 pub trait ButtplugMessageFinalizer {
-  fn finalize(&mut self) {}
+  fn finalize(&mut self) {
+  }
 }
 
 /// Base trait for all Buttplug Protocol Message Structs. Handles management of
 /// message ids, as well as implementing conveinence functions for converting
 /// between message structs and various message enums, serialization, etc...
-pub trait ButtplugMessage: ButtplugMessageValidator + ButtplugMessageFinalizer + Send + Sync + Clone {
+pub trait ButtplugMessage:
+  ButtplugMessageValidator + ButtplugMessageFinalizer + Send + Sync + Clone
+{
   /// Returns the id number of the message
   fn id(&self) -> u32;
   /// Sets the id number of the message.
@@ -445,7 +448,7 @@ impl ButtplugMessageFinalizer for ButtplugSpecV3ServerMessage {
     match self {
       ButtplugSpecV3ServerMessage::DeviceAdded(da) => da.finalize(),
       ButtplugSpecV3ServerMessage::DeviceList(dl) => dl.finalize(),
-      _ => return
+      _ => return,
     }
   }
 }
@@ -488,7 +491,13 @@ pub enum ButtplugSpecV2ClientMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, ButtplugServerMessageType,
+  Debug,
+  Clone,
+  PartialEq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV2ServerMessage {
@@ -577,7 +586,14 @@ pub enum ButtplugSpecV1ClientMessage {
 
 /// Represents all server-to-client messages in v2 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, ButtplugServerMessageType,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV1ServerMessage {
@@ -663,7 +679,14 @@ pub enum ButtplugSpecV0ClientMessage {
 
 /// Represents all server-to-client messages in v0 of the Buttplug Spec
 #[derive(
-  Debug, Clone, PartialEq, Eq, ButtplugMessage, ButtplugMessageValidator, ButtplugMessageFinalizer, ButtplugServerMessageType,
+  Debug,
+  Clone,
+  PartialEq,
+  Eq,
+  ButtplugMessage,
+  ButtplugMessageValidator,
+  ButtplugMessageFinalizer,
+  ButtplugServerMessageType,
 )]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub enum ButtplugSpecV0ServerMessage {

@@ -33,4 +33,3 @@ impl ButtplugMessageValidator for BatteryLevelCmd {
     self.is_not_system_id(self.id)
   }
 }
-

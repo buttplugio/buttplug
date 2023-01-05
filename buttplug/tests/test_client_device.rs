@@ -7,7 +7,12 @@
 
 mod util;
 use buttplug::{
-  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, ScalarValueCommand},
+  client::{
+    ButtplugClientDeviceEvent,
+    ButtplugClientError,
+    ButtplugClientEvent,
+    ScalarValueCommand,
+  },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{self, ButtplugClientMessage, ClientDeviceMessageAttributes},

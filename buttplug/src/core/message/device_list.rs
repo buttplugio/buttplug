@@ -71,7 +71,8 @@ impl ButtplugMessageValidator for DeviceListV2 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceListV2 {}
+impl ButtplugMessageFinalizer for DeviceListV2 {
+}
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -103,7 +104,8 @@ impl ButtplugMessageValidator for DeviceListV1 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceListV1 {}
+impl ButtplugMessageFinalizer for DeviceListV1 {
+}
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
@@ -136,4 +138,5 @@ impl ButtplugMessageValidator for DeviceListV0 {
   }
 }
 
-impl ButtplugMessageFinalizer for DeviceListV0 {}
+impl ButtplugMessageFinalizer for DeviceListV0 {
+}

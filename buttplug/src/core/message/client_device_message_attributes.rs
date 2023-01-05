@@ -252,7 +252,7 @@ pub struct ClientGenericDeviceMessageAttributes {
   // TODO This needs to actually be part of the device info relayed to the client in spec v4.
   #[getset(get = "pub")]
   #[serde(skip, default)]
-  index: u32
+  index: u32,
 }
 
 impl ClientGenericDeviceMessageAttributes {
@@ -262,7 +262,7 @@ impl ClientGenericDeviceMessageAttributes {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,
       step_count,
-      index: 0
+      index: 0,
     }
   }
 
@@ -316,7 +316,7 @@ pub struct SensorDeviceMessageAttributes {
   // TODO This needs to actually be part of the device info relayed to the client in spec v4.
   #[getset(get = "pub")]
   #[serde(skip, default)]
-  index: u32
+  index: u32,
 }
 
 /*

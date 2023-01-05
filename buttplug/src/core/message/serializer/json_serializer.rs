@@ -95,13 +95,16 @@ where
     .and_then(|json_msg| {
       if validator.is_valid(&json_msg) {
         match serde_json::from_value::<Vec<T>>(json_msg) {
-          Ok(mut msg_vec) => { 
+          Ok(mut msg_vec) => {
             for msg in msg_vec.iter_mut() {
               msg.finalize();
             }
             Ok(msg_vec)
-          },
-          Err(e) => Err(ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e)))
+          }
+          Err(e) => Err(ButtplugSerializerError::JsonSerializerError(format!(
+            "Message: {} - Error: {:?}",
+            msg, e
+          ))),
         }
       } else {
         // If is_valid fails, re-run validation to get our error message.
