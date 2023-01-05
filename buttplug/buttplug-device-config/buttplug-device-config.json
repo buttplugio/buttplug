@@ -10,6 +10,15 @@
           "LVS-*",
           "LOVE-*"
         ],
+        "manufacturer-data": [
+          {
+            "company": 620,
+            "data": [
+              255,
+              33
+            ]
+          }
+        ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
             "tx": "0000fff2-0000-1000-8000-00805f9b34fb",
