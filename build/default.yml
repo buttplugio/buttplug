@@ -97,7 +97,7 @@ jobs:
      - script: cargo test --all
        displayName: cargo test
        # Set timeout for tests, as some tests seem to randomly stall.
-       timeoutInMinutes: 5
+       timeoutInMinutes: 10
  - ${{ if ne('false', parameters.minrust) }}:
    - job: msrv
      displayName: "${{ format('Minimum supported Rust version: {0}', parameters.minrust) }}"
