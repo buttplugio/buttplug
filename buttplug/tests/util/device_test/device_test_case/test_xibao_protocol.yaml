@@ -1,0 +1,45 @@
+devices:
+  - identifier: 
+      name: "CCYB_1904"
+    expected_name: "Xibao Smart Masturbation Cup"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x66, 0x3a, 0x00, 0x06, 0x00, 0x06, 0x01, 0x02, 0x00, 0x02, 0x04, 0x32, 0xe7]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 1
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x66, 0x3a, 0x00, 0x06, 0x00, 0x06, 0x01, 0x02, 0x00, 0x02, 0x04, 0x63, 0x18]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x66, 0x3a, 0x00, 0x06, 0x00, 0x06, 0x01, 0x02, 0x00, 0x02, 0x04, 0x00, 0xb5]
+            write_with_response: false
