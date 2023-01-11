@@ -3170,6 +3170,19 @@ protocols:
       - identifier:
           - V415
         name: Galaku Nebula
+  xibao:
+    btle:
+      names:
+        - CCYB_1904
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Xibao Smart Masturbation Cup
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 99]
+            ActuatorType: Oscillate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
