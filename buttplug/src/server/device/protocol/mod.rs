@@ -65,6 +65,7 @@ pub mod sensee;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_iker;
+pub mod svakom_pulse;
 pub mod svakom_sam;
 pub mod synchro;
 pub mod tcode_v03;
@@ -300,6 +301,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
