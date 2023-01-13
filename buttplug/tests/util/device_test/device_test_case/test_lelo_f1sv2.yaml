@@ -1,0 +1,80 @@
+devices:
+  - identifier: 
+      name: "F1SV2A"
+    expected_name: "Lelo F1s V2"
+device_init:
+  # Initialization
+  - !Commands
+    device_index: 0
+    commands:
+      - !Subscribe
+        endpoint: whitelist
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: whitelist
+          data: [0,0,0,0,0,0,0,0]
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: whitelist
+          data: [1,2,3,4,5,6,8]
+  - !Commands
+    device_index: 0
+    commands:
+      - !Unsubscribe
+        endpoint: whitelist
+      - !Write
+        endpoint: whitelist
+        data: [1,2,3,4,5,6,8]
+        write_with_response: true
+      - !Subscribe
+        endpoint: whitelist
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: whitelist
+          data: [0x01, 0, 0, 0, 0, 0, 0, 0]
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x32, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x4b, 0x32]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x00, 0x00]
+            write_with_response: false
