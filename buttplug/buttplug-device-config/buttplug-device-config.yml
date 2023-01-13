@@ -3183,6 +3183,19 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 99]
             ActuatorType: Oscillate
+  sensee:
+    btle:
+      names:
+        - CTY222S4
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff5-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Sensee Diandou Rabbit
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
