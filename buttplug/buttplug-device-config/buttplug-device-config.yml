@@ -3151,6 +3151,25 @@ protocols:
       - identifier:
           - THE UNICORN
         name: The Unicorn
+  galaku-pump:
+    btle:
+      names:
+        - V415
+      services:
+        00001000-0000-1000-8000-00805f9b34fb:
+          tx: 00001001-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Galaku Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Oscillate
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - V415
+        name: Galaku Nebula
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
