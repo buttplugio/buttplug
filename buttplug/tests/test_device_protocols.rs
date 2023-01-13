@@ -72,6 +72,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Solo")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -135,6 +136,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_galaku_nebula.yaml" ; "Galaku Pump Protocol - Nebula")]
 #[test_case("test_xibao_protocol.yaml" ; "Xibao Protocol")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Solo")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -187,6 +189,7 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Solo")]
 fn test_device_protocols_embedded_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -237,6 +240,7 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_hgod_protocol.yaml" ; "Hgod Protocol")]
 #[test_case("test_metaxsire_rex.yaml" ; "metaXsire Protocol - Rex")]
 #[test_case("test_sensee_protocol.yaml" ; "Sensee Diandou Protocol - Rabbit")]
+#[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Solo")]
 fn test_device_protocols_json_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await)

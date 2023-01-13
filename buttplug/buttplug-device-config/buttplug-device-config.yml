@@ -1707,6 +1707,24 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 5]
             ActuatorType: Vibrate
+  svakom-pulse:
+    btle:
+      names:
+        - SWK-SX013A # Pulse Solo
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Pulse Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 9]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - SWK-SX013A
+        name: Svakom Pulse Solo
   realov:
     btle:
       names:
