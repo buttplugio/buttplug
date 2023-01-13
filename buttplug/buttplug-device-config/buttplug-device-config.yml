@@ -3214,6 +3214,21 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
+  fox:
+    btle:
+      names:
+        - FOX
+        - FOX M70 Pro
+        - FoxM70Pro
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Fox Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
