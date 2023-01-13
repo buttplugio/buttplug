@@ -19,6 +19,7 @@ pub mod buttplug_passthru;
 pub mod cachito;
 pub mod cowgirl;
 pub mod fredorch;
+pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
 pub mod htk_bm;
@@ -158,6 +159,11 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
 
   add_to_protocol_map(&mut map, hgod::setup::HgodIdentifierFactory::default());
+
+  add_to_protocol_map(
+    &mut map,
+    galaku_pump::setup::GalakuPumpIdentifierFactory::default(),
+  );
 
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
   add_to_protocol_map(
