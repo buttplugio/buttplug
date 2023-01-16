@@ -1,3 +1,20 @@
+# 7.0.1 (2023-01-16)
+
+## Features
+
+- Added Device Support
+  - Galaku Nebula
+  - Xibao Smart Masturbation Cup
+  - Sensee Diandou Rabbit
+  - Svakom Pulse Solo
+  - Fox Device
+
+## Bugfixes
+
+- Remove duplicate WeVibe Chorus Definition
+- Correct Folove device detection
+- Correct attributes for Lelo F1 v1/v2
+
 # 7.0.0 (2022-12-30)
 
 ## Breaking API Change
