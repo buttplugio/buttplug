@@ -28,6 +28,7 @@ impl ProtocolHandler for Kizuna {
       Endpoint::Tx,
       vec![48 + scalar as u8, '\r' as u8, '\n' as u8],
       false,
-    ).into()])
+    )
+    .into()])
   }
 }

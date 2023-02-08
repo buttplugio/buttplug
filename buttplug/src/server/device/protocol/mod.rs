@@ -188,10 +188,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
   );
-  add_to_protocol_map(
-    &mut map,
-    kizuna::setup::KizunaIdentifierFactory::default(),
-  );
+  add_to_protocol_map(&mut map, kizuna::setup::KizunaIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     lelof1s::setup::LeloF1sIdentifierFactory::default(),
