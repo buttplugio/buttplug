@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "SWK-SX013A"
-    expected_name: "Svakom Pulse Solo"
+    expected_name: "Svakom Pulse Lite Neo"
 device_commands:
   - !Messages
       device_index: 0
@@ -38,5 +38,5 @@ device_commands:
       commands:
         - !Write
             endpoint: tx
-            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x01]
+            data: [0x55, 0x03, 0x03, 0x00, 0x00, 0x01]
             write_with_response: false

@@ -3366,7 +3366,8 @@
     "svakom-pulse": {
       "btle": {
         "names": [
-          "SWK-SX013A"
+          "SWK-SX013A",
+          "Pulse Union"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3394,7 +3395,13 @@
           "identifier": [
             "SWK-SX013A"
           ],
-          "name": "Svakom Pulse Solo"
+          "name": "Svakom Pulse Lite Neo"
+        },
+        {
+          "identifier": [
+            "Pulse Union"
+          ],
+          "name": "Svakom Pulse Union"
         }
       ]
     },
