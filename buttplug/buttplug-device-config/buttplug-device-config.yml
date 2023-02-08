@@ -1710,7 +1710,8 @@ protocols:
   svakom-pulse:
     btle:
       names:
-        - SWK-SX013A # Pulse Solo
+        - SWK-SX013A # Pulse Lite Neo
+        - Pulse Union
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1724,7 +1725,10 @@ protocols:
     configurations:
       - identifier:
           - SWK-SX013A
-        name: Svakom Pulse Solo
+        name: Svakom Pulse Lite Neo
+      - identifier:
+          - Pulse Union
+        name: Svakom Pulse Union
   realov:
     btle:
       names:

@@ -26,7 +26,15 @@ impl ProtocolHandler for SvakomPulse {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      [0x55, 0x03, 0x03, 0x00, 0x01, scalar as u8 + 1].to_vec(),
+      [
+        0x55,
+        0x03,
+        0x03,
+        0x00,
+        if scalar == 0 { 0x00 } else { 0x01 },
+        scalar as u8 + 1,
+      ]
+      .to_vec(),
       false,
     )
     .into()])
