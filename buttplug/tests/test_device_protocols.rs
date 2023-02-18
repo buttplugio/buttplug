@@ -78,6 +78,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+#[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -147,6 +148,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+#[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {

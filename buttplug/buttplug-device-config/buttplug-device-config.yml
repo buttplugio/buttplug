@@ -3105,6 +3105,9 @@ protocols:
     btle:
       names:
         - sakuraneko-01
+        - sakuraneko-02
+        - sakuraneko-03
+        - sakuraneko-04
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3114,6 +3117,25 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - sakuraneko-01
+        name: Sakuraneko Korokoro
+      - identifier:
+          - sakuraneko-02
+        name: Sakuraneko Nukunuku
+      - identifier:
+          - sakuraneko-03
+        name: Sakuraneko Dokidoki
+      - identifier:
+          - sakuraneko-04
+        name: Sakuraneko Koikoi
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+            - StepRange: [0, 100]
+              ActuatorType: Rotate
   synchro:
     btle:
       names:
