@@ -1,3 +1,13 @@
+# 7.0.2 (2023-02-19)
+
+- Added Device Support
+  - Kizuna Smart
+  - Svakom Phoenix Neo
+  - Svakom Vivianna
+  - Svakom Pulse Union
+  - Sakuraneko Koikoi
+  - Sakuraneko Nukunuku
+
 # 7.0.1 (2023-01-16)
 
 ## Features
