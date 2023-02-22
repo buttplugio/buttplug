@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2023 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -13,12 +13,12 @@ use crate::{
   },
 };
 
-generic_protocol_setup!(Sakuraneko, "sakuraneko");
+generic_protocol_setup!(SvakomV3, "svakom-v3");
 
 #[derive(Default)]
-pub struct Sakuraneko {}
+pub struct SvakomV3 {}
 
-impl ProtocolHandler for Sakuraneko {
+impl ProtocolHandler for SvakomV3 {
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
@@ -26,20 +26,15 @@ impl ProtocolHandler for Sakuraneko {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![
-        0xa1,
-        0x08,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x64,
-        scalar as u8,
-        0x00,
-        0x64,
-        0xdf,
+      [
         0x55,
-      ],
+        0x03,
+        0x03,
+        0x00,
+        if scalar == 0 { 0x00 } else { 0x01 },
+        scalar as u8,
+      ]
+      .to_vec(),
       false,
     )
     .into()])
@@ -52,20 +47,7 @@ impl ProtocolHandler for Sakuraneko {
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![
-        0xa2,
-        0x08,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x64,
-        scalar as u8,
-        0x00,
-        0x32,
-        0xdf,
-        0x55,
-      ],
+      [0x55, 0x08, 0x00, 0x00, scalar as u8, 0xff].to_vec(),
       false,
     )
     .into()])

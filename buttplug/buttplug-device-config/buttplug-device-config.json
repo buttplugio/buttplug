@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 9
+    "minor": 10
   },
   "protocols": {
     "lovense": {
@@ -3205,7 +3205,6 @@
         "names": [
           "Aogu SUV",
           "Aogu SCB",
-          "Ella NEO",
           "Emma NEO",
           "Phoenix NEO",
           "Vick NEO"
@@ -3240,12 +3239,6 @@
         },
         {
           "identifier": [
-            "Ella NEO"
-          ],
-          "name": "Svakom Ella Neo"
-        },
-        {
-          "identifier": [
             "Phoenix NEO"
           ],
           "name": "Svakom Phoenix Neo"
@@ -3268,7 +3261,8 @@
       "btle": {
         "names": [
           "116",
-          "Viviana"
+          "Viviana",
+          "Ella NEO"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3303,6 +3297,79 @@
             "Viviana"
           ],
           "name": "Svakom Viviana"
+        },
+        {
+          "identifier": [
+            "Ella NEO"
+          ],
+          "name": "Svakom Ella Neo"
+        }
+      ]
+    },
+    "svakom-v3": {
+      "btle": {
+        "names": [
+          "Phoenix Neo 2",
+          "FK008A",
+          "Hannes NEO"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Device v3",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Phoenix Neo 2"
+          ],
+          "name": "Svakom Phoenix Neo 2"
+        },
+        {
+          "identifier": [
+            "FK008A"
+          ],
+          "name": "Fantasy Cup Theodore",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  10
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  1
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Hannes NEO"
+          ],
+          "name": "Svakom Hannes Neo"
         }
       ]
     },
@@ -3352,6 +3419,32 @@
       },
       "defaults": {
         "name": "Svakom Alex Neo",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "svakom-alex-v2": {
+      "btle": {
+        "names": [
+          "Alex NEO 2"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Alex Neo 2",
         "messages": {
           "ScalarCmd": [
             {
