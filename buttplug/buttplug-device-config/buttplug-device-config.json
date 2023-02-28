@@ -651,7 +651,19 @@
           "identifier": [
             "XMachine"
           ],
-          "name": "Lovense Sex Machine"
+          "name": "Lovense Sex Machine",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
         },
         {
           "identifier": [
