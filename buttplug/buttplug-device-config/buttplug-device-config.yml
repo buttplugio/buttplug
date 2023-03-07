@@ -691,6 +691,7 @@ protocols:
         - Smart Mini Vibe*
         - Flamingo
         - Smart Bean # Magic Kegel Twins/Master/Master V2
+        - Smart Bean3 # FitCute Kegel Rejuve
         - Magic Cell # Candy/Dante
         - Magic Wand
         - Fugu
@@ -717,6 +718,9 @@ protocols:
       - identifier:
           - Smart Bean
         name: MagicMotion Smart Bean
+      - identifier:
+          - Smart Bean3
+        name: FitCute Kegel Rejuve
       - identifier:
           - Smart Mini Vibe
         name: MagicMotion Smart Mini Vibe
