@@ -2232,7 +2232,8 @@
       "btle": {
         "names": [
           "Chorus",
-          "skeena"
+          "skeena",
+          "Sync 2"
         ],
         "services": {
           "f000bb03-0451-4000-b000-000000000000": {
@@ -2261,7 +2262,33 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Sync 2"
+          ],
+          "name": "WeVibe Sync 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  3
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  3
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
     },
     "youcups": {
       "btle": {
