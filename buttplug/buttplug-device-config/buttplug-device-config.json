@@ -1204,6 +1204,7 @@
           "Smart Mini Vibe*",
           "Flamingo",
           "Smart Bean",
+          "Smart Bean3",
           "Magic Cell",
           "Magic Wand",
           "Fugu",
@@ -1252,6 +1253,12 @@
             "Smart Bean"
           ],
           "name": "MagicMotion Smart Bean"
+        },
+        {
+          "identifier": [
+            "Smart Bean3"
+          ],
+          "name": "FitCute Kegel Rejuve"
         },
         {
           "identifier": [
