@@ -1193,6 +1193,7 @@ protocols:
       names:
         - Chorus
         - skeena
+        - Sync 2
       services:
         f000bb03-0451-4000-b000-000000000000:
           tx: f000c000-0451-4000-b000-000000000000
@@ -1205,6 +1206,16 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 30]
             ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - Sync 2
+        name: WeVibe Sync 2
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 3]
+              ActuatorType: Vibrate
+            - StepRange: [0, 3]
+              ActuatorType: Vibrate
   youcups:
     btle:
       names:
