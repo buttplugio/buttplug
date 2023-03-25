@@ -74,6 +74,9 @@ async fn run_connection_loop<S>(
       _ = sleep(Duration::from_millis(1000)).fuse() => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
+          if websocket_server_sender.close().await.is_err() {
+            error!("Cannot close, assuming connection already closed");
+          }
           return;
         }
         pong_count = 0;
@@ -82,6 +85,9 @@ async fn run_connection_loop<S>(
           .await
           .is_err() {
           error!("Cannot send ping to client, considering connection closed.");
+          if websocket_server_sender.close().await.is_err() {
+            error!("Cannot close, assuming connection already closed");
+          }
           return;
         }
       }
