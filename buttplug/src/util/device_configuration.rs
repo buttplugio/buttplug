@@ -157,6 +157,7 @@ struct UserConfigDefinition {
 pub struct UserConfigDeviceIdentifier {
   address: String,
   protocol: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<String>,
 }
 
@@ -168,6 +169,22 @@ impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
       ProtocolAttributesType::Default
     };
     ServerDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
+  }
+}
+
+
+impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
+  fn from(ident: ServerDeviceIdentifier) -> Self {
+    let server_identifier = if let ProtocolAttributesType::Identifier(ident_string) = ident.attributes_identifier() {
+      Some(ident_string.clone())
+    } else {
+      None
+    };
+    UserConfigDeviceIdentifier {
+      address: ident.address().clone(),
+      protocol: ident.protocol().clone(), 
+      identifier: server_identifier
+    }
   }
 }
 

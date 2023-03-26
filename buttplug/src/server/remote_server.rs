@@ -19,7 +19,7 @@ use crate::{
       ButtplugServerMessage,
     },
   },
-  util::{async_manager, stream::convert_broadcast_receiver_to_stream},
+  util::{async_manager, stream::convert_broadcast_receiver_to_stream, device_configuration::UserConfigDeviceIdentifier},
 };
 use futures::{future::Future, select, FutureExt, Stream, StreamExt};
 use std::sync::Arc;
@@ -31,8 +31,8 @@ use tokio::sync::{broadcast, mpsc, Notify};
 pub enum ButtplugRemoteServerEvent {
   ClientConnected(String),
   ClientDisconnected,
-  DeviceAdded(u32, String, String, Option<String>),
-  DeviceRemoved(u32),
+  DeviceAdded{ index: u32, identifier: UserConfigDeviceIdentifier, name: String, display_name: Option<String> },
+  DeviceRemoved{ index: u32 },
   //DeviceCommand(ButtplugDeviceCommandMessageUnion)
 }
 
@@ -118,15 +118,17 @@ async fn run_server<ConnectorType>(
             match &msg {
               ButtplugServerMessage::DeviceAdded(da) => {
                 if let Some(device_info) = server.device_manager().device_info(da.device_index()) {
-                  if remote_event_sender.send(ButtplugRemoteServerEvent::DeviceAdded(da.device_index(), da.device_name().clone(), device_info.identifier().address().clone(), device_info.display_name().clone())).is_err() {
+                  let added_event = ButtplugRemoteServerEvent::DeviceAdded { index: da.device_index(), name: da.device_name().clone(), identifier: device_info.identifier().clone().into(), display_name: device_info.display_name().clone() };
+                  if remote_event_sender.send(added_event).is_err() {
                     error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
                   }
                 }
               },
               ButtplugServerMessage::DeviceRemoved(dr) => {
-               if remote_event_sender.send(ButtplugRemoteServerEvent::DeviceRemoved(dr.device_index())).is_err() {
-                 error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
-               }
+                let removed_event = ButtplugRemoteServerEvent::DeviceRemoved { index: dr.device_index() };
+                if remote_event_sender.send(removed_event).is_err() {
+                  error!("Cannot send event to owner, dropping and assuming local server thread has exited.");
+                }
               },
               _ => {}
             }
