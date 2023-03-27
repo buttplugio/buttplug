@@ -1,5 +1,9 @@
-use crate::util::{device_test::connector::build_channel_connector, TestDeviceChannelHost, ButtplugTestServer};
-use buttplug::{ 
+use crate::util::{
+  device_test::connector::build_channel_connector,
+  ButtplugTestServer,
+  TestDeviceChannelHost,
+};
+use buttplug::{
   client::{
     ButtplugClient,
     ButtplugClientDevice,

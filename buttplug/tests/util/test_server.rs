@@ -20,7 +20,7 @@ use buttplug::{
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
-use futures::{future::Future, select, FutureExt, StreamExt, pin_mut};
+use futures::{future::Future, pin_mut, select, FutureExt, StreamExt};
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::{mpsc, Notify};
@@ -123,7 +123,6 @@ impl ButtplugTestServer {
       disconnect_notifier: Arc::new(Notify::new()),
     }
   }
-
 
   pub fn start<ConnectorType>(
     &self,

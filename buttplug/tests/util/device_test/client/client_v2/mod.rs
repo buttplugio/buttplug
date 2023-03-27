@@ -4,7 +4,11 @@ mod client_message_sorter;
 mod device;
 mod in_process_connector;
 
-use crate::util::{device_test::connector::build_channel_connector_v2, TestDeviceChannelHost, ButtplugTestServer};
+use crate::util::{
+  device_test::connector::build_channel_connector_v2,
+  ButtplugTestServer,
+  TestDeviceChannelHost,
+};
 use buttplug::{
   server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,

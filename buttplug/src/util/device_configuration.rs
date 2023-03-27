@@ -172,18 +172,18 @@ impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
   }
 }
 
-
 impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
   fn from(ident: ServerDeviceIdentifier) -> Self {
-    let server_identifier = if let ProtocolAttributesType::Identifier(ident_string) = ident.attributes_identifier() {
-      Some(ident_string.clone())
-    } else {
-      None
-    };
+    let server_identifier =
+      if let ProtocolAttributesType::Identifier(ident_string) = ident.attributes_identifier() {
+        Some(ident_string.clone())
+      } else {
+        None
+      };
     UserConfigDeviceIdentifier {
       address: ident.address().clone(),
-      protocol: ident.protocol().clone(), 
-      identifier: server_identifier
+      protocol: ident.protocol().clone(),
+      identifier: server_identifier,
     }
   }
 }
