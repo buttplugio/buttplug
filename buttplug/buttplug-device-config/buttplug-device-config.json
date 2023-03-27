@@ -6720,7 +6720,7 @@
     "xibao": {
       "btle": {
         "names": [
-          "CCYB_1904"
+          "CCYB_*"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
