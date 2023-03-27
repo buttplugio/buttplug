@@ -3914,7 +3914,8 @@
           "IdaWave",
           "Ida Wave",
           "TianiHarmony",
-          "Tiani Harmony"
+          "Tiani Harmony",
+          "TOR3"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -3967,6 +3968,23 @@
                   100
                 ],
                 "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "TOR3"
+          ],
+          "name": "Lelo Tor 3",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
               }
             ]
           }

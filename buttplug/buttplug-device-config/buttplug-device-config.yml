@@ -2007,6 +2007,7 @@ protocols:
         - Ida Wave
         - TianiHarmony
         - Tiani Harmony
+        - TOR3
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           command: 0000fff1-0000-1000-8000-00805f9b34fb
@@ -2033,6 +2034,13 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 100]
               ActuatorType: Rotate
+      - identifier:
+          - TOR3
+        name: Lelo Tor 3
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
   aneros:
     btle:
       names:
