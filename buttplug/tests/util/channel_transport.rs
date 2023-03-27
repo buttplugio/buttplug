@@ -7,6 +7,7 @@
 
 #![allow(dead_code)]
 
+use crate::util::ButtplugTestServer;
 use buttplug::{
   client::{ButtplugClient, ButtplugClientError},
   core::{
@@ -31,7 +32,6 @@ use buttplug::{
       BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
-  server::ButtplugRemoteServer,
   util::async_manager,
 };
 use futures::{
@@ -261,7 +261,7 @@ impl ChannelClientTestHelper {
 }
 
 pub struct ChannelServerTestHelper {
-  server: Arc<ButtplugRemoteServer>,
+  server: Arc<ButtplugTestServer>,
   sender: Sender<ButtplugTransportIncomingMessage>,
   receiver: Arc<Mutex<Receiver<ButtplugSerializedMessage>>>,
   connector: Arc<
@@ -273,7 +273,7 @@ pub struct ChannelServerTestHelper {
 
 impl ChannelServerTestHelper {
   pub fn new() -> Self {
-    let server = Arc::new(ButtplugRemoteServer::default());
+    let server = Arc::new(ButtplugTestServer::default());
     let (incoming_sender, incoming_receiver) = channel(256);
     let (outgoing_sender, outgoing_receiver) = channel(256);
     let connector = Arc::new(Mutex::new(Some(ButtplugRemoteServerConnector::<
@@ -295,7 +295,7 @@ impl ChannelServerTestHelper {
     }
   }
 
-  pub fn server(&self) -> &ButtplugRemoteServer {
+  pub fn server(&self) -> &ButtplugTestServer {
     &self.server
   }
 

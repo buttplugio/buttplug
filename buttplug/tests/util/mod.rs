@@ -6,6 +6,8 @@
 // for full license information.
 
 mod delay_device_communication_manager;
+pub mod test_server;
+pub use test_server::ButtplugTestServer;
 pub mod device_test;
 pub use device_test::DeviceTestCase;
 pub mod test_device_manager;
