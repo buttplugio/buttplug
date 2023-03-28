@@ -23,6 +23,7 @@ pub mod fredorch;
 pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
+pub mod hismith_mini;
 pub mod htk_bm;
 pub mod jejoue;
 pub mod kgoal_boost;
@@ -153,6 +154,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     hismith::setup::HismithIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    hismith_mini::setup::HismithMiniIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
   add_to_protocol_map(
