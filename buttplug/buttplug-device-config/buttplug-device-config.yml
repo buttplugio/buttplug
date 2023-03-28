@@ -3126,9 +3126,6 @@ protocols:
           - "1005"
         name: Hismith Mini Sex Machine
       - identifier:
-          - "4001"
-        name: Auxfun Sex Machine
-      - identifier:
           - "1002"
         name: Hismith Pro Traveler
       - identifier:
@@ -3151,6 +3148,26 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
+  hismith-mini:
+    btle:
+      names:
+        - Auxfun-Box
+      services:
+        0000ffe5-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe9-0000-1000-8000-00805f9b34fb
+        0000ff90-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 0000ff96-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Hismith Mini device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Oscillate
+            FeatureDescriptor: Fucking Machine Oscillation Speed
+    configurations:
+      - identifier:
+          - "4001"
+        name: Auxfun Sex Machine
   wetoy:
     btle:
       names:
