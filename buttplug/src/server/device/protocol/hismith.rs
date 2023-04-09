@@ -88,12 +88,8 @@ impl ProtocolHandler for Hismith {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 {
-      0xf0
-    } else {
-      scalar as u8
-    };
+    let idx: u8 = 0x04;
+    let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -105,11 +101,13 @@ impl ProtocolHandler for Hismith {
 
   fn handle_scalar_vibrate_cmd(
     &self,
-    _index: u32,
+    index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if _index == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 {
+    // Wildolo has a vibe at index 0 using id 4
+    // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)
+    let idx: u8 = if index == 0 { 0x04 } else { 0x06 };
+    let speed: u8 = if index != 0 && scalar == 0 {
       0xf0
     } else {
       scalar as u8

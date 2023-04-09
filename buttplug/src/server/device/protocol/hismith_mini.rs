@@ -88,12 +88,8 @@ impl ProtocolHandler for HismithMini {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if _index == 0 { 0x03 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 {
-      0xf0
-    } else {
-      scalar as u8
-    };
+    let idx: u8 = 0x03;
+    let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
@@ -108,12 +104,24 @@ impl ProtocolHandler for HismithMini {
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = if _index == 0 { 0x03 } else { 0x06 };
-    let speed: u8 = if _index != 0 && scalar == 0 {
-      0xf0
-    } else {
-      scalar as u8
-    };
+    let idx: u8 = 0x05;
+    let speed: u8 = scalar as u8;
+
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xCC, idx, speed, speed + idx],
+      false,
+    )
+    .into()])
+  }
+
+  fn handle_scalar_constrict_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let idx: u8 = 0x03;
+    let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,

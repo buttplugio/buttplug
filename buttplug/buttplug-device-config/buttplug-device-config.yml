@@ -3152,6 +3152,7 @@ protocols:
     btle:
       names:
         - Auxfun-Box
+        - Sinloli
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
@@ -3168,6 +3169,17 @@ protocols:
       - identifier:
           - "4001"
         name: Auxfun Sex Machine
+      - identifier:
+          - "2201"
+        name: Sinloli Automatic Sex Doll
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              FeatureDescriptor: Air Pump
+              ActuatorType: Constrict
+            - StepRange: [0, 100]
+              FeatureDescriptor: Vibrator
+              ActuatorType: Vibrate
   wetoy:
     btle:
       names:
