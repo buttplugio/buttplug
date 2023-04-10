@@ -183,7 +183,8 @@ pub enum ProtocolAttributesType {
 /// This mirrors [ServerDeviceIdentifier], except that address is optional, as we will have protocol
 /// attributes that pertain to sets of hardware as well as user configs, which only deal with a
 /// single piece of hardware.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Getters)]
+#[getset(get="pub")]
 pub struct ProtocolAttributesIdentifier {
   protocol: String,
   attributes_identifier: ProtocolAttributesType,
