@@ -55,10 +55,11 @@ fn main() {
         } else {
           format!("\"{fd}\"")
         };
+        let actuator_id = *scalarcmd_attr.actuator_type() as u8;
         let min = scalarcmd_attr.step_range().start();
         let max = scalarcmd_attr.step_range().end();
         println!("INSERT INTO device_feature (id, device_id) VALUES ({feature_id}, {device_id});");
-        println!("INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES ({scalar_attr_id}, {feature_id}, 1, {desc}, {min}, {max});");
+        println!("INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES ({scalar_attr_id}, {feature_id}, {actuator_id}, {desc}, {min}, {max});");
         feature_id += 1;
         scalar_attr_id += 1;
       }

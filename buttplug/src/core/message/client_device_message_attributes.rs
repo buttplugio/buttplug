@@ -15,7 +15,7 @@ use std::ops::RangeInclusive;
 
 #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ActuatorType {
-  Unknown,
+  Unknown = 1,
   Vibrate,
   // Single Direction Rotation Speed
   Rotate,
@@ -29,7 +29,7 @@ pub enum ActuatorType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Display)]
 pub enum SensorType {
-  Unknown,
+  Unknown = 1,
   Battery,
   RSSI,
   Button,
