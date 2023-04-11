@@ -138,6 +138,10 @@
 //!
 
 mod server_device_message_attributes;
+mod schema;
+mod models;
+pub mod device_database;
+pub use device_database::*;
 pub mod specifier;
 pub use specifier::*;
 
