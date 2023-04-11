@@ -1,4 +1,4 @@
-use buttplug::{util::device_configuration::{load_protocol_configs_no_dm}, server::device::configuration::{ProtocolCommunicationSpecifier, ProtocolAttributesType}};
+use buttplug::{server::device::configuration::device_database::DeviceDatabaseManager, util::device_configuration::{load_protocol_configs_no_dm}, server::device::configuration::{ProtocolCommunicationSpecifier, ProtocolAttributesType}};
 
 fn main() {
   let config = load_protocol_configs_no_dm(
@@ -17,23 +17,29 @@ fn main() {
     for specifier in specifiers {
       match specifier {
         ProtocolCommunicationSpecifier::BluetoothLE(btle) => {
+          // TODO add manufacturer data moves
           for name in btle.names() {
             if name.contains("*") {
-              println!("INSERT INTO protocol_bluetooth_prefix (protocol_id, prefix) VALUES ({protocol_id}, \"{name}\");");
+              // Remove * character, no longer needed since we have a trait column now.
+              let mut prefix = name.clone();
+              prefix.pop();
+              println!("INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES ({protocol_id}, \"{prefix}\", 1);");
             } else {
-              println!("INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name) VALUES ({protocol_id}, \"{name}\");");
+              println!("INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES ({protocol_id}, \"{name}\", 0);");
             }
           }
           for (service_uuid, endpoints) in btle.services() {
             println!("INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES ({btle_service_id}, {protocol_id}, \"{service_uuid}\");");
             for (endpoint, char_uuid) in endpoints {
-              println!("INSERT INTO protocol_bluetooth_characteristic (id, service_id, endpoint, characteristic_uuid) VALUES ({btle_characteristic_id}, {btle_service_id}, \"{endpoint}\", \"{char_uuid}\");");
+              println!("INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES ({btle_characteristic_id}, {btle_service_id}, \"{endpoint}\", \"{char_uuid}\");");
               btle_characteristic_id += 1;
             }
             btle_service_id += 1;
           }
-          btle_service_id += 1;
         },
+        // TODO add xinput
+        // TODO add hid
+        // TODO add serial
         _ => {}
       }
     }
@@ -65,7 +71,15 @@ fn main() {
       }
       device_id += 1;
     }
+    // TODO Remove inheritance. If an identifier variation has no actuators, copy all from default implementation.
+    // TODO Add rotatecmd
+    // TODO Add linearcmd
+    // TODO Add sensorcmd
   
     protocol_id += 1;
   }
+  /*
+  let mgr = DeviceDatabaseManager::new();
+  println!("{:?}", mgr.find_bluetooth_info("XiaoLu", vec!()));
+   */
 }
