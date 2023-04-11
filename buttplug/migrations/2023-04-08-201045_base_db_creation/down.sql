@@ -2,7 +2,6 @@
 
 DROP TABLE protocol_bluetooth_name;
 DROP TABLE protocol_bluetooth_manufacturer_data;
-DROP TABLE protocol_bluetooth_prefix;
 DROP TABLE protocol_bluetooth_characteristic;
 DROP TABLE protocol_bluetooth_service;
 DROP TABLE protocol_xinput;
