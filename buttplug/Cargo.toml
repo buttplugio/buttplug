@@ -39,7 +39,7 @@ btleplug-manager=["server", "btleplug"]
 serial-manager=["server", "serialport"]
 hid-manager=["server", "hidapi"]
 lovense-dongle-manager=["server", "serialport", "hidapi"]
-lovense-connect-service-manager=["server","reqwest"]
+lovense-connect-service-manager=["server", "reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
 tokio-runtime=[]
@@ -94,6 +94,8 @@ instant = "0.1.12"
 regex = "1.10.2"
 tokio-tungstenite = { version = "0.21.0", features = ["rustls-tls-webpki-roots"], optional = true }
 rustls = { version = "0.22.1", optional = true }
+diesel = { version = "2.0.3", default-features = false, features = ["sqlite"] }
+
 
 [dev-dependencies]
 serde_yaml = "0.9.29"
