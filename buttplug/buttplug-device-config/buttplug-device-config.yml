@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 10
+  minor: 11
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -187,6 +187,9 @@ protocols:
         45410001-0023-4bd4-bbd5-a6920e4c5653: # Gravity
           tx: 45410002-0023-4bd4-bbd5-a6920e4c5653
           rx: 45410003-0023-4bd4-bbd5-a6920e4c5653
+        51300001-0023-4bd4-bbd5-a6920e4c5653: # Tenera
+          tx: 51300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 51300003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name: Lovense Device
       messages:
@@ -334,6 +337,9 @@ protocols:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
               SensorRange: [[0, 100]]
+      - identifier:
+          - Q
+        name: Lovense Tenera
   lovense-connect-service:
     lovense-connect-service:
       exists: true
