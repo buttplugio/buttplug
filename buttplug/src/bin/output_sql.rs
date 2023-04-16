@@ -80,6 +80,6 @@ fn main() {
   }
   /*
   let mgr = DeviceDatabaseManager::new();
-  println!("{:?}", mgr.find_bluetooth_info("XiaoLu", vec!()));
-   */
+  println!("{:?}", mgr.find_bluetooth_info("XiaoLu"));
+  */
 }
