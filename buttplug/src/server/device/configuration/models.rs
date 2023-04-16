@@ -7,7 +7,7 @@ use crate::core::message::Endpoint;
 
 use super::schema::*;
 
-#[derive(Queryable, QueryableByName, Selectable, Getters, Debug)]
+#[derive(Queryable, QueryableByName, Selectable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
 #[diesel(table_name = protocol)]
 pub struct Protocol {
   #[getset(get_copy="pub")]
@@ -42,7 +42,7 @@ pub struct ProtocolBluetoothPrefix {
   prefix: String,
 }
 
-#[derive(Queryable, Associations, Selectable, Identifiable, Getters, Debug)]
+#[derive(Queryable, Associations, Selectable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
 #[diesel(belongs_to(Protocol))]
 #[diesel(table_name = protocol_bluetooth_service)]
 pub struct ProtocolBluetoothService {
@@ -59,7 +59,7 @@ impl ProtocolBluetoothService {
   }
 }
 
-#[derive(Queryable, Selectable, Identifiable, Associations, Getters, Debug)]
+#[derive(Queryable, Selectable, Identifiable, Associations, Getters, Debug, Clone)]
 #[diesel(belongs_to(ProtocolBluetoothService))]
 #[diesel(table_name = protocol_bluetooth_characteristic)]
 pub struct ProtocolBluetoothCharacteristic {

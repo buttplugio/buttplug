@@ -6,37 +6,29 @@ use diesel::{
 };
 use super::{
   schema::{
-    protocol_bluetooth_name,
-    protocol_bluetooth_prefix, protocol_bluetooth_service, protocol_bluetooth_characteristic,
+    protocol,
+    protocol_bluetooth_service,
   },
   models::{
     Protocol, ProtocolBluetoothService, ProtocolBluetoothCharacteristic,
-    //ProtocolBluetoothCharacteristic,
-    //ProtocolBluetoothService
   }
 };
 use crate::{
   core::message::Endpoint
 };
 use getset::{Getters, MutGetters, Setters};
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, sync::Arc};
 use uuid::Uuid;
 use tokio::sync::Mutex;
 
-// Note: There's a ton of extra structs in here just to deserialize the json
-// file. Just leave them and build extras (for instance,
-// DeviceProtocolConfiguration) if needed elsewhere in the codebase. It's not
-// gonna hurt anything and making a ton of serde attributes is just going to get
-// confusing (see the messages impl).
-
 #[derive(Debug, Clone, Getters, MutGetters, Setters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-pub struct DBBluetoothLEManufacturerData {
+struct BluetoothLEManufacturerData {
   company: u16,
   data: Option<Vec<u8>>,
 }
 
-impl DBBluetoothLEManufacturerData {
+impl BluetoothLEManufacturerData {
   pub fn new(company: u16, data: &Option<Vec<u8>>) -> Self {
     Self {
       company,
@@ -44,6 +36,33 @@ impl DBBluetoothLEManufacturerData {
     }
   }
 }
+
+#[derive(Getters)]
+#[getset(get = "pub")]
+struct BluetoothLEIdentifier {  
+  name: String,
+  manufacturer_data: Vec<BluetoothLEManufacturerData>
+}
+
+impl BluetoothLEIdentifier {
+  pub fn new(name: &str, manufacturer_data: &Vec<BluetoothLEManufacturerData>) -> Self {
+    Self {
+      name: name.to_owned(),
+      manufacturer_data: manufacturer_data.clone()
+    }
+  }
+}
+
+pub enum DeviceIdentifier {
+  //BluetoothLE(DBBluetoothLEIdentifier),
+  Serial(String),
+  WebsocketDevice(String),
+  HID {vendor_id: u16, product_id: u16},
+  XInput(),
+  LovenseConnect(),
+  LovenseDongle(),
+}
+
 
 pub struct DeviceDatabaseManagerBuilder {
   // TODO Specify external Device DB
@@ -70,17 +89,31 @@ impl DeviceDatabaseManager {
     }
   }
 
-  pub fn find_bluetooth_info(&self, name: &str, manufacturer_data: Vec<DBBluetoothLEManufacturerData>) -> Option<Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>> {
+  pub async fn find_device_info(&self, identifier: &DeviceIdentifier) -> Option<bool> {
+    match identifier {
+      /*
+      DeviceIdentifier::BluetoothLE(ident) => {
+        None //ident.name()
+      },
+      */
+      _ => None
+    }
+  }
+
+  pub fn find_bluetooth_info(&self, name: &str, /* manufacturer_data: Vec<BluetoothLEManufacturerData> */) -> Option<Vec<(Protocol, Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>)>> {
     //let mut conn = self.db_connection.lock().await;
     let mut conn = SqliteConnection::establish("c:\\Users\\qdot\\code\\buttplug\\buttplug\\buttplug-device-config\\buttplug-device-config.sqlite").unwrap();
     // See if any names or prefixes match. Due to requiring SQLite's string methods, we have to run
     // this as a raw SQL command instead of running the query builder.
     let matched_protocols = 
-      sql_query(format!("SELECT protocol_id 
-      FROM protocol_bluetooth_name 
-      WHERE (prefix = 1 AND bluetooth_name LIKE substr(\"{name}\", 0, LENGTH(bluetooth_name)+1)) 
-      OR (prefix = 0 AND bluetooth_name LIKE \"{name}\");"))
-          .load::<ProtocolId>(&mut conn).unwrap();
+      sql_query(format!("SELECT * 
+      FROM protocol
+      WHERE id IN 
+        (SELECT protocol_id 
+          FROM protocol_bluetooth_name 
+          WHERE (prefix = 1 AND bluetooth_name LIKE substr(\"{name}\", 0, LENGTH(bluetooth_name)+1)) 
+          OR (prefix = 0 AND bluetooth_name LIKE \"{name}\"));"))
+          .load::<Protocol>(&mut conn).unwrap();
     // Log found protocols
 
     if matched_protocols.is_empty() {
@@ -89,7 +122,7 @@ impl DeviceDatabaseManager {
 
     // Select services and child characteristics
     let services = protocol_bluetooth_service::table
-      .filter(protocol_bluetooth_service::protocol_id.eq_any(matched_protocols.iter().map(|x| x.protocol_id())))
+      .filter(protocol_bluetooth_service::protocol_id.eq_any(matched_protocols.iter().map(|x| x.id())))
       .select(ProtocolBluetoothService::as_select())
       .load(&mut conn)
       .unwrap();
@@ -99,12 +132,39 @@ impl DeviceDatabaseManager {
       .load(&mut conn)
       .unwrap();
 
-    Some(characteristics
+    // Having gotten all the info, turn it into something useful to send back to the hardware connector
+    let protocol_services = services
+      .clone()
+      .grouped_by(&matched_protocols)
+      .into_iter()
+      .zip(matched_protocols)
+      .map(|(srv, pro)| (pro, srv))
+      .collect::<Vec<(Protocol, Vec<ProtocolBluetoothService>)>>();
+
+    let service_characteristics: Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)> = characteristics
       .grouped_by(&services)
       .into_iter()
       .zip(services)
       .map(|(chr, srv)| (srv, chr))
-      .collect::<Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>>()
-    )
+      .collect::<Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>>();
+
+    let protocol_characteristics = protocol_services
+      .iter()
+      .map(|(pro, srv_vec)| {
+        (pro.clone(), srv_vec.iter().map(|srv| {
+          (srv.clone(), service_characteristics
+            .iter()
+            .map(|(srv, chrs)| (*srv.id(), chrs.clone()))
+            .collect::<HashMap<i32, Vec<ProtocolBluetoothCharacteristic>>>()
+            .get(pro.id())
+            .unwrap()
+            .clone())
+        }).collect::<Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>>())
+      })
+      .collect::<Vec<(Protocol, Vec<(ProtocolBluetoothService, Vec<ProtocolBluetoothCharacteristic>)>)>>();
+
+    println!("{:?}", protocol_characteristics);
+    Some(protocol_characteristics)
   }
+
 }
