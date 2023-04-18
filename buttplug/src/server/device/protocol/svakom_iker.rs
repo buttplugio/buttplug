@@ -61,7 +61,7 @@ impl ProtocolIdentifier for SvakomIkerIdentifier {
       ServerDeviceIdentifier::new(
         hardware.address(),
         "svakom-iker",
-        &ProtocolAttributesType::Identifier(ident),
+        &ProtocolAttributesType::Identifier("Iker".to_owned()),
       ),
       Box::new(SvakomIkerInitializer::default()),
     ))
