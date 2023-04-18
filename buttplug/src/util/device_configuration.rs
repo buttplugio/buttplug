@@ -483,38 +483,41 @@ pub fn load_protocol_configs(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
   skip_version_check: bool,
-  device_manager_builder: &mut ServerDeviceManagerBuilder,
-) -> Result<(), ButtplugDeviceError> {
+) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
+  let mut dcm_builder = DeviceConfigurationManagerBuilder::default();
+
   let external_config =
     load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
 
   for address in external_config.allow_list() {
-    device_manager_builder.allowed_address(address);
+    dcm_builder.allowed_address(address);
   }
 
   for address in external_config.deny_list() {
-    device_manager_builder.denied_address(address);
+    dcm_builder.denied_address(address);
   }
 
   for (index, address) in external_config.reserved_indexes() {
-    device_manager_builder.reserved_index(address, *index);
+    dcm_builder.reserved_index(address, *index);
   }
 
   for (name, specifiers) in external_config.protocol_specifiers() {
     for spec in specifiers {
-      device_manager_builder.communication_specifier(name, spec.clone());
+      dcm_builder.communication_specifier(name, spec.clone());
     }
   }
 
   for (ident, attributes) in external_config.protocol_attributes() {
-    device_manager_builder.protocol_attributes(ident.clone(), attributes.clone());
+    dcm_builder.protocol_attributes(ident.clone(), attributes.clone());
   }
 
   for (ident, attributes) in external_config.user_configs() {
-    device_manager_builder.protocol_attributes(ident.into(), attributes.clone());
+    dcm_builder.protocol_attributes(ident.into(), attributes.clone());
   }
 
-  Ok(())
+  Ok(dcm_builder)
+}
+
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {

@@ -371,7 +371,7 @@ impl ProtocolDeviceAttributes {
   }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
   skip_default_protocols: bool,
   allow_raw_messages: bool,
