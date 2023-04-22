@@ -523,6 +523,16 @@ impl DeviceConfigurationManagerBuilder {
       }) {
         let attr_with_parent = attr.new_with_parent(parent.clone());
         attribute_tree_map.insert(ident.clone(), Arc::new(attr_with_parent));
+      } else if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
+        address: None,
+        protocol: ident.protocol.clone(),
+        attributes_identifier: ProtocolAttributesType::Default,
+      }) {
+        // There are some cases where protocols will hand back identifiers even though we don't have
+        // any in the config (i.e. new devices we haven't added specializations for yet). In that
+        // case, fall back to the default.
+        let attr_with_parent = attr.new_with_parent(parent.clone());
+        attribute_tree_map.insert(ident.clone(), Arc::new(attr_with_parent));
       } else {
         return Err(ButtplugDeviceError::DeviceConfigurationError(format!("User configuration {:?} does not have a parent type, cannot create configuration. Please remove this user configuration, or make sure it has a parent.", ident)));
       }
