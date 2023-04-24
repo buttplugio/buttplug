@@ -58,6 +58,14 @@ pub struct LovenseIdentifier {}
 
 fn lovense_model_resolver(type_response: String) -> String {
   let parts = type_response.split(':').collect::<Vec<&str>>();
+  if parts.len() < 2 {
+    warn!(
+      "Lovense Device returned invalid DeviceType info: {}",
+      type_response
+    );
+    return "lovense".to_string();
+  }
+
   let identifier = parts[0].to_owned();
   let version = parts[1].to_owned().parse::<i32>().unwrap_or(0);
 
