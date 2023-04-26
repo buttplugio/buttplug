@@ -85,6 +85,7 @@ pub mod wevibe8bit;
 pub mod wevibe_chorus;
 pub mod xibao;
 pub mod xinput;
+pub mod xiuxiuda;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
@@ -363,6 +364,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     youcups::setup::YoucupsIdentifierFactory::default(),
