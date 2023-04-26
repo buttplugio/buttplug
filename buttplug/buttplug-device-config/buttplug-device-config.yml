@@ -1688,8 +1688,10 @@ protocols:
     btle:
       names:
         - "116" # Phoenix NEO
+        - "117" # Edeny
         - Viviana
         - Ella NEO
+        - S38A # Svakom Tammy Pro
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1717,6 +1719,12 @@ protocols:
       - identifier:
           - Ella NEO
         name: Svakom Ella Neo
+      - identifier:
+          - "117"
+        name: Svakom Edeny
+      - identifier:
+          - S38A
+        name: Svakom Tammy Pro
   svakom-v3:
     btle:
       names:

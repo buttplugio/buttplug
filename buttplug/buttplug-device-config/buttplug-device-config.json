@@ -3317,8 +3317,10 @@
       "btle": {
         "names": [
           "116",
+          "117",
           "Viviana",
-          "Ella NEO"
+          "Ella NEO",
+          "S38A"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3359,6 +3361,18 @@
             "Ella NEO"
           ],
           "name": "Svakom Ella Neo"
+        },
+        {
+          "identifier": [
+            "117"
+          ],
+          "name": "Svakom Edeny"
+        },
+        {
+          "identifier": [
+            "S38A"
+          ],
+          "name": "Svakom Tammy Pro"
         }
       ]
     },
