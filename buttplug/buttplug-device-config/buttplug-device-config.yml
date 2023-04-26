@@ -3419,6 +3419,19 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 9]
             ActuatorType: Rotate
+  xiuxiuda:
+    btle:
+      names:
+        - XXD-Lush*
+      services:
+        53300001-0023-4bd4-bbd5-a6920e4c5653:
+          tx: 53300003-0023-4bd4-bbd5-a6920e4c5653
+    defaults:
+      name: Xiuxiuda Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 19]
+            ActuatorType: Vibrate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e
