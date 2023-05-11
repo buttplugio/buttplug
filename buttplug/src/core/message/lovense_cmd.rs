@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 // As this message is considered deprecated and is not actually implemented for
 // Lovense devices even on spec v1 connections, we can put a null validator on
 // it.
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, Getters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct LovenseCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

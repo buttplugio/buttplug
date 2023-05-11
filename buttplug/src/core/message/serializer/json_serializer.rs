@@ -14,6 +14,7 @@ use crate::core::{
     ButtplugCurrentSpecClientMessage,
     ButtplugCurrentSpecServerMessage,
     ButtplugMessage,
+    ButtplugMessageFinalizer,
     ButtplugMessageSpecVersion,
     ButtplugServerMessage,
     ButtplugSpecV0ClientMessage,
@@ -29,7 +30,7 @@ use crate::core::{
 use jsonschema::JSONSchema;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::{convert::TryFrom, fmt::Debug};
 
 static MESSAGE_JSON_SCHEMA: &str =
   include_str!("../../../../buttplug-schema/schema/buttplug-schema.json");
@@ -83,7 +84,7 @@ pub fn deserialize_to_message<T>(
   msg: &str,
 ) -> Result<Vec<T>, ButtplugSerializerError>
 where
-  T: serde::de::DeserializeOwned + Clone,
+  T: serde::de::DeserializeOwned + ButtplugMessageFinalizer + Clone + Debug,
 {
   // We have to pass back a string formatted error, as SerdeJson's error type
   // isn't clonable.
@@ -93,9 +94,18 @@ where
     })
     .and_then(|json_msg| {
       if validator.is_valid(&json_msg) {
-        serde_json::from_value(json_msg).map_err(|e| {
-          ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
-        })
+        match serde_json::from_value::<Vec<T>>(json_msg) {
+          Ok(mut msg_vec) => {
+            for msg in msg_vec.iter_mut() {
+              msg.finalize();
+            }
+            Ok(msg_vec)
+          }
+          Err(e) => Err(ButtplugSerializerError::JsonSerializerError(format!(
+            "Message: {} - Error: {:?}",
+            msg, e
+          ))),
+        }
       } else {
         // If is_valid fails, re-run validation to get our error message.
         let e = validator
@@ -277,7 +287,7 @@ impl ButtplugClientJSONSerializerImpl {
     msg: &ButtplugSerializedMessage,
   ) -> Result<Vec<T>, ButtplugSerializerError>
   where
-    T: serde::de::DeserializeOwned + Clone,
+    T: serde::de::DeserializeOwned + ButtplugMessageFinalizer + Clone + Debug,
   {
     if let ButtplugSerializedMessage::Text(text_msg) = msg {
       deserialize_to_message::<T>(&self.validator, text_msg)

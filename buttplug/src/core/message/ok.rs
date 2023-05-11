@@ -10,7 +10,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Ok message, signifying successful response to a command. [Spec link](https://buttplug-spec.docs.buttplug.io/status.html#ok).
-#[derive(Debug, PartialEq, Eq, ButtplugMessage, Clone)]
+#[derive(Debug, PartialEq, Eq, ButtplugMessage, ButtplugMessageFinalizer, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Ok {
   /// Message Id, used for matching message pairs in remote connection instances.

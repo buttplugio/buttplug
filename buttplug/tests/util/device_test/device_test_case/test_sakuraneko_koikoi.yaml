@@ -1,0 +1,54 @@
+devices:
+  - identifier: 
+      name: "sakuraneko-04"
+    expected_name: "Sakuraneko Koikoi"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x08, 0x01, 0x00, 0x00, 0x00, 0x64, 0x32, 0x00, 0x64, 0xdf, 0x55]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Rotate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x08, 0x01, 0x00, 0x00, 0x00, 0x64, 0x4b, 0x00, 0x64, 0xdf, 0x55]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xa2, 0x08, 0x01, 0x00, 0x00, 0x00, 0x64, 0x32, 0x00, 0x32, 0xdf, 0x55]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xa1, 0x08, 0x01, 0x00, 0x00, 0x00, 0x64, 0x00, 0x00, 0x64, 0xdf, 0x55]
+            write_with_response: false
+        - !Write
+            endpoint: tx
+            data: [0xa2, 0x08, 0x01, 0x00, 0x00, 0x00, 0x64, 0x00, 0x00, 0x32, 0xdf, 0x55]
+            write_with_response: false

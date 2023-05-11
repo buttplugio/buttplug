@@ -101,6 +101,10 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
 pub struct LeloF1sV2 {}
 
 impl ProtocolHandler for LeloF1sV2 {
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

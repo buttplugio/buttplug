@@ -55,20 +55,28 @@ impl DeviceAdded {
     device_message_timing_gap: &Option<u32>,
     device_messages: &ClientDeviceMessageAttributes,
   ) -> Self {
-    Self {
+    let mut obj = Self {
       id: 0,
       device_index,
       device_name: device_name.to_string(),
       device_display_name: device_display_name.clone(),
       device_message_timing_gap: *device_message_timing_gap,
       device_messages: device_messages.clone(),
-    }
+    };
+    obj.finalize();
+    obj
   }
 }
 
 impl ButtplugMessageValidator for DeviceAdded {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
+  }
+}
+
+impl ButtplugMessageFinalizer for DeviceAdded {
+  fn finalize(&mut self) {
+    self.device_messages.finalize();
   }
 }
 
@@ -109,6 +117,9 @@ impl ButtplugMessageValidator for DeviceAddedV2 {
   }
 }
 
+impl ButtplugMessageFinalizer for DeviceAddedV2 {
+}
+
 #[derive(ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceAddedV1 {
@@ -145,6 +156,9 @@ impl ButtplugMessageValidator for DeviceAddedV1 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
+}
+
+impl ButtplugMessageFinalizer for DeviceAddedV1 {
 }
 
 #[derive(Default, ButtplugMessage, Clone, Debug, PartialEq, Eq, Getters, CopyGetters)]
@@ -184,6 +198,9 @@ impl ButtplugMessageValidator for DeviceAddedV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_system_id(self.id)
   }
+}
+
+impl ButtplugMessageFinalizer for DeviceAddedV0 {
 }
 
 // TODO Test repeated message type in attributes in JSON

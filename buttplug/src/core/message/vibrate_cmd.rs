@@ -26,7 +26,9 @@ impl VibrateSubcommand {
   }
 }
 
-#[derive(Debug, Default, ButtplugDeviceMessage, PartialEq, Clone, Getters)]
+#[derive(
+  Debug, Default, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, Getters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VibrateCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

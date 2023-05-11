@@ -151,6 +151,36 @@ fn impl_buttplug_message_validator_macro(ast: &syn::DeriveInput) -> TokenStream 
   }
 }
 
+#[proc_macro_derive(ButtplugMessageFinalizer)]
+pub fn buttplug_message_finalizer_derive(input: TokenStream) -> TokenStream {
+  // Construct a representation of Rust code as a syntax tree
+  // that we can manipulate
+  let ast = syn::parse(input).expect("Failure will cause compile failure.");
+
+  // Build the trait implementation
+  impl_buttplug_message_finalizer_macro(&ast)
+}
+
+fn impl_buttplug_message_finalizer_macro(ast: &syn::DeriveInput) -> TokenStream {
+  let name = &ast.ident;
+
+  match &ast.data {
+    syn::Data::Enum(_) => {
+      let gen = quote! {
+          impl ButtplugMessageFinalizer for #name {}
+      };
+      gen.into()
+    }
+    syn::Data::Struct(_) => {
+      let gen = quote! {
+          impl ButtplugMessageFinalizer for #name {}
+      };
+      gen.into()
+    }
+    _ => panic!("Derivation only works on structs and enums"),
+  }
+}
+
 #[proc_macro_derive(TryFromButtplugClientMessage)]
 pub fn try_from_buttplug_client_message_derive(input: TokenStream) -> TokenStream {
   // Construct a representation of Rust code as a syntax tree

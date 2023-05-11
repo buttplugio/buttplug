@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 6
+  minor: 9
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -111,6 +111,9 @@ protocols:
       # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
       # advertised-services:
         # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
+      manufacturer-data:
+        - company: 0x026c
+          data: [0xff, 0x21] # Folove manufacturer data (start of a pretty long array)
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff2-0000-1000-8000-00805f9b34fb
@@ -687,6 +690,7 @@ protocols:
         - Magic Wand
         - Fugu
         - Gballs2
+        - GBalls3
         - FM-LILAC-101
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
@@ -732,6 +736,9 @@ protocols:
       - identifier:
           - Gballs2
         name: G Vibe Gballs 2
+      - identifier:
+          - GBalls3
+        name: G Vibe Gballs 3
       - identifier:
           - FM-LILAC-101
         name: Femometer Lilac
@@ -1652,6 +1659,38 @@ protocols:
       - identifier:
           - Vick NEO
         name: Svakom Vick Neo
+      - identifier:
+          - Emma NEO
+        name: Svakom Emma Neo
+  svakom-v2:
+    btle:
+      names:
+        - "116" # Phoenix NEO
+        - Viviana
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Device v2
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 10 ]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - "116"
+        name: Svakom Phoenix Neo
+      - identifier:
+          - Viviana
+        name: Svakom Viviana
+#        messages:
+#          ScalarCmd:
+#            - StepRange: [ 0, 10 ]
+#              ActuatorType: Vibrate
+#            - StepRange: [ 0, 5 ]
+#              ActuatorType: Vibrate
+#              FeatureDescriptor: Unsupported feature
   svakom-sam:
     btle:
       names:
@@ -1683,10 +1722,15 @@ protocols:
   svakom-iker:
     btle:
       names:
-        - Iker
+        - Iker*
+      manufacturer-data:
+        - company: 0x27
+          data: [0x53, 0x56, 0x41]
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+        00001800-0000-1000-8000-00805f9b34fb:
+          rxblemodel: 00002a00-0000-1000-8000-00805f9b34fb
     defaults:
       name: Svakom Iker
       messages:
@@ -1695,6 +1739,28 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 5]
             ActuatorType: Vibrate
+  svakom-pulse:
+    btle:
+      names:
+        - SWK-SX013A # Pulse Lite Neo
+        - Pulse Union
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Pulse Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 9]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - SWK-SX013A
+        name: Svakom Pulse Lite Neo
+      - identifier:
+          - Pulse Union
+        name: Svakom Pulse Union
   realov:
     btle:
       names:
@@ -3039,6 +3105,9 @@ protocols:
     btle:
       names:
         - sakuraneko-01
+        - sakuraneko-02
+        - sakuraneko-03
+        - sakuraneko-04
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3048,6 +3117,25 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 100]
             ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - sakuraneko-01
+        name: Sakuraneko Korokoro
+      - identifier:
+          - sakuraneko-02
+        name: Sakuraneko Nukunuku
+      - identifier:
+          - sakuraneko-03
+        name: Sakuraneko Dokidoki
+      - identifier:
+          - sakuraneko-04
+        name: Sakuraneko Koikoi
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+            - StepRange: [0, 100]
+              ActuatorType: Rotate
   synchro:
     btle:
       names:
@@ -3101,10 +3189,10 @@ protocols:
         name: metaXsire Cali
         messages:
           ScalarCmd:
-          - StepRange: [0, 255]
-            ActuatorType: Vibrate
-          - StepRange: [0, 255]
-            ActuatorType: Constrict # More like "suck"
+            - StepRange: [0, 255]
+              ActuatorType: Vibrate
+            - StepRange: [0, 255]
+              ActuatorType: Constrict # More like "suck"
       - identifier:
           - Olis
         name: metaXsire Olis
@@ -3116,6 +3204,102 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 255]
               ActuatorType: Rotate
+  cowgirl:
+    btle:
+      names:
+        - THE COWGIRL
+        - THE UNICORN
+      services:
+        0000fe00-0000-1000-8000-00805f9b34fb:
+          tx: 0000fe01-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: The Cowgirl Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 255]
+            ActuatorType: Vibrate
+          - StepRange: [0, 255]
+            ActuatorType: Rotate
+    configurations:
+      - identifier:
+          - THE COWGIRL
+        name: The Cowgirl
+      - identifier:
+          - THE UNICORN
+        name: The Unicorn
+  galaku-pump:
+    btle:
+      names:
+        - V415
+      services:
+        00001000-0000-1000-8000-00805f9b34fb:
+          tx: 00001001-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Galaku Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Oscillate
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - V415
+        name: Galaku Nebula
+  xibao:
+    btle:
+      names:
+        - CCYB_1904
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Xibao Smart Masturbation Cup
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 99]
+            ActuatorType: Oscillate
+  sensee:
+    btle:
+      names:
+        - CTY222S4
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff5-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Sensee Diandou Rabbit
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+  fox:
+    btle:
+      names:
+        - FOX
+        - FOX M70 Pro
+        - FoxM70Pro
+      services:
+        0000ae00-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Fox Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
+  kizuna:
+    serial:
+      - port: default
+        baud-rate: 19200
+        data-bits: 8
+        parity: N
+        stop-bits: 1
+    defaults:
+      name: Kizuna Smart
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 9]
+            ActuatorType: Rotate
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

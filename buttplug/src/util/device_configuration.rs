@@ -97,7 +97,7 @@ struct UserDeviceConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
@@ -108,7 +108,7 @@ struct ProtocolAttributes {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in specifiers(). Feels
@@ -135,14 +135,14 @@ struct ProtocolDefinition {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct UserDeviceConfigPair {
   identifier: UserConfigDeviceIdentifier,
   config: UserDeviceConfig,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 struct UserConfigDefinition {
   #[serde(default)]
   specifiers: Option<HashMap<String, ProtocolDefinition>>,
@@ -153,7 +153,7 @@ struct UserConfigDefinition {
 #[derive(
   Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters, Eq, PartialEq, Hash,
 )]
-#[getset(get = "pub", set = "pub", get_mut = "pub")]
+#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct UserConfigDeviceIdentifier {
   address: String,
   protocol: String,

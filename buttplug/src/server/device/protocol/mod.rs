@@ -17,7 +17,10 @@ pub mod aneros;
 pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
+pub mod cowgirl;
+pub mod fox;
 pub mod fredorch;
+pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
 pub mod htk_bm;
@@ -27,6 +30,7 @@ pub mod kiiroo_v2;
 pub mod kiiroo_v21;
 pub mod kiiroo_v21_initialized;
 pub mod kiiroo_v2_vibrator;
+pub mod kizuna;
 pub mod lelo_harmony;
 pub mod lelof1s;
 pub mod lelof1sv2;
@@ -59,10 +63,13 @@ pub mod raw_protocol;
 pub mod realov;
 pub mod sakuraneko;
 pub mod satisfyer;
+pub mod sensee;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_iker;
+pub mod svakom_pulse;
 pub mod svakom_sam;
+pub mod svakom_v2;
 pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
@@ -73,6 +80,7 @@ pub mod wetoy;
 pub mod wevibe;
 pub mod wevibe8bit;
 pub mod wevibe_chorus;
+pub mod xibao;
 pub mod xinput;
 pub mod youcups;
 pub mod youou;
@@ -134,6 +142,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    cowgirl::setup::CowgirlIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     lovense::setup::LovenseIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -147,12 +159,18 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
 
   add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
+  add_to_protocol_map(&mut map, fox::setup::FoxIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     fredorch::setup::FredorchIdentifierFactory::default(),
   );
 
   add_to_protocol_map(&mut map, hgod::setup::HgodIdentifierFactory::default());
+
+  add_to_protocol_map(
+    &mut map,
+    galaku_pump::setup::GalakuPumpIdentifierFactory::default(),
+  );
 
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
   add_to_protocol_map(
@@ -171,6 +189,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     kiiroo_v21_initialized::setup::KiirooV21InitializedIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, kizuna::setup::KizunaIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     lelof1s::setup::LeloF1sIdentifierFactory::default(),
@@ -278,6 +297,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     satisfyer::setup::SatisfyerIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
@@ -289,7 +309,15 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    svakom_pulse::setup::SvakomPulseIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     svakom_sam::setup::SvakomSamIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_v2::setup::SvakomV2IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -318,6 +346,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     wevibe_chorus::setup::WeVibeChorusIdentifierFactory::default(),
   );
+  add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
@@ -482,6 +511,9 @@ pub trait ProtocolHandler: Sync + Send {
           ActuatorType::Rotate => self.handle_scalar_rotate_cmd(index as u32, *scalar)?,
           ActuatorType::Vibrate => self.handle_scalar_vibrate_cmd(index as u32, *scalar)?,
           ActuatorType::Position => self.handle_scalar_position_cmd(index as u32, *scalar)?,
+          ActuatorType::Unknown => Err(ButtplugDeviceError::UnhandledCommand(
+            "Unknown actuator types are not controllable.".to_owned(),
+          ))?,
         }),
       );
     }

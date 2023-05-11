@@ -34,6 +34,14 @@ impl ButtplugMessageValidator for DeviceList {
   }
 }
 
+impl ButtplugMessageFinalizer for DeviceList {
+  fn finalize(&mut self) {
+    for device in &mut self.devices {
+      device.device_messages_mut().finalize();
+    }
+  }
+}
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV2 {
@@ -61,6 +69,9 @@ impl ButtplugMessageValidator for DeviceListV2 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
+}
+
+impl ButtplugMessageFinalizer for DeviceListV2 {
 }
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
@@ -93,6 +104,9 @@ impl ButtplugMessageValidator for DeviceListV1 {
   }
 }
 
+impl ButtplugMessageFinalizer for DeviceListV1 {
+}
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, ButtplugMessage, Getters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct DeviceListV0 {
@@ -122,4 +136,7 @@ impl ButtplugMessageValidator for DeviceListV0 {
   fn is_valid(&self) -> Result<(), ButtplugMessageError> {
     self.is_not_system_id(self.id)
   }
+}
+
+impl ButtplugMessageFinalizer for DeviceListV0 {
 }

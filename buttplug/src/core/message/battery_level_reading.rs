@@ -11,7 +11,7 @@ use getset::CopyGetters;
 use serde::{Deserialize, Serialize};
 
 /// Battery level response
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Clone, CopyGetters)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Clone, CopyGetters)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct BatteryLevelReading {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

@@ -1,0 +1,57 @@
+devices:
+  - identifier: 
+      name: "F1s"
+    expected_name: "Lelo F1s"
+device_init: 
+  # Initialization
+  - !Commands
+      device_index: 0
+      commands:
+        - !Subscribe
+            endpoint: rx
+  - !Events
+    device_index: 0
+    events:
+      - !Notifications
+        - endpoint: rx
+          data: [0]
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x32, 0x00]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+          - Index: 1
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x4b, 0x32]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Stop 
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [0x01, 0x00, 0x00]
+            write_with_response: false

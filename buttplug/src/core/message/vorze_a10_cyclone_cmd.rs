@@ -10,7 +10,9 @@ use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, Default, PartialEq, Eq, Clone, CopyGetters)]
+#[derive(
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, Default, PartialEq, Eq, Clone, CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct VorzeA10CycloneCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

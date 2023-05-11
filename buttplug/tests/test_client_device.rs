@@ -7,7 +7,12 @@
 
 mod util;
 use buttplug::{
-  client::{ButtplugClientDeviceEvent, ButtplugClientError, ButtplugClientEvent, VibrateCommand},
+  client::{
+    ButtplugClientDeviceEvent,
+    ButtplugClientError,
+    ButtplugClientEvent,
+    ScalarValueCommand,
+  },
   core::{
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{self, ButtplugClientMessage, ClientDeviceMessageAttributes},
@@ -146,7 +151,7 @@ fn test_client_device_invalid_command() {
     let test_device = client_device.expect("Test, assuming infallible.");
     assert!(matches!(
       test_device
-        .vibrate(&VibrateCommand::Speed(2.0))
+        .vibrate(&ScalarValueCommand::ScalarValue(2.0))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugMessageError(
@@ -155,7 +160,7 @@ fn test_client_device_invalid_command() {
     ));
     assert!(matches!(
       test_device
-        .vibrate(&VibrateCommand::SpeedVec(vec!(0.5, 0.5, 0.5)))
+        .vibrate(&ScalarValueCommand::ScalarValueVec(vec!(0.5, 0.5, 0.5)))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(
@@ -164,7 +169,7 @@ fn test_client_device_invalid_command() {
     ));
     assert!(matches!(
       test_device
-        .vibrate(&VibrateCommand::SpeedVec(vec!()))
+        .vibrate(&ScalarValueCommand::ScalarValueVec(vec!()))
         .await
         .unwrap_err(),
       ButtplugClientError::ButtplugError(ButtplugError::ButtplugDeviceError(

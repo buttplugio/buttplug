@@ -1,3 +1,58 @@
+# 7.0.2 (2023-02-19)
+
+- Added Device Support
+  - Kizuna Smart
+  - Svakom Phoenix Neo
+  - Svakom Vivianna
+  - Svakom Pulse Union
+  - Sakuraneko Koikoi
+  - Sakuraneko Nukunuku
+
+# 7.0.1 (2023-01-16)
+
+## Features
+
+- Added Device Support
+  - Galaku Nebula
+  - Xibao Smart Masturbation Cup
+  - Sensee Diandou Rabbit
+  - Svakom Pulse Solo
+  - Fox Device
+
+## Bugfixes
+
+- Remove duplicate WeVibe Chorus Definition
+- Correct Folove device detection
+- Correct attributes for Lelo F1 v1/v2
+
+# 7.0.0 (2022-12-30)
+
+## Breaking API Change
+
+- In order to accommodate ScalarCmd flexibility, VibrateCommand in the ButtplugClient has been
+  changed to ScalarValueCommand. This changes the signature of the vibrate method in the client,
+  which may cause breakage.
+- Removed IPC connectors. They were never really advertised as usable, and the longer we've stuck
+  with websockets, the less feasible breaking out new connectors has become.
+
+## Features
+
+- Added ergonomic action methods to ButtplugClient (ability to query for attributes related to
+  scalar actions, etc...)
+- Added new_json_ws_client_connector() convenience method for creating new client connectors
+- Added Device Support
+  - GBalls v3
+  - The Cowgirl/The Unicorn
+- Removed old, unused rust book
+- Moved spec to new docs site repo (https://docs.buttplug.io)
+
+## Bugfixes
+
+- Fixed issue where ButtplugClient could make ill-defined requests for device control. This was done
+  by added finalizers to ButtplugMessage, so that DeviceAdded and DeviceList messages can include scalar/sensor indexes in their message attributes. This problem will be fixed at the spec level in spec v4.
+- Fix buttplug device config schema issue blocking use of websocket devices.
+- Fix Svakom Iker identifiers
+
 # 6.3.0 (2022-12-19)
 
 ## Features

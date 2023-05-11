@@ -10,7 +10,9 @@ use getset::CopyGetters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone, CopyGetters)]
+#[derive(
+  Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone, CopyGetters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct RawReadCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

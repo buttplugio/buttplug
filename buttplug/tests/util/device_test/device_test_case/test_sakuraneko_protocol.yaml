@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "sakuraneko-01"
-    expected_name: "Sakuraneko Device"
+    expected_name: "Sakuraneko Korokoro"
 device_commands:
   - !Messages
       device_index: 0

@@ -44,4 +44,30 @@ impl ProtocolHandler for Sakuraneko {
     )
     .into()])
   }
+
+  fn handle_scalar_rotate_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0xa2,
+        0x08,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+        0x64,
+        scalar as u8,
+        0x00,
+        0x32,
+        0xdf,
+        0x55,
+      ],
+      false,
+    )
+        .into()])
+  }
 }

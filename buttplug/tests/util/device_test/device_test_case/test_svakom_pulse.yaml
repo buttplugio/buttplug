@@ -1,0 +1,42 @@
+devices:
+  - identifier: 
+      name: "SWK-SX013A"
+    expected_name: "Svakom Pulse Lite Neo"
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x06]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.75
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x01, 0x08]
+            write_with_response: false
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x55, 0x03, 0x03, 0x00, 0x00, 0x01]
+            write_with_response: false

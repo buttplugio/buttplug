@@ -10,7 +10,7 @@ use super::*;
 use serde::{Deserialize, Serialize};
 
 /// Battery level request
-#[derive(Debug, ButtplugDeviceMessage, PartialEq, Eq, Clone)]
+#[derive(Debug, ButtplugDeviceMessage, ButtplugMessageFinalizer, PartialEq, Eq, Clone)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct BatteryLevelCmd {
   #[cfg_attr(feature = "serialize-json", serde(rename = "Id"))]

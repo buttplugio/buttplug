@@ -10,7 +10,9 @@ use getset::Getters;
 #[cfg(feature = "serialize-json")]
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, ButtplugMessage, Clone, PartialEq, Eq, Getters)]
+#[derive(
+  Debug, Default, ButtplugMessage, ButtplugMessageFinalizer, Clone, PartialEq, Eq, Getters,
+)]
 #[cfg_attr(feature = "serialize-json", derive(Serialize, Deserialize))]
 pub struct Test {
   /// Message Id, used for matching message pairs in remote connection instances.

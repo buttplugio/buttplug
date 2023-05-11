@@ -1,3 +1,7 @@
+# 0.8.0 - 2022/12/29
+
+- Add ButtplugMessageFinalizer trait derivation
+
 # 0.7.0 - 2022/08/29
 
 ## Changes
