@@ -1292,6 +1292,7 @@ protocols:
     btle:
       names:
         - Pearl2
+        - Pearl2+
         - Fuse
         - Virtual Blowbot
         - Titan
@@ -1315,6 +1316,13 @@ protocols:
       - identifier:
           - Pearl2
         name: Kiiroo Pearl 2
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+      - identifier:
+          - Pearl2+
+        name: Kiiroo Pearl 2+
         messages:
           ScalarCmd:
             - StepRange: [0, 100]
