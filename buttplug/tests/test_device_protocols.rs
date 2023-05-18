@@ -82,6 +82,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
@@ -158,6 +159,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
@@ -220,6 +222,7 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_embedded_v2(test_file: &str) {
@@ -279,6 +282,7 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_json_v2(test_file: &str) {

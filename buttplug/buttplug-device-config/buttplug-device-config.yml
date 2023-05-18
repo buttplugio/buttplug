@@ -1815,12 +1815,10 @@ protocols:
         - Iker*
       manufacturer-data:
         - company: 0x27
-          data: [0x53, 0x56, 0x41]
+          data: [0x53, 0x56, 0x41, 0x01, 0x0B, 0x12, 0x01, 0x33, 0x44, 0x55, 0xCA, 0x08]
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
-        00001800-0000-1000-8000-00805f9b34fb:
-          rxblemodel: 00002a00-0000-1000-8000-00805f9b34fb
     defaults:
       name: Svakom Iker
       messages:
