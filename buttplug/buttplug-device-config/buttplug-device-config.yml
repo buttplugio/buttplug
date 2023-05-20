@@ -1340,7 +1340,7 @@ protocols:
               FeatureOrder: 0
       - identifier:
           - Virtual Rabbit
-        name: PornHub Virtual Rabit
+        name: PornHub Virtual Rabbit
         messages:
           ScalarCmd:
             - StepRange: [0, 100]
