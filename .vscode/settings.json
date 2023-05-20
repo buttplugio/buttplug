@@ -20,5 +20,9 @@
     "!RSSI",
     "!Vibrate sequence",
     "!Battery mapping"
-  ],  
+  ],
+  "rust-analyzer.linkedProjects": [
+    ".\\buttplug\\Cargo.toml"
+  ],
+  
 }
