@@ -121,6 +121,10 @@ pub fn get_piston_speed(mut distance: f64, mut duration: f64) -> u8 {
 }
 
 impl ProtocolHandler for VorzeSA {
+  fn needs_full_command_set(&self) -> bool {
+    true
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
