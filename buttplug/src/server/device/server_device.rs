@@ -446,7 +446,10 @@ impl ServerDevice {
         self.handle_generic_command_result(self.handler.handle_scalar_cmd(&commands))
       }
       ButtplugDeviceCommandMessageUnion::RotateCmd(msg) => {
-        let commands = match self.generic_command_manager.update_rotation(&msg) {
+        let commands = match self
+          .generic_command_manager
+          .update_rotation(&msg, self.handler.needs_full_command_set())
+        {
           Ok(values) => values,
           Err(err) => return future::ready(Err(err)).boxed(),
         };

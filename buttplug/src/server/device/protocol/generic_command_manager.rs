@@ -226,6 +226,7 @@ impl GenericCommandManager {
   pub fn update_rotation(
     &self,
     msg: &RotateCmd,
+    match_all: bool,
   ) -> Result<Vec<Option<(u32, bool)>>, ButtplugError> {
     // First, make sure this is a valid command, that contains at least one
     // command.
@@ -288,6 +289,16 @@ impl GenericCommandManager {
       }
       if !sent_rotation {
         self.sent_rotation.store(true, SeqCst);
+      }
+    }
+
+    // If we're in a match all situation, set up the array with all prior
+    // values before switching them out.
+    if match_all && !result.iter().all(|x| x.is_none()) {
+      for (index, rotation) in self.rotations.iter().enumerate() {
+        if result[index].is_none() {
+          result[index] = Some((rotation.0.load(SeqCst), rotation.1.load(SeqCst)));
+        }
       }
     }
 
@@ -577,13 +588,13 @@ mod test {
     );
     assert_eq!(
       mgr
-        .update_rotation(&rotate_msg)
+        .update_rotation(&rotate_msg, false)
         .expect("Test, assuming infallible"),
       vec![Some((10, true)), Some((10, true))]
     );
     assert_eq!(
       mgr
-        .update_rotation(&rotate_msg)
+        .update_rotation(&rotate_msg, false)
         .expect("Test, assuming infallible"),
       vec![None, None]
     );
@@ -596,12 +607,25 @@ mod test {
     );
     assert_eq!(
       mgr
-        .update_rotation(&rotate_msg_2)
+        .update_rotation(&rotate_msg_2, false)
         .expect("Test, assuming infallible"),
       vec![None, Some((15, false))]
     );
+    let rotate_msg_3 = RotateCmd::new(
+      0,
+      vec![
+        RotationSubcommand::new(0, 0.75, false),
+        RotationSubcommand::new(1, 0.75, false),
+      ],
+    );
+    assert_eq!(
+      mgr
+        .update_rotation(&rotate_msg_3, true)
+        .expect("Test, assuming infallible"),
+      vec![Some((15, false)), Some((15, false))]
+    );
     let rotate_msg_invalid = RotateCmd::new(0, vec![RotationSubcommand::new(2, 0.5, true)]);
-    assert!(mgr.update_rotation(&rotate_msg_invalid).is_err());
+    assert!(mgr.update_rotation(&rotate_msg_invalid, false).is_err());
   }
   // TODO Write test for vibration stop generator
 }

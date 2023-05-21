@@ -33,22 +33,36 @@ device_commands:
             data: [0x05, 0x63, 0x00]
             write_with_response: true
   - !Messages
-    device_index: 0
-    messages:
-      - !Rotate
-        - Index: 0
-          Speed: 1
-          Clockwise: false
-        - Index: 1
-          Speed: .25
-          Clockwise: true
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: 1
+            Clockwise: false
+          - Index: 1
+            Speed: .25
+            Clockwise: true
   - !Commands
-    device_index: 0
-    commands:
-      - !Write
-        endpoint: tx
-        data: [0x05, 0x63, 0x96]
-        write_with_response: true
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x05, 0x63, 0x99]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Rotate
+          - Index: 0
+            Speed: .25
+            Clockwise: true
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0x05, 0x99, 0x99]
+            write_with_response: true
   - !Messages
       device_index: 0
       messages:
