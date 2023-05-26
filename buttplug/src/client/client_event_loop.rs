@@ -11,7 +11,7 @@ use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
-  ButtplugClientMessageFuturePair,
+  ButtplugClientMessageFuturePair, ButtplugClientMessageSender,
 };
 use crate::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},
@@ -35,7 +35,7 @@ use tokio::sync::{broadcast, mpsc};
 
 /// Enum used for communication from the client to the event loop.
 #[derive(Clone)]
-pub(super) enum ButtplugClientRequest {
+pub enum ButtplugClientRequest {
   /// Client request to disconnect, via already sent connector instance.
   Disconnect(ButtplugConnectorStateShared),
   /// Given a DeviceList message, update the inner loop values and create
@@ -93,7 +93,7 @@ where
   to_client_sender: broadcast::Sender<ButtplugClientEvent>,
   /// Sends events to the client receiver. Stored here so it can be handed to
   /// new ButtplugClientDevice instances.
-  from_client_sender: broadcast::Sender<ButtplugClientRequest>,
+  from_client_sender: Arc<ButtplugClientMessageSender>,
   /// Receives incoming messages from client instances.
   from_client_receiver: broadcast::Receiver<ButtplugClientRequest>,
   sorter: ClientMessageSorter,
@@ -114,7 +114,7 @@ where
     connector: ConnectorType,
     from_connector_receiver: mpsc::Receiver<ButtplugCurrentSpecServerMessage>,
     to_client_sender: broadcast::Sender<ButtplugClientEvent>,
-    from_client_sender: broadcast::Sender<ButtplugClientRequest>,
+    from_client_sender: Arc<ButtplugClientMessageSender>,
     device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
   ) -> Self {
     trace!("Creating ButtplugClientEventLoop instance.");
@@ -151,7 +151,7 @@ where
         debug!("Device does not exist, creating new entry.");
         let device = Arc::new(ButtplugClientDevice::new_from_device_info(
           info,
-          self.from_client_sender.clone(),
+          &self.from_client_sender,
         ));
         self.device_map.insert(info.device_index(), device.clone());
         device

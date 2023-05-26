@@ -8,22 +8,18 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
-  ButtplugClientError,
-  ButtplugClientMessageFuturePair,
-  ButtplugClientRequest,
   ButtplugClientResultFuture,
-  ButtplugServerMessageFuture,
+  create_boxed_future_client_error, 
+  ButtplugClientMessageSender
 };
 use crate::{
   core::{
-    connector::ButtplugConnectorError,
     errors::{ButtplugDeviceError, ButtplugError, ButtplugMessageError},
     message::{
       ActuatorType,
       ButtplugCurrentSpecClientMessage,
       ButtplugCurrentSpecServerMessage,
       ButtplugDeviceMessageType,
-      ButtplugMessage,
       ClientDeviceMessageAttributes,
       ClientGenericDeviceMessageAttributes,
       DeviceMessageInfo,
@@ -47,7 +43,7 @@ use crate::{
   },
   util::stream::convert_broadcast_receiver_to_stream,
 };
-use futures::{future, FutureExt, Stream};
+use futures::{FutureExt, Stream};
 use getset::{CopyGetters, Getters};
 use std::{
   collections::HashMap,
@@ -58,7 +54,6 @@ use std::{
   },
 };
 use tokio::sync::broadcast;
-use tracing_futures::Instrument;
 
 /// Enum for messages going to a [ButtplugClientDevice] instance.
 #[derive(Clone, Debug)]
@@ -172,7 +167,7 @@ pub struct ButtplugClientDevice {
   /// [ButtplugClient][super::ButtplugClient]'s event loop, which will then send
   /// the message on to the [ButtplugServer][crate::server::ButtplugServer]
   /// through the connector.
-  event_loop_sender: broadcast::Sender<ButtplugClientRequest>,
+  event_loop_sender: Arc<ButtplugClientMessageSender>,
   internal_event_sender: broadcast::Sender<ButtplugClientDeviceEvent>,
   /// True if this [ButtplugClientDevice] is currently connected to the
   /// [ButtplugServer][crate::server::ButtplugServer].
@@ -202,7 +197,7 @@ impl ButtplugClientDevice {
     display_name: &Option<String>,
     index: u32,
     message_attributes: &ClientDeviceMessageAttributes,
-    message_sender: broadcast::Sender<ButtplugClientRequest>,
+    message_sender: &Arc<ButtplugClientMessageSender>,
   ) -> Self {
     info!(
       "Creating client device {} with index {} and messages {:?}.",
@@ -217,7 +212,7 @@ impl ButtplugClientDevice {
       display_name: display_name.clone(),
       index,
       message_attributes: message_attributes.clone(),
-      event_loop_sender: message_sender,
+      event_loop_sender: message_sender.clone(),
       internal_event_sender: event_sender,
       device_connected,
       client_connected,
@@ -226,7 +221,7 @@ impl ButtplugClientDevice {
 
   pub(super) fn new_from_device_info(
     info: &DeviceMessageInfo,
-    sender: broadcast::Sender<ButtplugClientRequest>,
+    sender: &Arc<ButtplugClientMessageSender>,
   ) -> Self {
     ButtplugClientDevice::new(
       info.device_name(),
@@ -241,85 +236,10 @@ impl ButtplugClientDevice {
     self.device_connected.load(Ordering::SeqCst)
   }
 
-  /// Sends a message through the owning
-  /// [ButtplugClient][super::ButtplugClient].
-  ///
-  /// Performs the send/receive flow for send a device command and receiving the
-  /// response from the server.
-  fn send_message(
-    &self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugClientResultFuture<ButtplugCurrentSpecServerMessage> {
-    let message_sender = self.event_loop_sender.clone();
-    let client_connected = self.client_connected.clone();
-    let device_connected = self.device_connected.clone();
-    let id = msg.id();
-    let device_name = self.name.clone();
-    async move {
-      if !client_connected.load(Ordering::SeqCst) {
-        error!("Client not connected, cannot run device command");
-        return Err(ButtplugConnectorError::ConnectorNotConnected.into());
-      } else if !device_connected.load(Ordering::SeqCst) {
-        error!("Device not connected, cannot run device command");
-        return Err(
-          ButtplugError::from(ButtplugDeviceError::DeviceNotConnected(device_name)).into(),
-        );
-      }
-      let fut = ButtplugServerMessageFuture::default();
-      message_sender
-        .send(ButtplugClientRequest::Message(
-          ButtplugClientMessageFuturePair::new(msg.clone(), fut.get_state_clone()),
-        ))
-        .map_err(|_| {
-          ButtplugClientError::ButtplugConnectorError(
-            ButtplugConnectorError::ConnectorChannelClosed,
-          )
-        })?;
-      let msg = fut.await?;
-      if let ButtplugCurrentSpecServerMessage::Error(_err) = msg {
-        Err(ButtplugError::from(_err).into())
-      } else {
-        Ok(msg)
-      }
-    }
-    .instrument(tracing::trace_span!("ClientDeviceSendFuture for {}", id))
-    .boxed()
-  }
-
   pub fn event_stream(&self) -> Box<dyn Stream<Item = ButtplugClientDeviceEvent> + Send + Unpin> {
     Box::new(Box::pin(convert_broadcast_receiver_to_stream(
       self.internal_event_sender.subscribe(),
     )))
-  }
-
-  fn create_boxed_future_client_error<T>(&self, err: ButtplugError) -> ButtplugClientResultFuture<T>
-  where
-    T: 'static + Send + Sync,
-  {
-    future::ready(Err(ButtplugClientError::ButtplugError(err))).boxed()
-  }
-
-  /// Sends a message, expecting back an [Ok][crate::core::messages::Ok]
-  /// message, otherwise returns a [ButtplugError]
-  fn send_message_expect_ok(
-    &self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugClientResultFuture {
-    let send_fut = self.send_message(msg);
-    async move {
-      match send_fut.await? {
-        ButtplugCurrentSpecServerMessage::Ok(_) => Ok(()),
-        ButtplugCurrentSpecServerMessage::Error(_err) => Err(ButtplugError::from(_err).into()),
-        msg => Err(
-          ButtplugError::from(ButtplugMessageError::UnexpectedMessageType(format!(
-            "{:?}",
-            msg
-          )))
-          .into(),
-        ),
-      }
-    }
-    .boxed()
   }
 
   fn scalar_value_attributes(
@@ -364,7 +284,7 @@ impl ButtplugClientDevice {
     attrs: &Vec<ClientGenericDeviceMessageAttributes>,
   ) -> ButtplugClientResultFuture {
     if attrs.is_empty() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::UnhandledCommand(format!(
           "ScalarCmd with {actuator} is not handled by this device"
         ))
@@ -384,14 +304,14 @@ impl ButtplugClientDevice {
       }
       ScalarValueCommand::ScalarValueMap(map) => {
         if map.len() as u32 > scalar_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
         scalar_vec = Vec::with_capacity(map.len() as usize);
         for (idx, speed) in map {
           if *idx >= scalar_count {
-            return self.create_boxed_future_client_error(
+            return create_boxed_future_client_error(
               ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
             );
           }
@@ -404,7 +324,7 @@ impl ButtplugClientDevice {
       }
       ScalarValueCommand::ScalarValueVec(vec) => {
         if vec.len() as u32 > scalar_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
           );
         }
@@ -416,7 +336,7 @@ impl ButtplugClientDevice {
     }
     let msg = ScalarCmd::new(self.index, scalar_vec).into();
     info!("{:?}", msg);
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn vibrate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
@@ -447,7 +367,7 @@ impl ButtplugClientDevice {
 
   pub fn scalar(&self, scalar_cmd: &ScalarCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.scalar_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::VibrateCmd).into(),
       );
     }
@@ -469,14 +389,14 @@ impl ButtplugClientDevice {
       }
       ScalarCommand::ScalarMap(map) => {
         if map.len() as u32 > scalar_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, map.len() as u32).into(),
           );
         }
         scalar_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (scalar, actuator)) in map {
           if *idx >= scalar_count {
-            return self.create_boxed_future_client_error(
+            return create_boxed_future_client_error(
               ButtplugDeviceError::DeviceFeatureIndexError(scalar_count, *idx).into(),
             );
           }
@@ -485,7 +405,7 @@ impl ButtplugClientDevice {
       }
       ScalarCommand::ScalarVec(vec) => {
         if vec.len() as u32 > scalar_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(scalar_count, vec.len() as u32).into(),
           );
         }
@@ -496,7 +416,7 @@ impl ButtplugClientDevice {
       }
     }
     let msg = ScalarCmd::new(self.index, scalar_vec).into();
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn linear_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
@@ -510,7 +430,7 @@ impl ButtplugClientDevice {
   /// Commands device to move linearly, assuming it has the features to do so.
   pub fn linear(&self, linear_cmd: &LinearCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.linear_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::LinearCmd).into(),
       );
     }
@@ -527,14 +447,14 @@ impl ButtplugClientDevice {
       }
       LinearCommand::LinearMap(map) => {
         if map.len() as u32 > linear_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, map.len() as u32).into(),
           );
         }
         linear_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (dur, pos)) in map {
           if *idx >= linear_count {
-            return self.create_boxed_future_client_error(
+            return create_boxed_future_client_error(
               ButtplugDeviceError::DeviceFeatureIndexError(linear_count, *idx).into(),
             );
           }
@@ -543,7 +463,7 @@ impl ButtplugClientDevice {
       }
       LinearCommand::LinearVec(vec) => {
         if vec.len() as u32 > linear_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(linear_count, vec.len() as u32).into(),
           );
         }
@@ -554,7 +474,7 @@ impl ButtplugClientDevice {
       }
     }
     let msg = LinearCmd::new(self.index, linear_vec).into();
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn rotate_attributes(&self) -> Vec<ClientGenericDeviceMessageAttributes> {
@@ -568,7 +488,7 @@ impl ButtplugClientDevice {
   /// Commands device to rotate, assuming it has the features to do so.
   pub fn rotate(&self, rotate_cmd: &RotateCommand) -> ButtplugClientResultFuture {
     if self.message_attributes.rotate_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RotateCmd).into(),
       );
     }
@@ -585,14 +505,14 @@ impl ButtplugClientDevice {
       }
       RotateCommand::RotateMap(map) => {
         if map.len() as u32 > rotate_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, map.len() as u32).into(),
           );
         }
         rotate_vec = Vec::with_capacity(map.len() as usize);
         for (idx, (speed, clockwise)) in map {
           if *idx > rotate_count - 1 {
-            return self.create_boxed_future_client_error(
+            return create_boxed_future_client_error(
               ButtplugDeviceError::DeviceFeatureIndexError(rotate_count, *idx).into(),
             );
           }
@@ -601,7 +521,7 @@ impl ButtplugClientDevice {
       }
       RotateCommand::RotateVec(vec) => {
         if vec.len() as u32 > rotate_count {
-          return self.create_boxed_future_client_error(
+          return create_boxed_future_client_error(
             ButtplugDeviceError::DeviceFeatureCountMismatch(rotate_count, vec.len() as u32).into(),
           );
         }
@@ -612,7 +532,7 @@ impl ButtplugClientDevice {
       }
     }
     let msg = RotateCmd::new(self.index, rotate_vec).into();
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn subscribe_sensor(
@@ -621,13 +541,13 @@ impl ButtplugClientDevice {
     sensor_type: SensorType,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
           .into(),
       );
     }
     let msg = SensorSubscribeCmd::new(self.index, sensor_index, sensor_type).into();
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn unsubscribe_sensor(
@@ -636,18 +556,18 @@ impl ButtplugClientDevice {
     sensor_type: SensorType,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.sensor_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorSubscribeCmd)
           .into(),
       );
     }
     let msg = SensorUnsubscribeCmd::new(self.index, sensor_index, sensor_type).into();
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   fn read_single_sensor(&self, sensor_type: &SensorType) -> ButtplugClientResultFuture<Vec<i32>> {
     if self.message_attributes.sensor_read_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::SensorReadCmd).into(),
       );
     }
@@ -662,12 +582,12 @@ impl ButtplugClientDevice {
       .map(|x| x.0 as u32)
       .collect();
     if sensor_indexes.len() != 1 {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::ProtocolSensorNotSupported(*sensor_type).into(),
       );
     }
     let msg = SensorReadCmd::new(self.index, sensor_indexes[0], *sensor_type).into();
-    let reply = self.send_message(msg);
+    let reply = self.event_loop_sender.send_message(msg);
     async move {
       if let ButtplugCurrentSpecServerMessage::SensorReading(data) = reply.await? {
         Ok(data.data().clone())
@@ -723,7 +643,7 @@ impl ButtplugClientDevice {
     write_with_response: bool,
   ) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_write_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawWriteCmd).into(),
       );
     }
@@ -733,7 +653,7 @@ impl ButtplugClientDevice {
       data,
       write_with_response,
     ));
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn raw_read(
@@ -743,7 +663,7 @@ impl ButtplugClientDevice {
     timeout: u32,
   ) -> ButtplugClientResultFuture<Vec<u8>> {
     if self.message_attributes.raw_read_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawReadCmd).into(),
       );
     }
@@ -753,7 +673,7 @@ impl ButtplugClientDevice {
       expected_length,
       timeout,
     ));
-    let send_fut = self.send_message(msg);
+    let send_fut = self.event_loop_sender.send_message(msg);
     async move {
       match send_fut.await? {
         ButtplugCurrentSpecServerMessage::RawReading(reading) => Ok(reading.data().clone()),
@@ -772,31 +692,31 @@ impl ButtplugClientDevice {
 
   pub fn raw_subscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
       );
     }
     let msg =
       ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
-    self.send_message_expect_ok(msg)
+      self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
     if self.message_attributes.raw_subscribe_cmd().is_none() {
-      return self.create_boxed_future_client_error(
+      return create_boxed_future_client_error(
         ButtplugDeviceError::MessageNotSupported(ButtplugDeviceMessageType::RawSubscribeCmd).into(),
       );
     }
     let msg = ButtplugCurrentSpecClientMessage::RawUnsubscribeCmd(RawUnsubscribeCmd::new(
       self.index, endpoint,
     ));
-    self.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   /// Commands device to stop all movement.
   pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
-    self.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
+    self.event_loop_sender.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
   }
 
   pub(super) fn set_device_connected(&self, connected: bool) {

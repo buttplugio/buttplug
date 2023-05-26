@@ -147,6 +147,97 @@ pub enum ButtplugClientEvent {
 impl Unpin for ButtplugClientEvent {
 }
 
+pub(super) fn create_boxed_future_client_error<T>(err: ButtplugError) -> ButtplugClientResultFuture<T>
+where
+  T: 'static + Send + Sync,
+{
+  future::ready(Err(ButtplugClientError::ButtplugError(err))).boxed()
+}
+
+pub(super) struct ButtplugClientMessageSender {
+  message_sender: broadcast::Sender<ButtplugClientRequest>,
+  connected: Arc<AtomicBool>,
+}
+
+impl ButtplugClientMessageSender {
+  fn new(message_sender: &broadcast::Sender<ButtplugClientRequest>, connected: &Arc<AtomicBool>) -> Self {
+    Self {
+      message_sender: message_sender.clone(),
+      connected: connected.clone()
+    }
+  }
+  
+  /// Send message to the internal event loop.
+  ///
+  /// Mostly for handling boilerplate around possible send errors.
+  pub fn send_message_to_event_loop(
+    &self,
+    msg: ButtplugClientRequest,
+  ) -> BoxFuture<'static, Result<(), ButtplugClientError>> {
+    // If we're running the event loop, we should have a message_sender.
+    // Being connected to the server doesn't matter here yet because we use
+    // this function in order to connect also.
+    //
+    // The message sender doesn't require an async send now, but we still want
+    // to delay execution as part of our future in order to keep task coherency.
+    let message_sender = self.message_sender.clone();
+    async move {
+      message_sender
+        .send(msg)
+        .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
+      Ok(())
+    }
+    .boxed()
+  }
+  
+  pub fn subscribe(&self) -> broadcast::Receiver<ButtplugClientRequest> {
+    self.message_sender.subscribe()
+  }
+
+  pub fn send_message(
+    &self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugServerMessageResultFuture {
+    if !self.connected.load(Ordering::Relaxed) {
+      future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed()
+    } else {
+      self.send_message_ignore_connect_status(msg)
+    }
+  }
+
+  /// Sends a ButtplugMessage from client to server. Expects to receive a
+  /// ButtplugMessage back from the server.
+  pub fn send_message_ignore_connect_status(
+    &self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugServerMessageResultFuture {
+    // Create a future to pair with the message being resolved.
+    let fut = ButtplugServerMessageFuture::default();
+    let internal_msg = ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
+      msg,
+      fut.get_state_clone(),
+    ));
+
+    // Send message to internal loop and wait for return.
+    let send_fut = self.send_message_to_event_loop(internal_msg);
+    async move {
+      send_fut.await?;
+      fut.await
+    }
+    .boxed()
+  }
+
+  /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
+  /// type ButtplugMessage back from the server.
+  pub fn send_message_expect_ok(
+    &self,
+    msg: ButtplugCurrentSpecClientMessage,
+  ) -> ButtplugClientResultFuture {
+    let send_fut = self.send_message(msg);
+    async move { send_fut.await.map(|_| ()) }.boxed()
+  }
+}
+
 /// Struct used by applications to communicate with a Buttplug Server.
 ///
 /// Buttplug Clients provide an API layer on top of the Buttplug Protocol that
@@ -171,7 +262,7 @@ pub struct ButtplugClient {
   server_name: Arc<Mutex<Option<String>>>,
   event_stream: broadcast::Sender<ButtplugClientEvent>,
   // Sender to relay messages to the internal client loop
-  message_sender: broadcast::Sender<ButtplugClientRequest>,
+  message_sender: Arc<ButtplugClientMessageSender>,
   connected: Arc<AtomicBool>,
   device_map: Arc<DashMap<u32, Arc<ButtplugClientDevice>>>,
 }
@@ -180,12 +271,13 @@ impl ButtplugClient {
   pub fn new(name: &str) -> Self {
     let (message_sender, _) = broadcast::channel(256);
     let (event_stream, _) = broadcast::channel(256);
+    let connected = Arc::new(AtomicBool::new(false));
     Self {
       client_name: name.to_owned(),
       server_name: Arc::new(Mutex::new(None)),
       event_stream,
-      message_sender,
-      connected: Arc::new(AtomicBool::new(false)),
+      message_sender: Arc::new(ButtplugClientMessageSender::new(&message_sender, &connected)),
+      connected,
       device_map: Arc::new(DashMap::new()),
     }
   }
@@ -243,6 +335,7 @@ impl ButtplugClient {
     // Run our handshake
     info!("Running handshake with server.");
     let msg = self
+      .message_sender
       .send_message_ignore_connect_status(
         RequestServerInfo::new(&self.client_name, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
       )
@@ -261,10 +354,12 @@ impl ButtplugClient {
       // handle sending the message and getting the return, and
       // will send the client updates as events.
       let msg = self
+        .message_sender
         .send_message(RequestDeviceList::default().into())
         .await?;
       if let ButtplugCurrentSpecServerMessage::DeviceList(m) = msg {
         self
+          .message_sender
           .send_message_to_event_loop(ButtplugClientRequest::HandleDeviceList(m))
           .await?;
       }
@@ -295,7 +390,7 @@ impl ButtplugClient {
     // further communications with the server, if connection is successful.
     let fut = ButtplugConnectorFuture::default();
     let msg = ButtplugClientRequest::Disconnect(fut.get_state_clone());
-    let send_fut = self.send_message_to_event_loop(msg);
+    let send_fut = self.message_sender.send_message_to_event_loop(msg);
     let connected = self.connected.clone();
     async move {
       connected.store(false, Ordering::SeqCst);
@@ -310,7 +405,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn start_scanning(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StartScanning::default().into())
+    self.message_sender.send_message_expect_ok(StartScanning::default().into())
   }
 
   /// Tells server to stop scanning for devices.
@@ -318,7 +413,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_scanning(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StopScanning::default().into())
+    self.message_sender.send_message_expect_ok(StopScanning::default().into())
   }
 
   /// Tells server to stop all devices.
@@ -326,7 +421,7 @@ impl ButtplugClient {
   /// Returns Err([ButtplugClientError]) if request fails due to issues with
   /// DeviceManagers on the server, disconnection, etc.
   pub fn stop_all_devices(&self) -> ButtplugClientResultFuture {
-    self.send_message_expect_ok(StopAllDevices::default().into())
+    self.message_sender.send_message_expect_ok(StopAllDevices::default().into())
   }
 
   pub fn event_stream(&self) -> impl Stream<Item = ButtplugClientEvent> {
@@ -339,72 +434,6 @@ impl ButtplugClient {
     Box::pin(stream)
   }
 
-  /// Send message to the internal event loop.
-  ///
-  /// Mostly for handling boilerplate around possible send errors.
-  fn send_message_to_event_loop(
-    &self,
-    msg: ButtplugClientRequest,
-  ) -> BoxFuture<'static, Result<(), ButtplugClientError>> {
-    // If we're running the event loop, we should have a message_sender.
-    // Being connected to the server doesn't matter here yet because we use
-    // this function in order to connect also.
-    //
-    // The message sender doesn't require an async send now, but we still want
-    // to delay execution as part of our future in order to keep task coherency.
-    let message_sender = self.message_sender.clone();
-    async move {
-      message_sender
-        .send(msg)
-        .map_err(|_| ButtplugConnectorError::ConnectorChannelClosed)?;
-      Ok(())
-    }
-    .boxed()
-  }
-
-  fn send_message(
-    &self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugServerMessageResultFuture {
-    if !self.connected() {
-      future::ready(Err(ButtplugConnectorError::ConnectorNotConnected.into())).boxed()
-    } else {
-      self.send_message_ignore_connect_status(msg)
-    }
-  }
-
-  /// Sends a ButtplugMessage from client to server. Expects to receive a
-  /// ButtplugMessage back from the server.
-  fn send_message_ignore_connect_status(
-    &self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugServerMessageResultFuture {
-    // Create a future to pair with the message being resolved.
-    let fut = ButtplugServerMessageFuture::default();
-    let internal_msg = ButtplugClientRequest::Message(ButtplugClientMessageFuturePair::new(
-      msg,
-      fut.get_state_clone(),
-    ));
-
-    // Send message to internal loop and wait for return.
-    let send_fut = self.send_message_to_event_loop(internal_msg);
-    async move {
-      send_fut.await?;
-      fut.await
-    }
-    .boxed()
-  }
-
-  /// Sends a ButtplugMessage from client to server. Expects to receive an [Ok]
-  /// type ButtplugMessage back from the server.
-  fn send_message_expect_ok(
-    &self,
-    msg: ButtplugCurrentSpecClientMessage,
-  ) -> ButtplugClientResultFuture {
-    let send_fut = self.send_message(msg);
-    async move { send_fut.await.map(|_| ()) }.boxed()
-  }
-
   /// Retreives a list of currently connected devices.
   pub fn devices(&self) -> Vec<Arc<ButtplugClientDevice>> {
     self
@@ -415,7 +444,7 @@ impl ButtplugClient {
   }
 
   pub fn ping(&self) -> ButtplugClientResultFuture {
-    let ping_fut = self.send_message_expect_ok(Ping::default().into());
+    let ping_fut = self.message_sender.send_message_expect_ok(Ping::default().into());
     async move { ping_fut.await }.boxed()
   }
 
