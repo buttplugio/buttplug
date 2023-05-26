@@ -422,7 +422,7 @@ protocols:
         name: Loveai Dolp
       - identifier:
           - XMachine
-        name: Lovense Sex Machine
+        name: Lovense Connect Sex Machine
         messages:
           ScalarCmd:
             - StepRange: [0, 20]
