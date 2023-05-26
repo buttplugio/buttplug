@@ -4,9 +4,13 @@ mod client_message_sorter;
 mod device;
 mod in_process_connector;
 
-use crate::util::{device_test::connector::build_channel_connector_v2, TestDeviceChannelHost};
+use crate::util::{
+  device_test::connector::build_channel_connector_v2,
+  ButtplugTestServer,
+  TestDeviceChannelHost,
+};
 use buttplug::{
-  server::{ButtplugRemoteServer, ButtplugServer, ButtplugServerBuilder},
+  server::{ButtplugServer, ButtplugServerBuilder},
   util::async_manager,
 };
 use client::{ButtplugClient, ButtplugClientEvent};
@@ -153,7 +157,7 @@ pub async fn run_json_test_case(test_case: &DeviceTestCase) {
   let (client_connector, server_connector) = build_channel_connector_v2(&notify);
 
   let (server, device_channels) = build_server(test_case);
-  let remote_server = ButtplugRemoteServer::new(server);
+  let remote_server = ButtplugTestServer::new(server);
   async_manager::spawn(async move {
     remote_server
       .start(server_connector)

@@ -23,6 +23,8 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_hismith_auxfun_box.yaml" ; "Hismith Mini Protocol - Auxfun Box")]
+#[test_case("test_hismith_sinloli.yaml" ; "Hismith Mini Protocol - Sinloli")]
 #[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
 #[test_case("test_hismith_wildolo.yaml" ; "Hismith Protocol - Wildolo")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
@@ -43,7 +45,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
-#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
 #[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
 #[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
@@ -77,8 +79,13 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
+#[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -92,6 +99,8 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_ankni_protocol_no_handshake.yaml" ; "Ankni Protocol - No Handshake")]
 #[test_case("test_cachito_protocol.yaml" ; "Cachito Protocol")]
 #[test_case("test_fredorch_protocol.yaml" ; "Fredorch Protocol")]
+#[test_case("test_hismith_auxfun_box.yaml" ; "Hismith Mini Protocol - Auxfun Box")]
+#[test_case("test_hismith_sinloli.yaml" ; "Hismith Mini Protocol - Sinloli")]
 #[test_case("test_hismith_thrusting_cup.yaml" ; "Hismith Protocol - Thrusting Cup")]
 #[test_case("test_hismith_wildolo.yaml" ; "Hismith Protocol - Wildolo")]
 #[test_case("test_lovense_single_vibrator.yaml" ; "Lovense Protocol - Single Vibrator Device")]
@@ -113,7 +122,7 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
-#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
 #[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
 #[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
@@ -147,8 +156,13 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
+#[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
   async_manager::block_on(async {
@@ -177,7 +191,7 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
-#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
 #[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
 #[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
@@ -206,7 +220,11 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_embedded_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
@@ -233,7 +251,7 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
-#[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO TW")]
+#[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
 #[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
 #[test_case("test_wevibe_4plus.yaml" ; "WeVibe Protocol (Legacy) - 4 Plus")]
 #[test_case("test_wevibe_pivot.yaml" ; "WeVibe Protocol (Legacy) - Pivot")]
@@ -262,7 +280,11 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_svakom_pulse.yaml" ; "Svakom Pulse Protocol - Pulse Lite Neo")]
 #[test_case("test_svakom_ella.yaml" ; "Svakom V1 Protocol - Ella")]
 #[test_case("test_svakom_vivianna.yaml" ; "Svakom V2 Protocol - Vivianna")]
+#[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
+#[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
+#[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 fn test_device_protocols_json_v2(test_file: &str) {
   async_manager::block_on(async {
     util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await)

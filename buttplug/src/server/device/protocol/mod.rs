@@ -23,6 +23,7 @@ pub mod fredorch;
 pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
+pub mod hismith_mini;
 pub mod htk_bm;
 pub mod jejoue;
 pub mod kgoal_boost;
@@ -66,10 +67,12 @@ pub mod satisfyer;
 pub mod sensee;
 pub mod svakom;
 pub mod svakom_alex;
+pub mod svakom_alex_v2;
 pub mod svakom_iker;
 pub mod svakom_pulse;
 pub mod svakom_sam;
 pub mod svakom_v2;
+pub mod svakom_v3;
 pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
@@ -82,6 +85,7 @@ pub mod wevibe8bit;
 pub mod wevibe_chorus;
 pub mod xibao;
 pub mod xinput;
+pub mod xiuxiuda;
 pub mod youcups;
 pub mod youou;
 pub mod zalo;
@@ -151,6 +155,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     hismith::setup::HismithIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    hismith_mini::setup::HismithMiniIdentifierFactory::default(),
   );
   add_to_protocol_map(&mut map, htk_bm::setup::HtkBmIdentifierFactory::default());
   add_to_protocol_map(
@@ -305,6 +313,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    svakom_alex_v2::setup::SvakomAlexV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -318,6 +330,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     svakom_v2::setup::SvakomV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_v3::setup::SvakomV3IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -348,6 +364,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, xibao::setup::XibaoIdentifierFactory::default());
   add_to_protocol_map(&mut map, xinput::setup::XInputIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    xiuxiuda::setup::XiuxiudaIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     youcups::setup::YoucupsIdentifierFactory::default(),

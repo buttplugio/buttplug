@@ -26,6 +26,7 @@ use crate::{
   util::async_manager,
 };
 use async_trait::async_trait;
+use btleplug::api::CharPropFlags;
 use btleplug::{
   api::{Central, CentralEvent, Characteristic, Peripheral, ValueNotification, WriteType},
   platform::Adapter,
@@ -334,12 +335,43 @@ impl<T: Peripheral + 'static> HardwareInternal for BtlePlugHardware<T> {
         return future::ready(Err(ButtplugDeviceError::InvalidEndpoint(msg.endpoint))).boxed();
       }
     };
+
     let device = self.device.clone();
-    let write_type = if msg.write_with_response {
+    let mut write_type = if msg.write_with_response {
       WriteType::WithResponse
     } else {
       WriteType::WithoutResponse
     };
+
+    if (write_type == WriteType::WithoutResponse
+      && (characteristic.properties & CharPropFlags::WRITE_WITHOUT_RESPONSE)
+        != CharPropFlags::WRITE_WITHOUT_RESPONSE)
+      || (write_type == WriteType::WithResponse
+        && (characteristic.properties & CharPropFlags::WRITE) != CharPropFlags::WRITE)
+    {
+      if write_type == WriteType::WithoutResponse
+        && (characteristic.properties & CharPropFlags::WRITE) == CharPropFlags::WRITE
+      {
+        warn!("BTLEPlug device doesn't support write-without-response! Falling back to write-with-response!");
+        write_type = WriteType::WithResponse
+      } else if write_type == WriteType::WithResponse
+        && (characteristic.properties & CharPropFlags::WRITE_WITHOUT_RESPONSE)
+          == CharPropFlags::WRITE_WITHOUT_RESPONSE
+      {
+        warn!("BTLEPlug device doesn't support write-with-response! Falling back to write-without-response!");
+        write_type = WriteType::WithoutResponse
+      } else {
+        error!(
+          "BTLEPlug device doesn't support {}! No fallback available!",
+          if write_type == WriteType::WithoutResponse {
+            "write-without-response"
+          } else {
+            "write-with-response"
+          }
+        );
+      }
+    }
+
     let data = msg.data.clone();
     async move {
       match device.write(&characteristic, &data, write_type).await {

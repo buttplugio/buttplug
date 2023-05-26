@@ -89,6 +89,11 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
+  pub fn device_configuration_manager_builder(&mut self, dcm_builder: &DeviceConfigurationManagerBuilder) -> &mut Self {
+    self.configuration_manager_builder.merge(dcm_builder);
+    self
+  }
+
   pub fn allowed_address(&mut self, address: &str) -> &mut Self {
     self.configuration_manager_builder.allowed_address(address);
     self

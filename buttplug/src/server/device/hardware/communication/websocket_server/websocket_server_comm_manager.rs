@@ -96,13 +96,13 @@ impl WebsocketServerDeviceCommunicationManager {
       debug!("Trying to listen on {}", addr);
 
       // Create the event loop and TCP listener we'll accept connections on.
-      let try_socket = TcpListener::bind(&addr).await;
       debug!("Socket bound.");
-      let listener = if let Ok(listener) = try_socket {
-        listener
-      } else {
-        error!("Cannot bind websocket server to {}.", addr);
-        return;
+      let listener = match TcpListener::bind(&addr).await {
+        Ok(listener) => listener,
+        Err(err) => {
+          error!("Cannot bind websocket server to {}: {:?}.", addr, err);
+          return;
+        }
       };
       debug!("Listening on: {}", addr);
       loop {

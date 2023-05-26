@@ -5,10 +5,13 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+mod util;
+
 // The tests in this file can fail on CI if there isn't a timed retry. Seems to work reliably on
 // windows, so lock it to that platform for now.
 #[cfg(all(feature = "websockets", target_os = "windows"))]
 mod websocket_connector_tests {
+  use crate::util::ButtplugTestServer;
   use buttplug::{
     client::ButtplugClient,
     core::{
@@ -21,7 +24,6 @@ mod websocket_connector_tests {
       },
       message::serializer::{ButtplugClientJSONSerializer, ButtplugServerJSONSerializer},
     },
-    server::ButtplugRemoteServer,
     util::async_manager,
   };
   use std::{sync::Arc, time::Duration};
@@ -30,7 +32,7 @@ mod websocket_connector_tests {
   #[test]
   fn test_client_ws_client_server_ws_server_insecure() {
     async_manager::block_on(async move {
-      let test_server = ButtplugRemoteServer::default();
+      let test_server = ButtplugTestServer::default();
       let server = Arc::new(test_server);
       let server_clone = server.clone();
       async_manager::spawn(async move {
@@ -74,7 +76,7 @@ mod websocket_connector_tests {
   #[test]
   fn test_client_ws_server_server_ws_client_insecure() {
     async_manager::block_on(async move {
-      let test_server = ButtplugRemoteServer::default();
+      let test_server = ButtplugTestServer::default();
       let server = Arc::new(test_server);
       let server_clone = server.clone();
       async_manager::spawn(async move {

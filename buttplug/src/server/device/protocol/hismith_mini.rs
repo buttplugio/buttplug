@@ -1,6 +1,6 @@
 // Buttplug Rust Source Code File - See https://buttplug.io for more info.
 //
-// Copyright 2016-2022 Nonpolynomial Labs LLC. All rights reserved.
+// Copyright 2016-2023 Nonpolynomial Labs LLC. All rights reserved.
 //
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
@@ -21,24 +21,24 @@ use std::sync::Arc;
 pub mod setup {
   use crate::server::device::protocol::{ProtocolIdentifier, ProtocolIdentifierFactory};
   #[derive(Default)]
-  pub struct HismithIdentifierFactory {}
+  pub struct HismithMiniIdentifierFactory {}
 
-  impl ProtocolIdentifierFactory for HismithIdentifierFactory {
+  impl ProtocolIdentifierFactory for HismithMiniIdentifierFactory {
     fn identifier(&self) -> &str {
-      "hismith"
+      "hismith-mini"
     }
 
     fn create(&self) -> Box<dyn ProtocolIdentifier> {
-      Box::new(super::HismithIdentifier::default())
+      Box::new(super::HismithMiniIdentifier::default())
     }
   }
 }
 
 #[derive(Default)]
-pub struct HismithIdentifier {}
+pub struct HismithMiniIdentifier {}
 
 #[async_trait]
-impl ProtocolIdentifier for HismithIdentifier {
+impl ProtocolIdentifier for HismithMiniIdentifier {
   async fn identify(
     &mut self,
     hardware: Arc<Hardware>,
@@ -57,43 +57,43 @@ impl ProtocolIdentifier for HismithIdentifier {
     Ok((
       ServerDeviceIdentifier::new(
         hardware.address(),
-        "hismith",
+        "hismith-mini",
         &ProtocolAttributesType::Identifier(identifier),
       ),
-      Box::new(HismithInitializer::default()),
+      Box::new(HismithMiniInitializer::default()),
     ))
   }
 }
 
 #[derive(Default)]
-pub struct HismithInitializer {}
+pub struct HismithMiniInitializer {}
 
 #[async_trait]
-impl ProtocolInitializer for HismithInitializer {
+impl ProtocolInitializer for HismithMiniInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(Hismith::default()))
+    Ok(Arc::new(HismithMini::default()))
   }
 }
 
 #[derive(Default)]
-pub struct Hismith {}
+pub struct HismithMini {}
 
-impl ProtocolHandler for Hismith {
+impl ProtocolHandler for HismithMini {
   fn handle_scalar_oscillate_cmd(
     &self,
     _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = 0x04;
+    let idx: u8 = 0x03;
     let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xAA, idx, speed, speed + idx],
+      vec![0xCC, idx, speed, speed + idx],
       false,
     )
     .into()])
@@ -101,21 +101,31 @@ impl ProtocolHandler for Hismith {
 
   fn handle_scalar_vibrate_cmd(
     &self,
-    index: u32,
+    _index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    // Wildolo has a vibe at index 0 using id 4
-    // The thrusting stroker has a vibe at index 1 using id 6 (and the weird 0xf0 off)
-    let idx: u8 = if index == 0 { 0x04 } else { 0x06 };
-    let speed: u8 = if index != 0 && scalar == 0 {
-      0xf0
-    } else {
-      scalar as u8
-    };
+    let idx: u8 = 0x05;
+    let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0xAA, idx, speed, speed + idx],
+      vec![0xCC, idx, speed, speed + idx],
+      false,
+    )
+    .into()])
+  }
+
+  fn handle_scalar_constrict_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    let idx: u8 = 0x03;
+    let speed: u8 = scalar as u8;
+
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![0xCC, idx, speed, speed + idx],
       false,
     )
     .into()])

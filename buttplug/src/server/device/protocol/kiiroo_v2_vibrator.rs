@@ -16,7 +16,7 @@ use crate::{
   },
 };
 
-generic_protocol_setup!(KiirooV2Vibrator, "kiiroov2vibrator");
+generic_protocol_setup!(KiirooV2Vibrator, "kiiroo-v2-vibrator");
 
 #[derive(Default)]
 pub struct KiirooV2Vibrator {}

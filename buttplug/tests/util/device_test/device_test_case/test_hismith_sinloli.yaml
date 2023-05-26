@@ -1,0 +1,63 @@
+devices:
+  - identifier: 
+      name: "Sinloli"
+    expected_name: "Sinloli Automatic Sex Doll"
+device_init:
+  - !Events
+    device_index: 0
+    events:
+      - !Reads
+        - endpoint: rxblemodel
+          data: [0x22, 0x01]
+device_commands:
+  # Commands
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.5
+          ActuatorType: Constrict
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xCC, 0x03, 0x32, 0x35]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Scalar
+        - Index: 0
+          Scalar: 0.1
+          ActuatorType: Constrict
+        - Index: 1
+          Scalar: 0.5
+          ActuatorType: Vibrate
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xCC, 0x03, 0x0a, 0x0d]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0xCC, 0x05, 0x32, 0x37]
+        write_with_response: false
+  - !Messages
+    device_index: 0
+    messages:
+      - !Stop
+  - !Commands
+    device_index: 0
+    commands:
+      - !Write
+        endpoint: tx
+        data: [0xCC, 0x03, 0x00, 0x03]
+        write_with_response: false
+      - !Write
+        endpoint: tx
+        data: [0xCC, 0x05, 0x00, 0x05]
+        write_with_response: false

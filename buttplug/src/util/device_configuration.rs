@@ -76,8 +76,8 @@ struct GenericUserDeviceMessageAttributes {
 }
 
 #[derive(Serialize, Deserialize, Debug, Getters, Setters, Default, Clone)]
-#[getset(get = "pub", set = "pub")]
-struct UserDeviceConfig {
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
+pub struct UserDeviceConfig {
   #[serde(skip_serializing_if = "Option::is_none")]
   #[serde(default)]
   #[serde(rename = "display-name")]
@@ -98,7 +98,7 @@ struct UserDeviceConfig {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct ProtocolAttributes {
+pub struct ProtocolAttributes {
   #[serde(skip_serializing_if = "Option::is_none")]
   identifier: Option<Vec<String>>,
   #[serde(skip_serializing_if = "Option::is_none")]
@@ -109,7 +109,7 @@ struct ProtocolAttributes {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct ProtocolDefinition {
+pub struct ProtocolDefinition {
   // Can't get serde flatten specifiers into a String/DeviceSpecifier map, so
   // they're kept separate here, and we return them in specifiers(). Feels
   // very clumsy, but we really don't do this a bunch during a session.
@@ -136,17 +136,26 @@ struct ProtocolDefinition {
 
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct UserDeviceConfigPair {
+pub struct UserDeviceConfigPair {
   identifier: UserConfigDeviceIdentifier,
   config: UserDeviceConfig,
 }
 
+impl UserDeviceConfigPair {
+  pub fn new(identifier:UserConfigDeviceIdentifier, config: UserDeviceConfig) -> Self {
+    Self {
+      identifier,
+      config
+    }
+  }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, Default, Getters, Setters, MutGetters)]
-#[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
-struct UserConfigDefinition {
-  #[serde(default)]
+#[getset(get = "pub", set = "pub", get_mut = "pub")]
+pub struct UserConfigDefinition {
+  #[serde(default, skip_serializing_if = "Option::is_none")]
   specifiers: Option<HashMap<String, ProtocolDefinition>>,
-  #[serde(rename = "devices", default)]
+  #[serde(rename = "devices", default, skip_serializing_if = "Option::is_none")]
   user_device_configs: Option<Vec<UserDeviceConfigPair>>,
 }
 
@@ -155,9 +164,10 @@ struct UserConfigDefinition {
 )]
 #[getset(get = "pub", set = "pub", get_mut = "pub(crate)")]
 pub struct UserConfigDeviceIdentifier {
-  address: String,
-  protocol: String,
-  identifier: Option<String>,
+  pub address: String,
+  pub protocol: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub identifier: Option<String>,
 }
 
 impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
@@ -168,6 +178,22 @@ impl From<UserConfigDeviceIdentifier> for ServerDeviceIdentifier {
       ProtocolAttributesType::Default
     };
     ServerDeviceIdentifier::new(&ident.address, &ident.protocol, &server_identifier)
+  }
+}
+
+impl From<ServerDeviceIdentifier> for UserConfigDeviceIdentifier {
+  fn from(ident: ServerDeviceIdentifier) -> Self {
+    let server_identifier =
+      if let ProtocolAttributesType::Identifier(ident_string) = ident.attributes_identifier() {
+        Some(ident_string.clone())
+      } else {
+        None
+      };
+    UserConfigDeviceIdentifier {
+      address: ident.address().clone(),
+      protocol: ident.protocol().clone(),
+      identifier: server_identifier,
+    }
   }
 }
 
@@ -326,10 +352,10 @@ fn add_user_configs_to_protocol(
 }
 
 #[derive(Deserialize, Serialize, Debug, CopyGetters)]
-#[getset(get_copy = "pub")]
-struct ConfigVersion {
-  major: u32,
-  minor: u32,
+#[getset(get_copy = "pub", get_mut = "pub")]
+pub struct ConfigVersion {
+  pub major: u32,
+  pub minor: u32,
 }
 
 impl Display for ConfigVersion {
@@ -339,13 +365,13 @@ impl Display for ConfigVersion {
 }
 
 #[derive(Deserialize, Serialize, Debug, Getters)]
-#[getset(get = "pub")]
-struct ProtocolConfiguration {
-  version: ConfigVersion,
-  #[serde(default)]
-  protocols: Option<HashMap<String, ProtocolDefinition>>,
-  #[serde(rename = "user-configs", default)]
-  user_configs: Option<UserConfigDefinition>,
+#[getset(get = "pub", get_mut = "pub", set = "pub")]
+pub struct ProtocolConfiguration {
+  pub version: ConfigVersion,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub protocols: Option<HashMap<String, ProtocolDefinition>>,
+  #[serde(rename = "user-configs", default, skip_serializing_if = "Option::is_none")]
+  pub user_configs: Option<UserConfigDefinition>,
 }
 
 impl Default for ProtocolConfiguration {
@@ -359,6 +385,14 @@ impl Default for ProtocolConfiguration {
 }
 
 impl ProtocolConfiguration {
+  pub fn new(major_version: u32, minor_version: u32) -> Self {
+    Self {
+      version: ConfigVersion { major: major_version, minor: minor_version },
+      protocols: None,
+      user_configs: None
+    }
+  }
+
   #[allow(dead_code)]
   pub fn to_json(&self) -> String {
     serde_json::to_string(self)
@@ -466,38 +500,47 @@ pub fn load_protocol_configs(
   main_config_str: Option<String>,
   user_config_str: Option<String>,
   skip_version_check: bool,
-  device_manager_builder: &mut ServerDeviceManagerBuilder,
-) -> Result<(), ButtplugDeviceError> {
+) -> Result<DeviceConfigurationManagerBuilder, ButtplugDeviceError> {
+  let mut dcm_builder = DeviceConfigurationManagerBuilder::default();
+
   let external_config =
     load_protocol_configs_internal(main_config_str, user_config_str, skip_version_check)?;
 
   for address in external_config.allow_list() {
-    device_manager_builder.allowed_address(address);
+    dcm_builder.allowed_address(address);
   }
 
   for address in external_config.deny_list() {
-    device_manager_builder.denied_address(address);
+    dcm_builder.denied_address(address);
   }
 
   for (index, address) in external_config.reserved_indexes() {
-    device_manager_builder.reserved_index(address, *index);
+    dcm_builder.reserved_index(address, *index);
   }
 
   for (name, specifiers) in external_config.protocol_specifiers() {
     for spec in specifiers {
-      device_manager_builder.communication_specifier(name, spec.clone());
+      dcm_builder.communication_specifier(name, spec.clone());
     }
   }
 
   for (ident, attributes) in external_config.protocol_attributes() {
-    device_manager_builder.protocol_attributes(ident.clone(), attributes.clone());
+    dcm_builder.protocol_attributes(ident.clone(), attributes.clone());
   }
 
   for (ident, attributes) in external_config.user_configs() {
-    device_manager_builder.protocol_attributes(ident.into(), attributes.clone());
+    dcm_builder.protocol_attributes(ident.into(), attributes.clone());
   }
 
-  Ok(())
+  Ok(dcm_builder)
+}
+
+pub fn load_user_configs(user_config_str: &str) -> Vec<UserDeviceConfigPair> {
+  let user_config = load_protocol_config_from_json(user_config_str, true).unwrap();
+  match user_config.user_configs {
+    Some(config) => config.user_device_configs.unwrap_or_default(),
+    None => vec!()
+  }
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {

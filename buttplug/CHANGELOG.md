@@ -1,4 +1,40 @@
+# 7.1.0 (2023-05-21)
+
+## Breaking(ish) Changes
+
+- ButtplugRemoteServer has been moved up to Intiface Engine, because it mostly deals with handling
+  external connections, and was only used by the engine. While this is an API breaking change on the
+  server side, I'm pretty sure no one ever used this outside of Intiface Engine, so I'm just making
+  this a point release. I guess if someone did use it, I'm gonna hear about it.
+
+## Features
+
+- Added Device Support
+  - Svakom Phoenix Neo 2, Hannes, Ella Neo, Edeny, Tammy Pro
+  - WeVibe Sync 2
+  - FitCute Kegel Rejuve
+  - Lelo Tor 3
+  - Auxfun Remote Control Box
+  - Hismith Sinloli
+  - Lovense Tenera
+  - Xiuxiuda Devices
+  - Kiiroo Pearl 2+
+- Rework configuration system for easier loading of user device configs
+
+## Bugfixes
+
+- Fix name for Xibao Smart Masturbation Cup
+- Fix Folove Telescopic Prostate Massager communications
+- Fix Svakom Iker identification to use manufacturer value
+- Fix protocol impl for some Kiiroo Vibrators
+- Fix Vorze UFO TW Nipple Stimulator rotation commands
+- User configs with non-null but unknown identifiers should use default configs
+- Clarify error message for Websocket Server not being able to bind
+- Close websocket device server when ping times out (won't show device as disconnected otherwise)
+
 # 7.0.2 (2023-02-19)
+
+## Features
 
 - Added Device Support
   - Kizuna Smart

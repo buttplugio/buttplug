@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 9
+    "minor": 11
   },
   "protocols": {
     "lovense": {
@@ -115,6 +115,10 @@
           "45410001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "45410002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "45410003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "51300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "51300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "51300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -468,6 +472,12 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Q"
+          ],
+          "name": "Lovense Tenera"
         }
       ]
     },
@@ -651,7 +661,19 @@
           "identifier": [
             "XMachine"
           ],
-          "name": "Lovense Connect Sex Machine"
+          "name": "Lovense Sex Machine",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+              }
+            ]
+          }
         },
         {
           "identifier": [
@@ -1192,6 +1214,7 @@
           "Smart Mini Vibe*",
           "Flamingo",
           "Smart Bean",
+          "Smart Bean3",
           "Magic Cell",
           "Magic Wand",
           "Fugu",
@@ -1240,6 +1263,12 @@
             "Smart Bean"
           ],
           "name": "MagicMotion Smart Bean"
+        },
+        {
+          "identifier": [
+            "Smart Bean3"
+          ],
+          "name": "FitCute Kegel Rejuve"
         },
         {
           "identifier": [
@@ -2220,7 +2249,8 @@
       "btle": {
         "names": [
           "Chorus",
-          "skeena"
+          "skeena",
+          "Sync 2"
         ],
         "services": {
           "f000bb03-0451-4000-b000-000000000000": {
@@ -2249,7 +2279,33 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Sync 2"
+          ],
+          "name": "WeVibe Sync 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  3
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  3
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
     },
     "youcups": {
       "btle": {
@@ -2408,6 +2464,7 @@
       "btle": {
         "names": [
           "Pearl2",
+          "Pearl2+",
           "Fuse",
           "Virtual Blowbot",
           "Titan",
@@ -2469,6 +2526,23 @@
         },
         {
           "identifier": [
+            "Pearl2+"
+          ],
+          "name": "Kiiroo Pearl 2+",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
             "Fuse"
           ],
           "name": "OhMiBod Fuse",
@@ -2497,7 +2571,7 @@
           "identifier": [
             "Virtual Rabbit"
           ],
-          "name": "PornHub Virtual Rabit",
+          "name": "PornHub Virtual Rabbit",
           "messages": {
             "ScalarCmd": [
               {
@@ -3205,7 +3279,6 @@
         "names": [
           "Aogu SUV",
           "Aogu SCB",
-          "Ella NEO",
           "Emma NEO",
           "Phoenix NEO",
           "Vick NEO"
@@ -3240,12 +3313,6 @@
         },
         {
           "identifier": [
-            "Ella NEO"
-          ],
-          "name": "Svakom Ella Neo"
-        },
-        {
-          "identifier": [
             "Phoenix NEO"
           ],
           "name": "Svakom Phoenix Neo"
@@ -3268,7 +3335,10 @@
       "btle": {
         "names": [
           "116",
-          "Viviana"
+          "117",
+          "Viviana",
+          "Ella NEO",
+          "S38A"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3303,6 +3373,91 @@
             "Viviana"
           ],
           "name": "Svakom Viviana"
+        },
+        {
+          "identifier": [
+            "Ella NEO"
+          ],
+          "name": "Svakom Ella Neo"
+        },
+        {
+          "identifier": [
+            "117"
+          ],
+          "name": "Svakom Edeny"
+        },
+        {
+          "identifier": [
+            "S38A"
+          ],
+          "name": "Svakom Tammy Pro"
+        }
+      ]
+    },
+    "svakom-v3": {
+      "btle": {
+        "names": [
+          "Phoenix Neo 2",
+          "FK008A",
+          "Hannes NEO"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Device v3",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "Phoenix Neo 2"
+          ],
+          "name": "Svakom Phoenix Neo 2"
+        },
+        {
+          "identifier": [
+            "FK008A"
+          ],
+          "name": "Fantasy Cup Theodore",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  10
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  1
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Hannes NEO"
+          ],
+          "name": "Svakom Hannes Neo"
         }
       ]
     },
@@ -3365,6 +3520,32 @@
         }
       }
     },
+    "svakom-alex-v2": {
+      "btle": {
+        "names": [
+          "Alex NEO 2"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Alex Neo 2",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
     "svakom-iker": {
       "btle": {
         "names": [
@@ -3376,16 +3557,22 @@
             "data": [
               83,
               86,
-              65
+              65,
+              1,
+              11,
+              18,
+              1,
+              51,
+              68,
+              85,
+              202,
+              8
             ]
           }
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
             "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
-          },
-          "00001800-0000-1000-8000-00805f9b34fb": {
-            "rxblemodel": "00002a00-0000-1000-8000-00805f9b34fb"
           }
         }
       },
@@ -3775,7 +3962,8 @@
           "IdaWave",
           "Ida Wave",
           "TianiHarmony",
-          "Tiani Harmony"
+          "Tiani Harmony",
+          "TOR3"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -3828,6 +4016,23 @@
                   100
                 ],
                 "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "TOR3"
+          ],
+          "name": "Lelo Tor 3",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
               }
             ]
           }
@@ -6135,12 +6340,6 @@
         },
         {
           "identifier": [
-            "4001"
-          ],
-          "name": "Auxfun Sex Machine"
-        },
-        {
-          "identifier": [
             "1002"
           ],
           "name": "Hismith Pro Traveler"
@@ -6188,6 +6387,71 @@
                   0,
                   100
                 ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "hismith-mini": {
+      "btle": {
+        "names": [
+          "Auxfun-Box",
+          "Sinloli"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+          },
+          "0000ff90-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Hismith Mini device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "4001"
+          ],
+          "name": "Auxfun Sex Machine"
+        },
+        {
+          "identifier": [
+            "2201"
+          ],
+          "name": "Sinloli Automatic Sex Doll",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Vibrator",
                 "ActuatorType": "Vibrate"
               }
             ]
@@ -6563,7 +6827,7 @@
     "xibao": {
       "btle": {
         "names": [
-          "CCYB_1904"
+          "CCYB_*"
         ],
         "services": {
           "0000fff0-0000-1000-8000-00805f9b34fb": {
@@ -6660,6 +6924,32 @@
                 9
               ],
               "ActuatorType": "Rotate"
+            }
+          ]
+        }
+      }
+    },
+    "xiuxiuda": {
+      "btle": {
+        "names": [
+          "XXD-Lush*"
+        ],
+        "services": {
+          "53300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "53300003-0023-4bd4-bbd5-a6920e4c5653"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Xiuxiuda Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                19
+              ],
+              "ActuatorType": "Vibrate"
             }
           ]
         }

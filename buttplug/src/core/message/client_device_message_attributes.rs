@@ -257,7 +257,6 @@ pub struct ClientGenericDeviceMessageAttributes {
 
 impl ClientGenericDeviceMessageAttributes {
   pub fn new(feature_descriptor: &str, step_count: u32, actuator_type: ActuatorType) -> Self {
-    info!("GENERIC DEVICE MESSAGE CONSTRUCTOR CALLED");
     Self {
       feature_descriptor: feature_descriptor.to_owned(),
       actuator_type,

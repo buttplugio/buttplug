@@ -371,7 +371,7 @@ impl ProtocolDeviceAttributes {
   }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct DeviceConfigurationManagerBuilder {
   skip_default_protocols: bool,
   allow_raw_messages: bool,
@@ -391,6 +391,21 @@ pub struct DeviceConfigurationManagerBuilder {
 }
 
 impl DeviceConfigurationManagerBuilder {
+  pub fn merge(
+    &mut self,
+    other: &DeviceConfigurationManagerBuilder
+  ) -> &mut Self {
+    self.skip_default_protocols = self.skip_default_protocols || other.skip_default_protocols;
+    self.allow_raw_messages = self.allow_raw_messages || other.allow_raw_messages;
+    self.communication_specifiers.extend(other.communication_specifiers.iter().map(|(k,v)| (k.clone(), v.clone())));
+    self.protocol_attributes.extend(other.protocol_attributes.iter().map(|(k,v)| (k.clone(), v.clone())));
+    self.protocols.extend(other.protocols.iter().map(|v| (v.clone())));
+    self.allowed_addresses.extend(other.allowed_addresses.iter().map(|v| (v.clone())));
+    self.denied_addresses.extend(other.denied_addresses.iter().map(|v| (v.clone())));
+    self.reserved_indexes.extend(other.reserved_indexes.iter().map(|v| (v.clone())));
+    self
+  }
+
   pub fn communication_specifier(
     &mut self,
     protocol_name: &str,
@@ -521,6 +536,16 @@ impl DeviceConfigurationManagerBuilder {
         protocol: ident.protocol.clone(),
         attributes_identifier: ident.attributes_identifier.clone(),
       }) {
+        let attr_with_parent = attr.new_with_parent(parent.clone());
+        attribute_tree_map.insert(ident.clone(), Arc::new(attr_with_parent));
+      } else if let Some(parent) = attribute_tree_map.get(&ProtocolAttributesIdentifier {
+        address: None,
+        protocol: ident.protocol.clone(),
+        attributes_identifier: ProtocolAttributesType::Default,
+      }) {
+        // There are some cases where protocols will hand back identifiers even though we don't have
+        // any in the config (i.e. new devices we haven't added specializations for yet). In that
+        // case, fall back to the default.
         let attr_with_parent = attr.new_with_parent(parent.clone());
         attribute_tree_map.insert(ident.clone(), Arc::new(attr_with_parent));
       } else {
