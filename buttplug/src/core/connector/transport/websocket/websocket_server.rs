@@ -156,10 +156,9 @@ async fn run_connection_loop<S>(
                   }
                   break;
                 }
-                async_tungstenite::tungstenite::Message::Ping(_) => {
-                  // noop
+                async_tungstenite::tungstenite::Message::Ping(val) => {
                   if websocket_server_sender
-                    .send(async_tungstenite::tungstenite::Message::Pong(vec!(0)))
+                    .send(async_tungstenite::tungstenite::Message::Pong(val))
                     .await
                     .is_err() {
                     warn!("Cannot send pong to client, considering connection closed.");
@@ -172,7 +171,6 @@ async fn run_connection_loop<S>(
                   continue;
                 }
                 async_tungstenite::tungstenite::Message::Pong(_) => {
-                  // noop
                   pong_count += 1;
                   continue;
                 }
