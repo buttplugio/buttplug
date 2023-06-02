@@ -41,7 +41,7 @@ impl ProtocolHandler for WeVibeChorus {
     } else {
       // Note the motor order is flipped for the Chorus
       let status_byte: u8 =
-        (if r_speed_ext == 0 { 0 } else { 1 }) | (if r_speed_int == 0 { 0 } else { 2 });
+        (if r_speed_ext == 0 { 0 } else { 2 }) | (if r_speed_int == 0 { 0 } else { 1 });
       vec![
         0x0f,
         0x1a,
