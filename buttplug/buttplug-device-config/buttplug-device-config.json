@@ -6972,6 +6972,40 @@
           ]
         }
       }
+    },
+    "longlosttouch": {
+      "btle": {
+        "names": [
+          "RS-KNW"
+        ],
+        "services": {
+          "0000cb60-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000cb61-0000-1000-8000-00805f9b34fb",
+            "rx": "0000cb62-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Long Lost Touch Possible Kiss",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Oscillate"
+            }
+          ]
+        }
+      }
     }
   }
 }
