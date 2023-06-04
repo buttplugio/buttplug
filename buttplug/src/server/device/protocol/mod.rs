@@ -38,6 +38,7 @@ pub mod lelof1sv2;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod longlosttouch;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
@@ -221,6 +222,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
