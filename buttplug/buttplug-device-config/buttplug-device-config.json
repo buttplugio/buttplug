@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 11
+    "minor": 12
   },
   "protocols": {
     "lovense": {
@@ -2250,7 +2250,8 @@
         "names": [
           "Chorus",
           "skeena",
-          "Sync 2"
+          "Sync 2",
+          "Sync Lite"
         ],
         "services": {
           "f000bb03-0451-4000-b000-000000000000": {
@@ -2291,14 +2292,31 @@
               {
                 "StepRange": [
                   0,
-                  3
+                  30
                 ],
                 "ActuatorType": "Vibrate"
               },
               {
                 "StepRange": [
                   0,
-                  3
+                  30
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Sync Lite"
+          ],
+          "name": "WeVibe Sync Lite",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  30
                 ],
                 "ActuatorType": "Vibrate"
               }
