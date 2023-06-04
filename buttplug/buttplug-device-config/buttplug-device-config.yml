@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 11
+  minor: 12
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -1204,6 +1204,7 @@ protocols:
         - Chorus
         - skeena
         - Sync 2
+        - Sync Lite
       services:
         f000bb03-0451-4000-b000-000000000000:
           tx: f000c000-0451-4000-b000-000000000000
@@ -1222,9 +1223,16 @@ protocols:
         name: WeVibe Sync 2
         messages:
           ScalarCmd:
-            - StepRange: [0, 3]
+            - StepRange: [0, 30]
               ActuatorType: Vibrate
-            - StepRange: [0, 3]
+            - StepRange: [0, 30]
+              ActuatorType: Vibrate
+      - identifier:
+          - Sync Lite
+        name: WeVibe Sync Lite
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 30]
               ActuatorType: Vibrate
   youcups:
     btle:
