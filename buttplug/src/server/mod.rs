@@ -79,7 +79,7 @@ use crate::{
     async_manager,
     device_configuration::{load_protocol_configs, DEVICE_CONFIGURATION_JSON},
     stream::convert_broadcast_receiver_to_stream,
-  }
+  },
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -264,7 +264,9 @@ impl ButtplugServerBuilder {
     )
     .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
-    self.device_manager_builder.device_configuration_manager_builder(&dcm_builder);
+    self
+      .device_manager_builder
+      .device_configuration_manager_builder(&dcm_builder);
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();

@@ -391,18 +391,33 @@ pub struct DeviceConfigurationManagerBuilder {
 }
 
 impl DeviceConfigurationManagerBuilder {
-  pub fn merge(
-    &mut self,
-    other: &DeviceConfigurationManagerBuilder
-  ) -> &mut Self {
+  pub fn merge(&mut self, other: &DeviceConfigurationManagerBuilder) -> &mut Self {
     self.skip_default_protocols = self.skip_default_protocols || other.skip_default_protocols;
     self.allow_raw_messages = self.allow_raw_messages || other.allow_raw_messages;
-    self.communication_specifiers.extend(other.communication_specifiers.iter().map(|(k,v)| (k.clone(), v.clone())));
-    self.protocol_attributes.extend(other.protocol_attributes.iter().map(|(k,v)| (k.clone(), v.clone())));
-    self.protocols.extend(other.protocols.iter().map(|v| (v.clone())));
-    self.allowed_addresses.extend(other.allowed_addresses.iter().map(|v| (v.clone())));
-    self.denied_addresses.extend(other.denied_addresses.iter().map(|v| (v.clone())));
-    self.reserved_indexes.extend(other.reserved_indexes.iter().map(|v| (v.clone())));
+    self.communication_specifiers.extend(
+      other
+        .communication_specifiers
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone())),
+    );
+    self.protocol_attributes.extend(
+      other
+        .protocol_attributes
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone())),
+    );
+    self
+      .protocols
+      .extend(other.protocols.iter().map(|v| (v.clone())));
+    self
+      .allowed_addresses
+      .extend(other.allowed_addresses.iter().map(|v| (v.clone())));
+    self
+      .denied_addresses
+      .extend(other.denied_addresses.iter().map(|v| (v.clone())));
+    self
+      .reserved_indexes
+      .extend(other.reserved_indexes.iter().map(|v| (v.clone())));
     self
   }
 

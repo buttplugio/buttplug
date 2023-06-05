@@ -89,7 +89,10 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn device_configuration_manager_builder(&mut self, dcm_builder: &DeviceConfigurationManagerBuilder) -> &mut Self {
+  pub fn device_configuration_manager_builder(
+    &mut self,
+    dcm_builder: &DeviceConfigurationManagerBuilder,
+  ) -> &mut Self {
     self.configuration_manager_builder.merge(dcm_builder);
     self
   }
