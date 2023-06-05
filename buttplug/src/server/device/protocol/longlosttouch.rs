@@ -82,7 +82,7 @@ fn form_commands(data: Arc<Vec<AtomicU8>>, force: Option<Vec<bool>>) -> Vec<Vec<
   }
 
   (0..2).for_each(|i| {
-    if !skip[i as usize] && (zero[i as usize] || data[i as usize].load(Ordering::SeqCst) != 0 ) {
+    if !skip[i as usize] && (zero[i as usize] || data[i as usize].load(Ordering::SeqCst) != 0) {
       cmds.push(vec![
         0xAA,
         0x02,
@@ -144,10 +144,13 @@ impl ProtocolHandler for LongLostTouch {
       }
     }
     Ok(
-      form_commands(self.last_command.clone(), Some(commands.iter().map(|i| i.is_some()).collect()))
-        .iter()
-        .map(|data| HardwareWriteCmd::new(Endpoint::Tx, data.clone(), true).into())
-        .collect(),
+      form_commands(
+        self.last_command.clone(),
+        Some(commands.iter().map(|i| i.is_some()).collect()),
+      )
+      .iter()
+      .map(|data| HardwareWriteCmd::new(Endpoint::Tx, data.clone(), true).into())
+      .collect(),
     )
   }
 }
