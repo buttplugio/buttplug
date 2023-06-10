@@ -2894,6 +2894,7 @@
         "names": [
           "Rey",
           "We-Vibe Rocketman",
+          "Realm1.1",
           "Onyx2.1",
           "Onyx+",
           "KEON",
@@ -2970,7 +2971,8 @@
         {
           "identifier": [
             "Rey",
-            "We-Vibe Rocketman"
+            "We-Vibe Rocketman",
+            "Realm1.1"
           ],
           "name": "Kiiroo Onyx+ Realm Edition",
           "messages": {
