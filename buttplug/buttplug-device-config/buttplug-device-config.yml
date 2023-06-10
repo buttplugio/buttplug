@@ -1472,6 +1472,7 @@ protocols:
       names:
         - Rey # Branded Realm
         - We-Vibe Rocketman # Rey alias
+        - Realm1.1 # Rey alias
         - Onyx2.1
         - Onyx+
         - KEON
@@ -1514,6 +1515,7 @@ protocols:
       - identifier:
           - Rey
           - We-Vibe Rocketman
+          - Realm1.1
         name: Kiiroo Onyx+ Realm Edition
         messages:
           LinearCmd:
