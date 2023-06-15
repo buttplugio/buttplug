@@ -6321,7 +6321,8 @@
       "btle": {
         "names": [
           "HISMITH",
-          "Wildolo"
+          "Wildolo",
+          "\u0007HISMITH"
         ],
         "services": {
           "0000ffe5-0000-1000-8000-00805f9b34fb": {
