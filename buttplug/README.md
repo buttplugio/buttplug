@@ -46,7 +46,7 @@ usually means sex toys, but could honestly be just about anything. It's basicall
 manager for things that may not specifically be HID.
 
 In more concrete terms, think of Buttplug as something like [osculator](http://www.osculator.net/)
-or [VRPN](http://vrpn.org), but for sex toys. Instead of wiimotes and control surfaces, we interface
+or [VRPN](https://vrpn.github.io), but for sex toys. Instead of wiimotes and control surfaces, we interface
 with vibrators, electrostim equipment, fucking machines, and other hardware that can communicate
 with computers.
 
