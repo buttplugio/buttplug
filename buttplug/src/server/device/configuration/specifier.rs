@@ -342,9 +342,11 @@ impl PartialEq for WebsocketSpecifier {
 }
 
 impl WebsocketSpecifier {
-  pub fn new(name: &str) -> WebsocketSpecifier {
+  pub fn new(names: &Vec<String>) -> WebsocketSpecifier {
     let mut set = HashSet::new();
-    set.insert(name.to_string());
+    for name in names {
+      set.insert(name.clone());
+    }
     WebsocketSpecifier { names: set }
   }
 }
