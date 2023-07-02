@@ -71,13 +71,13 @@ async fn run_connection_loop<S>(
 
   loop {
     select! {
-      _ = sleep(Duration::from_millis(1000)).fuse() => {
+      _ = sleep(Duration::from_millis(10000)).fuse() => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
           if websocket_server_sender.close().await.is_err() {
             error!("Cannot close, assuming connection already closed");
           }
-          return;
+          break;
         }
         pong_count = 0;
         if websocket_server_sender
@@ -88,7 +88,7 @@ async fn run_connection_loop<S>(
           if websocket_server_sender.close().await.is_err() {
             error!("Cannot close, assuming connection already closed");
           }
-          return;
+          break;
         }
       }
       ws_msg = request_receiver.recv().fuse() => {
@@ -98,14 +98,14 @@ async fn run_connection_loop<S>(
             .await
             .is_err() {
             error!("Cannot send binary value to client, considering connection closed.");
-            return;
+            break;
           }
         } else {
           info!("Websocket server connector owner dropped, disconnecting websocket connection.");
           if websocket_server_sender.close().await.is_err() {
             error!("Cannot close, assuming connection already closed");
           }
-          return;
+          break;
         }
       }
       websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
@@ -150,11 +150,12 @@ async fn run_connection_loop<S>(
         },
         None => {
           error!("Websocket channel closed, breaking");
-          return;
+          break;
         }
       }
     }
   }
+  websocket_server_sender.close().await;
   debug!("Exiting Websocket Server Device control loop.");
 }
 
