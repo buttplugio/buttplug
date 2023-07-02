@@ -538,12 +538,8 @@ pub fn load_protocol_configs(
   Ok(dcm_builder)
 }
 
-pub fn load_user_configs(user_config_str: &str) -> Vec<UserDeviceConfigPair> {
-  let user_config = load_protocol_config_from_json(user_config_str, true).unwrap();
-  match user_config.user_configs {
-    Some(config) => config.user_device_configs.unwrap_or_default(),
-    None => vec![],
-  }
+pub fn load_user_configs(user_config_str: &str) -> UserConfigDefinition {
+  load_protocol_config_from_json(user_config_str, true).unwrap().user_configs.unwrap()
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {
