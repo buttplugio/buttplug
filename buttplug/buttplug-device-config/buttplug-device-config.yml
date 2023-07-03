@@ -1681,7 +1681,6 @@ protocols:
         - Aogu SCB # Ella
         - Emma NEO
         - Phoenix NEO
-        - Vick NEO
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1700,9 +1699,6 @@ protocols:
           - Phoenix NEO
         name: Svakom Phoenix Neo
       - identifier:
-          - Vick NEO
-        name: Svakom Vick Neo
-      - identifier:
           - Emma NEO
         name: Svakom Emma Neo
   svakom-v2:
@@ -1713,6 +1709,7 @@ protocols:
         - Viviana
         - Ella NEO
         - S38A # Svakom Tammy Pro
+        - Vick NEO
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1746,6 +1743,9 @@ protocols:
       - identifier:
           - S38A
         name: Svakom Tammy Pro
+      - identifier:
+          - Vick NEO
+        name: Svakom Vick Neo
   svakom-v3:
     btle:
       names:

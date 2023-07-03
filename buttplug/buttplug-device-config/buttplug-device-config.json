@@ -3304,8 +3304,7 @@
           "Aogu SUV",
           "Aogu SCB",
           "Emma NEO",
-          "Phoenix NEO",
-          "Vick NEO"
+          "Phoenix NEO"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3343,12 +3342,6 @@
         },
         {
           "identifier": [
-            "Vick NEO"
-          ],
-          "name": "Svakom Vick Neo"
-        },
-        {
-          "identifier": [
             "Emma NEO"
           ],
           "name": "Svakom Emma Neo"
@@ -3362,7 +3355,8 @@
           "117",
           "Viviana",
           "Ella NEO",
-          "S38A"
+          "S38A",
+          "Vick NEO"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3415,6 +3409,12 @@
             "S38A"
           ],
           "name": "Svakom Tammy Pro"
+        },
+        {
+          "identifier": [
+            "Vick NEO"
+          ],
+          "name": "Svakom Vick Neo"
         }
       ]
     },
