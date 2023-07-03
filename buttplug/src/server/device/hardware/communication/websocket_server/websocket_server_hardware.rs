@@ -114,7 +114,8 @@ async fn run_connection_loop<S>(
             Ok(msg) => {
               match msg {
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
-                  trace!("Got text: {}", text_msg);
+                  // If someone accidentally packs text, politely turn it into binary for them.
+                  let _ = response_sender.send(text_msg.as_bytes().to_vec());
                 }
                 async_tungstenite::tungstenite::Message::Binary(binary_msg) => {
                   // If no one is listening, ignore output.
@@ -306,6 +307,7 @@ impl HardwareInternal for WebsocketServerHardware {
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
+      error!("Endpoint already subscribed somehow!");
       return future::ready(Ok(())).boxed();
     }
     // TODO Should check endpoint validity
