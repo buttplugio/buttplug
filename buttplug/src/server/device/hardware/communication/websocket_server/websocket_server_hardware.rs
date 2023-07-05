@@ -74,9 +74,6 @@ async fn run_connection_loop<S>(
       _ = sleep(Duration::from_millis(10000)).fuse() => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
           break;
         }
         pong_count = 0;
@@ -85,9 +82,6 @@ async fn run_connection_loop<S>(
           .await
           .is_err() {
           error!("Cannot send ping to client, considering connection closed.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
           break;
         }
       }
@@ -102,9 +96,6 @@ async fn run_connection_loop<S>(
           }
         } else {
           info!("Websocket server connector owner dropped, disconnecting websocket connection.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
           break;
         }
       }
@@ -156,7 +147,10 @@ async fn run_connection_loop<S>(
       }
     }
   }
-  websocket_server_sender.close().await;
+  
+  if let Err(e) = websocket_server_sender.close().await {
+    error!("Error closing websocket: {}", e);
+  }
   debug!("Exiting Websocket Server Device control loop.");
 }
 
