@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 12
+  minor: 13
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -2358,10 +2358,8 @@ protocols:
       services:
         0000fe00-0000-1000-8000-00805f9b34fb:
           tx: 0000fe01-0000-1000-8000-00805f9b34fb
-          rx: 0000fe02-0000-1000-8000-00805f9b34fb
         0000fffe-0000-1000-8000-00805f9b34fb:
-          tx: 0000fe01-0000-1000-8000-00805f9b34fb
-          rx: 0000fe02-0000-1000-8000-00805f9b34fb
+          tx: 0000fe02-0000-1000-8000-00805f9b34fb
         0000180a-0000-1000-8000-00805f9b34fb:
           generic0: 00002a50-0000-1000-8000-00805f9b34fb
     defaults:
