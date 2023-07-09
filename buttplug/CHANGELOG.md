@@ -1,3 +1,23 @@
+# 7.1.1 (2023-07-09)
+
+## Features
+
+- Added Device Support
+  - WeVibe Sync Lite
+  - Long Lost Touch Possible Kiss
+  - Lovense Exomoon
+  - Kiiroo Realm 1.1
+- A bunch of under-the-covers stuff to prepare Intiface Engine/Central for websocket device UX
+
+## Bugfixes
+
+- Update btleplug to v0.11, may fix some android bugs
+- Fix Wevibe Chorus protocol impl
+- Fix Hismith matching code
+- Fix Roselex device characteristics
+- Fix issues w/ websocket device ports not closing in some instances
+- Fix issues w/ websocket device system dropping some messages due to being text vs binary
+
 # 7.1.0 (2023-05-21)
 
 ## Breaking(ish) Changes
