@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 13
+    "minor": 14
   },
   "protocols": {
     "lovense": {
@@ -1217,11 +1217,13 @@
         "names": [
           "Smart Mini Vibe*",
           "Flamingo",
+          "Flamingo T",
           "Smart Bean",
           "Smart Bean3",
           "Magic Cell",
           "Magic Wand",
           "Fugu",
+          "Fugu2",
           "Gballs2",
           "GBalls3",
           "FM-LILAC-101"
@@ -1288,7 +1290,8 @@
         },
         {
           "identifier": [
-            "Flamingo"
+            "Flamingo",
+            "Flamingo T"
           ],
           "name": "MagicMotion Flamingo"
         },
@@ -1312,7 +1315,9 @@
         },
         {
           "identifier": [
-            "Magic Fugu"
+            "Magic Fugu",
+            "Fugu",
+            "Fugu2"
           ],
           "name": "MagicMotion Fugu"
         },
