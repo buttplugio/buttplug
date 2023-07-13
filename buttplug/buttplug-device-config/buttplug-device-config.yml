@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 13
+  minor: 14
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -699,11 +699,13 @@ protocols:
       names:
         - Smart Mini Vibe*
         - Flamingo
+        - Flamingo T
         - Smart Bean # Magic Kegel Twins/Master/Master V2
         - Smart Bean3 # FitCute Kegel Rejuve
         - Magic Cell # Candy/Dante
         - Magic Wand
         - Fugu
+        - Fugu2
         - Gballs2
         - GBalls3
         - FM-LILAC-101
@@ -738,6 +740,7 @@ protocols:
         name: MagicMotion Vini
       - identifier:
           - Flamingo
+          - Flamingo T
         name: MagicMotion Flamingo
       - identifier:
           - Magic Bean
@@ -750,6 +753,8 @@ protocols:
         name: MagicMotion Wand
       - identifier:
           - Magic Fugu
+          - Fugu
+          - Fugu2
         name: MagicMotion Fugu
       - identifier:
           - Gballs2
