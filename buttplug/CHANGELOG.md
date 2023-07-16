@@ -1,3 +1,14 @@
+# 7.1.2 (2023-07-16)
+
+## Features
+
+- Added Device Support
+  - Magic Motion Fugu2, Flamingo T
+
+## Bugfixes
+
+- Fix expectation of populated data field in Lovense Connect packet
+
 # 7.1.1 (2023-07-09)
 
 ## Features
