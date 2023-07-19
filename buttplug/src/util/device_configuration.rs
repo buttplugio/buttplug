@@ -539,7 +539,10 @@ pub fn load_protocol_configs(
 }
 
 pub fn load_user_configs(user_config_str: &str) -> UserConfigDefinition {
-  load_protocol_config_from_json(user_config_str, true).unwrap().user_configs.unwrap()
+  load_protocol_config_from_json(user_config_str, true)
+    .unwrap()
+    .user_configs
+    .unwrap()
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {

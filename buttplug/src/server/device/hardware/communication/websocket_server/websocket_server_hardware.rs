@@ -147,7 +147,7 @@ async fn run_connection_loop<S>(
       }
     }
   }
-  
+
   if let Err(e) = websocket_server_sender.close().await {
     error!("Error closing websocket: {}", e);
   }
@@ -205,7 +205,10 @@ impl WebsocketServerHardwareConnector {
 #[async_trait]
 impl HardwareConnector for WebsocketServerHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
-    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&vec![self.info.identifier().to_owned()]))
+    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&vec![self
+      .info
+      .identifier()
+      .to_owned()]))
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {

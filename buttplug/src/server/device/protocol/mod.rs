@@ -137,7 +137,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     map.insert(factory.identifier().to_owned(), factory);
   }
 
-  add_to_protocol_map(&mut map, adrienlastic::setup::AdrienLasticIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    adrienlastic::setup::AdrienLasticIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,

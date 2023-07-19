@@ -11,7 +11,8 @@ use super::{
   client_message_sorter::ClientMessageSorter,
   device::{ButtplugClientDevice, ButtplugClientDeviceEvent},
   ButtplugClientEvent,
-  ButtplugClientMessageFuturePair, ButtplugClientMessageSender,
+  ButtplugClientMessageFuturePair,
+  ButtplugClientMessageSender,
 };
 use crate::core::{
   connector::{ButtplugConnector, ButtplugConnectorStateShared},

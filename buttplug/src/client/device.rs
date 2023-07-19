@@ -8,9 +8,9 @@
 //! Representation and management of devices connected to the server.
 
 use super::{
+  create_boxed_future_client_error,
+  ButtplugClientMessageSender,
   ButtplugClientResultFuture,
-  create_boxed_future_client_error, 
-  ButtplugClientMessageSender
 };
 use crate::{
   core::{
@@ -698,7 +698,7 @@ impl ButtplugClientDevice {
     }
     let msg =
       ButtplugCurrentSpecClientMessage::RawSubscribeCmd(RawSubscribeCmd::new(self.index, endpoint));
-      self.event_loop_sender.send_message_expect_ok(msg)
+    self.event_loop_sender.send_message_expect_ok(msg)
   }
 
   pub fn raw_unsubscribe(&self, endpoint: Endpoint) -> ButtplugClientResultFuture {
@@ -716,7 +716,9 @@ impl ButtplugClientDevice {
   /// Commands device to stop all movement.
   pub fn stop(&self) -> ButtplugClientResultFuture {
     // All devices accept StopDeviceCmd
-    self.event_loop_sender.send_message_expect_ok(StopDeviceCmd::new(self.index).into())
+    self
+      .event_loop_sender
+      .send_message_expect_ok(StopDeviceCmd::new(self.index).into())
   }
 
   pub(super) fn set_device_connected(&self, connected: bool) {
