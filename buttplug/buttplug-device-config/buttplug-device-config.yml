@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 14
+  minor: 15
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -1435,6 +1435,7 @@ protocols:
               ActuatorType: Vibrate
       - identifier:
           - OhMiBod 4.0
+          - OhMiBod ESCA
         name: OhMiBod Esca 2
         messages:
           ScalarCmd:
@@ -3471,6 +3472,32 @@ protocols:
             ActuatorType: Vibrate
           - StepRange: [0, 100]
             ActuatorType: Oscillate
+  adrienlastic:
+    # Welp, this was going to happen at some point right?
+    # They cloned the UUIDs and names of the Lush but not the protocol...
+    btle:
+      names:
+        - Placeholder to avoid conflict with bad attempt to clone a Lovense Lush
+      #  - LVS-S001
+      #  - LVS-S002
+      advertised-services:
+        - 00001320-0000-1000-8000-00805f9b34fb # Folove advertised service
+      services:
+        6e400001-b5a3-f393-e0a9-e50e24dcca9e:
+          tx: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+    defaults:
+      name: Adrien Lastic Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 16]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - LVS-S001
+        name: Adrien Lastic Palpitation
+      - identifier:
+          - LVS-S002
+        name: Adrien Lastic Revelation
   # nintendo-joycon:
   #   hid:
   #     vendor-id: 0x057e

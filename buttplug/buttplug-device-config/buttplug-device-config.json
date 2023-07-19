@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 14
+    "minor": 15
   },
   "protocols": {
     "lovense": {
@@ -2799,7 +2799,8 @@
         },
         {
           "identifier": [
-            "OhMiBod 4.0"
+            "OhMiBod 4.0",
+            "OhMiBod ESCA"
           ],
           "name": "OhMiBod Esca 2",
           "messages": {
@@ -7016,6 +7017,49 @@
           ]
         }
       }
+    },
+    "adrienlastic": {
+      "btle": {
+        "names": [
+          "Placeholder to avoid conflict with bad attempt to clone a Lovense Lush"
+        ],
+        "advertised-services": [
+          "00001320-0000-1000-8000-00805f9b34fb"
+        ],
+        "services": {
+          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Adrien Lastic Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                16
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "LVS-S001"
+          ],
+          "name": "Adrien Lastic Palpitation"
+        },
+        {
+          "identifier": [
+            "LVS-S002"
+          ],
+          "name": "Adrien Lastic Revelation"
+        }
+      ]
     }
   }
 }

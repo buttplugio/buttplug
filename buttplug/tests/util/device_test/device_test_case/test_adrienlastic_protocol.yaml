@@ -1,0 +1,43 @@
+devices:
+  - identifier: 
+      name: "Placeholder to avoid conflict with bad attempt to clone a Lovense Lush"
+    expected_name: "Adrien Lastic Device"
+device_commands:
+  # Commands
+  - !Messages
+      device_index: 0
+      messages: 
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands: 
+        - !Write
+            endpoint: tx
+            data: [77, 111, 116, 111, 114, 86, 97, 108, 117, 101, 58, 48, 56, 59]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.1
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [77, 111, 116, 111, 114, 86, 97, 108, 117, 101, 58, 48, 50, 59]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [77, 111, 116, 111, 114, 86, 97, 108, 117, 101, 58, 48, 48, 59]
+            write_with_response: true
