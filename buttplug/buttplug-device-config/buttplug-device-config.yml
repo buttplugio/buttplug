@@ -1717,6 +1717,7 @@ protocols:
         - Ella NEO
         - S38A # Svakom Tammy Pro
         - Vick NEO
+        - STG05A # Svakom Aravinda
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1753,6 +1754,9 @@ protocols:
       - identifier:
           - Vick NEO
         name: Svakom Vick Neo
+      - identifier:
+          - STG05A
+        name: Svakom Aravinda
   svakom-v3:
     btle:
       names:
@@ -3192,6 +3196,7 @@ protocols:
       names:
         - Auxfun-Box
         - Sinloli
+        - Eropair *
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
@@ -3216,6 +3221,28 @@ protocols:
             - StepRange: [0, 100]
               FeatureDescriptor: Air Pump
               ActuatorType: Constrict
+            - StepRange: [0, 100]
+              FeatureDescriptor: Vibrator
+              ActuatorType: Vibrate
+      - identifier:
+          - "3101"
+        name: Eropair Rabbit Vibrator
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              FeatureDescriptor: Internal Vibrator
+              ActuatorType: Vibrate
+            - StepRange: [0, 100]
+              FeatureDescriptor: External Vibrator
+              ActuatorType: Vibrate
+      - identifier:
+          - "3102"
+        name: Eropair Thrusting Vibrating Dildo
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              FeatureDescriptor: Air Pump
+              ActuatorType: Oscillate
             - StepRange: [0, 100]
               FeatureDescriptor: Vibrator
               ActuatorType: Vibrate
