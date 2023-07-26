@@ -5,6 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use crate::core::message::ActuatorType::Vibrate;
 use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
@@ -73,14 +74,26 @@ impl ProtocolInitializer for HismithMiniInitializer {
   async fn initialize(
     &mut self,
     _: Arc<Hardware>,
-    _: &ProtocolDeviceAttributes,
+    attrs: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(HismithMini::default()))
+    let mut dual_vibes = false;
+    if let Some(scalar) = attrs.message_attributes().scalar_cmd() {
+      dual_vibes = scalar
+        .iter()
+        .filter(|s| s.actuator_type() == &Vibrate)
+        .count()
+        >= 2;
+    }
+    Ok(Arc::new(HismithMini {
+      dual_vibe: dual_vibes,
+    }))
   }
 }
 
 #[derive(Default)]
-pub struct HismithMini {}
+pub struct HismithMini {
+  dual_vibe: bool,
+}
 
 impl ProtocolHandler for HismithMini {
   fn handle_scalar_oscillate_cmd(
@@ -101,10 +114,14 @@ impl ProtocolHandler for HismithMini {
 
   fn handle_scalar_vibrate_cmd(
     &self,
-    _index: u32,
+    index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    let idx: u8 = 0x05;
+    let idx: u8 = if !self.dual_vibe || index == 1 {
+      0x05
+    } else {
+      0x03
+    };
     let speed: u8 = scalar as u8;
 
     Ok(vec![HardwareWriteCmd::new(
