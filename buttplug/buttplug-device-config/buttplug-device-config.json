@@ -6371,12 +6371,6 @@
         },
         {
           "identifier": [
-            "1005"
-          ],
-          "name": "Hismith Mini Sex Machine"
-        },
-        {
-          "identifier": [
             "1002"
           ],
           "name": "Hismith Pro Traveler"
@@ -6436,7 +6430,8 @@
         "names": [
           "Auxfun-Box",
           "Sinloli",
-          "Eropair *"
+          "Eropair *",
+          "HISMITH S1"
         ],
         "services": {
           "0000ffe5-0000-1000-8000-00805f9b34fb": {
@@ -6468,6 +6463,12 @@
             "4001"
           ],
           "name": "Auxfun Sex Machine"
+        },
+        {
+          "identifier": [
+            "1005"
+          ],
+          "name": "Hismith Sex Machine"
         },
         {
           "identifier": [

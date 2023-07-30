@@ -3166,9 +3166,6 @@ protocols:
           - "1101"
         name: Hismith Sex Machine
       - identifier:
-          - "1005"
-        name: Hismith Mini Sex Machine
-      - identifier:
           - "1002"
         name: Hismith Pro Traveler
       - identifier:
@@ -3197,6 +3194,7 @@ protocols:
         - Auxfun-Box
         - Sinloli
         - Eropair *
+        - HISMITH S1
       services:
         0000ffe5-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe9-0000-1000-8000-00805f9b34fb
@@ -3213,6 +3211,9 @@ protocols:
       - identifier:
           - "4001"
         name: Auxfun Sex Machine
+      - identifier:
+          - "1005"
+        name: Hismith Sex Machine
       - identifier:
           - "2201"
         name: Sinloli Automatic Sex Doll
