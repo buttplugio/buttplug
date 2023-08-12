@@ -55,7 +55,7 @@ that registers and communicates with different hardware. Clients can then connec
 network ports, to claim and interact with the hardware.
 
 Buttplug-rs is a full fledged implementation of Buttplug, implementing both the client and server
-portions of the system. Implementations for other langauges (such as C# and JS) are built on top of
+portions of the system. Implementations for other languages (such as C# and JS) are built on top of
 the Rust library. See the [buttplug-rs-ffi](https://github.com/buttplugio/buttplug-rs-ffi) repo for
 more info.
 
@@ -87,13 +87,13 @@ On Linux, the following packages will be needed to build with default features:
 - `libudev-dev` (Required for serial port/HID support)
 - `libusb-1.0-0-dev` (Required for serial port/HID support)
 
-The package names are listed as their debian requirements, and may be different for other
+The package names are listed as their Debian requirements, and may be different for other
 distributions. Removing the `lovense-dongle-manager` and `serial-manager` features should stop these
-from being requires.
+from being required.
 
 ## Usage
 
-To use Buttplug in your rust application or library, check out the
+To use Buttplug in your Rust application or library, check out the
 [buttplug package on crates.io](https://crates.io/crates/buttplug).
 
 The following crate features are available
@@ -136,11 +136,9 @@ issue](https://github.com/buttplugio/buttplug-rs/issues).
 We are not looking for code contributions or pull requests at this time, and will not accept pull
 requests that do not have a matching issue where the matter was previously discussed. Pull requests
 should only be submitted after talking to [qdot](https://github.com/qdot) via issues (or on
-[discord](https://discord.buttplug.io) or [twitter DMs](https://twitter.com/buttplugio) if you would
-like to stay anonymous and out of recorded info on the repo) before submitting PRs. Random PRs
-without matching issues and discussion are likely to be closed without merging. and receiving
-approval to develop code based on an issue. Any random or non-issue pull requests will most likely
-be closed without merging.
+[Discord](https://discord.buttplug.io) or [Twitter DMs](https://twitter.com/buttplugio) if you would
+like to stay anonymous and out of recorded info on the repo) and receiving approval to develop code
+based on an issue. Any random or non-issue pull requests will most likely be closed without merging.
 
 If you'd like to contribute in a non-technical way, we need money to keep up with supporting the
 latest and greatest hardware. We have multiple ways to donate!
