@@ -1873,6 +1873,21 @@ protocols:
       - identifier:
           - Pulse Union
         name: Svakom Pulse Union
+  svakom-barnard:
+    btle:
+      names:
+        - DG239A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Fantasy Cup Barnard
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 3 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 3 ]
+            ActuatorType: Oscillate
   realov:
     btle:
       names:
