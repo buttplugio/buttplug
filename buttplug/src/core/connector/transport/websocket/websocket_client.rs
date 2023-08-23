@@ -29,8 +29,7 @@ use tokio::sync::{
 };
 use tokio_rustls::rustls::{
   client::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
-  Certificate, ClientConfig, DigitallySignedStruct, ServerName,
-  RootCertStore
+  Certificate, ClientConfig, DigitallySignedStruct, RootCertStore, ServerName,
 };
 use tracing::Instrument;
 
@@ -128,9 +127,13 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // based on our certificate verfication needs. Otherwise, just pass None in
     // which case we won't wrap.
     let tls_connector = if self.should_use_tls {
+      let mut roots = RootCertStore::empty();
+      for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
+        roots.add(&Certificate(cert.0)).unwrap();
+      }
       let mut config = ClientConfig::builder()
         .with_safe_defaults()
-        .with_root_certificates(RootCertStore::empty())
+        .with_root_certificates(roots)
         .with_no_client_auth();
       if self.bypass_cert_verify {
         config
