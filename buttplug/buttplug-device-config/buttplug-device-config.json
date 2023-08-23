@@ -6242,6 +6242,30 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "10309"
+          ],
+          "name": "Satisfyer Pro 2 Gen 3",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
         }
       ]
     },
@@ -6396,9 +6420,7 @@
       "configurations": [
         {
           "identifier": [
-            "1001",
-            "1005",
-            "1101"
+            "1001"
           ],
           "name": "Hismith Sex Machine"
         },
@@ -6567,7 +6589,7 @@
                   0,
                   100
                 ],
-                "FeatureDescriptor": "Air Pump",
+                "FeatureDescriptor": "Thruster",
                 "ActuatorType": "Oscillate"
               },
               {
@@ -6580,6 +6602,70 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "2101"
+          ],
+          "name": "Eropair Cup",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Vibrator",
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "hismith-servo": {
+      "btle": {
+        "names": [
+          "HISMITH S2"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+          },
+          "0000ff90-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Hismith servo device",
+        "messages": {
+          "LinearCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Position",
+              "FeatureDescriptor": "Fucking Machine Position"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "1101"
+          ],
+          "name": "Hismith Servo"
         }
       ]
     },
