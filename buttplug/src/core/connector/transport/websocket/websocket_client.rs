@@ -11,12 +11,10 @@ use crate::{
   core::{
     connector::{
       transport::{
-        ButtplugConnectorTransport,
-        ButtplugConnectorTransportSpecificError,
+        ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
         ButtplugTransportIncomingMessage,
       },
-      ButtplugConnectorError,
-      ButtplugConnectorResultFuture,
+      ButtplugConnectorError, ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
   },
@@ -24,10 +22,15 @@ use crate::{
 };
 use async_tungstenite::{tokio::connect_async_with_tls_connector, tungstenite::protocol::Message};
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
-use std::sync::Arc;
+use std::{sync::Arc, time::SystemTime};
 use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
+};
+use tokio_rustls::rustls::{
+  client::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
+  Certificate, ClientConfig, DigitallySignedStruct, ServerName,
+  RootCertStore
 };
 use tracing::Instrument;
 
@@ -75,6 +78,44 @@ impl ButtplugWebsocketClientTransport {
   }
 }
 
+// Dummy "just let everything through" cert verifier
+struct PassEverythingVerifier {}
+
+impl ServerCertVerifier for PassEverythingVerifier {
+  fn verify_server_cert(
+    &self,
+    _end_entity: &Certificate,
+    _intermediates: &[Certificate],
+    _server_name: &ServerName,
+    _scts: &mut dyn Iterator<Item = &[u8]>,
+    _ocsp_response: &[u8],
+    _now: SystemTime,
+  ) -> Result<ServerCertVerified, tokio_rustls::rustls::Error> {
+    Ok(ServerCertVerified::assertion())
+  }
+
+  fn verify_tls12_signature(
+    &self,
+    _message: &[u8],
+    _cert: &Certificate,
+    _dss: &DigitallySignedStruct,
+  ) -> Result<HandshakeSignatureValid, tokio_rustls::rustls::Error> {
+    Ok(HandshakeSignatureValid::assertion())
+  }
+
+  fn verify_tls13_signature(
+    &self,
+    _message: &[u8],
+    _cert: &Certificate,
+    _dss: &DigitallySignedStruct,
+  ) -> Result<HandshakeSignatureValid, tokio_rustls::rustls::Error> {
+    Ok(HandshakeSignatureValid::assertion())
+  }
+  fn request_scts(&self) -> bool {
+    false
+  }
+}
+
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   fn connect(
     &self,
@@ -87,22 +128,16 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // based on our certificate verfication needs. Otherwise, just pass None in
     // which case we won't wrap.
     let tls_connector = if self.should_use_tls {
-      use native_tls::TlsConnector;
+      let mut config = ClientConfig::builder()
+        .with_safe_defaults()
+        .with_root_certificates(RootCertStore::empty())
+        .with_no_client_auth();
       if self.bypass_cert_verify {
-        Some(
-          TlsConnector::builder()
-            .danger_accept_invalid_certs(true)
-            .build()
-            .expect("Should always succeed, we're not setting any fallible options.")
-            .into(),
-        )
-      } else {
-        Some(
-          TlsConnector::new()
-            .expect("Should always succeed, not setting options.")
-            .into(),
-        )
+        config
+          .dangerous()
+          .set_certificate_verifier(Arc::new(PassEverythingVerifier {}));
       }
+      Some(Arc::new(config).into())
     } else {
       // If we're not using a secure connection, just return None, at which
       // point async_tungstenite won't use a wrapper.

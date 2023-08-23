@@ -31,7 +31,7 @@ client=[]
 server=[]
 serialize-json=[]
 # Connectors
-websockets=["serialize-json", "async-tungstenite", "native-tls"]
+websockets=["serialize-json", "async-tungstenite", "tokio-rustls"]
 # Device Communication Managers
 xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
@@ -40,7 +40,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
-tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
+tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-rustls-webpki-roots"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
 dummy-runtime=[]
 # Compiler config
@@ -49,7 +49,7 @@ unstable=[]
 [dependencies]
 buttplug_derive = "0.8.0"
 # buttplug_derive = { path = "../buttplug_derive" }
-native-tls = { version = "0.2.11", optional = true }
+tokio-rustls = { version = "0.24.1", optional = true, features=["dangerous_configuration"] }
 futures = "0.3.28"
 futures-util = "0.3.28"
 async-trait = "0.1.71"
@@ -68,7 +68,7 @@ paste = "1.0.13"
 lazy_static = "1.4.0"
 byteorder = "1.4.3"
 thiserror = "1.0.43"
-async-tungstenite = { version = "0.22.2", optional = true }
+async-tungstenite = { version = "0.22.2", optional = true, features=["tokio-rustls-webpki-roots"] }
 wasm-bindgen-futures = { version = "0.4.37", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.37"
@@ -81,7 +81,7 @@ tokio = { version = "1.29.1", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.5"
 prost = "0.11.9"
 tokio-util = "0.7.8"
-reqwest = { version = "0.11.18", optional = true, features = ["native-tls"] }
+reqwest = { version = "0.11.18", default-features = false, optional = true, features = ["rustls-tls"] }
 serde-aux = "4.2.0"
 getset = "0.1.2"
 os_info = "3.7.0"
