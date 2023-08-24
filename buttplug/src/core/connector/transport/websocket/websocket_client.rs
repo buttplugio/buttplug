@@ -27,9 +27,11 @@ use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
+use tokio_native_tls::TlsConnector;
+use tokio_native_tls::native_tls::TlsConnector as NativeTlsConnector;
 use tokio_rustls::rustls::{
   client::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
-  Certificate, ClientConfig, DigitallySignedStruct, RootCertStore, ServerName,
+  Certificate, DigitallySignedStruct, ServerName, 
 };
 use tracing::Instrument;
 
@@ -126,21 +128,22 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // If we're supposed to be a secure connection, generate a TLS connector
     // based on our certificate verfication needs. Otherwise, just pass None in
     // which case we won't wrap.
-    let tls_connector = if self.should_use_tls {
-      let mut roots = RootCertStore::empty();
-      for cert in rustls_native_certs::load_native_certs().expect("could not load platform certs") {
-        roots.add(&Certificate(cert.0)).unwrap();
-      }
-      let mut config = ClientConfig::builder()
-        .with_safe_defaults()
-        .with_root_certificates(roots)
-        .with_no_client_auth();
+    let tls_connector: Option<TlsConnector> = if self.should_use_tls {
       if self.bypass_cert_verify {
-        config
-          .dangerous()
-          .set_certificate_verifier(Arc::new(PassEverythingVerifier {}));
-      }
-      Some(Arc::new(config).into())
+      Some(
+        NativeTlsConnector::builder()
+          .danger_accept_invalid_certs(true)
+          .build()
+          .expect("Should always succeed, we're not setting any fallible options.")
+          .into(),
+      )
+    } else {
+      Some(
+        NativeTlsConnector::new()
+          .expect("Should always succeed, not setting options.")
+          .into(),
+      )
+    }
     } else {
       // If we're not using a secure connection, just return None, at which
       // point async_tungstenite won't use a wrapper.
