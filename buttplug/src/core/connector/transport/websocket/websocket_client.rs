@@ -22,17 +22,13 @@ use crate::{
 };
 use async_tungstenite::{tokio::connect_async_with_tls_connector, tungstenite::protocol::Message};
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
-use std::{sync::Arc, time::SystemTime};
+use std::sync::Arc;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
 use tokio_native_tls::TlsConnector;
 use tokio_native_tls::native_tls::TlsConnector as NativeTlsConnector;
-use tokio_rustls::rustls::{
-  client::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier},
-  Certificate, DigitallySignedStruct, ServerName, 
-};
 use tracing::Instrument;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -79,44 +75,6 @@ impl ButtplugWebsocketClientTransport {
   }
 }
 
-// Dummy "just let everything through" cert verifier
-struct PassEverythingVerifier {}
-
-impl ServerCertVerifier for PassEverythingVerifier {
-  fn verify_server_cert(
-    &self,
-    _end_entity: &Certificate,
-    _intermediates: &[Certificate],
-    _server_name: &ServerName,
-    _scts: &mut dyn Iterator<Item = &[u8]>,
-    _ocsp_response: &[u8],
-    _now: SystemTime,
-  ) -> Result<ServerCertVerified, tokio_rustls::rustls::Error> {
-    Ok(ServerCertVerified::assertion())
-  }
-
-  fn verify_tls12_signature(
-    &self,
-    _message: &[u8],
-    _cert: &Certificate,
-    _dss: &DigitallySignedStruct,
-  ) -> Result<HandshakeSignatureValid, tokio_rustls::rustls::Error> {
-    Ok(HandshakeSignatureValid::assertion())
-  }
-
-  fn verify_tls13_signature(
-    &self,
-    _message: &[u8],
-    _cert: &Certificate,
-    _dss: &DigitallySignedStruct,
-  ) -> Result<HandshakeSignatureValid, tokio_rustls::rustls::Error> {
-    Ok(HandshakeSignatureValid::assertion())
-  }
-  fn request_scts(&self) -> bool {
-    false
-  }
-}
-
 impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   fn connect(
     &self,
@@ -130,20 +88,20 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // which case we won't wrap.
     let tls_connector: Option<TlsConnector> = if self.should_use_tls {
       if self.bypass_cert_verify {
-      Some(
-        NativeTlsConnector::builder()
-          .danger_accept_invalid_certs(true)
-          .build()
-          .expect("Should always succeed, we're not setting any fallible options.")
-          .into(),
-      )
-    } else {
-      Some(
-        NativeTlsConnector::new()
-          .expect("Should always succeed, not setting options.")
-          .into(),
-      )
-    }
+        Some(
+          NativeTlsConnector::builder()
+            .danger_accept_invalid_certs(true)
+            .build()
+            .expect("Should always succeed, we're not setting any fallible options.")
+            .into(),
+        )
+      } else {
+        Some(
+          NativeTlsConnector::new()
+            .expect("Should always succeed, not setting options.")
+            .into(),
+        )
+      }
     } else {
       // If we're not using a secure connection, just return None, at which
       // point async_tungstenite won't use a wrapper.
