@@ -31,7 +31,7 @@ client=[]
 server=[]
 serialize-json=[]
 # Connectors
-websockets=["serialize-json", "async-tungstenite", "tokio-rustls", "rustls-native-certs"]
+websockets=["serialize-json", "async-tungstenite", "tokio-rustls", "tokio-native-tls"]
 # Device Communication Managers
 xinput-manager=["server"]
 btleplug-manager=["server", "btleplug"]
@@ -40,7 +40,7 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
-tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-rustls-webpki-roots"]
+tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
 dummy-runtime=[]
 # Compiler config
@@ -68,8 +68,8 @@ paste = "1.0.13"
 lazy_static = "1.4.0"
 byteorder = "1.4.3"
 thiserror = "1.0.43"
-async-tungstenite = { version = "0.22.2", optional = true, features=["tokio-rustls-native-certs"] }
-rustls-native-certs = { version= "0.6.3", optional = true }
+async-tungstenite = { version = "0.22.2", optional = true }
+tokio-native-tls = { version = "0.3.1", optional = true }
 wasm-bindgen-futures = { version = "0.4.37", optional = true }
 cfg-if = "1.0.0"
 tracing = "0.1.37"
