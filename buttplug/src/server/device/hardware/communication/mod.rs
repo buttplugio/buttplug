@@ -43,7 +43,7 @@ pub mod xinput;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
-  util::async_manager,
+  util::{async_manager, sleep}
 };
 use async_trait::async_trait;
 use futures::future::{self, FutureExt};
@@ -158,7 +158,7 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
             break;
           }
           tokio::select! {
-            _ = tokio::time::sleep(duration) => continue,
+            _ = sleep(duration) => continue,
             _ = child_token.cancelled() => break,
           }
         }

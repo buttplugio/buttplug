@@ -63,6 +63,7 @@
 //! There are slightly more useful situations like device forwarders where this work comes in also,
 //! but that Windows 7/Android example is where the idea originally came from.
 
+#[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
 mod in_process_connector;
 pub mod remote_connector;
 pub mod transport;
@@ -73,7 +74,7 @@ use crate::{
 };
 use displaydoc::Display;
 use futures::future::{self, BoxFuture, FutureExt};
-#[cfg(all(feature = "server", feature = "client"))]
+#[cfg(all(feature = "server", feature = "client", not(feature = "wasm")))]
 pub use in_process_connector::{
   ButtplugInProcessClientConnector,
   ButtplugInProcessClientConnectorBuilder,

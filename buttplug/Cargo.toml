@@ -17,6 +17,7 @@ path = "src/lib.rs"
 test = true
 doctest = true
 doc = true
+crate-type = ["cdylib", "rlib"]
 
 # Only build docs on one platform (linux)
 [package.metadata.docs.rs]
@@ -26,7 +27,7 @@ features = ["default", "unstable"]
 
 [features]
 # Basic features
-default=["tokio-runtime", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
+default=["tokio-runtime", "jsonschema/resolve-file", "client", "server", "serialize-json", "websockets", "btleplug-manager", "xinput-manager", "serial-manager", "lovense-dongle-manager", "lovense-connect-service-manager", "websocket-server-manager"]
 client=[]
 server=[]
 serialize-json=[]
@@ -40,8 +41,9 @@ lovense-dongle-manager=["server", "serialport", "hidapi"]
 lovense-connect-service-manager=["server","reqwest"]
 websocket-server-manager=["server", "websockets"]
 # Runtime managers
-tokio-runtime=["tokio/rt-multi-thread", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
+tokio-runtime=["tokio/rt", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-native-tls"]
 wasm-bindgen-runtime=["wasm-bindgen", "wasm-bindgen-futures"]
+wasm = ["server", "wasm-bindgen-runtime", "serialize-json", "wasm-bindgen", "uuid/wasm-bindgen", "wasmtimer"]
 dummy-runtime=[]
 # Compiler config
 unstable=[]
@@ -76,7 +78,7 @@ tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.17", features = ["json"] }
 dashmap = "5.4.0"
 displaydoc = "0.2.4"
-wasm-bindgen = { version = "0.2.87", optional = true }
+wasm-bindgen = { version = "0.2.87", features = ["serde-serialize"], optional = true }
 tokio = { version = "1.29.1", features = ["sync", "macros", "io-util"] }
 async-stream = "0.3.5"
 prost = "0.11.9"
@@ -85,7 +87,7 @@ reqwest = { version = "0.11.18", default-features = false, optional = true, feat
 serde-aux = "4.2.0"
 getset = "0.1.2"
 os_info = "3.7.0"
-jsonschema = { version = "0.17.1", default-features = false, features = ["resolve-file"] }
+jsonschema = { version = "0.17.1", default-features = false }
 derivative = "2.2.0"
 tokio-stream = "0.1.14"
 wasmtimer = { version = "0.2.0", optional = true }
@@ -118,3 +120,29 @@ serialport = { version = "4.2.1", optional = true }
 # Linux hidraw is needed here in order to work with the lovense dongle. libusb breaks it on linux.
 # Other platforms are not affected by the feature changes.
 hidapi = { version = "2.4.0", default-features = false, features = ["linux-static-hidraw", "illumos-static-libusb"], optional = true }
+
+[dependencies.web-sys]
+version = "0.3.64"
+# path = "../../wasm-bindgen/crates/web-sys"
+#git = "https://github.com/rustwasm/wasm-bindgen"
+optional = true
+features = [
+  "Navigator",
+  "Bluetooth",
+  "BluetoothDevice",
+  "BluetoothLeScanFilterInit",
+  "BluetoothRemoteGattCharacteristic",
+  "BluetoothRemoteGattServer",
+  "BluetoothRemoteGattService",
+  "BinaryType",
+  "Blob",
+  "console",
+  "ErrorEvent",
+  "Event",
+  "FileReader",
+  "MessageEvent",
+  "ProgressEvent",
+  "RequestDeviceOptions",
+  "WebSocket",
+  "Window"
+]

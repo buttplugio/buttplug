@@ -14,6 +14,7 @@ pub use json_serializer::{
   ButtplugClientJSONSerializer,
   ButtplugClientJSONSerializerImpl,
   ButtplugServerJSONSerializer,
+  vec_to_protocol_json
 };
 
 use serde::{Deserialize, Serialize};
