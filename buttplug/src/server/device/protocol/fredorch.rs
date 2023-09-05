@@ -23,6 +23,7 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
+  util::sleep
 };
 use async_trait::async_trait;
 use futures::FutureExt;
@@ -33,7 +34,6 @@ use std::{
   },
   time::Duration,
 };
-use tokio::time::sleep;
 
 const FREDORCH_COMMAND_TIMEOUT_MS: u64 = 500;
 

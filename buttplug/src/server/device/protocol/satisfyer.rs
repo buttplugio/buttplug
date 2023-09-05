@@ -17,7 +17,7 @@ use crate::{
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
   },
-  util::async_manager,
+  util::{async_manager, sleep}
 };
 use async_trait::async_trait;
 use std::{
@@ -130,7 +130,7 @@ async fn send_satisfyer_updates(
       );
       break;
     }
-    tokio::time::sleep(Duration::from_secs(1)).await;
+    sleep(Duration::from_secs(1)).await;
   }
 }
 

@@ -22,11 +22,11 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
-  util::async_manager,
+  util::{async_manager, sleep}
 };
 use async_trait::async_trait;
 use std::{sync::Arc, time::Duration};
-use tokio::{sync::RwLock, time::sleep};
+use tokio::sync::RwLock;
 
 generic_protocol_initializer_setup!(MysteryVibe, "mysteryvibe");
 

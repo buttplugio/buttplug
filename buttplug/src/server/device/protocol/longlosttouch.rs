@@ -20,6 +20,7 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
+  util::sleep
 };
 use async_trait::async_trait;
 use std::sync::atomic::{AtomicU8, Ordering};
@@ -111,7 +112,7 @@ async fn send_longlosttouch_updates(device: Arc<Hardware>, data: Arc<Vec<AtomicU
         break;
       }
     }
-    tokio::time::sleep(Duration::from_millis(2500)).await;
+    sleep(Duration::from_millis(2500)).await;
   }
 }
 
