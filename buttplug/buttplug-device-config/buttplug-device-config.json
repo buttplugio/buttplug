@@ -6699,7 +6699,8 @@
     "pink_punch": {
       "btle": {
         "names": [
-          "Pink_Punch"
+          "Pink_Punch",
+          "PinkPunch_Peachu"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -6719,7 +6720,15 @@
               "ActuatorType": "Vibrate"
             }
           ]
-        }
+        },
+        "configurations": [
+          {
+            "identifier": [
+              "PinkPunch_Peachu"
+            ],
+            "name": "Pink Punch Peachu"
+          }
+        ]
       }
     },
     "sakuraneko": {
