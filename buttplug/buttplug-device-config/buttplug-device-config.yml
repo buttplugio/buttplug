@@ -1394,6 +1394,7 @@ protocols:
         - OhMiBod 4.0
         - OhMiBod LUMEN
         - OhMiBod NEX3
+        - OhMiBod ESCA
         - Pulse Interactive
       services:
         00001900-0000-1000-8000-00805f9b34fb:
