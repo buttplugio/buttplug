@@ -66,7 +66,7 @@ impl ButtplugInProcessClientConnectorBuilder {
 /// develop (and we highly recommend developing that way), and also an easy way to get users up and
 /// running as quickly as possible, we recommend also including some sort of IPC Connector in order
 /// for your application to connect to newer servers when they come out.
-#[cfg(feature = "server")]
+#[derive(Clone)]
 pub struct ButtplugInProcessClientConnector {
   /// Internal server object for the embedded connector.
   server: Arc<ButtplugServer>,
@@ -74,14 +74,12 @@ pub struct ButtplugInProcessClientConnector {
   connected: Arc<AtomicBool>,
 }
 
-#[cfg(feature = "server")]
 impl Default for ButtplugInProcessClientConnector {
   fn default() -> Self {
     ButtplugInProcessClientConnectorBuilder::default().finish()
   }
 }
 
-#[cfg(feature = "server")]
 impl<'a> ButtplugInProcessClientConnector {
   /// Creates a new in-process connector, with a server instance.
   ///
@@ -113,7 +111,6 @@ impl<'a> ButtplugInProcessClientConnector {
   }
 }
 
-#[cfg(feature = "server")]
 impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage>
   for ButtplugInProcessClientConnector
 {
