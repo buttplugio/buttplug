@@ -1,0 +1,90 @@
+name: Buttplug CI Build
+
+on:
+  push:
+    branches:
+      - dev
+      - master
+
+jobs:
+  build-stable:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fix ~/.cargo directory permissions
+      if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')
+      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+    - name: Update package list
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get -y update
+    - name: Install required packages
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Cache cargo build
+      uses: actions/cache@v1
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Rust toolchain fetch
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+    - name: Formatting check
+      continue-on-error: true
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+#    - name: Build Debug
+#      run: cargo build
+#    - name: Run tests
+#      run: cargo test
+#    - name: Run doc gen
+#      run: cargo doc --no-deps
+    - name: Build Release
+      run: cargo build --release
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fix ~/.cargo directory permissions
+      run: sudo chown -R $(whoami):$(id -ng) ~/.cargo/
+    - name: Update package list
+      run: sudo apt-get -y update
+    - name: Install required packages
+      run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev libdbus-1-dev
+    - name: Cache cargo registry
+      uses: actions/cache@v1
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Cache cargo build
+      uses: actions/cache@v1
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('.github/workflows/cache_version') }}
+    - name: Rust toolchain fetch
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+    - name: WASM Toolchain fetch
+      uses: jetli/wasm-pack-action@v0.4.0
+      with:
+        version: 'latest'
+    - name: Build Release
+      run: wasm-pack build --dev --no-default-features --features wasm
+      working-directory: ./buttplug
