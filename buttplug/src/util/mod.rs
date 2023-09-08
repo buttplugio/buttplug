@@ -9,6 +9,7 @@
 //! the library.
 
 pub mod async_manager;
+#[cfg(feature = "server")]
 pub mod device_configuration;
 pub mod future;
 pub mod json;
