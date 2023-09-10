@@ -1,3 +1,28 @@
+# 7.1.3 (2023-09-08)
+
+## Features
+
+- Added Device Support
+  - Lastic
+  - OhMiBod Esca (new identifier)
+  - Hismith v4
+  - Svakom Barnard (Fantasty Cup), Aravinda
+  - Satisfyer Pro 2 Gen 3
+  - Pink Punch Peachu
+  - Eropair S1, V1
+- Remove requirements for OpenSSL
+  - Makes building dependent projects much simpler
+- Make library compile cleanly under WASM again
+- Start work to let library run in single threaded async contexts
+
+## Bugfixes
+
+- Update to btleplug 0.11.1
+  - Might fix some issues with device disconnection on windows
+- Fix issue with Svakom Neo disconnection
+- Fix issues with missing includes/features for compiling dependent projects that don't
+  use the client/server features
+
 # 7.1.2 (2023-07-16)
 
 ## Features
