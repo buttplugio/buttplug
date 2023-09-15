@@ -933,6 +933,28 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 56]
               ActuatorType: Vibrate
+  mysteryvibe-v2:
+    btle:
+      names:
+        - "6907 MV1"
+      services:
+        f0006900-110c-478b-b74b-6f403b364a9c:
+          txmode: f0006901-110c-478b-b74b-6f403b364a9c
+          txvibrate: f0006903-110c-478b-b74b-6f403b364a9c
+    defaults:
+      name: Mysteryvibe V2 Device
+      messages:
+        ScalarCmd:
+            - StepRange: [0, 56]
+              ActuatorType: Vibrate
+            - StepRange: [0, 56]
+              ActuatorType: Vibrate
+            - StepRange: [0, 56]
+              ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - "6907 MV1"
+        name: MysteryVibe Tenuto Mini
   picobong:
     btle:
       names:
