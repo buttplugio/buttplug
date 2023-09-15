@@ -6856,7 +6856,8 @@
     "synchro": {
       "btle": {
         "names": [
-          "Shinkuro"
+          "Shinkuro",
+          "synchro EX"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -6877,7 +6878,15 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "synchro EX"
+          ],
+          "name": "Synchro Exchange"
+        }
+      ]
     },
     "tryfun": {
       "btle": {

@@ -3393,6 +3393,7 @@ protocols:
     btle:
       names:
         - Shinkuro
+        - synchro EX
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3402,6 +3403,10 @@ protocols:
         RotateCmd:
           - StepRange: [0, 6]
             ActuatorType: Rotate
+    configurations:
+      - identifier:
+          - synchro EX
+        name: Synchro Exchange
   tryfun:
     btle:
       names:
