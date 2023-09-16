@@ -13,5 +13,5 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-syn = "2.0.25"
-quote = "1.0.29"
+syn = "2.0.35"
+quote = "1.0.33"
