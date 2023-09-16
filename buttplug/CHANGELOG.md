@@ -1,3 +1,18 @@
+# 7.1.4 (2023-09-16)
+
+## Features
+
+- Added Device Support
+  - Mysteryvibe Tenuto Mini
+  - Synchro Edge
+  - Lovense Ridge
+  - Kiiroo Fuse 1.1
+  - Svakom Theodore, Barzillai, Mimiki, KyuKyu (BeYourLover), Tara X (ToyCod)
+
+## Bugfixes
+
+- Fix test executors
+
 # 7.1.3 (2023-09-08)
 
 ## Features
