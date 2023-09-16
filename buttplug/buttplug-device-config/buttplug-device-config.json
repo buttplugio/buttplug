@@ -2757,7 +2757,8 @@
           "OhMiBod LUMEN",
           "OhMiBod NEX3",
           "OhMiBod ESCA",
-          "Pulse Interactive"
+          "Pulse Interactive",
+          "Fuse1.1"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -2958,6 +2959,23 @@
                 "StepRange": [
                   0,
                   6
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Fuse1.1"
+          ],
+          "name": "OhMiBod Fuse 1.1",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
                 ],
                 "ActuatorType": "Vibrate"
               }

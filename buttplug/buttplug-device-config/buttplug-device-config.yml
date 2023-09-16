@@ -1428,6 +1428,7 @@ protocols:
         - OhMiBod NEX3
         - OhMiBod ESCA
         - Pulse Interactive
+        - Fuse1.1
       services:
         00001900-0000-1000-8000-00805f9b34fb:
           # Used to clear the whitelist and read battery level
@@ -1506,6 +1507,16 @@ protocols:
           ScalarCmd:
             - StepRange: [0, 6]
               ActuatorType: Vibrate
+      - identifier:
+          - Fuse1.1
+        name: OhMiBod Fuse 1.1
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+            # The external vive should be independently controllable?
+            #- StepRange: [0, 100]
+            # ActuatorType: Vibrate
   kiiroo-v21-initialized:
     btle:
       names:
