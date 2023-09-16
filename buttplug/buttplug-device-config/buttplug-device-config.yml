@@ -1804,7 +1804,7 @@ protocols:
     btle:
       names:
         - Phoenix Neo 2
-        - FK008A
+        - FK008A # Theodore
         - Hannes NEO
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
@@ -1835,6 +1835,24 @@ protocols:
       - identifier:
           - Hannes NEO
         name: Svakom Hannes Neo
+  svakom-v4:
+    btle:
+      names:
+        - B2CM6 # Barzillai
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Svakom Device v4
+      messages:
+        ScalarCmd:
+          - StepRange: [ 0, 9 ]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - B2CM6
+        name: ToyCod Barzillai
   svakom-sam:
     btle:
       names:
@@ -1900,6 +1918,8 @@ protocols:
       names:
         - SWK-SX013A # Pulse Lite Neo
         - Pulse Union
+        - SX033APP
+        - BX288A
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1917,6 +1937,30 @@ protocols:
       - identifier:
           - Pulse Union
         name: Svakom Pulse Union
+      - identifier:
+          - SX033APP
+        name: Svakom Mimiki
+      - identifier:
+          - BX288A
+        name: BeYourLover Kyukyu
+  svakom-tarax:
+    btle:
+      names:
+        - SX218A
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: ToyCod Tara X
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
+            FeatureDescriptor: Internal vibrator
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
+            FeatureDescriptor: External pulsator
   svakom-barnard:
     btle:
       names:
