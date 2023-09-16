@@ -23,7 +23,7 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
-  util::sleep
+  util::sleep,
 };
 use async_trait::async_trait;
 use futures::FutureExt;

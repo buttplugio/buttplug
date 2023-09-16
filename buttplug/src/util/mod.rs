@@ -17,10 +17,9 @@ pub mod logging;
 pub mod stream;
 
 #[cfg(not(feature = "wasm"))]
-pub use tokio::time::sleep as sleep;
+pub use tokio::time::sleep;
 #[cfg(feature = "wasm")]
-pub use wasmtimer::tokio::sleep as sleep;
-
+pub use wasmtimer::tokio::sleep;
 
 #[cfg(all(feature = "server", feature = "client"))]
 use crate::{
@@ -129,4 +128,3 @@ pub async fn in_process_client(client_name: &str, allow_raw_messages: bool) -> B
   client.connect(connector).await.unwrap();
   client
 }
-

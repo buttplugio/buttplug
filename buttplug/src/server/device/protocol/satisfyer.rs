@@ -17,7 +17,7 @@ use crate::{
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
   },
-  util::{async_manager, sleep}
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use std::{

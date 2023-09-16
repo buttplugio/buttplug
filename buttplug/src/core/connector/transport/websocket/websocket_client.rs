@@ -11,10 +11,12 @@ use crate::{
   core::{
     connector::{
       transport::{
-        ButtplugConnectorTransport, ButtplugConnectorTransportSpecificError,
+        ButtplugConnectorTransport,
+        ButtplugConnectorTransportSpecificError,
         ButtplugTransportIncomingMessage,
       },
-      ButtplugConnectorError, ButtplugConnectorResultFuture,
+      ButtplugConnectorError,
+      ButtplugConnectorResultFuture,
     },
     message::serializer::ButtplugSerializedMessage,
   },
@@ -27,8 +29,8 @@ use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
-use tokio_native_tls::TlsConnector;
 use tokio_native_tls::native_tls::TlsConnector as NativeTlsConnector;
+use tokio_native_tls::TlsConnector;
 use tracing::Instrument;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]

@@ -17,7 +17,7 @@ use crate::{
     protocol::{ProtocolHandler, ProtocolIdentifier, ProtocolInitializer},
     ServerDeviceIdentifier,
   },
-  util::sleep
+  util::sleep,
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
@@ -28,7 +28,6 @@ use std::{
   },
   time::Duration,
 };
-
 
 // Constants for dealing with the Lovense subscript/write race condition. The
 // timeout needs to be VERY long, otherwise this trips up old lovense serial
