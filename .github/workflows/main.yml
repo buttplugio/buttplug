@@ -46,14 +46,16 @@ jobs:
       with:
         command: fmt
         args: --all -- --check
-#    - name: Build Debug
-#      run: cargo build
-#    - name: Run tests
-#      run: cargo test
-#    - name: Run doc gen
-#      run: cargo doc --no-deps
-    - name: Build Release
-      run: cargo build --release
+    - name: Build Debug
+      run: cargo build
+    - name: Run tests
+      run: cargo test
+    # Only run doc gen on windows. It has the most code to build anyways, all other projects are a subset of it.
+    - name: Run doc gen
+      if: startsWith(matrix.os, 'windows')
+      run: cargo doc --no-deps
+#    - name: Build Release
+#      run: cargo build --release
   build-wasm:
     runs-on: ubuntu-latest
     steps:
@@ -85,6 +87,6 @@ jobs:
       uses: jetli/wasm-pack-action@v0.4.0
       with:
         version: 'latest'
-    - name: Build Release
+    - name: Build Dev
       run: wasm-pack build --dev --no-default-features --features wasm
       working-directory: ./buttplug
