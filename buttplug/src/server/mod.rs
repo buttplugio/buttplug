@@ -50,19 +50,29 @@ mod ping_timer;
 
 use self::device::{
   configuration::{
-    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
+    ProtocolAttributesIdentifier,
+    ProtocolCommunicationSpecifier,
+    ProtocolDeviceAttributes,
   },
   hardware::communication::HardwareCommunicationManagerBuilder,
   protocol::ProtocolIdentifierFactory,
-  ServerDeviceIdentifier, ServerDeviceManager, ServerDeviceManagerBuilder,
+  ServerDeviceIdentifier,
+  ServerDeviceManager,
+  ServerDeviceManagerBuilder,
 };
 use crate::{
   core::{
     errors::*,
     message::{
-      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
-      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self,
+      ButtplugClientMessage,
+      ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion,
+      ButtplugMessage,
+      ButtplugServerMessage,
+      StopAllDevices,
+      StopScanning,
+      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{

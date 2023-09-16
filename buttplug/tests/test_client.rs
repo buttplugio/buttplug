@@ -55,118 +55,118 @@ impl ButtplugConnector<ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServ
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_failing_connection() {
-    let client = ButtplugClient::new("Test Client");
-    assert!(client
-      .connect(ButtplugFailingConnector::default())
-      .await
-      .is_err());
+  let client = ButtplugClient::new("Test Client");
+  assert!(client
+    .connect(ButtplugFailingConnector::default())
+    .await
+    .is_err());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_disconnect_status() {
-    let client = test_client().await;
-    assert!(client.disconnect().await.is_ok());
-    assert!(!client.connected());
+  let client = test_client().await;
+  assert!(client.disconnect().await.is_ok());
+  assert!(!client.connected());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_double_disconnect() {
-    let client = test_client().await;
-    assert!(client.disconnect().await.is_ok());
-    assert!(client.disconnect().await.is_err());
+  let client = test_client().await;
+  assert!(client.disconnect().await.is_ok());
+  assert!(client.disconnect().await.is_err());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_connect_init() {
-    let client = test_client().await;
-    assert_eq!(client.server_name(), Some("Buttplug Server".to_owned()));
+  let client = test_client().await;
+  assert_eq!(client.server_name(), Some("Buttplug Server".to_owned()));
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_connected_status() {
-    let client = test_client().await;
-    client
-      .disconnect()
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(!client.connected());
+  let client = test_client().await;
+  client
+    .disconnect()
+    .await
+    .expect("Test, assuming infallible.");
+  assert!(!client.connected());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_start_scanning() {
-    let (client, _) = test_client_with_device().await;
-    assert!(client.start_scanning().await.is_ok());
+  let (client, _) = test_client_with_device().await;
+  assert!(client.start_scanning().await.is_ok());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 #[ignore = "We may want to just call this Ok now?"]
 async fn test_stop_scanning_when_not_scanning() {
-    let (client, _) = test_client_with_device().await;
-    let should_be_err = client.stop_scanning().await;
-    if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
-      assert!(matches!(
-        bp_err,
-        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)
-      ));
-    } else {
-      panic!("Should've thrown error!");
-    }
-    assert!(client.stop_scanning().await.is_err());
+  let (client, _) = test_client_with_device().await;
+  let should_be_err = client.stop_scanning().await;
+  if let Err(ButtplugClientError::ButtplugError(bp_err)) = should_be_err {
+    assert!(matches!(
+      bp_err,
+      ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceScanningAlreadyStopped)
+    ));
+  } else {
+    panic!("Should've thrown error!");
+  }
+  assert!(client.stop_scanning().await.is_err());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_start_scanning_when_already_scanning() {
-    let client = test_client_with_delayed_device_manager().await;
-    assert!(client.start_scanning().await.is_ok());
-    assert!(client.start_scanning().await.is_ok());
+  let client = test_client_with_delayed_device_manager().await;
+  assert!(client.start_scanning().await.is_ok());
+  assert!(client.start_scanning().await.is_ok());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_successive_start_scanning() {
-    let (client, _) = test_client_with_device().await;
-    assert!(client.start_scanning().await.is_ok());
-    assert!(client.start_scanning().await.is_ok());
+  let (client, _) = test_client_with_device().await;
+  assert!(client.start_scanning().await.is_ok());
+  assert!(client.start_scanning().await.is_ok());
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_scanning_finished() {
-    let (client, _) = test_client_with_device().await;
-    let mut recv = client.event_stream();
-    assert!(client.start_scanning().await.is_ok());
+  let (client, _) = test_client_with_device().await;
+  let mut recv = client.event_stream();
+  assert!(client.start_scanning().await.is_ok());
   assert!(matches!(
-      recv.next().await.expect("Test, assuming infallible."),
-      ButtplugClientEvent::ScanningFinished
-    ));
+    recv.next().await.expect("Test, assuming infallible."),
+    ButtplugClientEvent::ScanningFinished
+  ));
 }
 
 #[cfg(feature = "server")]
 #[tokio::test]
 async fn test_client_ping() {
-    let server = ButtplugServerBuilder::default()
-      .max_ping_time(200)
-      .finish()
-      .expect("Test, assuming infallible.");
-    let connector = ButtplugInProcessClientConnectorBuilder::default()
-      .server(server)
-      .finish();
-    let client = ButtplugClient::new("Test Client");
-    client
-      .connect(connector)
-      .await
-      .expect("Test, assuming infallible.");
-    assert!(client.ping().await.is_ok());
-    sleep(Duration::from_millis(800)).await;
-    // TODO Watch for ping events
-    assert!(client.ping().await.is_err());
+  let server = ButtplugServerBuilder::default()
+    .max_ping_time(200)
+    .finish()
+    .expect("Test, assuming infallible.");
+  let connector = ButtplugInProcessClientConnectorBuilder::default()
+    .server(server)
+    .finish();
+  let client = ButtplugClient::new("Test Client");
+  client
+    .connect(connector)
+    .await
+    .expect("Test, assuming infallible.");
+  assert!(client.ping().await.is_ok());
+  sleep(Duration::from_millis(800)).await;
+  // TODO Watch for ping events
+  assert!(client.ping().await.is_err());
 }
 /*
 // Tests both the stop all devices functionality, as well as both ends of the

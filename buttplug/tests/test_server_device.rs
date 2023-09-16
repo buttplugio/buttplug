@@ -6,11 +6,10 @@
 // for full license information.
 
 mod util;
-use buttplug::
-  core::{
-    errors::{ButtplugDeviceError, ButtplugError},
-    message::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
-  };
+use buttplug::core::{
+  errors::{ButtplugDeviceError, ButtplugError},
+  message::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
+};
 use futures::{pin_mut, StreamExt};
 use std::matches;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
@@ -21,166 +20,162 @@ use util::test_server_with_device;
 // the device itself does not.
 #[tokio::test]
 async fn test_capabilities_exposure() {
-    // Hold the channel but don't do anything with it.
-    let (server, _channel) = test_server_with_device("Onyx+", false).await;
-    let recv = server.event_stream();
-    pin_mut!(recv);
+  // Hold the channel but don't do anything with it.
+  let (server, _channel) = test_server_with_device("Onyx+", false).await;
+  let recv = server.event_stream();
+  pin_mut!(recv);
 
-    server
-      .parse_message(
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-          .into(),
-      )
-      .await
-      .expect("Test, assuming infallible.");
-    server
-      .parse_message(message::StartScanning::default().into())
-      .await
-      .expect("Test, assuming infallible.");
-    while let Some(msg) = recv.next().await {
-      if let ButtplugServerMessage::DeviceAdded(device) = msg {
-        assert!(device.device_messages().scalar_cmd().is_none());
-        assert!(device.device_messages().linear_cmd().is_some());
-        return;
-      }
+  server
+    .parse_message(
+      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into(),
+    )
+    .await
+    .expect("Test, assuming infallible.");
+  server
+    .parse_message(message::StartScanning::default().into())
+    .await
+    .expect("Test, assuming infallible.");
+  while let Some(msg) = recv.next().await {
+    if let ButtplugServerMessage::DeviceAdded(device) = msg {
+      assert!(device.device_messages().scalar_cmd().is_none());
+      assert!(device.device_messages().linear_cmd().is_some());
+      return;
     }
+  }
 }
 
 #[tokio::test]
 async fn test_server_raw_message() {
-    let (server, _) = test_server_with_device("Massage Demo", true).await;
-    let recv = server.event_stream();
-    pin_mut!(recv);
-    assert!(server
-      .parse_message(
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-          .into()
-      )
-      .await
-      .is_ok());
-    assert!(server
-      .parse_message(message::StartScanning::default().into())
-      .await
-      .is_ok());
-    while let Some(msg) = recv.next().await {
-      if let ButtplugServerMessage::ScanningFinished(_) = msg {
-        continue;
-      } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert!(da.device_messages().raw_read_cmd().is_some());
-        assert!(da.device_messages().raw_write_cmd().is_some());
-        assert!(da.device_messages().raw_subscribe_cmd().is_some());
-        assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
-        return;
-      } else {
-        panic!(
-          "Returned message was not a DeviceAdded message or timed out: {:?}",
-          msg
-        );
-      }
+  let (server, _) = test_server_with_device("Massage Demo", true).await;
+  let recv = server.event_stream();
+  pin_mut!(recv);
+  assert!(server
+    .parse_message(
+      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+    )
+    .await
+    .is_ok());
+  assert!(server
+    .parse_message(message::StartScanning::default().into())
+    .await
+    .is_ok());
+  while let Some(msg) = recv.next().await {
+    if let ButtplugServerMessage::ScanningFinished(_) = msg {
+      continue;
+    } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
+      assert!(da.device_messages().raw_read_cmd().is_some());
+      assert!(da.device_messages().raw_write_cmd().is_some());
+      assert!(da.device_messages().raw_subscribe_cmd().is_some());
+      assert_eq!(da.device_name(), "Aneros Vivi (Raw Messages Allowed)");
+      return;
+    } else {
+      panic!(
+        "Returned message was not a DeviceAdded message or timed out: {:?}",
+        msg
+      );
     }
+  }
 }
 
 #[tokio::test]
 async fn test_server_no_raw_message() {
-    let (server, _) = test_server_with_device("Massage Demo", false).await;
-    let recv = server.event_stream();
-    pin_mut!(recv);
-    assert!(server
-      .parse_message(
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-          .into()
-      )
-      .await
-      .is_ok());
-    assert!(server
-      .parse_message(message::StartScanning::default().into())
-      .await
-      .is_ok());
-    while let Some(msg) = recv.next().await {
-      if let ButtplugServerMessage::ScanningFinished(_) = msg {
-        continue;
-      } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name(), "Aneros Vivi");
-        assert!(da.device_messages().raw_read_cmd().is_none());
-        assert!(da.device_messages().raw_write_cmd().is_none());
-        assert!(da.device_messages().raw_subscribe_cmd().is_none());
-        break;
-      } else {
-        panic!(
-          "Returned message was not a DeviceAdded message or timed out: {:?}",
-          msg
-        );
-      }
+  let (server, _) = test_server_with_device("Massage Demo", false).await;
+  let recv = server.event_stream();
+  pin_mut!(recv);
+  assert!(server
+    .parse_message(
+      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+    )
+    .await
+    .is_ok());
+  assert!(server
+    .parse_message(message::StartScanning::default().into())
+    .await
+    .is_ok());
+  while let Some(msg) = recv.next().await {
+    if let ButtplugServerMessage::ScanningFinished(_) = msg {
+      continue;
+    } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
+      assert_eq!(da.device_name(), "Aneros Vivi");
+      assert!(da.device_messages().raw_read_cmd().is_none());
+      assert!(da.device_messages().raw_write_cmd().is_none());
+      assert!(da.device_messages().raw_subscribe_cmd().is_none());
+      break;
+    } else {
+      panic!(
+        "Returned message was not a DeviceAdded message or timed out: {:?}",
+        msg
+      );
     }
+  }
 }
 
 #[tokio::test]
 async fn test_reject_on_no_raw_message() {
-    let (server, _) = test_server_with_device("Massage Demo", false).await;
-    let recv = server.event_stream();
-    pin_mut!(recv);
-    assert!(server
-      .parse_message(
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION)
-          .into()
-      )
-      .await
-      .is_ok());
-    assert!(server
-      .parse_message(message::StartScanning::default().into())
-      .await
-      .is_ok());
-    while let Some(msg) = recv.next().await {
-      if let ButtplugServerMessage::ScanningFinished(_) = msg {
-        continue;
-      } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
-        assert_eq!(da.device_name(), "Aneros Vivi");
-        let mut should_be_err;
-        should_be_err = server
-          .parse_message(
-            message::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &vec![0x0], false).into(),
-          )
-          .await;
-        assert!(should_be_err.is_err());
-        assert!(matches!(
-          should_be_err.unwrap_err().original_error(),
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
-        ));
+  let (server, _) = test_server_with_device("Massage Demo", false).await;
+  let recv = server.event_stream();
+  pin_mut!(recv);
+  assert!(server
+    .parse_message(
+      message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION).into()
+    )
+    .await
+    .is_ok());
+  assert!(server
+    .parse_message(message::StartScanning::default().into())
+    .await
+    .is_ok());
+  while let Some(msg) = recv.next().await {
+    if let ButtplugServerMessage::ScanningFinished(_) = msg {
+      continue;
+    } else if let ButtplugServerMessage::DeviceAdded(da) = msg {
+      assert_eq!(da.device_name(), "Aneros Vivi");
+      let mut should_be_err;
+      should_be_err = server
+        .parse_message(
+          message::RawWriteCmd::new(da.device_index(), Endpoint::Tx, &vec![0x0], false).into(),
+        )
+        .await;
+      assert!(should_be_err.is_err());
+      assert!(matches!(
+        should_be_err.unwrap_err().original_error(),
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
+      ));
 
-        should_be_err = server
-          .parse_message(message::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
-          .await;
-        assert!(should_be_err.is_err());
-        assert!(matches!(
-          should_be_err.unwrap_err().original_error(),
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
-        ));
+      should_be_err = server
+        .parse_message(message::RawReadCmd::new(da.device_index(), Endpoint::Tx, 0, 0).into())
+        .await;
+      assert!(should_be_err.is_err());
+      assert!(matches!(
+        should_be_err.unwrap_err().original_error(),
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
+      ));
 
-        should_be_err = server
-          .parse_message(message::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
-          .await;
-        assert!(should_be_err.is_err());
-        assert!(matches!(
-          should_be_err.unwrap_err().original_error(),
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
-        ));
+      should_be_err = server
+        .parse_message(message::RawSubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+        .await;
+      assert!(should_be_err.is_err());
+      assert!(matches!(
+        should_be_err.unwrap_err().original_error(),
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
+      ));
 
-        should_be_err = server
-          .parse_message(message::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
-          .await;
-        assert!(should_be_err.is_err());
-        assert!(matches!(
-          should_be_err.unwrap_err().original_error(),
-          ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
-        ));
-        return;
-      } else {
-        panic!(
-          "Returned message was not a DeviceAdded message or timed out: {:?}",
-          msg
-        );
-      }
+      should_be_err = server
+        .parse_message(message::RawUnsubscribeCmd::new(da.device_index(), Endpoint::Tx).into())
+        .await;
+      assert!(should_be_err.is_err());
+      assert!(matches!(
+        should_be_err.unwrap_err().original_error(),
+        ButtplugError::ButtplugDeviceError(ButtplugDeviceError::MessageNotSupported(_))
+      ));
+      return;
+    } else {
+      panic!(
+        "Returned message was not a DeviceAdded message or timed out: {:?}",
+        msg
+      );
     }
+  }
 }
 
 /*

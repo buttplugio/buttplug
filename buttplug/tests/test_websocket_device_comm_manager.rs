@@ -40,7 +40,7 @@ mod test {
 
   #[tokio::test]
   async fn test_websocket_server_dcm_bringup() {
-        let client = setup_test_client().await;
-      assert!(client.connected());
-    }
+    let client = setup_test_client().await;
+    assert!(client.connected());
+  }
 }

@@ -92,8 +92,8 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
-    util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await)
-      .await;
+  util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await)
+    .await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -170,8 +170,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
-    util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await)
-      .await;
+  util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -231,8 +230,8 @@ async fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v2(test_file: &str) {
-    util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
-      .await;
+  util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
+    .await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -291,6 +290,5 @@ async fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v2(test_file: &str) {
-    util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await)
-      .await;
+  util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
 }
