@@ -43,7 +43,7 @@ pub mod xinput;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
-  util::{async_manager, sleep}
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use futures::future::{self, FutureExt};
