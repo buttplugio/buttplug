@@ -6,13 +6,11 @@
 // for full license information.
 
 mod util;
-use buttplug::{
+use buttplug::
   core::{
     errors::{ButtplugDeviceError, ButtplugError},
     message::{self, ButtplugServerMessage, Endpoint, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
-  },
-  util::async_manager,
-};
+  };
 use futures::{pin_mut, StreamExt};
 use std::matches;
 pub use util::test_device_manager::TestDeviceCommunicationManagerBuilder;
@@ -21,9 +19,8 @@ use util::test_server_with_device;
 // Test devices that have protocols that support movements not all devices do.
 // For instance, the Onyx+ is part of a protocol that supports vibration, but
 // the device itself does not.
-#[test]
-fn test_capabilities_exposure() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_capabilities_exposure() {
     // Hold the channel but don't do anything with it.
     let (server, _channel) = test_server_with_device("Onyx+", false).await;
     let recv = server.event_stream();
@@ -47,12 +44,10 @@ fn test_capabilities_exposure() {
         return;
       }
     }
-  });
 }
 
-#[test]
-fn test_server_raw_message() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_raw_message() {
     let (server, _) = test_server_with_device("Massage Demo", true).await;
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -83,12 +78,10 @@ fn test_server_raw_message() {
         );
       }
     }
-  });
 }
 
-#[test]
-fn test_server_no_raw_message() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_no_raw_message() {
     let (server, _) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -119,12 +112,10 @@ fn test_server_no_raw_message() {
         );
       }
     }
-  });
 }
 
-#[test]
-fn test_reject_on_no_raw_message() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_reject_on_no_raw_message() {
     let (server, _) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -190,15 +181,13 @@ fn test_reject_on_no_raw_message() {
         );
       }
     }
-  });
 }
 
 /*
 #[cfg(target_os = "windows")]
 #[ignore = "Has weird timeout issues"]
-#[test]
-fn test_repeated_address_additions() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_repeated_address_additions() {
     let mut server_builder = ButtplugServerBuilder::default();
     let builder = TestDeviceCommunicationManagerBuilder::default();
     let helper = builder.helper();
@@ -256,6 +245,5 @@ fn test_repeated_address_additions() {
         }
       }
     }
-  });
 }
 */

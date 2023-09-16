@@ -28,9 +28,8 @@ use buttplug::{
 use futures::{pin_mut, StreamExt};
 use util::test_server_with_device;
 
-#[test]
-fn test_version0_connection() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_version0_connection() {
     let server = ButtplugServer::default();
     let serializer = ButtplugServerJSONSerializer::default();
     let rsi = r#"[{"RequestServerInfo":{"Id": 1, "ClientName": "Test Client"}}]"#;
@@ -46,12 +45,10 @@ fn test_version0_connection() {
         incoming_json,
         r#"[{"ServerInfo":{"Id":1,"MajorVersion":0,"MinorVersion":0,"BuildVersion":0,"MessageVersion":0,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
-  });
 }
 
-#[test]
-fn test_version2_connection() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_version2_connection() {
     let server = ButtplugServer::default();
     let serializer = ButtplugServerJSONSerializer::default();
     let rsi =
@@ -68,12 +65,10 @@ fn test_version2_connection() {
         incoming_json,
         r#"[{"ServerInfo":{"Id":1,"MessageVersion":2,"MaxPingTime":0,"ServerName":"Buttplug Server"}}]"#.to_owned().into(),
       );
-  });
 }
 
-#[test]
-fn test_version0_device_added_device_list() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_version0_device_added_device_list() {
     let (server, _) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -118,12 +113,10 @@ fn test_version0_device_added_device_list() {
         serializer.serialize(&vec!(output)),
         r#"[{"DeviceList":{"Id":1,"Devices":[{"DeviceIndex":0,"DeviceName":"Aneros Vivi","DeviceMessages":["SingleMotorVibrateCmd","StopDeviceCmd"]}]}}]"#.to_owned().into()
       );
-  });
 }
 
-#[test]
-fn test_version0_singlemotorvibratecmd() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_version0_singlemotorvibratecmd() {
     let (server, mut device) = test_server_with_device("Massage Demo", false).await;
     let recv = server.event_stream();
     pin_mut!(recv);
@@ -176,5 +169,4 @@ fn test_version0_singlemotorvibratecmd() {
       &mut device,
       HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0xF1, 64], false)),
     );
-  });
 }

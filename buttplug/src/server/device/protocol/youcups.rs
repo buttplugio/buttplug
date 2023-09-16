@@ -32,5 +32,3 @@ impl ProtocolHandler for Youcups {
     .into()])
   }
 }
-
-// TODO Write Tests

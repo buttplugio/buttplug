@@ -57,20 +57,17 @@ async fn setup_test_server(
   (server, recv)
 }
 
-#[test]
-fn test_server_handshake() {
+#[tokio::test]
+async fn test_server_handshake() {
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3).into();
-  async_manager::block_on(async {
     let (server, _recv) = setup_test_server(msg).await;
     assert!(server.connected());
-  });
 }
 
-#[test]
-fn test_server_handshake_not_done_first() {
+#[tokio::test]
+async fn test_server_handshake_not_done_first() {
   let msg = message::Ping::default().into();
-  async_manager::block_on(async {
     let server = ButtplugServer::default();
     // assert_eq!(server.server_name, "Test Server");
     let result = server.parse_message(msg).await;
@@ -80,14 +77,12 @@ fn test_server_handshake_not_done_first() {
       ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::RequestServerInfoExpected)
     ));
     assert!(!server.connected());
-  });
 }
 
-#[test]
-fn test_client_version_older_than_server() {
+#[tokio::test]
+async fn test_client_version_older_than_server() {
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
-  async_manager::block_on(async {
     let server = ButtplugServer::default();
     // assert_eq!(server.server_name, "Test Server");
     match server
@@ -101,26 +96,22 @@ fn test_client_version_older_than_server() {
       ),
       _ => panic!("Should've received ok"),
     }
-  });
 }
 
-#[test]
+#[tokio::test]
 #[ignore = "Needs to be rewritten to send in via the JSON parser, otherwise we're type bound due to the enum and can't fail"]
-fn test_server_version_older_than_client() {
+async fn test_server_version_older_than_client() {
   let server = ButtplugServer::default();
   let msg =
     message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version2).into();
-  async_manager::block_on(async {
     assert!(
       server.parse_message(msg).await.is_err(),
       "Client having higher version than server should fail"
     );
-  });
 }
 
-#[test]
-fn test_ping_timeout() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_ping_timeout() {
     let server = ButtplugServerBuilder::default()
       .max_ping_time(100)
       .finish()
@@ -151,12 +142,12 @@ fn test_ping_timeout() {
     } else {
       panic!("Didn't get an error message back");
     }
-  });
+
 }
 
-#[test]
-fn test_device_stop_on_ping_timeout() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_device_stop_on_ping_timeout() {
+
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut device = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
 
@@ -217,13 +208,12 @@ fn test_device_stop_on_ping_timeout() {
       HardwareCommand::Write(DeviceWriteCmd::new(Endpoint::Tx, vec![0xF1, 0], false)),
     );
      */
-  });
 }
 
-#[test]
-fn test_repeated_handshake() {
+#[tokio::test]
+async fn test_repeated_handshake() {
   let msg = message::RequestServerInfo::new("Test Client", ButtplugMessageSpecVersion::Version3);
-  async_manager::block_on(async {
+
     let (server, _recv) = setup_test_server((msg.clone()).into()).await;
     assert!(server.connected());
     let err = server.parse_message(msg.into()).await.unwrap_err();
@@ -231,13 +221,11 @@ fn test_repeated_handshake() {
       err.original_error(),
       ButtplugError::ButtplugHandshakeError(ButtplugHandshakeError::HandshakeAlreadyHappened)
     ));
-  });
 }
 
-#[test]
-fn test_invalid_device_index() {
-  async_manager::block_on(async {
-    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+#[tokio::test]
+async fn test_invalid_device_index() {
+      let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
     let (server, _) = setup_test_server(msg.into()).await;
     let reply = server
       .parse_message(message::VibrateCmd::new(10, vec![]).into())
@@ -247,12 +235,10 @@ fn test_invalid_device_index() {
       reply.unwrap_err().original_error(),
       ButtplugError::ButtplugDeviceError(ButtplugDeviceError::DeviceNotAvailable(_))
     ));
-  });
 }
 
-#[test]
-fn test_device_index_generation() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_device_index_generation() {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
     let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
@@ -297,12 +283,10 @@ fn test_device_index_generation() {
         );
       }
     }
-  });
 }
 
-#[test]
-fn test_server_scanning_finished() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_scanning_finished() {
     let mut builder = TestDeviceCommunicationManagerBuilder::default();
     let mut _device1 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
     let mut _device2 = builder.add_test_device(&TestDeviceIdentifier::new("Massage Demo", None));
@@ -339,34 +323,28 @@ fn test_server_scanning_finished() {
       }
     }
     assert!(finish_received);
-  });
 }
 
-#[test]
-fn test_server_builder_null_device_config() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_null_device_config() {
     let mut builder = ButtplugServerBuilder::default();
     let _ = builder
       .device_configuration_json(None)
       .finish()
       .expect("Test, assuming infallible.");
-  });
 }
 
-#[test]
-fn test_server_builder_device_config_invalid_json() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_device_config_invalid_json() {
     let mut builder = ButtplugServerBuilder::default();
     assert!(builder
       .device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
       .finish()
       .is_err());
-  });
 }
 
-#[test]
-fn test_server_builder_device_config_schema_break() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_device_config_schema_break() {
     let mut builder = ButtplugServerBuilder::default();
     // missing version block.
     let device_json = r#"{
@@ -403,12 +381,10 @@ fn test_server_builder_device_config_schema_break() {
       .device_configuration_json(Some(device_json.to_owned()))
       .finish()
       .is_err());
-  });
 }
 
-#[test]
-fn test_server_builder_device_config_old_config_version() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_device_config_old_config_version() {
     let mut builder = ButtplugServerBuilder::default();
     // missing version block.
     let device_json = r#"{
@@ -420,34 +396,28 @@ fn test_server_builder_device_config_old_config_version() {
       .device_configuration_json(Some(device_json.to_owned()))
       .finish()
       .is_err());
-  });
 }
 
-#[test]
-fn test_server_builder_null_user_device_config() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_null_user_device_config() {
     let mut builder = ButtplugServerBuilder::default();
     let _ = builder
       .user_device_configuration_json(None)
       .finish()
       .expect("Test, assuming infallible.");
-  });
 }
 
-#[test]
-fn test_server_builder_user_device_config_invalid_json() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_user_device_config_invalid_json() {
     let mut builder = ButtplugServerBuilder::default();
     assert!(builder
       .user_device_configuration_json(Some("{\"Not Valid JSON\"}".to_owned()))
       .finish()
       .is_err());
-  });
 }
 
-#[test]
-fn test_server_builder_user_device_config_schema_break() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_server_builder_user_device_config_schema_break() {
     let mut builder = ButtplugServerBuilder::default();
     // missing version block.
     let device_json = r#"{
@@ -484,13 +454,11 @@ fn test_server_builder_user_device_config_schema_break() {
       .user_device_configuration_json(Some(device_json.to_owned()))
       .finish()
       .is_err());
-  });
 }
 
-#[test]
+#[tokio::test]
 #[ignore = "Skip until we've figured out whether we actually want version differences to fail."]
-fn test_server_builder_user_device_config_old_config_version() {
-  async_manager::block_on(async {
+async fn test_server_builder_user_device_config_old_config_version() {
     let mut builder = ButtplugServerBuilder::default();
     // missing version block.
     let device_json = r#"{
@@ -502,7 +470,6 @@ fn test_server_builder_user_device_config_old_config_version() {
       .user_device_configuration_json(Some(device_json.to_owned()))
       .finish()
       .is_err());
-  });
 }
 
 // TODO Test sending system message (Id 0)

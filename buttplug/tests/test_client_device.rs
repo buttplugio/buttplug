@@ -25,9 +25,8 @@ use tokio::time::sleep;
 use util::{test_client_with_device, test_device_manager::TestHardwareEvent};
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_device_connected_status() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_client_device_connected_status() {
     let (client, device) = test_client_with_device().await;
 
     let mut event_stream = client.event_stream();
@@ -61,13 +60,11 @@ fn test_client_device_connected_status() {
       .await
       .expect("Test, assuming infallible.");
     assert!(!client.connected());
-  });
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_device_client_disconnected_status() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_client_device_client_disconnected_status() {
     let (client, _) = test_client_with_device().await;
 
     let mut event_stream = client.event_stream();
@@ -101,13 +98,11 @@ fn test_client_device_client_disconnected_status() {
         break;
       }
     }
-  });
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_device_connected_no_event_listener() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_client_device_connected_no_event_listener() {
     let (client, device) = test_client_with_device().await;
 
     client
@@ -127,13 +122,11 @@ fn test_client_device_connected_no_event_listener() {
       .expect("Test, assuming infallible.");
     assert!(!client.connected());
     sleep(Duration::from_millis(100)).await;
-  });
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_device_invalid_command() {
-  async_manager::block_on(async {
+#[tokio::test]
+async fn test_client_device_invalid_command() {
     let (client, _) = test_client_with_device().await;
 
     let mut event_stream = client.event_stream();
@@ -176,13 +169,11 @@ fn test_client_device_invalid_command() {
         ButtplugDeviceError::ProtocolRequirementError(..)
       ))
     ));
-  });
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_repeated_deviceadded_message() {
-  async_manager::block_on(async move {
+#[tokio::test]
+async fn test_client_repeated_deviceadded_message() {
     let helper = Arc::new(util::ChannelClientTestHelper::new());
     helper.simulate_successful_connect().await;
     let helper_clone = helper.clone();
@@ -226,13 +217,11 @@ fn test_client_repeated_deviceadded_message() {
         .expect("Test, assuming infallible."),
       ButtplugClientEvent::Error(..)
     ));
-  });
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_client_repeated_deviceremoved_message() {
-  async_manager::block_on(async move {
+#[tokio::test]
+async fn test_client_repeated_deviceremoved_message() {
     let helper = Arc::new(util::ChannelClientTestHelper::new());
     helper.simulate_successful_connect().await;
     let helper_clone = helper.clone();
@@ -287,7 +276,6 @@ fn test_client_repeated_deviceremoved_message() {
         .expect("Test, assuming infallible."),
       ButtplugClientEvent::Error(..)
     ));
-  });
 }
 
 // TODO Test invalid messages to device

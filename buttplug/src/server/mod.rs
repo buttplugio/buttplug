@@ -50,29 +50,19 @@ mod ping_timer;
 
 use self::device::{
   configuration::{
-    ProtocolAttributesIdentifier,
-    ProtocolCommunicationSpecifier,
-    ProtocolDeviceAttributes,
+    ProtocolAttributesIdentifier, ProtocolCommunicationSpecifier, ProtocolDeviceAttributes,
   },
   hardware::communication::HardwareCommunicationManagerBuilder,
   protocol::ProtocolIdentifierFactory,
-  ServerDeviceIdentifier,
-  ServerDeviceManager,
-  ServerDeviceManagerBuilder,
+  ServerDeviceIdentifier, ServerDeviceManager, ServerDeviceManagerBuilder,
 };
 use crate::{
   core::{
     errors::*,
     message::{
-      self,
-      ButtplugClientMessage,
-      ButtplugDeviceCommandMessageUnion,
-      ButtplugDeviceManagerMessageUnion,
-      ButtplugMessage,
-      ButtplugServerMessage,
-      StopAllDevices,
-      StopScanning,
-      BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
+      self, ButtplugClientMessage, ButtplugDeviceCommandMessageUnion,
+      ButtplugDeviceManagerMessageUnion, ButtplugMessage, ButtplugServerMessage, StopAllDevices,
+      StopScanning, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION,
     },
   },
   util::{
@@ -537,32 +527,28 @@ mod test {
   use crate::{
     core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,
-    util::async_manager,
   };
 
-  #[test]
-  fn test_server_reuse() {
-    async_manager::block_on(async {
-      let server = ButtplugServer::default();
-      let msg =
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      let mut reply = server.parse_message(msg.clone().into()).await;
-      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
+  #[tokio::test]
+  async fn test_server_reuse() {
+    let server = ButtplugServer::default();
+    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let mut reply = server.parse_message(msg.clone().into()).await;
+    assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 
-      reply = server.parse_message(msg.clone().into()).await;
-      assert!(
-        reply.is_err(),
-        "Should get back err on double handshake: {:?}",
-        reply
-      );
-      assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
+    reply = server.parse_message(msg.clone().into()).await;
+    assert!(
+      reply.is_err(),
+      "Should get back err on double handshake: {:?}",
+      reply
+    );
+    assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
 
-      reply = server.parse_message(msg.clone().into()).await;
-      assert!(
-        reply.is_ok(),
-        "Should get back ok on handshake after disconnect: {:?}",
-        reply
-      );
-    });
+    reply = server.parse_message(msg.clone().into()).await;
+    assert!(
+      reply.is_ok(),
+      "Should get back ok on handshake after disconnect: {:?}",
+      reply
+    );
   }
 }

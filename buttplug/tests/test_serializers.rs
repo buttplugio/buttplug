@@ -26,9 +26,8 @@ use std::sync::Arc;
 use tokio::sync::Notify;
 use util::ChannelClientTestHelper;
 
-#[test]
-fn test_garbled_client_rsi_response() {
-  async_manager::block_on(async move {
+#[tokio::test]
+async fn test_garbled_client_rsi_response() {
     let helper = Arc::new(ChannelClientTestHelper::new());
     let helper_clone = helper.clone();
     let finish_notifier = Arc::new(Notify::new());
@@ -63,12 +62,10 @@ fn test_garbled_client_rsi_response() {
     dl.set_id(2);
     helper.send_client_incoming(dl.into()).await;
     finish_notifier.notified().await;
-  });
 }
 
-#[test]
-fn test_serialized_error_relay() {
-  async_manager::block_on(async move {
+#[tokio::test]
+async fn test_serialized_error_relay() {
     let helper = Arc::new(ChannelClientTestHelper::new());
     helper.simulate_successful_connect().await;
     let helper_clone = helper.clone();
@@ -89,7 +86,6 @@ fn test_serialized_error_relay() {
         buttplug::core::errors::ButtplugUnknownError::NoDeviceCommManagers
       ))
     ));
-  });
 }
 
 // TODO Test bad incoming JSON
