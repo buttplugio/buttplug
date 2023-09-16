@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 15
+    "minor": 16
   },
   "protocols": {
     "lovense": {
