@@ -515,6 +515,17 @@ protocols:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
               SensorRange: [[0, 100]]
+      - identifier:
+          - Ridge
+        name: Lovense Ridge
+        messages:
+          RotateCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Rotate
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special

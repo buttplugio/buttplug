@@ -893,6 +893,35 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Ridge"
+          ],
+          "name": "Lovense Ridge",
+          "messages": {
+            "RotateCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
         }
       ]
     },
