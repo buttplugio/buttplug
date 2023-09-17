@@ -1,4 +1,4 @@
-Copyright (c) 2016-2022, Nonpolynomial Labs, LLC
+Copyright (c) 2016-2023, Nonpolynomial Labs, LLC
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -25,3 +25,21 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+---
+
+Joycon support in Buttplug uses code with the following licenses
+
+---
+
+Joycon-rs by Kaisei Yokoyama
+
+Licensed under Apache License, Version 2.0 (LICENSE or http://www.apache.org/licenses/LICENSE-2.0)
+
+---
+
+hid-async by Swift Technologies
+
+Copyright 2020 Shift Cryptosecurity AG
+
+Licensed under Apache License, Version 2.0 (LICENSE or http://www.apache.org/licenses/LICENSE-2.0)
