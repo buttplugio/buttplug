@@ -104,34 +104,6 @@ async fn send_sub_command(
 /// Constraints exist.
 /// * frequency - 0.0 < freq < 1252.0
 /// * amplitude - 0.0 < amp < 1.799.0
-///
-/// # Example
-/// ```no_run
-/// use joycon_rs::prelude::{*, joycon_features::JoyConFeature};
-///
-/// let manager = JoyConManager::get_instance();
-/// let devices = {
-///     let lock = manager.lock();
-///     match lock {
-///         Ok(manager) => manager.new_devices(),
-///         Err(_) => unreachable!(),
-///     }
-/// };
-///
-/// devices.iter()
-///     .try_for_each::<_, JoyConResult<()>>(|d| {
-///         let mut driver = SimpleJoyConDriver::new(&d)?;
-///
-///         driver.enable_feature(JoyConFeature::Vibration)?;
-///
-///         let rumble = Rumble::new(300.0,0.9);
-///         // ₍₍(ง˘ω˘)ว⁾⁾ Rumble! ₍₍(ง˘ω˘)ว⁾⁾
-///         driver.rumble((Some(rumble), Some(rumble)))?;
-///
-///         Ok(())
-///     })
-///     .unwrap();
-///```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rumble {
   frequency: f32,
@@ -178,14 +150,6 @@ impl Rumble {
   }
 
   /// Generates stopper of rumbling.
-  ///
-  /// # Example
-  /// ```ignore
-  /// # use joycon_rs::prelude::*;
-  /// # let mut rumbling_controller_driver: SimpleJoyConDriver;
-  /// // Make JoyCon stop rambling.
-  /// rumbling_controller_driver.rumble((Some(Rumble::stop()),Some(Rumble::stop()))).unwrap();
-  /// ```
   pub fn stop() -> Self {
     Self {
       frequency: 0.0,
