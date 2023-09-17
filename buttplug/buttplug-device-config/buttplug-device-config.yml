@@ -3704,5 +3704,5 @@ protocols:
       name: Nintendo Joycon
       messages:
         ScalarCmd:
-          - StepRange: [0, 255]
+          - StepRange: [0, 1000]
             ActuatorType: Vibrate      
