@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 16
+  minor: 17
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -3689,7 +3689,20 @@ protocols:
       - identifier:
           - LVS-S002
         name: Adrien Lastic Revelation
-  # nintendo-joycon:
-  #   hid:
-  #     vendor-id: 0x057e
-  #     product-id: 0x2006
+  nintendo-joycon:
+    hid:
+      # Joycon L
+      - vendor-id: 0x057e
+        product-id: 0x2007
+      # Joycon R
+      - vendor-id: 0x057e
+        product-id: 0x2006
+      # Pro Controller
+      - vendor-id: 0x057e
+        product-id: 0x2009
+    defaults:
+      name: Nintendo Joycon
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 255]
+            ActuatorType: Vibrate      
