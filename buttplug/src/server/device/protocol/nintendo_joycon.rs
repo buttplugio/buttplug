@@ -4,7 +4,7 @@ use crate::{
     configuration::ProtocolDeviceAttributes,
     hardware::{HardwareCommand, HardwareWriteCmd, Hardware},
     protocol::{ProtocolHandler, ProtocolInitializer, ProtocolIdentifier, ServerDeviceIdentifier, ProtocolAttributesType},
-  }, generic_protocol_initializer_setup,
+  }, generic_protocol_initializer_setup, util::{async_manager, self},
 };
 use std::{time::Duration, sync::{Arc, atomic::{AtomicU16, Ordering, AtomicBool}}};
 use tokio::sync::Notify;
@@ -235,10 +235,11 @@ impl NintendoJoycon {
     let speed_val = Arc::new(AtomicU16::new(0));
     let speed_val_clone = speed_val.clone();
     let notifier = Arc::new(Notify::new());
+    #[cfg(not(feature = "wasm"))]
     let notifier_clone = notifier.clone();
     let is_stopped = Arc::new(AtomicBool::new(false));
     let is_stopped_clone = is_stopped.clone();
-    tokio::spawn(async move {
+    async_manager::spawn(async move {
       loop {
         if is_stopped_clone.load(Ordering::Relaxed) {
           return;
@@ -254,7 +255,14 @@ impl NintendoJoycon {
           error!("Joycon command failed, exiting update loop");
           break;
         }
+        #[cfg(not(feature = "wasm"))]
         let _ = tokio::time::timeout(Duration::from_millis(15), notifier_clone.notified()).await;
+
+        // If we're using WASM, we can't use tokio's timeout due to lack of time library in WASM.
+        // I'm also too lazy to make this a select. So, this'll do. We can't even access this
+        // protocol in a web context yet since there's no WebHID comm manager yet.
+        #[cfg(feature = "wasm")]
+        util::sleep(Duration::from_millis(15)).await;
       }
     });
     Self {
