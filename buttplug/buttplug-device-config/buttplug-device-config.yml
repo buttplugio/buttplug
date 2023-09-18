@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 17
+  minor: 18
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -730,6 +730,7 @@ protocols:
         - Gballs2
         - GBalls3
         - FM-LILAC-101
+        - Xone
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -786,6 +787,13 @@ protocols:
       - identifier:
           - FM-LILAC-101
         name: Femometer Lilac
+      - identifier:
+          - Xone
+        name: MagicMotion Xone
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 100 ]
+              ActuatorType: Oscillate
   magic-motion-2:
     btle:
       names:
@@ -793,6 +801,8 @@ protocols:
         - Lipstick # Awaken
         - Sword # Equinox
         - Curve # Solstice
+        - Solstice X
+        - funwand # Zenith
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -828,6 +838,18 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 100]
               ActuatorType: Vibrate
+      - identifier:
+          - Solstice X
+        name: MagicMotion Solstice X
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+            - StepRange: [0, 100]
+              ActuatorType: Vibrate
+      - identifier:
+          - funwand
+        name: MagicMotion Zenith
   magic-motion-3:
     btle:
       names:
@@ -3705,4 +3727,4 @@ protocols:
       messages:
         ScalarCmd:
           - StepRange: [0, 1000]
-            ActuatorType: Vibrate      
+            ActuatorType: Vibrate
