@@ -2455,6 +2455,21 @@ protocols:
           - StepRange: [0, 150]
             ActuatorType: Position
         FleshlightLaunchFW12Cmd: {}
+  fredorch-rotary:
+    btle:
+      names:
+        - M1_*
+      services:
+        0000ae10-0000-1000-8000-00805f9b34fb:
+          tx: 0000ae01-0000-1000-8000-00805f9b34fb
+          rx: 0000ae02-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Fredorch Rotary Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 20]
+            ActuatorType: Oscillate
+            FeatureDescriptor: Fucking Machine Oscillation Speed
   mizzzee:
     btle:
       names:
