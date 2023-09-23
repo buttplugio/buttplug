@@ -1,14 +1,28 @@
 use crate::{
   core::{errors::ButtplugDeviceError, message::Endpoint},
+  generic_protocol_initializer_setup,
   server::device::{
     configuration::ProtocolDeviceAttributes,
-    hardware::{HardwareCommand, HardwareWriteCmd, Hardware},
-    protocol::{ProtocolHandler, ProtocolInitializer, ProtocolIdentifier, ServerDeviceIdentifier, ProtocolAttributesType},
-  }, generic_protocol_initializer_setup, util::{async_manager, self},
+    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    protocol::{
+      ProtocolAttributesType,
+      ProtocolHandler,
+      ProtocolIdentifier,
+      ProtocolInitializer,
+      ServerDeviceIdentifier,
+    },
+  },
+  util::{self, async_manager},
 };
-use std::{time::Duration, sync::{Arc, atomic::{AtomicU16, Ordering, AtomicBool}}};
-use tokio::sync::Notify;
 use async_trait::async_trait;
+use std::{
+  sync::{
+    atomic::{AtomicBool, AtomicU16, Ordering},
+    Arc,
+  },
+  time::Duration,
+};
+use tokio::sync::Notify;
 
 /// Send command, sub-command, and data (sub-command's arguments) with u8 integers
 /// This returns ACK packet for the command or Error.
@@ -205,7 +219,6 @@ impl Into<[u8; 4]> for Rumble {
   }
 }
 
-
 generic_protocol_initializer_setup!(NintendoJoycon, "nintendo-joycon");
 
 #[derive(Default)]
@@ -218,7 +231,11 @@ impl ProtocolInitializer for NintendoJoyconInitializer {
     hardware: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    send_sub_command(hardware.clone(), 0, 72, &[0x01]).await.map_err(|_| ButtplugDeviceError::DeviceConnectionError("Cannot initialize joycon".to_owned()))?;
+    send_sub_command(hardware.clone(), 0, 72, &[0x01])
+      .await
+      .map_err(|_| {
+        ButtplugDeviceError::DeviceConnectionError("Cannot initialize joycon".to_owned())
+      })?;
     Ok(Arc::new(NintendoJoycon::new(hardware)))
   }
 }
@@ -227,7 +244,7 @@ pub struct NintendoJoycon {
   //packet_number: Arc<AtomicU8>,
   speed_val: Arc<AtomicU16>,
   notifier: Arc<Notify>,
-  is_stopped: Arc<AtomicBool>
+  is_stopped: Arc<AtomicBool>,
 }
 
 impl NintendoJoycon {
@@ -251,7 +268,9 @@ impl NintendoJoycon {
           Rumble::stop()
         };
 
-        if let Err(_) = send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble)).await {
+        if let Err(_) =
+          send_command_raw(hardware.clone(), 1, 16, 0, &[], Some(rumble), Some(rumble)).await
+        {
           error!("Joycon command failed, exiting update loop");
           break;
         }
@@ -269,7 +288,7 @@ impl NintendoJoycon {
       //packet_number: Arc::new(AtomicU8::new(0)),
       speed_val,
       notifier,
-      is_stopped
+      is_stopped,
     }
   }
 }

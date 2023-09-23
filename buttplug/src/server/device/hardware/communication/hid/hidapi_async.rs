@@ -73,9 +73,9 @@ impl Drop for HidAsyncDevice {
         match guard.read_thread.take() {
           Some(jh) => match jh.join() {
             Ok(_) => info!("device read thread joined"),
-            Err(_) => {}//error!("failed to join device read thread"),
+            Err(_) => {} //error!("failed to join device read thread"),
           },
-          None => {}//error!("already joined"),
+          None => {} //error!("already joined"),
         }
       } else {
         //error!("Failed to take lock on device");
@@ -186,7 +186,7 @@ impl AsyncWrite for HidAsyncDevice {
               .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("hidapi failed: {}", e)))?;
             //debug!("Wrote: {:?}", &buf[0..max_len]);
           }
-          Err(_) => {}//error!("{:?}", e),
+          Err(_) => {} //error!("{:?}", e),
         },
         Err(e) => {
           return Poll::Ready(Err(io::Error::new(
