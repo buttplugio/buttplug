@@ -274,7 +274,7 @@ impl HIDSpecifier {
   pub fn new(vendor_id: u16, product_id: u16) -> Self {
     Self {
       vendor_id,
-      product_id
+      product_id,
     }
   }
 }
