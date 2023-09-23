@@ -1,6 +1,6 @@
 [package]
 name = "buttplug"
-version = "7.1.4"
+version = "7.1.5"
 authors = ["Nonpolynomial Labs, LLC <kyle@nonpolynomial.com>"]
 description = "Buttplug Intimate Hardware Control Library"
 license = "BSD-3-Clause"

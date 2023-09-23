@@ -1,3 +1,11 @@
+# 7.1.5 (2023-09-23)
+
+## Features
+
+- Added Device Support
+  - Magic Motion Solstice X, Zenith, Xone
+  - Fredorch Rotary devices
+
 # 7.1.4 (2023-09-16)
 
 ## Features
