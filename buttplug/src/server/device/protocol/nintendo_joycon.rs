@@ -12,7 +12,7 @@ use crate::{
       ServerDeviceIdentifier,
     },
   },
-  util::{self, async_manager},
+  util::async_manager,
 };
 use async_trait::async_trait;
 use std::{
