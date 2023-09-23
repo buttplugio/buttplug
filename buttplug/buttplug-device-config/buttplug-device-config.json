@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 18
+    "minor": 17
   },
   "protocols": {
     "lovense": {
@@ -1276,8 +1276,7 @@
           "Fugu2",
           "Gballs2",
           "GBalls3",
-          "FM-LILAC-101",
-          "Xone"
+          "FM-LILAC-101"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1389,23 +1388,6 @@
             "FM-LILAC-101"
           ],
           "name": "Femometer Lilac"
-        },
-        {
-          "identifier": [
-            "Xone"
-          ],
-          "name": "MagicMotion Xone",
-          "messages": {
-            "ScalarCmd": [
-              {
-                "StepRange": [
-                  0,
-                  100
-                ],
-                "ActuatorType": "Oscillate"
-              }
-            ]
-          }
         }
       ]
     },
@@ -1415,9 +1397,7 @@
           "Eidolon",
           "Lipstick",
           "Sword",
-          "Curve",
-          "Solstice X",
-          "funwand"
+          "Curve"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1496,36 +1476,6 @@
               }
             ]
           }
-        },
-        {
-          "identifier": [
-            "Solstice X"
-          ],
-          "name": "MagicMotion Solstice X",
-          "messages": {
-            "ScalarCmd": [
-              {
-                "StepRange": [
-                  0,
-                  100
-                ],
-                "ActuatorType": "Vibrate"
-              },
-              {
-                "StepRange": [
-                  0,
-                  100
-                ],
-                "ActuatorType": "Vibrate"
-              }
-            ]
-          }
-        },
-        {
-          "identifier": [
-            "funwand"
-          ],
-          "name": "MagicMotion Zenith"
         }
       ]
     },
@@ -3527,6 +3477,7 @@
         "names": [
           "116",
           "117",
+          "118",
           "Viviana",
           "Ella NEO",
           "S38A",
@@ -3596,6 +3547,12 @@
             "STG05A"
           ],
           "name": "Svakom Aravinda"
+        },
+        {
+          "identifier": [
+            "118"
+          ],
+          "name": "ToyCod Vanesia"
         }
       ]
     },
@@ -3669,7 +3626,8 @@
     "svakom-v4": {
       "btle": {
         "names": [
-          "B2CM6"
+          "B2CM6",
+          "ERICA"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3685,7 +3643,14 @@
             {
               "StepRange": [
                 0,
-                9
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                10
               ],
               "ActuatorType": "Vibrate"
             }
@@ -3698,6 +3663,12 @@
             "B2CM6"
           ],
           "name": "ToyCod Barzillai"
+        },
+        {
+          "identifier": [
+            "ERICA"
+          ],
+          "name": "Svakom Erica"
         }
       ]
     },
@@ -4815,34 +4786,6 @@
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
-        }
-      }
-    },
-    "fredorch-rotary": {
-      "btle": {
-        "names": [
-          "M1_*"
-        ],
-        "services": {
-          "0000ae10-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000ae02-0000-1000-8000-00805f9b34fb"
-          }
-        }
-      },
-      "defaults": {
-        "name": "Fredorch Rotary Device",
-        "messages": {
-          "ScalarCmd": [
-            {
-              "StepRange": [
-                0,
-                20
-              ],
-              "ActuatorType": "Oscillate",
-              "FeatureDescriptor": "Fucking Machine Oscillation Speed"
-            }
-          ]
         }
       }
     },
