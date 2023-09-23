@@ -21,6 +21,7 @@ pub mod cachito;
 pub mod cowgirl;
 pub mod fox;
 pub mod fredorch;
+pub mod fredorch_rotary;
 pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
@@ -182,6 +183,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     fredorch::setup::FredorchIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    fredorch_rotary::setup::FredorchRotaryIdentifierFactory::default(),
   );
 
   add_to_protocol_map(&mut map, hgod::setup::HgodIdentifierFactory::default());

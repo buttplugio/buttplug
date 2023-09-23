@@ -1276,7 +1276,8 @@
           "Fugu2",
           "Gballs2",
           "GBalls3",
-          "FM-LILAC-101"
+          "FM-LILAC-101",
+          "Xone"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1388,6 +1389,23 @@
             "FM-LILAC-101"
           ],
           "name": "Femometer Lilac"
+        },
+        {
+          "identifier": [
+            "Xone"
+          ],
+          "name": "MagicMotion Xone",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate"
+              }
+            ]
+          }
         }
       ]
     },
@@ -1397,7 +1415,9 @@
           "Eidolon",
           "Lipstick",
           "Sword",
-          "Curve"
+          "Curve",
+          "Solstice X",
+          "funwand"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1476,6 +1496,36 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Solstice X"
+          ],
+          "name": "MagicMotion Solstice X",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "funwand"
+          ],
+          "name": "MagicMotion Zenith"
         }
       ]
     },
@@ -4765,6 +4815,34 @@
             }
           ],
           "FleshlightLaunchFW12Cmd": {}
+        }
+      }
+    },
+    "fredorch-rotary": {
+      "btle": {
+        "names": [
+          "M1_*"
+        ],
+        "services": {
+          "0000ae10-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ae02-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Fredorch Rotary Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                20
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+            }
+          ]
         }
       }
     },
