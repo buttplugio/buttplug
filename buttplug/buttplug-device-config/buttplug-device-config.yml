@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 18
+  minor: 17
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -108,8 +108,8 @@ protocols:
       names:
         - LVS-*
         - LOVE-*
-      # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
-      # advertised-services:
+        # This conflicts with Hismith, and we don't need this for identification anymore since we've moved to
+        # advertised-services:
         # - 0000ffb0-0000-1000-8000-00805f9b34fb # Folove advertised service
       manufacturer-data:
         - company: 0x026c
@@ -553,11 +553,11 @@ protocols:
         - Onyx2
       services:
         88f80580-0000-01e6-aace-0002a5d5c51b:
-         tx: 88f80581-0000-01e6-aace-0002a5d5c51b
-         rx: 88f80582-0000-01e6-aace-0002a5d5c51b
-         # The Launch has a special characteristic for loading
-         # firmware.
-         firmware: 88f80583-0000-01e6-aace-0002a5d5c51b
+          tx: 88f80581-0000-01e6-aace-0002a5d5c51b
+          rx: 88f80582-0000-01e6-aace-0002a5d5c51b
+          # The Launch has a special characteristic for loading
+          # firmware.
+          firmware: 88f80583-0000-01e6-aace-0002a5d5c51b
         f60402a6-0293-4bdb-9f20-6758133f7090:
           tx: 02962ac9-e86f-4094-989d-231d69995fc2
           rx: d44d0393-0731-43b3-a373-8fc70b1f3323
@@ -579,138 +579,138 @@ protocols:
           - Onyx2
         name: Kiiroo Onyx 2
   libo-elle:
-      btle:
-        names:
-          - PiPiJing # Whale/ELLE - Shock Egg
-          - Shuidi # ELLE2 - Shock Egg
-        services:
-          # Write Service
-          00006000-0000-1000-8000-00805f9b34fb:
-            tx: 00006001-0000-1000-8000-00805f9b34fb
-            txmode: 00006002-0000-1000-8000-00805f9b34fb
-      defaults:
-        name: Libo Elle Device
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 3]  # Vibe
-              ActuatorType: Vibrate
-      configurations:
-        - identifier:
-            - PiPiJing
-          name: LiBo Elle
-        - identifier:
-            - Shuidi
-          name: Libo Elle 2
+    btle:
+      names:
+        - PiPiJing # Whale/ELLE - Shock Egg
+        - Shuidi # ELLE2 - Shock Egg
+      services:
+        # Write Service
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Libo Elle Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]  # Vibe
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - PiPiJing
+        name: LiBo Elle
+      - identifier:
+          - Shuidi
+        name: Libo Elle 2
   libo-shark:
-      btle:
-        names:
-          - ShaYu # Shark - Inflating Rabbit
-        services:
-          # Write Service
-          00006000-0000-1000-8000-00805f9b34fb:
-            tx: 00006001-0000-1000-8000-00805f9b34fb
-            txmode: 00006002-0000-1000-8000-00805f9b34fb
-      defaults:
-        name: Libo Shark
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 3]
-              ActuatorType: Vibrate
-            - StepRange: [0, 3]
-              ActuatorType: Vibrate
+    btle:
+      names:
+        - ShaYu # Shark - Inflating Rabbit
+      services:
+        # Write Service
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Libo Shark
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
+          - StepRange: [0, 3]
+            ActuatorType: Vibrate
   libo-karen:
-      btle:
-        names:
-          - SuoYinQiu # Karen - Kegel
-        services:
-          # Write Service
-          00006000-0000-1000-8000-00805f9b34fb:
-            tx: 00006001-0000-1000-8000-00805f9b34fb
-            txmode: 00006002-0000-1000-8000-00805f9b34fb
-          # pressure
-          00006050-0000-1000-8000-00805f9b34fb:
-            rxpressure: 00006051-0000-1000-8000-00805f9b34fb
-      defaults:
-        name: Libo Karen
-        messages: {}
+    btle:
+      names:
+        - SuoYinQiu # Karen - Kegel
+      services:
+        # Write Service
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+        # pressure
+        00006050-0000-1000-8000-00805f9b34fb:
+          rxpressure: 00006051-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Libo Karen
+      messages: {}
   libo-vibes:
-      btle:
-        names:
-          - XiaoLu # Lottie - Rabbit
-          - LuXiaoHan # LuLu - Egg
-          - BaiHu # LaLa - Suction Rabbit
-          - MonsterPub # Sistalk MonsterPub (all 6?)
-          - Gugudai # Carlos - Suction Chicken
-          - Yuyi # Lina - Leaf
-          - LuWuShuang # Adel - Curved Rabbit
-          - LiBo # Lily - Double ended mini wand
-          - QingTing # Lucy - Dragonfly egg
-          - Huohu # Lara/Sexy Fox - Rabbit
-          - Yuyi # Feather
-          - Haima # Selina - Suction Seahorse
-        services:
-          # Write Service
-          00006000-0000-1000-8000-00805f9b34fb:
-            tx: 00006001-0000-1000-8000-00805f9b34fb
-            txmode: 00006002-0000-1000-8000-00805f9b34fb
-      defaults:
-        name: Libo Vibes Device
+    btle:
+      names:
+        - XiaoLu # Lottie - Rabbit
+        - LuXiaoHan # LuLu - Egg
+        - BaiHu # LaLa - Suction Rabbit
+        - MonsterPub # Sistalk MonsterPub (all 6?)
+        - Gugudai # Carlos - Suction Chicken
+        - Yuyi # Lina - Leaf
+        - LuWuShuang # Adel - Curved Rabbit
+        - LiBo # Lily - Double ended mini wand
+        - QingTing # Lucy - Dragonfly egg
+        - Huohu # Lara/Sexy Fox - Rabbit
+        - Yuyi # Feather
+        - Haima # Selina - Suction Seahorse
+      services:
+        # Write Service
+        00006000-0000-1000-8000-00805f9b34fb:
+          tx: 00006001-0000-1000-8000-00805f9b34fb
+          txmode: 00006002-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Libo Vibes Device
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 100]
+            ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - XiaoLu
+        name: Libo Lottie
+      - identifier:
+          - MonsterPub
+        name: Sistalk MonsterPub
+      - identifier:
+          - LuXiaoHan
+        name: Libo LuLu
+      - identifier:
+          - Yuyi
+        name: Libo Lina
+      - identifier:
+          - LuWuShuang
+        name: Libo Adel
+      - identifier:
+          - LiBo
+        name: Libo Lily
+      - identifier:
+          - QingTing
+        name: Libo Lucy
+      - identifier:
+          - Huohu
+        name: Libo Lara
+      - identifier:
+          - Yuyi
+        name: Libo Feather
+      # Suction Vibes
+      - identifier:
+          - BaiHu
+        name: Libo LaLa
         messages:
           ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
-      configurations:
-        - identifier:
-            - XiaoLu
-          name: Libo Lottie
-        - identifier:
-            - MonsterPub
-          name: Sistalk MonsterPub
-        - identifier:
-            - LuXiaoHan
-          name: Libo LuLu
-        - identifier:
-            - Yuyi
-          name: Libo Lina
-        - identifier:
-            - LuWuShuang
-          name: Libo Adel
-        - identifier:
-            - LiBo
-          name: Libo Lily
-        - identifier:
-            - QingTing
-          name: Libo Lucy
-        - identifier:
-            - Huohu
-          name: Libo Lara
-        - identifier:
-            - Yuyi
-          name: Libo Feather
-        # Suction Vibes
-        - identifier:
-            - BaiHu
-          name: Libo LaLa
-          messages:
-            ScalarCmd:
+            - StepRange: [0, 3]
+              ActuatorType: Vibrate
+      - identifier:
+          - Gugudai
+        name: Libo Carlos
+        messages:
+          ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
             - StepRange: [0, 3]
               ActuatorType: Vibrate
-        - identifier:
-            - Gugudai
-          name: Libo Carlos
-          messages:
-            ScalarCmd:
-            - StepRange: [0, 100]
-              ActuatorType: Vibrate
-            - StepRange: [0, 3]
-              ActuatorType: Vibrate
-        - identifier:
-            - Haima
-          name: Libo Selina
-          messages:
-            ScalarCmd:
+      - identifier:
+          - Haima
+        name: Libo Selina
+        messages:
+          ScalarCmd:
             - StepRange: [0, 100]
               ActuatorType: Vibrate
             - StepRange: [0, 3]
@@ -730,7 +730,6 @@ protocols:
         - Gballs2
         - GBalls3
         - FM-LILAC-101
-        - Xone
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -787,13 +786,6 @@ protocols:
       - identifier:
           - FM-LILAC-101
         name: Femometer Lilac
-      - identifier:
-          - Xone
-        name: MagicMotion Xone
-        messages:
-          ScalarCmd:
-            - StepRange: [ 0, 100 ]
-              ActuatorType: Oscillate
   magic-motion-2:
     btle:
       names:
@@ -801,8 +793,6 @@ protocols:
         - Lipstick # Awaken
         - Sword # Equinox
         - Curve # Solstice
-        - Solstice X
-        - funwand # Zenith
       services:
         78667579-7b48-43db-b8c5-7928a6b0a335:
           tx: 78667579-a914-49a4-8333-aa3c0cd8fedc
@@ -838,18 +828,6 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 100]
               ActuatorType: Vibrate
-      - identifier:
-          - Solstice X
-        name: MagicMotion Solstice X
-        messages:
-          ScalarCmd:
-            - StepRange: [0, 100]
-              ActuatorType: Vibrate
-            - StepRange: [0, 100]
-              ActuatorType: Vibrate
-      - identifier:
-          - funwand
-        name: MagicMotion Zenith
   magic-motion-3:
     btle:
       names:
@@ -988,12 +966,12 @@ protocols:
       name: Mysteryvibe V2 Device
       messages:
         ScalarCmd:
-            - StepRange: [0, 56]
-              ActuatorType: Vibrate
-            - StepRange: [0, 56]
-              ActuatorType: Vibrate
-            - StepRange: [0, 56]
-              ActuatorType: Vibrate
+          - StepRange: [0, 56]
+            ActuatorType: Vibrate
+          - StepRange: [0, 56]
+            ActuatorType: Vibrate
+          - StepRange: [0, 56]
+            ActuatorType: Vibrate
     configurations:
       - identifier:
           - "6907 MV1"
@@ -1789,6 +1767,7 @@ protocols:
       names:
         - "116" # Phoenix NEO
         - "117" # Edeny
+        - "118" # Vanesia
         - Viviana
         - Ella NEO
         - S38A # Svakom Tammy Pro
@@ -1811,13 +1790,13 @@ protocols:
       - identifier:
           - Viviana
         name: Svakom Viviana
-#        messages:
-#          ScalarCmd:
-#            - StepRange: [ 0, 10 ]
-#              ActuatorType: Vibrate
-#            - StepRange: [ 0, 5 ]
-#              ActuatorType: Vibrate
-#              FeatureDescriptor: Unsupported feature
+      #        messages:
+      #          ScalarCmd:
+      #            - StepRange: [ 0, 10 ]
+      #              ActuatorType: Vibrate
+      #            - StepRange: [ 0, 5 ]
+      #              ActuatorType: Vibrate
+      #              FeatureDescriptor: Unsupported feature
       - identifier:
           - Ella NEO
         name: Svakom Ella Neo
@@ -1833,6 +1812,9 @@ protocols:
       - identifier:
           - STG05A
         name: Svakom Aravinda
+      - identifier:
+          - "118"
+        name: ToyCod Vanesia
   svakom-v3:
     btle:
       names:
@@ -1862,9 +1844,9 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [ 0, 1 ]
               ActuatorType: Rotate
-#            - StepRange: [ 0, 5 ]
-#              ActuatorType: Temperature
-#              FeatureDescriptor: Unsupported feature
+      #            - StepRange: [ 0, 5 ]
+      #              ActuatorType: Temperature
+      #              FeatureDescriptor: Unsupported feature
       - identifier:
           - Hannes NEO
         name: Svakom Hannes Neo
@@ -1872,6 +1854,7 @@ protocols:
     btle:
       names:
         - B2CM6 # Barzillai
+        - ERICA
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1880,12 +1863,17 @@ protocols:
       name: Svakom Device v4
       messages:
         ScalarCmd:
-          - StepRange: [ 0, 9 ]
+          - StepRange: [ 0, 10 ]
+            ActuatorType: Vibrate
+          - StepRange: [ 0, 10 ]
             ActuatorType: Vibrate
     configurations:
       - identifier:
           - B2CM6
         name: ToyCod Barzillai
+      - identifier:
+          - ERICA
+        name: Svakom Erica
   svakom-sam:
     btle:
       names:
@@ -2108,8 +2096,8 @@ protocols:
         name: SayberX
         messages:
           ScalarCmd:
-          - StepRange: [0, 4]
-            ActuatorType: Vibrate
+            - StepRange: [0, 4]
+              ActuatorType: Vibrate
       - identifier:
           - X-Ring
         name: Sayber X-Ring
@@ -2264,15 +2252,15 @@ protocols:
         name: Lovehoney Desire Knicker Vibrator
         messages:
           ScalarCmd:
-          - StepRange: [0, 127]
-            ActuatorType: Vibrate
+            - StepRange: [0, 127]
+              ActuatorType: Vibrate
       - identifier:
           - LOVE EGG
         name: Lovehoney Desire Love Egg
         messages:
           ScalarCmd:
-          - StepRange: [0, 127]
-            ActuatorType: Vibrate
+            - StepRange: [0, 127]
+              ActuatorType: Vibrate
   twerkingbutt:
     btle:
       names:
@@ -2287,7 +2275,7 @@ protocols:
       name: Twerking Butt
       messages: {}
         # Vibration and Rotation protocols still need to be establised
-        # Twerk mode will be represented as a vibrator
+      # Twerk mode will be represented as a vibrator
   maxpro:
     btle:
       names:
@@ -2455,21 +2443,6 @@ protocols:
           - StepRange: [0, 150]
             ActuatorType: Position
         FleshlightLaunchFW12Cmd: {}
-  fredorch-rotary:
-    btle:
-      names:
-        - M1_*
-      services:
-        0000ae10-0000-1000-8000-00805f9b34fb:
-          tx: 0000ae01-0000-1000-8000-00805f9b34fb
-          rx: 0000ae02-0000-1000-8000-00805f9b34fb
-    defaults:
-      name: Fredorch Rotary Device
-      messages:
-        ScalarCmd:
-          - StepRange: [0, 20]
-            ActuatorType: Oscillate
-            FeatureDescriptor: Fucking Machine Oscillation Speed
   mizzzee:
     btle:
       names:
