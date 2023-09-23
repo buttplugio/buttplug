@@ -23,6 +23,8 @@ use std::{
   time::Duration,
 };
 use tokio::sync::Notify;
+#[cfg(feature = "wasm")]
+use crate::util;
 
 /// Send command, sub-command, and data (sub-command's arguments) with u8 integers
 /// This returns ACK packet for the command or Error.
