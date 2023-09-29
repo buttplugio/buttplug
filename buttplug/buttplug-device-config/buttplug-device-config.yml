@@ -3716,3 +3716,16 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 1000]
             ActuatorType: Vibrate
+  foreo:
+    btle:
+      names:
+        - FOFO
+      services:
+        0000fff0-0000-1000-8000-00805f9b34fb:
+          tx: 0000fff1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Foreo Luna Fofo
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 10]
+            ActuatorType: Vibrate
