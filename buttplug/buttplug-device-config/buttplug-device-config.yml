@@ -3720,12 +3720,173 @@ protocols:
     btle:
       names:
         - FOFO
+        - LUNA fofo
+        - LUNA FOFO
+        - LUNA PLAY SMART
+        - LUNA PLAYSMART2
+        - LUNA PLAY SMART2
+        - LUNA play smart2
+        - LUNA play smart 2
+        - LUNA 3
+        - LUNA3
+        - LUNA3PLUS
+        - LUNA3 PLUS
+        - LUNA 3 PLUS
+        - LUNA 3 plus
+        - LUNA 3 MEN
+        - LUNA3MEN
+        - LUNA MINI3
+        - LUNA MINI 3
+        - LUNA mini 3
+        - LUNA4PLUS
+        - LUNA4
+        - LUNA 4
+        - LUNA4PLUS
+        - LUNA4 PLUS
+        - LUNA 4 plus
+        - LUNA4MEN
+        - LUNA 4 MEN
+        - LUNA 4 FOR MEN
+        - LUNA MINI4
+        - LUNA MINI 4
+        - LUNA mini 4
+        - LUNA 4 mini
+        - UFO
+        - UFO mini
+        - UFO MINI
+        - UFO MIN
+        - UFO2
+        - UFO 2
+        - UFOMINI2
+        - UFO mini 2
+        - UFO3
+        - UFO3mini
+        - UFO3go
+        - UFO3led
+        - BEAR
+        - BEAR_MINI
+        - BEAR MINI
+        - BEAR mini
+        - BEAR2
+        - BEAR 2
+        - BEAR2go
+        - BEAR2body
+        - BEAR2eyes
+        - KIWI
+        - KIWI derma
       services:
         0000fff0-0000-1000-8000-00805f9b34fb:
           tx: 0000fff1-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Foreo Luna Fofo
+      name: Foreo Device
       messages:
         ScalarCmd:
           - StepRange: [0, 10]
             ActuatorType: Vibrate
+    configurations:
+      - identifier:
+          - FOFO
+          - LUNA fofo
+          - LUNA FOFO
+          - LUNA PLAY SMART
+        name: Foreo LUNA fofo
+      - identifier:
+          - LUNA PLAYSMART2
+          - LUNA PLAY SMART2
+          - LUNA play smart2
+          - LUNA play smart 2
+        name: Foreo LUNA play smart 2
+      - identifier:
+          - LUNA 3
+          - LUNA3
+        name: Foreo LUNA 3
+      - identifier:
+          - LUNA3PLUS
+          - LUNA3 PLUS
+          - LUNA 3 PLUS
+          - LUNA 3 plus
+        name: Foreo LUNA 3 plus
+      - identifier:
+          - LUNA 3 MEN
+          - LUNA3MEN
+        name: Foreo LUNA 3 men
+      - identifier:
+          - LUNA MINI3
+          - LUNA MINI 3
+          - LUNA mini 3
+        name: Foreo LUNA 3 mini
+      - identifier:
+          - LUNA4
+          - LUNA 4
+        name: Foreo LUNA 4
+      - identifier:
+          - LUNA4PLUS
+          - LUNA4 PLUS
+          - LUNA 4 plus
+        name: Foreo LUNA 4 plus
+      - identifier:
+          - LUNA4MEN
+          - LUNA 4 MEN
+          - LUNA 4 FOR MEN
+        name: Foreo LUNA 4 men
+      - identifier:
+          - LUNA MINI4
+          - LUNA MINI 4
+          - LUNA mini 4
+          - LUNA 4 mini
+        name: Foreo LUNA 4 mini
+      - identifier:
+          - UFO
+        name: Foreo UFO
+      - identifier:
+          - UFO mini
+          - UFO MINI
+          - UFO MIN
+        name: Foreo UFO mini
+      - identifier:
+          - UFO2
+          - UFO 2
+        name: Foreo UFO 2
+      - identifier:
+          - UFO3
+        name: Foreo UFO 3
+      - identifier:
+          - UFO3go
+        name: Foreo UFO 3 go
+      - identifier:
+          - UFO3eyes
+        name: Foreo UFO 3 led
+      - identifier:
+          - UFO3mini
+        name: Foreo UFO 3 mini
+      - identifier:
+          - UFOMINI2
+          - UFO mini 2
+        name: Foreo UFO mini 2
+      - identifier:
+          - BEAR
+        name: Foreo BEAR
+      - identifier:
+          - BEAR_MINI
+          - BEAR MINI
+          - BEAR mini
+        name: Foreo BEAR mini
+      - identifier:
+          - BEAR2
+          - BEAR 2
+        name: Foreo BEAR 2
+      - identifier:
+          - BEAR2go
+        name: Foreo BEAR 2 go
+      - identifier:
+          - BEAR2eyes
+        name: Foreo BEAR 2 eyes
+      - identifier:
+          - BEAR2body
+        name: Foreo BEAR 2 body
+      - identifier:
+          - KIWI
+        name: Foreo KIWI
+      - identifier:
+          - KIWI derma
+        name: Foreo KIWI derma
