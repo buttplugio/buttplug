@@ -1,5 +1,11 @@
 # 7.1.6 (2023-10-08)
 
+## Features
+
+- Added Device Support
+  - Forea Luna Fofo
+    - Yes, Buttplug now supports beauty products
+
 ## Bugfixes
 
 - Fix issue with lovense dongle support being broken in single threaded runtime situations (which
