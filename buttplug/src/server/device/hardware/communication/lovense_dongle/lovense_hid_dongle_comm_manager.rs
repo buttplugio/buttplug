@@ -33,13 +33,12 @@ use std::{
   thread,
 };
 use tokio::{
+  runtime,
   sync::{
     mpsc::{channel, Receiver, Sender},
     Mutex,
   },
-  runtime
-}
-;
+};
 use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
 
@@ -47,9 +46,11 @@ fn hid_write_thread(
   dongle: HidDevice,
   mut receiver: Receiver<OutgoingLovenseData>,
   token: CancellationToken,
-) {  
+) {
   info!("Starting HID dongle write thread");
-  let rt  = runtime::Builder::new_current_thread().build().expect("Should always build");
+  let rt = runtime::Builder::new_current_thread()
+    .build()
+    .expect("Should always build");
   let _guard = rt.enter();
   let port_write = |mut data: String| {
     data += "\r\n";
