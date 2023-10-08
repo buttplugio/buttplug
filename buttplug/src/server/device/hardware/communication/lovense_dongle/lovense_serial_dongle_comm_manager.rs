@@ -34,10 +34,11 @@ use std::{
   thread,
   time::Duration,
 };
-use tokio::sync::{
+use tokio::{runtime, 
+  sync::{
   mpsc::{channel, Receiver, Sender},
   Mutex,
-};
+}};
 use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
 
@@ -45,7 +46,10 @@ fn serial_write_thread(
   mut port: Box<dyn SerialPort>,
   mut receiver: Receiver<OutgoingLovenseData>,
   token: CancellationToken,
-) {
+) {  
+  let rt  = runtime::Builder::new_current_thread().build().expect("Should always build");
+  let _guard = rt.enter();
+
   let mut port_write = |mut data: String| {
     data += "\r\n";
     debug!("Writing message: {}", data);
