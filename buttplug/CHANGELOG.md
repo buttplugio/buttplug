@@ -1,3 +1,10 @@
+# 7.1.6 (2023-10-08)
+
+## Bugfixes
+
+- Fix issue with lovense dongle support being broken in single threaded runtime situations (which
+  includes intiface engine.)
+
 # 7.1.5 (2023-09-23)
 
 ## Features
