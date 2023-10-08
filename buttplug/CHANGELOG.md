@@ -3,7 +3,7 @@
 ## Features
 
 - Added Device Support
-  - Forea - all vibrating products for brand
+  - Foreo - all vibrating products for brand
     - Yes, Buttplug now supports "beauty products"
 
 ## Bugfixes

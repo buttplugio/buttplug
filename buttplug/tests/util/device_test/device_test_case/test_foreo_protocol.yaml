@@ -1,7 +1,7 @@
 devices:
   - identifier: 
       name: "FOFO"
-    expected_name: "Foreo Luna Fofo"
+    expected_name: "Foreo LUNA fofo"
 device_commands:
   - !Messages
       device_index: 0
