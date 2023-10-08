@@ -3,13 +3,13 @@
 ## Features
 
 - Added Device Support
-  - Forea Luna Fofo
-    - Yes, Buttplug now supports beauty products
+  - Forea - all vibrating products for brand
+    - Yes, Buttplug now supports "beauty products"
 
 ## Bugfixes
 
-- Fix issue with lovense dongle support being broken in single threaded runtime situations (which
-  includes intiface engine.)
+- #588: Fix issue with lovense dongle support being broken in single threaded runtime situations
+  (which includes intiface engine.)
 
 # 7.1.5 (2023-09-23)
 
