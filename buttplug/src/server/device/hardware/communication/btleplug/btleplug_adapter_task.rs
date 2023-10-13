@@ -185,6 +185,8 @@ impl BtleplugAdapterTask {
                 "Asus"
               } else if device_id.contains("VID_13D3") {
                 "IMC"
+              } else if device_id.contains("VID_10D7") {
+                "Actions Semi"
               } else {
                 "Unknown Manufacturer"
               };
