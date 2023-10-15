@@ -211,7 +211,7 @@ impl ServerDevice {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(2);
         loop {
-          if hardware.time_since_last_write() > wait_duration {
+          if hardware.time_since_last_write().await > wait_duration {
             match &strategy {
               ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
                 if let Err(e) = hardware.write_value(&packet).await {
