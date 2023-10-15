@@ -22,6 +22,10 @@ generic_protocol_setup!(LovehoneyDesire, "lovehoney-desire");
 pub struct LovehoneyDesire {}
 
 impl ProtocolHandler for LovehoneyDesire {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

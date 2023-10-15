@@ -61,6 +61,10 @@ impl ProtocolInitializer for WeVibeInitializer {
 pub struct WeVibe {}
 
 impl ProtocolHandler for WeVibe {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

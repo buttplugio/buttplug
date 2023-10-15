@@ -22,6 +22,10 @@ generic_protocol_setup!(KiirooV2Vibrator, "kiiroo-v2-vibrator");
 pub struct KiirooV2Vibrator {}
 
 impl ProtocolHandler for KiirooV2Vibrator {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

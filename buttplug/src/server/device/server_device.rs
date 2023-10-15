@@ -51,11 +51,12 @@ use dashmap::DashSet;
 use futures::future::{self, FutureExt};
 use getset::{Getters, MutGetters, Setters};
 use serde::{Deserialize, Serialize};
+use tokio::sync::RwLock;
 use tokio_stream::StreamExt;
 
 use super::{
   configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
-  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer, ProtocolKeepaliveStrategy},
+  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer, ProtocolKeepaliveStrategy}, hardware::HardwareWriteCmd,
 };
 
 #[derive(Debug)]
@@ -158,8 +159,20 @@ pub(super) async fn build_server_device(
     .initialize(hardware.clone(), &attrs)
     .await?;
 
+  let requires_keepalive = hardware.requires_keepalive();
+  let strategy = handler.keepalive_strategy();
+
   // We now have fully initialized hardware, return a server device.
-  Ok(ServerDevice::new(identifier, handler, hardware, &attrs))
+  let device = ServerDevice::new(identifier, handler, hardware, &attrs);
+  
+  // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
+  if requires_keepalive && matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategy) {
+    if let Err(e) = device.handle_stop_device_cmd().await {
+      return Err(ButtplugDeviceError::DeviceConnectionError(format!("Error setting up keepalive: {}", e)));
+    }
+  }
+
+  Ok(device)
 }
 
 pub struct ServerDevice {
@@ -170,6 +183,7 @@ pub struct ServerDevice {
   /// Unique identifier for the device
   identifier: ServerDeviceIdentifier,
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
+  keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -203,10 +217,13 @@ impl ServerDevice {
     hardware: Arc<Hardware>,
     attributes: &ProtocolDeviceAttributes,
   ) -> Self {
+    let keepalive_packet = Arc::new(RwLock::new(None));
+    let gcm = GenericCommandManager::new(attributes);
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
     if hardware.requires_keepalive() && !matches!(handler.keepalive_strategy(), ProtocolKeepaliveStrategy::NoStrategy) {
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
+      let keepalive_packet = keepalive_packet.clone();
       tokio::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
@@ -219,6 +236,11 @@ impl ServerDevice {
                   break;
                 }
               }
+              ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
+                if let Some(packet) = &*keepalive_packet.read().await {
+                  hardware.write_value(&packet);
+                }
+              },
               _ => {
                 info!("Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy", strategy);
               }
@@ -233,9 +255,10 @@ impl ServerDevice {
 
     Self {
       identifier,
-      generic_command_manager: GenericCommandManager::new(attributes),
+      generic_command_manager: gcm,
       handler,
       hardware,
+      keepalive_packet,
       attributes: attributes.clone(),
       raw_subscribed_endpoints: Arc::new(DashSet::new()),
     }
@@ -511,6 +534,8 @@ impl ServerDevice {
 
   fn handle_hardware_commands(&self, commands: Vec<HardwareCommand>) -> ButtplugServerResultFuture {
     let hardware = self.hardware.clone();
+    let keepalive_type = self.handler.keepalive_strategy();
+    let keepalive_packet = self.keepalive_packet.clone();
     async move {
       // Run commands in order, otherwise we may end up sending out of order. This may take a while,
       // but it's what 99% of protocols expect. If they want something else, they can implement it
@@ -520,6 +545,11 @@ impl ServerDevice {
       // disconnected.
       for command in commands {
         hardware.parse_message(&command).await?;
+        if hardware.requires_keepalive() && matches!(keepalive_type, ProtocolKeepaliveStrategy::RepeatLastPacketStrategy) {
+          if let HardwareCommand::Write(command) = command {
+            *keepalive_packet.write().await = Some(command);
+          }
+        }
       }
       Ok(message::Ok::default().into())
     }

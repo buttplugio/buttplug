@@ -30,6 +30,10 @@ generic_protocol_setup!(GalakuPump, "galaku-pump");
 pub struct GalakuPump {}
 
 impl ProtocolHandler for GalakuPump {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

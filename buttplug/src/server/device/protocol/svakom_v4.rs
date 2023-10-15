@@ -20,6 +20,10 @@ generic_protocol_setup!(SvakomV4, "svakom-v4");
 pub struct SvakomV4 {}
 
 impl ProtocolHandler for SvakomV4 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

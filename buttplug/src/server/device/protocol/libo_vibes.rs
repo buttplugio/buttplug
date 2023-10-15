@@ -22,6 +22,10 @@ generic_protocol_setup!(LiboVibes, "libo-vibes");
 pub struct LiboVibes {}
 
 impl ProtocolHandler for LiboVibes {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

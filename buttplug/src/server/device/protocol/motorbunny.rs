@@ -26,6 +26,10 @@ generic_protocol_setup!(Motorbunny, "motorbunny");
 pub struct Motorbunny {}
 
 impl ProtocolHandler for Motorbunny {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

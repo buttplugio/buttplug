@@ -22,6 +22,10 @@ generic_protocol_setup!(JeJoue, "jejoue");
 pub struct JeJoue {}
 
 impl ProtocolHandler for JeJoue {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

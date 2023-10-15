@@ -19,14 +19,18 @@ generic_protocol_setup!(Meese, "meese");
 pub struct Meese {}
 
 impl ProtocolHandler for Meese {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
-    _index: u32,
+    index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
-      vec![0x01, 0x80, 0x01 + (_index as u8), (scalar as u8)],
+      vec![0x01, 0x80, 0x01 + (index as u8), (scalar as u8)],
       true,
     )
     .into()])

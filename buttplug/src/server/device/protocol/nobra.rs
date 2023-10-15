@@ -46,6 +46,10 @@ impl ProtocolInitializer for NobraInitializer {
 pub struct Nobra {}
 
 impl ProtocolHandler for Nobra {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

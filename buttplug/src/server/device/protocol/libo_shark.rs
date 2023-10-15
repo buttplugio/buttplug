@@ -22,6 +22,10 @@ generic_protocol_setup!(LiboShark, "libo-shark");
 pub struct LiboShark {}
 
 impl ProtocolHandler for LiboShark {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
