@@ -77,6 +77,10 @@ impl ProtocolInitializer for AnkniInitializer {
 pub struct Ankni {}
 
 impl ProtocolHandler for Ankni {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

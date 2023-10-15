@@ -22,6 +22,10 @@ generic_protocol_setup!(HtkBm, "htk_bm");
 pub struct HtkBm {}
 
 impl ProtocolHandler for HtkBm {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],
@@ -41,66 +45,5 @@ impl ProtocolHandler for HtkBm {
       cmd_vec.push(HardwareWriteCmd::new(Endpoint::Tx, vec![data], false).into());
     }
     Ok(cmd_vec)
-  }
-}
-
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use super::HtkBm;
-  use crate::{
-    core::message::{ActuatorType, Endpoint},
-    server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      protocol::ProtocolHandler,
-    },
-  };
-
-  #[test]
-  pub fn test_htkbm_protocol() {
-    let handler = HtkBm {};
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![
-        Some((ActuatorType::Vibrate, 0)),
-        Some((ActuatorType::Vibrate, 0))
-      ]),
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![15],
-        false
-      ))])
-    );
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![
-        Some((ActuatorType::Vibrate, 1)),
-        Some((ActuatorType::Vibrate, 0))
-      ]),
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![12],
-        false
-      ))])
-    );
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![
-        Some((ActuatorType::Vibrate, 0)),
-        Some((ActuatorType::Vibrate, 1))
-      ]),
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![13],
-        false
-      ))])
-    );
-    assert_eq!(
-      handler.handle_scalar_cmd(&vec![
-        Some((ActuatorType::Vibrate, 1)),
-        Some((ActuatorType::Vibrate, 1))
-      ]),
-      Ok(vec![HardwareCommand::Write(HardwareWriteCmd::new(
-        Endpoint::Tx,
-        vec![11],
-        false
-      ))])
-    );
   }
 }

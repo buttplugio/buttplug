@@ -19,6 +19,10 @@ generic_protocol_setup!(Kizuna, "kizuna");
 pub struct Kizuna {}
 
 impl ProtocolHandler for Kizuna {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_rotate_cmd(
     &self,
     _index: u32,

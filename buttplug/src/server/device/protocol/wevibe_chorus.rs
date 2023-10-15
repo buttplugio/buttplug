@@ -22,6 +22,10 @@ generic_protocol_setup!(WeVibeChorus, "wevibe-chorus");
 pub struct WeVibeChorus {}
 
 impl ProtocolHandler for WeVibeChorus {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

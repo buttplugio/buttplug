@@ -131,6 +131,23 @@ use std::{collections::HashMap, sync::Arc};
 /// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
 /// we never know which of our hundreds of supported devices someone might connect, we need context
 /// as to which keepalive strategy to use.
+/// 
+/// When choosing a keepalive strategy for a protocol:
+/// 
+/// - All protocols use NoStrategy by default. For many devices, sending trash will break them in
+///   very weird ways and we can't risk that, so we need to know the protocol context.
+/// - If the protocol already needs its own keepalive (Satisfyer, Mysteryvibe, etc...), use
+///   NoStrategy for now. RepeatLastPacketStrategy could be used, but we'd need per-protocol
+///   timeouts at that point.
+/// - If the protocol has a command that essentially does nothing to the actuators, set up
+///   RepeatPacketStrategy to use that. This is useful for devices that have info commands (like
+///   Lovense), ping commands (like The Handy), sensor commands that aren't yet subscribed to output
+///   notifications, etc...
+/// - For many devices with only scalar actuators, RepeatLastPacketStrategy should work. You just
+///   need to make sure the protocol doesn't have a packet counter or something else that will trip
+///   if the same packet is replayed multiple times.
+/// - For all other devices, use Custom Strategy. This assumes the protocol will have implemented a
+///   method to generate a valid packet.
 #[derive(Debug)]
 pub enum ProtocolKeepaliveStrategy {
   /// Do nothing. This is for protocols that already require internal keepalives, like satisfyer,
@@ -141,10 +158,8 @@ pub enum ProtocolKeepaliveStrategy {
   /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. This
   /// will be useful for most devices that purely use scalar commands.
   RepeatLastPacketStrategy,
-  /// Request battery values as the keep alive.
-  BatteryStrategy,
-  /// Protocol implements a custom strategy, use that.
-  CustomStrategy,
+  /// Call a specific method on the protocol implementation to generate keepalive packets.
+  CustomStrategy
 }
 
 pub trait ProtocolIdentifierFactory: Send + Sync {

@@ -19,6 +19,10 @@ generic_protocol_setup!(Maxpro, "maxpro");
 pub struct Maxpro {}
 
 impl ProtocolHandler for Maxpro {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
@@ -46,5 +50,3 @@ impl ProtocolHandler for Maxpro {
     Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, data, false).into()])
   }
 }
-
-// TODO Write some tests! Especially with the weird operational range on this.

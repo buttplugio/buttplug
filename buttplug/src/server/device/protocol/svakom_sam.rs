@@ -49,6 +49,10 @@ impl ProtocolInitializer for SvakomSamInitializer {
 pub struct SvakomSam {}
 
 impl ProtocolHandler for SvakomSam {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

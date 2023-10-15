@@ -19,6 +19,10 @@ generic_protocol_setup!(MagicMotionV1, "magic-motion-1");
 pub struct MagicMotionV1 {}
 
 impl ProtocolHandler for MagicMotionV1 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

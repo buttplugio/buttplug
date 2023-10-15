@@ -19,6 +19,10 @@ generic_protocol_setup!(Foreo, "foreo");
 pub struct Foreo {}
 
 impl ProtocolHandler for Foreo {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _: u32,

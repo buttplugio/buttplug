@@ -19,6 +19,10 @@ generic_protocol_setup!(SvakomV3, "svakom-v3");
 pub struct SvakomV3 {}
 
 impl ProtocolHandler for SvakomV3 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

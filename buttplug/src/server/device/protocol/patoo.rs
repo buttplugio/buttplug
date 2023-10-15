@@ -83,6 +83,10 @@ impl ProtocolInitializer for PatooInitializer {
 pub struct Patoo {}
 
 impl ProtocolHandler for Patoo {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_cmd(
     &self,
     cmds: &[Option<(ActuatorType, u32)>],

@@ -19,6 +19,10 @@ generic_protocol_setup!(Realov, "realov");
 pub struct Realov {}
 
 impl ProtocolHandler for Realov {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

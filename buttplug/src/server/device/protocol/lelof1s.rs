@@ -52,6 +52,10 @@ impl ProtocolInitializer for LeloF1sInitializer {
 pub struct LeloF1s {}
 
 impl ProtocolHandler for LeloF1s {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

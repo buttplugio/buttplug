@@ -19,6 +19,10 @@ generic_protocol_setup!(SvakomAlexV2, "svakom-alex-v2");
 pub struct SvakomAlexV2 {}
 
 impl ProtocolHandler for SvakomAlexV2 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,

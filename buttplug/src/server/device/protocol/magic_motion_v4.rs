@@ -22,6 +22,10 @@ generic_protocol_setup!(MagicMotionV4, "magic-motion-4");
 pub struct MagicMotionV4 {}
 
 impl ProtocolHandler for MagicMotionV4 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }
