@@ -43,6 +43,7 @@ pub struct BtleplugAdapterTask {
   event_sender: Sender<HardwareCommunicationManagerEvent>,
   command_receiver: Receiver<BtleplugAdapterCommand>,
   adapter_connected: Arc<AtomicBool>,
+  requires_keepalive: bool
 }
 
 impl BtleplugAdapterTask {
@@ -50,11 +51,13 @@ impl BtleplugAdapterTask {
     event_sender: Sender<HardwareCommunicationManagerEvent>,
     command_receiver: Receiver<BtleplugAdapterCommand>,
     adapter_connected: Arc<AtomicBool>,
+    requires_keepalive: bool
   ) -> Self {
     Self {
       event_sender,
       command_receiver,
       adapter_connected,
+      requires_keepalive
     }
   }
 
@@ -115,6 +118,7 @@ impl BtleplugAdapterTask {
         &properties.services,
         peripheral.clone(),
         adapter.clone(),
+        self.requires_keepalive
       ));
       if self
         .event_sender

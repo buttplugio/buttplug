@@ -127,6 +127,26 @@ use futures::{
 use std::pin::Pin;
 use std::{collections::HashMap, sync::Arc};
 
+/// Strategy for situations where hardware needs to get updates every so often in order to keep
+/// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
+/// we never know which of our hundreds of supported devices someone might connect, we need context
+/// as to which keepalive strategy to use.
+#[derive(Debug)]
+pub enum ProtocolKeepaliveStrategy {
+  /// Do nothing. This is for protocols that already require internal keepalives, like satisfyer,
+  /// mysteryvibe, etc.
+  NoStrategy,
+  /// Repeat a specific packet, such as a ping or a no-op
+  RepeatPacketStrategy(HardwareWriteCmd),
+  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. This
+  /// will be useful for most devices that purely use scalar commands.
+  RepeatLastPacketStrategy,
+  /// Request battery values as the keep alive.
+  BatteryStrategy,
+  /// Protocol implements a custom strategy, use that.
+  CustomStrategy,
+}
+
 pub trait ProtocolIdentifierFactory: Send + Sync {
   fn identifier(&self) -> &str;
   fn create(&self) -> Box<dyn ProtocolIdentifier>;
@@ -535,6 +555,10 @@ pub trait ProtocolHandler: Sync + Send {
     false
   }
 
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::NoStrategy
+  }
+
   fn handle_message(
     &self,
     message: &ButtplugDeviceCommandMessageUnion,
@@ -819,3 +843,5 @@ macro_rules! generic_protocol_initializer_setup {
 use crate::server::device::configuration::ProtocolDeviceAttributes;
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
+
+use super::hardware::HardwareWriteCmd;
