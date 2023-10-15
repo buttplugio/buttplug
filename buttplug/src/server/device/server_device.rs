@@ -209,7 +209,7 @@ impl ServerDevice {
       let strategy = handler.keepalive_strategy();
       tokio::spawn(async move {
         // Arbitrary wait time for now.
-        let wait_duration = Duration::from_secs(2);
+        let wait_duration = Duration::from_secs(5);
         loop {
           if hardware.time_since_last_write().await > wait_duration {
             match &strategy {
