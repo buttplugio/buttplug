@@ -8,6 +8,7 @@
 use std::{
   fmt::{self, Debug},
   sync::Arc,
+  time::Duration,
 };
 
 use crate::{
@@ -43,7 +44,7 @@ use crate::{
     },
     ButtplugServerResultFuture,
   },
-  util::stream::convert_broadcast_receiver_to_stream,
+  util::{self, stream::convert_broadcast_receiver_to_stream},
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashSet;
@@ -54,7 +55,7 @@ use tokio_stream::StreamExt;
 
 use super::{
   configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
-  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer},
+  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer, ProtocolKeepaliveStrategy},
 };
 
 #[derive(Debug)]
@@ -202,7 +203,33 @@ impl ServerDevice {
     hardware: Arc<Hardware>,
     attributes: &ProtocolDeviceAttributes,
   ) -> Self {
-    // Hook up our stream mapper now.
+    // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
+    if hardware.requires_keepalive() && !matches!(handler.keepalive_strategy(), ProtocolKeepaliveStrategy::NoStrategy) {
+      let hardware = hardware.clone();
+      let strategy = handler.keepalive_strategy();
+      tokio::spawn(async move {
+        // Arbitrary wait time for now.
+        let wait_duration = Duration::from_secs(2);
+        loop {
+          if hardware.time_since_last_write() > wait_duration {
+            match &strategy {
+              ProtocolKeepaliveStrategy::RepeatPacketStrategy(packet) => {
+                if let Err(e) = hardware.write_value(&packet).await {
+                  warn!("Error writing keepalive packet: {:?}", e);
+                  break;
+                }
+              }
+              _ => {
+                info!("Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy", strategy);
+              }
+            }  
+          }
+          // Arbitrary wait time for now.
+          util::sleep(wait_duration).await;
+        }
+        info!("Leaving keepalive task for {}", hardware.name());
+      });
+    }
 
     Self {
       identifier,
