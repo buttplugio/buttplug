@@ -5,6 +5,8 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
+use self::handyplug::Ping;
+
 use super::fleshlight_launch_helper;
 use crate::server::device::configuration::ProtocolDeviceAttributes;
 use crate::{
@@ -114,6 +116,21 @@ pub struct TheHandy {
 }
 
 impl ProtocolHandler for TheHandy {
+
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    let ping_payload = handyplug::Payload {
+      messages: vec![handyplug::Message {
+        message: Some(handyplug::message::Message::Ping(Ping { id: 999 })),
+      }]
+    };
+    let mut ping_buf = vec![];
+    ping_payload
+      .encode(&mut ping_buf)
+      .expect("Infallible encode.");
+    
+    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(Endpoint::Tx, ping_buf, true))
+  }
+
   fn handle_fleshlight_launch_fw12_cmd(
     &self,
     message: message::FleshlightLaunchFW12Cmd,
