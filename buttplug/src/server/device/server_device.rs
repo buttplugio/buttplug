@@ -238,7 +238,10 @@ impl ServerDevice {
               }
               ProtocolKeepaliveStrategy::RepeatLastPacketStrategy => {
                 if let Some(packet) = &*keepalive_packet.read().await {
-                  hardware.write_value(&packet);
+                  if let Err(e) = hardware.write_value(&packet).await {
+                    warn!("Error writing keepalive packet: {:?}", e);
+                    break;
+                  }
                 }
               },
               _ => {
