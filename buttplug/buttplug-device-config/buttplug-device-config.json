@@ -3698,7 +3698,7 @@
             {
               "StepRange": [
                 0,
-                1
+                5 
               ],
               "ActuatorType": "Vibrate"
             }

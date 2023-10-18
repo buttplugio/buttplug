@@ -1888,8 +1888,15 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 10]
             ActuatorType: Vibrate
-          - StepRange: [0, 1]
+          - StepRange: [0, 5]
             ActuatorType: Vibrate
+            # suction pattern enum:
+            # 0: off
+            # 1: short
+            # 2: long short short
+            # 3: long short
+            # 4: long long short short
+            # 5: long long long short short
   svakom-alex:
     btle:
       names:
