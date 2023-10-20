@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::hardware::HardwareSubscribeCmd;
+use crate::server::device::hardware::{HardwareReadCmd, HardwareSubscribeCmd};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -41,12 +41,22 @@ impl ProtocolInitializer for SvakomSamInitializer {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
-    Ok(Arc::new(SvakomSam::default()))
+    let gen2 = hardware
+      .read_value(&HardwareReadCmd::new(Endpoint::TxMode, 16, 500))
+      .await
+      .is_ok();
+    Ok(Arc::new(SvakomSam::new(gen2)))
   }
 }
 
-#[derive(Default)]
-pub struct SvakomSam {}
+pub struct SvakomSam {
+  gen2: bool,
+}
+impl SvakomSam {
+  pub fn new(gen2: bool) -> Self {
+    Self { gen2 }
+  }
+}
 
 impl ProtocolHandler for SvakomSam {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
@@ -60,7 +70,24 @@ impl ProtocolHandler for SvakomSam {
     let mut msg_vec = vec![];
     if let Some((_, speed)) = cmds[0] {
       msg_vec.push(
-        HardwareWriteCmd::new(Endpoint::Tx, [18, 1, 3, 0, 5, speed as u8].to_vec(), false).into(),
+        HardwareWriteCmd::new(
+          Endpoint::Tx,
+          if self.gen2 {
+            [
+              18,
+              1,
+              3,
+              0,
+              if speed == 0 { 0x00 } else { 0x04 },
+              speed as u8,
+            ]
+            .to_vec()
+          } else {
+            [18, 1, 3, 0, 5, speed as u8].to_vec()
+          },
+          false,
+        )
+        .into(),
       );
     }
     if cmds.len() > 1 {
