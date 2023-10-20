@@ -1,3 +1,16 @@
+# 7.1.7 (2023-10-19)
+
+## Features
+
+- Added Device Support
+  - Mysteryvibe Crescendo 2, Tenuto 2
+- Keepalive option added to btleplug, allows devices to resend commands to keep connections alive
+  - Needed for iOS backgrounding
+
+## Bugfixes
+
+- Fixed issue with Svakom Sam Neo having different commands between same hardware
+
 # 7.1.6 (2023-10-08)
 
 ## Features
