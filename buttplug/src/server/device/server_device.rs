@@ -44,7 +44,7 @@ use crate::{
     },
     ButtplugServerResultFuture,
   },
-  util::{self, stream::convert_broadcast_receiver_to_stream},
+  util::{self, stream::convert_broadcast_receiver_to_stream, async_manager},
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashSet;
@@ -224,7 +224,7 @@ impl ServerDevice {
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
       let keepalive_packet = keepalive_packet.clone();
-      tokio::spawn(async move {
+      async_manager::spawn(async move {
         // Arbitrary wait time for now.
         let wait_duration = Duration::from_secs(5);
         loop {
