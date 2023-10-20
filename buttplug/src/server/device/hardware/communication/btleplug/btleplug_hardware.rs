@@ -55,7 +55,7 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
   services: Vec<Uuid>,
   device: T,
   adapter: Adapter,
-  requires_keepalive: bool
+  requires_keepalive: bool,
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
@@ -65,7 +65,7 @@ impl<T: Peripheral> BtleplugHardwareConnector<T> {
     services: &[Uuid],
     device: T,
     adapter: Adapter,
-    requires_keepalive: bool
+    requires_keepalive: bool,
   ) -> Self {
     Self {
       name: name.to_owned(),
@@ -73,7 +73,7 @@ impl<T: Peripheral> BtleplugHardwareConnector<T> {
       services: services.to_vec(),
       device,
       adapter,
-      requires_keepalive
+      requires_keepalive,
     }
   }
 }
@@ -122,7 +122,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
       &self.name,
       self.device.clone(),
       self.adapter.clone(),
-      self.requires_keepalive
+      self.requires_keepalive,
     )))
   }
 }
@@ -131,7 +131,7 @@ pub struct BtleplugHardwareSpecializer<T: Peripheral + 'static> {
   name: String,
   device: T,
   adapter: Adapter,
-  requires_keepalive: bool
+  requires_keepalive: bool,
 }
 
 impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
@@ -140,7 +140,7 @@ impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
       name: name.to_owned(),
       device,
       adapter,
-      requires_keepalive
+      requires_keepalive,
     }
   }
 }

@@ -131,9 +131,9 @@ use std::{collections::HashMap, sync::Arc};
 /// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
 /// we never know which of our hundreds of supported devices someone might connect, we need context
 /// as to which keepalive strategy to use.
-/// 
+///
 /// When choosing a keepalive strategy for a protocol:
-/// 
+///
 /// - All protocols use NoStrategy by default. For many devices, sending trash will break them in
 ///   very weird ways and we can't risk that, so we need to know the protocol context.
 /// - If the protocol already needs its own keepalive (Satisfyer, Mysteryvibe, etc...), use
@@ -159,7 +159,7 @@ pub enum ProtocolKeepaliveStrategy {
   /// will be useful for most devices that purely use scalar commands.
   RepeatLastPacketStrategy,
   /// Call a specific method on the protocol implementation to generate keepalive packets.
-  CustomStrategy
+  CustomStrategy,
 }
 
 pub trait ProtocolIdentifierFactory: Send + Sync {

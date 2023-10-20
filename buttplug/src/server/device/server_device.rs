@@ -44,7 +44,7 @@ use crate::{
     },
     ButtplugServerResultFuture,
   },
-  util::{self, stream::convert_broadcast_receiver_to_stream, async_manager},
+  util::{self, async_manager, stream::convert_broadcast_receiver_to_stream},
 };
 use core::hash::{Hash, Hasher};
 use dashmap::DashSet;
@@ -56,7 +56,12 @@ use tokio_stream::StreamExt;
 
 use super::{
   configuration::{ProtocolDeviceAttributes, ServerDeviceMessageAttributes},
-  protocol::{generic_command_manager::GenericCommandManager, ProtocolSpecializer, ProtocolKeepaliveStrategy}, hardware::HardwareWriteCmd,
+  hardware::HardwareWriteCmd,
+  protocol::{
+    generic_command_manager::GenericCommandManager,
+    ProtocolKeepaliveStrategy,
+    ProtocolSpecializer,
+  },
 };
 
 #[derive(Debug)]
@@ -164,11 +169,19 @@ pub(super) async fn build_server_device(
 
   // We now have fully initialized hardware, return a server device.
   let device = ServerDevice::new(identifier, handler, hardware, &attrs);
-  
+
   // If we need a keepalive with a packet replay, set this up via stopping the device on connect.
-  if requires_keepalive && matches!(strategy, ProtocolKeepaliveStrategy::RepeatLastPacketStrategy) {
+  if requires_keepalive
+    && matches!(
+      strategy,
+      ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    )
+  {
     if let Err(e) = device.handle_stop_device_cmd().await {
-      return Err(ButtplugDeviceError::DeviceConnectionError(format!("Error setting up keepalive: {}", e)));
+      return Err(ButtplugDeviceError::DeviceConnectionError(format!(
+        "Error setting up keepalive: {}",
+        e
+      )));
     }
   }
 
@@ -183,7 +196,7 @@ pub struct ServerDevice {
   /// Unique identifier for the device
   identifier: ServerDeviceIdentifier,
   raw_subscribed_endpoints: Arc<DashSet<Endpoint>>,
-  keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>
+  keepalive_packet: Arc<RwLock<Option<HardwareWriteCmd>>>,
 }
 impl Debug for ServerDevice {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -220,7 +233,12 @@ impl ServerDevice {
     let keepalive_packet = Arc::new(RwLock::new(None));
     let gcm = GenericCommandManager::new(attributes);
     // If we've gotten here, we know our hardware is connected. This means we can start the keepalive if it's required.
-    if hardware.requires_keepalive() && !matches!(handler.keepalive_strategy(), ProtocolKeepaliveStrategy::NoStrategy) {
+    if hardware.requires_keepalive()
+      && !matches!(
+        handler.keepalive_strategy(),
+        ProtocolKeepaliveStrategy::NoStrategy
+      )
+    {
       let hardware = hardware.clone();
       let strategy = handler.keepalive_strategy();
       let keepalive_packet = keepalive_packet.clone();
@@ -243,11 +261,14 @@ impl ServerDevice {
                     break;
                   }
                 }
-              },
-              _ => {
-                info!("Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy", strategy);
               }
-            }  
+              _ => {
+                info!(
+                  "Protocol keepalive strategy {:?} not implemented, replacing with NoStrategy",
+                  strategy
+                );
+              }
+            }
           }
           // Arbitrary wait time for now.
           util::sleep(wait_duration).await;
@@ -548,7 +569,12 @@ impl ServerDevice {
       // disconnected.
       for command in commands {
         hardware.parse_message(&command).await?;
-        if hardware.requires_keepalive() && matches!(keepalive_type, ProtocolKeepaliveStrategy::RepeatLastPacketStrategy) {
+        if hardware.requires_keepalive()
+          && matches!(
+            keepalive_type,
+            ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+          )
+        {
           if let HardwareCommand::Write(command) = command {
             *keepalive_packet.write().await = Some(command);
           }

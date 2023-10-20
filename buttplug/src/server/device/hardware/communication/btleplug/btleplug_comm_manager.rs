@@ -24,7 +24,7 @@ use tokio::sync::mpsc::{channel, Sender};
 
 #[derive(Default, Clone)]
 pub struct BtlePlugCommunicationManagerBuilder {
-  require_keepalive: bool
+  require_keepalive: bool,
 }
 
 impl BtlePlugCommunicationManagerBuilder {
@@ -39,7 +39,10 @@ impl HardwareCommunicationManagerBuilder for BtlePlugCommunicationManagerBuilder
     &mut self,
     sender: Sender<HardwareCommunicationManagerEvent>,
   ) -> Box<dyn HardwareCommunicationManager> {
-    Box::new(BtlePlugCommunicationManager::new(sender, self.require_keepalive))
+    Box::new(BtlePlugCommunicationManager::new(
+      sender,
+      self.require_keepalive,
+    ))
   }
 }
 
@@ -50,12 +53,20 @@ pub struct BtlePlugCommunicationManager {
 }
 
 impl BtlePlugCommunicationManager {
-  pub fn new(event_sender: Sender<HardwareCommunicationManagerEvent>, require_keepalive: bool) -> Self {
+  pub fn new(
+    event_sender: Sender<HardwareCommunicationManagerEvent>,
+    require_keepalive: bool,
+  ) -> Self {
     let (sender, receiver) = channel(256);
     let adapter_connected = Arc::new(AtomicBool::new(false));
     let adapter_connected_clone = adapter_connected.clone();
     async_manager::spawn(async move {
-      let mut task = BtleplugAdapterTask::new(event_sender, receiver, adapter_connected_clone, require_keepalive);
+      let mut task = BtleplugAdapterTask::new(
+        event_sender,
+        receiver,
+        adapter_connected_clone,
+        require_keepalive,
+      );
       task.run().await;
     });
     Self {

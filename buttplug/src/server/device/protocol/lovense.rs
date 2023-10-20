@@ -158,10 +158,13 @@ pub struct Lovense {
 }
 
 impl ProtocolHandler for Lovense {
-
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     // For Lovense, we'll just repeat the device type packet and drop the result.
-    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false))
+    super::ProtocolKeepaliveStrategy::RepeatPacketStrategy(HardwareWriteCmd::new(
+      Endpoint::Tx,
+      b"DeviceType;".to_vec(),
+      false,
+    ))
   }
 
   fn handle_scalar_cmd(

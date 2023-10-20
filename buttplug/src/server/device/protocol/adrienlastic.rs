@@ -20,7 +20,7 @@ pub struct AdrienLastic {}
 
 impl ProtocolHandler for AdrienLastic {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-      super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
 
   fn handle_scalar_vibrate_cmd(

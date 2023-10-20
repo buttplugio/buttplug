@@ -1,9 +1,6 @@
 pub mod communication;
 
-use std::{
-  fmt::Debug,
-  time::Duration, sync::Arc
-};
+use std::{fmt::Debug, sync::Arc, time::Duration};
 
 use crate::{
   core::{
@@ -16,9 +13,9 @@ use async_trait::async_trait;
 use futures::future::BoxFuture;
 use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};
+use instant::Instant;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{broadcast, RwLock};
-use instant::Instant;
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -247,9 +244,9 @@ pub struct Hardware {
   /// Internal implementation details
   internal_impl: Box<dyn HardwareInternal>,
   /// Requires a keepalive signal to be sent by the Server Device class
-  #[getset(get_copy="pub")]
+  #[getset(get_copy = "pub")]
   requires_keepalive: bool,
-  last_write_time: Arc<RwLock<Instant>>
+  last_write_time: Arc<RwLock<Instant>>,
 }
 
 impl Hardware {
@@ -265,7 +262,7 @@ impl Hardware {
       endpoints: endpoints.into(),
       internal_impl,
       requires_keepalive: false,
-      last_write_time: Arc::new(RwLock::new(Instant::now()))
+      last_write_time: Arc::new(RwLock::new(Instant::now())),
     }
   }
 
@@ -329,14 +326,14 @@ impl Hardware {
     &self,
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-
     let write_fut = self.internal_impl.write_value(msg);
     if self.requires_keepalive {
       let last_write_time = self.last_write_time.clone();
       async move {
         *last_write_time.write().await = Instant::now();
         write_fut.await
-      }.boxed()
+      }
+      .boxed()
     } else {
       write_fut
     }
