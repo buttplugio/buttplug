@@ -93,6 +93,7 @@ derivative = "2.2.0"
 tokio-stream = "0.1.14"
 wasmtimer = { version = "0.2.0", optional = true }
 instant = "0.1.12"
+regex = "1.9.4"
 
 [dev-dependencies]
 serde_yaml = "0.9.25"

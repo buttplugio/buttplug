@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 19
+  minor: 20
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -196,6 +196,12 @@ protocols:
         454c0001-0023-4bd4-bbd5-a6920e4c5653: # Exomoon
           tx: 454c0002-0023-4bd4-bbd5-a6920e4c5653
           rx: 454c0003-0023-4bd4-bbd5-a6920e4c5653
+        55300001-0023-4bd4-bbd5-a6920e4c5653: # Lapis
+          tx: 55300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 55300003-0023-4bd4-bbd5-a6920e4c5653
+        53440001-0023-4bd4-bbd5-a6920e4c5653: # Vulse
+          tx: 53440002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 53440003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name: Lovense Device
       messages:
@@ -353,6 +359,27 @@ protocols:
           RotateCmd:
             - StepRange: [0, 20]
               ActuatorType: Rotate
+      - identifier:
+          - U
+        name: Lovense Lapis
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Tip Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Internal Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: External Vibe
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
+      - identifier:
+          - SD
+        name: Lovense Vulse
   lovense-connect-service:
     lovense-connect-service:
       exists: true
@@ -526,6 +553,28 @@ protocols:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
               SensorRange: [[0, 100]]
+      - identifier:
+          - Lapis
+        name: Lovense Lapis
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Tip Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Internal Vibe
+            # Connect can't address this vibe?
+            #- StepRange: [0, 20]
+            #  ActuatorType: Vibrate
+            #  FeatureDescriptor: External Vibe
+          SensorReadCmd:
+            - FeatureDescriptor: Battery Level
+              SensorType: Battery
+              SensorRange: [[0, 100]]
+      - identifier:
+          - Vulse
+        name: Lovense Vulse
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special

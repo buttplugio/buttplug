@@ -21,6 +21,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::{future::BoxFuture, FutureExt};
+use regex::Regex;
 use std::{
   sync::{
     atomic::{AtomicBool, Ordering},
@@ -90,7 +91,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
       .await?;
 
     loop {
-      let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
+      let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), true);
       hardware.write_value(&msg).await?;
 
       select! {
@@ -112,6 +113,11 @@ impl ProtocolIdentifier for LovenseIdentifier {
           count += 1;
           if count > LOVENSE_COMMAND_RETRY {
             warn!("Lovense Device timed out while getting DeviceType info. ({} retries)", LOVENSE_COMMAND_RETRY);
+            let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
+            if let Some(caps) = re.captures(hardware.name()) {
+              info!("Lovense Device identified by BLE name");
+              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(caps[1].to_string())), Box::new(LovenseInitializer::default())));
+            };
             return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Default), Box::new(LovenseInitializer::default())));
           }
         }
@@ -141,7 +147,7 @@ impl ProtocolInitializer for LovenseInitializer {
 
       // This might need better tuning if other complex Lovenses are released
       // Currently this only applies to the Flexer
-      if protocol.vibrator_count == 2 && scalars.len() > 2 {
+      if (protocol.vibrator_count == 2 && scalars.len() > 2) || protocol.vibrator_count > 2 {
         protocol.use_mply = true;
       }
     }
