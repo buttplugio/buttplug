@@ -5,7 +5,6 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::server::device::hardware::{HardwareReadCmd, HardwareSubscribeCmd};
 use crate::{
   core::{
     errors::ButtplugDeviceError,
@@ -13,7 +12,7 @@ use crate::{
   },
   server::device::{
     configuration::{ProtocolAttributesType, ProtocolDeviceAttributes},
-    hardware::{Hardware, HardwareCommand, HardwareWriteCmd},
+    hardware::{Hardware, HardwareCommand, HardwareSubscribeCmd, HardwareWriteCmd},
     protocol::{
       generic_protocol_initializer_setup,
       ProtocolHandler,
@@ -41,10 +40,7 @@ impl ProtocolInitializer for SvakomSamInitializer {
     hardware
       .subscribe(&HardwareSubscribeCmd::new(Endpoint::Rx))
       .await?;
-    let gen2 = hardware
-      .read_value(&HardwareReadCmd::new(Endpoint::TxMode, 16, 500))
-      .await
-      .is_ok();
+    let gen2 = hardware.endpoints().contains(&Endpoint::TxMode);
     Ok(Arc::new(SvakomSam::new(gen2)))
   }
 }
