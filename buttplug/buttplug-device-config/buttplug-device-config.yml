@@ -3598,6 +3598,7 @@ protocols:
     btle:
       names:
         - Shinkuro
+        - synchro2
         - synchro EX
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
