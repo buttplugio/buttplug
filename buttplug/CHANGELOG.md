@@ -1,3 +1,16 @@
+# 7.1.8 (2023-11-04)
+
+## Features
+
+- Added Device Support
+  - Lovense Vulse, Lapis
+  - Funtown Caleo, Jive
+
+## Bugfixes
+
+- Fix Svakom Sam 2 Detection
+- Add missing Synchro identifier
+
 # 7.1.7 (2023-10-19)
 
 ## Features
