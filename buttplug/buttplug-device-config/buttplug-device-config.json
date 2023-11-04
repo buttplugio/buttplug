@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 20
+    "minor": 21
   },
   "protocols": {
     "lovense": {
@@ -1381,7 +1381,8 @@
           "Gballs2",
           "GBalls3",
           "FM-LILAC-101",
-          "Xone"
+          "Xone",
+          "CBT002"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1510,6 +1511,12 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "CBT002"
+          ],
+          "name": "FunTown Caleo"
         }
       ]
     },
@@ -1521,7 +1528,8 @@
           "Sword",
           "Curve",
           "Solstice X",
-          "funwand"
+          "funwand",
+          "CBT001"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1630,6 +1638,30 @@
             "funwand"
           ],
           "name": "MagicMotion Zenith"
+        },
+        {
+          "identifier": [
+            "CBT001"
+          ],
+          "name": "FunTown Jive",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate"
+              }
+            ]
+          }
         }
       ]
     },
