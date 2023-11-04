@@ -91,7 +91,7 @@ impl ProtocolIdentifier for LovenseIdentifier {
       .await?;
 
     loop {
-      let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), true);
+      let msg = HardwareWriteCmd::new(Endpoint::Tx, b"DeviceType;".to_vec(), false);
       hardware.write_value(&msg).await?;
 
       select! {
