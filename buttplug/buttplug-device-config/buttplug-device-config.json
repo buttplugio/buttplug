@@ -3064,6 +3064,8 @@
           "OhMiBod LUMEN",
           "OhMiBod NEX3",
           "OhMiBod ESCA",
+          "OhMiBod Foxy",
+          "OhMiBod Chill Panty Vibe",
           "Pulse Interactive",
           "Fuse1.1"
         ],
@@ -3277,6 +3279,40 @@
             "Fuse1.1"
           ],
           "name": "OhMiBod Fuse 1.1",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod Foxy"
+          ],
+          "name": "OhMiBod Foxy",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod Chill Panty Vibe"
+          ],
+          "name": "OhMiBod Chill",
           "messages": {
             "ScalarCmd": [
               {
