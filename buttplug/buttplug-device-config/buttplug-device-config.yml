@@ -3360,6 +3360,7 @@ protocols:
             - StepRange: [0, 100] # Rolling?
               ActuatorType: Vibrate
       - identifier:
+          - "10307"
           - "10309"
         name: Satisfyer Pro 2 Gen 3
         messages:
