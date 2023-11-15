@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 21
+  minor: 22
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -202,6 +202,9 @@ protocols:
         53440001-0023-4bd4-bbd5-a6920e4c5653: # Vulse
           tx: 53440002-0023-4bd4-bbd5-a6920e4c5653
           rx: 53440003-0023-4bd4-bbd5-a6920e4c5653
+        48300001-0023-4bd4-bbd5-a6920e4c5653: # Solace
+          tx: 48300002-0023-4bd4-bbd5-a6920e4c5653
+          rx: 48300003-0023-4bd4-bbd5-a6920e4c5653
     defaults:
       name: Lovense Device
       messages:
@@ -380,6 +383,14 @@ protocols:
       - identifier:
           - SD
         name: Lovense Vulse
+      - identifier:
+          - H
+        name: Lovense Solace
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Stroker Oscillation Speed
   lovense-connect-service:
     lovense-connect-service:
       exists: true

@@ -135,6 +135,10 @@
           "53440001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "53440002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "53440003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "48300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "48300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "48300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -563,6 +567,24 @@
             "SD"
           ],
           "name": "Lovense Vulse"
+        },
+        {
+          "identifier": [
+            "H"
+          ],
+          "name": "Lovense Solace",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Stroker Oscillation Speed"
+              }
+            ]
+          }
         }
       ]
     },

@@ -99,7 +99,8 @@ impl ProtocolIdentifier for LovenseIdentifier {
           if let Ok(HardwareEvent::Notification(_, _, n)) = event {
             let type_response = std::str::from_utf8(&n).map_err(|_| ButtplugDeviceError::ProtocolSpecificError("lovense".to_owned(), "Lovense device init got back non-UTF8 string.".to_owned()))?.to_owned();
             info!("Lovense Device Type Response: {}", type_response);
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(lovense_model_resolver(type_response))), Box::new(LovenseInitializer::default())));
+            let ident = lovense_model_resolver(type_response);
+            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(ident.clone())), Box::new(LovenseInitializer::new(ident))));
           } else {
             return Err(
               ButtplugDeviceError::ProtocolSpecificError(
@@ -116,18 +117,24 @@ impl ProtocolIdentifier for LovenseIdentifier {
             let re = Regex::new(r"LVS-([A-Z]+)\d+").expect("Static regex shouldn't fail");
             if let Some(caps) = re.captures(hardware.name()) {
               info!("Lovense Device identified by BLE name");
-              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(caps[1].to_string())), Box::new(LovenseInitializer::default())));
+              return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Identifier(caps[1].to_string())), Box::new(LovenseInitializer::new(caps[1].to_string()))));
             };
-            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Default), Box::new(LovenseInitializer::default())));
+            return Ok((ServerDeviceIdentifier::new(hardware.address(), "lovense", &ProtocolAttributesType::Default), Box::new(LovenseInitializer::new("".to_string()))));
           }
         }
       }
     }
   }
 }
+pub struct LovenseInitializer {
+  device_type: String,
+}
 
-#[derive(Default)]
-pub struct LovenseInitializer {}
+impl LovenseInitializer {
+  pub fn new(device_type: String) -> Self {
+    Self { device_type }
+  }
+}
 
 #[async_trait]
 impl ProtocolInitializer for LovenseInitializer {
@@ -137,6 +144,7 @@ impl ProtocolInitializer for LovenseInitializer {
     attributes: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
     let mut protocol = Lovense::default();
+    protocol.device_type = self.device_type.clone();
 
     if let Some(scalars) = attributes.message_attributes.scalar_cmd() {
       protocol.vibrator_count = scalars
@@ -146,8 +154,11 @@ impl ProtocolInitializer for LovenseInitializer {
         .count();
 
       // This might need better tuning if other complex Lovenses are released
-      // Currently this only applies to the Flexer
-      if (protocol.vibrator_count == 2 && scalars.len() > 2) || protocol.vibrator_count > 2 {
+      // Currently this only applies to the Flexer/Lapis/Solace
+      if (protocol.vibrator_count == 2 && scalars.len() > 2)
+        || protocol.vibrator_count > 2
+        || protocol.device_type == "H"
+      {
         protocol.use_mply = true;
       }
     }
@@ -161,6 +172,7 @@ pub struct Lovense {
   rotation_direction: Arc<AtomicBool>,
   vibrator_count: usize,
   use_mply: bool,
+  device_type: String,
 }
 
 impl ProtocolHandler for Lovense {
@@ -178,20 +190,22 @@ impl ProtocolHandler for Lovense {
     cmds: &[Option<(ActuatorType, u32)>],
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     if self.use_mply {
-      let lovense_cmd = format!(
-        "Mply:{};",
-        cmds
-          .iter()
-          .map(|x| if let Some(val) = x {
+      let mut speeds = cmds
+        .iter()
+        .map(|x| {
+          if let Some(val) = x {
             val.1.to_string()
           } else {
             "-1".to_string()
-          })
-          .collect::<Vec<_>>()
-          .join(":")
-      )
-      .as_bytes()
-      .to_vec();
+          }
+        })
+        .collect::<Vec<_>>();
+
+      if speeds.len() == 1 && self.device_type == "H" {
+        speeds.push("20".to_string()); // Max range
+      }
+
+      let lovense_cmd = format!("Mply:{};", speeds.join(":")).as_bytes().to_vec();
 
       return Ok(vec![HardwareWriteCmd::new(
         Endpoint::Tx,
