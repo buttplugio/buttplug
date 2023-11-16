@@ -1,3 +1,12 @@
+# 7.1.9 (2023-11-15)
+
+## Features
+
+- Added Device Support
+  - Lovense Solace (speed only, depth coming at some point in the future)
+  - Satisfyer Pro Gen 3
+  - OhMiBod Foxy, Chill
+
 # 7.1.8 (2023-11-04)
 
 ## Features
