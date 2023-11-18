@@ -85,54 +85,46 @@ const BASE_VALID_NULL_USER_CONFIG_JSON: &str = r#"
 "#;
 
 #[cfg(feature = "server")]
-#[test]
-fn test_valid_null_version_config() {
-  async_manager::block_on(async move {
-    ButtplugServerBuilder::default()
-      .user_device_configuration_json(Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()))
-      .finish()
-      .unwrap();
-  });
+#[tokio::test]
+async fn test_valid_null_version_config() {
+  ButtplugServerBuilder::default()
+    .user_device_configuration_json(Some(BASE_VALID_VERSION_CONFIG_JSON.to_owned()))
+    .finish()
+    .unwrap();
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_valid_null_user_config() {
-  async_manager::block_on(async move {
-    ButtplugServerBuilder::default()
-      .user_device_configuration_json(Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()))
-      .finish()
-      .unwrap();
-  });
+#[tokio::test]
+async fn test_valid_null_user_config() {
+  ButtplugServerBuilder::default()
+    .user_device_configuration_json(Some(BASE_VALID_NULL_USER_CONFIG_JSON.to_owned()))
+    .finish()
+    .unwrap();
 }
 
 #[cfg(feature = "server")]
-#[test]
-fn test_invalid_null_version_config() {
-  async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default()
-      .user_device_configuration_json(Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()))
-      .finish()
-      .is_err());
-  });
+#[tokio::test]
+async fn test_invalid_null_version_config() {
+  assert!(ButtplugServerBuilder::default()
+    .user_device_configuration_json(Some(BASE_INVALID_VERSION_CONFIG_JSON.to_owned()))
+    .finish()
+    .is_err());
 }
 
 #[cfg(feature = "server")]
-#[test]
+#[tokio::test]
 #[ignore = "Still need to update for new message format"]
-fn test_basic_device_config() {
-  async_manager::block_on(async move {
-    ButtplugServerBuilder::default()
-      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-      .finish()
-      .unwrap();
-  });
+async fn test_basic_device_config() {
+  ButtplugServerBuilder::default()
+    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+    .finish()
+    .unwrap();
 }
 
 #[cfg(feature = "server")]
-#[test]
+#[tokio::test]
 #[ignore = "Still need to update for new message format"]
-fn test_valid_step_range() {
+async fn test_valid_step_range() {
   let user_config_json = r#"
   {
     "version": 63,
@@ -151,19 +143,17 @@ fn test_valid_step_range() {
     }
   }
   "#;
-  async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default()
-      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-      .user_device_configuration_json(Some(user_config_json.to_owned()))
-      .finish()
-      .is_ok());
-  });
+  assert!(ButtplugServerBuilder::default()
+    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+    .user_device_configuration_json(Some(user_config_json.to_owned()))
+    .finish()
+    .is_ok());
 }
 
 #[cfg(feature = "server")]
-#[test]
+#[tokio::test]
 #[ignore = "Still need to update for new message format"]
-fn test_invalid_step_range_device_config_wrong_range_length() {
+async fn test_invalid_step_range_device_config_wrong_range_length() {
   let user_config_json = r#"
   {
     "version": 63,
@@ -182,19 +172,17 @@ fn test_invalid_step_range_device_config_wrong_range_length() {
     }
   }
   "#;
-  async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default()
-      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-      .user_device_configuration_json(Some(user_config_json.to_owned()))
-      .finish()
-      .is_err());
-  });
+  assert!(ButtplugServerBuilder::default()
+    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+    .user_device_configuration_json(Some(user_config_json.to_owned()))
+    .finish()
+    .is_err());
 }
 
 #[cfg(feature = "server")]
-#[test]
+#[tokio::test]
 #[ignore = "Still need to update for new message format"]
-fn test_invalid_step_range_device_config_wrong_order() {
+async fn test_invalid_step_range_device_config_wrong_order() {
   let user_config_json = r#"
   {
     "version": 63,
@@ -214,16 +202,14 @@ fn test_invalid_step_range_device_config_wrong_order() {
     }
   }
   "#;
-  async_manager::block_on(async move {
-    assert!(ButtplugServerBuilder::default()
-      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-      .user_device_configuration_json(Some(user_config_json.to_owned()))
-      .finish()
-      .is_ok());
-    assert!(ButtplugServerBuilder::default()
-      .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
-      .user_device_configuration_json(Some(user_config_json.to_owned()))
-      .finish()
-      .is_ok());
-  });
+  assert!(ButtplugServerBuilder::default()
+    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+    .user_device_configuration_json(Some(user_config_json.to_owned()))
+    .finish()
+    .is_ok());
+  assert!(ButtplugServerBuilder::default()
+    .device_configuration_json(Some(BASE_CONFIG_JSON.to_owned()))
+    .user_device_configuration_json(Some(user_config_json.to_owned()))
+    .finish()
+    .is_ok());
 }

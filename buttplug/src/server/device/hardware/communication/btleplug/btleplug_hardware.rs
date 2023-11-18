@@ -55,6 +55,7 @@ pub(super) struct BtleplugHardwareConnector<T: Peripheral + 'static> {
   services: Vec<Uuid>,
   device: T,
   adapter: Adapter,
+  requires_keepalive: bool,
 }
 
 impl<T: Peripheral> BtleplugHardwareConnector<T> {
@@ -64,6 +65,7 @@ impl<T: Peripheral> BtleplugHardwareConnector<T> {
     services: &[Uuid],
     device: T,
     adapter: Adapter,
+    requires_keepalive: bool,
   ) -> Self {
     Self {
       name: name.to_owned(),
@@ -71,6 +73,7 @@ impl<T: Peripheral> BtleplugHardwareConnector<T> {
       services: services.to_vec(),
       device,
       adapter,
+      requires_keepalive,
     }
   }
 }
@@ -119,6 +122,7 @@ impl<T: Peripheral> HardwareConnector for BtleplugHardwareConnector<T> {
       &self.name,
       self.device.clone(),
       self.adapter.clone(),
+      self.requires_keepalive,
     )))
   }
 }
@@ -127,14 +131,16 @@ pub struct BtleplugHardwareSpecializer<T: Peripheral + 'static> {
   name: String,
   device: T,
   adapter: Adapter,
+  requires_keepalive: bool,
 }
 
 impl<T: Peripheral> BtleplugHardwareSpecializer<T> {
-  pub(super) fn new(name: &str, device: T, adapter: Adapter) -> Self {
+  pub(super) fn new(name: &str, device: T, adapter: Adapter, requires_keepalive: bool) -> Self {
     Self {
       name: name.to_owned(),
       device,
       adapter,
+      requires_keepalive,
     }
   }
 }
@@ -206,12 +212,17 @@ impl<T: Peripheral> HardwareSpecializer for BtleplugHardwareSpecializer<T> {
       endpoints.clone(),
       uuid_map,
     );
-    let hardware = Hardware::new(
+    let mut hardware = Hardware::new(
       &self.name,
       &format!("{:?}", address),
       &endpoints.keys().cloned().collect::<Vec<Endpoint>>(),
       Box::new(device_internal_impl),
     );
+
+    // Let the hardware know if we need command resends or whatever. Fucking iOS.
+    if self.requires_keepalive {
+      hardware.set_requires_keepalive();
+    }
     Ok(hardware)
   }
 }

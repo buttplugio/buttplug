@@ -71,13 +71,10 @@ async fn run_connection_loop<S>(
 
   loop {
     select! {
-      _ = sleep(Duration::from_millis(1000)).fuse() => {
+      _ = sleep(Duration::from_millis(10000)).fuse() => {
         if pong_count == 0 {
           error!("No pongs received, considering connection closed.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
-          return;
+          break;
         }
         pong_count = 0;
         if websocket_server_sender
@@ -85,10 +82,7 @@ async fn run_connection_loop<S>(
           .await
           .is_err() {
           error!("Cannot send ping to client, considering connection closed.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
-          return;
+          break;
         }
       }
       ws_msg = request_receiver.recv().fuse() => {
@@ -98,14 +92,11 @@ async fn run_connection_loop<S>(
             .await
             .is_err() {
             error!("Cannot send binary value to client, considering connection closed.");
-            return;
+            break;
           }
         } else {
           info!("Websocket server connector owner dropped, disconnecting websocket connection.");
-          if websocket_server_sender.close().await.is_err() {
-            error!("Cannot close, assuming connection already closed");
-          }
-          return;
+          break;
         }
       }
       websocket_server_msg = websocket_server_receiver.next().fuse() => match websocket_server_msg {
@@ -114,7 +105,8 @@ async fn run_connection_loop<S>(
             Ok(msg) => {
               match msg {
                 async_tungstenite::tungstenite::Message::Text(text_msg) => {
-                  trace!("Got text: {}", text_msg);
+                  // If someone accidentally packs text, politely turn it into binary for them.
+                  let _ = response_sender.send(text_msg.as_bytes().to_vec());
                 }
                 async_tungstenite::tungstenite::Message::Binary(binary_msg) => {
                   // If no one is listening, ignore output.
@@ -150,10 +142,14 @@ async fn run_connection_loop<S>(
         },
         None => {
           error!("Websocket channel closed, breaking");
-          return;
+          break;
         }
       }
     }
+  }
+
+  if let Err(e) = websocket_server_sender.close().await {
+    error!("Error closing websocket: {}", e);
   }
   debug!("Exiting Websocket Server Device control loop.");
 }
@@ -209,7 +205,10 @@ impl WebsocketServerHardwareConnector {
 #[async_trait]
 impl HardwareConnector for WebsocketServerHardwareConnector {
   fn specifier(&self) -> ProtocolCommunicationSpecifier {
-    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(self.info.identifier()))
+    ProtocolCommunicationSpecifier::Websocket(WebsocketSpecifier::new(&vec![self
+      .info
+      .identifier()
+      .to_owned()]))
   }
 
   async fn connect(&mut self) -> Result<Box<dyn HardwareSpecializer>, ButtplugDeviceError> {
@@ -305,6 +304,7 @@ impl HardwareInternal for WebsocketServerHardware {
     _msg: &HardwareSubscribeCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
     if self.subscribed.load(Ordering::SeqCst) {
+      error!("Endpoint already subscribed somehow!");
       return future::ready(Ok(())).boxed();
     }
     // TODO Should check endpoint validity

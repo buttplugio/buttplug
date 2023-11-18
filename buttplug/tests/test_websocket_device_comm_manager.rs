@@ -15,7 +15,6 @@ mod test {
     core::connector::ButtplugInProcessClientConnectorBuilder,
     server::device::hardware::communication::websocket_server::websocket_server_comm_manager::WebsocketServerDeviceCommunicationManagerBuilder,
     server::ButtplugServerBuilder,
-    util::async_manager,
   };
 
   async fn setup_test_client() -> ButtplugClient {
@@ -39,11 +38,9 @@ mod test {
     client
   }
 
-  #[test]
-  fn test_websocket_server_dcm_bringup() {
-    async_manager::block_on(async {
-      let client = setup_test_client().await;
-      assert!(client.connected());
-    });
+  #[tokio::test]
+  async fn test_websocket_server_dcm_bringup() {
+    let client = setup_test_client().await;
+    assert!(client.connected());
   }
 }

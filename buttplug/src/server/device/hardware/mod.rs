@@ -1,6 +1,6 @@
 pub mod communication;
 
-use std::fmt::Debug;
+use std::{fmt::Debug, sync::Arc, time::Duration};
 
 use crate::{
   core::{
@@ -11,9 +11,11 @@ use crate::{
 };
 use async_trait::async_trait;
 use futures::future::BoxFuture;
+use futures_util::FutureExt;
 use getset::{CopyGetters, Getters};
+use instant::Instant;
 use serde::{Deserialize, Serialize};
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, RwLock};
 
 /// Parameters for reading data from a [Hardware](crate::device::Hardware) endpoint
 ///
@@ -231,6 +233,7 @@ pub enum HardwareEvent {
 /// HardwareInternal, which handles all of the actual hardware communication. However, the struct
 /// also needs to carry around identifying information, so we wrap it in this type instead of
 /// requiring that all implementors of deal with name/address/endpoint accessors.
+#[derive(CopyGetters)]
 pub struct Hardware {
   /// Device name
   name: String,
@@ -240,6 +243,10 @@ pub struct Hardware {
   endpoints: Vec<Endpoint>,
   /// Internal implementation details
   internal_impl: Box<dyn HardwareInternal>,
+  /// Requires a keepalive signal to be sent by the Server Device class
+  #[getset(get_copy = "pub")]
+  requires_keepalive: bool,
+  last_write_time: Arc<RwLock<Instant>>,
 }
 
 impl Hardware {
@@ -254,7 +261,17 @@ impl Hardware {
       address: address.to_owned(),
       endpoints: endpoints.into(),
       internal_impl,
+      requires_keepalive: false,
+      last_write_time: Arc::new(RwLock::new(Instant::now())),
     }
+  }
+
+  pub async fn time_since_last_write(&self) -> Duration {
+    Instant::now().duration_since(*self.last_write_time.read().await)
+  }
+
+  pub fn set_requires_keepalive(&mut self) {
+    self.requires_keepalive = true;
   }
 
   /// Returns the device name
@@ -309,7 +326,17 @@ impl Hardware {
     &self,
     msg: &HardwareWriteCmd,
   ) -> BoxFuture<'static, Result<(), ButtplugDeviceError>> {
-    self.internal_impl.write_value(msg)
+    let write_fut = self.internal_impl.write_value(msg);
+    if self.requires_keepalive {
+      let last_write_time = self.last_write_time.clone();
+      async move {
+        *last_write_time.write().await = Instant::now();
+        write_fut.await
+      }
+      .boxed()
+    } else {
+      write_fut
+    }
   }
 
   /// Subscribe to a device endpoint, if it exists

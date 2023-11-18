@@ -147,11 +147,12 @@ impl ChannelHub {
   }
 
   pub async fn send_event(&self, msg: HardwareCommunicationManagerEvent) {
-    self
-      .event_outgoing
-      .send(msg)
-      .await
-      .expect("Won't get here without owner being alive.");
+    if let Err(e) = self.event_outgoing.send(msg).await {
+      warn!(
+        "Possible error (ignorable if shutting down state machine): {}",
+        e
+      );
+    }
   }
 
   pub fn set_scanning_status(&self, is_scanning: bool) {

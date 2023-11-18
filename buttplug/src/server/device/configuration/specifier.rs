@@ -270,6 +270,15 @@ pub struct HIDSpecifier {
   product_id: u16,
 }
 
+impl HIDSpecifier {
+  pub fn new(vendor_id: u16, product_id: u16) -> Self {
+    Self {
+      vendor_id,
+      product_id,
+    }
+  }
+}
+
 /// Specifier for Serial devices
 ///
 /// Handles serial port device identification (via port names) and configuration.
@@ -342,9 +351,11 @@ impl PartialEq for WebsocketSpecifier {
 }
 
 impl WebsocketSpecifier {
-  pub fn new(name: &str) -> WebsocketSpecifier {
+  pub fn new(names: &Vec<String>) -> WebsocketSpecifier {
     let mut set = HashSet::new();
-    set.insert(name.to_string());
+    for name in names {
+      set.insert(name.clone());
+    }
     WebsocketSpecifier { names: set }
   }
 }

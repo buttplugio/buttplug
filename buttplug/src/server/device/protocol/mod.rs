@@ -13,13 +13,16 @@ pub mod generic_command_manager;
 pub mod fleshlight_launch_helper;
 
 // Since users can pick and choose protocols, we need all of these to be public.
+pub mod adrienlastic;
 pub mod aneros;
 pub mod ankni;
 pub mod buttplug_passthru;
 pub mod cachito;
 pub mod cowgirl;
+pub mod foreo;
 pub mod fox;
 pub mod fredorch;
+pub mod fredorch_rotary;
 pub mod galaku_pump;
 pub mod hgod;
 pub mod hismith;
@@ -38,6 +41,7 @@ pub mod lelof1sv2;
 pub mod libo_elle;
 pub mod libo_shark;
 pub mod libo_vibes;
+pub mod longlosttouch;
 pub mod lovedistance;
 pub mod lovehoney_desire;
 pub mod lovense;
@@ -55,6 +59,8 @@ pub mod mizzzee;
 pub mod mizzzee_v2;
 pub mod motorbunny;
 pub mod mysteryvibe;
+pub mod mysteryvibe_v2;
+pub mod nintendo_joycon;
 pub mod nobra;
 pub mod patoo;
 pub mod picobong;
@@ -68,11 +74,14 @@ pub mod sensee;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_alex_v2;
+pub mod svakom_barnard;
 pub mod svakom_iker;
 pub mod svakom_pulse;
 pub mod svakom_sam;
+pub mod svakom_tarax;
 pub mod svakom_v2;
 pub mod svakom_v3;
+pub mod svakom_v4;
 pub mod synchro;
 pub mod tcode_v03;
 pub mod thehandy;
@@ -118,6 +127,41 @@ use futures::{
 use std::pin::Pin;
 use std::{collections::HashMap, sync::Arc};
 
+/// Strategy for situations where hardware needs to get updates every so often in order to keep
+/// things alive. Currently this only applies to iOS backgrounding with bluetooth devices, but since
+/// we never know which of our hundreds of supported devices someone might connect, we need context
+/// as to which keepalive strategy to use.
+///
+/// When choosing a keepalive strategy for a protocol:
+///
+/// - All protocols use NoStrategy by default. For many devices, sending trash will break them in
+///   very weird ways and we can't risk that, so we need to know the protocol context.
+/// - If the protocol already needs its own keepalive (Satisfyer, Mysteryvibe, etc...), use
+///   NoStrategy for now. RepeatLastPacketStrategy could be used, but we'd need per-protocol
+///   timeouts at that point.
+/// - If the protocol has a command that essentially does nothing to the actuators, set up
+///   RepeatPacketStrategy to use that. This is useful for devices that have info commands (like
+///   Lovense), ping commands (like The Handy), sensor commands that aren't yet subscribed to output
+///   notifications, etc...
+/// - For many devices with only scalar actuators, RepeatLastPacketStrategy should work. You just
+///   need to make sure the protocol doesn't have a packet counter or something else that will trip
+///   if the same packet is replayed multiple times.
+/// - For all other devices, use Custom Strategy. This assumes the protocol will have implemented a
+///   method to generate a valid packet.
+#[derive(Debug)]
+pub enum ProtocolKeepaliveStrategy {
+  /// Do nothing. This is for protocols that already require internal keepalives, like satisfyer,
+  /// mysteryvibe, etc.
+  NoStrategy,
+  /// Repeat a specific packet, such as a ping or a no-op
+  RepeatPacketStrategy(HardwareWriteCmd),
+  /// Repeat whatever the last packet sent was, and send Stop commands until first packet sent. This
+  /// will be useful for most devices that purely use scalar commands.
+  RepeatLastPacketStrategy,
+  /// Call a specific method on the protocol implementation to generate keepalive packets.
+  CustomStrategy,
+}
+
 pub trait ProtocolIdentifierFactory: Send + Sync {
   fn identifier(&self) -> &str;
   fn create(&self) -> Box<dyn ProtocolIdentifier>;
@@ -135,6 +179,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     map.insert(factory.identifier().to_owned(), factory);
   }
 
+  add_to_protocol_map(
+    &mut map,
+    adrienlastic::setup::AdrienLasticIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
@@ -167,10 +215,15 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
 
   add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
+  add_to_protocol_map(&mut map, foreo::setup::ForeoIdentifierFactory::default());
   add_to_protocol_map(&mut map, fox::setup::FoxIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     fredorch::setup::FredorchIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    fredorch_rotary::setup::FredorchRotaryIdentifierFactory::default(),
   );
 
   add_to_protocol_map(&mut map, hgod::setup::HgodIdentifierFactory::default());
@@ -221,6 +274,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     libo_vibes::setup::LiboVibesIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    longlosttouch::setup::LongLostTouchIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -278,6 +335,14 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     &mut map,
     mysteryvibe::setup::MysteryVibeIdentifierFactory::default(),
   );
+  add_to_protocol_map(
+    &mut map,
+    mysteryvibe_v2::setup::MysteryVibeV2IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    nintendo_joycon::setup::NintendoJoyconIdentifierFactory::default(),
+  );
   add_to_protocol_map(&mut map, nobra::setup::NobraIdentifierFactory::default());
   add_to_protocol_map(&mut map, patoo::setup::PatooIdentifierFactory::default());
   add_to_protocol_map(
@@ -317,6 +382,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    svakom_barnard::setup::SvakomBarnardIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     svakom_iker::setup::SvakomIkerIdentifierFactory::default(),
   );
   add_to_protocol_map(
@@ -329,11 +398,19 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(
     &mut map,
+    svakom_tarax::setup::SvakomTaraXIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
     svakom_v2::setup::SvakomV2IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
     svakom_v3::setup::SvakomV3IdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    svakom_v4::setup::SvakomV4IdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
@@ -491,6 +568,10 @@ pub trait ProtocolHandler: Sync + Send {
 
   fn has_handle_message(&self) -> bool {
     false
+  }
+
+  fn keepalive_strategy(&self) -> ProtocolKeepaliveStrategy {
+    ProtocolKeepaliveStrategy::NoStrategy
   }
 
   fn handle_message(
@@ -777,3 +858,5 @@ macro_rules! generic_protocol_initializer_setup {
 use crate::server::device::configuration::ProtocolDeviceAttributes;
 pub use generic_protocol_initializer_setup;
 pub use generic_protocol_setup;
+
+use super::hardware::HardwareWriteCmd;

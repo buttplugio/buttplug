@@ -1,5 +1,5 @@
 mod util;
-use buttplug::util::async_manager;
+//use buttplug::util::async_manager;
 use test_case::test_case;
 use util::DeviceTestCase;
 
@@ -83,15 +83,18 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
 #[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
+#[test_case("test_svakom_barnard.yaml" ; "Svakom (Fantasy Cup) Barnard")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
-fn test_device_protocols_embedded_v3(test_file: &str) {
+#[test_case("test_longlosttouch_protocol.yaml" ; "LongLostTouch Protocol")]
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[tokio::test]
+async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
-  async_manager::block_on(async {
-    util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await)
-      .await;
-  });
+  util::device_test::client::client_v3::run_embedded_test_case(&load_test_case(test_file).await)
+    .await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -159,16 +162,17 @@ fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_svakom_theodore.yaml" ; "Svakom V3 Protocol - Theodore")]
 #[test_case("test_svakom_alex.yaml" ; "Svakom Alex Neo")]
 #[test_case("test_svakom_alex_v2.yaml" ; "Svakom Alex Neo 2")]
+#[test_case("test_svakom_barnard.yaml" ; "Svakom (Fantasy Cup) Barnard")]
 #[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_sakuraneko_koikoi.yaml" ; "Sakuraneko Protocol - Koikoi")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
-fn test_device_protocols_json_v3(test_file: &str) {
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[tokio::test]
+async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
-  async_manager::block_on(async {
-    util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await)
-      .await;
-  });
+  util::device_test::client::client_v3::run_json_test_case(&load_test_case(test_file).await).await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -225,11 +229,12 @@ fn test_device_protocols_json_v3(test_file: &str) {
 #[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
-fn test_device_protocols_embedded_v2(test_file: &str) {
-  async_manager::block_on(async {
-    util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
-      .await;
-  });
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[tokio::test]
+async fn test_device_protocols_embedded_v2(test_file: &str) {
+  util::device_test::client::client_v2::run_embedded_test_case(&load_test_case(test_file).await)
+    .await;
 }
 
 #[test_case("test_aneros_protocol.yaml" ; "Aneros Protocol")]
@@ -285,9 +290,9 @@ fn test_device_protocols_embedded_v2(test_file: &str) {
 #[test_case("test_svakom_iker.yaml" ; "Svakom Iker")]
 #[test_case("test_fox_protocol.yaml" ; "Fox Protocol")]
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
-fn test_device_protocols_json_v2(test_file: &str) {
-  async_manager::block_on(async {
-    util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await)
-      .await;
-  });
+#[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
+#[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[tokio::test]
+async fn test_device_protocols_json_v2(test_file: &str) {
+  util::device_test::client::client_v2::run_json_test_case(&load_test_case(test_file).await).await;
 }

@@ -1,3 +1,130 @@
+# 7.1.9 (2023-11-15)
+
+## Features
+
+- Added Device Support
+  - Lovense Solace (speed only, depth coming at some point in the future)
+  - Satisfyer Pro Gen 3
+  - OhMiBod Foxy, Chill
+
+# 7.1.8 (2023-11-04)
+
+## Features
+
+- Added Device Support
+  - Lovense Vulse, Lapis
+  - Funtown Caleo, Jive
+
+## Bugfixes
+
+- Fix Svakom Sam 2 Detection
+- Add missing Synchro identifier
+
+# 7.1.7 (2023-10-19)
+
+## Features
+
+- Added Device Support
+  - Mysteryvibe Crescendo 2, Tenuto 2
+- Keepalive option added to btleplug, allows devices to resend commands to keep connections alive
+  - Needed for iOS backgrounding
+
+## Bugfixes
+
+- Fixed issue with Svakom Sam Neo having different commands between same hardware
+
+# 7.1.6 (2023-10-08)
+
+## Features
+
+- Added Device Support
+  - Foreo - all vibrating products for brand
+    - Yes, Buttplug now supports "beauty products"
+
+## Bugfixes
+
+- #588: Fix issue with lovense dongle support being broken in single threaded runtime situations
+  (which includes intiface engine.)
+
+# 7.1.5 (2023-09-23)
+
+## Features
+
+- Added Device Support
+  - Magic Motion Solstice X, Zenith, Xone
+  - Fredorch Rotary devices
+
+# 7.1.4 (2023-09-16)
+
+## Features
+
+- Added Device Support
+  - Mysteryvibe Tenuto Mini
+  - Synchro Edge
+  - Lovense Ridge
+  - Kiiroo Fuse 1.1
+  - Svakom Theodore, Barzillai, Mimiki, KyuKyu (BeYourLover), Tara X (ToyCod)
+
+## Bugfixes
+
+- Fix test executors
+
+# 7.1.3 (2023-09-08)
+
+## Features
+
+- Added Device Support
+  - Lastic
+  - OhMiBod Esca (new identifier)
+  - Hismith v4
+  - Svakom Barnard (Fantasty Cup), Aravinda
+  - Satisfyer Pro 2 Gen 3
+  - Pink Punch Peachu
+  - Eropair S1, V1
+- Remove requirements for OpenSSL
+  - Makes building dependent projects much simpler
+- Make library compile cleanly under WASM again
+- Start work to let library run in single threaded async contexts
+
+## Bugfixes
+
+- Update to btleplug 0.11.1
+  - Might fix some issues with device disconnection on windows
+- Fix issue with Svakom Neo disconnection
+- Fix issues with missing includes/features for compiling dependent projects that don't
+  use the client/server features
+
+# 7.1.2 (2023-07-16)
+
+## Features
+
+- Added Device Support
+  - Magic Motion Fugu2, Flamingo T
+
+## Bugfixes
+
+- Fix expectation of populated data field in Lovense Connect packet
+
+# 7.1.1 (2023-07-09)
+
+## Features
+
+- Added Device Support
+  - WeVibe Sync Lite
+  - Long Lost Touch Possible Kiss
+  - Lovense Exomoon
+  - Kiiroo Realm 1.1
+- A bunch of under-the-covers stuff to prepare Intiface Engine/Central for websocket device UX
+
+## Bugfixes
+
+- Update btleplug to v0.11, may fix some android bugs
+- Fix Wevibe Chorus protocol impl
+- Fix Hismith matching code
+- Fix Roselex device characteristics
+- Fix issues w/ websocket device ports not closing in some instances
+- Fix issues w/ websocket device system dropping some messages due to being text vs binary
+
 # 7.1.0 (2023-05-21)
 
 ## Breaking(ish) Changes

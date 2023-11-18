@@ -29,6 +29,8 @@ use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
+use tokio_native_tls::native_tls::TlsConnector as NativeTlsConnector;
+use tokio_native_tls::TlsConnector;
 use tracing::Instrument;
 
 /// Websocket connector for ButtplugClients, using [async_tungstenite]
@@ -86,11 +88,10 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
     // If we're supposed to be a secure connection, generate a TLS connector
     // based on our certificate verfication needs. Otherwise, just pass None in
     // which case we won't wrap.
-    let tls_connector = if self.should_use_tls {
-      use native_tls::TlsConnector;
+    let tls_connector: Option<TlsConnector> = if self.should_use_tls {
       if self.bypass_cert_verify {
         Some(
-          TlsConnector::builder()
+          NativeTlsConnector::builder()
             .danger_accept_invalid_certs(true)
             .build()
             .expect("Should always succeed, we're not setting any fallible options.")
@@ -98,7 +99,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
         )
       } else {
         Some(
-          TlsConnector::new()
+          NativeTlsConnector::new()
             .expect("Should always succeed, not setting options.")
             .into(),
         )

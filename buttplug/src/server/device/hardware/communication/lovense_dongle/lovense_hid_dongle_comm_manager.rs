@@ -32,9 +32,12 @@ use std::{
   },
   thread,
 };
-use tokio::sync::{
-  mpsc::{channel, Receiver, Sender},
-  Mutex,
+use tokio::{
+  runtime,
+  sync::{
+    mpsc::{channel, Receiver, Sender},
+    Mutex,
+  },
 };
 use tokio_util::sync::CancellationToken;
 use tracing_futures::Instrument;
@@ -44,14 +47,18 @@ fn hid_write_thread(
   mut receiver: Receiver<OutgoingLovenseData>,
   token: CancellationToken,
 ) {
-  trace!("Starting HID dongle write thread");
+  info!("Starting HID dongle write thread");
+  let rt = runtime::Builder::new_current_thread()
+    .build()
+    .expect("Should always build");
+  let _guard = rt.enter();
   let port_write = |mut data: String| {
     data += "\r\n";
-    trace!("Writing message: {}", data);
+    info!("Writing message: {}", data);
 
     // For HID, we have to append the null report id before writing.
     let data_bytes = data.into_bytes();
-    trace!("Writing length: {}", data_bytes.len());
+    info!("Writing length: {}", data_bytes.len());
     // We need to keep the first and last byte of our HID report 0, and we're
     // packing 65 bytes (1 report id, 64 bytes data). We can chunk into 63 byte
     // pieces and iterate.
@@ -66,7 +73,7 @@ fn hid_write_thread(
     }
   };
 
-  while let Some(data) = async_manager::block_on(async {
+  while let Some(data) = rt.block_on(async {
     select! {
       _ = token.cancelled().fuse() => None,
       data = receiver.recv().fuse() => data

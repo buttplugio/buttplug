@@ -19,7 +19,37 @@ generic_protocol_setup!(MagicMotionV1, "magic-motion-1");
 pub struct MagicMotionV1 {}
 
 impl ProtocolHandler for MagicMotionV1 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
+    &self,
+    _index: u32,
+    scalar: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    Ok(vec![HardwareWriteCmd::new(
+      Endpoint::Tx,
+      vec![
+        0x0b,
+        0xff,
+        0x04,
+        0x0a,
+        0x32,
+        0x32,
+        0x00,
+        0x04,
+        0x08,
+        scalar as u8,
+        0x64,
+        0x00,
+      ],
+      false,
+    )
+    .into()])
+  }
+
+  fn handle_scalar_oscillate_cmd(
     &self,
     _index: u32,
     scalar: u32,

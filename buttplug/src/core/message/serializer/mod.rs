@@ -11,6 +11,7 @@
 mod json_serializer;
 #[cfg(feature = "serialize-json")]
 pub use json_serializer::{
+  vec_to_protocol_json,
   ButtplugClientJSONSerializer,
   ButtplugClientJSONSerializerImpl,
   ButtplugServerJSONSerializer,

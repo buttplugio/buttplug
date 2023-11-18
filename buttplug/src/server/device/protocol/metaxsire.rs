@@ -21,6 +21,10 @@ generic_protocol_setup!(MetaXSire, "metaxsire");
 pub struct MetaXSire {}
 
 impl ProtocolHandler for MetaXSire {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }

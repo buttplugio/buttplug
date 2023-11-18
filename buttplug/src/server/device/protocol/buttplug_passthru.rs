@@ -22,6 +22,10 @@ generic_protocol_setup!(ButtplugPassthru, "buttplug-passthru");
 struct ButtplugPassthru {}
 
 impl ProtocolHandler for ButtplugPassthru {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn has_handle_message(&self) -> bool {
     true
   }

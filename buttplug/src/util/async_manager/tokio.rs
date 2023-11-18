@@ -42,10 +42,8 @@ pub fn block_on<F>(f: F) -> <F as Future>::Output
 where
   F: Future,
 {
-  // Create the runtime
-  let rt =
-    tokio::runtime::Runtime::new().expect("Assumed infallible in this case (usually for tests).");
-
+  let handle = tokio::runtime::Handle::current();
+  let _ = handle.enter();
   // Execute the future, blocking the current thread until completion
-  rt.block_on(async move { f.await })
+  futures::executor::block_on(async move { f.await })
 }

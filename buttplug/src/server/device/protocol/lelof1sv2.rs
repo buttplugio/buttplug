@@ -101,6 +101,10 @@ impl ProtocolInitializer for LeloF1sV2Initializer {
 pub struct LeloF1sV2 {}
 
 impl ProtocolHandler for LeloF1sV2 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn needs_full_command_set(&self) -> bool {
     true
   }
@@ -118,108 +122,3 @@ impl ProtocolHandler for LeloF1sV2 {
     ])
   }
 }
-
-// TODO Gonna need to add the ability to set subscribe data in tests before
-// writing the Lelo F1S V2 tests.
-/*
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use crate::{
-    core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
-    server::device::{
-      device::hardware::{HardwareCommand, DeviceWriteCmd},
-      hardware::communication::test::{
-        check_test_recv_empty,
-        check_test_recv_value,
-        new_bluetoothle_test_device,
-      },
-    },
-    util::async_manager,
-  };
-
-  #[test]
-  pub fn test_lelo_f1s_v2_protocol() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("F1SV2A")
-        .await
-        .expect("Test, assuming infallible");
-      let whitelist_sender = test_device
-          .get_endpoint_sender(&Endpoint::Whitelist)
-          .expect("Test, assuming infallible");
-      let whitelist_receiver = test_device
-          .get_endpoint_receiver(&Endpoint::Whitelist)
-          .expect("Test, assuming infallible");
-
-      // Security handshake
-      whitelist_sender.send(vec![0;8]);
-      whitelist_sender.send(vec![1,2,3,4,5,6,7,8]);
-      check_test_recv_value(
-        &whitelist_receiver,
-        HardwareCommand::Write(DeviceWriteCmd::new(
-          Endpoint::Whitelist,
-          vec![1,2,3,4,5,6,7,8],
-          false,
-        )),
-      );
-      whitelist_sender.send(vec![1,0,0,0,0,0,0,0]);
-
-      let command_receiver = test_device
-        .get_endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x01, 0x32, 0x0],
-          false,
-        )),
-      );
-      // Since we only created one subcommand, we should only receive one command.
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      assert!(check_test_recv_empty(&command_receiver));
-
-      device
-        .parse_message(
-          VibrateCmd::new(
-            0,
-            vec![
-              VibrateSubcommand::new(0, 0.1),
-              VibrateSubcommand::new(1, 0.5),
-            ],
-          )
-          .into(),
-        )
-        .await
-        .expect("Test, assuming infallible");
-      // TODO There's probably a more concise way to do this.
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x1, 0xa, 0x32],
-          false,
-        )),
-      );
-      device
-        .parse_message(StopDeviceCmd::new(0).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(DeviceWriteCmd::new(
-          Endpoint::Tx,
-          vec![0x1, 0x0, 0x0],
-          false,
-        )),
-      );
-    });
-  }
-}
-*/

@@ -20,7 +20,7 @@ use crate::{
     },
     ServerDeviceIdentifier,
   },
-  util::async_manager,
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use std::{
@@ -84,7 +84,7 @@ async fn send_hgod_updates(device: Arc<Hardware>, data: Arc<AtomicU8>) {
         break;
       }
     }
-    tokio::time::sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
+    sleep(Duration::from_millis(HGOD_COMMAND_DELAY_MS)).await;
   }
 }
 

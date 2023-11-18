@@ -19,6 +19,10 @@ generic_protocol_setup!(Synchro, "synchro");
 pub struct Synchro {}
 
 impl ProtocolHandler for Synchro {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_rotate_cmd(
     &self,
     cmds: &[Option<(u32, bool)>],

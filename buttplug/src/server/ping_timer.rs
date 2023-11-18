@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use crate::util::async_manager;
+use crate::util::{async_manager, sleep};
 use futures::{Future, FutureExt};
 use std::{
   sync::{
@@ -14,10 +14,7 @@ use std::{
   },
   time::Duration,
 };
-use tokio::{
-  sync::{mpsc, Notify},
-  time::sleep,
-};
+use tokio::sync::{mpsc, Notify};
 
 pub enum PingMessage {
   Ping,

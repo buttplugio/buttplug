@@ -54,6 +54,10 @@ pub struct KiirooV2 {
 }
 
 impl ProtocolHandler for KiirooV2 {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_linear_cmd(
     &self,
     message: message::LinearCmd,
@@ -85,57 +89,3 @@ impl ProtocolHandler for KiirooV2 {
     .into()])
   }
 }
-
-/*
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use crate::{
-    core::messages::{Endpoint, FleshlightLaunchFW12Cmd, LinearCmd, VectorSubcommand},
-    server::device::{
-      hardware::communication::test::{check_test_recv_value, new_bluetoothle_test_device},
-      hardware::{HardwareCommand, HardwareWriteCmd},
-    },
-    util::async_manager,
-  };
-
-  #[test]
-  pub fn test_kiiroov2_fleshlight_fw12cmd() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-      device
-        .parse_message(FleshlightLaunchFW12Cmd::new(0, 50, 50).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![50, 50], false)),
-      );
-    });
-  }
-
-  #[test]
-  pub fn test_kiiroov2_linearcmd() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Launch")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-      device
-        .parse_message(LinearCmd::new(0, vec![VectorSubcommand::new(0, 500, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![49, 19], false)),
-      );
-    });
-  }
-}
-*/

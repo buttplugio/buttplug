@@ -36,6 +36,12 @@ pub mod lovense_dongle;
 ))]
 pub mod serialport;
 
+#[cfg(all(
+  feature = "hid-manager",
+  any(target_os = "windows", target_os = "macos", target_os = "linux")
+))]
+pub mod hid;
+
 // XInput is windows only
 #[cfg(all(feature = "xinput-manager", target_os = "windows"))]
 pub mod xinput;
@@ -43,7 +49,7 @@ pub mod xinput;
 use crate::{
   core::{errors::ButtplugDeviceError, ButtplugResultFuture},
   server::device::hardware::HardwareConnector,
-  util::async_manager,
+  util::{async_manager, sleep},
 };
 use async_trait::async_trait;
 use futures::future::{self, FutureExt};
@@ -158,7 +164,7 @@ impl<T: TimedRetryCommunicationManagerImpl> HardwareCommunicationManager
             break;
           }
           tokio::select! {
-            _ = tokio::time::sleep(duration) => continue,
+            _ = sleep(duration) => continue,
             _ = child_token.cancelled() => break,
           }
         }

@@ -28,7 +28,7 @@ use crate::{
   },
   util::async_manager,
 };
-use futures::{future::BoxFuture, FutureExt};
+use futures::{future::BoxFuture, select, FutureExt};
 use std::marker::PhantomData;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 

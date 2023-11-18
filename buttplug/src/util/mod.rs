@@ -9,11 +9,17 @@
 //! the library.
 
 pub mod async_manager;
+#[cfg(feature = "server")]
 pub mod device_configuration;
 pub mod future;
 pub mod json;
 pub mod logging;
 pub mod stream;
+
+#[cfg(not(feature = "wasm"))]
+pub use tokio::time::sleep;
+#[cfg(feature = "wasm")]
+pub use wasmtimer::tokio::sleep;
 
 #[cfg(all(feature = "server", feature = "client"))]
 use crate::{

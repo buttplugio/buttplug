@@ -31,7 +31,11 @@
 </div>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="images/buttplug_rust_docs.png">
+    <source media="(prefers-color-scheme: dark)" srcset="images/buttplug_rust_docs_light.png">
+    <img src="https://raw.githubusercontent.com/buttplugio/buttplug/master/images/buttplug_rust_docs.png">
+  </picture>
 </p>
 
 A Rust implementation of the Buttplug Intimate Hardware Control Protocol, including a client and server. This is the core implementation of Buttplug.

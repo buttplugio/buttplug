@@ -26,7 +26,6 @@ use crate::{
       XInputSpecifier,
     },
     ServerDeviceIdentifier,
-    ServerDeviceManagerBuilder,
   },
 };
 use getset::{CopyGetters, Getters, MutGetters, Setters};
@@ -142,11 +141,8 @@ pub struct UserDeviceConfigPair {
 }
 
 impl UserDeviceConfigPair {
-  pub fn new(identifier:UserConfigDeviceIdentifier, config: UserDeviceConfig) -> Self {
-    Self {
-      identifier,
-      config
-    }
+  pub fn new(identifier: UserConfigDeviceIdentifier, config: UserDeviceConfig) -> Self {
+    Self { identifier, config }
   }
 }
 
@@ -370,7 +366,11 @@ pub struct ProtocolConfiguration {
   pub version: ConfigVersion,
   #[serde(default, skip_serializing_if = "Option::is_none")]
   pub protocols: Option<HashMap<String, ProtocolDefinition>>,
-  #[serde(rename = "user-configs", default, skip_serializing_if = "Option::is_none")]
+  #[serde(
+    rename = "user-configs",
+    default,
+    skip_serializing_if = "Option::is_none"
+  )]
   pub user_configs: Option<UserConfigDefinition>,
 }
 
@@ -387,9 +387,12 @@ impl Default for ProtocolConfiguration {
 impl ProtocolConfiguration {
   pub fn new(major_version: u32, minor_version: u32) -> Self {
     Self {
-      version: ConfigVersion { major: major_version, minor: minor_version },
+      version: ConfigVersion {
+        major: major_version,
+        minor: minor_version,
+      },
       protocols: None,
-      user_configs: None
+      user_configs: None,
     }
   }
 
@@ -535,12 +538,11 @@ pub fn load_protocol_configs(
   Ok(dcm_builder)
 }
 
-pub fn load_user_configs(user_config_str: &str) -> Vec<UserDeviceConfigPair> {
-  let user_config = load_protocol_config_from_json(user_config_str, true).unwrap();
-  match user_config.user_configs {
-    Some(config) => config.user_device_configs.unwrap_or_default(),
-    None => vec!()
-  }
+pub fn load_user_configs(user_config_str: &str) -> UserConfigDefinition {
+  load_protocol_config_from_json(user_config_str, true)
+    .unwrap()
+    .user_configs
+    .unwrap()
 }
 
 pub fn create_test_dcm(allow_raw_messages: bool) -> DeviceConfigurationManager {

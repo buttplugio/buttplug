@@ -89,7 +89,10 @@ impl ServerDeviceManagerBuilder {
     self
   }
 
-  pub fn device_configuration_manager_builder(&mut self, dcm_builder: &DeviceConfigurationManagerBuilder) -> &mut Self {
+  pub fn device_configuration_manager_builder(
+    &mut self,
+    dcm_builder: &DeviceConfigurationManagerBuilder,
+  ) -> &mut Self {
     self.configuration_manager_builder.merge(dcm_builder);
     self
   }
@@ -366,6 +369,7 @@ impl ServerDeviceManager {
     self.running.store(false, Ordering::SeqCst);
     let stop_scanning = self.stop_scanning();
     let stop_devices = self.stop_all_devices();
+    let token = self.loop_cancellation_token.clone();
     async move {
       // Force stop scanning, otherwise we can disconnect and instantly try to reconnect while
       // cleaning up if we're still scanning.
@@ -374,6 +378,7 @@ impl ServerDeviceManager {
       for device in devices.iter() {
         device.value().disconnect().await?;
       }
+      token.cancel();
       Ok(message::Ok::default().into())
     }
     .boxed()

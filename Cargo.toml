@@ -1,8 +1,8 @@
 [workspace]
-
+resolver = "2"
 members = [
     "buttplug",
-    "buttplug_derive",
+    "buttplug_derive"
 ]
 
 [profile.release]

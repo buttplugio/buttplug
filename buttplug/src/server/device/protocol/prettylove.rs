@@ -72,6 +72,10 @@ impl ProtocolInitializer for PrettyLoveInitializer {
 pub struct PrettyLove {}
 
 impl ProtocolHandler for PrettyLove {
+  fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
+    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+  }
+
   fn handle_scalar_vibrate_cmd(
     &self,
     _index: u32,
@@ -85,59 +89,3 @@ impl ProtocolHandler for PrettyLove {
     .into()])
   }
 }
-
-/*
-#[cfg(all(test, feature = "server"))]
-mod test {
-  use crate::{
-    core::messages::{Endpoint, StopDeviceCmd, VibrateCmd, VibrateSubcommand},
-    server::device::{
-      hardware::{HardwareCommand, HardwareWriteCmd},
-      hardware::communication::test::{
-        check_test_recv_empty,
-        check_test_recv_value,
-        new_bluetoothle_test_device,
-      },
-    },
-    util::async_manager,
-  };
-
-  #[test]
-  pub fn test_prettylove_protocol() {
-    async_manager::block_on(async move {
-      let (device, test_device) = new_bluetoothle_test_device("Aogu BLE Device")
-        .await
-        .expect("Test, assuming infallible");
-      let command_receiver = test_device
-        .endpoint_receiver(&Endpoint::Tx)
-        .expect("Test, assuming infallible");
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x00, 0x02], true)),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-
-      // Since we only created one subcommand, we should only receive one command.
-      device
-        .parse_message(VibrateCmd::new(0, vec![VibrateSubcommand::new(0, 0.5)]).into())
-        .await
-        .expect("Test, assuming infallible");
-      assert!(check_test_recv_empty(&command_receiver));
-
-      device
-        .parse_message(StopDeviceCmd::new(0).into())
-        .await
-        .expect("Test, assuming infallible");
-      check_test_recv_value(
-        &command_receiver,
-        HardwareCommand::Write(HardwareWriteCmd::new(Endpoint::Tx, vec![0x00, 0x00], true)),
-      );
-      assert!(check_test_recv_empty(&command_receiver));
-    });
-  }
-}
-*/

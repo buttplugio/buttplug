@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 11
+    "minor": 22
   },
   "protocols": {
     "lovense": {
@@ -119,6 +119,26 @@
           "51300001-0023-4bd4-bbd5-a6920e4c5653": {
             "tx": "51300002-0023-4bd4-bbd5-a6920e4c5653",
             "rx": "51300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "45460001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "45460002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "45460003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "454c0001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "454c0002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "454c0003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "55300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "55300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "55300003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "53440001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "53440002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "53440003-0023-4bd4-bbd5-a6920e4c5653"
+          },
+          "48300001-0023-4bd4-bbd5-a6920e4c5653": {
+            "tx": "48300002-0023-4bd4-bbd5-a6920e4c5653",
+            "rx": "48300003-0023-4bd4-bbd5-a6920e4c5653"
           }
         }
       },
@@ -478,6 +498,93 @@
             "Q"
           ],
           "name": "Lovense Tenera"
+        },
+        {
+          "identifier": [
+            "EL"
+          ],
+          "name": "Lovense Ridge",
+          "messages": {
+            "RotateCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "U"
+          ],
+          "name": "Lovense Lapis",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Tip Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Internal Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "External Vibe"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "SD"
+          ],
+          "name": "Lovense Vulse"
+        },
+        {
+          "identifier": [
+            "H"
+          ],
+          "name": "Lovense Solace",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Stroker Oscillation Speed"
+              }
+            ]
+          }
         }
       ]
     },
@@ -868,6 +975,79 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Ridge"
+          ],
+          "name": "Lovense Ridge",
+          "messages": {
+            "RotateCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Rotate"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Lapis"
+          ],
+          "name": "Lovense Lapis",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Tip Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "Internal Vibe"
+              }
+            ],
+            "SensorReadCmd": [
+              {
+                "FeatureDescriptor": "Battery Level",
+                "SensorType": "Battery",
+                "SensorRange": [
+                  [
+                    0,
+                    100
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Vulse"
+          ],
+          "name": "Lovense Vulse"
         }
       ]
     },
@@ -1213,14 +1393,18 @@
         "names": [
           "Smart Mini Vibe*",
           "Flamingo",
+          "Flamingo T",
           "Smart Bean",
           "Smart Bean3",
           "Magic Cell",
           "Magic Wand",
           "Fugu",
+          "Fugu2",
           "Gballs2",
           "GBalls3",
-          "FM-LILAC-101"
+          "FM-LILAC-101",
+          "Xone",
+          "CBT002"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1284,7 +1468,8 @@
         },
         {
           "identifier": [
-            "Flamingo"
+            "Flamingo",
+            "Flamingo T"
           ],
           "name": "MagicMotion Flamingo"
         },
@@ -1308,7 +1493,9 @@
         },
         {
           "identifier": [
-            "Magic Fugu"
+            "Magic Fugu",
+            "Fugu",
+            "Fugu2"
           ],
           "name": "MagicMotion Fugu"
         },
@@ -1329,6 +1516,29 @@
             "FM-LILAC-101"
           ],
           "name": "Femometer Lilac"
+        },
+        {
+          "identifier": [
+            "Xone"
+          ],
+          "name": "MagicMotion Xone",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "CBT002"
+          ],
+          "name": "FunTown Caleo"
         }
       ]
     },
@@ -1338,7 +1548,10 @@
           "Eidolon",
           "Lipstick",
           "Sword",
-          "Curve"
+          "Curve",
+          "Solstice X",
+          "funwand",
+          "CBT001"
         ],
         "services": {
           "78667579-7b48-43db-b8c5-7928a6b0a335": {
@@ -1414,6 +1627,60 @@
                   100
                 ],
                 "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Solstice X"
+          ],
+          "name": "MagicMotion Solstice X",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "funwand"
+          ],
+          "name": "MagicMotion Zenith"
+        },
+        {
+          "identifier": [
+            "CBT001"
+          ],
+          "name": "FunTown Jive",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Oscillate"
               }
             ]
           }
@@ -1678,6 +1945,147 @@
           "name": "MysteryVibe Poco",
           "messages": {
             "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "mysteryvibe-v2": {
+      "btle": {
+        "names": [
+          "6907 MV1",
+          "6908 MV1",
+          "6909 MV1"
+        ],
+        "services": {
+          "f0006900-110c-478b-b74b-6f403b364a9c": {
+            "txmode": "f0006901-110c-478b-b74b-6f403b364a9c",
+            "txvibrate": "f0006903-110c-478b-b74b-6f403b364a9c"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Mysteryvibe V2 Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                56
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                56
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                56
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "6907 MV1"
+          ],
+          "name": "MysteryVibe Tenuto Mini"
+        },
+        {
+          "identifier": [
+            "6908 MV1"
+          ],
+          "name": "MysteryVibe Crescendo 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "6909 MV1"
+          ],
+          "name": "MysteryVibe Tenuto 2",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  56
+                ],
+                "ActuatorType": "Vibrate"
+              },
               {
                 "StepRange": [
                   0,
@@ -2250,7 +2658,8 @@
         "names": [
           "Chorus",
           "skeena",
-          "Sync 2"
+          "Sync 2",
+          "Sync Lite"
         ],
         "services": {
           "f000bb03-0451-4000-b000-000000000000": {
@@ -2291,14 +2700,31 @@
               {
                 "StepRange": [
                   0,
-                  3
+                  30
                 ],
                 "ActuatorType": "Vibrate"
               },
               {
                 "StepRange": [
                   0,
-                  3
+                  30
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "Sync Lite"
+          ],
+          "name": "WeVibe Sync Lite",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  30
                 ],
                 "ActuatorType": "Vibrate"
               }
@@ -2659,7 +3085,11 @@
           "OhMiBod 4.0",
           "OhMiBod LUMEN",
           "OhMiBod NEX3",
-          "Pulse Interactive"
+          "OhMiBod ESCA",
+          "OhMiBod Foxy",
+          "OhMiBod Chill Panty Vibe",
+          "Pulse Interactive",
+          "Fuse1.1"
         ],
         "services": {
           "00001900-0000-1000-8000-00805f9b34fb": {
@@ -2772,7 +3202,8 @@
         },
         {
           "identifier": [
-            "OhMiBod 4.0"
+            "OhMiBod 4.0",
+            "OhMiBod ESCA"
           ],
           "name": "OhMiBod Esca 2",
           "messages": {
@@ -2864,6 +3295,57 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "Fuse1.1"
+          ],
+          "name": "OhMiBod Fuse 1.1",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod Foxy"
+          ],
+          "name": "OhMiBod Foxy",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "OhMiBod Chill Panty Vibe"
+          ],
+          "name": "OhMiBod Chill",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
         }
       ]
     },
@@ -2872,6 +3354,7 @@
         "names": [
           "Rey",
           "We-Vibe Rocketman",
+          "Realm1.1",
           "Onyx2.1",
           "Onyx+",
           "KEON",
@@ -2948,7 +3431,8 @@
         {
           "identifier": [
             "Rey",
-            "We-Vibe Rocketman"
+            "We-Vibe Rocketman",
+            "Realm1.1"
           ],
           "name": "Kiiroo Onyx+ Realm Edition",
           "messages": {
@@ -3280,8 +3764,7 @@
           "Aogu SUV",
           "Aogu SCB",
           "Emma NEO",
-          "Phoenix NEO",
-          "Vick NEO"
+          "Phoenix NEO"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3319,12 +3802,6 @@
         },
         {
           "identifier": [
-            "Vick NEO"
-          ],
-          "name": "Svakom Vick Neo"
-        },
-        {
-          "identifier": [
             "Emma NEO"
           ],
           "name": "Svakom Emma Neo"
@@ -3336,9 +3813,12 @@
         "names": [
           "116",
           "117",
+          "118",
           "Viviana",
           "Ella NEO",
-          "S38A"
+          "S38A",
+          "Vick NEO",
+          "STG05A"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3391,6 +3871,24 @@
             "S38A"
           ],
           "name": "Svakom Tammy Pro"
+        },
+        {
+          "identifier": [
+            "Vick NEO"
+          ],
+          "name": "Svakom Vick Neo"
+        },
+        {
+          "identifier": [
+            "STG05A"
+          ],
+          "name": "Svakom Aravinda"
+        },
+        {
+          "identifier": [
+            "118"
+          ],
+          "name": "ToyCod Vanesia"
         }
       ]
     },
@@ -3461,6 +3959,55 @@
         }
       ]
     },
+    "svakom-v4": {
+      "btle": {
+        "names": [
+          "B2CM6",
+          "ERICA"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Device v4",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "B2CM6"
+          ],
+          "name": "ToyCod Barzillai"
+        },
+        {
+          "identifier": [
+            "ERICA"
+          ],
+          "name": "Svakom Erica"
+        }
+      ]
+    },
     "svakom-sam": {
       "btle": {
         "names": [
@@ -3468,7 +4015,9 @@
         ],
         "services": {
           "0000ae00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000ae01-0000-1000-8000-00805f9b34fb"
+            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ae02-0000-1000-8000-00805f9b34fb",
+            "txmode": "0000ae10-0000-1000-8000-00805f9b34fb"
           }
         }
       },
@@ -3602,7 +4151,9 @@
       "btle": {
         "names": [
           "SWK-SX013A",
-          "Pulse Union"
+          "Pulse Union",
+          "SX033APP",
+          "BX288A"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3637,8 +4188,89 @@
             "Pulse Union"
           ],
           "name": "Svakom Pulse Union"
+        },
+        {
+          "identifier": [
+            "SX033APP"
+          ],
+          "name": "Svakom Mimiki"
+        },
+        {
+          "identifier": [
+            "BX288A"
+          ],
+          "name": "BeYourLover Kyukyu"
         }
       ]
+    },
+    "svakom-tarax": {
+      "btle": {
+        "names": [
+          "SX218A"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "ToyCod Tara X",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate",
+              "FeatureDescriptor": "Internal vibrator"
+            },
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate",
+              "FeatureDescriptor": "External pulsator"
+            }
+          ]
+        }
+      }
+    },
+    "svakom-barnard": {
+      "btle": {
+        "names": [
+          "DG239A"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Fantasy Cup Barnard",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Oscillate"
+            }
+          ]
+        }
+      }
     },
     "realov": {
       "btle": {
@@ -4494,6 +5126,34 @@
         }
       }
     },
+    "fredorch-rotary": {
+      "btle": {
+        "names": [
+          "M1_*"
+        ],
+        "services": {
+          "0000ae10-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ae01-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ae02-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Fredorch Rotary Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                20
+              ],
+              "ActuatorType": "Oscillate",
+              "FeatureDescriptor": "Fucking Machine Oscillation Speed"
+            }
+          ]
+        }
+      }
+    },
     "mizzzee": {
       "btle": {
         "names": [
@@ -4589,12 +5249,10 @@
         ],
         "services": {
           "0000fe00-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000fe02-0000-1000-8000-00805f9b34fb"
+            "tx": "0000fe01-0000-1000-8000-00805f9b34fb"
           },
           "0000fffe-0000-1000-8000-00805f9b34fb": {
-            "tx": "0000fe01-0000-1000-8000-00805f9b34fb",
-            "rx": "0000fe02-0000-1000-8000-00805f9b34fb"
+            "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
           },
           "0000180a-0000-1000-8000-00805f9b34fb": {
             "generic0": "00002a50-0000-1000-8000-00805f9b34fb"
@@ -6173,6 +6831,31 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "10307",
+            "10309"
+          ],
+          "name": "Satisfyer Pro 2 Gen 3",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
         }
       ]
     },
@@ -6297,7 +6980,8 @@
       "btle": {
         "names": [
           "HISMITH",
-          "Wildolo"
+          "Wildolo",
+          "\u0007HISMITH"
         ],
         "services": {
           "0000ffe5-0000-1000-8000-00805f9b34fb": {
@@ -6326,17 +7010,9 @@
       "configurations": [
         {
           "identifier": [
-            "1001",
-            "1005",
-            "1101"
+            "1001"
           ],
           "name": "Hismith Sex Machine"
-        },
-        {
-          "identifier": [
-            "1005"
-          ],
-          "name": "Hismith Mini Sex Machine"
         },
         {
           "identifier": [
@@ -6398,7 +7074,9 @@
       "btle": {
         "names": [
           "Auxfun-Box",
-          "Sinloli"
+          "Sinloli",
+          "Eropair *",
+          "HISMITH S1"
         ],
         "services": {
           "0000ffe5-0000-1000-8000-00805f9b34fb": {
@@ -6433,6 +7111,12 @@
         },
         {
           "identifier": [
+            "1005"
+          ],
+          "name": "Hismith Sex Machine"
+        },
+        {
+          "identifier": [
             "2201"
           ],
           "name": "Sinloli Automatic Sex Doll",
@@ -6456,6 +7140,122 @@
               }
             ]
           }
+        },
+        {
+          "identifier": [
+            "3101"
+          ],
+          "name": "Eropair Rabbit Vibrator",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Internal Vibrator",
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "External Vibrator",
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "3102"
+          ],
+          "name": "Eropair Thrusting Vibrating Dildo",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Thruster",
+                "ActuatorType": "Oscillate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Vibrator",
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "2101"
+          ],
+          "name": "Eropair Cup",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Air Pump",
+                "ActuatorType": "Constrict"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "FeatureDescriptor": "Vibrator",
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "hismith-servo": {
+      "btle": {
+        "names": [
+          "HISMITH S2"
+        ],
+        "services": {
+          "0000ffe5-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe9-0000-1000-8000-00805f9b34fb"
+          },
+          "0000ff90-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "0000ff96-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Hismith servo device",
+        "messages": {
+          "LinearCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Position",
+              "FeatureDescriptor": "Fucking Machine Position"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "1101"
+          ],
+          "name": "Hismith Servo"
         }
       ]
     },
@@ -6488,7 +7288,8 @@
     "pink_punch": {
       "btle": {
         "names": [
-          "Pink_Punch"
+          "Pink_Punch",
+          "PinkPunch_Peachu"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -6508,7 +7309,15 @@
               "ActuatorType": "Vibrate"
             }
           ]
-        }
+        },
+        "configurations": [
+          {
+            "identifier": [
+              "PinkPunch_Peachu"
+            ],
+            "name": "Pink Punch Peachu"
+          }
+        ]
       }
     },
     "sakuraneko": {
@@ -6587,7 +7396,9 @@
     "synchro": {
       "btle": {
         "names": [
-          "Shinkuro"
+          "Shinkuro",
+          "synchro2",
+          "synchro EX"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -6608,7 +7419,15 @@
             }
           ]
         }
-      }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "synchro EX"
+          ],
+          "name": "Synchro Exchange"
+        }
+      ]
     },
     "tryfun": {
       "btle": {
@@ -6954,6 +7773,379 @@
           ]
         }
       }
+    },
+    "longlosttouch": {
+      "btle": {
+        "names": [
+          "RS-KNW"
+        ],
+        "services": {
+          "0000cb60-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000cb61-0000-1000-8000-00805f9b34fb",
+            "rx": "0000cb62-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Long Lost Touch Possible Kiss",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Oscillate"
+            }
+          ]
+        }
+      }
+    },
+    "adrienlastic": {
+      "btle": {
+        "names": [
+          "Placeholder to avoid conflict with bad attempt to clone a Lovense Lush"
+        ],
+        "advertised-services": [
+          "00001320-0000-1000-8000-00805f9b34fb"
+        ],
+        "services": {
+          "6e400001-b5a3-f393-e0a9-e50e24dcca9e": {
+            "tx": "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Adrien Lastic Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                16
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "LVS-S001"
+          ],
+          "name": "Adrien Lastic Palpitation"
+        },
+        {
+          "identifier": [
+            "LVS-S002"
+          ],
+          "name": "Adrien Lastic Revelation"
+        }
+      ]
+    },
+    "nintendo-joycon": {
+      "hid": [
+        {
+          "vendor-id": 1406,
+          "product-id": 8199
+        },
+        {
+          "vendor-id": 1406,
+          "product-id": 8198
+        },
+        {
+          "vendor-id": 1406,
+          "product-id": 8201
+        }
+      ],
+      "defaults": {
+        "name": "Nintendo Joycon",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                1000
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
+    "foreo": {
+      "btle": {
+        "names": [
+          "FOFO",
+          "LUNA fofo",
+          "LUNA FOFO",
+          "LUNA PLAY SMART",
+          "LUNA PLAYSMART2",
+          "LUNA PLAY SMART2",
+          "LUNA play smart2",
+          "LUNA play smart 2",
+          "LUNA 3",
+          "LUNA3",
+          "LUNA3PLUS",
+          "LUNA3 PLUS",
+          "LUNA 3 PLUS",
+          "LUNA 3 plus",
+          "LUNA 3 MEN",
+          "LUNA3MEN",
+          "LUNA MINI3",
+          "LUNA MINI 3",
+          "LUNA mini 3",
+          "LUNA4PLUS",
+          "LUNA4",
+          "LUNA 4",
+          "LUNA4PLUS",
+          "LUNA4 PLUS",
+          "LUNA 4 plus",
+          "LUNA4MEN",
+          "LUNA 4 MEN",
+          "LUNA 4 FOR MEN",
+          "LUNA MINI4",
+          "LUNA MINI 4",
+          "LUNA mini 4",
+          "LUNA 4 mini",
+          "UFO",
+          "UFO mini",
+          "UFO MINI",
+          "UFO MIN",
+          "UFO2",
+          "UFO 2",
+          "UFOMINI2",
+          "UFO mini 2",
+          "UFO3",
+          "UFO3mini",
+          "UFO3go",
+          "UFO3led",
+          "BEAR",
+          "BEAR_MINI",
+          "BEAR MINI",
+          "BEAR mini",
+          "BEAR2",
+          "BEAR 2",
+          "BEAR2go",
+          "BEAR2body",
+          "BEAR2eyes",
+          "KIWI",
+          "KIWI derma"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fff1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Foreo Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "FOFO",
+            "LUNA fofo",
+            "LUNA FOFO",
+            "LUNA PLAY SMART"
+          ],
+          "name": "Foreo LUNA fofo"
+        },
+        {
+          "identifier": [
+            "LUNA PLAYSMART2",
+            "LUNA PLAY SMART2",
+            "LUNA play smart2",
+            "LUNA play smart 2"
+          ],
+          "name": "Foreo LUNA play smart 2"
+        },
+        {
+          "identifier": [
+            "LUNA 3",
+            "LUNA3"
+          ],
+          "name": "Foreo LUNA 3"
+        },
+        {
+          "identifier": [
+            "LUNA3PLUS",
+            "LUNA3 PLUS",
+            "LUNA 3 PLUS",
+            "LUNA 3 plus"
+          ],
+          "name": "Foreo LUNA 3 plus"
+        },
+        {
+          "identifier": [
+            "LUNA 3 MEN",
+            "LUNA3MEN"
+          ],
+          "name": "Foreo LUNA 3 men"
+        },
+        {
+          "identifier": [
+            "LUNA MINI3",
+            "LUNA MINI 3",
+            "LUNA mini 3"
+          ],
+          "name": "Foreo LUNA 3 mini"
+        },
+        {
+          "identifier": [
+            "LUNA4",
+            "LUNA 4"
+          ],
+          "name": "Foreo LUNA 4"
+        },
+        {
+          "identifier": [
+            "LUNA4PLUS",
+            "LUNA4 PLUS",
+            "LUNA 4 plus"
+          ],
+          "name": "Foreo LUNA 4 plus"
+        },
+        {
+          "identifier": [
+            "LUNA4MEN",
+            "LUNA 4 MEN",
+            "LUNA 4 FOR MEN"
+          ],
+          "name": "Foreo LUNA 4 men"
+        },
+        {
+          "identifier": [
+            "LUNA MINI4",
+            "LUNA MINI 4",
+            "LUNA mini 4",
+            "LUNA 4 mini"
+          ],
+          "name": "Foreo LUNA 4 mini"
+        },
+        {
+          "identifier": [
+            "UFO"
+          ],
+          "name": "Foreo UFO"
+        },
+        {
+          "identifier": [
+            "UFO mini",
+            "UFO MINI",
+            "UFO MIN"
+          ],
+          "name": "Foreo UFO mini"
+        },
+        {
+          "identifier": [
+            "UFO2",
+            "UFO 2"
+          ],
+          "name": "Foreo UFO 2"
+        },
+        {
+          "identifier": [
+            "UFO3"
+          ],
+          "name": "Foreo UFO 3"
+        },
+        {
+          "identifier": [
+            "UFO3go"
+          ],
+          "name": "Foreo UFO 3 go"
+        },
+        {
+          "identifier": [
+            "UFO3eyes"
+          ],
+          "name": "Foreo UFO 3 led"
+        },
+        {
+          "identifier": [
+            "UFO3mini"
+          ],
+          "name": "Foreo UFO 3 mini"
+        },
+        {
+          "identifier": [
+            "UFOMINI2",
+            "UFO mini 2"
+          ],
+          "name": "Foreo UFO mini 2"
+        },
+        {
+          "identifier": [
+            "BEAR"
+          ],
+          "name": "Foreo BEAR"
+        },
+        {
+          "identifier": [
+            "BEAR_MINI",
+            "BEAR MINI",
+            "BEAR mini"
+          ],
+          "name": "Foreo BEAR mini"
+        },
+        {
+          "identifier": [
+            "BEAR2",
+            "BEAR 2"
+          ],
+          "name": "Foreo BEAR 2"
+        },
+        {
+          "identifier": [
+            "BEAR2go"
+          ],
+          "name": "Foreo BEAR 2 go"
+        },
+        {
+          "identifier": [
+            "BEAR2eyes"
+          ],
+          "name": "Foreo BEAR 2 eyes"
+        },
+        {
+          "identifier": [
+            "BEAR2body"
+          ],
+          "name": "Foreo BEAR 2 body"
+        },
+        {
+          "identifier": [
+            "KIWI"
+          ],
+          "name": "Foreo KIWI"
+        },
+        {
+          "identifier": [
+            "KIWI derma"
+          ],
+          "name": "Foreo KIWI derma"
+        }
+      ]
     }
   }
 }

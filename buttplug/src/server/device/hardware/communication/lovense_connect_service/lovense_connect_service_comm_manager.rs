@@ -104,6 +104,7 @@ pub(super) struct LovenseServiceLocalInfo {
     deserialize_with = "deserialize_number_from_string"
   )]
   pub _code: u32,
+  #[serde(default)]
   pub data: HashMap<String, LovenseServiceToyInfo>,
 }
 

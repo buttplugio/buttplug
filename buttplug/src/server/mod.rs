@@ -79,7 +79,7 @@ use crate::{
     async_manager,
     device_configuration::{load_protocol_configs, DEVICE_CONFIGURATION_JSON},
     stream::convert_broadcast_receiver_to_stream,
-  }
+  },
 };
 use futures::{
   future::{self, BoxFuture, FutureExt},
@@ -264,7 +264,9 @@ impl ButtplugServerBuilder {
     )
     .map_err(ButtplugServerError::DeviceConfigurationManagerError)?;
 
-    self.device_manager_builder.device_configuration_manager_builder(&dcm_builder);
+    self
+      .device_manager_builder
+      .device_configuration_manager_builder(&dcm_builder);
     // Set up our channels to different parts of the system.
     let (output_sender, _) = broadcast::channel(256);
     let output_sender_clone = output_sender.clone();
@@ -535,32 +537,28 @@ mod test {
   use crate::{
     core::message::{self, BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION},
     server::ButtplugServer,
-    util::async_manager,
   };
 
-  #[test]
-  fn test_server_reuse() {
-    async_manager::block_on(async {
-      let server = ButtplugServer::default();
-      let msg =
-        message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
-      let mut reply = server.parse_message(msg.clone().into()).await;
-      assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
+  #[tokio::test]
+  async fn test_server_reuse() {
+    let server = ButtplugServer::default();
+    let msg = message::RequestServerInfo::new("Test Client", BUTTPLUG_CURRENT_MESSAGE_SPEC_VERSION);
+    let mut reply = server.parse_message(msg.clone().into()).await;
+    assert!(reply.is_ok(), "Should get back ok: {:?}", reply);
 
-      reply = server.parse_message(msg.clone().into()).await;
-      assert!(
-        reply.is_err(),
-        "Should get back err on double handshake: {:?}",
-        reply
-      );
-      assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
+    reply = server.parse_message(msg.clone().into()).await;
+    assert!(
+      reply.is_err(),
+      "Should get back err on double handshake: {:?}",
+      reply
+    );
+    assert!(server.disconnect().await.is_ok(), "Should disconnect ok");
 
-      reply = server.parse_message(msg.clone().into()).await;
-      assert!(
-        reply.is_ok(),
-        "Should get back ok on handshake after disconnect: {:?}",
-        reply
-      );
-    });
+    reply = server.parse_message(msg.clone().into()).await;
+    assert!(
+      reply.is_ok(),
+      "Should get back ok on handshake after disconnect: {:?}",
+      reply
+    );
   }
 }
