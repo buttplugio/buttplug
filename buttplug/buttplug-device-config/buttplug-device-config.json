@@ -980,7 +980,7 @@
           "identifier": [
             "Ridge"
           ],
-          "name": "Lovense Ridge",
+          "name": "Lovense Connect Ridge",
           "messages": {
             "RotateCmd": [
               {
@@ -1009,7 +1009,7 @@
           "identifier": [
             "Lapis"
           ],
-          "name": "Lovense Lapis",
+          "name": "Lovense Connect Lapis",
           "messages": {
             "ScalarCmd": [
               {
@@ -1047,7 +1047,7 @@
           "identifier": [
             "Vulse"
           ],
-          "name": "Lovense Vulse"
+          "name": "Lovense Connect Vulse"
         }
       ]
     },
