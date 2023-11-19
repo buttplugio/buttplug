@@ -1,3 +1,11 @@
+# 7.1.10 (2023-11-18)
+
+## Bugfixes
+
+- Update to btleplug 0.11.2
+  - Fixes issue with non-UTF-8 advertisement names in Android, which blocked Lovense Solace
+    connection
+
 # 7.1.9 (2023-11-15)
 
 ## Features
