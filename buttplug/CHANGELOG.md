@@ -1,3 +1,10 @@
+# 7.1.11 (2023-11-18)
+
+## Bugfixes
+
+- Update to btleplug 0.11.3
+  - Fix macOS missing import issue
+
 # 7.1.10 (2023-11-18)
 
 ## Bugfixes
