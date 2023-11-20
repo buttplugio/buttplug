@@ -30,6 +30,7 @@ use crate::core::{
 use jsonschema::JSONSchema;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
+use serde_json::{Deserializer, Value};
 use std::{convert::TryFrom, fmt::Debug};
 
 static MESSAGE_JSON_SCHEMA: &str =
@@ -81,43 +82,52 @@ where
 
 pub fn deserialize_to_message<T>(
   validator: &JSONSchema,
-  msg: &str,
+  msg_str: &str,
 ) -> Result<Vec<T>, ButtplugSerializerError>
 where
   T: serde::de::DeserializeOwned + ButtplugMessageFinalizer + Clone + Debug,
 {
-  // We have to pass back a string formatted error, as SerdeJson's error type
-  // isn't clonable.
-  serde_json::from_str::<serde_json::Value>(msg)
-    .map_err(|e| {
-      ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg, e))
-    })
-    .and_then(|json_msg| {
-      if validator.is_valid(&json_msg) {
-        match serde_json::from_value::<Vec<T>>(json_msg) {
-          Ok(mut msg_vec) => {
-            for msg in msg_vec.iter_mut() {
-              msg.finalize();
+  // TODO This assumes that we've gotten a full JSON string to deserialize, which may not be the
+  // case.
+  let stream = Deserializer::from_str(msg_str).into_iter::<Value>();
+
+  let mut result = vec![];
+
+  for msg in stream {
+    match msg {
+      Ok(json_msg) => {
+        if validator.is_valid(&json_msg) {
+          match serde_json::from_value::<Vec<T>>(json_msg) {
+            Ok(mut msg_vec) => {
+              for msg in msg_vec.iter_mut() {
+                msg.finalize();
+              }
+              result.append(&mut msg_vec);
+              //Ok(msg_vec)
             }
-            Ok(msg_vec)
+            Err(e) => return Err(ButtplugSerializerError::JsonSerializerError(format!(
+              "Message: {} - Error: {:?}",
+              msg_str, e
+            ))),
           }
-          Err(e) => Err(ButtplugSerializerError::JsonSerializerError(format!(
-            "Message: {} - Error: {:?}",
-            msg, e
-          ))),
+        } else {
+          // If is_valid fails, re-run validation to get our error message.
+          let e = validator
+            .validate(&json_msg)
+            .expect_err("We can't get here without validity checks failing.");
+          let err_vec: Vec<jsonschema::ValidationError> = e.collect();
+          return Err(ButtplugSerializerError::JsonSerializerError(format!(
+            "Error during JSON Schema Validation - Message: {} - Error: {:?}",
+            json_msg, err_vec
+          )))
         }
-      } else {
-        // If is_valid fails, re-run validation to get our error message.
-        let e = validator
-          .validate(&json_msg)
-          .expect_err("We can't get here without validity checks failing.");
-        let err_vec: Vec<jsonschema::ValidationError> = e.collect();
-        Err(ButtplugSerializerError::JsonSerializerError(format!(
-          "Error during JSON Schema Validation - Message: {} - Error: {:?}",
-          json_msg, err_vec
-        )))
+      },
+      Err(e) => {
+        return Err(ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg_str, e)))
       }
-    })
+    }
+  }
+  Ok(result)
 }
 
 fn serialize_to_version(
@@ -361,6 +371,104 @@ mod test {
     let serializer = ButtplugServerJSONSerializer::default();
     let msg = serializer.deserialize(&ButtplugSerializedMessage::Text(json.to_owned()));
     assert!(msg.is_err());
+  }
+
+  #[test]
+  fn test_message_array() {
+    let json = r#"[
+        {
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        },
+        {
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        },
+        {
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+        }
+    }]"#;
+    let serializer = ButtplugServerJSONSerializer::default();
+    let messages = serializer
+      .deserialize(&ButtplugSerializedMessage::Text(json.to_owned()))
+      .expect("Infallible deserialization");
+    assert_eq!(
+      messages.len(),
+      3
+    );
+  }
+
+  #[test]
+  fn test_streamed_message_array() {
+    let json = r#"[
+        {
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        }]
+        [{
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        }]
+        [{
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        }]
+    "#;
+    let serializer = ButtplugServerJSONSerializer::default();
+    let messages = serializer
+      .deserialize(&ButtplugSerializedMessage::Text(json.to_owned()))
+      .expect("Infallible deserialization");
+    assert_eq!(
+      messages.len(),
+      3
+    );
+  }
+
+  #[test]
+  fn test_invalid_streamed_message_array() {
+    // Missing a } in the second message.
+    let json = r#"[
+        {
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        }]
+        [{
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+        }]
+        [{
+          "RequestServerInfo": {
+              "Id": 1,
+              "ClientName": "Test Client",
+              "MessageVersion": 3
+          }
+        }]
+    "#;
+    let serializer = ButtplugServerJSONSerializer::default();
+    assert!(matches!(serializer.deserialize(&ButtplugSerializedMessage::Text(json.to_owned())), Err(_)));
   }
 
   #[test]
