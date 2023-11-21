@@ -1,3 +1,16 @@
+# 7.1.12 (In Development)
+
+## Features
+
+- Move from async-tungstenite to tokio-tungstenite
+  - We only build for tokio at this point anyways
+  - Easier to integrate with rustls, removes OpenSSL requirement on some platforms
+
+## Bugfixes
+
+- Streamed JSON now handled by serializer
+  - May fix issues with some older Buttplug C# programs.
+
 # 7.1.11 (2023-11-18)
 
 ## Bugfixes
