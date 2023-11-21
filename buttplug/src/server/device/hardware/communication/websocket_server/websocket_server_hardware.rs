@@ -42,12 +42,13 @@ use std::{
   time::Duration,
 };
 use tokio::{
+  net::TcpStream,
   sync::{
     broadcast,
     mpsc::{channel, Receiver, Sender},
     Mutex,
   },
-  time::sleep, net::TcpStream,
+  time::sleep,
 };
 use tokio_util::sync::CancellationToken;
 
@@ -169,8 +170,7 @@ impl WebsocketServerHardwareConnector {
   pub fn new(
     info: WebsocketServerDeviceCommManagerInitInfo,
     ws_stream: tokio_tungstenite::WebSocketStream<TcpStream>,
-  ) -> Self
-  {
+  ) -> Self {
     let (outgoing_sender, outgoing_receiver) = channel(256);
     let (incoming_broadcaster, _) = broadcast::channel(256);
     let incoming_broadcaster_clone = incoming_broadcaster.clone();

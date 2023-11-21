@@ -105,10 +105,12 @@ where
               result.append(&mut msg_vec);
               //Ok(msg_vec)
             }
-            Err(e) => return Err(ButtplugSerializerError::JsonSerializerError(format!(
-              "Message: {} - Error: {:?}",
-              msg_str, e
-            ))),
+            Err(e) => {
+              return Err(ButtplugSerializerError::JsonSerializerError(format!(
+                "Message: {} - Error: {:?}",
+                msg_str, e
+              )))
+            }
           }
         } else {
           // If is_valid fails, re-run validation to get our error message.
@@ -119,11 +121,14 @@ where
           return Err(ButtplugSerializerError::JsonSerializerError(format!(
             "Error during JSON Schema Validation - Message: {} - Error: {:?}",
             json_msg, err_vec
-          )))
+          )));
         }
-      },
+      }
       Err(e) => {
-        return Err(ButtplugSerializerError::JsonSerializerError(format!("Message: {} - Error: {:?}", msg_str, e)))
+        return Err(ButtplugSerializerError::JsonSerializerError(format!(
+          "Message: {} - Error: {:?}",
+          msg_str, e
+        )))
       }
     }
   }
@@ -401,10 +406,7 @@ mod test {
     let messages = serializer
       .deserialize(&ButtplugSerializedMessage::Text(json.to_owned()))
       .expect("Infallible deserialization");
-    assert_eq!(
-      messages.len(),
-      3
-    );
+    assert_eq!(messages.len(), 3);
   }
 
   #[test]
@@ -436,10 +438,7 @@ mod test {
     let messages = serializer
       .deserialize(&ButtplugSerializedMessage::Text(json.to_owned()))
       .expect("Infallible deserialization");
-    assert_eq!(
-      messages.len(),
-      3
-    );
+    assert_eq!(messages.len(), 3);
   }
 
   #[test]
@@ -468,7 +467,10 @@ mod test {
         }]
     "#;
     let serializer = ButtplugServerJSONSerializer::default();
-    assert!(matches!(serializer.deserialize(&ButtplugSerializedMessage::Text(json.to_owned())), Err(_)));
+    assert!(matches!(
+      serializer.deserialize(&ButtplugSerializedMessage::Text(json.to_owned())),
+      Err(_)
+    ));
   }
 
   #[test]

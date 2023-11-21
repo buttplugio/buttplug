@@ -20,7 +20,7 @@ use crate::{
   },
   util::async_manager,
 };
-use futures::{future::BoxFuture, FutureExt, StreamExt, SinkExt};
+use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
 use std::{sync::Arc, time::Duration};
 use tokio::{
   net::{TcpListener, TcpStream},
@@ -73,8 +73,7 @@ async fn run_connection_loop(
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
   disconnect_notifier: Arc<Notify>,
-)
-{
+) {
   info!("Starting websocket server connection event loop.");
 
   let (mut websocket_server_sender, mut websocket_server_receiver) = ws_stream.split();
@@ -231,12 +230,14 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket: Got connection");
-        let ws_stream = tokio_tungstenite::accept_async(stream).await.map_err(|err| {
-          error!("Websocket server accept error: {:?}", err);
-          ButtplugConnectorError::TransportSpecificError(
-            ButtplugConnectorTransportSpecificError::TungsteniteError(err),
-          )
-        })?;
+        let ws_stream = tokio_tungstenite::accept_async(stream)
+          .await
+          .map_err(|err| {
+            error!("Websocket server accept error: {:?}", err);
+            ButtplugConnectorError::TransportSpecificError(
+              ButtplugConnectorTransportSpecificError::TungsteniteError(err),
+            )
+          })?;
         async_manager::spawn(async move {
           run_connection_loop(
             ws_stream,

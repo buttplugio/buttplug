@@ -22,25 +22,30 @@ use crate::{
   },
   util::async_manager,
 };
-use tokio_tungstenite::{Connector, connect_async_tls_with_config, tungstenite::protocol::Message, connect_async};
-use rustls::ClientConfig;
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
-use url::Url;
+use rustls::ClientConfig;
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
+use tokio_tungstenite::{
+  connect_async,
+  connect_async_tls_with_config,
+  tungstenite::protocol::Message,
+  Connector,
+};
 use tracing::Instrument;
+use url::Url;
 
 // Taken from https://stackoverflow.com/questions/72846337/does-hyper-client-not-accept-self-signed-certificates
 pub fn get_rustls_config_dangerous() -> ClientConfig {
   let store = rustls::RootCertStore::empty();
 
   let mut config = ClientConfig::builder()
-      .with_safe_defaults()
-      .with_root_certificates(store)
-      .with_no_client_auth();
+    .with_safe_defaults()
+    .with_root_certificates(store)
+    .with_no_client_auth();
 
   // if you want to completely disable cert-verification, use this
   let mut dangerous_config = ClientConfig::dangerous(&mut config);
@@ -51,15 +56,15 @@ pub fn get_rustls_config_dangerous() -> ClientConfig {
 pub struct NoCertificateVerification {}
 impl rustls::client::ServerCertVerifier for NoCertificateVerification {
   fn verify_server_cert(
-      &self,
-      _end_entity: &rustls::Certificate,
-      _intermediates: &[rustls::Certificate],
-      _server_name: &rustls::ServerName,
-      _scts: &mut dyn Iterator<Item = &[u8]>,
-      _ocsp: &[u8],
-      _now: std::time::SystemTime,
+    &self,
+    _end_entity: &rustls::Certificate,
+    _intermediates: &[rustls::Certificate],
+    _server_name: &rustls::ServerName,
+    _scts: &mut dyn Iterator<Item = &[u8]>,
+    _ocsp: &[u8],
+    _now: std::time::SystemTime,
   ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-      Ok(rustls::client::ServerCertVerified::assertion())
+    Ok(rustls::client::ServerCertVerified::assertion())
   }
 }
 
