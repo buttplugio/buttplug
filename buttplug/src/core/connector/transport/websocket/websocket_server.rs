@@ -20,10 +20,10 @@ use crate::{
   },
   util::async_manager,
 };
-use futures::{future::BoxFuture, AsyncRead, AsyncWrite, FutureExt, SinkExt, StreamExt};
+use futures::{future::BoxFuture, FutureExt, StreamExt, SinkExt};
 use std::{sync::Arc, time::Duration};
 use tokio::{
-  net::TcpListener,
+  net::{TcpListener, TcpStream},
   sync::{
     mpsc::{Receiver, Sender},
     Notify,
@@ -68,13 +68,12 @@ impl ButtplugWebsocketServerTransportBuilder {
   }
 }
 
-async fn run_connection_loop<S>(
-  ws_stream: async_tungstenite::WebSocketStream<S>,
+async fn run_connection_loop(
+  ws_stream: tokio_tungstenite::WebSocketStream<TcpStream>,
   mut request_receiver: Receiver<ButtplugSerializedMessage>,
   response_sender: Sender<ButtplugTransportIncomingMessage>,
   disconnect_notifier: Arc<Notify>,
-) where
-  S: AsyncRead + AsyncWrite + Unpin,
+)
 {
   info!("Starting websocket server connection event loop.");
 
@@ -98,7 +97,7 @@ async fn run_connection_loop<S>(
         }
         pong_count = 0;
         if websocket_server_sender
-          .send(async_tungstenite::tungstenite::Message::Ping(vec!(0)))
+          .send(tokio_tungstenite::tungstenite::Message::Ping(vec!(0)))
           .await
           .is_err() {
           warn!("Cannot send ping to client, considering connection closed.");
@@ -111,7 +110,7 @@ async fn run_connection_loop<S>(
             ButtplugSerializedMessage::Text(text_msg) => {
               trace!("Sending text message: {}", text_msg);
               if websocket_server_sender
-                .send(async_tungstenite::tungstenite::Message::Text(text_msg))
+                .send(tokio_tungstenite::tungstenite::Message::Text(text_msg))
                 .await
                 .is_err() {
                 warn!("Cannot send text value to server, considering connection closed.");
@@ -120,7 +119,7 @@ async fn run_connection_loop<S>(
             }
             ButtplugSerializedMessage::Binary(binary_msg) => {
               if websocket_server_sender
-                .send(async_tungstenite::tungstenite::Message::Binary(binary_msg))
+                .send(tokio_tungstenite::tungstenite::Message::Binary(binary_msg))
                 .await
                 .is_err() {
                 warn!("Cannot send binary value to server, considering connection closed.");
@@ -141,14 +140,14 @@ async fn run_connection_loop<S>(
           match ws_data {
             Ok(msg) => {
               match msg {
-                async_tungstenite::tungstenite::Message::Text(text_msg) => {
+                tokio_tungstenite::tungstenite::Message::Text(text_msg) => {
                   trace!("Got text: {}", text_msg);
                   if response_sender.send(ButtplugTransportIncomingMessage::Message(ButtplugSerializedMessage::Text(text_msg))).await.is_err() {
                     warn!("Connector that owns transport no longer available, exiting.");
                     break;
                   }
                 }
-                async_tungstenite::tungstenite::Message::Close(_) => {
+                tokio_tungstenite::tungstenite::Message::Close(_) => {
                   let _ = response_sender.send(ButtplugTransportIncomingMessage::Close("Websocket server closed".to_owned())).await;
                   // If closing errors out, log it but there's not a lot we can do.
                   if let Err(e) = websocket_server_sender.close().await {
@@ -156,9 +155,9 @@ async fn run_connection_loop<S>(
                   }
                   break;
                 }
-                async_tungstenite::tungstenite::Message::Ping(val) => {
+                tokio_tungstenite::tungstenite::Message::Ping(val) => {
                   if websocket_server_sender
-                    .send(async_tungstenite::tungstenite::Message::Pong(val))
+                    .send(tokio_tungstenite::tungstenite::Message::Pong(val))
                     .await
                     .is_err() {
                     warn!("Cannot send pong to client, considering connection closed.");
@@ -166,15 +165,15 @@ async fn run_connection_loop<S>(
                   }
                   continue;
                 }
-                async_tungstenite::tungstenite::Message::Frame(_) => {
+                tokio_tungstenite::tungstenite::Message::Frame(_) => {
                   // noop
                   continue;
                 }
-                async_tungstenite::tungstenite::Message::Pong(_) => {
+                tokio_tungstenite::tungstenite::Message::Pong(_) => {
                   pong_count += 1;
                   continue;
                 }
-                async_tungstenite::tungstenite::Message::Binary(_) => {
+                tokio_tungstenite::tungstenite::Message::Binary(_) => {
                   error!("Don't know how to handle binary message types!");
                 }
               }
@@ -195,7 +194,7 @@ async fn run_connection_loop<S>(
   }
 }
 
-/// Websocket connector for ButtplugClients, using [async_tungstenite]
+/// Websocket connector for ButtplugClients, using [tokio_tungstenite]
 pub struct ButtplugWebsocketServerTransport {
   port: u16,
   listen_on_all_interfaces: bool,
@@ -232,8 +231,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketServerTransport {
       debug!("Websocket: Listening on: {}", addr);
       if let Ok((stream, _)) = listener.accept().await {
         info!("Websocket: Got connection");
-        let ws_fut = async_tungstenite::tokio::accept_async(stream);
-        let ws_stream = ws_fut.await.map_err(|err| {
+        let ws_stream = tokio_tungstenite::accept_async(stream).await.map_err(|err| {
           error!("Websocket server accept error: {:?}", err);
           ButtplugConnectorError::TransportSpecificError(
             ButtplugConnectorTransportSpecificError::TungsteniteError(err),

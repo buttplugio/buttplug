@@ -22,18 +22,48 @@ use crate::{
   },
   util::async_manager,
 };
-use async_tungstenite::{tokio::connect_async_with_tls_connector, tungstenite::protocol::Message};
+use tokio_tungstenite::{Connector, connect_async_tls_with_config, tungstenite::protocol::Message, connect_async};
+use rustls::ClientConfig;
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
+use url::Url;
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
   Notify,
 };
-use tokio_native_tls::native_tls::TlsConnector as NativeTlsConnector;
-use tokio_native_tls::TlsConnector;
 use tracing::Instrument;
 
-/// Websocket connector for ButtplugClients, using [async_tungstenite]
+// Taken from https://stackoverflow.com/questions/72846337/does-hyper-client-not-accept-self-signed-certificates
+pub fn get_rustls_config_dangerous() -> ClientConfig {
+  let store = rustls::RootCertStore::empty();
+
+  let mut config = ClientConfig::builder()
+      .with_safe_defaults()
+      .with_root_certificates(store)
+      .with_no_client_auth();
+
+  // if you want to completely disable cert-verification, use this
+  let mut dangerous_config = ClientConfig::dangerous(&mut config);
+  dangerous_config.set_certificate_verifier(Arc::new(NoCertificateVerification {}));
+
+  config
+}
+pub struct NoCertificateVerification {}
+impl rustls::client::ServerCertVerifier for NoCertificateVerification {
+  fn verify_server_cert(
+      &self,
+      _end_entity: &rustls::Certificate,
+      _intermediates: &[rustls::Certificate],
+      _server_name: &rustls::ServerName,
+      _scts: &mut dyn Iterator<Item = &[u8]>,
+      _ocsp: &[u8],
+      _now: std::time::SystemTime,
+  ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
+      Ok(rustls::client::ServerCertVerified::assertion())
+  }
+}
+
+/// Websocket connector for ButtplugClients, using [tokio_tungstenite]
 pub struct ButtplugWebsocketClientTransport {
   /// Address of the server we'll connect to.
   address: String,
@@ -85,34 +115,26 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
   ) -> BoxFuture<'static, Result<(), ButtplugConnectorError>> {
     let disconnect_notifier = self.disconnect_notifier.clone();
 
-    // If we're supposed to be a secure connection, generate a TLS connector
-    // based on our certificate verfication needs. Otherwise, just pass None in
-    // which case we won't wrap.
-    let tls_connector: Option<TlsConnector> = if self.should_use_tls {
-      if self.bypass_cert_verify {
-        Some(
-          NativeTlsConnector::builder()
-            .danger_accept_invalid_certs(true)
-            .build()
-            .expect("Should always succeed, we're not setting any fallible options.")
-            .into(),
-        )
-      } else {
-        Some(
-          NativeTlsConnector::new()
-            .expect("Should always succeed, not setting options.")
-            .into(),
-        )
-      }
-    } else {
-      // If we're not using a secure connection, just return None, at which
-      // point async_tungstenite won't use a wrapper.
-      None
-    };
     let address = self.address.clone();
-
+    let should_use_tls = self.should_use_tls;
+    let bypass_cert_verify = self.bypass_cert_verify;
     async move {
-      match connect_async_with_tls_connector(&address, tls_connector).await {
+      let url = Url::parse(&address).expect("Should be checked before here");
+      let stream_result = if should_use_tls {
+        // If we're supposed to be a secure connection, generate a TLS connector
+        // based on our certificate verfication needs. Otherwise, just pass None in
+        // which case we won't wrap.
+        let connector = if bypass_cert_verify {
+          Some(Connector::Rustls(Arc::new(get_rustls_config_dangerous())))          
+        } else {
+          None
+        };
+        connect_async_tls_with_config(&url, None, false, connector).await
+      } else {
+        connect_async(&url).await
+      };
+
+      match stream_result {
         Ok((stream, _)) => {
           let (mut writer, mut reader) = stream.split();
 

@@ -115,7 +115,7 @@ impl WebsocketServerDeviceCommunicationManager {
               return;
             };
             info!("Got connection");
-            let ws_fut = async_tungstenite::tokio::accept_async(stream);
+            let ws_fut = tokio_tungstenite::accept_async(stream);
             let mut ws_stream = match ws_fut.await {
               Ok(ws_stream) => ws_stream,
               Err(err) => {
@@ -130,7 +130,7 @@ impl WebsocketServerDeviceCommunicationManager {
             let sender_clone = sender.clone();
             tokio::spawn(async move {
               // TODO Implement a receive timeout here so we don't wait forever
-              if let Some(Ok(async_tungstenite::tungstenite::Message::Text(info_message))) =
+              if let Some(Ok(tokio_tungstenite::tungstenite::Message::Text(info_message))) =
                 ws_stream.next().await
               {
                 let info_packet: WebsocketServerDeviceCommManagerInitInfo =
