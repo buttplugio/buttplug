@@ -1055,6 +1055,7 @@ protocols:
         - "6907 MV1"
         - "6908 MV1"
         - "6909 MV1"
+        - "6915 MV1"
       services:
         f0006900-110c-478b-b74b-6f403b364a9c:
           txmode: f0006901-110c-478b-b74b-6f403b364a9c
@@ -1101,6 +1102,13 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [ 0, 56 ]
               ActuatorType: Vibrate
+            - StepRange: [ 0, 56 ]
+              ActuatorType: Vibrate
+      - identifier:
+          - "6915 MV1"
+        name: MysteryVibe Molto
+        messages:
+          ScalarCmd:
             - StepRange: [ 0, 56 ]
               ActuatorType: Vibrate
   picobong:
