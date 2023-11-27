@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 22
+  minor: 23
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -575,10 +575,9 @@ protocols:
             - StepRange: [0, 20]
               ActuatorType: Vibrate
               FeatureDescriptor: Internal Vibe
-            # Connect can't address this vibe?
-            #- StepRange: [0, 20]
-            #  ActuatorType: Vibrate
-            #  FeatureDescriptor: External Vibe
+            - StepRange: [0, 20]
+              ActuatorType: Vibrate
+              FeatureDescriptor: External Vibe
           SensorReadCmd:
             - FeatureDescriptor: Battery Level
               SensorType: Battery
