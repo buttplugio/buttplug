@@ -161,9 +161,19 @@ impl HardwareInternal for LovenseServiceHardware {
       std::str::from_utf8(&msg.data)
         .expect("We build this in the protocol then have to serialize to [u8], but it's a string.")
     );
+
+    trace!("Sending Lovense Connect command: {}", command_url);
     async move {
       match reqwest::get(command_url).await {
-        Ok(_) => Ok(()),
+        Ok(res) => {
+          async_manager::spawn(async move {
+            trace!(
+              "Got http response: {}",
+              res.text().await.unwrap_or(format!("no response"))
+            );
+          });
+          Ok(())
+        }
         Err(err) => {
           error!("Got http error: {}", err);
           Err(ButtplugDeviceError::UnhandledCommand(err.to_string()))

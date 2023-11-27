@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 22
+    "minor": 23
   },
   "protocols": {
     "lovense": {
@@ -1027,6 +1027,14 @@
                 ],
                 "ActuatorType": "Vibrate",
                 "FeatureDescriptor": "Internal Vibe"
+              },
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Vibrate",
+                "FeatureDescriptor": "External Vibe"
               }
             ],
             "SensorReadCmd": [
