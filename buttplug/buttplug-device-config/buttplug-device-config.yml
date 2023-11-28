@@ -585,6 +585,14 @@ protocols:
       - identifier:
           - Vulse
         name: Lovense Vulse
+      - identifier:
+          - Solace
+        name: Lovense Solace
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 20]
+              ActuatorType: Oscillate
+              FeatureDescriptor: Stroker Oscillation Speed
   xinput:
     # This will actually be ANY gamepad that supports XInput. XInput
     # is its own connector type, so we don't have any special

@@ -65,6 +65,20 @@ impl ProtocolInitializer for LovenseConnectServiceInitializer {
       }
     }
 
+    if hardware.name() == "Solace" {
+      // Just hardcoding this weird exception until we can control depth
+      let lovense_cmd = format!("Depth?v={}&t={}", 3, hardware.address())
+        .as_bytes()
+        .to_vec();
+
+      hardware
+        .write_value(&HardwareWriteCmd::new(Endpoint::Tx, lovense_cmd, false).into())
+        .await?;
+
+      protocol.vibrator_count = 0;
+      protocol.thusting_count = 1;
+    }
+
     Ok(Arc::new(protocol))
   }
 }
