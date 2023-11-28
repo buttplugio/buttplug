@@ -1056,6 +1056,24 @@
             "Vulse"
           ],
           "name": "Lovense Vulse"
+        },
+        {
+          "identifier": [
+            "Solace"
+          ],
+          "name": "Lovense Solace",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  20
+                ],
+                "ActuatorType": "Oscillate",
+                "FeatureDescriptor": "Stroker Oscillation Speed"
+              }
+            ]
+          }
         }
       ]
     },
