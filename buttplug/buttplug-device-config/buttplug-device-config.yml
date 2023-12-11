@@ -754,6 +754,10 @@ protocols:
       - identifier:
           - Yuyi
         name: Libo Feather
+        messages:
+          ScalarCmd:
+            - StepRange: [0, 99]
+              ActuatorType: Vibrate
       # Suction Vibes
       - identifier:
           - BaiHu
@@ -1980,6 +1984,7 @@ protocols:
         - Phoenix Neo 2
         - FK008A # Theodore
         - Hannes NEO
+        - QH-SX007E
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -2009,6 +2014,17 @@ protocols:
       - identifier:
           - Hannes NEO
         name: Svakom Hannes Neo
+      - identifier:
+          - QH-SX007E
+        name: Svakom Alberta
+        messages:
+          ScalarCmd:
+            - StepRange: [ 0, 10 ]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Vibrating attachments
+            - StepRange: [ 0, 1 ]
+              ActuatorType: Vibrate
+              FeatureDescriptor: Suction lens
   svakom-v4:
     btle:
       names:

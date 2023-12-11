@@ -25,15 +25,15 @@ impl ProtocolHandler for SvakomV3 {
 
   fn handle_scalar_vibrate_cmd(
     &self,
-    _index: u32,
+    index: u32,
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     Ok(vec![HardwareWriteCmd::new(
       Endpoint::Tx,
       [
         0x55,
-        0x03,
-        0x03,
+        if index == 0 { 0x03 } else { 0x09 },
+        if index == 0 { 0x03 } else { 0x00 },
         0x00,
         if scalar == 0 { 0x00 } else { 0x01 },
         scalar as u8,
