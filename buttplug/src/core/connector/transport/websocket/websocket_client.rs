@@ -130,7 +130,7 @@ impl ButtplugConnectorTransport for ButtplugWebsocketClientTransport {
         // based on our certificate verfication needs. Otherwise, just pass None in
         // which case we won't wrap.
         let connector = if bypass_cert_verify {
-          Some(Connector::Rustls(Arc::new(get_rustls_config_dangerous())))          
+          Some(Connector::Rustls(Arc::new(get_rustls_config_dangerous())))
         } else {
           None
         };
