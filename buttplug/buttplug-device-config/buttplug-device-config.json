@@ -1254,7 +1254,6 @@
           "XiaoLu",
           "LuXiaoHan",
           "BaiHu",
-          "MonsterPub",
           "Gugudai",
           "Yuyi",
           "LuWuShuang",
@@ -1291,12 +1290,6 @@
             "XiaoLu"
           ],
           "name": "Libo Lottie"
-        },
-        {
-          "identifier": [
-            "MonsterPub"
-          ],
-          "name": "Sistalk MonsterPub"
         },
         {
           "identifier": [
@@ -8226,6 +8219,150 @@
             "KIWI derma"
           ],
           "name": "Foreo KIWI derma"
+        }
+      ]
+    },
+    "monsterpub": {
+      "btle": {
+        "names": [
+          "MonsterPub"
+        ],
+        "services": {
+          "00006000-0000-1000-8000-00805f9b34fb": {
+            "tx": "00006001-0000-1000-8000-00805f9b34fb",
+            "txmode": "00006002-0000-1000-8000-00805f9b34fb",
+            "txvibrate": "00006003-0000-1000-8000-00805f9b34fb"
+          },
+          "00006010-0000-1000-8000-00805f9b34fb": {
+            "rxblemodel": "00006014-0000-1000-8000-00805f9b34fb"
+          },
+          "00008000-0000-1000-8000-00805f9b34fb": {
+            "rx": "00008001-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Sistalk MonsterPub Device",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                100
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      },
+      "configurations": [
+        {
+          "identifier": [
+            "MP2_JK_N_P1"
+          ],
+          "name": "Sistalk MonsterPub 2 Doctor Whale",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "MP_MW_TL_P2"
+          ],
+          "name": "Sistalk MonsterPub Magic Kiss",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "MP2_QC_TL_P1"
+          ],
+          "name": "Sistalk MonsterPub 2 Mister Devil",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "MP_BABY_QC_N_P4"
+          ],
+          "name": "Sistalk MonsterPub Baby Youth Health",
+          "messages": {
+            "ScalarCmd": [
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              },
+              {
+                "StepRange": [
+                  0,
+                  100
+                ],
+                "ActuatorType": "Vibrate"
+              }
+            ]
+          }
+        },
+        {
+          "identifier": [
+            "MP_MXY_N_P1"
+          ],
+          "name": "Sistalk MonsterPub KiniCat"
+        },
+        {
+          "identifier": [
+            "MP1N_QC_TL_P2"
+          ],
+          "name": "Sistalk MonsterPub BeatHeart"
         }
       ]
     }
