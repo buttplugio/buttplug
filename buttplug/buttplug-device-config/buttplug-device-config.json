@@ -4314,6 +4314,41 @@
         }
       }
     },
+    "svakom-avaneo": {
+      "btle": {
+        "names": [
+          "SX218A",
+          "Ava Neo"
+        ],
+        "services": {
+          "0000ffe0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffe1-0000-1000-8000-00805f9b34fb",
+            "rx": "0000ffe2-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "Svakom Ava Neo",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                10
+              ],
+              "ActuatorType": "Vibrate"
+            },
+            {
+              "StepRange": [
+                0,
+                1
+              ],
+              "ActuatorType": "Oscillate"
+            }
+          ]
+        }
+      }
+    },
     "svakom-barnard": {
       "btle": {
         "names": [

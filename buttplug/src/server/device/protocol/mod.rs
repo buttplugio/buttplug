@@ -75,6 +75,7 @@ pub mod sensee;
 pub mod svakom;
 pub mod svakom_alex;
 pub mod svakom_alex_v2;
+pub mod svakom_avaneo;
 pub mod svakom_barnard;
 pub mod svakom_iker;
 pub mod svakom_pulse;
@@ -377,6 +378,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, sensee::setup::SenseeIdentifierFactory::default());
   add_to_protocol_map(&mut map, svakom::setup::SvakomIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    svakom_avaneo::setup::SvakomAvaNeoIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     svakom_alex::setup::SvakomAlexIdentifierFactory::default(),
