@@ -90,6 +90,7 @@ async fn load_test_case(test_file: &str) -> DeviceTestCase {
 #[test_case("test_longlosttouch_protocol.yaml" ; "LongLostTouch Protocol")]
 #[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[tokio::test]
 async fn test_device_protocols_embedded_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();
@@ -169,6 +170,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_xiuxiuda_protocol.yaml" ; "Xiuxiuda Protocol")]
 #[test_case("test_adrienlastic_protocol.yaml" ; "Adrien Lastic Protocol")]
 #[test_case("test_foreo_protocol.yaml" ; "Foreo Protocol")]
+#[test_case("test_joyhub_protocol.yaml" ; "JoyHub Protocol")]
 #[tokio::test]
 async fn test_device_protocols_json_v3(test_file: &str) {
   //tracing_subscriber::fmt::init();

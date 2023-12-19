@@ -29,6 +29,7 @@ pub mod hismith;
 pub mod hismith_mini;
 pub mod htk_bm;
 pub mod jejoue;
+pub mod joyhub;
 pub mod kgoal_boost;
 pub mod kiiroo_v2;
 pub mod kiiroo_v21;
@@ -236,6 +237,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
 
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
+  add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     kiiroo_v2::setup::KiirooV2IdentifierFactory::default(),
