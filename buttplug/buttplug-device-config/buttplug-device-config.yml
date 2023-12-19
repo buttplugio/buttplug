@@ -4159,3 +4159,18 @@ protocols:
       - identifier:
           - MP1N_QC_TL_P2
         name: Sistalk MonsterPub BeatHeart
+  joyhub:
+    btle:
+      names:
+        - J-Petalwish2
+      services:
+        0000ffa0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffa1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: JoyHub Petalwish 2
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 255]
+            ActuatorType: Oscillate
+          - StepRange: [0, 255]
+            ActuatorType: Vibrate
