@@ -1,0 +1,62 @@
+devices:
+  - identifier: 
+      name: "LY272A01"
+    expected_name: "metaXsire Nolan"
+device_init:
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x04]
+            write_with_response: true
+device_commands:
+  - !Messages
+      device_index: 0
+      messages:
+        - !Vibrate
+          - Index: 0
+            Speed: 0.5
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x03, 0x01, 0x01, 0x64, 0x0a]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Scalar
+          - Index: 0
+            Scalar: 0.75
+            ActuatorType: Vibrate
+          - Index: 1
+            Scalar: 0.5
+            ActuatorType: Oscillate
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x03, 0x01, 0x01, 0x64, 0x0f]
+            write_with_response: true
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x03, 0x01, 0x02, 0x64, 0x0a]
+            write_with_response: true
+  - !Messages
+      device_index: 0
+      messages:
+        - !Stop
+  - !Commands
+      device_index: 0
+      commands:
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x03, 0x01, 0x01, 0x64, 0x00]
+            write_with_response: true
+        - !Write
+            endpoint: tx
+            data: [0xaa, 0x03, 0x01, 0x02, 0x64, 0x00]
+            write_with_response: true
