@@ -3721,6 +3721,7 @@ protocols:
         - Rex
         - Cali
         - Olis
+        - LY199B01
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -3755,6 +3756,21 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 255]
               ActuatorType: Rotate
+  metaxsire-v2:
+    btle:
+      names:
+        - LY272A01
+      services:
+        0000bae0-0000-1000-8000-00805f9b34fb:
+          tx: 0000bae1-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: metaXsire Nolan
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 20]
+            ActuatorType: Vibrate
+          - StepRange: [0, 20]
+            ActuatorType: Oscillate
   cowgirl:
     btle:
       names:
