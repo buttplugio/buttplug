@@ -56,6 +56,7 @@ pub mod mannuo;
 pub mod maxpro;
 pub mod meese;
 pub mod metaxsire;
+pub mod metaxsire_repeat;
 pub mod metaxsire_v2;
 pub mod mizzzee;
 pub mod mizzzee_v2;
@@ -323,6 +324,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(
     &mut map,
     metaxsire::setup::MetaXSireIdentifierFactory::default(),
+  );
+  add_to_protocol_map(
+    &mut map,
+    metaxsire_repeat::setup::MetaXSireRepeatIdentifierFactory::default(),
   );
   add_to_protocol_map(
     &mut map,
