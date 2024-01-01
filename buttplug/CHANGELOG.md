@@ -5,11 +5,23 @@
 - Move from async-tungstenite to tokio-tungstenite
   - We only build for tokio at this point anyways
   - Easier to integrate with rustls, removes OpenSSL requirement on some platforms
+- Added Device Support
+  - Mysteryvibe Molto
+  - Svakom Alberta, Ava Neo
+  - MonsterPub Gen 2+ (multiple devices)
+  - Joyhub Petalwish 2
+  - metaXsire Nolan
+  - Cooxer Bullet Vibe
 
 ## Bugfixes
 
 - Streamed JSON now handled by serializer
   - May fix issues with some older Buttplug C# programs.
+- Lovense Lapis now controls all 3 vibrators using Lovense Connect
+- Lovense Solace works via Lovense Connect
+- Fix mode flags on Foreo devices
+- Add new BLE name for Sinoli devices
+- 
 
 # 7.1.11 (2023-11-18)
 
