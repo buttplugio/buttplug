@@ -3756,6 +3756,20 @@ protocols:
               ActuatorType: Vibrate
             - StepRange: [0, 255]
               ActuatorType: Rotate
+  metaxsire-repeat:
+    btle:
+      names:
+        - LY199B01
+      services:
+        0000ffe0-0000-1000-8000-00805f9b34fb:
+          tx: 0000ffe1-0000-1000-8000-00805f9b34fb
+          rx: 0000ffe2-0000-1000-8000-00805f9b34fb
+    defaults:
+      name: Cooxer Bullet Vibe
+      messages:
+        ScalarCmd:
+          - StepRange: [0, 255]
+            ActuatorType: Vibrate
   metaxsire-v2:
     btle:
       names:
