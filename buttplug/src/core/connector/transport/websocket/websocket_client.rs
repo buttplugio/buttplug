@@ -23,7 +23,7 @@ use crate::{
   util::async_manager,
 };
 use futures::{future::BoxFuture, FutureExt, SinkExt, StreamExt};
-use rustls::ClientConfig;
+use rustls::{ClientConfig, client::danger::{ServerCertVerifier, ServerCertVerified, HandshakeSignatureValid}, SignatureScheme};
 use std::sync::Arc;
 use tokio::sync::{
   mpsc::{Receiver, Sender},
@@ -38,33 +38,53 @@ use tokio_tungstenite::{
 use tracing::Instrument;
 use url::Url;
 
-// Taken from https://stackoverflow.com/questions/72846337/does-hyper-client-not-accept-self-signed-certificates
 pub fn get_rustls_config_dangerous() -> ClientConfig {
   let store = rustls::RootCertStore::empty();
 
+  // As of rustls v0.22, safe defaults are provided by default in the ClientConfig builder.
   let mut config = ClientConfig::builder()
-    .with_safe_defaults()
     .with_root_certificates(store)
     .with_no_client_auth();
-
-  // if you want to completely disable cert-verification, use this
-  let mut dangerous_config = ClientConfig::dangerous(&mut config);
-  dangerous_config.set_certificate_verifier(Arc::new(NoCertificateVerification {}));
+  config
+    .dangerous()
+    .set_certificate_verifier(Arc::new(NoCertificateVerification {}));
 
   config
 }
+#[derive(Debug)]
 pub struct NoCertificateVerification {}
-impl rustls::client::ServerCertVerifier for NoCertificateVerification {
+impl ServerCertVerifier for NoCertificateVerification {
   fn verify_server_cert(
     &self,
-    _end_entity: &rustls::Certificate,
-    _intermediates: &[rustls::Certificate],
-    _server_name: &rustls::ServerName,
-    _scts: &mut dyn Iterator<Item = &[u8]>,
+    _end_entity: &rustls::pki_types::CertificateDer,
+    _intermediates: &[rustls::pki_types::CertificateDer],
+    _server_name: &rustls::pki_types::ServerName,
     _ocsp: &[u8],
-    _now: std::time::SystemTime,
-  ) -> Result<rustls::client::ServerCertVerified, rustls::Error> {
-    Ok(rustls::client::ServerCertVerified::assertion())
+    _now: rustls::pki_types::UnixTime,
+  ) -> Result<ServerCertVerified, rustls::Error> {
+    Ok(ServerCertVerified::assertion())
+  }
+
+  fn verify_tls12_signature(
+    &self,
+    _message: &[u8],
+    _cert: &rustls::pki_types::CertificateDer<'_>,
+    _dss: &rustls::DigitallySignedStruct
+  ) -> Result<HandshakeSignatureValid, rustls::Error> {
+    Ok(HandshakeSignatureValid::assertion())
+  }
+  
+  fn verify_tls13_signature(
+    &self,
+    _message: &[u8],
+    _cert: &rustls::pki_types::CertificateDer<'_>,
+    _dss: &rustls::DigitallySignedStruct
+  ) -> Result<HandshakeSignatureValid, rustls::Error> {
+    Ok(HandshakeSignatureValid::assertion())
+  }
+
+  fn supported_verify_schemes(&self) -> Vec<SignatureScheme> {
+    vec!(SignatureScheme::ECDSA_NISTP256_SHA256, SignatureScheme::ECDSA_NISTP384_SHA384, SignatureScheme::ECDSA_NISTP521_SHA512, SignatureScheme::ECDSA_SHA1_Legacy, SignatureScheme::ED25519, SignatureScheme::ED448, SignatureScheme::RSA_PKCS1_SHA1, SignatureScheme::RSA_PKCS1_SHA1, SignatureScheme::RSA_PKCS1_SHA256, SignatureScheme::RSA_PKCS1_SHA384, SignatureScheme::RSA_PKCS1_SHA512, SignatureScheme::RSA_PSS_SHA256, SignatureScheme::RSA_PSS_SHA384, SignatureScheme::RSA_PSS_SHA512)
   }
 }
 
