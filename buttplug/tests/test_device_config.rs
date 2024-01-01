@@ -8,7 +8,7 @@
 mod util;
 extern crate buttplug;
 
-use buttplug::{server::ButtplugServerBuilder, util::async_manager};
+use buttplug::server::ButtplugServerBuilder;
 
 const BASE_CONFIG_JSON: &str = r#"
 {

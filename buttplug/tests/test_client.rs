@@ -23,7 +23,6 @@ use buttplug::{
     message::{ButtplugCurrentSpecClientMessage, ButtplugCurrentSpecServerMessage},
   },
   server::ButtplugServerBuilder,
-  util::async_manager,
 };
 
 use futures::{future::BoxFuture, StreamExt};

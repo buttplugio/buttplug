@@ -23,7 +23,6 @@ use buttplug::{
     device::hardware::{HardwareCommand, HardwareWriteCmd},
     ButtplugServer,
   },
-  util::async_manager,
 };
 use futures::{pin_mut, StreamExt};
 use util::test_server_with_device;

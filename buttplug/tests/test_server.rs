@@ -31,7 +31,6 @@ use buttplug::{
     ButtplugServer,
     ButtplugServerBuilder,
   },
-  util::async_manager,
 };
 use futures::{pin_mut, Stream, StreamExt};
 use std::time::Duration;
