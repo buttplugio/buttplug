@@ -93,7 +93,7 @@
 #   user in the user device config file.
 version:
   major: 2
-  minor: 23
+  minor: 24
 protocols:
   lovense:
     # Lovense is special. Special in oh so many ways.
@@ -2113,6 +2113,7 @@ protocols:
         - Pulse Union
         - SX033APP
         - BX288A
+        - QH-SX045A-B
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -2136,6 +2137,9 @@ protocols:
       - identifier:
           - BX288A
         name: BeYourLover Kyukyu
+      - identifier:
+          - QH-SX045A-B
+        name: Coleur Dor VX045A
   svakom-tarax:
     btle:
       names:
