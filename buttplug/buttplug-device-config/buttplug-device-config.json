@@ -4228,7 +4228,8 @@
           "SWK-SX013A",
           "Pulse Union",
           "SX033APP",
-          "BX288A"
+          "BX288A",
+          "QH-SX045A-B"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -4275,6 +4276,12 @@
             "BX288A"
           ],
           "name": "BeYourLover Kyukyu"
+        },
+        {
+          "identifier": [
+            "QH-SX045A-B"
+          ],
+          "name": "Coleur Dor VX045A"
         }
       ]
     },
