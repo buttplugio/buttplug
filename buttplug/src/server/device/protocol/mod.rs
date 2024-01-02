@@ -28,6 +28,7 @@ pub mod hgod;
 pub mod hismith;
 pub mod hismith_mini;
 pub mod htk_bm;
+pub mod itoys;
 pub mod jejoue;
 pub mod joyhub;
 pub mod kgoal_boost;
@@ -238,6 +239,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
     galaku_pump::setup::GalakuPumpIdentifierFactory::default(),
   );
 
+  add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
   add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
   add_to_protocol_map(

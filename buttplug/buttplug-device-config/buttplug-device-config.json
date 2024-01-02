@@ -8495,6 +8495,32 @@
           ]
         }
       }
+    },
+    "itoys": {
+      "btle": {
+        "names": [
+          "26-021-B"
+        ],
+        "services": {
+          "0000ffa0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000ffa1-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "iToys Seagull",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                3
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
     }
   }
 }
