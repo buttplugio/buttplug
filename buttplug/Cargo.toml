@@ -94,7 +94,7 @@ instant = "0.1.12"
 regex = "1.10.2"
 tokio-tungstenite = { version = "0.21.0", features = ["rustls-tls-webpki-roots"], optional = true }
 rustls = { version = "0.22.1", optional = true }
-diesel = { version = "2.0.3", default-features = false, features = ["sqlite"] }
+diesel = { version = "2.1.4", default-features = false, features = ["sqlite"] }
 
 
 [dev-dependencies]
