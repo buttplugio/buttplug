@@ -1932,6 +1932,7 @@ protocols:
         - S38A # Svakom Tammy Pro
         - Vick NEO
         - STG05A # Svakom Aravinda
+        - QH-SJ007A # Svakom Winni 2
       services:
         0000ffe0-0000-1000-8000-00805f9b34fb:
           tx: 0000ffe1-0000-1000-8000-00805f9b34fb
@@ -1974,6 +1975,9 @@ protocols:
       - identifier:
           - "118"
         name: ToyCod Vanesia
+      - identifier:
+          - QH-SJ007A
+        name: Svakom Winni 2
   svakom-v3:
     btle:
       names:
