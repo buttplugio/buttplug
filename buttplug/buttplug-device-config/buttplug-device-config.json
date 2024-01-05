@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 2,
-    "minor": 23
+    "minor": 24
   },
   "protocols": {
     "lovense": {
@@ -3866,7 +3866,8 @@
           "Ella NEO",
           "S38A",
           "Vick NEO",
-          "STG05A"
+          "STG05A",
+          "QH-SJ007A"
         ],
         "services": {
           "0000ffe0-0000-1000-8000-00805f9b34fb": {
@@ -3937,6 +3938,12 @@
             "118"
           ],
           "name": "ToyCod Vanesia"
+        },
+        {
+          "identifier": [
+            "QH-SJ007A"
+          ],
+          "name": "Svakom Winni 2"
         }
       ]
     },
