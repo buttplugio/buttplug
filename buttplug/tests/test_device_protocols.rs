@@ -128,6 +128,7 @@ async fn test_device_protocols_embedded_v3(test_file: &str) {
 #[test_case("test_meese_protocol.yaml" ; "Meese Protocol")]
 #[test_case("test_mizzzee_protocol.yaml" ; "Mizz Zee Protocol")]
 #[test_case("test_mizzzee_v2_protocol.yaml" ; "Mizz Zee v2 Protocol")]
+#[test_case("test_mizzzee_v2.1_protocol.yaml" ; "Mizz Zee v2.1 Protocol")]
 #[test_case("test_vorze_ufo.yaml" ; "Vorze Protocol - UFO")]
 #[test_case("test_vorze_ufo_tw.yaml" ; "Vorze Protocol - UFO TW")]
 #[test_case("test_vorze_cyclone.yaml" ; "Vorze Protocol - Cyclone")]
