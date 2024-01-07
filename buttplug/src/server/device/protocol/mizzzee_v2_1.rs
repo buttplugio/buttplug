@@ -27,7 +27,6 @@ use crate::{
 use async_trait::async_trait;
 use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
 use std::{sync::Arc, time::Duration};
-use tokio::sync::RwLock;
 
 generic_protocol_initializer_setup!(MizzZeeV2_1, "mizzzee-v2.1");
 
