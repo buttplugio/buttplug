@@ -5328,7 +5328,7 @@
         }
       },
       "defaults": {
-        "name": "Mizz Zee 2 Device",
+        "name": "Mizz Zee Device",
         "messages": {
           "ScalarCmd": [
             {

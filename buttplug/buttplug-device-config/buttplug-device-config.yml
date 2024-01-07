@@ -2681,7 +2681,7 @@ protocols:
         0000ff10-0000-1000-8000-00805f9b34fb:
           tx: 0000ff12-0000-1000-8000-00805f9b34fb
     defaults:
-      name: Mizz Zee 2 Device
+      name: Mizz Zee Device
       messages:
         ScalarCmd:
           - StepRange: [0, 1000]
