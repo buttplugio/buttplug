@@ -5,7 +5,7 @@
 // Licensed under the BSD 3-Clause license. See LICENSE file in the project root
 // for full license information.
 
-use super::json::JSONValidator;
+use super::super::json::JSONValidator;
 use crate::{
   core::errors::ButtplugDeviceError,
   server::device::{
@@ -33,9 +33,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display, ops::RangeInclusive};
 
 pub static DEVICE_CONFIGURATION_JSON: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config.json");
+  include_str!("../../../buttplug-device-config/buttplug-device-config.json");
 static DEVICE_CONFIGURATION_JSON_SCHEMA: &str =
-  include_str!("../../buttplug-device-config/buttplug-device-config-schema.json");
+  include_str!("../../../buttplug-device-config/buttplug-device-config-schema.json");
 
 /// The top level configuration for a protocol. Contains all data about devices that can use the
 /// protocol, as well as names, message attributes, etc... for different devices.
