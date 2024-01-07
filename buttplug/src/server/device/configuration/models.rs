@@ -1,13 +1,13 @@
 use std::str::FromStr;
 
 use diesel::prelude::*;
-use getset::{Getters};
+use getset::Getters;
 use uuid::Uuid;
 use crate::core::message::Endpoint;
 
 use super::schema::*;
 
-#[derive(Queryable, QueryableByName, Selectable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
+#[derive(Queryable, QueryableByName, Selectable, Insertable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
 #[diesel(table_name = protocol)]
 pub struct Protocol {
   #[getset(get_copy="pub")]
@@ -15,13 +15,13 @@ pub struct Protocol {
   #[getset(get="pub")]
   protocol_name: String,
   #[getset(get="pub")]
-  display_name: String,
+  protocol_display_name: String,
 }
 
-#[derive(Queryable, QueryableByName, Associations, Identifiable, Selectable, Getters, Debug)]
+#[derive(Queryable, QueryableByName, Selectable, Insertable, Associations, Identifiable, Getters, Debug)]
 #[diesel(belongs_to(Protocol))]
-#[diesel(table_name = protocol_bluetooth_name)]
-pub struct ProtocolBluetoothName {
+#[diesel(table_name = comm_bluetooth_name)]
+pub struct CommBluetoothName {
   #[getset(get_copy="pub")]
   id: i32,
   #[getset(get_copy="pub")]
@@ -30,48 +30,52 @@ pub struct ProtocolBluetoothName {
   bluetooth_name: String,
 }
 
-#[derive(Queryable, QueryableByName, Associations, Identifiable, Selectable, Getters, Debug)]
+#[derive(Queryable, QueryableByName, Selectable, Insertable, Associations, Identifiable, Getters, Debug)]
 #[diesel(belongs_to(Protocol))]
-#[diesel(table_name = protocol_bluetooth_prefix)]
-pub struct ProtocolBluetoothPrefix {
+#[diesel(table_name = comm_bluetooth_prefix)]
+pub struct CommBluetoothPrefix {
   #[getset(get_copy="pub")]
   id: i32,
   #[getset(get_copy="pub")]
   protocol_id: i32,
   #[getset(get="pub")]
-  prefix: String,
+  bluetooth_prefix: String,
 }
 
-#[derive(Queryable, Associations, Selectable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
+#[derive(Queryable, Associations, Selectable, Insertable, Identifiable, Getters, Debug, Eq, PartialEq, Clone)]
 #[diesel(belongs_to(Protocol))]
-#[diesel(table_name = protocol_bluetooth_service)]
-pub struct ProtocolBluetoothService {
+#[diesel(table_name = comm_bluetooth_service)]
+pub struct CommBluetoothService {
   #[getset(get_copy="pub")]
   id: i32,
-  #[getset(get_copy="pub")]
+  //#[getset(get_copy="pub")]
   protocol_id: i32,
   service_uuid: String
 }
 
-impl ProtocolBluetoothService {
+impl CommBluetoothService {
   pub fn service_uuid(&self) -> Uuid {
     Uuid::parse_str(&self.service_uuid).unwrap()
+  }
+
+  pub fn protocol_id(&self) -> i32 {
+    self.protocol_id
   }
 }
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Getters, Debug, Clone)]
-#[diesel(belongs_to(ProtocolBluetoothService))]
-#[diesel(table_name = protocol_bluetooth_characteristic)]
-pub struct ProtocolBluetoothCharacteristic {
+#[diesel(belongs_to(CommBluetoothService))]
+#[diesel(table_name = comm_bluetooth_characteristic)]
+pub struct CommBluetoothCharacteristic {
   #[getset(get_copy="pub")]
   id: i32,
   #[getset(get_copy="pub")]
-  protocol_bluetooth_service_id: i32,
+  comm_bluetooth_service_id: i32,
   endpoint: String,
   characteristic_uuid: String
 }
 
-impl ProtocolBluetoothCharacteristic {
+impl CommBluetoothCharacteristic {
   pub fn endpoint(&self) -> Endpoint {
     Endpoint::from_str(&self.endpoint).unwrap()
   }
@@ -79,4 +83,13 @@ impl ProtocolBluetoothCharacteristic {
   pub fn service_uuid(&self) -> Uuid {
     Uuid::parse_str(&self.characteristic_uuid).unwrap()
   }
+}
+
+#[derive(Queryable, QueryableByName, Selectable, Insertable, Identifiable, Getters, Debug)]
+#[diesel(table_name = feature_type)]
+pub struct FeatureType {
+  #[getset(get_copy="pub")]
+  id: i32,
+  #[getset(get_copy="pub")]
+  typename: String,
 }

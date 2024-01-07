@@ -1,19 +1,29 @@
-use buttplug::{server::device::configuration::device_database::DeviceDatabaseManager, util::device_configuration::{load_protocol_configs_no_dm}, server::device::configuration::{ProtocolCommunicationSpecifier, ProtocolAttributesType}};
+use buttplug::{
+  server::device::configuration::{
+      device_database::DeviceDatabaseManager, 
+      ProtocolCommunicationSpecifier, 
+      ProtocolAttributesType,
+      models::FeatureType,
+      schema::{self, feature_type, protocol::dsl::*, comm_bluetooth_name::dsl::*, comm_bluetooth_prefix::dsl::*, comm_bluetooth_service::dsl::*, comm_bluetooth_characteristic::dsl::*, device::dsl::*},
+  }, 
+  util::device_configuration::load_protocol_configs_no_dm, 
+};
+use diesel::{prelude::*, Connection, SqliteConnection, insert_into};
+
 
 fn main() {
+  let mut conn = SqliteConnection::establish("c:\\Users\\qdot\\code\\buttplug\\buttplug\\buttplug-device-config\\buttplug-device-config.sqlite").unwrap();
   let config = load_protocol_configs_no_dm(
     None,
     None,
     false,
   ).unwrap();
-  let mut protocol_id = 1;
-  let mut btle_service_id = 1;
-  let mut btle_characteristic_id = 1;
-  let mut device_id = 1;
-  let mut feature_id = 1;
-  let mut scalar_attr_id = 1;
-  for (protocol, specifiers) in config.protocol_specifiers() {
-    println!("INSERT INTO protocol (id, protocol_name, display_name) VALUES ({protocol_id}, \"{protocol}\", \"{protocol}\");");
+  for (config_protocol_name, specifiers) in config.protocol_specifiers() {
+    let new_protocol_id: i32 = insert_into(protocol)
+      .values((protocol_name.eq(config_protocol_name), protocol_display_name.eq(config_protocol_name)))
+      .returning(schema::protocol::dsl::id)
+      .get_result(&mut conn)
+      .unwrap();
     for specifier in specifiers {
       match specifier {
         ProtocolCommunicationSpecifier::BluetoothLE(btle) => {
@@ -21,20 +31,31 @@ fn main() {
           for name in btle.names() {
             if name.contains("*") {
               // Remove * character, no longer needed since we have a trait column now.
-              let mut prefix = name.clone();
-              prefix.pop();
-              println!("INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES ({protocol_id}, \"{prefix}\", 1);");
+              let mut config_prefix = name.to_owned();
+              config_prefix.pop();
+              insert_into(comm_bluetooth_prefix)
+                .values((schema::comm_bluetooth_prefix::dsl::protocol_id.eq(new_protocol_id), bluetooth_prefix.eq(config_prefix)))
+                .execute(&mut conn)
+                .unwrap();
             } else {
-              println!("INSERT INTO protocol_bluetooth_name (protocol_id, bluetooth_name, prefix) VALUES ({protocol_id}, \"{name}\", 0);");
+              insert_into(comm_bluetooth_name)
+                .values((schema::comm_bluetooth_name::dsl::protocol_id.eq(new_protocol_id), bluetooth_name.eq(name)))
+                .execute(&mut conn)
+                .unwrap();
             }
           }
-          for (service_uuid, endpoints) in btle.services() {
-            println!("INSERT INTO protocol_bluetooth_service (id, protocol_id, service_uuid) VALUES ({btle_service_id}, {protocol_id}, \"{service_uuid}\");");
-            for (endpoint, char_uuid) in endpoints {
-              println!("INSERT INTO protocol_bluetooth_characteristic (id, protocol_bluetooth_service_id, endpoint, characteristic_uuid) VALUES ({btle_characteristic_id}, {btle_service_id}, \"{endpoint}\", \"{char_uuid}\");");
-              btle_characteristic_id += 1;
+          for (btle_service_uuid, endpoints) in btle.services() {
+            let new_btle_service_id: i32 = insert_into(comm_bluetooth_service)
+              .values((schema::comm_bluetooth_service::dsl::protocol_id.eq(new_protocol_id), service_uuid.eq(btle_service_uuid.to_string())))
+              .returning(schema::comm_bluetooth_service::dsl::id)
+              .get_result(&mut conn)
+              .unwrap();
+            for (btle_endpoint, char_uuid) in endpoints {
+              insert_into(comm_bluetooth_characteristic)
+                .values((schema::comm_bluetooth_characteristic::dsl::comm_bluetooth_service_id.eq(new_btle_service_id), endpoint.eq(btle_endpoint.to_string()), characteristic_uuid.eq(char_uuid.to_string())))
+                .execute(&mut conn)
+                .unwrap();
             }
-            btle_service_id += 1;
           }
         },
         // TODO add xinput
@@ -43,43 +64,59 @@ fn main() {
         _ => {}
       }
     }
-    // While we're here, find all of the devices linked to this protocol and add those to the DB too.
-    for (ident, device) in config.protocol_attributes() {
-      if ident.protocol() != protocol {
+    for (ident, config_device) in config.protocol_attributes() {
+      if ident.protocol() != config_protocol_name {
         continue;
       }
       let device_ident = match ident.attributes_identifier() {
-        ProtocolAttributesType::Default => "NULL".to_owned(),
-        ProtocolAttributesType::Identifier(id) => format!("\"{id}\""),
+        ProtocolAttributesType::Default => None,
+        ProtocolAttributesType::Identifier(device_id) => Some(format!("\"{device_id}\"")),
       };
-      let device_name = device.name();
-      println!("INSERT INTO device (id, protocol_id, identifier, device_name) VALUES ({device_id}, {protocol_id}, {device_ident}, \"{device_name}\");");
-      for scalarcmd_attr in device.message_attributes().scalar_cmd().as_ref().unwrap_or(&vec![]) {
+      let config_device_name = config_device.name();
+      //println!("INSERT INTO device (id, protocol_id, identifier, device_name) VALUES ({device_id}, {protocol_id}, {device_ident}, \"{device_name}\");");
+      let new_device_id: i32 = insert_into(device)
+        .values((schema::device::dsl::protocol_id.eq(new_protocol_id), schema::device::dsl::identifier.eq(device_ident), schema::device::dsl::device_name.eq(config_device_name)))
+        .returning(schema::device::dsl::id)
+        .get_result(&mut conn)
+        .unwrap();
+      for scalarcmd_attr in config_device.message_attributes().scalar_cmd().as_ref().unwrap_or(&vec![]) {
         let fd = scalarcmd_attr.feature_descriptor();
         let desc = if fd == "N/A" {
           "NULL".to_owned()
         } else {
           format!("\"{fd}\"")
         };
-        let actuator_id = *scalarcmd_attr.actuator_type() as u8;
+        //let actuator_id = *scalarcmd_attr.actuator_type() as u8;
         let min = scalarcmd_attr.step_range().start();
         let max = scalarcmd_attr.step_range().end();
-        println!("INSERT INTO device_feature (id, device_id) VALUES ({feature_id}, {device_id});");
-        println!("INSERT INTO feature_scalarcmd (id, feature_id, actuator_type_id, description, range_min, range_max) VALUES ({scalar_attr_id}, {feature_id}, {actuator_id}, {desc}, {min}, {max});");
-        feature_id += 1;
-        scalar_attr_id += 1;
+
+        let feature_type_id = feature_type::table
+          .filter(feature_type::dsl::typename.eq(scalarcmd_attr.actuator_type().to_string()))
+          .select(FeatureType::as_select())
+          .first(&mut conn)
+          .unwrap();
+
+        let new_feature_id: i32 = insert_into(schema::device_feature::dsl::device_feature)
+          .values((schema::device_feature::dsl::device_id.eq(new_device_id), schema::device_feature::dsl::feature_type_id.eq(feature_type_id.id()), schema::device_feature::dsl::descriptor.eq(desc), schema::device_feature::dsl::range_min.eq(i32::try_from(*min).unwrap()), schema::device_feature::dsl::range_max.eq(i32::try_from(*max).unwrap())))
+          .returning(schema::device_feature::dsl::id)
+          .get_result(&mut conn)
+          .unwrap();
+        
+        // ScalarCmd is 1
+        insert_into(schema::device_feature_message::dsl::device_feature_message)
+          .values((schema::device_feature_message::feature_id.eq(new_feature_id), schema::device_feature_message::feature_message_id.eq(1)))
+          .execute(&mut conn)
+          .unwrap();
       }
-      device_id += 1;
     }
     // TODO Remove inheritance. If an identifier variation has no actuators, copy all from default implementation.
     // TODO Add rotatecmd
     // TODO Add linearcmd
     // TODO Add sensorcmd
   
-    protocol_id += 1;
   }
-  /*
+ 
   let mgr = DeviceDatabaseManager::new();
   println!("{:?}", mgr.find_bluetooth_info("XiaoLu"));
-  */
+  
 }
