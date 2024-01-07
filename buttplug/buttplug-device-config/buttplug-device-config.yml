@@ -2673,7 +2673,7 @@ protocols:
         ScalarCmd:
           - StepRange: [0, 68]
             ActuatorType: Vibrate
-  mizzzee-v2.1:
+  mizzzee-v3:
     btle:
       names:
         - XHTKJ

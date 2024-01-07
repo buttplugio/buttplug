@@ -28,19 +28,19 @@ use async_trait::async_trait;
 use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
 use std::{sync::Arc, time::Duration};
 
-generic_protocol_initializer_setup!(MizzZeeV2_1, "mizzzee-v2.1");
+generic_protocol_initializer_setup!(MizzZeeV3, "mizzzee-v3");
 
 #[derive(Default)]
-pub struct MizzZeeV2_1Initializer {}
+pub struct MizzZeeV3Initializer {}
 
 #[async_trait]
-impl ProtocolInitializer for MizzZeeV2_1Initializer {
+impl ProtocolInitializer for MizzZeeV3Initializer {
   async fn initialize(
     &mut self,
     hardware: Arc<Hardware>,
     _: &ProtocolDeviceAttributes,
   ) -> Result<Arc<dyn ProtocolHandler>, ButtplugDeviceError> {
-    Ok(Arc::new(MizzZeeV2_1::new(hardware)))
+    Ok(Arc::new(MizzZeeV3::new(hardware)))
   }
 }
 
@@ -115,11 +115,11 @@ async fn vibration_update_handler(
 }
 
 #[derive(Default)]
-pub struct MizzZeeV2_1 {
+pub struct MizzZeeV3 {
   current_scalar: Arc<AtomicU32>,
 }
 
-impl MizzZeeV2_1 {
+impl MizzZeeV3 {
   fn new(device: Arc<Hardware>) -> Self {
     let loops_skipped = Arc::new(AtomicU8::new(0));
     let loops_skipped_clone = loops_skipped.clone();
@@ -137,7 +137,7 @@ impl MizzZeeV2_1 {
   }
 }
 
-impl ProtocolHandler for MizzZeeV2_1 {
+impl ProtocolHandler for MizzZeeV3 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
     super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
   }
