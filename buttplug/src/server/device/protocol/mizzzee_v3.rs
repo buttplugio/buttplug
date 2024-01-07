@@ -25,7 +25,7 @@ use crate::{
   util::{async_manager, sleep},
 };
 use async_trait::async_trait;
-use std::sync::atomic::{AtomicU32, AtomicU8, Ordering};
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::{sync::Arc, time::Duration};
 
 generic_protocol_initializer_setup!(MizzZeeV3, "mizzzee-v3");
@@ -45,13 +45,7 @@ impl ProtocolInitializer for MizzZeeV3Initializer {
 }
 
 // Time between MizzZee2 update commands, in milliseconds.
-const MIZZZEE2_COMMAND_DELAY_MS: u64 = 20;
-
-// Time between MizzZee2 keep vibrating commands, in milliseconds.
-const MIZZZEE2_COMMANDS_KEEP_VIBRATING: u64 = 200;
-
-// Amount of commands that can be skipped without stopping the device.
-const MIZZZEE2_COMMANDS_TO_SKIP: u8 = (MIZZZEE2_COMMANDS_KEEP_VIBRATING / MIZZZEE2_COMMAND_DELAY_MS - 1) as u8;
+const MIZZZEE2_COMMAND_DELAY_MS: u64 = 200;
 
 fn handle_scale(scale: f32) -> f32 {
   if scale == 0.0 { return 0.0; }
@@ -80,58 +74,37 @@ fn scalar_to_vector(scalar: u32) -> Vec<u8> {
 
 async fn vibration_update_handler(
   device: Arc<Hardware>,
-  loops_skipped_holder: Arc<AtomicU8>,
-  last_scalar_holder: Arc<AtomicU32>,
   current_scalar_holder: Arc<AtomicU32>,
 ) {
-  info!("Entering MizzZee2 Control Loop");
-  loop {
+  info!("Entering Mizz Zee v3 Control Loop");
+  let mut current_scalar = current_scalar_holder.load(Ordering::Relaxed);
+  while device
+    .write_value(&HardwareWriteCmd::new(
+      Endpoint::Tx,
+      scalar_to_vector(current_scalar),
+      false,
+    ))
+    .await
+    .is_ok()
+  {
     sleep(Duration::from_millis(MIZZZEE2_COMMAND_DELAY_MS)).await;
-
-    let loops_skipped = loops_skipped_holder.load(Ordering::Relaxed);
-    let last_scalar = last_scalar_holder.load(Ordering::Relaxed);
-    let current_scalar = current_scalar_holder.load(Ordering::Relaxed);
-
-    if last_scalar == current_scalar && loops_skipped < MIZZZEE2_COMMANDS_TO_SKIP {
-      loops_skipped_holder.store(loops_skipped + 1, Ordering::Relaxed);
-      continue;
-    }
-
-    loops_skipped_holder.store(0, Ordering::Relaxed);
-    last_scalar_holder.store(current_scalar, Ordering::Relaxed);
-
-    if device
-      .write_value(&HardwareWriteCmd::new(
-        Endpoint::Tx,
-        scalar_to_vector(current_scalar),
-        true
-      ))
-      .await
-      .is_err() { break; }
-
-    info!("MZ2 scalar: {}", current_scalar);
+    current_scalar = current_scalar_holder.load(Ordering::Relaxed);
+    info!("Mizz Zee v3 scalar: {}", current_scalar);
   }
-  info!("MizzZee2 control loop exiting, most likely due to device disconnection.");
+  info!("Mizz Zee v3 control loop exiting, most likely due to device disconnection.");
 }
 
 #[derive(Default)]
 pub struct MizzZeeV3 {
-  current_scalar: Arc<AtomicU32>,
+  current_scalar: Arc<AtomicU32>
 }
 
 impl MizzZeeV3 {
   fn new(device: Arc<Hardware>) -> Self {
-    let loops_skipped = Arc::new(AtomicU8::new(0));
-    let loops_skipped_clone = loops_skipped.clone();
-
-    let last_scalar = Arc::new(AtomicU32::new(0));
-    let last_scalar_clone = last_scalar.clone();
-
     let current_scalar = Arc::new(AtomicU32::new(0));
     let current_scalar_clone = current_scalar.clone();
-
     async_manager::spawn( async move {
-      vibration_update_handler(device, loops_skipped_clone, last_scalar_clone, current_scalar_clone).await
+      vibration_update_handler(device, current_scalar_clone).await
     });
     Self { current_scalar }
   }
@@ -139,7 +112,7 @@ impl MizzZeeV3 {
 
 impl ProtocolHandler for MizzZeeV3 {
   fn keepalive_strategy(&self) -> super::ProtocolKeepaliveStrategy {
-    super::ProtocolKeepaliveStrategy::RepeatLastPacketStrategy
+    super::ProtocolKeepaliveStrategy::NoStrategy
   }
 
   fn handle_scalar_vibrate_cmd(
@@ -148,9 +121,7 @@ impl ProtocolHandler for MizzZeeV3 {
     scalar: u32,
   ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
     let current_scalar = self.current_scalar.clone();
-    async_manager::spawn(async move {
-      current_scalar.store(scalar, Ordering::Relaxed);
-    });
-    Ok(vec![])
+    current_scalar.store(scalar, Ordering::Relaxed);
+    Ok(vec![HardwareWriteCmd::new(Endpoint::Tx, scalar_to_vector(scalar), true).into()])
   }
 }
