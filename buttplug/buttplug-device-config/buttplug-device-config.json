@@ -7740,6 +7740,32 @@
         }
       }
     },
+    "metaxsire-v3": {
+      "btle": {
+        "names": [
+          "TAY001"
+        ],
+        "services": {
+          "0000fff0-0000-1000-8000-00805f9b34fb": {
+            "tx": "0000fe02-0000-1000-8000-00805f9b34fb"
+          }
+        }
+      },
+      "defaults": {
+        "name": "metaXsire Tay",
+        "messages": {
+          "ScalarCmd": [
+            {
+              "StepRange": [
+                0,
+                20
+              ],
+              "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    },
     "cowgirl": {
       "btle": {
         "names": [
