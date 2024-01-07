@@ -89,7 +89,7 @@ async fn vibration_update_handler(
   {
     sleep(Duration::from_millis(MIZZZEE2_COMMAND_DELAY_MS)).await;
     current_scalar = current_scalar_holder.load(Ordering::Relaxed);
-    info!("Mizz Zee v3 scalar: {}", current_scalar);
+    trace!("Mizz Zee v3 scalar: {}", current_scalar);
   }
   info!("Mizz Zee v3 control loop exiting, most likely due to device disconnection.");
 }
